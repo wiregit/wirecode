@@ -17,7 +17,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.FileUtils;
@@ -102,7 +102,7 @@ public class LeafRoutingTest extends LimeTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");

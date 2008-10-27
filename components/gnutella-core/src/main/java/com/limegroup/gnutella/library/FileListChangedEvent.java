@@ -1,14 +1,27 @@
 package com.limegroup.gnutella.library;
 
+import java.io.File;
+
 
 public class FileListChangedEvent {
     
-    public static enum Type { ADDED, REMOVED, CHANGED }
+    public static enum Type {
+        ADDED, REMOVED, CHANGED, ADD_FAILED,
+    }
     
     private final Type type;
     private final FileList list;
     private final FileDesc newValue;
     private final FileDesc oldValue;
+    private final File file;
+    
+    public FileListChangedEvent(FileList list, Type type, File file) {
+        this.type = type;
+        this.list = list;
+        this.file = file;
+        this.oldValue = null;
+        this.newValue = null;
+    }
     
     public FileListChangedEvent(FileList list, Type type, FileDesc value) {
         this(list, type, null, value);
@@ -19,6 +32,11 @@ public class FileListChangedEvent {
         this.list = list;
         this.oldValue = oldValue;
         this.newValue = newValue;
+        this.file = newValue.getFile();
+    }
+    
+    public File getFile() {
+        return file;
     }
     
     public Type getType() {

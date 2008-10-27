@@ -19,7 +19,7 @@ import java.util.concurrent.Future;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.nio.NIODispatcher;
@@ -37,6 +37,7 @@ import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
+@SuppressWarnings("deprecation")
 public class LimeTestUtils {
 
     public static void waitForNIO() throws InterruptedException {
@@ -157,7 +158,7 @@ public class LimeTestUtils {
     
     public static void setSharedDirectories(File[] dirs) {
         Set<File> set = new HashSet<File>(Arrays.asList(dirs));
-        SharingSettings.DIRECTORIES_TO_SHARE.setValue(set);
+        OldLibrarySettings.DIRECTORIES_TO_SHARE.setValue(set);
     }
 
     /**

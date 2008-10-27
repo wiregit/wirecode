@@ -12,8 +12,8 @@ import java.util.Properties;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
@@ -35,6 +35,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Allows a testcase to easily interact with a fully running LimeWire.
  */
+@SuppressWarnings("deprecation")
 public abstract class PeerTestCase extends LimeTestCase {
     
     public static final int SERVER_PORT = 6669;
@@ -58,7 +59,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         super(name);
     }
     
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "deprecation" })
     private static void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -72,7 +73,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        

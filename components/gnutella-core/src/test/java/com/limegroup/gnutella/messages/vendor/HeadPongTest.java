@@ -644,7 +644,7 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(FileManagerStub.NOT_HAVE);
+        req.setUrn(FileListStub.NOT_HAVE);
         req.setGuid(guid);
                 
         HeadPong pong = headPongFactory.create(req);
@@ -1654,10 +1654,11 @@ public class HeadPongTest extends LimeTestCase {
     private void setupFileManager(FileDesc fd, URN urn) {
         Map<URN,FileDesc> map = new HashMap<URN,FileDesc>();
         map.put(urn, fd);
-        fileManager.setUrns(map);
+        FileListStub stub = (FileListStub)fileManager.getGnutellaSharedFileList();
+        stub.setUrns(map);
         List<FileDesc> list = new ArrayList<FileDesc>();
         list.add(fd);
-        fileManager.setFileDesc(list);
-        ((FileListStub)fileManager.getGnutellaSharedFileList()).setDescs(list);
+        stub.setFileDesc(list);
+        stub.setDescs(list);
     }
 }

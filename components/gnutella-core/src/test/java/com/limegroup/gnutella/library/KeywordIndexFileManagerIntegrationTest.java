@@ -12,7 +12,6 @@ import org.limewire.util.MediaType;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -59,9 +58,9 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
                 "artist=\"Sammy B\" album=\"Jazz in A minor\" genre=\"mean Median Standard Deviation\" "));
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
-        FileManagerEvent result = addIfShared(f1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getNewFileDesc().getLimeXMLDocuments().get(0));
+        FileListChangedEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.getType() == FileListChangedEvent.Type.ADDED);
+        assertEquals(d1, result.getFileDesc().getLimeXMLDocuments().get(0));
 
         // test exact match of keywords in metadata
         Response[] responses = keywordIndex.query(queryRequestFactory.createRequery("Sammy B"));
@@ -132,7 +131,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertEquals(0, responses.length);
 
         // remove file
-        fman.removeFile(f1);
+        fman.getManagedFileList().remove(f1);
 
         // no more matches
         responses = keywordIndex.query(queryRequestFactory.createQuery("Sammy B"));
@@ -242,7 +241,7 @@ public class KeywordIndexFileManagerIntegrationTest extends FileManagerTestCase 
         assertTrue(responsesContain(algebraXml, nine, eightFourSixXml));
 
         // remove a file for which "eig" matches in the metadata
-        fman.removeFile(algebraFile);
+        fman.getManagedFileList().remove(algebraFile);
 
         // 9. Perform same query as before, and while the other files should still match,
         //    the removed file should no longer match

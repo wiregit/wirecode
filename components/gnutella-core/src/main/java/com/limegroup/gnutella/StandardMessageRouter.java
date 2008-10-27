@@ -346,12 +346,11 @@ public class StandardMessageRouter extends MessageRouterImpl {
 
         // if we cannot service a regular query, only send back results for
         // application-shared metafiles, if any.
-        if (!uploadManager.isServiceable()) {
-        	
+        if (!uploadManager.isServiceable()) {        	
         	List<Response> filtered = new ArrayList<Response>(responses.length);
         	for(Response r : responses) {
         		if (r.isMetaFile() && 
-        				fileManager.isFileApplicationShared(r.getName()))
+        				fileManager.getGnutellaSharedFileList().isFileApplicationShare(r.getName()))
         			filtered.add(r);
         	}
         	

@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -198,13 +198,13 @@ public class SharingTransferHandler extends TransferHandler {
         }
         String fileExtension = FileUtils.getFileExtension(file.getName());
         if (!fileExtension.isEmpty()) {
-            if (!alwaysShareDocuments && !SharingSettings.DOCUMENT_SHARING_ENABLED.getValue()) {
+            if (!alwaysShareDocuments && !LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
                 if (type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {
                     return false;
                 }
             }
-            if (!SharingSettings.PROGRAM_SHARING_ENABLED.getValue()) {
+            if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
                 if (type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS))
                     return false;

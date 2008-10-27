@@ -83,6 +83,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private final static int PORT=6666;
     private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
+    private FileListStub fileList;
     private CoreDownloaderFactory gnutellaDownloaderFactory;
     private static NetworkManagerStub networkManager;
     private Injector injector;
@@ -127,6 +128,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        fileList = (FileListStub)fileManager.getGnutellaSharedFileList();
         gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         
@@ -168,9 +170,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	Map<File, FileDesc> fileMap = new HashMap<File, FileDesc>();
     	fileMap.put(f,partialDesc);
     	
-    	fileManager.setFileDesc(descList);
-    	fileManager.setUrns(urnMap);
-    	fileManager.setFiles(fileMap);
+    	fileList.setFileDesc(descList);
+    	fileList.setUrns(urnMap);
+    	fileList.setFiles(fileMap);
     	
     	FileListStub sharedList = (FileListStub) fileManager.getGnutellaSharedFileList();
     	sharedList.setDescs(descList);
@@ -180,7 +182,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = fileManager.getFileDesc(partialURN);
+    	FileDesc test = sharedList.getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
@@ -212,7 +214,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
     	//the altloc should have been added to the file descriptor
-    	test = fileManager.getFileDesc(partialURN);
+    	test = sharedList.getFileDesc(partialURN);
     	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
     	
     	//now repeat the test, pretending the uploader wants push altlocs
@@ -226,7 +228,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertTrue(fakeDownloader._addedSuccessfull);
     	
     	//make sure the file was added to the file descriptor
-    	test = fileManager.getFileDesc(partialURN);
+    	test = sharedList.getFileDesc(partialURN);
     	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
     	
     	//rince and repeat, saying this was a bad altloc. 

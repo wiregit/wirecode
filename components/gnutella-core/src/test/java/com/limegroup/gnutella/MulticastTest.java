@@ -12,27 +12,28 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.net.TLSManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
-import org.limewire.net.TLSManager;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+@SuppressWarnings("deprecation")
 public class MulticastTest extends LimeTestCase {
 
     private  final int DELAY = 1000;
@@ -78,13 +79,14 @@ public class MulticastTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
+    @SuppressWarnings("deprecation")
     private void setSettings() throws Exception {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*.*.*" });
         // Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { ip });
         NetworkSettings.PORT.setValue(TEST_PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = TestUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
         File result = new File(_sharedDir, "metadata.mp3");

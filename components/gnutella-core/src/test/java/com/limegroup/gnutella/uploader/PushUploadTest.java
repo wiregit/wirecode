@@ -30,6 +30,7 @@ import org.apache.http.message.BasicLineParser;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
@@ -75,8 +76,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.FileManagerEvent.Type;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -91,6 +91,7 @@ import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 //ITEST
+@SuppressWarnings("deprecation")
 public class PushUploadTest extends LimeTestCase {
 
     private final int PORT = 6668;
@@ -133,6 +134,7 @@ public class PushUploadTest extends LimeTestCase {
         return buildTestSuite(PushUploadTest.class);
     }
 
+    @SuppressWarnings("deprecation")
     private void doSettings() throws Exception {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
@@ -141,7 +143,7 @@ public class PushUploadTest extends LimeTestCase {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
 
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
@@ -197,21 +199,21 @@ public class PushUploadTest extends LimeTestCase {
     
     private void startAndWait(long timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch startedLatch = new CountDownLatch(1);
-        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
-            public void handleEvent(FileManagerEvent evt) {
-                if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
+        EventListener<ManagedListStatusEvent> listener = new EventListener<ManagedListStatusEvent>() {
+            public void handleEvent(ManagedListStatusEvent evt) {
+                if (evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                     startedLatch.countDown();
                 }
             }            
         };
         try {
-            fm.addFileEventListener(listener);
+            fm.getManagedFileList().addManagedListStatusListener(listener);
             fm.start();
             if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
                 throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
             }
         } finally {
-            fm.removeFileEventListener(listener);
+            fm.getManagedFileList().addManagedListStatusListener(listener);
         }
     }
         

@@ -15,6 +15,7 @@ import junit.framework.Test;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For

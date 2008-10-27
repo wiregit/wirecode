@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import org.limewire.listener.EventListener;
 
@@ -61,19 +62,7 @@ public interface FileList {
      * Adds the specific file, using the given LimeXMLDocuments as the default
      * documents for that file.
      */
-    void add(File file, List<LimeXMLDocument> documents);    
-
-    /**
-     * Adds this FileList just for this session.
-     */
-    void addForSession(File file);
-    
-    /**
-     * Given a non-null FileDesc, adds this FileDesc to this list. If FileDesc
-     * is null, throws an IllegalArguementException. 
-     * @param fileDesc - FileDesc to be added to this list
-     */
-    boolean add(FileDesc fileDesc);
+    void add(File file, List<? extends LimeXMLDocument> documents);
     
     /**
      * Removes the File from this list if there exists a FileDesc wrapper for
@@ -112,14 +101,6 @@ public interface FileList {
      * Only use this if you must iterate in passes.
      */
     Iterable<FileDesc> threadSafeIterable();
-
-     /**
-     * Returns the size of all files within this list, in <b>bytes</b>.  
-     * <p>
-     * NOTE: the largest value that can be returned is Integer.MAX_VALUE, 
-     * i.e., ~2GB. If more bytes are being shared, returns this value.
-     */
-    int getNumBytes();
     
     /**
      * Returns the number of files in this list. 
@@ -132,11 +113,6 @@ public interface FileList {
     void clear();
     
     /**
-     * Returns true if this file can be added to this list, false otherwise.
-     */
-    boolean isFileAddable(File file);
-    
-    /**
      * Returns a list of all the file descriptors in this list that exist 
      * in the given directory, in any order.
      * 
@@ -147,8 +123,6 @@ public interface FileList {
      * This operation is <b>not</b> efficient, and should not be done often.
      */
     List<FileDesc> getFilesInDirectory(File directory);
-    
-    int getNumForcedFiles();
        
     /**
      * Adds a listener to this list
@@ -160,75 +134,6 @@ public interface FileList {
      */
     void removeFileListListener(EventListener<FileListChangedEvent> listener);
     
-    /**
-     * Returns an object which to lock on when iterating over this FileList. The
-     * Lock should be used only during iteration, all other calls are thread safe
-     * when used with SynchronizedFileList.
-     */
-    Object getLock();
-    
-    /**
-     * Removes any listeners this list might be holding prior to its destruction.
-     */
-    void cleanupListeners();
-    
-    /**
-     * Changes the smart sharing value for images. If true, all new images added to
-     * the library will be shared with this list, if false, new images added to 
-     * the library will not be automatically shared with this list but current images
-     * will not be removed.
-     */
-    void setAddNewImageAlways(boolean value);
-    
-    /**
-     * Returns true if image files are being smartly shraed with this friend, false otherwise.
-     */
-    boolean isAddNewImageAlways();
-    
-    /**
-     * Changes the smart sharing value for audio files. If true, all new audio files added to
-     * the library will be shared with this list, if false, new audio files added to 
-     * the library will not be automatically shared with this list but current audio files
-     * will not be removed.
-     */
-    void setAddNewAudioAlways(boolean value);
-    
-    /**
-     * Returns true if audio files are being smartly shared with this friend, false otherwise.
-     */
-    boolean isAddNewAudioAlways();
-    
-    /**
-     * Changes the smart sharing value for videos. If true, all new videos added to
-     * the library will be shared with this list, if false, new videos added to 
-     * the library will not be automatically shared with this list but current videos
-     * will not be removed.
-     */
-    void setAddNewVideoAlways(boolean value);
-    
-    /**
-     * Returns true if videos are being smartly shared with this friend, false otherwise.
-     */
-    boolean isAddNewVideoAlways();
-        
-    ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
-    /////   does not exist in 5.x  ////
-    
-    /**
-     * Returns a copy of all the files in this list that are not located in 
-     * a complete directory for this FileList type. This is a subset of files
-     * returned by getAllFileDescs.
-     */
-    File[] getIndividualFiles();
-    
-    /**
-     * Returns the number of individual files in this FileList.
-     */
-    int getNumIndividualFiles();
-    
-    /**
-     * Returns true if this file exists in this FileList and is an individual
-     * file in this FileList, false otherwise.
-     */
-    boolean isIndividualFile(File file);
+    /** Returns a lock to use when iterating over this FileList. */
+    Lock getReadLock();
 }

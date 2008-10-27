@@ -10,7 +10,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -43,7 +43,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
-@SuppressWarnings( { "cast" } )
+@SuppressWarnings( { "cast", "deprecation" } )
 public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
 	/**
@@ -113,13 +113,14 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         ULTRAPEER_2 = blockingConnectionFactory.createConnection("localhost", PORT);
     }
 
+    @SuppressWarnings("deprecation")
     public void setSettings() {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
         NetworkSettings.PORT.setValue(PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");

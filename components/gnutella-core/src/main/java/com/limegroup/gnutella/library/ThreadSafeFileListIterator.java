@@ -7,13 +7,13 @@ class ThreadSafeFileListIterator implements Iterator<FileDesc> {
     
     // TODO: Fail on revision changes in FileManager
     
-    private final FileListImpl fileList;
+    private final AbstractFileList fileList;
     
     /** Points to the index that is to be examined next. */
     private int index = 0;
     private FileDesc preview;
     
-    public ThreadSafeFileListIterator(FileListImpl fileList) {
+    public ThreadSafeFileListIterator(AbstractFileList fileList) {
         this.fileList = fileList;
         this.index = fileList.getMinIndex();
     }
@@ -25,17 +25,20 @@ class ThreadSafeFileListIterator implements Iterator<FileDesc> {
 //            return false;
 //        }
 
-        synchronized (fileList) {
+        fileList.getReadLock().lock();
+        try {
             while (index <= fileList.getMaxIndex()) {
                 preview = fileList.getFileDescForIndex(index);
                 index++;
                 if (preview != null) {
                     return true;
                 }
-            }
-            
+            }            
             return false;
+        } finally {
+            fileList.getReadLock().unlock();
         }
+        
     }
     
     @Override

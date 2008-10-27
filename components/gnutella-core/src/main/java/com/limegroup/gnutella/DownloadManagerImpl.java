@@ -61,8 +61,8 @@ import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -71,7 +71,7 @@ import com.limegroup.mozilla.MozillaDownload;
 import com.limegroup.mozilla.MozillaDownloaderImpl;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager, Service, EventListener<FileManagerEvent> {
+public class DownloadManagerImpl implements DownloadManager, Service, EventListener<ManagedListStatusEvent> {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
@@ -181,7 +181,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     }
     
     @Inject
-    void register(ListenerSupport<FileManagerEvent> listeners) {
+    void register(ListenerSupport<ManagedListStatusEvent> listeners) {
         listeners.addListener(this);
     }
 
@@ -772,7 +772,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      */
     public synchronized Downloader download(DownloadInformation info, long now) 
     throws SaveLocationException {
-        File dir = SharingUtils.PREFERENCE_SHARE;
+        File dir = LibraryUtils.PREFERENCE_SHARE;
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
@@ -1180,9 +1180,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     /**
      * Listens for events from FileManager
      */
-    public void handleEvent(FileManagerEvent evt) {
+    public void handleEvent(ManagedListStatusEvent evt) {
         switch(evt.getType()){
-            case FILEMANAGER_LOAD_FINISHING:
+            case LOAD_FINISHING:
                 getIncompleteFileManager().registerAllIncompleteFiles();
                 break;
         }

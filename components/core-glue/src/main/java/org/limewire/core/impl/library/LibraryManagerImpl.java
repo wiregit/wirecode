@@ -230,12 +230,15 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
             com.limegroup.gnutella.library.FileList fileList =
                 fileManager.getFriendFileList(name);  
 
-              synchronized (fileList.getLock()) {
+              fileList.getReadLock().lock();
+              try {
                   for(FileDesc fileDesc : fileList.iterable()) {
                       LocalFileItem newItem = coreLocalFileItemFactory.createCoreLocalFileItem(fileDesc);
                       lookup.put(fileDesc.getFile(), newItem);
                       threadSafeList.add(newItem);
                   }
+              } finally {
+                  fileList.getReadLock().unlock();
               }
         }
         

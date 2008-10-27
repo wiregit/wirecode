@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
@@ -13,7 +13,9 @@ import org.limewire.setting.evt.SettingsGroupEvent.EventType;
 /**
  * A container of LibraryData.
  */
-public class LibraryData extends AbstractSettingsGroup {
+@Deprecated
+@SuppressWarnings("deprecation")
+public class OldLibraryData extends AbstractSettingsGroup {
     
     /**
      * The Container data, storing all the information.
@@ -56,39 +58,8 @@ public class LibraryData extends AbstractSettingsGroup {
     /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
-    public LibraryData() {
+    public OldLibraryData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
-    }
-    
-    /**
-     * Returns a Set of Files with the key name. If a Set does not
-     * exist with this name it creates one and returns it.
-     */
-    public Set<File> getFriendList(String name) {
-        return DATA.getSet(name);
-    }
-    
-    /**
-     * Returns true if a BuddyList exists by this name, false
-     * otherwise
-     */
-    public boolean containsBuddyList(String name) {
-        return DATA.contains(name);
-    }
-    
-    /**
-     * Creates a new BuddyList by this name is one does not
-     * exist.
-     */
-    public void addFriendList(String name) {
-        DATA.getSet(name);
-    }
-    
-    /**
-     * Removes the BuddyList associated with this name
-     */
-    public void removeFriendList(String name) {
-        DATA.remove(name);
     }
     
     /**
@@ -124,9 +95,10 @@ public class LibraryData extends AbstractSettingsGroup {
 	 * Cleans special file sharing settings by removing references to files that
 	 * no longer exist.
 	 */
-	public final void clean() {
-		SharingSettings.DIRECTORIES_TO_SHARE.clean();
-		Set<File> parents = SharingSettings.DIRECTORIES_TO_SHARE.getValue();
+	@SuppressWarnings("deprecation")
+    public final void clean() {
+	    OldLibrarySettings.DIRECTORIES_TO_SHARE.clean();
+		Set<File> parents = OldLibrarySettings.DIRECTORIES_TO_SHARE.getValue();
 		clean(DIRECTORIES_NOT_TO_SHARE, parents);
 		clean(FILES_NOT_TO_SHARE, parents);
 		clean(SENSITIVE_DIRECTORIES_VALIDATED, parents);

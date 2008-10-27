@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,19 +12,18 @@ import java.util.Properties;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.FileUtils;
-import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.google.inject.Injector;
-import com.google.inject.Stage;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -100,7 +98,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         // get the resource file for com/limegroup/gnutella
         File berkeley = 

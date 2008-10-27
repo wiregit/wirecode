@@ -278,7 +278,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
 
     }
 
-    public static URN getSha1(Set<URN> urns) {
+    public static URN getSha1(Set<? extends URN> urns) {
         if(urns instanceof UrnSet) {
             return ((UrnSet)urns).sha1;
         } else {

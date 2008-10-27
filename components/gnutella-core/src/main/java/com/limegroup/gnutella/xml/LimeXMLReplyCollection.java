@@ -748,7 +748,7 @@ public class LimeXMLReplyCollection {
             //to other schemas will be lost unless we update those tables
             //with the new hashValue. 
             //NOTE:This is the only time the hash will change-(mp3 and audio)
-            fileManager.get().fileChanged(file, currentXmlDocs);
+            fileManager.get().getManagedFileList().fileChanged(file, currentXmlDocs);
         }
         return retVal;
     }

@@ -8,7 +8,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.collection.CollectionUtils;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -23,6 +23,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -31,11 +32,11 @@ import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 
+@SuppressWarnings("deprecation")
 public final class LicenseSharingTest extends ClientSideTestCase {
 
     private FileManager fileManager;
@@ -62,9 +63,10 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         return 3;
     }
 	
-	@Override	
+	@SuppressWarnings("deprecation")
+    @Override	
     public void setSettings() {
-	    SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;ogg;wma");
+	    OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;ogg;wma");
         // get the resource file for com/limegroup/gnutella
         File cc1 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
         File cc2 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.mp3");

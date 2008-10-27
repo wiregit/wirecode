@@ -35,6 +35,7 @@ import org.limewire.util.GenericsUtils;
  * Either Collections or Maps.
  * All collections are returned as synchronized on this container.
  */
+@Deprecated
 class Container {
     
     private static final Log LOG = LogFactory.getLog(Container.class);

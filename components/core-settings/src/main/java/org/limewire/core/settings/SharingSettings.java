@@ -2,19 +2,14 @@ package org.limewire.core.settings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Set;
 
 import org.limewire.setting.BooleanSetting;
-import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.Setting;
-import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -326,202 +321,6 @@ public class SharingSettings extends LimeProps {
     /*********************************************************************/
     
     /**
-     * Default file extensions.
-     */
-    private static final String DEFAULT_EXTENSIONS_TO_SHARE =
-		"asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
-		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;flac;fla;"+
-		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;bz2;sea;pf;arc;arj;"+
-		"bz;tbz;mime;taz;ua;toast;lit;rpm;deb;pkg;sxw;l6t;srt;sub;idx;mkv;"+
-		"ogm;shn;dvi;rmvp;kar;cdg;ccd;cue;c;h;m;java;jar;pl;py;pyc;"+
-		"pyo;pyz";
-    
-    /**
-     * Default disabled extensions.
-     */
-    private static final String DEFAULT_EXTENSIONS_TO_DISABLE =
-        "doc;pdf;xls;rtf;bak;csv;dat;docx;xlsx;xlam;xltx;xltm;xlsm;xlsb;dotm;docm;dotx;dot;qdf;qtx;qph;qel;qdb;qsd;qif;mbf;mny";
-        
-    
-    /**
-     * The list of extensions shared by default
-     */
-    public static final String[] getDefaultExtensions() {
-        return StringArraySetting.decode(DEFAULT_EXTENSIONS_TO_SHARE); 
-    }
-    
-    /**
-     * The list of extensions shared by default
-     */
-    public static final String getDefaultExtensionsAsString() {
-        return DEFAULT_EXTENSIONS_TO_SHARE; 
-    }
-    
-    /**
-     * The list of extensions disabled by default in the file types sharing screen
-     */
-    public static final String[] getDefaultDisabledExtensions() {
-        return StringArraySetting.decode(DEFAULT_EXTENSIONS_TO_DISABLE); 
-    }
-    
-    /**
-     * The list of extensions disabled by default in the file types sharing screen
-     */
-    public static final String getDefaultDisabledExtensionsAsString() {
-        return DEFAULT_EXTENSIONS_TO_DISABLE; 
-    }
-    
-    /**
-     * A saved list of names of all the friendLists that have been created.
-     */
-    public static final StringArraySetting SHARED_FRIEND_LIST_NAMES = 
-        FACTORY.createStringArraySetting("SHARED_FRIEND_LIST_NAMES", new String[0]);
-
-    /**
-     * Removes a name of a saved friendlist.
-     */
-    public static final void removeFriendListName(String id) {
-        String[] names = SHARED_FRIEND_LIST_NAMES.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        nameList.remove(id);
-        
-        if(nameList.size() != names.length) {
-            SHARED_FRIEND_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
-        }
-    }
-    
-    /**
-     * Adds a new name to the list of shared friend list names if one does not 
-     * already exist. Returns true if the name was added or false if it 
-     * already existed
-     */
-    public static final boolean addFriendListName(String id) {
-        String[] names = SHARED_FRIEND_LIST_NAMES.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        if(nameList.contains(id))
-            return false;
-        else {
-            nameList.add(id);
-            SHARED_FRIEND_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
-            return true;
-        }
-    }
-    
-    /**
-     * A list of all friend names with whom all images in the library will be shared with.
-     * When a friend exists in this list, all new images added to the library will automatically
-     * be shared with that friend. 
-     */
-    public static StringArraySetting SHARE_NEW_IMAGES_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_IMAGES_ALWAYS", new String[0]);
-    
-    /**
-     * Returns true if this friend is sharing all images and new images, false
-     * otherwise.
-     */
-    public static final boolean containsFriendShareNewImages(String id) {
-        String[] names = SHARE_NEW_IMAGES_ALWAYS.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        return nameList.contains(id);
-    }
-    
-    /**
-     * A list of all friend names with whom all audio files in the library will be shared with.
-     * When a friend exists in this list, all new audio files added to the library will automatically
-     * be shared with that friend. 
-     */
-    public static StringArraySetting SHARE_NEW_AUDIO_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_AUDIO_ALWAYS", new String[0]);
-        
-    /**
-     * Returns true if this friend is sharing all audio files and new audio files,
-     * false otherwise.
-     */
-    public static final boolean containsFriendShareNewAudio(String id) {
-        String[] names = SHARE_NEW_AUDIO_ALWAYS.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        return nameList.contains(id);
-    }
-    
-    /**
-     * A list of all friend names with whom all videos in the library will be shared with.
-     * When a friend exists in this list, all new videos added to the library will automatically
-     * be shared with that friend. 
-     */
-    public static StringArraySetting SHARE_NEW_VIDEO_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_VIDEO_ALWAYS", new String[0]);
-    
-    
-    /**
-     * Returns true if this friend is sharing all videos and new video files,
-     * false otherwise.
-     */
-    public static final boolean containsFriendShareNewVideo(String id) {
-        String[] names = SHARE_NEW_VIDEO_ALWAYS.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        return nameList.contains(id);
-    }
-    
-    /**
-     * Adds a friend to the list of names to always files with. 
-     * @param id - name of the friend to share with
-     * @return true if the name was added, false if the name already existed.
-     */
-    public static final boolean addFriendShareNewFiles(StringArraySetting stringArray, String id) {
-        String[] names = stringArray.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        if(nameList.contains(id))
-            return false;
-        else {
-            nameList.add(id);
-            stringArray.setValue(nameList.toArray(new String[nameList.size()]));
-            return true;
-        }
-    }
-    
-    /**
-     * Removes a friend from the list of names to always share files with. This friend
-     * will no longer automatically share new files of this type that are added to the library. This
-     * will not remove current files that are already shared with the friend.
-     * @param id - friend to remove
-     */
-    public static final void removeFiendShareNewFiles(StringArraySetting stringArray, String id) {
-        String[] names = stringArray.getValue();
-        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
-        nameList.remove(id);
-        
-        if(nameList.size() != names.length) {
-            stringArray.setValue(nameList.toArray(new String[nameList.size()]));
-        }
-    }
-    
-    /**
-     * Whether to allow Documents to be shared.
-     */
-    public static final BooleanSetting DOCUMENT_SHARING_ENABLED =
-        FACTORY.createBooleanSetting("DOCUMENT_SHARING_ENABLED", false);
-    
-    /**
-     * Whether to allow Programs to be shared.
-     */
-    public static final BooleanSetting PROGRAM_SHARING_ENABLED =
-        FACTORY.createBooleanSetting("PROGRAM_SHARING_ENABLED", false);
-    
-    /**
-	 * The shared directories. 
-	 */
-    public static final FileSetSetting DIRECTORIES_TO_SHARE =
-        FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
-
-    /**
-     * Directories to display in LW but not necessarily share
-     */
-    public static final FileSetSetting DIRECTORIES_TO_DISPLAY =
-        FACTORY.createFileSetSetting("DIRECTORIES_TO_DISPLAY", new File[0]);
-
-    /**
      * Whether or not to auto-share files when using 'Download As'.
      */
 	public static final BooleanSetting SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES =
@@ -538,41 +337,6 @@ public class SharingSettings extends LimeProps {
      */
     public static final BooleanSetting SHOW_TORRENT_META_FILES =
         FACTORY.createBooleanSetting("SHOW_TORRENT_META_FILES", false); 
-    
-    /**
-	 * File extensions that are shared.
-	 */
-    public static final StringSetting EXTENSIONS_TO_SHARE =
-        FACTORY.createStringSetting("EXTENSIONS_TO_SEARCH_FOR", DEFAULT_EXTENSIONS_TO_SHARE);
-    
-    // New Settings for extension management
-
-    /**
-     * Used to flag the first use of the new database type to migrate the 
-     *  extensions database across into the new settings 
-     */
-    public static final BooleanSetting EXTENSIONS_MIGRATE = 
-        FACTORY.createBooleanSetting("EXTENSIONS_MIGRATE", true);
-    
-    /**
-     * List of Extra file extensions.
-     */
-    public static final StringSetting EXTENSIONS_LIST_CUSTOM =
-         FACTORY.createStringSetting("EXTENSIONS_LIST_CUSTOM", "");
-    
-    /**
-     * File extensions that are not shared.
-     */
-    public static final StringSetting EXTENSIONS_LIST_UNSHARED =
-         FACTORY.createStringSetting("EXTENSIONS_LIST_UNSHARED", "");
-    
-    
-    
-    /**
-     * If to not force disable sensitive extensions.
-     */
-    public static final BooleanSetting DISABLE_SENSITIVE =
-        FACTORY.createBooleanSetting("DISABLE_SENSITIVE_EXTS", true);
     
     /**
      * Sets the probability (expressed as a percentage) that an incoming

@@ -28,7 +28,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
 
 import org.jdesktop.swingx.JXButton;
@@ -38,7 +37,6 @@ public class LimeComboBox extends JXButton {
     
     private final List<Action> actions;
     private Action             selectedAction;
-    private JMenuItem          selectedComponent;
 
     private final List<SelectionListener> selectionListeners 
         = new LinkedList<SelectionListener>();
@@ -53,10 +51,7 @@ public class LimeComboBox extends JXButton {
     
     private UpdateHandler updateHandler = null;
     
-    LimeComboBox(List<Action> actions) {
-        
-        final Color ITEM_BACK = (Color)UIManager.get("Menu.selectionBackground");
-        
+    LimeComboBox(List<Action> actions) {        
         this.setText(null);
         
         this.actions = new LinkedList<Action>();
@@ -159,7 +154,6 @@ public class LimeComboBox extends JXButton {
         this.actions.clear();
         
         this.selectedAction = null;
-        this.selectedComponent = null;
     }
     
     public void  removeAction(Action action) {
@@ -169,7 +163,6 @@ public class LimeComboBox extends JXButton {
         
         if (action == this.selectedAction) {
             this.selectedAction = null;
-            this.selectedComponent = null;
         }
     }
     
@@ -442,7 +435,6 @@ public class LimeComboBox extends JXButton {
 
             // Change selection in parent combo box
             selectedAction = this.wrappedAction;
-            selectedComponent = (JMenuItem) e.getSource();
 
             // Fire the parent listeners
             for ( SelectionListener listener : selectionListeners )
@@ -498,9 +490,6 @@ public class LimeComboBox extends JXButton {
             menuItem.setBorder(BorderFactory.createEmptyBorder(0,ix1,0,0));
             
             this.menu.add(menuItem);
-            
-            if (action == this.selectedAction)
-                this.selectedComponent = menuItem;
         }
 
     }

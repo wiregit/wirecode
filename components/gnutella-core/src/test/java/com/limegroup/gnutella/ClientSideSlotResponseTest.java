@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -21,9 +21,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -38,6 +38,7 @@ import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProv
  * Tests how the availability of upload slots affects responses, as well
  * as chocking of queries to a leaf.
  */
+@SuppressWarnings("deprecation")
 public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public ClientSideSlotResponseTest(String name) {
         super(name);
@@ -56,14 +57,15 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     private static final String APP_TXT = SOME_FILE+"2.txt";
     private static final String OTHER_TORRENT = "other.torrent";
     
+    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() throws Exception {
-    	SharingSettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
     	File textFile = new File(_sharedDir,TEXT_FILE);
-    	File torrentFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
+    	File torrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
     	File userTorrentFile = new File(_sharedDir,USER_TORRENT);
-    	File appTextFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE,APP_TXT);
-    	File appTorrentFile = new File(SharingUtils.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
+    	File appTextFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,APP_TXT);
+    	File appTorrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
     	someFileMatches.add(TEXT_FILE);
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);
@@ -74,14 +76,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
     	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
-        fileManager.addFileEventListener(waiter);
+        fileManager.getGnutellaSharedFileList().addFileListListener(waiter);
         fileManager.getGnutellaSharedFileList().add(textFile);
         fileManager.getGnutellaSharedFileList().add(torrentFile);
         fileManager.getGnutellaSharedFileList().add(userTorrentFile);
         fileManager.getGnutellaSharedFileList().add(appTextFile);
         fileManager.getGnutellaSharedFileList().add(appTorrentFile);
         waiter.waitForLoad();
-        fileManager.removeFileEventListener(waiter);
+        fileManager.getGnutellaSharedFileList().removeFileListListener(waiter);
                 
     	assertEquals(5, fileManager.getGnutellaSharedFileList().size());
     }
@@ -239,15 +241,15 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	assertEquals(TORRENT_FILE, responses.get(0).getName());
     }
     
-    private static class FileEventListenerWaiter implements EventListener<FileManagerEvent> {
+    private static class FileEventListenerWaiter implements EventListener<FileListChangedEvent> {
         private final CountDownLatch latch;
         
         public FileEventListenerWaiter(int waitings) {
             this.latch = new CountDownLatch(waitings);
         }
 
-        public void handleEvent(FileManagerEvent evt) {
-            if(evt.isAddEvent())
+        public void handleEvent(FileListChangedEvent evt) {
+            if(evt.getType() == FileListChangedEvent.Type.ADDED)
                 latch.countDown();            
         }
         

@@ -458,7 +458,7 @@ public class IncompleteFileManager  {
         Set<URN> completeHashes = getAllCompletedHashes(incompleteFile);
         if( completeHashes.size() == 0 ) return;
         
-        fileManager.get().addIncompleteFile(
+        fileManager.get().getIncompleteFileList().addIncompleteFile(
             incompleteFile,
             completeHashes,
             getCompletedName(incompleteFile),

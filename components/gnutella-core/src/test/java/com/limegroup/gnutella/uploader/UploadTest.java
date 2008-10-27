@@ -42,6 +42,7 @@ import org.limewire.core.settings.ChatSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
@@ -71,15 +72,15 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeCacheImpl;
 import com.limegroup.gnutella.tigertree.HashTreeUtils;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -87,6 +88,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * lowercase characters a-z.
  */
 //ITEST
+@SuppressWarnings("deprecation")
 public class UploadTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -189,7 +191,7 @@ public class UploadTest extends LimeTestCase {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
         vf = injector.getInstance(VerifyingFileFactory.class).createVerifyingFile(252450);
-        fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf);
+        fileManager.getIncompleteFileList().addIncompleteFile(incFile, urns, incName, 1981, vf);
         incompleteHashUrl = LimeTestUtils.getRequest("localhost", PORT, incompleteHash);
         
         badHashUrl = LimeTestUtils.getRequest("localhost", PORT, badHash);
@@ -215,6 +217,7 @@ public class UploadTest extends LimeTestCase {
         LimeTestUtils.waitForNIO();
     }
 
+    @SuppressWarnings("deprecation")
     private void doSettings() throws UnknownHostException {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
@@ -223,7 +226,7 @@ public class UploadTest extends LimeTestCase {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
 
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
@@ -1526,15 +1529,15 @@ public class UploadTest extends LimeTestCase {
 
         // catch notification when file is reshared
         final CountDownLatch latch = new CountDownLatch(1);
-        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
-            public void handleEvent(FileManagerEvent event) {
-                if (event.isAddEvent()) {
+        EventListener<FileListChangedEvent> listener = new EventListener<FileListChangedEvent>() {
+            public void handleEvent(FileListChangedEvent event) {
+                if (event.getType() == FileListChangedEvent.Type.ADDED) {
                     latch.countDown();
                 }
             }            
         };
         try {
-            fileManager.addFileEventListener(listener);
+            fileManager.getGnutellaSharedFileList().addFileListListener(listener);
 
             HttpGet method = new HttpGet(LimeTestUtils.getRequest("localhost", PORT, fd.getSHA1Urn()));
             HttpResponse response = null;
@@ -1564,7 +1567,7 @@ public class UploadTest extends LimeTestCase {
                 HttpClientUtils.releaseConnection(response);
             }
         } finally {
-            fileManager.removeFileEventListener(listener);
+            fileManager.getGnutellaSharedFileList().removeFileListListener(listener);
         }
         
     }

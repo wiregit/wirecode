@@ -8,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -27,7 +27,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -35,6 +34,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 /**
  * Tests for FileManager and handling of queries.
  */
+@SuppressWarnings("deprecation")
 public class FileManagerTestCase extends LimeTestCase {
 
     public static final String SHARE_EXTENSION = "XYZ";
@@ -68,9 +68,10 @@ public class FileManagerTestCase extends LimeTestCase {
         super(name);
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     protected void setUp() throws Exception {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         cleanFiles(_incompleteDir, false);
@@ -226,15 +227,13 @@ public class FileManagerTestCase extends LimeTestCase {
     // classes and methods related to adding files to file manager
     ////////////////////////////////////////////////////////////////////////////////////
 
-    public static class Listener implements EventListener<FileManagerEvent> {
+    public static class Listener implements EventListener<FileListChangedEvent> {
         private final CountDownLatch latch = new CountDownLatch(1);
-        public FileManagerEvent evt;
-        public void handleEvent(FileManagerEvent fme) {
-            if(fme.getType() != FileManagerEvent.Type.LOAD_FILE) {
-                evt = fme;
-                latch.countDown();
-                fme.getSource().removeFileEventListener(this);
-            }
+        public FileListChangedEvent evt;
+        public void handleEvent(FileListChangedEvent fme) {
+            evt = fme;
+            latch.countDown();
+            fme.getList().removeFileListListener(this);
         }
         
         void await(long timeout) throws Exception {
@@ -242,50 +241,50 @@ public class FileManagerTestCase extends LimeTestCase {
         }
     }
 
-    protected FileManagerEvent addIfShared(File f) throws Exception {
+    protected FileListChangedEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        fman.addSharedFile(f, LimeXMLDocument.EMPTY_LIST);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
+        fman.getGnutellaSharedFileList().add(f, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileManagerEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
+    protected FileListChangedEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        fman.addSharedFile(f, l);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
+        fman.getGnutellaSharedFileList().add(f, l);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileManagerEvent addAlways(File f) throws Exception {
+    protected FileListChangedEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        fman.addSharedFileAlways(f);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
+        fman.getGnutellaSharedFileList().add(f);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileManagerEvent renameFile(File f1, File f2) throws Exception {
+    protected FileListChangedEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        fman.renameFile(f1, f2);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
+        fman.getManagedFileList().fileRenamed(f1, f2);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileManagerEvent addFileForSession(File f1) throws Exception {
+    protected FileListChangedEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
         fman.getGnutellaSharedFileList().addForSession(f1);
         fel.await(5000);
         return fel.evt;
     }
 
-    protected FileManagerEvent fileChanged(File f1) throws Exception {
+    protected FileListChangedEvent fileChanged(File f1) throws Exception {
         Listener fel = new Listener();
-        fman.addFileEventListener(fel);
-        fman.fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
+        fman.getGnutellaSharedFileList().addFileListListener(fel);
+        fman.getManagedFileList().fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
     }

@@ -16,7 +16,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.util.FileUtils;
 
@@ -26,7 +26,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpTestUtils;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -34,6 +34,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * utilizing the X-Gnutella-Content-URN header and the
  * X-Gnutella-Alternate-Location header.
  */
+@SuppressWarnings("deprecation")
 public final class UrnHttpRequestTest extends LimeTestCase {
 
     private static final String STATUS_503 = "HTTP/1.1 503 Service Unavailable";
@@ -61,6 +62,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void setUp() throws Exception {
         // create shared files with random content
@@ -72,7 +74,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                     + "file" + i + ".tmp", data);
         }
 
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("tmp");
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         // initialize services

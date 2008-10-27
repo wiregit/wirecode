@@ -31,8 +31,8 @@ import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -67,15 +67,15 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
-import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * This class tests the QueryReply class.
  */
-@SuppressWarnings({"unchecked", "null"})
+@SuppressWarnings({"unchecked", "null", "deprecation"})
 public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
@@ -117,8 +117,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	}
 	
     
-	public void setUp() throws Exception {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+	@SuppressWarnings("deprecation")
+    public void setUp() throws Exception {
+	    OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
@@ -1500,7 +1501,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 // use files with a $ because they'll generally
                 // trigger a single-response return, which is
                 // easier to check
-                return SharingUtils.isFilePhysicallyShareable(file) && file.getName().indexOf("$") != -1;
+                return LibraryUtils.isFilePhysicallyManagable(file) && file.getName().indexOf("$") != -1;
             }
         });
 

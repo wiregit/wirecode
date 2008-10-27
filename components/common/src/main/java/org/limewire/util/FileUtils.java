@@ -223,16 +223,19 @@ public class FileUtils {
      */
     public static String getFileExtension(String name) {
         int index = name.lastIndexOf(".");
-        if(index == -1) return "";
-        
+        if (index == -1)
+            return "";
+
         // the file must have a name other than the extension
-        if(index == 0) return "";
-        
+        if (index == 0)
+            return "";
+
         // if the last character of the string is the ".", then there's
         // no extension
-        if(index == (name.length()-1)) return "";
-        
-        return name.substring(index+1);
+        if (index == (name.length() - 1))
+            return "";
+
+        return name.substring(index + 1);
     }
     
     /**

@@ -23,7 +23,7 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -38,11 +38,12 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+@SuppressWarnings("deprecation")
 public class BrowseHostHandlerTest extends LimeTestCase {
 
     private final int PORT = 6668;
@@ -68,6 +69,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void setUp() throws Exception {
 
@@ -87,8 +89,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 testFiles.length);
 
 
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("class");
-        SharingSettings.DIRECTORIES_TO_SHARE.setValue(Collections
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("class");
+        OldLibrarySettings.DIRECTORIES_TO_SHARE.setValue(Collections
                 .singleton(sharedDirectory));
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -164,12 +166,15 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
 
-        synchronized (fileManager.getGnutellaSharedFileList().getLock()) {
-            for (FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
+        fileManager.getGnutellaSharedFileList().getReadLock().lock();
+        try {
+            for(FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
                 boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
             }
+        } finally {
+            fileManager.getGnutellaSharedFileList().getReadLock().unlock();
         }
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());

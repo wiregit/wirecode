@@ -29,7 +29,7 @@ public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvid
      */
     @Override
     public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
-        return Collections.singletonList(fileManager.getGnutellaSharedFileList());
+        return Collections.singletonList((FileList)fileManager.getGnutellaSharedFileList());
     }
 
 }

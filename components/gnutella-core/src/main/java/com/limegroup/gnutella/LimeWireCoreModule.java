@@ -122,7 +122,6 @@ import com.limegroup.gnutella.handshaking.HeadersFactoryImpl;
 import com.limegroup.gnutella.http.DefaultHttpExecutor;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.LimeWireLibraryModule;
-import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseFactoryImpl;
 import com.limegroup.gnutella.lws.server.LWSManager;
@@ -196,6 +195,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * The module that defines what implementations are used within
@@ -374,7 +374,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LocalAcceptor.class);
         bind(Pinger.class);
         bind(ConnectionWatchdog.class);
-        bind(SavedFileManager.class);
         bind(RatingTable.class);
         bind(OutOfBandThroughputMeasurer.class);
         bind(HostCatcher.class);
@@ -384,6 +383,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FirewalledAddressSerializer.class);
         bind(SameNATAddressResolver.class);
         bind(ConnectableConnector.class);
+        bind(SchemaReplyCollectionMapper.class);
     }
     
     

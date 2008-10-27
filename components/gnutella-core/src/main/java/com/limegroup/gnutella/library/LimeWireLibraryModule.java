@@ -21,9 +21,13 @@ public class LimeWireLibraryModule extends AbstractModule {
         bind(CreationTimeCache.class);        
         
         bind(FileManager.class).to(FileManagerImpl.class);
-        EventMulticaster<FileManagerEvent> fileManagerMulticaster = new EventMulticasterImpl<FileManagerEvent>();
-        bind(new TypeLiteral<EventBroadcaster<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FileManagerEvent>>(){}).toInstance(fileManagerMulticaster);
+        bind(ManagedFileList.class).to(ManagedFileListImpl.class);
+        
+        EventMulticaster<ManagedListStatusEvent> managedListMulticaster =
+            new EventMulticasterImpl<ManagedListStatusEvent>();
+        bind(new TypeLiteral<EventBroadcaster<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
+        bind(new TypeLiteral<ListenerSupport<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
+        bind(new TypeLiteral<EventMulticaster<ManagedListStatusEvent>>(){}).toInstance(managedListMulticaster);
         
         SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster =
             new SourcedEventMulticasterImpl<FileDescChangeEvent, FileDesc>();

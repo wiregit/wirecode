@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.util.I18n;
 
 public class UnsafeTypeOptionPanel extends OptionPanel {
@@ -36,19 +36,19 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        SharingSettings.PROGRAM_SHARING_ENABLED.setValue(programCheckBox.isSelected());
-        SharingSettings.DOCUMENT_SHARING_ENABLED.setValue(documentCheckBox.isSelected());
+        LibrarySettings.PROGRAM_SHARING_ENABLED.setValue(programCheckBox.isSelected());
+        LibrarySettings.DOCUMENT_SHARING_ENABLED.setValue(documentCheckBox.isSelected());
     }
 
     @Override
     boolean hasChanged() {
-        return SharingSettings.PROGRAM_SHARING_ENABLED.getValue() != programCheckBox.isSelected() 
-                || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue() != documentCheckBox.isSelected();
+        return LibrarySettings.PROGRAM_SHARING_ENABLED.getValue() != programCheckBox.isSelected() 
+                || LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue() != documentCheckBox.isSelected();
     }
 
     @Override
     public void initOptions() {
-        programCheckBox.setSelected(SharingSettings.PROGRAM_SHARING_ENABLED.getValue());
-        documentCheckBox.setSelected(SharingSettings.DOCUMENT_SHARING_ENABLED.getValue());
+        programCheckBox.setSelected(LibrarySettings.PROGRAM_SHARING_ENABLED.getValue());
+        documentCheckBox.setSelected(LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue());
     }
 }

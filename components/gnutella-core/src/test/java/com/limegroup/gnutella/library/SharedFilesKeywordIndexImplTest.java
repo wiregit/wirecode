@@ -25,6 +25,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private FileManager fileManager;
     private FileList sharedFileList;
     private FileList incompleteFileList;
+    private ManagedFileList managedFileList;
 
     public SharedFilesKeywordIndexImplTest(String name) {
         super(name);
@@ -36,6 +37,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         multicaster = context.mock(SourcedEventMulticaster.class);
         registry = context.mock(ServiceRegistry.class);
         fileManager = context.mock(FileManager.class);
+        managedFileList = context.mock(ManagedFileList.class);
         sharedFileList = context.mock(FileList.class);
         incompleteFileList = context.mock(FileList.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
@@ -54,9 +56,12 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
             {
                 exactly(1).of(registry).register(with(serviceGetter));                
                 exactly(1).of(sharedFileList).addFileListListener(with(listenerGetter));
-                exactly(1).of(fileManager).addFileEventListener(with(any(EventListener.class)));
+                exactly(1).of(managedFileList).addManagedListStatusListener(with(any(EventListener.class)));
                 exactly(1).of(incompleteFileList).addFileListListener(with(any(EventListener.class)));
                 exactly(1).of(multicaster).addListener(with(any(EventListener.class)));
+                
+                atLeast(1).of(fileManager).getManagedFileList();
+                will(returnValue(managedFileList));
                 
                 atLeast(1).of(fileManager).getIncompleteFileList();
                 will(returnValue(incompleteFileList));

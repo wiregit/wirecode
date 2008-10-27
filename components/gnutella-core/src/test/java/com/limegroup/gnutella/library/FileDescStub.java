@@ -52,7 +52,6 @@ public class FileDescStub implements FileDesc {
     private final String path;
     private final long modified;
     private final long size;
-    
     public FileDescStub(String name, URN urn, int index) {
         this.file = createStubFile(new File(name));
         this.urns = new UrnSet(urn);

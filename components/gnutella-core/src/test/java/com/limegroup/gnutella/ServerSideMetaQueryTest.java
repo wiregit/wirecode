@@ -8,7 +8,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -17,18 +17,18 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Checks whether Meta-Queries are correctly answered, etc.
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+@SuppressWarnings( { "unchecked", "cast", "deprecation" } )
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     private QueryRequestFactory queryRequestFactory;
@@ -45,10 +45,11 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }      
     
+    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() {
         TIMEOUT = 1250;
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");

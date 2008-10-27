@@ -113,10 +113,10 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleFileDescEvent(event);
                     }
                 });                
-                fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+                fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
                     @Override
-                    public void handleEvent(FileManagerEvent event) {
-                        handleFileManagerEvent(event);
+                    public void handleEvent(ManagedListStatusEvent event) {
+                        handleManagedListStatusEvent(event);
                     }
                 });
                 fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
@@ -299,14 +299,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         }
     }
 
-    private void handleFileManagerEvent(FileManagerEvent evt) {
+    private void handleManagedListStatusEvent(ManagedListStatusEvent evt) {
         // building tries should be fast and non-blocking so can be done in
         // dispatch thread
         switch (evt.getType()) {
-        case FILEMANAGER_LOAD_STARTED:
+        case LOAD_STARTED:
             clear();
             break;
-        case FILEMANAGER_LOAD_COMPLETE:
+        case LOAD_COMPLETE:
             trim();
             break;
         }

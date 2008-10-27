@@ -104,10 +104,10 @@ public final class CreationTimeCache {
             }
             @Override
             public void initialize() {
-                fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
+                fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
                     @Override
-                    public void handleEvent(FileManagerEvent event) {
-                        handleFileManagerEvent(event);
+                    public void handleEvent(ManagedListStatusEvent event) {
+                        handleManagedListStatusEvent(event);
                     }
                 });
                 fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
@@ -334,14 +334,9 @@ public final class CreationTimeCache {
                         if(urnList.size() >= max)
                             break;
                         
-                        // we only want shared FDs, store files also have cached urns
-                        FileDesc fd = fileManager.getManagedFileList().getFileDesc(currURN);
-                        
-                    	// don't remove store files from the urn cache list
-                    	if( fd != null && fileManager.getStoreFileList().contains(fd))
-                    		continue;
-                        // unfortunately fds can turn into ifds so ignore
-                        if ((fd == null) || fd instanceof IncompleteFileDesc) {
+                        // we only want shared FDs
+                        FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+                        if (fd == null) {
                             if (toRemove == null)
                                 toRemove = new ArrayList<URN>();
                             toRemove.add(currURN);
@@ -528,12 +523,12 @@ public final class CreationTimeCache {
     /**
      * Listens for events from the FileManager
      */
-    private void handleFileManagerEvent(FileManagerEvent evt) {
+    private void handleManagedListStatusEvent(ManagedListStatusEvent evt) {
         switch(evt.getType()) {
-            case FILEMANAGER_LOAD_FINISHING:
+            case LOAD_FINISHING:
                 pruneTimes();          
                 break;
-            case FILEMANAGER_SAVE:
+            case SAVE:
                 persistCache();
                 break;
         }
@@ -546,7 +541,7 @@ public final class CreationTimeCache {
             // the installer.  We populate free LimeWire's with free installers
             // so we have to make sure we don't influence the what is new
             // result set.
-            if (!SharingUtils.isForcedShare(evt.getFileDesc())) {     
+            if (!LibraryUtils.isForcedShare(evt.getFileDesc())) {     
                 fileAdded(evt.getFileDesc().getFile(), evt.getFileDesc().getSHA1Urn());
             }
             break;

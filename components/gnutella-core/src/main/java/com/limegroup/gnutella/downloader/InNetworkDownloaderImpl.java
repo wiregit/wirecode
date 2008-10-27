@@ -26,8 +26,7 @@ import com.limegroup.gnutella.downloader.serial.InNetworkDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SavedFileManager;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -55,7 +54,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
             DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
             ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
-            UrnCache urnCache, SavedFileManager savedFileManager,
+            UrnCache urnCache,
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
@@ -63,7 +62,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
-                contentManager, sourceRankerFactory, urnCache, savedFileManager,
+                contentManager, sourceRankerFactory, urnCache, 
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }
@@ -101,7 +100,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
     @Override
     protected File getIncompleteFile(String name, URN urn,
                                      long length) throws IOException {
-        return incompleteFileManager.getFile(name, urn, length, new File(SharingUtils.PREFERENCE_SHARE, "Incomplete"));
+        return incompleteFileManager.getFile(name, urn, length, new File(LibraryUtils.PREFERENCE_SHARE, "Incomplete"));
     }
     
     /**

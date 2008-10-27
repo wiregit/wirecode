@@ -46,6 +46,7 @@ import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTControllerFactory;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -67,7 +68,6 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
-import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.library.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.licenses.LicenseCache;
@@ -110,7 +110,6 @@ import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
-import com.limegroup.gnutella.daap.DaapManager;
 
 /**
  * Contains mostly all references to singletons within LimeWire.
@@ -372,10 +371,6 @@ public class LimeWireCore {
 
     public StaticMessages getStaticMessages() {
         return injector.getInstance(StaticMessages.class);
-    }
-
-    public SavedFileManager getSavedFileManager() {
-        return injector.getInstance(SavedFileManager.class);
     }
     
     public DownloadCallback getInNetworkCallback() {

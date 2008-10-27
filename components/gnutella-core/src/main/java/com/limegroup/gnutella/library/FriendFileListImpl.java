@@ -1,83 +1,34 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executor;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
-
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import org.limewire.util.Objects;
 
 
 /**
  * A collection of FileDescs containing files shared with an individual friend.
  */
-class FriendFileListImpl extends FileListImpl {
+class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     
-    private final String idName;
+    private final String id;
     
     private boolean addNewImagesAlways = false;
     private boolean addNewAudioAlways = false;
     private boolean addNewVideoAlways = false;
     
+    private final LibraryFileData data;
 
-    public FriendFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> filesToShare, String id) {
-        super(executor, fileManager, filesToShare);
-        if(id == null)
-            throw new NullPointerException("ID cannot be null");
-        idName = id;
+    public FriendFileListImpl(LibraryFileData data, ManagedFileList managedList,  String id) {
+        super(managedList);
+        this.id = Objects.nonNull(id, "id");
+        this.data = data;
         
-        addNewAudioAlways = SharingSettings.containsFriendShareNewAudio(id);
-        addNewImagesAlways = SharingSettings.containsFriendShareNewImages(id);
-        addNewVideoAlways = SharingSettings.containsFriendShareNewVideo(id);
-    }
-    
-    @Override
-    public void add(File file) {
-        fileManager.addFriendFile(idName, file);
-    }
-    
-    @Override
-    public void add(File file, List<LimeXMLDocument> documents) {
-        fileManager.addFriendFile(idName, file, documents);
-    }
-    
-    @Override
-    public void addForSession(File file) {
-        throw new UnsupportedOperationException("will not add");
-    }
-
-    /**
-     * Only called by events from FileManager. Will only add this
-     * FileDesc if this list was explicitly waiting for this file
-     */
-    @Override
-    protected void addPendingFileDesc(FileDesc fileDesc) {
-        if(pendingFiles.contains(fileDesc.getFile()) || isSmartlySharedType(fileDesc.getFile()))
-            add(fileDesc);
-    }
-    
-    /**
-     * Friend lists are based completely on individual files since there's no 
-     * directory for files to defaultly reside in. Always add friend files as 
-     * individuals
-     */
-    @Override
-    protected void addAsIndividualFile(FileDesc fileDesc) {
-        individualFiles.add(fileDesc.getFile());
-    }
-    
-    /**
-     * When a file is removed, if that file type was being smartly shared, then
-     * the smart sharing function is remove for that file type.
-     */
-    @Override
-    public boolean remove(FileDesc fileDesc) {
-        stopSmartSharingType(fileDesc.getFile());
-        return super.remove(fileDesc);
+        addNewAudioAlways = LibrarySettings.containsFriendShareNewAudio(id);
+        addNewImagesAlways = LibrarySettings.containsFriendShareNewImages(id);
+        addNewVideoAlways = LibrarySettings.containsFriendShareNewVideo(id);
     }
     
     /**
@@ -103,9 +54,9 @@ class FriendFileListImpl extends FileListImpl {
     public void setAddNewImageAlways(boolean value) {
         if(value != addNewImagesAlways) {
             if(value == false) {
-                SharingSettings.removeFiendShareNewFiles(SharingSettings.SHARE_NEW_IMAGES_ALWAYS, idName);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, id);
             } else {
-                SharingSettings.addFriendShareNewFiles(SharingSettings.SHARE_NEW_IMAGES_ALWAYS, idName);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, id);
             }
             addNewImagesAlways = value;
         }
@@ -129,9 +80,9 @@ class FriendFileListImpl extends FileListImpl {
     public void setAddNewAudioAlways(boolean value) {
         if(value != addNewAudioAlways) {
             if(value == false) {
-                SharingSettings.removeFiendShareNewFiles(SharingSettings.SHARE_NEW_AUDIO_ALWAYS, idName);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, id);
             } else {
-                SharingSettings.addFriendShareNewFiles(SharingSettings.SHARE_NEW_AUDIO_ALWAYS, idName);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, id);
             }
             addNewAudioAlways = value;
         }
@@ -155,9 +106,9 @@ class FriendFileListImpl extends FileListImpl {
     public void setAddNewVideoAlways(boolean value) {
         if(value != addNewVideoAlways) {
             if(value == false) {
-                SharingSettings.removeFiendShareNewFiles(SharingSettings.SHARE_NEW_VIDEO_ALWAYS, idName);
+                LibrarySettings.removeFiendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, id);
             } else {
-                SharingSettings.addFriendShareNewFiles(SharingSettings.SHARE_NEW_VIDEO_ALWAYS, idName);
+                LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, id);
             }
             addNewVideoAlways = value;
         }
@@ -169,6 +120,25 @@ class FriendFileListImpl extends FileListImpl {
     @Override
     public boolean isAddNewVideoAlways() {
         return addNewVideoAlways;
+    }
+    
+    @Override
+    protected boolean isPending(File file, FileDesc fd) {
+        return isSmartlySharedType(file) || data.isSharedWithFriend(file, id);
+    }
+    
+    @Override
+    protected void saveChange(File file, boolean added) {
+        // If we're smart sharing, stop doing it if we removed.
+        //                       , if added do nothing special.
+        // If not smart sharing, just synchronize the data.
+        if(isSmartlySharedType(file)) {
+            if(!added) {
+                stopSmartSharingType(file);
+            }
+        } else {
+            data.setSharedWithFriend(file, id, added);
+        }        
     }
     
     /**

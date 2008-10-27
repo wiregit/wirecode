@@ -20,7 +20,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 public class FriendShareListRefresher {
 
@@ -53,9 +53,9 @@ public class FriendShareListRefresher {
 
         @Inject
         public void register(FileManager fileManager) {
-            fileManager.addFileEventListener(new EventListener<FileManagerEvent>() {
-                public void handleEvent(FileManagerEvent evt) {
-                    if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
+            fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                public void handleEvent(ManagedListStatusEvent evt) {
+                    if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                         FILE_MANAGER_LOADED.set(true);
                     }
                 }

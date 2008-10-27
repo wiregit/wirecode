@@ -41,8 +41,8 @@ import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
@@ -143,10 +143,10 @@ public final class DaapManager {
             }
 
             public void initialize() {
-                fileManager.get().addFileEventListener(new EventListener<FileManagerEvent>() {
+                fileManager.get().getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
                     @Override
-                    public void handleEvent(FileManagerEvent event) {
-                        handleFileManagerEvent(event);
+                    public void handleEvent(ManagedListStatusEvent event) {
+                        handleManagedListStatusEvent(event);
                     }
                 });
                 fileManager.get().getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
@@ -1113,7 +1113,7 @@ public final class DaapManager {
     /**
      * Listens for events from FileManager
      */
-    private void handleFileManagerEvent(final FileManagerEvent evt) {
+    private void handleManagedListStatusEvent(final ManagedListStatusEvent evt) {
         
         // if Daap isn't enabled ignore events
         if(!DaapSettings.DAAP_ENABLED.getValue())
@@ -1122,10 +1122,10 @@ public final class DaapManager {
         DAAP_EVENT_QUEUE.execute(new Runnable(){
             public void run(){
                 switch(evt.getType()) {
-                    case FILEMANAGER_LOAD_STARTED:
+                    case LOAD_STARTED:
                         setEnabled(false);
                         return;
-                    case FILEMANAGER_LOAD_COMPLETE:
+                    case LOAD_COMPLETE:
                         setEnabled(true);
                         return;
                 }

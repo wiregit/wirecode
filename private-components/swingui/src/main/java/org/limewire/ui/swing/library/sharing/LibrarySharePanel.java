@@ -45,8 +45,6 @@ import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.Network;
 import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -656,35 +654,5 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     public void propertyChange(PropertyChangeEvent evt) {
         // the share model file or cateogry has changed - reload friends.
         reloadSharedBuddies();
-    }
-    
-    private static class Gnutella implements Friend {
-        @Override
-        public boolean isAnonymous() {
-            return false;
-        }
-        
-        @Override
-        public String getId() {
-            return "_@_internal_@_";
-        }
-
-        @Override
-        public String getName() {
-            return I18n.tr("LimeWire Network");
-        }
-        
-        @Override
-        public String getRenderName() {
-            return getName();
-        }
-
-        public void setName(String name) {
-            
-        }
-
-        public Network getNetwork() {
-            return null;
-        }
     }
 }

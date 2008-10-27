@@ -126,7 +126,9 @@ public class LibraryNavigator extends JXPanel {
         setLayout(new MigLayout("insets 0, gap 0"));
         add(titleLabel, "growx, alignx left, aligny top,  wrap");
        
-        addNavPanel(new NavPanel(Me.ME, createMyCategories(navigator, myLibraryFactory, libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
+        addNavPanel(new NavPanel(Me.ME,
+                createMyCategories(navigator, myLibraryFactory,
+                        libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override

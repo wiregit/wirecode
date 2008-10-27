@@ -5,7 +5,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.setting.StringArraySetting;
 
 import com.google.inject.AbstractModule;
@@ -13,6 +13,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.GuiCoreMediator;
 
+@SuppressWarnings("deprecation")
 public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
 
     public FileTypeSharingPanelManagerTest(String name) {
@@ -31,10 +32,10 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
     
     @Override
     public void setUp() {
-        extensions = SharingSettings.EXTENSIONS_TO_SHARE.getValue();
-        extensions_unchecked = SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue();
-        extensions_custom = SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue();
-        migrate = SharingSettings.EXTENSIONS_MIGRATE.getValue();
+        extensions = OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue();
+        extensions_unchecked = OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue();
+        extensions_custom = OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue();
+        migrate = OldLibrarySettings.EXTENSIONS_MIGRATE.getValue();
         
         LimeTestUtils.createInjector(new AbstractModule() {
 
@@ -49,15 +50,15 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
     
     @Override
     public void tearDown() {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(extensions);
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue(extensions_unchecked);
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.setValue(extensions_custom);
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(migrate);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(extensions);
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.setValue(extensions_unchecked);
+        OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.setValue(extensions_custom);
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(migrate);
     }
     
     public void testMigrate() throws Exception {
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(true);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;wav;hello");
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(true);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;wav;hello");
         
         FileTypeSharingPanelManager manager = new FileTypeSharingPanelManager();
         
@@ -65,24 +66,24 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         manager.applyOptions();
         
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
-        assertEquals(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
-        assertFalse(SharingSettings.EXTENSIONS_MIGRATE.getValue());
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
+        assertEquals(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_MIGRATE.getValue());
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
     }
 
     
     public void testMigrateMalformed() throws Exception {
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(true);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;wav;;hello;");
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(true);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;wav;;hello;");
 
         FileTypeSharingPanelManager manager = new FileTypeSharingPanelManager();
         
@@ -90,27 +91,27 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         manager.applyOptions();
 
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
-        assertEquals(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
-        assertFalse(SharingSettings.EXTENSIONS_MIGRATE.getValue());
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("wav"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().matches("^[^;]*;[^;]*;[^;]*$"));
+        assertEquals(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue(), "hello");
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("doc"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_MIGRATE.getValue());
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
     }
 
     
     public void testNormal() throws Exception {
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(false);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("--blank--");
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(false);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("--blank--");
         
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue("mp3;wav;hello");
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.setValue("test;hello");
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.setValue("mp3;wav;hello");
+        OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.setValue("test;hello");
         
         FileTypeSharingPanelManager manager = new FileTypeSharingPanelManager();
         
@@ -118,27 +119,27 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         manager.applyOptions();
         
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("test"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("doc"));
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("test"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("hello"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("wav"));
-        assertFalse(SharingSettings.EXTENSIONS_MIGRATE.getValue());
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("test"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("doc"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("mp3"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("test"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("hello"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("mp3"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains("wav"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_MIGRATE.getValue());
     }
    
     public void testExtras() throws Exception {
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(false);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("--blank--");
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(false);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("--blank--");
         
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue("");
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.setValue("hello;test;hello;hello;hello;hello");
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.setValue("");
+        OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.setValue("hello;test;hello;hello;hello;hello");
         
         FileTypeSharingPanelManager manager = new FileTypeSharingPanelManager();
         
@@ -146,25 +147,25 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         manager.applyOptions();
         
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("test"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("doc"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("test"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("hello"));
-        assertTrue(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().length() == 0);
-        assertFalse(SharingSettings.EXTENSIONS_MIGRATE.getValue());
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("test"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("doc"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains("hello"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().endsWith(";"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("test"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains("hello"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().length() == 0);
+        assertFalse(OldLibrarySettings.EXTENSIONS_MIGRATE.getValue());
         
         int index;
 
         // Assert doubling of hello has been removed and not passed on
-        assertTrue((index = SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().indexOf("hello")) > -1);
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().indexOf("hello", index+1) > -1);
-        assertTrue((index = SharingSettings.EXTENSIONS_TO_SHARE.getValue().indexOf("hello")) > -1);
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().indexOf("hello", index+1) > -1);
+        assertTrue((index = OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().indexOf("hello")) > -1);
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().indexOf("hello", index+1) > -1);
+        assertTrue((index = OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().indexOf("hello")) > -1);
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().indexOf("hello", index+1) > -1);
     }
 
     
@@ -208,11 +209,11 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
     
     
     public void testClearAll() throws Exception {
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(false);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;doc;custom");
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(false);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;doc;custom");
         
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue(SharingSettings.getDefaultExtensionsAsString());
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.setValue("");
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.setValue(OldLibrarySettings.getDefaultExtensionsAsString());
+        OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.setValue("");
         
         FileTypeSharingPanelManager manager = new FileTypeSharingPanelManager();
         
@@ -221,9 +222,9 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
         
         Set<Integer> taken = new HashSet<Integer>();
         
-        for ( String ext : SharingSettings.getDefaultExtensions() ) {
+        for ( String ext : OldLibrarySettings.getDefaultExtensions() ) {
             int index;
-            if ((index = find(StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue()), ext)) != -1) {
+            if ((index = find(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue()), ext)) != -1) {
                 if (taken.contains(index)) {
                     fail("Warning -- duplicate extension in defaults: " + ext);
                 } 
@@ -236,12 +237,12 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
             }
         }
         
-        assertFalse(SharingSettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
-        assertFalse(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
-        assertTrue(SharingSettings.EXTENSIONS_TO_SHARE.getValue().length() == 0);
-        assertTrue(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().length() == 0);
-        assertFalse(SharingSettings.EXTENSIONS_MIGRATE.getValue());
+        assertFalse(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().contains(";;"));
+        assertFalse(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().contains(";;"));
+        assertTrue(OldLibrarySettings.EXTENSIONS_TO_SHARE.getValue().length() == 0);
+        assertTrue(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().length() == 0);
+        assertFalse(OldLibrarySettings.EXTENSIONS_MIGRATE.getValue());
         
 
 

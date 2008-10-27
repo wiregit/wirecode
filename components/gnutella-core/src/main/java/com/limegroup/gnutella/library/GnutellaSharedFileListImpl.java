@@ -1,192 +1,87 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
+import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.limewire.collection.MultiCollection;
-
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import org.limewire.util.FileUtils;
 
 
-class GnutellaSharedFileListImpl extends FileListImpl {
+class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFileList {
     
-    /**
-     * The number of files that are forcibly shared over the network.
-     * INVARIANT: numFiles >= numForcedFiles.
-     */
-    private int numForcedFiles;
+    /** Size of all the FileDescs in this list in bytes */
+    private final AtomicLong numBytes;
     
-    private final Set<File> filesNotToShare;
+    /** Where to store the info. */
+    private final LibraryFileData data;
     
-    /**
-     * Files that are shared only for this LW session.
-     * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
-     * at the same time
-     */
-    private final Set<File> transientSharedFiles;
+    /** A list of session-shared data -- it isn't saved. */
+    private Map<File, File> sessionFiles = new ConcurrentHashMap<File, File>();
     
-    /**
-     * Individual files that are not in a shared folder.
-     */
-    private Collection<File> individualSharedFiles; 
+    /** A list of application shared files. */
+    private final AtomicInteger applicationShared = new AtomicInteger();
     
-    public GnutellaSharedFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
-        super(executor, fileManager, individualFiles);
-        
-        this.filesNotToShare = filesNotToShare;
-        transientSharedFiles = new HashSet<File>();
-        
-        // the transient files and the special files.
-        individualSharedFiles = Collections.synchronizedCollection(
-                new MultiCollection<File>(transientSharedFiles, individualFiles));
-    }
-    
-    @Override
-    public void addPendingFileAlways(File file) {
-        filesNotToShare.remove(file); 
-        if (!isFileAddable(file))
-            individualFiles.add(file);
-        addPendingFile(file);
-    }
-        
-    /**
-     * Adds this file for the session only
-     */
-    @Override
-    public void addPendingFileForSession(File file) {
-        synchronized (this) {
-            filesNotToShare.remove(file);
-            if (!isFileAddable(file))
-                transientSharedFiles.add(file);    
-        }
-        addPendingFile(file);
-    }
-    
-    @Override
-    public void add(File file) {
-        fileManager.addSharedFileAlways(file);
-    }
-    
-    @Override
-    public void add(File file, List<LimeXMLDocument> documents) {
-        fileManager.addSharedFileAlways(file, documents);
-    }
-    
-    @Override
-    public void addForSession(File file) {
-        fileManager.addSharedFileForSession(file);
-    }
-    
-    @Override
-    public boolean addFileDesc(FileDesc fileDesc) {
-      	filesNotToShare.remove(fileDesc.getFile());
-        boolean value = super.addFileDesc(fileDesc);
-        
-        //Register this file with its parent directory.
-        File parent = fileDesc.getFile().getParentFile();
-        if(parent != null) {        
-            // files that are forcibly shared over the network
-            // aren't counted or shown.
-            if(SharingUtils.isForcedShareDirectory(parent))
-                numForcedFiles++;
-        }
-    
-        return value;
-    }
-    
-    @Override
-    public boolean removeFileDesc(FileDesc fd) {      
-        if(!individualSharedFiles.contains(fd.getFile()) && fileManager.isFileInCompletelySharedDirectory(fd.getFile()))
-            filesNotToShare.add(fd.getFile());
-       
-        boolean value = super.removeFileDesc(fd);
-
-        if (value) {
-            File parent = fd.getFile().getParentFile();
-            if (parent != null) {
-                // files that are forcibly shared over the network aren't
-                // counted
-                if (SharingUtils.isForcedShareDirectory(parent)) {
-                    numForcedFiles--;
-                }
-            }
-        }
-        return value;
-    }
-    
-    @Override
-    protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
-        if (super.removeFileDesc(oldFileDesc)) {
-            if(super.addFileDesc(newFileDesc)) {
-                fireChangeEvent(oldFileDesc, newFileDesc);
-            } else {
-                fireRemoveEvent(oldFileDesc);
-            }
-        }
-    }
-    
-    //TODO: iterator should ignore specially shared files
-    
-    @Override 
-    public int size() {
-        return super.size() - numForcedFiles;
-    }
-    
-    @Override
-    public int getNumForcedFiles() {
-        return numForcedFiles;
+    public GnutellaSharedFileListImpl(LibraryFileData data, ManagedFileList managedList) {
+        super(managedList);
+        this.data = data;
+        this.numBytes = new AtomicLong();
     }
     
     @Override
     public void clear() {
+        applicationShared.set(0);
+        sessionFiles.clear();
         super.clear();
-        if(transientSharedFiles != null)
-            transientSharedFiles.clear();
-        numForcedFiles = 0;
+    }
+
+    @Override
+    public long getNumBytes() {
+        return numBytes.get();
+    }    
+    
+    @Override
+    public void addForSession(File file) {
+        sessionFiles.put(file, file);
+        super.add(file);
     }
     
     @Override
-    public boolean isFileAddable(File file) {
-        if (!SharingUtils.isFilePhysicallyShareable(file))
-            return false;
-        if (individualSharedFiles.contains(file))
+    protected boolean addFileDescImpl(FileDesc fileDesc) {
+        if(super.addFileDescImpl(fileDesc)) {
+            numBytes.addAndGet(fileDesc.getFileSize());
+            if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
+                applicationShared.incrementAndGet();
+            }
+            fileDesc.setSharedWithGnutella(true);
             return true;
-        if (filesNotToShare.contains(file))
+        } else {
             return false;
-        if (fileManager.isFileInCompletelySharedDirectory(file)) {
-            if (file.getName().toUpperCase(Locale.US).startsWith("LIMEWIRE"))
-                return true;
-            if (!FileManagerImpl.hasShareableExtension(file))
-                return false;
-            return true;
         }
-        return false;
     }
     
     @Override
-    public Object inspect() {
-        Map<String,Object> inspections = new HashMap<String,Object>();
-        inspections.put("size of files", Long.valueOf(numBytes));
-        inspections.put("num of files", Integer.valueOf(super.size()));
-        inspections.put("num forced shared files", Integer.valueOf(numForcedFiles));
-        
+    protected boolean removeFileDescImpl(FileDesc fileDesc) {
+        if (super.removeFileDescImpl(fileDesc)) {
+            numBytes.addAndGet(-fileDesc.getFileSize());
+            if(LibraryUtils.isApplicationSpecialShare(fileDesc.getFile())) {
+                applicationShared.decrementAndGet();
+            }
+            fileDesc.setSharedWithGnutella(false);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object inspect() {        
+        Map<String,Object> inspections = (Map<String,Object>)super.inspect();
+        inspections.put("size of files", numBytes.get());        
         return inspections;
-    }
-    
-    @Override
-    protected void addAsIndividualFile(FileDesc fileDesc) { 
-        if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile()) && !transientSharedFiles.contains(fileDesc.getFile())) {
-            individualFiles.add(fileDesc.getFile());
-        }
     }
     
     /**
@@ -195,64 +90,45 @@ class GnutellaSharedFileListImpl extends FileListImpl {
      */
     @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
-        if( fileDesc.getLimeXMLDocuments().size() != 0 && 
-                isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
+        if(fileDesc instanceof IncompleteFileDesc) {
             return false;
-        } else if( !isFileAddable(fileDesc.getFile())){
+        } else if (fileDesc.getLimeXMLDocuments().size() != 0
+                && isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
             return false;
-        } 
-        return true;
-    }
-    
-    //////////////////////// For Backwards Compatibility /////////////////
-    
-    @Override
-    public File[] getIndividualFiles() { 
-        ArrayList<File> files = new ArrayList<File>(individualSharedFiles.size());
-        for(File f : individualSharedFiles) {
-            if (f.exists())
-                files.add(f);
+        } else {
+            return true;
         }
-          
-        if (files.isEmpty())
-            return new File[0];
-        else
-            return files.toArray(new File[files.size()]);
-    }
-
-    @Override
-    public int getNumIndividualFiles() {
-        return individualSharedFiles.size();
-    }
-
-    @Override
-    public boolean hasIndividualFiles() {
-        return !individualSharedFiles.isEmpty();
-    }
-
-    @Override
-    public boolean isIndividualFile(File file) {
-        return individualFiles.contains(file) && 
-                SharingUtils.isFilePhysicallyShareable(file)&& 
-                !SharingUtils.isApplicationSpecialShare(file);
     }
     
     @Override
-    protected void fireAddEvent(FileDesc fileDesc) {
-        fileDesc.setSharedWithGnutella(true);
-        super.fireAddEvent(fileDesc);
+    protected boolean isPending(File file, FileDesc fd) {
+        return data.isSharedWithGnutella(file) || sessionFiles.containsKey(file);
     }
-
+    
     @Override
-    protected void fireRemoveEvent(FileDesc fileDesc) {
-        fileDesc.setSharedWithGnutella(false);
-        super.fireRemoveEvent(fileDesc);
+    protected void saveChange(File file, boolean added) {
+        if(!sessionFiles.containsKey(file)) {
+            data.setSharedWithGnutella(file, added);
+        }        
+        // Make sure removed things are removed.
+        if(!added) {
+            sessionFiles.remove(file);
+        }
     }
-
+    
     @Override
-    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
-        oldFileDesc.setSharedWithGnutella(false);
-        newFileDesc.setSharedWithGnutella(true);
-        super.fireChangeEvent(oldFileDesc, newFileDesc);
+    public boolean hasApplicationSharedFiles() {
+        return applicationShared.get() > 0;
+    }
+    
+    @Override
+    public boolean isFileApplicationShare(String filename) {
+        File file = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, filename);
+        try {
+            file = FileUtils.getCanonicalFile(file);
+        } catch (IOException bad) {
+            return false;
+        }
+        return contains(file);
     }
 }

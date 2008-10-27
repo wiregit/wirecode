@@ -73,7 +73,6 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -424,7 +423,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final ContentManager contentManager;
     protected final SourceRankerFactory sourceRankerFactory;
     protected final UrnCache urnCache;
-    protected final SavedFileManager savedFileManager;
     protected final VerifyingFileFactory verifyingFileFactory;
     protected final DiskController diskController;
     protected final IPFilter ipFilter;
@@ -451,7 +449,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             OnDemandUnicaster onDemandUnicaster, DownloadWorkerFactory downloadWorkerFactory,
             AltLocManager altLocManager, ContentManager contentManager,
             SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
-            SavedFileManager savedFileManager, VerifyingFileFactory verifyingFileFactory,
+            VerifyingFileFactory verifyingFileFactory,
             DiskController diskController, 
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
@@ -472,7 +470,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.contentManager = contentManager;
         this.sourceRankerFactory = sourceRankerFactory;
         this.urnCache = urnCache;
-        this.savedFileManager = savedFileManager;
         this.verifyingFileFactory = verifyingFileFactory;
         this.diskController = diskController;
         this.ipFilter = ipFilter;
@@ -2081,10 +2078,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (ttroot != null)
                 urns.add(ttroot);
             urnCache.addUrns(file, urns);
-            // Notify the SavedFileManager that there is a new saved
-            // file.
-            savedFileManager.addSavedFile(file, urns);
-            
+            fileManager.getManagedFileList().add(file);
         }
     }
     

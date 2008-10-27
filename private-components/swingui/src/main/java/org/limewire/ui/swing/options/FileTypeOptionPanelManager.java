@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,16 +17,13 @@ import java.util.TreeSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.ui.swing.components.CheckBoxList;
@@ -47,6 +43,7 @@ import org.limewire.util.MediaType;
  *  menu and setup manager.  Includes external interface for saving
  *  and reloading settings.  
  */
+@SuppressWarnings("deprecation")
 public final class FileTypeOptionPanelManager {
 
     private static final int MAX_EXT_LENGTH = 15;
@@ -117,10 +114,10 @@ public final class FileTypeOptionPanelManager {
     private void revert() {
         Category oldKey = this.currentKey;
         
-        SharingSettings.EXTENSIONS_TO_SHARE.revertToDefault();
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.revertToDefault();
-        SharingSettings.DISABLE_SENSITIVE.revertToDefault();
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.revertToDefault();
+        OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.revertToDefault();
+        OldLibrarySettings.DISABLE_SENSITIVE.revertToDefault();
         
         initCore();
         buildUI();
@@ -153,13 +150,13 @@ public final class FileTypeOptionPanelManager {
    
     void initCore() {
         
-        String[] totalExtensions = SharingSettings.getDefaultExtensions();
+        String[] totalExtensions = OldLibrarySettings.getDefaultExtensions();
         String[] selectedExtensions;
         
         
         
-        String[] custom           = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().toLowerCase());
-        String[] unselected       = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().toLowerCase());
+        String[] custom           = StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue().toLowerCase());
+        String[] unselected       = StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue().toLowerCase());
                         
         Set<String> extSet = new HashSet<String>();
         Set<String> newTotalSet = new HashSet<String>();
@@ -355,7 +352,7 @@ public final class FileTypeOptionPanelManager {
         
            
         
-        if (contains(SharingSettings.getDefaultExtensions(), text)) {
+        if (contains(OldLibrarySettings.getDefaultExtensions(), text)) {
             MediaType type = MediaType.getMediaTypeForExtension(text);
             
             if (type == null) {
@@ -428,10 +425,10 @@ public final class FileTypeOptionPanelManager {
       
         String newList = this.getExtensions();
               
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(newList);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(newList);
         
-        SharingSettings.EXTENSIONS_MIGRATE.setValue(false);
-        SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue(getUncheckedExtensions());
+        OldLibrarySettings.EXTENSIONS_MIGRATE.setValue(false);
+        OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.setValue(getUncheckedExtensions());
                 
         return false;
     }

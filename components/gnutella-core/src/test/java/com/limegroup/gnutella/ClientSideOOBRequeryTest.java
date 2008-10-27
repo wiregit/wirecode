@@ -15,7 +15,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
@@ -35,6 +35,7 @@ import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -50,13 +51,13 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
+@SuppressWarnings("deprecation")
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     private static final int UPLOADER_PORT = 10000;
@@ -112,10 +113,11 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() {
         TIMEOUT = 4000;
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");

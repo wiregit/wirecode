@@ -11,7 +11,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 
-public class SharingUtils {
+public class LibraryUtils {
     
     // TODO: refactor back into filemanger for test mocking... use instances.
     
@@ -55,7 +55,7 @@ public class SharingUtils {
      * not null, is a directory, can be read, is not hidden.  
      * Returns false otherwise.
      */
-    public static boolean isFilePhysicallyShareable(File file) {
+    public static boolean isFilePhysicallyManagable(File file) {
         if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
             return false;
                 
@@ -140,15 +140,15 @@ public class SharingUtils {
      * Determines if this File is a network shared directory.
      */
     public static boolean isForcedShareDirectory(File f) {
-        return f.equals(SharingUtils.PROGRAM_SHARE) || f.equals(SharingUtils.PREFERENCE_SHARE);
+        return f.equals(LibraryUtils.PROGRAM_SHARE) || f.equals(LibraryUtils.PREFERENCE_SHARE);
     }
     
     public static boolean isApplicationSpecialShareDirectory(File directory) {
-        return directory.equals(SharingUtils.APPLICATION_SPECIAL_SHARE);
+        return directory.equals(LibraryUtils.APPLICATION_SPECIAL_SHARE);
     }
 
     /**
-     * Returns true if this folder should never be a shared or saved folder.
+     * Returns true if this folder should never be a managed.
      */
     public static boolean isFolderBanned(File folder) {        
         //  check for system roots

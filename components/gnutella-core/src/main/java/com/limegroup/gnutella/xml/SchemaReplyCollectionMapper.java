@@ -6,13 +6,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.i18n.I18nMarker;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileManagerEvent;
+import com.limegroup.gnutella.library.FileDescChangeEvent;
+import com.limegroup.gnutella.library.FileListChangedEvent;
+import com.limegroup.gnutella.library.ManagedFileList;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 
 /** 
@@ -21,7 +28,7 @@ import com.limegroup.gnutella.library.FileManagerEvent;
  * @author Sumeet Thadani
  */
 @Singleton
-public class SchemaReplyCollectionMapper implements EventListener<FileManagerEvent> {
+public class SchemaReplyCollectionMapper {
     
     private Map<String, LimeXMLReplyCollection> mapper;
     
@@ -68,32 +75,70 @@ public class SchemaReplyCollectionMapper implements EventListener<FileManagerEve
     public synchronized Collection<LimeXMLReplyCollection> getCollections() {
         return mapper.values();
     }
+    
+    @Inject void register(ServiceRegistry registry, final ManagedFileList managedList,
+            final ListenerSupport<FileDescChangeEvent> fileDescSupport) {
+        registry.register(new Service() {
+            @Override
+            public String getServiceName() {
+                return I18nMarker.marktr("Metadata Loader");
+            }
+            @Override
+            public void initialize() {
+                fileDescSupport.addListener(new EventListener<FileDescChangeEvent>() {
+                    @Override
+                    public void handleEvent(FileDescChangeEvent event) {
+                        switch(event.getType()) {
+                        case LOAD:
+                            load(event);
+                            break;
+                        }                        
+                    }
+                });
+                
+                managedList.addFileListListener(new EventListener<FileListChangedEvent>() {
+                    @Override
+                    public void handleEvent(FileListChangedEvent event) {
+                        switch(event.getType()) {
+                        case REMOVED:
+                            removeFileDesc(event.getFileDesc());
+                            break;
+                        case CHANGED:
+                            removeFileDesc(event.getOldValue());
+                            break; 
+                        }
+                    }
+                });
+                
+                managedList.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+                    @Override
+                    public void handleEvent(ManagedListStatusEvent event) {
+                        switch (event.getType()) {
+                        case LOAD_STARTED:
+                            loadSchemas();
+                            break;
+                        case LOAD_FINISHING:
+                            finishLoading();
+                            break;
+                        case SAVE:
+                            save(event);
+                            break;
 
-    /**
-     * Listen to events from FileManager
-     */
-    public void handleEvent(FileManagerEvent evt) {
-        switch(evt.getType()) {
-            case FILEMANAGER_LOAD_STARTED:
-                loadSchemas();
-                break;
-            case FILEMANAGER_LOAD_FINISHING:
-                finishLoading();
-                break;
-            case FILEMANAGER_SAVE:
-                save(evt);
-                break;
-            case LOAD_FILE:
-                load(evt);
-                break;
-            case REMOVE_FILE:
-                removeFileDesc(evt.getNewFileDesc());
-                break;
-            case RENAME_FILE:
-            case CHANGE_FILE:
-                removeFileDesc(evt.getOldFileDesc());
-                break;
-        }
+                        }
+                    }
+                });
+            }
+            @Override
+            public void start() {
+                // TODO Auto-generated method stub
+                
+            }
+            @Override
+            public void stop() {
+                // TODO Auto-generated method stub
+                
+            }
+        });
     }
     
     private synchronized void removeFileDesc(FileDesc fd) {
@@ -125,8 +170,8 @@ public class SchemaReplyCollectionMapper implements EventListener<FileManagerEve
     /**
      * Serializes the current LimeXMLReplyCollection to disk.
      */
-    private void save(FileManagerEvent evt) {
-        if (evt.getSource().isLoadFinished()) {
+    private void save(ManagedListStatusEvent event) {
+        if (event.getList().isLoadFinished()) {
             synchronized (this) {
                 Collection<LimeXMLReplyCollection> replies = getCollections();
                 for (LimeXMLReplyCollection col : replies)
@@ -139,12 +184,12 @@ public class SchemaReplyCollectionMapper implements EventListener<FileManagerEve
      * Loads the map with the LimeXMLDocument for a given FileDesc. If no LimeXMLDocument
      * exists for the FileDesc, one is created for it.
      */
-    private synchronized void load(FileManagerEvent evt) {
+    private synchronized void load(FileDescChangeEvent event) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         for (LimeXMLReplyCollection col : replies)
-            col.initialize(evt.getNewFileDesc(), evt.getMetaData());
+            col.initialize(event.getSource(), event.getXmlDocs());
         for (LimeXMLReplyCollection col : replies)
-            col.createIfNecessary(evt.getNewFileDesc());
+            col.createIfNecessary(event.getSource());
     }
     
     /**

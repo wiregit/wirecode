@@ -3,18 +3,25 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
-/**
- * A collection of IncompleteFileDescs.
- */
-class IncompleteFileListImpl extends FileListImpl {
+/** A collection of IncompleteFileDescs. */
+class IncompleteFileListImpl extends AbstractFileList implements IncompleteFileList {
+    
+    private ManagedFileListImpl managedList;
 
-    public IncompleteFileListImpl(Executor executor, FileManagerImpl fileManager, Set<File> individualFiles) {
-        super(executor, fileManager, individualFiles);
+    public IncompleteFileListImpl(ManagedFileListImpl managedList) {
+        super(managedList);
+        this.managedList = managedList;
+    }
+
+    public void addIncompleteFile(File incompleteFile, Set<? extends URN> urns, String name,
+            long size, VerifyingFile vf) {
+        managedList.addIncompleteFile(incompleteFile, urns, name, size, vf);
     }
     
     @Override
@@ -23,24 +30,24 @@ class IncompleteFileListImpl extends FileListImpl {
     }
     
     @Override
-    public void add(File file, List<LimeXMLDocument> documents) {
+    public void add(File file, List<? extends LimeXMLDocument> documents) {
         throw new UnsupportedOperationException("cannot add from here");
-    }
-    
-    @Override
-    public void addForSession(File file) {
-        throw new UnsupportedOperationException("will not add");
-    }
-    
-    @Override
-    protected void addPendingFileDesc(FileDesc fileDesc) { 
-        if(fileDesc instanceof IncompleteFileDesc) {
-            add(fileDesc);
-        }
     }
     
     @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
         return fileDesc instanceof IncompleteFileDesc;
     }
+
+    @Override
+    protected boolean isPending(File file, FileDesc fd) {
+        return fd instanceof IncompleteFileDesc;
+    }
+    
+    @Override
+    protected void saveChange(File file, boolean added) {
+        // Don't save incomplete status.
+    }
+    
+    
 }

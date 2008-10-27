@@ -12,11 +12,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.stubs.QueryRequestStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -63,26 +59,27 @@ public class QRPUpdaterTest extends LimeTestCase {
         assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
         
         // add a shared file 
-        FileDesc fd = new FileDescStub("FoundFile.txt");
-        FileListStub fileList = (FileListStub)fileManagerStub.getGnutellaSharedFileList();
-        fileList.setWhitelist(fd.getFile());
-        fileList.addPendingFile(fd.getFile());
-        fileManagerStub.dispatchEvent(FileManagerEvent.Type.ADD_FILE, fd);
-        
-        //update QRT table, shared file should be found in a query
-        table = qrpUpdater.getQRT();
-        assertTrue(table.contains(new QueryRequestImpl("limewire")));
-        assertTrue(table.contains(new QueryRequestImpl("FoundFile.txt")));
-        assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
-        
-        // simulate removing shared file
-        fileManagerStub.dispatchEvent(FileManagerEvent.Type.REMOVE_FILE, fd);
-        
-        //update QRT table, removed file should not be found in query
-        table = qrpUpdater.getQRT();
-        assertTrue(table.contains(new QueryRequestImpl("limewire")));
-        assertFalse(table.contains(new QueryRequestImpl("FoundFile.txt")));
-        assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
+        fail("TODO: Fix This Test");
+//        FileDesc fd = new FileDescStub("FoundFile.txt");
+//        FileListStub fileList = (FileListStub)fileManagerStub.getGnutellaSharedFileList();
+//        fileList.setWhitelist(fd.getFile());
+//        fileList.addPendingFile(fd.getFile());
+//        fileManagerStub.dispatchEvent(FileManagerEvent.Type.ADD_FILE, fd);
+//        
+//        //update QRT table, shared file should be found in a query
+//        table = qrpUpdater.getQRT();
+//        assertTrue(table.contains(new QueryRequestImpl("limewire")));
+//        assertTrue(table.contains(new QueryRequestImpl("FoundFile.txt")));
+//        assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
+//        
+//        // simulate removing shared file
+//        fileManagerStub.dispatchEvent(FileManagerEvent.Type.REMOVE_FILE, fd);
+//        
+//        //update QRT table, removed file should not be found in query
+//        table = qrpUpdater.getQRT();
+//        assertTrue(table.contains(new QueryRequestImpl("limewire")));
+//        assertFalse(table.contains(new QueryRequestImpl("FoundFile.txt")));
+//        assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
     }
     
     private class QueryRequestImpl extends QueryRequestStub {

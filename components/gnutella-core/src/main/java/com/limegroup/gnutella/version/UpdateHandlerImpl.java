@@ -70,9 +70,9 @@ import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
+import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -83,7 +83,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * version is stored in memory & on disk.
  */
 @Singleton
-public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManagerEvent>, Service {
+public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedListStatusEvent>, Service {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandlerImpl.class);
     
@@ -214,7 +214,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
     }
     
     @Inject
-    void register(ListenerSupport<FileManagerEvent> listener) {
+    void register(ListenerSupport<ManagedListStatusEvent> listener) {
         listener.addListener(this);
     }
         
@@ -578,7 +578,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
         if (info == null || info.getUpdateCommand() == null)
             return;
         
-        File path = SharingUtils.PREFERENCE_SHARE.getAbsoluteFile();
+        File path = LibraryUtils.PREFERENCE_SHARE.getAbsoluteFile();
         String name = info.getUpdateFileName();
         
         try {
@@ -623,7 +623,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
             if (isHopeless(next))
                 continue; 
             
-            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().isLoadFinished()) {
+            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().getManagedFileList().isLoadFinished()) {
                 
                 FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(next.getUpdateURN());
                 //TODO: remove the cast
@@ -666,7 +666,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().isLoadFinished())
+    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().getManagedFileList().isLoadFinished())
     		return;
     	
         if (_killingObsoleteNecessary) {
@@ -677,7 +677,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getGnutellaSharedFileList().getFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = fileManager.get().getGnutellaSharedFileList().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
                     fileManager.get().getManagedFileList().remove(fd.getFile());
@@ -839,7 +839,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
      * there was nothing to download
      */
     private boolean isMyUpdateDownloaded(UpdateInformation myInfo) {
-        if (!fileManager.get().isLoadFinished())
+        if (!fileManager.get().getManagedFileList().isLoadFinished())
             return false;
         
         URN myUrn = myInfo.getUpdateURN();
@@ -1012,8 +1012,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<FileManag
     /**
      * Listens for events from FileManager
      */
-    public void handleEvent(FileManagerEvent evt) {
-        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
+    public void handleEvent(ManagedListStatusEvent evt) {
+        if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
             tryToDownloadUpdates();
         }
     }

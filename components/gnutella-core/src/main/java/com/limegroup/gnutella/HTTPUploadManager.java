@@ -403,7 +403,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             return false;
         }
         
-        if (fileManager.get().hasApplicationSharedFiles())
+        if (fileManager.get().getGnutellaSharedFileList().hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
                     + getNumQueuedUploads());
         return isServiceable();
@@ -482,7 +482,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         FileDesc fd = session.getUploader().getFileDesc();
         if (!contentManager.get().isVerified(fd.getSHA1Urn())) // spawn a validation
-            fileManager.get().validate(fd);
+            fileManager.get().getManagedFileList().validate(fd);
 
         URN sha1 = fd.getSHA1Urn();
 

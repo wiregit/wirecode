@@ -4,8 +4,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
 import org.limewire.http.auth.Authenticator;
 import org.limewire.http.auth.AuthenticatorRegistry;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.security.SHA1;
 import org.limewire.security.SecurityUtils;
 import org.limewire.util.StringUtils;
@@ -21,7 +19,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class XMPPAuthenticator implements Authenticator {
 
-    private final static Log LOG = LogFactory.getLog(XMPPAuthenticator.class);
+//    private final static Log LOG = LogFactory.getLog(XMPPAuthenticator.class);
     
     /**
      * Per session random seed.

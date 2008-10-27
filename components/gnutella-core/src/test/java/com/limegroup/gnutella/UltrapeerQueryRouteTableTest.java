@@ -2,14 +2,14 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 
+import junit.framework.Test;
+
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.util.MediaType;
-
-import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -27,6 +27,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  * ULTRAPEER_1  ----  ULTRAPEER_2
  */
+@SuppressWarnings("deprecation")
 public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
 
 
@@ -59,10 +60,11 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
         return 0;
     }
     
+    @SuppressWarnings("deprecation")
     @Override
     protected void setSettings() throws Exception {
 
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("tmp");
         ConnectionSettings.NUM_CONNECTIONS.setValue(4);
         SearchSettings.GUESS_ENABLED.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);

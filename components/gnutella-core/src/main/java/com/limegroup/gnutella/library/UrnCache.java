@@ -45,7 +45,7 @@ import com.limegroup.gnutella.UrnSet;
  * @see URN
  */
 @Singleton
-public final class UrnCache implements EventListener<FileManagerEvent> {
+public final class UrnCache implements EventListener<ManagedListStatusEvent> {
     
     private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
@@ -505,10 +505,10 @@ public final class UrnCache implements EventListener<FileManagerEvent> {
 	/**
 	 * Handles events from the FileManager
 	 */
-    public void handleEvent(FileManagerEvent evt) {
-        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
-            clearPendingHashes(evt.getSource());
-        } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {
+    public void handleEvent(ManagedListStatusEvent evt) {
+        if(evt.getType() == ManagedListStatusEvent.Type.LOAD_STARTED) {
+            clearPendingHashes(evt.getList());
+        } else if(evt.getType() == ManagedListStatusEvent.Type.SAVE) {
             persistCache();
         } 
     }

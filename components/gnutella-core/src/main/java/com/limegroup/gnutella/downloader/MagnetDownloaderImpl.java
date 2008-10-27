@@ -30,7 +30,6 @@ import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -91,7 +90,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             OnDemandUnicaster onDemandUnicaster, DownloadWorkerFactory downloadWorkerFactory,
             AltLocManager altLocManager, ContentManager contentManager,
             SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
-            SavedFileManager savedFileManager, VerifyingFileFactory verifyingFileFactory,
+            VerifyingFileFactory verifyingFileFactory,
             DiskController diskController, 
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
@@ -100,7 +99,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
-                contentManager, sourceRankerFactory, urnCache, savedFileManager,
+                contentManager, sourceRankerFactory, urnCache, 
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }

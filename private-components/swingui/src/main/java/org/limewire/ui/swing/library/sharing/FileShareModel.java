@@ -7,7 +7,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 public class FileShareModel implements LibraryShareModel {
@@ -57,7 +57,7 @@ public class FileShareModel implements LibraryShareModel {
     
     @Override
     public boolean isGnutellaNetworkSharable() {
-        return (fileItem.getCategory() != Category.DOCUMENT || SharingSettings.DOCUMENT_SHARING_ENABLED.getValue());
+        return (fileItem.getCategory() != Category.DOCUMENT || LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue());
     }
  
     @Override

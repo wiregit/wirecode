@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.messages;
 
+import org.limewire.util.ByteUtils;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -39,7 +41,7 @@ public class LocalPongInfoImpl implements LocalPongInfo {
     }
 
     public int getSharedFileSize() {
-        return fileManager.get().getGnutellaSharedFileList().getNumBytes();
+        return ByteUtils.long2int(fileManager.get().getGnutellaSharedFileList().getNumBytes());
     }
 
     public boolean isSupernode() {

@@ -39,7 +39,7 @@ import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
@@ -162,7 +162,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
             HttpContext context, FileRequest fileRequest) throws IOException, HttpException {
         FileDesc fileDesc = fileRequest.getFileDesc();
         // create uploader
-        UploadType type = (SharingUtils.isForcedShare(fileDesc)) ? UploadType.FORCED_SHARE
+        UploadType type = (LibraryUtils.isForcedShare(fileDesc)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context, type, fileDesc.getFileName());
         uploader.setFileDesc(fileDesc);

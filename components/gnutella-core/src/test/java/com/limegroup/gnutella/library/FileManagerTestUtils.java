@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.util;
+package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,34 +13,30 @@ import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerEvent;
-import com.limegroup.gnutella.library.FileManagerEvent.Type;
-
 public class FileManagerTestUtils {
 
     /**
      * Begins a load on FileManager and waits for the FileManager to finishing loading before 
-     * continueing. Also can specify a timeout which will throw an exception if FileManager hasn't 
+     * continuing. Also can specify a timeout which will throw an exception if FileManager hasn't 
      * completed in a certain amount of time.
      */
     public static void waitForLoad(FileManager fileManager, int timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch loadedLatch = new CountDownLatch(1);
-        EventListener<FileManagerEvent> listener = new EventListener<FileManagerEvent>() {
-            public void handleEvent(FileManagerEvent evt) {
-                if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
+        EventListener<ManagedListStatusEvent> listener = new EventListener<ManagedListStatusEvent>() {
+            public void handleEvent(ManagedListStatusEvent evt) {
+                if (evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
                     loadedLatch.countDown();
                 }
             }            
         };
         try {
-            fileManager.addFileEventListener(listener);
-            fileManager.loadSettings();
+            fileManager.getManagedFileList().addManagedListStatusListener(listener);
+            ((ManagedFileListImpl)fileManager.getManagedFileList()).loadSettings();
             if (!loadedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
                 throw new TimeoutException("Loading of FileManager settings did not complete within " + timeout + " ms");
             }
         } finally {
-            fileManager.removeFileEventListener(listener);
+            fileManager.getManagedFileList().removeManagedListStatusListener(listener);
         }
     }
 

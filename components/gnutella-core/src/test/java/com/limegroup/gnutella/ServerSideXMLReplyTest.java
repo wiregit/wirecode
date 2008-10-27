@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -30,6 +30,7 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
+@SuppressWarnings("deprecation")
 public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
     private QueryRequestFactory queryRequestFactory;
@@ -56,9 +57,10 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 	    return 1;
     }
 	
+    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             TestUtils.getResourceFile("com/limegroup/gnutella/metadata/ID3V24.mp3");

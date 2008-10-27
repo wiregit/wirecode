@@ -25,7 +25,6 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.library.FileManagerEvent;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.version.UpdateInformation;
 
@@ -135,11 +134,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     public boolean handleDAAPConnectionError(Throwable t) {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    public void handleFileEvent(FileManagerEvent evt) {
-        // TODO Auto-generated method stub
-
     }
 
     public boolean handleMagnets(MagnetOptions[] magnets) {

@@ -31,7 +31,7 @@ import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 
 /**
  * Manages active torrents and dispatching of incoming BitTorrent connections. 
@@ -326,7 +326,7 @@ public class TorrentManagerImpl implements TorrentManager {
         
         Runnable r = new Runnable() {
             public void run() {
-            	if (SharingUtils.isFilePhysicallyShareable(f))
+            	if (LibraryUtils.isFilePhysicallyManagable(f))
             		fileManager.getGnutellaSharedFileList().addForSession(f);
             }
         };
@@ -364,7 +364,7 @@ public class TorrentManagerImpl implements TorrentManager {
      */
     public File getSharedTorrentMetaDataFile(BTMetaInfo info) {
         String fileName = info.getFileSystem().getName().concat(".torrent");
-        File f = new File(SharingUtils.APPLICATION_SPECIAL_SHARE, fileName);
+        File f = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, fileName);
         return f;
     }
 

@@ -17,9 +17,10 @@ import java.net.UnknownHostException;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
@@ -440,7 +441,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
      * number of connections to maintain, etc.
      */
     private void setStandardSettings(int port) {
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue(SHARED_EXTENSION);
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(SHARED_EXTENSION);
 
         SearchSettings.GUESS_ENABLED.setValue(true);
 

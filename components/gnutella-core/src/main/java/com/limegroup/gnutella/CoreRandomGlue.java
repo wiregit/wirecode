@@ -19,8 +19,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SavedFileManager;
-import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.simpp.SimppListener;
@@ -44,9 +43,7 @@ class CoreRandomGlue {
     private final SimppManager simppManager;
     private final HashTreeCache hashTreeCache;
     private final LicenseFactory licenseFactory;
-    private final SavedFileManager savedFileManager;
     private final UrnCache urnCache;
-    private final SchemaReplyCollectionMapper schemaMapper;
     private final AltLocManager altLocManager;
     
     @Inject
@@ -60,7 +57,6 @@ class CoreRandomGlue {
             SimppManager simppManager,
             LicenseFactory licenseFactory,
             HashTreeCache hashTreeCache,
-            SavedFileManager savedFileManager,
             UrnCache urnCache,
             SchemaReplyCollectionMapper schemaMapper,
             AltLocManager altLocManager) {
@@ -76,9 +72,7 @@ class CoreRandomGlue {
         this.simppManager = simppManager;
         this.hashTreeCache = hashTreeCache;
         this.licenseFactory = licenseFactory;
-        this.savedFileManager = savedFileManager;
         this.urnCache = urnCache;
-        this.schemaMapper = schemaMapper;
         this.altLocManager = altLocManager;
     }
     
@@ -87,10 +81,8 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 //TODO: find a better way to do this
-                fileManager.addFileEventListener(savedFileManager);
-                fileManager.addFileEventListener(urnCache);
-                fileManager.addFileEventListener(schemaMapper);
-                fileManager.addFileEventListener(altLocManager);
+                fileManager.getManagedFileList().addManagedListStatusListener(urnCache);
+                fileManager.getManagedFileList().addFileListListener(altLocManager);
                 
                 connectionManager.addEventListener(activityCallback);
                 connectionManager.addEventListener(dhtManager);
@@ -142,7 +134,7 @@ class CoreRandomGlue {
     
     
     private void cleanupTorrentMetadataFiles() {
-        if(!fileManager.isLoadFinished()) {
+        if(!fileManager.getManagedFileList().isLoadFinished()) {
             return;
         }
         
@@ -152,7 +144,7 @@ class CoreRandomGlue {
             }
         };
         
-        File[] file_list = SharingUtils.APPLICATION_SPECIAL_SHARE.listFiles(filter);
+        File[] file_list = LibraryUtils.APPLICATION_SPECIAL_SHARE.listFiles(filter);
         if(file_list == null) {
             return;
         }

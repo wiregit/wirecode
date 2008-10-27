@@ -29,7 +29,6 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.SavedFileManager;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -61,7 +60,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             QueryRequestFactory queryRequestFactory, OnDemandUnicaster onDemandUnicaster,
             DownloadWorkerFactory downloadWorkerFactory, AltLocManager altLocManager,
             ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
-            UrnCache urnCache, SavedFileManager savedFileManager,
+            UrnCache urnCache, 
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
@@ -70,7 +69,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
-                contentManager, sourceRankerFactory, urnCache, savedFileManager,
+                contentManager, sourceRankerFactory, urnCache, 
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
         this.metaDataFactory = metaDataFactory;

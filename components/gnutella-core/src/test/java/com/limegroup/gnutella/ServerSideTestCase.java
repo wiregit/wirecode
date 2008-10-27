@@ -7,7 +7,7 @@ import java.util.Properties;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.SharingSettings;
+import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -35,6 +35,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  *                                            numUPs, setUpQRPTables
  *  You CAN  implement the following methods: setSettings
  */
+@SuppressWarnings("deprecation")
 public abstract class ServerSideTestCase extends LimeTestCase {
 
     /**
@@ -84,6 +85,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         }
     }
 
+    @SuppressWarnings("deprecation")
     protected final void doSettings() throws Exception {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
@@ -91,7 +93,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*", localIP});
         NetworkSettings.PORT.setValue(PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
