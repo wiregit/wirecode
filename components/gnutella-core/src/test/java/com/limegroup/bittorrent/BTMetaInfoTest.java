@@ -16,7 +16,7 @@ public class BTMetaInfoTest extends LimeTestCase {
      * A directory containing the test data for this unit test.
      */
     public static final File TEST_DATA_DIR = TestUtils
-            .getResourceFile("org/limewire/swarm/bittorrent/torrents");
+            .getResourceFile("org/limewire/swarm/bittorrent/public_html/torrents");
 
     public BTMetaInfoTest(String name) {
         super(name);
