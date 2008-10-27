@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.setting.StringArraySetting;
@@ -35,8 +36,9 @@ import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeEven
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeListener;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionListener;
+import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.MediaType; // TODO: convert NamedMediaType!
+import org.limewire.util.MediaType;
 
 
 
@@ -59,50 +61,29 @@ public final class FileTypeOptionPanelManager {
     
     
     
-    private Component                    parent = null;
-    private JPanel                       mainContainer;
-    private CheckBoxList<MediaType> sidePanel;
+    private Component parent = null;
+    private JPanel mainContainer;
     
-    private CardLayout                   mediaLayout;
-    private JPanel                       currentPanel;
+    private CheckBoxList<Category> sidePanel;
+    
+    private CardLayout mediaLayout;
+    private JPanel currentPanel;
         
-    private CheckBoxList<String>         customPanel;
-    private Set<String>                  customUnchecked;
-    
-    private Map<MediaType,CheckBoxList<String>> panels;
+    private Map<Category,CheckBoxList<String>> panels;
     
     private final ExtensionProvider extensionProvider = new ExtensionProvider();
 
-    public static final String CUSTOM = "__Custom$";
-    public static final String OTHER = "_Other$";
-    public static final String CUSTOM_NAME = I18nMarker.marktr("My Extensions");
-    public static final String OTHER_NAME = I18nMarker.marktr("Other");
-
-    
-    private static final MediaType otherMedia = new MediaType(OTHER);
-        // TODO: = new MediaType(new MediaType(OTHER_NAME, OTHER, null),null);
-
-    private static final MediaType customMedia = new MediaType(CUSTOM);
-        // TODO: = new MediaType(new MediaType("CUSTOM_NAME", CUSTOM, null),null);
-
-    
-    private JCheckBox disableSensitive;
-    private boolean migrate;
-    private Set<MediaType> mediaKeys;
-    private Set<MediaType> mediaUnchecked;        
+    private Set<Category> mediaKeys;
+    private Set<Category> mediaUnchecked;        
 
 
-    /**
-     * Stores the key for the custom panel
-     */
-    private MediaType               customKey = customMedia;
-    
-    /**
-     * Stores the key for the currently viewed media type
-     */
-    private MediaType               currentKey;
-    
-    private String                       originalExtensions;
+    private Category currentKey;
+
+    private Object originalExtensions;
+
+    private CheckBoxList<String> otherPanel;
+
+    private Category otherKey;
     
     public FileTypeOptionPanelManager(Component parent) {
         this();
@@ -111,8 +92,6 @@ public final class FileTypeOptionPanelManager {
     }
     
     public FileTypeOptionPanelManager() {
-        this.customUnchecked = new HashSet<String>();
-        
         this.mainContainer   = new JPanel(new BorderLayout());
         
         this.mediaLayout  = new CardLayout();
@@ -125,32 +104,18 @@ public final class FileTypeOptionPanelManager {
     /**
      * Switches the active media panel to the one of the given key
      */
-    private void switchPanel(MediaType mediaKey) {
+    private void switchPanel(Category mediaKey) {
 
         this.currentKey = mediaKey;
         this.mediaLayout.show(currentPanel, mediaKey.toString());
         this.sidePanel.setItemSelected(mediaKey);
     }
     
-    /**
-     * Adds a new extension of type name 
-     */
-    public void addCustomExt(String name) {
-        Set<String> customExts = this.customPanel.getElements();
-        customExts.add(name);
-        
-        this.customUnchecked = this.customPanel.getRawUncheckedElementsAsSet();
-        this.customPanel.setElements(customExts, this.customUnchecked);
-        
-        this.switchPanel(this.customKey);
-        this.sidePanel.setItemSelected(this.customKey);
-    }
-    
     /** 
      * Reverts the set extensions to the limewire defaults
      */
     private void revert() {
-        MediaType oldKey = this.currentKey;
+        Category oldKey = this.currentKey;
         
         SharingSettings.EXTENSIONS_TO_SHARE.revertToDefault();
         SharingSettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
@@ -175,7 +140,7 @@ public final class FileTypeOptionPanelManager {
     /**
      * Sets the enabled setting of a panel of a given key
      */
-    private void setPanelEnabled(MediaType mediaKey, boolean enabled) {
+    private void setPanelEnabled(Category mediaKey, boolean enabled) {
        this.panels.get(mediaKey).setEnabled(enabled);
     }
 
@@ -187,64 +152,49 @@ public final class FileTypeOptionPanelManager {
     }
    
     void initCore() {
-        this.customUnchecked.clear();
-        
-        Set<String> customExts = new HashSet<String>();
         
         String[] totalExtensions = SharingSettings.getDefaultExtensions();
         String[] selectedExtensions;
         
         
-        migrate = SharingSettings.EXTENSIONS_MIGRATE.getValue();
         
-        if (migrate) { 
-            selectedExtensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase());
-            
-            for ( int i = 0 ; i<selectedExtensions.length ; i++ ) {
-                if (!contains(totalExtensions, selectedExtensions[i])) {
-                    customExts.add(selectedExtensions[i]);
-                }
-            }
-        }
-        else {
-            String[] custom           = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().toLowerCase());
-            String[] unselected       = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().toLowerCase());
+        String[] custom           = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().toLowerCase());
+        String[] unselected       = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().toLowerCase());
                         
-            Set<String> extSet = new HashSet<String>();
-            Set<String> newTotalSet = new HashSet<String>();
+        Set<String> extSet = new HashSet<String>();
+        Set<String> newTotalSet = new HashSet<String>();
             
-            for ( int i=0 ; i<totalExtensions.length ; i++ ) {
-                extSet.add(totalExtensions[i]);
-                newTotalSet.add(totalExtensions[i]);
-            }
-
-            for ( int i=0 ; i<custom.length ; i++ ) {
-                if (custom[i].length() > 0) {
-                    if (!contains(totalExtensions, custom[i]))
+        for ( int i=0 ; i<totalExtensions.length ; i++ ) {
+            extSet.add(totalExtensions[i]);
+            newTotalSet.add(totalExtensions[i]);
+        }
+/* TODO: Add to other
+        for ( int i=0 ; i<custom.length ; i++ ) {
+            if (custom[i].length() > 0) {
+                if (!contains(totalExtensions, custom[i]))
                     customExts.add(custom[i]);
-                }
             }
-            
-            for ( int i=0 ; i<unselected.length ; i++ ) {
-                extSet.remove(unselected[i]);
-                
-                if (customExts.contains(unselected[i])) {
-                    this.customUnchecked.add(unselected[i]);
-                }
-            }
-
-            
-            totalExtensions = newTotalSet.toArray(new String[newTotalSet.size()]);
-                        
-            selectedExtensions = new String[extSet.size()];
-            selectedExtensions = extSet.toArray(selectedExtensions);
         }
-                
-        Map<MediaType, List<String>> extensionsByType = createExtensionsMap(selectedExtensions, customExts);
-        Map<MediaType, List<String>> defaultsByType   = createExtensionsMap(totalExtensions, customExts);
+            
+        for ( int i=0 ; i<unselected.length ; i++ ) {
+            extSet.remove(unselected[i]);
+            
+            if (customExts.contains(unselected[i])) {
+                this.customUnchecked.add(unselected[i]);
+            }
+        }
+*/
+            
+        totalExtensions = newTotalSet.toArray(new String[newTotalSet.size()]);
+                        
+        selectedExtensions = new String[extSet.size()];
+        selectedExtensions = extSet.toArray(selectedExtensions);
+                        
+        Map<Category, List<String>> extensionsByType = createExtensionsMap(selectedExtensions, null);
+        Map<Category, List<String>> defaultsByType   = createExtensionsMap(totalExtensions, null);
 
-        mediaKeys = new TreeSet<MediaType>();
-        Set<MediaType> s; 
+        mediaKeys = new TreeSet<Category>();
+        Set<Category> s; 
         if ((s = extensionsByType.keySet()) != null) {        
             mediaKeys.addAll(s);
         }
@@ -252,13 +202,13 @@ public final class FileTypeOptionPanelManager {
             mediaKeys.addAll(s);
         }
 
-        this.panels = new LinkedHashMap<MediaType,CheckBoxList<String>>();
-        this.mediaUnchecked = new HashSet<MediaType>();
+        this.panels = new LinkedHashMap<Category,CheckBoxList<String>>();
+        this.mediaUnchecked = new HashSet<Category>();
         this.currentKey = null;
 
         PanelsCheckChangeListener refreshListener = new PanelsCheckChangeListener(this);
         
-        for (MediaType key : mediaKeys) {
+        for (Category key : mediaKeys) {
 
             if (this.currentKey == null) {
                 this.currentKey = key;
@@ -296,8 +246,6 @@ public final class FileTypeOptionPanelManager {
             this.panels.put(key, newPanel);
         }
         
-        this.insertNewCustomPanel(customExts);
-        
         this.originalExtensions = this.getExtensions();
     }
 
@@ -308,11 +256,11 @@ public final class FileTypeOptionPanelManager {
         this.currentPanel.removeAll();
         
         
-        for (MediaType key : mediaKeys) {
+        for (Category key : mediaKeys) {
             this.currentPanel.add(this.panels.get(key), key.toString());
         }
         
-        this.sidePanel = new CheckBoxList<MediaType>(this.mediaKeys, this.mediaUnchecked,
+        this.sidePanel = new CheckBoxList<Category>(this.mediaKeys, this.mediaUnchecked,
                 new MediaProvider(), new MediaExtrasProvider(this.panels),
                 CheckBoxList.SELECT_FIRST_ON);
         
@@ -320,6 +268,7 @@ public final class FileTypeOptionPanelManager {
         this.sidePanel.setSelectionListener(new SideSelectListener(this));
         this.sidePanel.setCheckChangeListener(new CheckChangeListener(this));
         this.sidePanel.setItemSelected(this.currentKey);
+        this.sidePanel.setCheckBoxesVisible(false);
         
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 this.sidePanel, this.currentPanel);
@@ -328,50 +277,21 @@ public final class FileTypeOptionPanelManager {
         
         this.mainContainer.add(splitPane, BorderLayout.CENTER);
         
-        this.addBottomPanel();
-        
-        this.shareProtect(!SharingSettings.DISABLE_SENSITIVE.getValue());
-        
         this.mainContainer.validate();
 
     }
     
-    /** 
-     * Turn on or off sensitive file protection on the given subset of files
-     *  as specified in SharingSettings
-     */
-    private void shareProtect(boolean state) {
-
-        String[] disabled = SharingSettings.getDefaultDisabledExtensions();
-        
-        Set<String> totalDisabled = new HashSet<String>();
-                
-        for( String item : disabled ) {
-            totalDisabled.add(item);
-        }
-        
-        for ( CheckBoxList<String> panel : this.panels.values() ) {
-            panel.setItemsEnabled(totalDisabled, state);
-        }
-
-        this.refreshSidePanel();
-    }
-    
-
-    
-    
-    
-    private static Map<MediaType, List<String>> createExtensionsMap(String[] extensions, Set<String> ignoreList) {
+    private static Map<Category, List<String>> createExtensionsMap(String[] extensions, Set<String> ignoreList) {
 
         if (extensions == null || extensions.length == 0) {
             return Collections.emptyMap();
         }
-        Map<MediaType, List<String>> extensionsByType = new LinkedHashMap<MediaType, List<String>>();
+        Map<Category, List<String>> extensionsByType = new LinkedHashMap<Category, List<String>>();
 
         for (String extension : extensions) { 
-            MediaType nm = MediaType.getMediaTypeForExtension(extension);
+            Category nm = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(extension));
             if (nm == null) {
-                nm = otherMedia;
+                nm = CategoryUtils.getCategory(MediaType.getOtherMediaType());
             }
             if (!extensionsByType.containsKey(nm)) {
                 extensionsByType.put(nm, new ArrayList<String>(8));
@@ -439,7 +359,7 @@ public final class FileTypeOptionPanelManager {
             MediaType type = MediaType.getMediaTypeForExtension(text);
             
             if (type == null) {
-                type = otherMedia;
+                type = MediaType.getOtherMediaType();
             }
             
             CheckBoxList<String> panel = this.panels.get(type); 
@@ -449,24 +369,24 @@ public final class FileTypeOptionPanelManager {
                 return false;    
             }
          
-            this.switchPanel(type);
+            this.switchPanel(CategoryUtils.getCategory(type));
             panel.setItemChecked(text);
-            this.sidePanel.setItemSelected(type);
+            this.sidePanel.setItemSelected(CategoryUtils.getCategory(type));
             
             return false;
         }
 
-        if (this.customPanel.getElements().contains(text)) {
-            CheckBoxList<String> panel = this.panels.get(this.customKey); 
+        if (this.otherPanel.getElements().contains(text)) {
+            CheckBoxList<String> panel = this.panels.get(this.otherKey); 
             
             if (panel == null) {
                 JOptionPane.showMessageDialog(this.parent, malformedMsg);
                 return false;    
             }
             
-            this.switchPanel(this.customKey);
+            this.switchPanel(this.otherKey);
             panel.setItemChecked(text);
-            this.sidePanel.setItemSelected(this.customKey);
+            this.sidePanel.setItemSelected(this.otherKey);
             
             return false;
         }
@@ -476,29 +396,7 @@ public final class FileTypeOptionPanelManager {
     }
 
     
-    private class AddExtAction extends AbstractAction {
-        
-        public AddExtAction() {
-            putValue(Action.NAME, I18n.tr("Add New Extension"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Add a New Extension to My Extensions"));
-        }
-        
-        public void actionPerformed(ActionEvent e) {
-            String text = JOptionPane.showInputDialog(parent, I18n.tr("Enter the extension pattern:"), 
-                    I18n.tr("Extension Sharing Settings"), JOptionPane.DEFAULT_OPTION);
-            
-            if (text != null) {
-                text = text.toLowerCase();
-            }
-            else {
-                return;
-            }        
-            
-            if (checkExt(text)) {                           
-                addCustomExt(text);
-            }
-        }
-    }
+    
     
     private class RestoreAction extends AbstractAction {
         
@@ -518,51 +416,6 @@ public final class FileTypeOptionPanelManager {
         }
     }
     
-    private void addBottomPanel() {
-
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(4, 0, 0, 0));
-        
-        this.disableSensitive = new JCheckBox(I18n.tr("Do Not Share Sensitive File Types"));        
-        this.disableSensitive.setToolTipText(I18n.tr("This stops LimeWire from sharing certain files that may contain sensitive information."));
-        this.disableSensitive.setSelected(SharingSettings.DISABLE_SENSITIVE.getValue());
-        
-        JPanel buffer = new JPanel(new BorderLayout());
-        buffer.setBorder(BorderFactory.createEmptyBorder(6, 0, 0, 0));
-        this.disableSensitive.setBorder(null);
-        buffer.add(this.disableSensitive);
-  
-        
-        bottomPanel.add(new JButton(new RestoreAction()), BorderLayout.WEST);
-        bottomPanel.add(buffer, BorderLayout.SOUTH);
-        bottomPanel.add(new JButton(new AddExtAction()), BorderLayout.EAST);
-        
-        this.disableSensitive.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                shareProtect(!((JCheckBox)e.getSource()).isSelected());            
-            }
-        });
-                
-        this.mainContainer.add(bottomPanel, BorderLayout.SOUTH);
-       
-    }
-
-    private void insertNewCustomPanel(Set<String> customExts) {
-        
-        this.customPanel = new CheckBoxList<String>(customExts, this.customUnchecked,
-                                   extensionProvider, CheckBoxList.SELECT_FIRST_OFF);
-        
-        this.customPanel.setRemovable(true);
-        this.customPanel.setCheckChangeListener(new PanelsCheckChangeListener(this));
-        
-        this.currentPanel.add(this.customPanel, this.customKey.toString());
-        
-        this.mediaKeys.add(this.customKey);
-        
-        this.panels.put(this.customKey, this.customPanel);
-    }
-    
-     
 
     // Methods to integrate with PaneItem
     
@@ -576,27 +429,15 @@ public final class FileTypeOptionPanelManager {
         String newList = this.getExtensions();
               
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(newList);
-        //GuiCoreMediator.getFileManager().loadSettings();
-               
-        SharingSettings.DISABLE_SENSITIVE.setValue(
-                   this.disableSensitive == null 
-                || this.disableSensitive.isSelected());
-        
-        // Save new database
-        
-        String[] customArray = new String[this.customPanel.getElements().size()];
-        customArray = this.customPanel.getElements().toArray(customArray);
         
         SharingSettings.EXTENSIONS_MIGRATE.setValue(false);
         SharingSettings.EXTENSIONS_LIST_UNSHARED.setValue(getUncheckedExtensions());
-        SharingSettings.EXTENSIONS_LIST_CUSTOM.setValue(StringArraySetting.encode(customArray)); 
-        
+                
         return false;
     }
 
     public boolean isDirty() {
-        return    !this.originalExtensions.equals(this.getExtensions())
-               || !this.disableSensitive.isSelected() == SharingSettings.DISABLE_SENSITIVE.getValue();
+        return    !this.originalExtensions.equals(this.getExtensions());
     }
 
   
@@ -620,12 +461,12 @@ public final class FileTypeOptionPanelManager {
         }
 
         public void valueChanged(CheckBoxListSelectionEvent e) {
-            parent.switchPanel((MediaType)e.getSelected());
+            parent.switchPanel((Category)e.getSelected());
         }
     }
 
     private static class CheckChangeListener implements
-            CheckBoxListCheckChangeListener<MediaType> {
+            CheckBoxListCheckChangeListener<Category> {
 
         private FileTypeOptionPanelManager parent;
 
@@ -633,7 +474,7 @@ public final class FileTypeOptionPanelManager {
             this.parent = parent;
         }
 
-        public void valueChanged(CheckBoxListCheckChangeEvent<MediaType> e) {
+        public void valueChanged(CheckBoxListCheckChangeEvent<Category> e) {
             this.parent.setPanelEnabled(e.getSelected(), e.getChecked());
             this.parent.refreshSidePanel();
         }
@@ -712,80 +553,36 @@ public final class FileTypeOptionPanelManager {
     
     
     private static class MediaProvider 
-        implements CheckBoxList.TextProvider<MediaType> {
+        implements CheckBoxList.TextProvider<Category> {
         
-        public String getText(MediaType obj) {
-            if (obj == null) {
-                throw new IllegalArgumentException();
-            }
-            
-            if (CUSTOM.equals(obj.toString())) { // TODO: = old getName()??
-                return CUSTOM_NAME;
-            }
-            
-            if (OTHER.equals(obj.toString())) { // TODO: = old getName()??
-                return OTHER_NAME;
-            }
-            
+        public String getText(Category obj) {
+                    
             return obj.toString(); // TODO: = old getName()??
         }
         
-        public String getToolTipText(MediaType obj) {
-            if (obj == null) {
-                throw new IllegalArgumentException();
-            }
-            
-            if (obj.toString() == null) { // TODO: = old getName()??
-                return null; 
-            }
-            
-            if (CUSTOM.equals(obj.toString())) { // TODO: = old getName()??
-                return I18n.tr("File types you added to share.");
-            } 
-            
-            if (OTHER.equals(obj.toString())) { // TODO: = old getName()??
-                return I18n.tr("Other types of files.");
-            }
-            
-            return obj.getDescriptionKey(); // TODO: obj.getMediaType().getDescriptionKey(); 
+        public String getToolTipText(Category obj) {
+            return null; // TODO: obj.getMediaType().getDescriptionKey(); 
         }
 
-        public Icon getIcon(MediaType obj) {
-            if (obj == null) {
-                throw new IllegalArgumentException();
-            }
-
-            if      (CUSTOM.equals(obj.toString())) {  // TODO: = old getName()??
-                Icon icon = null;// TODO:GUIMediator.getThemeImage("custom");
-                if (icon != null) {
-                    return icon;
-                }
-            }
-            else if (OTHER.equals(obj.toString())) {  // TODO: = old getName()??
-                Icon icon = null;// TODO:GUIMediator.getThemeImage("lime");
-                if (icon != null) {
-                    return icon;
-                }
-            }
-            
-            return null; // TODO obj.getIcon();
+        public Icon getIcon(Category obj) {
+            return null; // TODO: obj.getIcon();
         }
     }
         
     private static class MediaExtrasProvider
-        implements CheckBoxList.ExtrasProvider<MediaType> {
+        implements CheckBoxList.ExtrasProvider<Category> {
         
-        Map<MediaType,CheckBoxList<String>> panels;
+        Map<Category,CheckBoxList<String>> panels;
         
-        public MediaExtrasProvider(Map<MediaType,CheckBoxList<String>> panels) {
+        public MediaExtrasProvider(Map<Category,CheckBoxList<String>> panels) {
             this.panels = panels;
         }        
         
-        public boolean isSeparated(MediaType obj) {
-            return customMedia.equals(obj);
+        public boolean isSeparated(Category obj) {
+            return false;
         }
 
-        public String getComment(MediaType obj) {
+        public String getComment(Category obj) {
             CheckBoxList<String> panel = panels.get(obj);
             
             if (panel == null) {

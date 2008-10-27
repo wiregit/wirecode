@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.options;
 
+import javax.swing.JFrame;
+
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -15,6 +17,8 @@ public final class FileTypeOptionPanel extends OptionPanel {
         super(I18n.tr(FileTypeOptionPanelManager.TITLE));
         
         this.manager = new FileTypeOptionPanelManager(this);
+        
+        this.manager.initOptions();
         
         this.add(this.manager.getContainer());
     }
@@ -39,4 +43,15 @@ public final class FileTypeOptionPanel extends OptionPanel {
         return false;
     }
 
+    public static void main(String args[]) {
+        
+        FileTypeOptionPanel a = new FileTypeOptionPanel();
+        
+        JFrame frame = new JFrame();
+        
+        frame.add(a);
+        frame.pack();
+        frame.setVisible(true);
+    }
+    
 }
