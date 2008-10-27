@@ -43,11 +43,12 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null && !loading.containsKey(file)) {
-            loading.put(file, "");
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon));
-        } else if(icon == null) {
+        if(icon == null) {
             icon = loadIcon;
+            if(!loading.containsKey(file)) {
+                loading.put(file, "");
+                ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon));
+            }
         }
         return icon;
     }
@@ -57,26 +58,28 @@ public class ThumbnailManagerImpl implements ThumbnailManager {
         if(file == null)
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null && !loading.containsKey(file)) { 
-            loading.put(file, "");
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, callback));
-        } else if(icon == null) {
+        if(icon == null) {
             icon = loadIcon;
+            if(!loading.containsKey(file)) {
+                loading.put(file, "");
+                ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, callback));
+            }
         }
         return icon;
     }
     
     @Override 
     public Icon getThumbnailForFile(File file, JList list, int index) {
-        if(file == null)
+        if(file == null) 
             return null;
         Icon icon = thumbnails.get(file);
-        if(icon == null && !loading.containsKey(file)) {
-            loading.put(file, "");
-            ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, list, index));
-        } else if(icon == null) {
+        if(icon == null) {
             icon = loadIcon;
-        }
+            if(!loading.containsKey(file)) {
+                loading.put(file, "");
+                ImageExecutorService.submit(new ThumbnailCallable(thumbnails, loading, file, errorIcon, list, index));
+            }
+        } 
         return icon;
     }
 

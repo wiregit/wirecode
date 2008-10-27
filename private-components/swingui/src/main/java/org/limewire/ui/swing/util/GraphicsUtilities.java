@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.6 2008-10-25 18:36:59 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.7 2008-10-27 18:42:48 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -381,6 +381,43 @@ public class GraphicsUtilities {
     }
     
     /**
+     * Creates a thumbnail of the source image. This scales the image in a single pass, resulting in
+     * a low quality thumbnail but the aspect ratio of the image is still preserved.
+     * 
+     * @param image - image to create a thumbnail of
+     * @param maxTargetWidth - max width the thumbnail can be
+     * @param maxTargetHeight - max height the thumbnail ca
+     */
+    public static BufferedImage createRatioPreservedThumbnailFast(BufferedImage image, int maxWidth, int maxHeight) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        
+        boolean isWidthGreater = width > height;
+        
+        float ratioWH = (float) width / (float) height;
+        float ratioHW = (float) height / (float) width;
+        
+        int newWidth;
+        int newHeight;
+        
+        if (isWidthGreater) {
+            newWidth = maxWidth;
+            newHeight = (int) (newWidth / ratioWH);
+        } else {
+            newHeight = maxHeight;
+            newWidth = (int) (newHeight / ratioHW);
+        }
+        
+        BufferedImage temp = createCompatibleImage(image, newWidth, newHeight);
+        Graphics2D g2 = temp.createGraphics();         
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2.drawImage(image, 0, 0, temp.getWidth(), temp.getHeight(), null);
+        g2.dispose();
+        return temp;
+    }
+    
+    /**
      * Returns a thumbnail of the source image. This preserves the aspect ratio of the image. All images will
      * always be scaled to fit within the targetWidth and the taretHeight of the image. 
      * 
@@ -394,7 +431,6 @@ public class GraphicsUtilities {
         int height = image.getHeight();
 
         boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
-//        boolean isTranslucent = true;
         boolean isWidthGreater = width > height;
 
         if (isWidthGreater) {
@@ -423,43 +459,40 @@ public class GraphicsUtilities {
         int previousWidth = width;
         int previousHeight = height;
 
-        do {
-            try {
-                
-                if (width > maxTargetWidth) {
-                    width /= 2;
-                    if (width < maxTargetWidth) {
-                        width = maxTargetWidth;
-                    }
-                    height = (int) (width / ratioWH);
-                } else if (height > maxTargetHeight) {
-                    height /= 2;
-                    if (height < maxTargetHeight) {
-                        height = maxTargetHeight;
-                    }
-                    width = (int) (height / ratioHW);
+        do {               
+            if (width > maxTargetWidth) {
+                width /= 2;
+                if (width < maxTargetWidth) {
+                    width = maxTargetWidth;
                 }
-    
-                if (temp == null || isTranslucent) { 
-                    try {
-                        temp = createCompatibleImage(image, width, height);
-                    } catch(Throwable e) {
-                        temp = new BufferedImage(width, height, image.getType());
-                    }
-                    if(g2 != null)
-                        g2.dispose();
-                    g2 = temp.createGraphics();
-                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                height = (int) (width / ratioWH);
+            } else if (height > maxTargetHeight) {
+                height /= 2;
+                if (height < maxTargetHeight) {
+                    height = maxTargetHeight;
                 }
-                g2.drawImage(thumb, 0, 0, width, height,
-                        0, 0, previousWidth, previousHeight, null);
-    
-                previousWidth = width;
-                previousHeight = height;
-    
-                thumb = temp;
-            } catch(Throwable e) {}
+                width = (int) (height / ratioHW);
+            }
+
+            if (temp == null || isTranslucent) { 
+                try {
+                    temp = createCompatibleImage(image, width, height);
+                } catch(Throwable e) { e.printStackTrace();
+                    temp = new BufferedImage(width, height, image.getType());
+                }
+                if(g2 != null)
+                    g2.dispose();
+                g2 = temp.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            }
+            g2.drawImage(thumb, 0, 0, width, height,
+                    0, 0, previousWidth, previousHeight, null);
+
+            previousWidth = width;
+            previousHeight = height;
+
+            thumb = temp;
         } while ( (width > maxTargetWidth) || (height > maxTargetHeight));
 
         g2.dispose();
@@ -472,10 +505,8 @@ public class GraphicsUtilities {
             g2.drawImage(thumb, 0, 0, width, height, 0, 0, width, height, null);
             g2.dispose();
             thumb = temp;
-        } else { // if thumb is correct size, just convert it to a compatible image
-            thumb = toCompatibleImage(thumb);
         }
-
+        
         return thumb;
     }
 
@@ -505,9 +536,8 @@ public class GraphicsUtilities {
         int width = image.getWidth();
         int height = image.getHeight();
 
-//        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
-        boolean isTranslucent = true;
-        boolean isWidthGreater = false;//width > height;
+        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
+        boolean isWidthGreater = width > height;
 
         if (isWidthGreater) {
             if (newSize >= width) {
@@ -608,8 +638,7 @@ public class GraphicsUtilities {
         int width = image.getWidth();
         int height = image.getHeight();
 
-//        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
-        boolean isTranslucent = true;
+        boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
 
         if (newWidth >= width || newHeight >= height) {
             throw new IllegalArgumentException("newWidth and newHeight cannot" +

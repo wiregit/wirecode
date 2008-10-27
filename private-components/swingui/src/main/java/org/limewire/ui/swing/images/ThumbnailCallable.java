@@ -2,7 +2,6 @@ package org.limewire.ui.swing.images;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -116,8 +115,7 @@ public class ThumbnailCallable implements Callable<Void> {
         }
         BufferedImage image = null;
         try {  
-            URL url = file.toURI().toURL();
-            image = ImageIO.read(url);
+            image = ImageIO.read(file);
         } catch (Throwable e) {
             handleUpdate(errorIcon);
             return null;
@@ -128,9 +126,25 @@ public class ThumbnailCallable implements Callable<Void> {
         }
         // if the image is larger than our viewport, resize the image before saving
         if(image.getWidth() > ThumbnailManager.WIDTH || image.getHeight() > ThumbnailManager.HEIGHT) { 
-            //TODO: this can be optimized for pictures within one step away from the target size
             //TODO: this seems to fail regularly if width > 2 * height or height > 2 * width
-            image = GraphicsUtilities.createRatioPreservedThumbnail(image, ThumbnailManager.WIDTH, ThumbnailManager.HEIGHT);
+            // image manipulation can cause a whole host of errors, it should always be wrapped in a try/catch block
+            try { 
+                image = GraphicsUtilities.createRatioPreservedThumbnail(image, ThumbnailManager.WIDTH, ThumbnailManager.HEIGHT);
+            } catch(Throwable t) {
+                try { // if there was an error, try creating a less detailed thumbnail
+                    image = GraphicsUtilities.createRatioPreservedThumbnailFast(image, ThumbnailManager.WIDTH, ThumbnailManager.HEIGHT);
+                } catch (Throwable e) { // give up
+                    image = null;
+                }
+            }
+        } else {
+            // if the image didn't need to be scaled, make sure it can be accelerated
+            image = GraphicsUtilities.toCompatibleImage(image);
+        }
+        
+        if(image == null || image.getWidth() == 0 || image.getHeight() == 0) {
+            handleUpdate(errorIcon);
+            return null;
         }
         ImageIcon imageIcon = new ImageIcon(image);
         handleUpdate(imageIcon);
