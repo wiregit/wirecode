@@ -1,10 +1,12 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.impl.browse.CoreGlueBrowseModule;
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
+import org.limewire.core.impl.lifecycle.LifeCycleManagerImpl;
 import org.limewire.core.impl.mozilla.CoreGlueMozillaModule;
 import org.limewire.core.impl.player.CoreGluePlayerModule;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
@@ -23,6 +25,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(QueryReplyListenerList.class).to(GlueActivityCallback.class);
         bind(DownloadListenerList.class).to(GlueActivityCallback.class);
         bind(Application.class).to(ApplicationImpl.class);
+        bind(LifeCycleManager.class).to(LifeCycleManagerImpl.class);
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueSearchModule());

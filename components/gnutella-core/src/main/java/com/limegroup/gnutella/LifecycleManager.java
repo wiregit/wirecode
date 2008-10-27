@@ -1,5 +1,8 @@
 package com.limegroup.gnutella;
 
+import org.limewire.core.api.lifecycle.LifeCycleEvent;
+import org.limewire.listener.EventListener;
+
 /**
  * Defines the interface for the start up and shutdown of a LimeWire instance.
  */
@@ -32,5 +35,9 @@ public interface LifecycleManager {
 
     /** Gets the time this finished starting. */
     public long getStartFinishedTime();
+
+    public void addListener(EventListener<LifeCycleEvent> listener);
+    
+    public boolean removeListener(EventListener<LifeCycleEvent> listener);
 
 }

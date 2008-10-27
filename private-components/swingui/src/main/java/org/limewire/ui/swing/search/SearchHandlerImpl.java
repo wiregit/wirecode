@@ -2,6 +2,8 @@ package org.limewire.ui.swing.search;
 
 import java.util.List;
 
+import org.limewire.core.api.lifecycle.LifeCycleEvent;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -9,6 +11,7 @@ import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.listener.EventListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -20,23 +23,26 @@ class SearchHandlerImpl implements SearchHandler {
     private final SearchResultsPanelFactory panelFactory;
     private final SearchNavigator searchNavigator;
     private final SearchResultsModelFactory searchResultsModelFactory;
+    private final LifeCycleManager lifeCycleManager;
     
     @Inject
     SearchHandlerImpl(SearchFactory searchFactory,
             SearchResultsPanelFactory panelFactory,
             SearchNavigator searchNavigator,
-            SearchResultsModelFactory searchResultsModelFactory) {
+            SearchResultsModelFactory searchResultsModelFactory,
+            LifeCycleManager lifeCycleManager) {
         this.searchNavigator = searchNavigator;
         this.searchFactory = searchFactory;
         this.panelFactory = panelFactory;
         this.searchResultsModelFactory = searchResultsModelFactory;
+        this.lifeCycleManager = lifeCycleManager;
     }
 
     @Override
     public void doSearch(final SearchInfo info) {        
         final SearchCategory searchCategory = info.getSearchCategory();
 
-        Search search = searchFactory.createSearch(new SearchDetails() {
+        final Search search = searchFactory.createSearch(new SearchDetails() {
             @Override
             public SearchCategory getSearchCategory() {
                 return searchCategory;
@@ -97,6 +103,22 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
-        search.start();
+        if(lifeCycleManager.isStarted()) {
+            search.start();
+        } else {
+             searchPanel.setStartingLimeWire(true);
+             lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
+                 public void handleEvent(LifeCycleEvent event) {
+                     if(event == LifeCycleEvent.STARTED) {
+                         SwingUtils.invokeLater(new Runnable() {
+                             public void run() {
+                                 searchPanel.setStartingLimeWire(false);
+                                 search.start();
+                             }
+                         });
+                     }
+                 }
+             });   
+        }
     }
 }

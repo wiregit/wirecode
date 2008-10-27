@@ -9,11 +9,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.OSUtils;
@@ -43,6 +46,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     
     private final CountDownLatch startLatch = new CountDownLatch(1);
     
+    private final EventListenerList<LifeCycleEvent> listenerList;
+    
     private static enum State { NONE, STARTING, STARTED, STOPPED };
     
     /** The time when this finished starting. */
@@ -54,6 +59,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     @Inject
     public LifecycleManagerImpl(ServiceRegistry serviceRegistry) { 
         this.serviceRegistry = serviceRegistry;
+        this.listenerList = new EventListenerList<LifeCycleEvent>();
     }
     
     /* (non-Javadoc)
@@ -124,7 +130,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             return;
         
         try {
+            listenerList.broadcast(LifeCycleEvent.STARTING);
             doStart();
+            listenerList.broadcast(LifeCycleEvent.STARTED);
         } finally {
             startLatch.countDown();
         }
@@ -167,7 +175,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();
-        
+
         startDone.set(true);
         startFinishedTime = System.currentTimeMillis();
     }
@@ -177,7 +185,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
      */
     public void shutdown() {
         try {
+            listenerList.broadcast(LifeCycleEvent.SHUTINGDOWN);
             doShutdown();
+            listenerList.broadcast(LifeCycleEvent.SHUTDOWN);
         } catch(Throwable t) {
             ErrorService.error(t);
         }
@@ -292,5 +302,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         t.start();
         LOG.trace("Started manual GC thread.");
     }
-
+    
+    public void addListener(EventListener<LifeCycleEvent> listener) {
+        listenerList.addListener(listener);
+    }
+    
+    public boolean removeListener(EventListener<LifeCycleEvent> listener) {
+        return listenerList.removeListener(listener);
+    }
 }

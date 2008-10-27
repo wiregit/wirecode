@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 
@@ -27,6 +29,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -41,7 +44,7 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class SearchResultsPanel extends JXPanel {
     private final Log LOG = LogFactory.getLog(getClass());
-        
+       
     /**
      * This is the subpanel that appears in the upper-left corner
      * of each search results tab.  It displays the numbers of results
@@ -68,6 +71,8 @@ public class SearchResultsPanel extends JXPanel {
     
     /** The ScrollablePanel that the scroll pane is embedding. */
     private ScrollablePanel scrollablePanel;
+    
+    private JPanel messagePanel;
     
     @Resource private Color toolbarTopGradientColor;
     @Resource private Color toolbarBottomGradientColor;
@@ -145,7 +150,10 @@ public class SearchResultsPanel extends JXPanel {
             resultsContainer.synchronizeResultCount(
                 entry.getKey(), entry.getValue());
         }
-        
+
+        messagePanel = new JPanel();
+        messagePanel.add(new JLabel(I18n.tr("TODO get better copy... LimeWire is currently starting. When it has completed, your search will continue.")));
+        messagePanel.setVisible(false);
         layoutComponents();
     }
     
@@ -195,9 +203,9 @@ public class SearchResultsPanel extends JXPanel {
         
     private void layoutComponents() {
         MigLayout layout = new MigLayout(
-                "insets 0 0 0 0, gap 0!",
+                "hidemode 2, insets 0 0 0 0, gap 0!",
                 "[grow][grow]",
-                "[][grow]");
+                "[][][grow]");
         
         setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
@@ -217,10 +225,14 @@ public class SearchResultsPanel extends JXPanel {
         
         add(searchTab, "growy");
         add(sortAndFilterPanel, "wrap, align right");
-        add(scrollPane, "span, grow");
         
+        add(messagePanel, "span, growx");
+        add(scrollPane, "span, grow");
+
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
+        
+
         scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
         scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin 140, pad 8 8 8 0");
         scrollPane.setViewportView(scrollablePanel);
@@ -265,5 +277,13 @@ public class SearchResultsPanel extends JXPanel {
                 return scrollable.getScrollableBlockIncrement(visibleRect, orientation, direction);
             }
         }
+    }
+
+    public void setStartingLimeWire(boolean startingLimeWire) {
+       if(startingLimeWire) {
+           messagePanel.setVisible(true);
+       } else {
+           messagePanel.setVisible(false);
+       }
     }
 }
