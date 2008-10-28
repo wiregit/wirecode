@@ -27,6 +27,7 @@ public class ScanButtonEditor extends JCheckBox implements TableCellEditor {
                 int index = treeTable.getSelectedRow();
                 LibraryManagerItem item = (LibraryManagerItem) treeTable.getModel().getValueAt(index, LibraryManagerModel.SCAN_INDEX);
                 item.setScanned(!item.isScanned());
+                treeTable.expandRow(index);
                 
                 treeTable.repaint();
             }
