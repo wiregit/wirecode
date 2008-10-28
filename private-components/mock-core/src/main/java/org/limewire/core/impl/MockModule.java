@@ -13,7 +13,6 @@ import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.xmpp.MockXmppModule;
 
 import com.google.inject.AbstractModule;
-import com.limegroup.gnutella.connection.Connection;
 
 
 public class MockModule extends AbstractModule {
