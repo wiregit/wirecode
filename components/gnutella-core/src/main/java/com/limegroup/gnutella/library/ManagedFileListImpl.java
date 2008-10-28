@@ -390,6 +390,21 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
+    @Override
+    public void addDirectoryToExcludeFromManaging(File folder) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void addDirectoryToManageRecursively(File folder) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public List<File> getDirectoriesToManageRecursively() {
+        return fileData.getDirectoriesToManageRecursively();
+    }
+    
     public void validate(final FileDesc fd) {
         if(requestingValidation.add(fd.getSHA1Urn())) {
             contentManager.request(fd.getSHA1Urn(), new ContentResponseObserver() {
@@ -962,5 +977,5 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             return f.isDirectory()
                 && isFolderManageable(f, true);
         }        
-    };
+    }
 }

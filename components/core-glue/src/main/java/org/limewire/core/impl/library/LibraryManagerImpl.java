@@ -3,9 +3,11 @@ package org.limewire.core.impl.library;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.URN;
+import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
@@ -28,16 +30,49 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 class LibraryManagerImpl implements LibraryManager {
     
     private final LibraryFileListImpl libraryList;
+    private final LibraryData libraryData;
     
     @Inject
     public LibraryManagerImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
         this.libraryList = new LibraryFileListImpl(managedList, coreLocalFileItemFactory);
+        this.libraryData = new LibraryDataImpl(managedList);
     }
 
     
     @Override
     public LibraryFileList getLibraryManagedList() {
         return libraryList;
+    }
+    
+    public LibraryData getLibraryData() {
+        return libraryData;
+    }
+    
+    private static class LibraryDataImpl implements LibraryData {
+
+        ManagedFileList fileList;
+        
+        public LibraryDataImpl(ManagedFileList fileList) {
+            this.fileList = fileList;
+        }
+        
+        @Override
+        public void addDirectoryToExcludeFromManaging(File folder) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void addDirectoryToManageRecursively(File folder) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public List<File> getDirectoriesToManageRecursively() {
+            return fileList.getDirectoriesToManageRecursively();
+        }
+        
     }
 
     private static class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {

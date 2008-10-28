@@ -3,6 +3,7 @@ package org.limewire.ui.swing.options;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -14,15 +15,22 @@ import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.library.LibraryData;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.library.manager.LibraryManagerItem;
+import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
+import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
+import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 
 public class LibraryManagerOptionPanel extends OptionPanel {
 
+    private LibraryData libraryData;
+    
     private JButton addFolderButton;
     private JCheckBox musicCheckBox;
     private JCheckBox videoCheckBox;
@@ -34,7 +42,9 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     private JButton okButton;
     private JButton cancelButton;
     
-    public LibraryManagerOptionPanel(Action okAction, CancelDialogAction cancelAction) {
+    public LibraryManagerOptionPanel(Action okAction, CancelDialogAction cancelAction, LibraryData libraryData) {
+        this.libraryData = libraryData;
+        
         setLayout(new MigLayout("", "[300!][grow]", ""));
         
         createComponents(okAction, cancelAction);
@@ -89,7 +99,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         JFrame f = new JFrame();
         f.setSize(500,500);
         
-        LibraryManagerOptionPanel l = new LibraryManagerOptionPanel(null, null);
+        LibraryManagerOptionPanel l = new LibraryManagerOptionPanel(null, null, null);
         f.add(l);
         
         f.setDefaultCloseOperation(2);
@@ -110,12 +120,12 @@ public class LibraryManagerOptionPanel extends OptionPanel {
 
     @Override
     public void initOptions() {
-        //TODO: read folders from FileManager
-//        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
-//        items.add(new LibraryManagerItemImpl(new File("C:\\Documents and Settings\\meverett\\Desktop"), false));
-//        items.add(new LibraryManagerItemImpl(new File("C:\\Documents and Settings\\meverett\\My Documents"), true));
-//        
-//        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
+        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
+        for(File file : libraryData.getDirectoriesToManageRecursively()) {
+            items.add(new LibraryManagerItemImpl(file, true));
+        }
+
+        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
     }
     
     private class AddDirectoryAction extends AbstractAction {

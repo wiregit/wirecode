@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.library.manager;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -16,8 +18,19 @@ public class DontScanButtonEditor extends JCheckBox implements TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
-    public DontScanButtonEditor() {
+    public DontScanButtonEditor(final LibraryManagerTreeTable treeTable) {
         setHorizontalAlignment(SwingConstants.CENTER);
+        
+        addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int index = treeTable.getSelectedRow();
+                LibraryManagerItem item = (LibraryManagerItem) treeTable.getModel().getValueAt(index, LibraryManagerModel.SCAN_INDEX);
+                item.setScanned(!item.isScanned());
+                
+                treeTable.repaint();
+            }
+        });
     }
     
     @Override
@@ -26,11 +39,6 @@ public class DontScanButtonEditor extends JCheckBox implements TableCellEditor {
         setBackground(table.getSelectionBackground());
         LibraryManagerItem item = (LibraryManagerItem) value;
         setSelected(!item.isScanned());
-
-//        if(isSelected)
-//            setBackground(table.getSelectionBackground());
-//        else
-//            setBackground(table.getBackground());
         
         return this;
     }

@@ -44,6 +44,15 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
 
     @Override
     public void setScanned(boolean value) {
-        this.isScanned = value;
+        if(value != isScanned) {
+            isScanned = value;
+            setScanChildren(value);
+        }
+    }
+    
+    private void setScanChildren(boolean value) {
+        for(LibraryManagerItem item : getChildren()) {
+            item.setScanned(value);
+        }
     }
 }

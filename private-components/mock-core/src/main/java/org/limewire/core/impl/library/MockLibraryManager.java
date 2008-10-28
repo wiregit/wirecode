@@ -7,6 +7,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -141,6 +142,12 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     
     @Override
     public FriendFileList getFriendShareList(Friend friend) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public LibraryData getLibraryData() {
         // TODO Auto-generated method stub
         return null;
     }

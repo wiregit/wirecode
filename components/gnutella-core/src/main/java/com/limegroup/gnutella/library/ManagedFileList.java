@@ -19,6 +19,10 @@ public interface ManagedFileList extends FileList {
     void fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
     
     void validate(FileDesc fd);
-
-
+    
+    void addDirectoryToExcludeFromManaging(File folder);
+    
+    void addDirectoryToManageRecursively(File folder);
+    
+    List<File> getDirectoriesToManageRecursively();
 }

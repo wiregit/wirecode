@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
@@ -26,8 +27,11 @@ public class LibraryOptionPanel extends OptionPanel {
     private LibraryManagementPanel libraryManagerPanel;
     private SmartSharingPanel smartSharingPanel;
     
+    private LibraryManager libraryManager;
+    
     @Inject
-    public LibraryOptionPanel() {
+    public LibraryOptionPanel(LibraryManager libraryManager) {
+        this.libraryManager = libraryManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
@@ -77,11 +81,11 @@ public class LibraryOptionPanel extends OptionPanel {
         public LibraryManagementPanel() {
             super(I18n.tr("Library Management"));
             
-            libraryOptionPanel = new LibraryManagerOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            libraryOptionPanel = new LibraryManagerOptionPanel(new OKDialogAction(), new CancelDialogAction(), libraryManager.getLibraryData());
             libraryOptionPanel.setPreferredSize(new Dimension(500, 500));
             
             manageLibraryButton = new JButton(new DialogDisplayAction(LibraryOptionPanel.this,
-                    libraryOptionPanel,I18n.tr("Unsafe types"), I18n.tr("Manage Library"), 
+                    libraryOptionPanel,I18n.tr("Manage Library"), I18n.tr("Manage Library"), 
                     I18n.tr("Manage what folders are loaded into your library")));
             
             add(new MultiLineLabel(I18n.tr("Your library is a central location to view, share and unshare your files with the LimeWire Network and your friends."), 700), "wrap");
