@@ -34,6 +34,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -42,6 +43,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+@Singleton
 class ManagedFileListImpl implements ManagedFileList, FileList {
     
     private static final Log LOG = LogFactory.getLog(ManagedFileListImpl.class);

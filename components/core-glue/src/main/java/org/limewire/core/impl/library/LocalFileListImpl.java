@@ -4,7 +4,6 @@
 package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
-import java.io.File;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
@@ -16,23 +15,25 @@ import ca.odell.glazedlists.TransformedList;
 abstract class LocalFileListImpl implements LocalFileList {
     protected final EventList<LocalFileItem> baseList;
     protected final TransformedList<LocalFileItem, LocalFileItem> threadSafeList;
+    protected final TransformedList<LocalFileItem, LocalFileItem> readOnlyList;
     protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
     
     LocalFileListImpl(EventList<LocalFileItem> eventList) {
         this.baseList = eventList;
         this.threadSafeList = GlazedListsFactory.threadSafeList(eventList);
+        this.readOnlyList = GlazedListsFactory.readOnlyList(threadSafeList);
     }
     
     @Override
     public EventList<LocalFileItem> getModel() {
-        return threadSafeList;
+        return readOnlyList;
     }
     
     @Override
     public EventList<LocalFileItem> getSwingModel() {
         assert EventQueue.isDispatchThread();
         if(swingEventList == null) {
-            swingEventList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeList);
+            swingEventList =  GlazedListsFactory.swingThreadProxyEventList(readOnlyList);
         }
         return swingEventList;
     }
@@ -42,10 +43,9 @@ abstract class LocalFileListImpl implements LocalFileList {
             swingEventList.dispose();
         }
         threadSafeList.dispose();
-    }        
+        readOnlyList.dispose();
+    }       
     
-    void remove(File file) {
-    }
     
     @Override
     public int size() {

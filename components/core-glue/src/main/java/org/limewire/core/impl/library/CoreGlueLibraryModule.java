@@ -20,7 +20,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
     protected void configure() {
         bind(LibraryManager.class).to(LibraryManagerImpl.class);
         bind(RemoteLibraryManager.class).to(RemoteLibraryManagerImpl.class);
-        bind(ShareListManager.class).to(LibraryManagerImpl.class);
+        bind(ShareListManager.class).to(ShareListManagerImpl.class);
         bind(MagnetLinkFactory.class).to(MagnetLinkFactoryImpl.class);
         bind(PresenceLibraryBrowser.class);
         bind(FriendSearcher.class);
