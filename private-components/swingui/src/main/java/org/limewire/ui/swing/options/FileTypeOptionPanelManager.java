@@ -2,10 +2,8 @@ package org.limewire.ui.swing.options;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -547,23 +545,8 @@ public final class FileTypeOptionPanelManager {
             
             Icon icon = iconManager.getIconForExtension(obj);
             
-            return icon != null ? icon : new Icon() {
-
-                @Override
-                public int getIconHeight() {
-                    return 16;
-                }
-
-                @Override
-                public int getIconWidth() {
-                    return 16;
-                }
-
-                @Override
-                public void paintIcon(Component c, Graphics g, int x, int y) {
-                }};
+            return icon != null ? icon : iconManager.getBlankIcon();
         }
-        
     }
     
     
@@ -584,7 +567,7 @@ public final class FileTypeOptionPanelManager {
         }
     }
         
-    private static class MediaExtrasProvider
+    private class MediaExtrasProvider
         implements CheckBoxList.ExtrasProvider<Category> {
         
         Map<Category,CheckBoxList<String>> panels;

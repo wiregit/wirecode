@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.util;
 
+import java.awt.Component;
+import java.awt.Graphics;
 import java.io.File;
 
 import javax.swing.Icon;
@@ -19,6 +21,8 @@ public class IconManager {
     
     /** The current FileIconController. */
     private FileIconController fileController;
+    
+    private Icon blankIcon;
     
     @Inject
     IconManager() {
@@ -43,6 +47,34 @@ public class IconManager {
                 }
             }, "NativeFileIconLoader");
         }
+    }
+    
+    /**
+     * Function to create, cache, and provide an empty 16 by 16 icon
+     */
+    public Icon getBlankIcon() {
+        
+        if (this.blankIcon != null)  return this.blankIcon;
+        
+        this.blankIcon = new Icon() {
+
+            @Override
+            public int getIconHeight() {
+                return 16;
+            }
+
+            @Override
+            public int getIconWidth() {
+                return 16;
+            }
+
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+            }
+        };
+        
+    
+        return this.blankIcon;
     }
     
     /**
