@@ -2,8 +2,8 @@ package org.limewire.ui.swing.library.table;
 
 import java.util.Date;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -47,7 +47,7 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
     public Object getColumnValue(T baseObject, int column) {
     	 switch (column) {
          case AUTHOR_COL:
-             return baseObject.getProperty(Keys.AUTHOR);
+             return baseObject.getProperty(FilePropertyKey.AUTHOR);
          case CREATED_COL:
              return new Date(baseObject.getCreationTime());
          case MODIFIED_COL:

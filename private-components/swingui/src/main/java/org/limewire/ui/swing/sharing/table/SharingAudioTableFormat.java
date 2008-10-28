@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.sharing.table;
 
-import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.I18n;
@@ -26,13 +26,13 @@ public class SharingAudioTableFormat extends AbstractTableFormat<LocalFileItem> 
     public Object getColumnValue(LocalFileItem fileItem, int column) {
         switch(column) {
             case ARTIST_INDEX:
-                String name = (String) fileItem.getProperty(FileItem.Keys.AUTHOR);
+                String name = (String) fileItem.getProperty(FilePropertyKey.AUTHOR);
                 if(name != null)
                     return name;
                 else 
                     return fileItem.getName();
-            case SONG_INDEX: return fileItem.getProperty(FileItem.Keys.TITLE);
-            case ALBUM_INDEX: return fileItem.getProperty(FileItem.Keys.ALBUM);
+            case SONG_INDEX: return fileItem.getProperty(FilePropertyKey.TRACK_NAME);
+            case ALBUM_INDEX: return fileItem.getProperty(FilePropertyKey.TITLE);
             case ACTIONS_INDEX: return fileItem;
         }
         throw new IllegalStateException("Unknown column:" + column);

@@ -31,24 +31,11 @@ public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
     }
 
     public Iterator<String> iterator() {
-        final Iterator<RemoteFileItem> files = friendLibraries.iterator(category);
-        return new Iterator<String>() {
-            public boolean hasNext() {
-                return files.hasNext();
-            }
-
-            public String next() {
-                return files.next().getName();
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+        return iterator(null);
     }
 
     public Iterator<String> iterator(String s) {
-        final Iterator<RemoteFileItem> files = friendLibraries.iterator(s, category);
+        final Iterator<RemoteFileItem> files = friendLibraries.iterator(s, category, false);
         return new Iterator<String>() {
             public boolean hasNext() {
                 return files.hasNext();

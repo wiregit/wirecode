@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
@@ -141,13 +141,13 @@ public class MockSearch implements Search {
         msr.addSource("123.123.1.21");
         msr.addSource("123.12.1.221");
         msr.setUrn("www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Dr. Java");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 1.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Ross Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.3f);
 
         handleSearchResult(msr);
 
@@ -158,13 +158,13 @@ public class MockSearch implements Search {
         msr.setSize(45267L);
         msr.addSource("123.12.2.21");
         msr.setUrn("similar-www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Dr. Java");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
                 new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 1.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Ross Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
 
@@ -175,13 +175,13 @@ public class MockSearch implements Search {
         msr.setSize(14567L);
         msr.addSource("similar2");
         msr.setUrn("similar2-www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Dr. Java");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Dr. Java");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
                 new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 1.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Ross Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.3f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.3f);
         
         handleSearchResult(msr);
 
@@ -193,14 +193,14 @@ public class MockSearch implements Search {
         msr.setSize(12L);
         msr.addSource("12.12.1.21");
         msr.setUrn("www.partytime.com" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Night Life");
-        msr.setProperty(PropertyKey.COMMENTS, "Our album is awesome!");
-        msr.setProperty(PropertyKey.FILE_SIZE, 2.8);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "4:19");
-        msr.setProperty(PropertyKey.OWNER, "Phoebe Buffet");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
-        msr.setProperty(PropertyKey.QUALITY, "good quality");
+        msr.setProperty(FilePropertyKey.AUTHOR, "Night Life");
+        msr.setProperty(FilePropertyKey.COMMENTS, "Our album is awesome!");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 2.8);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "4:19");
+        msr.setProperty(FilePropertyKey.OWNER, "Phoebe Buffet");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         handleSearchResult(msr);
 
         // Create a search result that will be categorized as "Music".
@@ -211,20 +211,20 @@ public class MockSearch implements Search {
         msr.setSize(4234L);
         msr.addSource("123.2.1.21");
         msr.setUrn("www.solarsystem.net" + i);
-        msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
-        msr.setProperty(PropertyKey.BITRATE, "192");
-        msr.setProperty(PropertyKey.COMMENTS, "very jazzy");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.GENRE, "Jazz");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "4:31");
-        msr.setProperty(PropertyKey.OWNER, "Monica Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
-        msr.setProperty(PropertyKey.QUALITY, "good quality");
-        msr.setProperty(PropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
-        msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
+        msr.setProperty(FilePropertyKey.BITRATE, "192");
+        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.GENRE, "Jazz");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
+        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
+        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
+        msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -234,20 +234,20 @@ public class MockSearch implements Search {
         msr.setSize(1234L);
         msr.setUrn("www.solarsystem.net" + i);
         msr.addSource("monica-similar");
-        msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
-        msr.setProperty(PropertyKey.BITRATE, "192");
-        msr.setProperty(PropertyKey.COMMENTS, "very jazzy");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.GENRE, "Jazz");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "4:31");
-        msr.setProperty(PropertyKey.OWNER, "Monica Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
-        msr.setProperty(PropertyKey.QUALITY, "good quality");
-        msr.setProperty(PropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
-        msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
+        msr.setProperty(FilePropertyKey.BITRATE, "192");
+        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.GENRE, "Jazz");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
+        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
+        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
+        msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -259,20 +259,20 @@ public class MockSearch implements Search {
             msr.addSource("123.12.1.21-similar2" + j);
         }
         msr.setUrn("similar-www.solarsystem.net2");
-        msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
-        msr.setProperty(PropertyKey.BITRATE, "192");
-        msr.setProperty(PropertyKey.COMMENTS, "very jazzy");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.GENRE, "Jazz");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "4:31");
-        msr.setProperty(PropertyKey.OWNER, "Monica Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
-        msr.setProperty(PropertyKey.QUALITY, "good quality");
-        msr.setProperty(PropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
-        msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
+        msr.setProperty(FilePropertyKey.BITRATE, "192");
+        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.GENRE, "Jazz");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
+        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
+        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
+        msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -282,20 +282,20 @@ public class MockSearch implements Search {
         msr.setSize(71234L);
         msr.setUrn("www.miza.com");
         msr.addSource("123.12.1.21-similar3-is-a-loooooooooong-name");
-        msr.setProperty(PropertyKey.ALBUM_TITLE, "Nightfall");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "The Buddies");
-        msr.setProperty(PropertyKey.BITRATE, "192");
-        msr.setProperty(PropertyKey.COMMENTS, "very jazzy");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.GENRE, "Jazz");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "4:31");
-        msr.setProperty(PropertyKey.OWNER, "Monica Geller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
-        msr.setProperty(PropertyKey.QUALITY, "good quality");
-        msr.setProperty(PropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(PropertyKey.SAMPLE_RATE, "44,100 Hz");
-        msr.setProperty(PropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
+        msr.setProperty(FilePropertyKey.BITRATE, "192");
+        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.GENRE, "Jazz");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "4:31");
+        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.QUALITY, "good quality");
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
+        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
+        msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         handleSearchResult(msr);
 
         // Create a search result that will be categorized as "Video".
@@ -329,21 +329,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.mtownzoo.com" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Morristown Zoo");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Morristown Zoo");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Who knew they could do that?");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -354,21 +354,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.sdzoo.com" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "San Diego Zoo");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "San Diego Zoo");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Who knew they could do that?");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -379,21 +379,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.stlzoo.com" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "St. Louis Zoo");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "St. Louis Zoo");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Who knew they could do that?");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -404,21 +404,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Bracket High School");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Bracket High School");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Food fight");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Jo Hendricks");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.WIDTH, "230");
-        msr.setProperty(PropertyKey.YEAR, "2007");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -429,21 +429,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Monkey Matt");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Monkey Matt");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Food fight");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Matt Meddler");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.WIDTH, "230");
-        msr.setProperty(PropertyKey.YEAR, "2007");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Matt Meddler");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -454,21 +454,21 @@ public class MockSearch implements Search {
         msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Fleet Corrs");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Fleet Corrs");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Food fight");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Fleet Corrs");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.WIDTH, "230");
-        msr.setProperty(PropertyKey.YEAR, "2007");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Fleet Corrs");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
         handleSearchResult(msr);
     }
     private void addRecordsWater(int i){
@@ -482,13 +482,13 @@ public class MockSearch implements Search {
         msr.setResultType(Category.IMAGE);
         msr.setSize(4567L);
         msr.setUrn("www.Fenix.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "DownTown Stumpy");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "DownTown Stumpy");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Floss Sential");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -497,13 +497,13 @@ public class MockSearch implements Search {
         msr.setResultType(Category.IMAGE);
         msr.setSize(4567L);
         msr.setUrn("www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Jonsie Java");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Jonsie Java");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Moss Sential");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Moss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -512,13 +512,13 @@ public class MockSearch implements Search {
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(4567L);
         msr.setUrn("www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Chef Sarah");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Chef Sarah");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 4, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Sarah Thistle");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Sarah Thistle");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -527,13 +527,13 @@ public class MockSearch implements Search {
         msr.setResultType(Category.VIDEO);
         msr.setSize(4567L);
         msr.setUrn("www.mizzou.edu" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "Spencer Turtle");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Spencer Turtle");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 4, 27).getTimeInMillis());
-        msr.setProperty(PropertyKey.FILE_SIZE, 11.7);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Spencer");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Spencer");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
         
     }
@@ -549,15 +549,15 @@ public class MockSearch implements Search {
         msr.setSize(8765L);
         msr.addSource("chandler");
         msr.setUrn("www.superspread.org" + i);
-        msr.setProperty(PropertyKey.AUTHOR, "James Vanderbing");
-        msr.setProperty(PropertyKey.COMPANY, "FriendSoft");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.4);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Ding Bing");
-        msr.setProperty(PropertyKey.PLATFORM, "Mac OS X");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.AUTHOR, "James Vanderbing");
+        msr.setProperty(FilePropertyKey.COMPANY, "FriendSoft");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.4);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Ding Bing");
+        msr.setProperty(FilePropertyKey.PLATFORM, "Mac OS X");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 9, 2).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.6f);
         handleSearchResult(msr);
 
         
@@ -570,12 +570,12 @@ public class MockSearch implements Search {
         msr.addSource("143.12.1.21");
         msr.addSource("123.32.1.21");
         msr.setUrn("www.swimming.org" + i);
-        msr.setProperty(PropertyKey.FILE_SIZE, 0.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Mister Green");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 0.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Mister Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         
@@ -591,21 +591,21 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.johnswedding.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "John's Wedding");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "John's Wedding");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Someone likes to dance");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "John Stone");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "John Stone");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -615,10 +615,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.43.123");
         msr.setUrn("www.catering.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Chef Sarah");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.6f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Chef Sarah");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.6f);
         handleSearchResult(msr);
        
         msr = new MockSearchResult();
@@ -628,17 +628,17 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.joeswedding.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.OWNER, "Brent Sarah");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.OWNER, "Brent Sarah");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -648,16 +648,16 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.medicalMe.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Dr. John");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Dr. John");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "don't itch");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.OWNER, "John Hill");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.YEAR, "2008");
-        msr.setProperty(PropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.OWNER, "John Hill");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.NAME, name);
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -667,21 +667,21 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.GoodForSole.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "PB&J");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "PB&J");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Peanut butter ones are the best");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "John Stone");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "John Stone");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
         
 
@@ -699,12 +699,12 @@ public class MockSearch implements Search {
         msr.addSource("143.12.1.21");
         msr.addSource("123.32.1.21");
         msr.setUrn("www.juggling.org" + i);
-        msr.setProperty(PropertyKey.FILE_SIZE, 50.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Greg Green");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -714,12 +714,12 @@ public class MockSearch implements Search {
         msr.setSize(5678L);
         msr.addSource("123.132.1.21");
         msr.setUrn("similar-www.juggling.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 50.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Greg Green");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         
@@ -730,12 +730,12 @@ public class MockSearch implements Search {
         msr.setSize(5678L);
         msr.addSource("123.123.1.21");
         msr.setUrn("www.asdf.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Michael Madison");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Michael Madison");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -745,12 +745,12 @@ public class MockSearch implements Search {
         msr.setSize(5678L);
         msr.addSource("123.18.1.21");
         msr.setUrn("www.asdf3asdf.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Michael Madison");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Michael Madison");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -760,12 +760,12 @@ public class MockSearch implements Search {
         msr.setSize(5678L);
         msr.addSource("123.12.12.21");
         msr.setUrn("www.ddasdrf.net");
-        msr.setProperty(PropertyKey.FILE_SIZE, 15.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Michael Crede");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Michael Crede");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -775,12 +775,12 @@ public class MockSearch implements Search {
         msr.setSize(5678L);
         msr.addSource("123.12.1.21");
         msr.setUrn("www.3asdfNet.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Greg Green");
-        msr.setProperty(PropertyKey.DATE_CREATED,
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
-        msr.setProperty(PropertyKey.RELEVANCE, 0.8f);
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
         handleSearchResult(msr);
 
     }
@@ -795,10 +795,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.12.13.2");
         msr.setUrn("www.23sola3rsystem.net3");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -808,21 +808,21 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("127.1.1.21");
         msr.setUrn("www.stlzood.com" + i);
-        msr.setProperty(PropertyKey.ARTIST_NAME, "I'm engaged");
-        msr.setProperty(PropertyKey.BITRATE, "5000");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "I'm engaged");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Who knew they could do that?");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.HEIGHT, "480");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.LENGTH, "0:48");
-        msr.setProperty(PropertyKey.OWNER, "Chandler Bing");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "somewhat grainy");
-        msr.setProperty(PropertyKey.WIDTH, "640");
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "640");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -832,17 +832,17 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.joeswedding.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.OWNER, "Brent Sarah");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.OWNER, "Brent Sarah");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -852,17 +852,17 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.1.1.123");
         msr.setUrn("www.jsdfoeswedding.com");
-        msr.setProperty(PropertyKey.ARTIST_NAME, "Joe's Wedding");
-        msr.setProperty(PropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
+        msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
-        msr.setProperty(PropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(PropertyKey.OWNER, "Sarah");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.RATING, "8");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.5f);
-        msr.setProperty(PropertyKey.QUALITY, "excellent");
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.YEAR, "2008");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.OWNER, "Sarah");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -872,10 +872,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("1.12.13.234");
         msr.setUrn("www.23sola3ddddrsystem.net3");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -885,10 +885,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.setUrn("www.1sdfmizaz.com");
         msr.addSource("1.13.1.12");
-        msr.setProperty(PropertyKey.FILE_SIZE, 31.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Sammy Teufle");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 31.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Sammy Teufle");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -898,10 +898,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("2.1.1.13");
         msr.setUrn("www.tadsf3iza.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 11.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "John Bakker");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "John Bakker");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
         handleSearchResult(msr);
         msr = new MockSearchResult();
 
@@ -911,10 +911,10 @@ public class MockSearch implements Search {
         msr.setSize(9876L);
         msr.addSource("81.12.13.32");
         msr.setUrn("www.23sol3324a3rsystem.net3");
-        msr.setProperty(PropertyKey.FILE_SIZE, 3.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Fred Teller");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.9f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -924,10 +924,10 @@ public class MockSearch implements Search {
         msr.setSize(976L);
         msr.addSource("11.1.13.1");
         msr.setUrn("www.figiza.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 1.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "John Derrick");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 1.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "John Derrick");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -937,10 +937,10 @@ public class MockSearch implements Search {
         msr.setSize(9476L);
         msr.addSource("1.121.1.1");
         msr.setUrn("www.azdfaiza4.com");
-        msr.setProperty(PropertyKey.FILE_SIZE, 10.9);
-        msr.setProperty(PropertyKey.NAME, name);
-        msr.setProperty(PropertyKey.OWNER, "Eric Johanson");
-        msr.setProperty(PropertyKey.RELEVANCE, 0.7f);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 10.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Eric Johanson");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
         handleSearchResult(msr);
 
     }

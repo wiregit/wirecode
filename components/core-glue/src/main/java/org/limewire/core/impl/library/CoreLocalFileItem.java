@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
@@ -30,7 +31,7 @@ import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 class CoreLocalFileItem implements LocalFileItem {
 
     private final Category category;
-    private final Map<Keys,Object> map;
+    private final Map<FilePropertyKey,Object> map;
     private final FileDesc fileDesc;
     private final LocalFileDetailsFactory detailsFactory;
     private final CreationTimeCache creationTimeCache;
@@ -42,7 +43,7 @@ class CoreLocalFileItem implements LocalFileItem {
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
         this.category = getCategory(fileDesc.getFile());
-        this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
+        this.map = Collections.synchronizedMap(new HashMap<FilePropertyKey,Object>());
     }
     
     @Override
@@ -107,13 +108,8 @@ class CoreLocalFileItem implements LocalFileItem {
 //    }
 
     @Override
-    public Object getProperty(Keys key) {
+    public Object getProperty(FilePropertyKey key) {
         return map.get(key);
-    }
-    
-    @Override
-    public void setProperty(Keys key, Object value) {
-        map.put(key, value);
     }
 
     public FileMetaData offer(LimePresence presence) {

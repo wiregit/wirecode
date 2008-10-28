@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.nav.NavSelectable;
 
 public interface VisualSearchResult extends NavSelectable {
@@ -22,11 +22,11 @@ public interface VisualSearchResult extends NavSelectable {
 
     String getFileExtension();
     
-    Map<PropertyKey, Object> getProperties();
+    Map<FilePropertyKey, Object> getProperties();
 
-    Object getProperty(PropertyKey key);
+    Object getProperty(FilePropertyKey key);
 
-    String getPropertyString(PropertyKey key);
+    String getPropertyString(FilePropertyKey key);
 
     Collection<RemoteHost> getSources();
     

@@ -29,13 +29,33 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class FriendLibraries {
-    private final Map<String, LockableStringTrie<List<RemoteFileItem>>> libraries;
+    private final Map<String, Library> libraries;
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
 
     FriendLibraries() {
-        this.libraries = new ConcurrentHashMap<String, LockableStringTrie<List<RemoteFileItem>>>();
+        this.libraries = new ConcurrentHashMap<String, Library>();
     }
     
+    private class Library {
+        private final LockableStringTrie<List<RemoteFileItem>> fileIndex = new LockableStringTrie<List<RemoteFileItem>>(true);
+        private final LockableStringTrie<List<RemoteFileItem>> metaDataIndex = new LockableStringTrie<List<RemoteFileItem>>(true);
+        public void readLock() {
+            fileIndex.getLock().readLock().lock();
+            metaDataIndex.getLock().readLock().lock();
+        }
+        public void readUnlock() {
+            fileIndex.getLock().readLock().unlock();
+            metaDataIndex.getLock().readLock().unlock();
+        }
+        public void writeLock() {
+            fileIndex.getLock().writeLock().lock();
+            metaDataIndex.getLock().writeLock().lock();
+        }
+        public void writeUnlock() {
+            fileIndex.getLock().writeLock().unlock();
+            metaDataIndex.getLock().writeLock().unlock();
+        }
+    }
     @Inject
     void register(RemoteLibraryManager remoteLibraryManager) {
         remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
@@ -50,10 +70,10 @@ public class FriendLibraries {
                             
                             @Override
                             protected void itemAdded(PresenceLibrary item) {
-                                LockableStringTrie<List<RemoteFileItem>> trie = new LockableStringTrie<List<RemoteFileItem>>(true);
+                                Library library = new Library();
                                 LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
-                                libraries.put(item.getPresence().getPresenceId(), trie);
-                                LibraryListener listener = new LibraryListener(item.getPresence().getPresenceId(), trie);
+                                libraries.put(item.getPresence().getPresenceId(), library);
+                                LibraryListener listener = new LibraryListener(item.getPresence().getPresenceId(), library);
                                 listeners.put(item.getPresence().getPresenceId(), listener);
                                 item.getModel().addListEventListener(listener);
                             }
@@ -77,9 +97,9 @@ public class FriendLibraries {
     private class LibraryListener implements ListEventListener<RemoteFileItem> {
 
         private final String presenceId;
-        private final LockableStringTrie<List<RemoteFileItem>> library;
+        private final Library library;
 
-        LibraryListener(String presenceId, LockableStringTrie<List<RemoteFileItem>> library) {
+        LibraryListener(String presenceId, Library library) {
             this.presenceId = presenceId;
             this.library = library;
         }
@@ -104,29 +124,29 @@ public class FriendLibraries {
         private void addToIndex(RemoteFileItem newFile, String word) {
             LOG.debugf("\t {0}", word);
             List<RemoteFileItem> filesForWord;            
-            library.getLock().writeLock().lock();
+            library.writeLock();
             try {
-                filesForWord = library.get(word);
+                filesForWord = library.fileIndex.get(word);
                 if (filesForWord == null) {
                     filesForWord = new ArrayList<RemoteFileItem>();
-                    library.add(word, filesForWord);
+                    library.fileIndex.add(word, filesForWord);
                 }
                 filesForWord.add(newFile);
             } finally {
-                library.getLock().writeLock().unlock();
+                library.writeUnlock();
             }
         }
     }
 
     public Iterator<RemoteFileItem> iterator(SearchCategory category) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
+        for(Library library : libraries.values()) {
             Iterator<List<RemoteFileItem>> libraryResultsCopy;
-            library.getLock().readLock().lock();
+            library.readLock();
             try {
-                libraryResultsCopy = filterAndCopy(library.getIterator(), category);
+                libraryResultsCopy = filterAndCopy(library.fileIndex.getIterator(), category);
             } finally {
-                library.getLock().readLock().unlock();
+                library.readUnlock();
             }
             iterators.add(iterator(libraryResultsCopy));
         }
@@ -141,15 +161,15 @@ public class FriendLibraries {
         return new MultiIterator<RemoteFileItem>(iterators);
     }
 
-    public Iterator<RemoteFileItem> iterator(String s, SearchCategory category) {
+    public Iterator<RemoteFileItem> iterator(String s, SearchCategory category, boolean includeMetaDataMatches) {
         List<Iterator<RemoteFileItem>> iterators = new ArrayList<Iterator<RemoteFileItem>>();
-        for(LockableStringTrie<List<RemoteFileItem>> library : libraries.values()) {
+        for(Library library : libraries.values()) {
             Iterator<List<RemoteFileItem>> libraryResultsCopy;
-            library.getLock().readLock().lock();
+            library.readLock();
             try {
-                libraryResultsCopy = filterAndCopy(library.getPrefixedBy(s), category);
+                libraryResultsCopy = filterAndCopy(library.fileIndex.getPrefixedBy(s), category);
             } finally {
-                library.getLock().readLock().unlock();
+                library.readUnlock();
             }
             iterators.add(iterator(libraryResultsCopy));
         }

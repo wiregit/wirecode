@@ -4,7 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -51,10 +51,10 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TYPE_INDEX: return fileExtension; // TODO: RMV translate to verbal desc.
             case SIZE_INDEX: return vsr.getSize();
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 7: return getProperty(PropertyKey.OWNER);
-            case NUM_FILES_INDEX: return getProperty(PropertyKey.FILES_IN_ARCHIVE);
+            case 7: return getProperty(FilePropertyKey.OWNER);
+            case NUM_FILES_INDEX: return getProperty(FilePropertyKey.FILES_IN_ARCHIVE);
             default: return null;
         }
     }

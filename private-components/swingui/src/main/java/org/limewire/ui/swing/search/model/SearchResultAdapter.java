@@ -16,10 +16,10 @@ import java.util.TreeSet;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -34,7 +34,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     private final List<SearchResult> coreResults;
 
-    private Map<SearchResult.PropertyKey, Object> properties;
+    private Map<FilePropertyKey, Object> properties;
 
     private final Set<RemoteHost> remoteHosts;
 
@@ -95,11 +95,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     @Override
-    public Map<SearchResult.PropertyKey, Object> getProperties() {
+    public Map<FilePropertyKey, Object> getProperties() {
         if (properties == null) {
-            properties = new HashMap<SearchResult.PropertyKey, Object>();
+            properties = new HashMap<FilePropertyKey, Object>();
             for (SearchResult result : coreResults) {
-                Map<PropertyKey, Object> props = result.getProperties();
+                Map<FilePropertyKey, Object> props = result.getProperties();
                 properties.putAll(props);
             }
         }
@@ -107,11 +107,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         return properties;
     }
 
-    public Object getProperty(SearchResult.PropertyKey key) {
+    public Object getProperty(FilePropertyKey key) {
         return getProperties().get(key);
     }
 
-    public String getPropertyString(SearchResult.PropertyKey key) {
+    public String getPropertyString(FilePropertyKey key) {
         Object value = getProperty(key);
         if (value != null) {
             String stringValue = value.toString();
@@ -266,12 +266,12 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String getHeading() {
-        String name = getProperty(PropertyKey.NAME).toString();
+        String name = getProperty(FilePropertyKey.NAME).toString();
         String renderName = "";
         switch (getCategory()) {
         case AUDIO:
-            String artist = getPropertyString(PropertyKey.ARTIST_NAME);
-            String title = getPropertyString(PropertyKey.TRACK_NAME);
+            String artist = getPropertyString(FilePropertyKey.AUTHOR);
+            String title = getPropertyString(FilePropertyKey.TRACK_NAME);
             if (!StringUtils.isEmpty(artist) && !StringUtils.isEmpty(title)) {
                 renderName = artist + " - " + title;
             } else {
@@ -297,9 +297,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
         switch (getCategory()) {
         case AUDIO: {
-            String albumTitle = getPropertyString(PropertyKey.ALBUM_TITLE);
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.LENGTH));
+            String albumTitle = getPropertyString(FilePropertyKey.TITLE);
+            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.QUALITY));
+            Long length = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.LENGTH));
 
             boolean insertHypen = false;
             if (!StringUtils.isEmpty(albumTitle)) {
@@ -324,8 +324,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         }
             break;
         case VIDEO: {
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.LENGTH));
+            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.QUALITY));
+            Long length = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.LENGTH));
 
             boolean insertHyphen = false;
             if (qualityScore != null) {
@@ -342,14 +342,14 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         }
             break;
         case IMAGE: {
-            Object time = getProperty(PropertyKey.DATE_CREATED);
+            Object time = getProperty(FilePropertyKey.DATE_CREATED);
             if (time != null) {
                 subheading = DATE_FORMAT.format(new java.util.Date((Long) time));
             }
         }
             break;
         case PROGRAM: {
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.FILE_SIZE));
+            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.FILE_SIZE));
             if (fileSize != null) {
                 subheading = GuiUtils.toUnitbytes(fileSize);
             }
@@ -361,7 +361,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             // subheading = "{application name}";
             // TODO add name of program used to open this file, not included in
             // 5.0
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(PropertyKey.FILE_SIZE));
+            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.FILE_SIZE));
             if (fileSize != null) {
                 subheading = GuiUtils.toUnitbytes(fileSize);
             }
@@ -372,11 +372,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     private String toQualityString(long qualityScore) {
         if (qualityScore <= 1) {
-            return I18n.tr("Poor");
+            return I18n.tr("Poor Quality");
         } else if (qualityScore == 2) {
-            return I18n.tr("Good");
+            return I18n.tr("Good Quality");
         } else {
-           return I18n.tr("Excellent");
+           return I18n.tr("Excellent Quality");
         }
     }
 }

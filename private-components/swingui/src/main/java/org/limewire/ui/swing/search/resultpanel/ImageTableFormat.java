@@ -4,7 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.util.Calendar;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -42,13 +42,13 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
         String fileExtension = vsr.getFileExtension();
 
         switch (index) {
-            case NAME_INDEX: return getProperty(PropertyKey.NAME);
+            case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
             case EXTENSION_INDEX: return fileExtension; // TODO: RMV improve
-            case DATE_INDEX: return getProperty(PropertyKey.DATE_CREATED);
+            case DATE_INDEX: return getProperty(FilePropertyKey.DATE_CREATED);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 6: return getProperty(PropertyKey.OWNER);
+            case 6: return getProperty(FilePropertyKey.OWNER);
             default: return null;
         }
     }

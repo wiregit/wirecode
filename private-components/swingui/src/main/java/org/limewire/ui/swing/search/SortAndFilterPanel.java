@@ -30,9 +30,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
@@ -237,7 +236,7 @@ public class SortAndFilterPanel extends JXPanel {
         return filteredList;
     }
 
-    private static Comparator<VisualSearchResult> getDateComparator(final PropertyKey key,
+    private static Comparator<VisualSearchResult> getDateComparator(final FilePropertyKey key,
             final boolean ascending) {
         return new Comparator<VisualSearchResult>() {
             @Override
@@ -249,7 +248,7 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
 
-    private static Comparator<VisualSearchResult> getFloatComparator(final PropertyKey key,
+    private static Comparator<VisualSearchResult> getFloatComparator(final FilePropertyKey key,
             final boolean ascending, final boolean nullsFirst) {
         return new Comparator<VisualSearchResult>() {
             @Override
@@ -261,7 +260,7 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
 
-    private static Comparator<VisualSearchResult> getLongComparator(final PropertyKey key,
+    private static Comparator<VisualSearchResult> getLongComparator(final FilePropertyKey key,
             final boolean ascending) {
         return new Comparator<VisualSearchResult>() {
             @Override
@@ -275,7 +274,7 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
 
-    private static Comparator<VisualSearchResult> getStringComparator(final PropertyKey key,
+    private static Comparator<VisualSearchResult> getStringComparator(final FilePropertyKey key,
             final boolean ascending) {
         return new Comparator<VisualSearchResult>() {
             @Override
@@ -301,32 +300,32 @@ public class SortAndFilterPanel extends JXPanel {
 
     @SuppressWarnings("unchecked")
     private static SimilarResultsGroupingComparator getStringPropertyPlusNameComparator(
-            final PropertyKey propertyKey, final boolean ascending) {
-        return new SimilarResultsGroupingDelegateComparator(getStringComparator(propertyKey, ascending), getNameComparator(ascending));
+            final FilePropertyKey FilePropertyKey, final boolean ascending) {
+        return new SimilarResultsGroupingDelegateComparator(getStringComparator(FilePropertyKey, ascending), getNameComparator(ascending));
     }
     
     @SuppressWarnings("unchecked")
     private SimilarResultsGroupingDelegateComparator getRelevanceComparator() {
-        return new SimilarResultsGroupingDelegateComparator(getFloatComparator(PropertyKey.RELEVANCE, false, false), getNameComparator(true));
+        return new SimilarResultsGroupingDelegateComparator(getFloatComparator(FilePropertyKey.RELEVANCE, false, false), getNameComparator(true));
     }
 
     @SuppressWarnings("unchecked")
     private SimilarResultsGroupingComparator getComparator(String item) {
 
         if (ALBUM.equals(item)) {
-            return getStringPropertyPlusNameComparator(PropertyKey.ALBUM_TITLE, true);
+            return getStringPropertyPlusNameComparator(FilePropertyKey.TITLE, true);
         }
 
         if (ARTIST.equals(item)) {
-            return getStringPropertyPlusNameComparator(PropertyKey.ARTIST_NAME, true);
+            return getStringPropertyPlusNameComparator(FilePropertyKey.AUTHOR, true);
         }
 
         if (COMPANY.equals(item)) {
-            return getStringPropertyPlusNameComparator(PropertyKey.COMPANY, true);
+            return getStringPropertyPlusNameComparator(FilePropertyKey.COMPANY, true);
         }
 
         if (DATE_CREATED.equals(item)) {
-            return new SimilarResultsGroupingDelegateComparator(getDateComparator(PropertyKey.DATE_CREATED, false), getNameComparator(true)); 
+            return new SimilarResultsGroupingDelegateComparator(getDateComparator(FilePropertyKey.DATE_CREATED, false), getNameComparator(true)); 
         }
 
         if (FILE_EXTENSION.equals(item) || TYPE.equals(item)) {
@@ -360,7 +359,7 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if (LENGTH.equals(item)) {
-            return new SimilarResultsGroupingDelegateComparator(getLongComparator(PropertyKey.LENGTH, false), getNameComparator(true));
+            return new SimilarResultsGroupingDelegateComparator(getLongComparator(FilePropertyKey.LENGTH, false), getNameComparator(true));
         }
 
         if (NAME.equals(item) || TITLE.equals(item)) {
@@ -368,11 +367,11 @@ public class SortAndFilterPanel extends JXPanel {
         }
 
         if (PLATFORM.equals(item)) {
-            return getStringPropertyPlusNameComparator(PropertyKey.COMPANY, true);
+            return getStringPropertyPlusNameComparator(FilePropertyKey.COMPANY, true);
         }
 
         if (QUALITY.equals(item)) {
-            return new SimilarResultsGroupingDelegateComparator(getLongComparator(PropertyKey.QUALITY, false), getNameComparator(true));
+            return new SimilarResultsGroupingDelegateComparator(getLongComparator(FilePropertyKey.QUALITY, false), getNameComparator(true));
         }
 
         if (RELEVANCE_ITEM.equals(item)) {
@@ -414,7 +413,7 @@ public class SortAndFilterPanel extends JXPanel {
                 private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
 
                 private Comparator<VisualSearchResult> propertyComparator = getLongComparator(
-                        PropertyKey.YEAR, true);
+                        FilePropertyKey.YEAR, true);
 
                 @Override
                 public int doCompare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
@@ -551,8 +550,8 @@ public class SortAndFilterPanel extends JXPanel {
                 List<String> list, VisualSearchResult vsr) {
             list.add(vsr.getFileExtension());
             list.add(String.valueOf(vsr.getSize()));
-            Map<SearchResult.PropertyKey, Object> props = vsr.getProperties();
-            for (SearchResult.PropertyKey key : props.keySet()) {
+            Map<FilePropertyKey, Object> props = vsr.getProperties();
+            for (FilePropertyKey key : props.keySet()) {
                 String value = vsr.getPropertyString(key);
                 if(value != null) {
                     list.add(value);

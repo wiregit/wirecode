@@ -3,7 +3,7 @@ package org.limewire.ui.swing.search.resultpanel;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.*;
 import junit.framework.TestCase;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.MockVisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
@@ -44,7 +44,7 @@ public class ListViewRowHeightRuleTest extends TestCase {
     
     public void testHeadingAndMetadataOnly() {
         mock.setHeading("bar");
-        mock.getProperties().put(PropertyKey.NAME, "foo");
+        mock.getProperties().put(FilePropertyKey.NAME, "foo");
         assertStuff(BasicDownloadState.NOT_STARTED, "foo", HeadingAndMetadata, true, false);
     }
 
@@ -70,7 +70,7 @@ public class ListViewRowHeightRuleTest extends TestCase {
     public void testHeadingSubHeadingAndMetadata() {
         mock.setHeading("bar");
         mock.setSubHeading("baz");
-        mock.getProperties().put(PropertyKey.NAME, "foo");
+        mock.getProperties().put(FilePropertyKey.NAME, "foo");
         assertStuff(BasicDownloadState.NOT_STARTED, "foo", HeadingSubHeadingAndMetadata, false, false);
     }
 }

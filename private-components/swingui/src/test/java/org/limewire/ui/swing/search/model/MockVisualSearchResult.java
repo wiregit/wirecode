@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 
 public class MockVisualSearchResult implements VisualSearchResult {
     private List<VisualSearchResult> similarResults = new ArrayList<VisualSearchResult>();
@@ -20,7 +20,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
     private VisualSearchResult similarityParent;
     private boolean spam;
-    private HashMap<PropertyKey, Object> properties = new HashMap<PropertyKey, Object>();
+    private HashMap<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
     
     public MockVisualSearchResult(String name) {
         this.name = name;
@@ -55,13 +55,13 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public Map<PropertyKey, Object> getProperties() {
+    public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }
 
     @Override
-    public Object getProperty(PropertyKey key) {
-        if(key == PropertyKey.NAME) {
+    public Object getProperty(FilePropertyKey key) {
+        if(key == FilePropertyKey.NAME) {
             return name; 
         } else {
             return null;
@@ -69,7 +69,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public String getPropertyString(PropertyKey key) {
+    public String getPropertyString(FilePropertyKey key) {
         Object val = getProperties().get(key);
         return val == null ? null : val.toString();
     }

@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.xmpp.api.client.LimePresence;
@@ -72,15 +73,9 @@ public class MockLocalFileItem implements LocalFileItem {
     }
 
     @Override
-    public Object getProperty(Keys key) {
+    public Object getProperty(FilePropertyKey key) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public void setProperty(Keys key, Object object) {
-        // TODO Auto-generated method stub
-        
     }
 
     public FileMetaData offer(LimePresence limePresence) {

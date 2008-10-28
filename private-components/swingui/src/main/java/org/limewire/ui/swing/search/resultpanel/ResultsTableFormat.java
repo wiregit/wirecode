@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 import org.limewire.ui.swing.util.IconManager;
@@ -106,7 +106,7 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
      * @param key the property key or name
      * @return the property value
      */
-    protected Object getProperty(PropertyKey key) {
+    protected Object getProperty(FilePropertyKey key) {
         return vsr.getProperty(key);
     }
 
@@ -115,7 +115,7 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
      * @param key the property key or name
      * @return the String property value
      */
-    protected String getString(PropertyKey key) {
+    protected String getString(FilePropertyKey key) {
         Object value = vsr.getProperty(key);
         return value == null ? "?" : value.toString();
     }

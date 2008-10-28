@@ -7,9 +7,9 @@ import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -43,9 +43,9 @@ public class SearchResultPropertiesImpl extends Dialog implements SearchResultPr
     @Override
     public void showProperties(VisualSearchResult vsr) {
         headingLabel.setText(vsr.getHeading());
-        filename.setText(vsr.getPropertyString(PropertyKey.NAME));
+        filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
         subheading.setText(vsr.getSubHeading());
-        fileSize.setText(vsr.getPropertyString(PropertyKey.FILE_SIZE));
+        fileSize.setText(vsr.getPropertyString(FilePropertyKey.FILE_SIZE));
         metadata.setText("Key-value pairs go here");
         copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
         
@@ -58,7 +58,7 @@ public class SearchResultPropertiesImpl extends Dialog implements SearchResultPr
             }
         }
 
-        showDialog(vsr.getPropertyString(PropertyKey.NAME));
+        showDialog(vsr.getPropertyString(FilePropertyKey.NAME));
     }
     
     @Override

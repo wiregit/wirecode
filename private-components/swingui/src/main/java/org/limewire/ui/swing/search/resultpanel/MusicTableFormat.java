@@ -2,7 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -47,20 +47,20 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         this.vsr = vsr;
 
         switch (index) {
-            case NAME_INDEX: return getProperty(PropertyKey.NAME);
-            case ARTIST_INDEX: return getProperty(PropertyKey.ARTIST_NAME);
-            case ALBUM_INDEX: return getProperty(PropertyKey.ALBUM_TITLE);
-            case LENGTH_INDEX: return getProperty(PropertyKey.LENGTH);
-            case QUALITY_INDEX: return getProperty(PropertyKey.QUALITY);
+            case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
+            case ARTIST_INDEX: return getProperty(FilePropertyKey.AUTHOR);
+            case ALBUM_INDEX: return getProperty(FilePropertyKey.TITLE);
+            case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
+            case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case ACTION_INDEX: return vsr;
-            case BITRATE_INDEX: return getProperty(PropertyKey.BITRATE);
-            case 7: return getProperty(PropertyKey.GENRE);
-            case TRACK_INDEX: return getProperty(PropertyKey.TRACK_NUMBER);
-            case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
+            case 7: return getProperty(FilePropertyKey.GENRE);
+            case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
+            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 11: return getProperty(PropertyKey.OWNER);
+            case 11: return getProperty(FilePropertyKey.OWNER);
             case 12: return vsr.getFileExtension();
-            case 13: return getProperty(PropertyKey.SAMPLE_RATE);
+            case 13: return getProperty(FilePropertyKey.SAMPLE_RATE);
             default: return null;
         }
     }

@@ -1,10 +1,7 @@
 package org.limewire.core.impl.library;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
@@ -15,11 +12,9 @@ import com.limegroup.gnutella.RemoteFileDesc;
 
 public class CoreRemoteFileItem implements RemoteFileItem {
     private final RemoteFileDescAdapter searchResult;
-    private final Map<Keys, Object> map;
 
     CoreRemoteFileItem(RemoteFileDescAdapter rfd) {
         this.searchResult = rfd;
-        this.map = Collections.synchronizedMap(new HashMap<Keys,Object>());
     }
     
     public RemoteFileDesc getRfd() {
@@ -31,7 +26,7 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     }
     
     public String getName() {
-        return (String)searchResult.getProperty(SearchResult.PropertyKey.NAME);
+        return (String)searchResult.getProperty(FilePropertyKey.NAME);
     }
     
     public String getFileName(){
@@ -43,7 +38,7 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     }
 
     public long getCreationTime() {
-        Long time = (Long)searchResult.getProperty(SearchResult.PropertyKey.DATE_CREATED);
+        Long time = (Long)searchResult.getProperty(FilePropertyKey.DATE_CREATED);
         if(time == null)
             return -1;
         else
@@ -66,13 +61,8 @@ public class CoreRemoteFileItem implements RemoteFileItem {
         return searchResult.getCategory();   
     }
 
-    public Object getProperty(Keys key) {
-        return map.get(key);
-    }
-    
-    @Override
-    public void setProperty(Keys key, Object value) {
-        map.put(key, value);
+    public Object getProperty(FilePropertyKey key) {
+        return searchResult.getProperty(key);
     }
     
     @Override

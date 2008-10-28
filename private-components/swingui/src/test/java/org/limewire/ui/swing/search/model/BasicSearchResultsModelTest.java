@@ -6,8 +6,8 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.BaseTestCase;
 
 public class BasicSearchResultsModelTest extends BaseTestCase {
@@ -407,11 +407,11 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     public void testSameNameHyphenNameHyphenName() {
        
         
-        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
-        properties1.put(PropertyKey.NAME, "test-foo-bar");
+        Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
+        properties1.put(FilePropertyKey.NAME, "test-foo-bar");
         SearchResult searchResult1 = new TestSearchResult("1", "test-foo-bar.mp3", properties1); 
-        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
-        properties2.put(PropertyKey.NAME, "test-foo-bar");
+        Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
+        properties2.put(FilePropertyKey.NAME, "test-foo-bar");
         SearchResult searchResult2 = new TestSearchResult("2", "test-foo-bar.mp3", properties2);
         
         SearchResultsModel model = new BasicSearchResultsModel();
@@ -442,12 +442,12 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     public void testNotSameNameOrButSameTrackMetaData() {
-        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
-        properties1.put(PropertyKey.NAME, "test");
+        Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
+        properties1.put(FilePropertyKey.NAME, "test");
         SearchResult searchResult1 = new TestSearchResult("1", "test.mp3", properties1);
-        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
-        properties2.put(PropertyKey.NAME, "blah123");
-        properties2.put(PropertyKey.TRACK_NAME, "test");
+        Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
+        properties2.put(FilePropertyKey.NAME, "blah123");
+        properties2.put(FilePropertyKey.TRACK_NAME, "test");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         SearchResultsModel model = new BasicSearchResultsModel();
@@ -481,13 +481,13 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     public void testSameNameOrAlbumAndTrackMetaData() {
-        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
-        properties1.put(PropertyKey.NAME, "test-blah");
+        Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
+        properties1.put(FilePropertyKey.NAME, "test-blah");
         SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
-        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
-        properties2.put(PropertyKey.NAME, "blah123");
-        properties2.put(PropertyKey.ALBUM_TITLE, "test");
-        properties2.put(PropertyKey.TRACK_NAME, "blah");
+        Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
+        properties2.put(FilePropertyKey.NAME, "blah123");
+        properties2.put(FilePropertyKey.TITLE, "test");
+        properties2.put(FilePropertyKey.TRACK_NAME, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         
@@ -519,13 +519,13 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
     
     public void testSameNameOrArtistAndTrackMetaData() {
-        Map<PropertyKey, Object> properties1 = new HashMap<PropertyKey, Object>();
-        properties1.put(PropertyKey.NAME, "test-blah");
+        Map<FilePropertyKey, Object> properties1 = new HashMap<FilePropertyKey, Object>();
+        properties1.put(FilePropertyKey.NAME, "test-blah");
         SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
-        Map<PropertyKey, Object> properties2 = new HashMap<PropertyKey, Object>();
-        properties2.put(PropertyKey.NAME, "blah123");
-        properties2.put(PropertyKey.ARTIST_NAME, "test");
-        properties2.put(PropertyKey.TRACK_NAME, "blah");
+        Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
+        properties2.put(FilePropertyKey.NAME, "blah123");
+        properties2.put(FilePropertyKey.AUTHOR, "test");
+        properties2.put(FilePropertyKey.TRACK_NAME, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         SearchResultsModel model = new BasicSearchResultsModel();

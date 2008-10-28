@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
@@ -19,14 +19,14 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     private static final String EMPTY_STRING = "";
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.GENRE, PropertyKey.BITRATE, PropertyKey.TRACK_NUMBER, PropertyKey.SAMPLE_RATE);
+        new PropertyKeyComparator(FilePropertyKey.GENRE, FilePropertyKey.BITRATE, FilePropertyKey.TRACK_NUMBER, FilePropertyKey.SAMPLE_RATE);
     private final PropertyKeyComparator VIDEO_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.YEAR, PropertyKey.RATING, PropertyKey.COMMENTS, PropertyKey.HEIGHT, 
-                                  PropertyKey.WIDTH, PropertyKey.BITRATE);
+        new PropertyKeyComparator(FilePropertyKey.YEAR, FilePropertyKey.RATING, FilePropertyKey.COMMENTS, FilePropertyKey.HEIGHT, 
+                                  FilePropertyKey.WIDTH, FilePropertyKey.BITRATE);
     private final PropertyKeyComparator DOCUMENTS_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.DATE_CREATED, PropertyKey.AUTHOR);
+        new PropertyKeyComparator(FilePropertyKey.DATE_CREATED, FilePropertyKey.AUTHOR);
     private final PropertyKeyComparator PROGRAMS_COMPARATOR = 
-        new PropertyKeyComparator(PropertyKey.PLATFORM, PropertyKey.COMPANY);
+        new PropertyKeyComparator(FilePropertyKey.PLATFORM, FilePropertyKey.COMPANY);
 
     @Override
     public RowDisplayResult getDisplayResult(VisualSearchResult vsr, String searchText) {
@@ -88,9 +88,9 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         if(searchText == null)
             return null;
         
-        ArrayList<PropertyKey> properties = new ArrayList<PropertyKey>(vsr.getProperties().keySet());
+        ArrayList<FilePropertyKey> properties = new ArrayList<FilePropertyKey>(vsr.getProperties().keySet());
         Collections.sort(properties, getComparator(vsr));
-        for (PropertyKey key : properties) {
+        for (FilePropertyKey key : properties) {
             String value = vsr.getPropertyString(key);
 
             String propertyMatch = highlightMatches(value, searchText);
@@ -109,7 +109,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         return str1 != null && str2 != null && str1.length() != str2.length();
     }
     
-    private Comparator<PropertyKey> getComparator(VisualSearchResult vsr) {
+    private Comparator<FilePropertyKey> getComparator(VisualSearchResult vsr) {
         switch (vsr.getCategory()) {
         case AUDIO:
             return AUDIO_COMPARATOR;
@@ -207,20 +207,20 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
         }
     }
     
-    private static class PropertyKeyComparator implements Comparator<PropertyKey> {
-        private final PropertyKey[] keyOrder;
+    private static class PropertyKeyComparator implements Comparator<FilePropertyKey> {
+        private final FilePropertyKey[] keyOrder;
 
-        public PropertyKeyComparator(PropertyKey... keys) {
+        public PropertyKeyComparator(FilePropertyKey... keys) {
             this.keyOrder = keys;
         }
 
         @Override
-        public int compare(PropertyKey o1, PropertyKey o2) {
+        public int compare(FilePropertyKey o1, FilePropertyKey o2) {
             if (o1 == o2) {
                 return 0;
             }
             
-            for(PropertyKey key : keyOrder) {
+            for(FilePropertyKey key : keyOrder) {
                 if (o1 == key) {
                     return -1;
                 } else if (o2 == key) {

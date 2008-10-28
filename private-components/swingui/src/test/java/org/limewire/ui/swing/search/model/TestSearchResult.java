@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
@@ -22,17 +23,17 @@ public class TestSearchResult implements SearchResult {
 
     private String fileName;
 
-    private Map<PropertyKey, Object> properties;
+    private Map<FilePropertyKey, Object> properties;
 
     public TestSearchResult(String urn, String fileName) {
         this.urn = urn;
-        Map<PropertyKey, Object> properties = new HashMap<PropertyKey, Object>();
-        properties.put(PropertyKey.NAME, FileUtils.getFilenameNoExtension(fileName));
+        Map<FilePropertyKey, Object> properties = new HashMap<FilePropertyKey, Object>();
+        properties.put(FilePropertyKey.NAME, FileUtils.getFilenameNoExtension(fileName));
         this.properties = properties;
         this.fileName = fileName;
     }
 
-    public TestSearchResult(String urn, String fileName, Map<PropertyKey, Object> properties) {
+    public TestSearchResult(String urn, String fileName, Map<FilePropertyKey, Object> properties) {
         this.urn = urn;
         this.properties = properties;
         this.fileName = fileName;
@@ -44,12 +45,12 @@ public class TestSearchResult implements SearchResult {
     }
 
     @Override
-    public Map<PropertyKey, Object> getProperties() {
+    public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }
 
     @Override
-    public Object getProperty(PropertyKey key) {
+    public Object getProperty(FilePropertyKey key) {
         return properties.get(key);
     }
 
@@ -98,7 +99,7 @@ public class TestSearchResult implements SearchResult {
     }
 
     public String toString() {
-        return getUrn() + " - " + getProperty(PropertyKey.NAME);
+        return getUrn() + " - " + getProperty(FilePropertyKey.NAME);
     }
 
     @Override

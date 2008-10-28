@@ -2,8 +2,8 @@ package org.limewire.ui.swing.library.table;
 
 import java.util.Date;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -73,21 +73,21 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
         case NAME_COL:
             return baseObject.getName();
         case LENGTH_COL:
-            return baseObject.getProperty(Keys.LENGTH);
+            return baseObject.getProperty(FilePropertyKey.LENGTH);
         case MISC_COL:
-            return baseObject.getProperty(Keys.MISCELLANEOUS);
+            return baseObject.getProperty(FilePropertyKey.COMMENTS);
         case YEAR_COL:
-            return baseObject.getProperty(Keys.YEAR);
+            return baseObject.getProperty(FilePropertyKey.YEAR);
         case RATING_COL:
-            return baseObject.getProperty(Keys.RATING);
+            return baseObject.getProperty(FilePropertyKey.RATING);
         case BITRATE_COL:
-            return baseObject.getProperty(Keys.BITRATE);
+            return baseObject.getProperty(FilePropertyKey.BITRATE);
         case SIZE_COL:
             return baseObject.getSize();
         case COMMENTS_COL:
-            return baseObject.getProperty(Keys.COMMENTS);
+            return baseObject.getProperty(FilePropertyKey.COMMENTS);
         case HEIGHT_COL:
-            return baseObject.getProperty(Keys.HEIGHT);
+            return baseObject.getProperty(FilePropertyKey.HEIGHT);
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:

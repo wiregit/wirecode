@@ -9,8 +9,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.core.api.search.SearchResult.PropertyKey;
 import org.limewire.util.StringUtils;
 
 /**
@@ -46,40 +46,40 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
     }
 
     private void addNames(Set<String> names, SearchResult searchResult) {
-        Map<SearchResult.PropertyKey, String> metaData = getMetadata(searchResult);
+        Map<FilePropertyKey, String> metaData = getMetadata(searchResult);
 
-        String artist = metaData.get(PropertyKey.ARTIST_NAME);
-        String album = metaData.get(PropertyKey.ALBUM_TITLE);
-        String track = metaData.get(PropertyKey.TRACK_NAME);
+        String artist = metaData.get(FilePropertyKey.AUTHOR);
+        String album = metaData.get(FilePropertyKey.TITLE);
+        String track = metaData.get(FilePropertyKey.TRACK_NAME);
 
         if (!StringUtils.isEmpty(track)) {
             if (!StringUtils.isEmpty(artist)) {
-                String artistTrack = metaData.get(PropertyKey.ARTIST_NAME) + "-"
-                        + metaData.get(PropertyKey.TRACK_NAME);
+                String artistTrack = metaData.get(FilePropertyKey.AUTHOR) + "-"
+                        + metaData.get(FilePropertyKey.TRACK_NAME);
                 names.add(artistTrack);
 
                 if (!StringUtils.isEmpty(album)) {
-                    String artistAlbumTrack = metaData.get(PropertyKey.ARTIST_NAME) + "-"
-                            + metaData.get(PropertyKey.ALBUM_TITLE) + "-"
-                            + metaData.get(PropertyKey.TRACK_NAME);
+                    String artistAlbumTrack = metaData.get(FilePropertyKey.AUTHOR) + "-"
+                            + metaData.get(FilePropertyKey.TITLE) + "-"
+                            + metaData.get(FilePropertyKey.TRACK_NAME);
                     names.add(artistAlbumTrack);
                 }
             }
 
             if (!StringUtils.isEmpty(album)) {
-                String albumTrack = metaData.get(PropertyKey.ALBUM_TITLE) + "-"
-                        + metaData.get(PropertyKey.TRACK_NAME);
+                String albumTrack = metaData.get(FilePropertyKey.TITLE) + "-"
+                        + metaData.get(FilePropertyKey.TRACK_NAME);
                 names.add(albumTrack);
             }
         }
     }
 
-    private Map<SearchResult.PropertyKey, String> getMetadata(SearchResult result) {
-        String name = result.getProperty(SearchResult.PropertyKey.NAME).toString();
-        Map<SearchResult.PropertyKey, String> metadataCopy = new HashMap<SearchResult.PropertyKey, String>();
-        copyProperty(result, metadataCopy, PropertyKey.TRACK_NAME);
-        copyProperty(result, metadataCopy, PropertyKey.ALBUM_TITLE);
-        copyProperty(result, metadataCopy, PropertyKey.ARTIST_NAME);
+    private Map<FilePropertyKey, String> getMetadata(SearchResult result) {
+        String name = result.getProperty(FilePropertyKey.NAME).toString();
+        Map<FilePropertyKey, String> metadataCopy = new HashMap<FilePropertyKey, String>();
+        copyProperty(result, metadataCopy, FilePropertyKey.TRACK_NAME);
+        copyProperty(result, metadataCopy, FilePropertyKey.TITLE);
+        copyProperty(result, metadataCopy, FilePropertyKey.AUTHOR);
 
         StringTokenizer st = new StringTokenizer(name, "-");
         Stack<String> nameParts = new Stack<String>();
@@ -90,37 +90,37 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
 
         if (!nameParts.empty()) {
             String trackName = nameParts.pop();
-            if (StringUtils.isEmpty(metadataCopy.get(SearchResult.PropertyKey.TRACK_NAME))) {
-                metadataCopy.put(SearchResult.PropertyKey.TRACK_NAME, trackName);
+            if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.TRACK_NAME))) {
+                metadataCopy.put(FilePropertyKey.TRACK_NAME, trackName);
             }
             if (!nameParts.empty()) {
                 String albumOrArtist = nameParts.pop();
-                if (StringUtils.isEmpty(metadataCopy.get(SearchResult.PropertyKey.ALBUM_TITLE))) {
-                    metadataCopy.put(SearchResult.PropertyKey.ALBUM_TITLE, albumOrArtist);
+                if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.TITLE))) {
+                    metadataCopy.put(FilePropertyKey.TITLE, albumOrArtist);
                 }
                 if (!nameParts.empty()) {
                     String artist = nameParts.pop();
-                    if (StringUtils.isEmpty(metadataCopy.get(SearchResult.PropertyKey.ARTIST_NAME))) {
-                        metadataCopy.put(SearchResult.PropertyKey.ARTIST_NAME, artist);
+                    if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.AUTHOR))) {
+                        metadataCopy.put(FilePropertyKey.AUTHOR, artist);
                     }
                 }
             }
         }
-        cleanProperty(metadataCopy, PropertyKey.TRACK_NAME);
-        cleanProperty(metadataCopy, PropertyKey.ALBUM_TITLE);
-        cleanProperty(metadataCopy, PropertyKey.ARTIST_NAME);
+        cleanProperty(metadataCopy, FilePropertyKey.TRACK_NAME);
+        cleanProperty(metadataCopy, FilePropertyKey.TITLE);
+        cleanProperty(metadataCopy, FilePropertyKey.AUTHOR);
 
         return metadataCopy;
     }
 
     private void copyProperty(SearchResult result,
-            Map<SearchResult.PropertyKey, String> metadataCopy, PropertyKey propertyKey) {
+            Map<FilePropertyKey, String> metadataCopy, FilePropertyKey propertyKey) {
         metadataCopy.put(propertyKey, result.getProperty(propertyKey) == null ? "" : result
                 .getProperty(propertyKey).toString());
     }
 
-    private void cleanProperty(Map<SearchResult.PropertyKey, String> metadataCopy,
-            PropertyKey propertyKey) {
+    private void cleanProperty(Map<FilePropertyKey, String> metadataCopy,
+            FilePropertyKey propertyKey) {
         String cleanedProperty = getNameCache().getCleanString(metadataCopy.get(propertyKey));
         metadataCopy.put(propertyKey, cleanedProperty);
     }

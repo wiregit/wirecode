@@ -27,7 +27,7 @@ public class FriendSearcher {
             Set<RemoteFileItem> results = new HashSet<RemoteFileItem>();
             StringTokenizer st = new StringTokenizer(searchDetails.getSearchQuery());
             while(st.hasMoreElements()) {
-                Iterator<RemoteFileItem> resultsForWord = libraries.iterator(st.nextToken(), searchDetails.getSearchCategory());
+                Iterator<RemoteFileItem> resultsForWord = libraries.iterator(st.nextToken(), searchDetails.getSearchCategory(), true);
                 while (resultsForWord.hasNext()) {
                     results.add(resultsForWord.next());
                 }

@@ -2,7 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -51,20 +51,20 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
         String fileExtension = vsr.getFileExtension();
 
         switch (index) {
-            case NAME_INDEX: return getProperty(PropertyKey.NAME);
+            case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
             case EXTENSION_INDEX: return fileExtension; // TODO: RMV improve
-            case LENGTH_INDEX: return getProperty(PropertyKey.LENGTH);
-            case YEAR_INDEX: return getProperty(PropertyKey.YEAR);
-            case QUALITY_INDEX: return getProperty(PropertyKey.QUALITY);
+            case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
+            case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
+            case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 8: return getProperty(PropertyKey.OWNER);
-            case RATING_INDEX: return getProperty(PropertyKey.RATING);
-            case 10: return getProperty(PropertyKey.COMMENTS);
-            case HEIGHT_INDEX: return getProperty(PropertyKey.HEIGHT);
-            case WIDTH_INDEX: return getProperty(PropertyKey.WIDTH);
-            case BITRATE_INDEX: return getProperty(PropertyKey.BITRATE);
+            case 8: return getProperty(FilePropertyKey.OWNER);
+            case RATING_INDEX: return getProperty(FilePropertyKey.RATING);
+            case 10: return getProperty(FilePropertyKey.COMMENTS);
+            case HEIGHT_INDEX: return getProperty(FilePropertyKey.HEIGHT);
+            case WIDTH_INDEX: return getProperty(FilePropertyKey.WIDTH);
+            case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
             default: return null;
         }
     }

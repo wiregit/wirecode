@@ -3,7 +3,7 @@ package org.limewire.ui.swing.search.model;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.FilePropertyKey;
 
 import junit.framework.TestCase;
 
@@ -78,7 +78,7 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
         
         int index = 0;
         for (String result : order) {
-            assertEquals(result, results.get(index++).getProperty(SearchResult.PropertyKey.NAME));
+            assertEquals(result, results.get(index++).getProperty(FilePropertyKey.NAME));
         }
     }
 }

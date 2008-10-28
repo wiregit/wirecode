@@ -5,7 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Component;
 import java.util.Calendar;
 
-import org.limewire.core.api.search.SearchResult.PropertyKey;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -49,13 +49,13 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
             case NAME_INDEX: return getIconLabel(vsr);
             case TYPE_INDEX: return fileExtension; // TODO: RMV improve
             case SIZE_INDEX: return vsr.getSize();
-            case DATE_INDEX: return getProperty(PropertyKey.DATE_CREATED);
+            case DATE_INDEX: return getProperty(FilePropertyKey.DATE_CREATED);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(PropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
             case 6: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 8: return getProperty(PropertyKey.OWNER);
-            case 9: return getProperty(PropertyKey.AUTHOR);
+            case 8: return getProperty(FilePropertyKey.OWNER);
+            case 9: return getProperty(FilePropertyKey.AUTHOR);
             default: return null;
         }
     }

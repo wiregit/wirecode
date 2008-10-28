@@ -13,8 +13,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.TextFilterator;
@@ -59,10 +59,11 @@ public abstract class GenericSharingPanel extends JPanel implements ComponentLis
         public void getFilterStrings(List<String> baseList, LocalFileItem element) {
            baseList.add(element.getName());
 
-           for(Keys key : Keys.values()) {
+           for(FilePropertyKey key : FilePropertyKey.values()) {
                baseList.add((String)element.getProperty(key));
            }
-           baseList.remove(element.getProperty(Keys.IMAGE));
+           //baseList.remove(element.getProperty(PropertyKey.IMAGE));
+           //TODO this list is differant now
         }
     }
     

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
@@ -36,7 +37,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     private final RemoteFileDesc rfd;
     private final List<IpPort> locs;
-    private final Map<PropertyKey, Object> properties;    
+    private final Map<FilePropertyKey, Object> properties;    
     private final Category category;    
     private final String extension;
     private final String fileName;
@@ -47,26 +48,26 @@ public class RemoteFileDescAdapter implements SearchResult {
             Set<? extends IpPort> locs) {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);        
-        this.properties = new HashMap<PropertyKey, Object>();
+        this.properties = new HashMap<FilePropertyKey, Object>();
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
         category = MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(extension));
 
-        set(properties, PropertyKey.NAME, FileUtils.getFilenameNoExtension(rfd.getFileName()));
-        set(properties, PropertyKey.DATE_CREATED, rfd.getCreationTime());
+        set(properties, FilePropertyKey.NAME, FileUtils.getFilenameNoExtension(rfd.getFileName()));
+        set(properties, FilePropertyKey.DATE_CREATED, rfd.getCreationTime());
 
         LimeXMLDocument doc = rfd.getXMLDocument();
         if (doc != null) {
             if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.ALBUM_TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
-                set(properties, PropertyKey.ARTIST_NAME, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
-                set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
-                set(properties, PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
-                set(properties, PropertyKey.GENRE, doc.getValue(LimeXMLNames.AUDIO_GENRE));
-                set(properties, PropertyKey.LENGTH, doc.getValue(LimeXMLNames.AUDIO_SECONDS));
-                set(properties, PropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
-                set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
-                set(properties, PropertyKey.TRACK_NAME, doc.getValue(LimeXMLNames.AUDIO_TITLE));
+                set(properties, FilePropertyKey.TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
+                set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
+                set(properties, FilePropertyKey.BITRATE, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
+                set(properties, FilePropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
+                set(properties, FilePropertyKey.GENRE, doc.getValue(LimeXMLNames.AUDIO_GENRE));
+                set(properties, FilePropertyKey.LENGTH, doc.getValue(LimeXMLNames.AUDIO_SECONDS));
+                set(properties, FilePropertyKey.TRACK_NUMBER, doc.getValue(LimeXMLNames.AUDIO_TRACK));
+                set(properties, FilePropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
+                set(properties, FilePropertyKey.TRACK_NAME, doc.getValue(LimeXMLNames.AUDIO_TITLE));
 
                 Long bitrate = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.AUDIO_BITRATE));
@@ -76,17 +77,18 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                 int quality = toAudioQualityScore(getFileExtension(), getSize(), bitrate, length);
                 if(quality > 0) {
-                    set(properties, PropertyKey.QUALITY, quality);
+                    set(properties, FilePropertyKey.QUALITY, quality);
                 }
 
             } else if (LimeXMLNames.VIDEO_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.VIDEO_PRODUCER));
-                set(properties, PropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
-                set(properties, PropertyKey.COMMENTS, doc.getValue(LimeXMLNames.VIDEO_COMMENTS));
-                set(properties, PropertyKey.LENGTH, doc.getValue(LimeXMLNames.VIDEO_LENGTH));
-                set(properties, PropertyKey.HEIGHT, doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
-                set(properties, PropertyKey.WIDTH, doc.getValue(LimeXMLNames.VIDEO_WIDTH));
-                set(properties, PropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
+                set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.VIDEO_PRODUCER));
+                set(properties, FilePropertyKey.BITRATE, doc.getValue(LimeXMLNames.VIDEO_BITRATE));
+                set(properties, FilePropertyKey.COMMENTS, doc.getValue(LimeXMLNames.VIDEO_COMMENTS));
+                set(properties, FilePropertyKey.LENGTH, doc.getValue(LimeXMLNames.VIDEO_LENGTH));
+                set(properties, FilePropertyKey.HEIGHT, doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
+                set(properties, FilePropertyKey.WIDTH, doc.getValue(LimeXMLNames.VIDEO_WIDTH));
+                set(properties, FilePropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
+                set(properties, FilePropertyKey.TITLE, doc.getValue(LimeXMLNames.VIDEO_TITLE));
 
                 Long bitrate = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.VIDEO_BITRATE));
@@ -101,18 +103,18 @@ public class RemoteFileDescAdapter implements SearchResult {
                 int quality = toVideoQualityScore(getFileExtension(),getSize(), bitrate, length, height,
                         width);
                 if(quality > 0) {
-                    set(properties, PropertyKey.QUALITY, quality);
+                    set(properties, FilePropertyKey.QUALITY, quality);
                 }
             } else if (LimeXMLNames.APPLICATION_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION_NAME));
-                set(properties, PropertyKey.AUTHOR, doc
+                set(properties, FilePropertyKey.NAME, doc.getValue(LimeXMLNames.APPLICATION_NAME));
+                set(properties, FilePropertyKey.AUTHOR, doc
                         .getValue(LimeXMLNames.APPLICATION_PUBLISHER));
             } else if (LimeXMLNames.DOCUMENT_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.DOCUMENT_TITLE));
-                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.DOCUMENT_AUTHOR));
+                set(properties, FilePropertyKey.NAME, doc.getValue(LimeXMLNames.DOCUMENT_TITLE));
+                set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.DOCUMENT_AUTHOR));
             } else if (LimeXMLNames.IMAGE_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, PropertyKey.NAME, doc.getValue(LimeXMLNames.IMAGE_TITLE));
-                set(properties, PropertyKey.AUTHOR, doc.getValue(LimeXMLNames.IMAGE_ARTIST));
+                set(properties, FilePropertyKey.NAME, doc.getValue(LimeXMLNames.IMAGE_TITLE));
+                set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.IMAGE_ARTIST));
             }
         }
     }
@@ -126,7 +128,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         return extension;
     }
     
-    private void set(Map<PropertyKey, Object> map, PropertyKey property, Object value) {
+    private void set(Map<FilePropertyKey, Object> map, FilePropertyKey property, Object value) {
         // Insert nothing if value is null|empty.
         if(value != null && !value.toString().isEmpty()) {
             if(value instanceof String) {
@@ -137,12 +139,12 @@ public class RemoteFileDescAdapter implements SearchResult {
     }
 
     @Override
-    public Map<PropertyKey, Object> getProperties() {
+    public Map<FilePropertyKey, Object> getProperties() {
         return properties;
     }
 
     @Override
-    public Object getProperty(PropertyKey key) {
+    public Object getProperty(FilePropertyKey key) {
         return getProperties().get(key);
     }
 

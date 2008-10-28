@@ -2,8 +2,8 @@ package org.limewire.ui.swing.library.table;
 
 import java.util.Date;
 
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.FileItem.Keys;
 import org.limewire.ui.swing.util.I18n;
 
 public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
@@ -62,23 +62,23 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
 
         switch (column) {
         case NAME_COL:
-            return (baseObject.getProperty(Keys.TITLE) == null) ? baseObject.getName() : baseObject.getProperty(Keys.TITLE);
+            return (baseObject.getProperty(FilePropertyKey.NAME) == null) ? baseObject.getName() : baseObject.getProperty(FilePropertyKey.NAME);
         case ARTIST_COL:
-            return baseObject.getProperty(Keys.AUTHOR);
+            return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_COL:
-            return baseObject.getProperty(Keys.ALBUM);
+            return baseObject.getProperty(FilePropertyKey.TITLE);
         case LENGTH_COL:
-            return baseObject.getProperty(Keys.LENGTH);
+            return baseObject.getProperty(FilePropertyKey.LENGTH);
         case GENRE_COL:
-            return baseObject.getProperty(Keys.GENRE);
+            return baseObject.getProperty(FilePropertyKey.GENRE);
         case BITRATE_COL:
-            return baseObject.getProperty(Keys.BITRATE);
+            return baseObject.getProperty(FilePropertyKey.BITRATE);
         case SIZE_COL:
             return baseObject.getSize();
         case TRACK_COL:
-            return baseObject.getProperty(Keys.TRACK);
+            return baseObject.getProperty(FilePropertyKey.TRACK_NAME);
         case SAMPLE_RATE_COL:
-            return baseObject.getProperty(Keys.SAMPLE_RATE);
+            return baseObject.getProperty(FilePropertyKey.SAMPLE_RATE);
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
