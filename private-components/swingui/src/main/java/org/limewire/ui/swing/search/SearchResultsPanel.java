@@ -72,12 +72,17 @@ public class SearchResultsPanel extends JXPanel {
     /** The ScrollablePanel that the scroll pane is embedding. */
     private ScrollablePanel scrollablePanel;
     
+    private JLabel messageLabel;
     private JPanel messagePanel;
     
     @Resource private Color toolbarTopGradientColor;
     @Resource private Color toolbarBottomGradientColor;
     @Resource private Color tabHighlightTopGradientColor;
     @Resource private Color tabHighlightBottomGradientColor;
+
+    private boolean lifeCycleComplete = true;
+
+    private boolean fullyConnected = true;
     
     @AssistedInject
     public SearchResultsPanel(
@@ -151,8 +156,9 @@ public class SearchResultsPanel extends JXPanel {
                 entry.getKey(), entry.getValue());
         }
 
+        messageLabel = new JLabel();
         messagePanel = new JPanel();
-        messagePanel.add(new JLabel(I18n.tr("TODO get better copy... LimeWire is currently starting. When it has completed, your search will continue.")));
+        messagePanel.add(messageLabel);
         messagePanel.setVisible(false);
         layoutComponents();
     }
@@ -279,11 +285,25 @@ public class SearchResultsPanel extends JXPanel {
         }
     }
 
-    public void setStartingLimeWire(boolean startingLimeWire) {
-       if(startingLimeWire) {
-           messagePanel.setVisible(true);
-       } else {
-           messagePanel.setVisible(false);
-       }
+    public void setLifeCycleComplete(boolean lifeCycleComplete) {
+        this.lifeCycleComplete = lifeCycleComplete;
+        updateMessages();
+    }
+
+    public void setFullyConnected(boolean fullyConnected) {
+        this.fullyConnected = fullyConnected;
+        updateMessages();        
+    }
+    
+    private void updateMessages() {
+        if(!lifeCycleComplete) {
+            messageLabel.setText(I18n.tr("TODO get better copy... LimeWire is currently starting. When it has completed, your search will continue."));
+            messagePanel.setVisible(true);
+        } else if(!fullyConnected) {
+            messageLabel.setText(I18n.tr("TODO get better copy... LimeWire is not fully connected. You will not receive many search results until it finishes connecting."));
+            messagePanel.setVisible(true);
+        } else {
+            messagePanel.setVisible(false);
+        }
     }
 }

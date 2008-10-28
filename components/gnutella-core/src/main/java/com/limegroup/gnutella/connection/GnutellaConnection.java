@@ -13,6 +13,7 @@ import java.util.zip.Inflater;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.SearchSettings;
@@ -1174,7 +1175,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             receivedCapVM = true;
             // fire a vendor event
             connectionManager.dispatchEvent(new ConnectionLifecycleEvent(this,
-                    ConnectionLifecycleEvent.EventType.CONNECTION_CAPABILITIES, this));
+                    ConnectionLifeCycleEventType.CONNECTION_CAPABILITIES, this));
 
         } else if (vm instanceof MessagesSupportedVendorMessage) {
             // If this is a ClientSupernodeConnection and the host supports

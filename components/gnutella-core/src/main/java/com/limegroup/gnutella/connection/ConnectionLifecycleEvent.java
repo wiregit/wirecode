@@ -2,24 +2,14 @@ package com.limegroup.gnutella.connection;
 
 import java.util.EventObject;
 
+import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
+
 public class ConnectionLifecycleEvent extends EventObject {
     
-    /** Defines the various events during connection. */
-    public static enum EventType {
-        CONNECTING, 
-        CONNECTED, 
-        DISCONNECTED, 
-        NO_INTERNET, 
-        CONNECTION_INITIALIZING, 
-        CONNECTION_INITIALIZED, 
-        CONNECTION_CLOSED,
-        CONNECTION_CAPABILITIES;
-    }
-    
     private final RoutedConnection connection;
-    private final EventType type;
+    private final ConnectionLifeCycleEventType type;
     
-    public ConnectionLifecycleEvent(Object source, EventType type, RoutedConnection c) {
+    public ConnectionLifecycleEvent(Object source, ConnectionLifeCycleEventType type, RoutedConnection c) {
         super(source);
         this.connection = c;
         this.type = type;
@@ -31,11 +21,11 @@ public class ConnectionLifecycleEvent extends EventObject {
      * ADDRESS_CHANGED events.
      * 
      */
-    public ConnectionLifecycleEvent(Object source, EventType type) {
+    public ConnectionLifecycleEvent(Object source, ConnectionLifeCycleEventType type) {
         this(source, type, null);
     }
 
-    public EventType getType() {
+    public ConnectionLifeCycleEventType getType() {
         return type;
     }
 
@@ -44,35 +34,35 @@ public class ConnectionLifecycleEvent extends EventObject {
     }
 
     public boolean isConnectingEvent() {
-        return (type.equals(EventType.CONNECTING)); 
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTING)); 
     }
     
     public boolean isConnectedEvent() {
-        return (type.equals(EventType.CONNECTED));
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTED));
     }
     
     public boolean isDisconnectedEvent() {
-        return (type.equals(EventType.DISCONNECTED));
+        return (type.equals(ConnectionLifeCycleEventType.DISCONNECTED));
     }
     
     public boolean isNoInternetEvent() {
-        return (type.equals(EventType.NO_INTERNET));
+        return (type.equals(ConnectionLifeCycleEventType.NO_INTERNET));
     }
     
     public boolean isConnectionInitializingEvent() {
-        return (type.equals(EventType.CONNECTION_INITIALIZING));
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTION_INITIALIZING));
     }
     
     public boolean isConnectionClosedEvent() {
-        return (type.equals(EventType.CONNECTION_CLOSED));
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTION_CLOSED));
     }
     
     public boolean isConnectionInitializedEvent() {
-        return (type.equals(EventType.CONNECTION_INITIALIZED));
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTION_INITIALIZED));
     }
     
     public boolean isConnectionCapabilitiesEvent() {
-        return (type.equals(EventType.CONNECTION_CAPABILITIES));
+        return (type.equals(ConnectionLifeCycleEventType.CONNECTION_CAPABILITIES));
     }
     
     @Override

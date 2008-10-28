@@ -2,6 +2,9 @@ package org.limewire.ui.swing.search;
 
 import java.util.List;
 
+import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
+import org.limewire.core.api.connection.ConnectionLifeCycleListener;
+import org.limewire.core.api.connection.ConnectionManager;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.search.Search;
@@ -24,18 +27,21 @@ class SearchHandlerImpl implements SearchHandler {
     private final SearchNavigator searchNavigator;
     private final SearchResultsModelFactory searchResultsModelFactory;
     private final LifeCycleManager lifeCycleManager;
+    private final ConnectionManager connectionManager;
     
     @Inject
     SearchHandlerImpl(SearchFactory searchFactory,
             SearchResultsPanelFactory panelFactory,
             SearchNavigator searchNavigator,
             SearchResultsModelFactory searchResultsModelFactory,
-            LifeCycleManager lifeCycleManager) {
+            LifeCycleManager lifeCycleManager, 
+            ConnectionManager connectionManager) {
         this.searchNavigator = searchNavigator;
         this.searchFactory = searchFactory;
         this.panelFactory = panelFactory;
         this.searchResultsModelFactory = searchResultsModelFactory;
         this.lifeCycleManager = lifeCycleManager;
+        this.connectionManager = connectionManager;
     }
 
     @Override
@@ -103,24 +109,47 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
+        //prevent search from starting until lifecycle manager completes loading
         if(lifeCycleManager.isStarted()) {
             search.start();
         } else {
-             searchPanel.setStartingLimeWire(true);
+             searchPanel.setLifeCycleComplete(false);
              lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
                  final EventListener<LifeCycleEvent> eventListener = this;
                  public void handleEvent(LifeCycleEvent event) {
                      if(event == LifeCycleEvent.STARTED) {
                          SwingUtils.invokeLater(new Runnable() {
                              public void run() {
-                                 searchPanel.setStartingLimeWire(false);
+                                 searchPanel.setLifeCycleComplete(true);
                                  search.start();
-                                 lifeCycleManager.removeListener(eventListener);
+                           
                              }
                          });
+                         lifeCycleManager.removeListener(eventListener);
                      }
                  }
              });   
+        }
+       
+        //display search warning message until fully connected to limewire.
+        if(!connectionManager.isConnected() || !connectionManager.isFullyConnected()) {
+            searchPanel.setFullyConnected(false);
+            connectionManager.addEventListener( new ConnectionLifeCycleListener() {
+               private final ConnectionLifeCycleListener connectionLifecycleListener = this;
+               @Override
+                public void handleEvent(ConnectionLifeCycleEventType eventType) {
+                   if(eventType == ConnectionLifeCycleEventType.CONNECTED) {
+                       if(connectionManager.isFullyConnected()) {
+                           SwingUtils.invokeLater(new Runnable() {
+                               public void run() {
+                                   searchPanel.setFullyConnected(true);
+                               }
+                           });
+                           connectionManager.removeEventListener(connectionLifecycleListener);
+                       }
+                   }
+                } 
+            });
         }
     }
 }
