@@ -237,7 +237,9 @@ public class DownloadWorker {
     private final SocketsManager socketsManager;
     private final TLSManager TLSManager;
 
-    protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDesc rfd,
+    private final RemoteFileDescContext rfdContext;
+
+    protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDescContext rfdContext,
                              VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
                              ScheduledExecutorService backgroundExecutor,
                              ScheduledExecutorService nioExecutor,
@@ -250,7 +252,8 @@ public class DownloadWorker {
         this.pushDownloadManager = pushDownloadManager;
         this.socketsManager = socketsManager;
         _manager = manager;
-        _rfd = rfd;
+        _rfd = rfdContext.getRemoteFileDesc();
+        this.rfdContext = rfdContext;
         _commonOutFile = vf;
         this.statsTracker = statsTracker;
         this.TLSManager = TLSManager;
@@ -384,14 +387,14 @@ public class DownloadWorker {
      * Handles a failure of an RFD.
      */
     private void handleRFDFailure() {
-        _rfd.incrementFailedCount();
-        LOG.debug("handling rfd failure for "+_rfd+" with count now "+_rfd.getFailedCount());
+        rfdContext.incrementFailedCount();
+        LOG.debug("handling rfd failure for "+_rfd+" with count now "+ rfdContext.getFailedCount());
         // if this RFD had a failure, try it again.
-        if (_rfd.getFailedCount() < 2) {
+        if (rfdContext.getFailedCount() < 2) {
             LOG.debug("will try again in a minute");
             // set retry after, wait a little before retrying this RFD
-            _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-            _manager.addRFD(_rfd);
+            rfdContext.setRetryAfter(FAILED_RETRY_AFTER);
+            _manager.addToRanker(rfdContext);
         } else
             // tried the location twice -- it really is bad
             _manager.informMesh(_rfd, false);
@@ -458,7 +461,7 @@ public class DownloadWorker {
                 @Override
                 protected void handleState(boolean success) {
                     if (success) {
-                        _rfd.resetFailedCount();
+                        rfdContext.resetFailedCount();
                     } else {
                         _manager.workerFailed(DownloadWorker.this);
                     }
@@ -483,7 +486,7 @@ public class DownloadWorker {
                                                             // http11
                                                             // _activeWorkers to
                                                             // files
-                                _manager.addRFD(_rfd);
+                                _manager.addToRanker(rfdContext);
                         }
                     }
                 }
@@ -548,7 +551,7 @@ public class DownloadWorker {
         ConnectionStatus status = _downloader.parseThexResponseHeaders();
         if (!status.isConnected()) {
             // retry this RFD without THEX, since that's why it failed.
-            _rfd.setTHEXFailed();
+            rfdContext.setTHEXFailed();
             incrementState(status);
         } else {
             _manager.removeQueuedWorker(this);
@@ -669,7 +672,7 @@ public class DownloadWorker {
 
         // this rfd may still be useful remember it
         if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
-            _manager.addRFD(_rfd);
+            _manager.addToRanker(rfdContext);
             finishWorker();
             return;
         }
@@ -954,12 +957,12 @@ public class DownloadWorker {
         }
 
         // did not throw exception? OK. we are downloading
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
 
         synchronized (_manager) {
             if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
                 LOG.trace("Stopped in assignAndRequest");
-                _manager.addRFD(_rfd);
+                _manager.addToRanker(rfdContext);
                 return ConnectionStatus.getNoData();
             }
 
@@ -1074,8 +1077,7 @@ public class DownloadWorker {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
             try {
-                IntervalSet availableRanges = _downloader.getRemoteFileDesc()
-                        .getAvailableRanges();
+                IntervalSet availableRanges = _downloader.getContext().getAvailableRanges();
 
                 if (_currentState.isHttp11()) {
                     interval = _commonOutFile.leaseWhite(availableRanges,
@@ -1343,7 +1345,7 @@ public class DownloadWorker {
      * download
      */
     private ConnectionStatus handleNoMoreDownloaders() {
-        _manager.addRFD(_rfd);
+        _manager.addToRanker(rfdContext);
         return ConnectionStatus.getNoData();
     }
 
@@ -1352,15 +1354,15 @@ public class DownloadWorker {
      */
     private ConnectionStatus handleNoRanges() {
         // forget the ranges we are pretending uploader is busy.
-        _rfd.setAvailableRanges(null);
+        rfdContext.setAvailableRanges(null);
 
         // if this RFD did not already give us a retry-after header
         // then set one for it.
-        if (!_rfd.isBusy())
-            _rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
+        if (!rfdContext.isBusy())
+            rfdContext.setRetryAfter(NO_RANGES_RETRY_AFTER);
 
-        _rfd.resetFailedCount();
-        _manager.addRFD(_rfd);
+        rfdContext.resetFailedCount();
+        _manager.addToRanker(rfdContext);
 
         return ConnectionStatus.getNoFile();
     }
@@ -1368,19 +1370,19 @@ public class DownloadWorker {
     private ConnectionStatus handleTryAgainLater() {
         // if this RFD did not already give us a retry-after header
         // then set one for it.
-        if (!_rfd.isBusy()) {
-            _rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
+        if (!rfdContext.isBusy()) {
+            rfdContext.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
         }
 
         // if we already have downloads going, then raise the
         // retry-after if it was less than the appropriate amount
         if (!_manager.getActiveWorkers().isEmpty()
-                && _rfd.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
-            _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
+                && rfdContext.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
+            rfdContext.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
 
-        _manager.addRFD(_rfd);// try this rfd later
+        _manager.addToRanker(rfdContext);// try this rfd later
 
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
         return ConnectionStatus.getNoFile();
     }
 
@@ -1388,7 +1390,7 @@ public class DownloadWorker {
      * The ranges exist in the file, but the remote host does not have them
      */
     private ConnectionStatus handleRangeNotAvailable() {
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
         _manager.informMesh(_rfd, true);
         // no need to add to files or busy we keep iterating
         return ConnectionStatus.getPartialData();
@@ -1412,7 +1414,7 @@ public class DownloadWorker {
                                                             // to stop.
                 _manager.setState(DownloadStatus.REMOTE_QUEUED);
             }
-            _rfd.resetFailedCount();
+            rfdContext.resetFailedCount();
             return ConnectionStatus.getQueued(position, pollTime);
         }
     }
@@ -1578,7 +1580,7 @@ public class DownloadWorker {
         @Override
         public void handleConnect(Socket socket) {
             // LOG.debug(_rfd + " -- Handling connect from PushConnector");
-            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
@@ -1660,7 +1662,7 @@ public class DownloadWorker {
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
 
-            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP(); // already connected, timeout doesn't

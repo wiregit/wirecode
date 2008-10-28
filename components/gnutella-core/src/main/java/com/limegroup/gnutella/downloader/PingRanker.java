@@ -37,14 +37,14 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
 
     private static final Log LOG = LogFactory.getLog(PingRanker.class);
     
-    private static final Comparator<RemoteFileDesc> RFD_COMPARATOR = new RFDComparator();    
-    private static final Comparator<RemoteFileDesc> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
+    private static final Comparator<RemoteFileDescContext> RFD_COMPARATOR = new RFDComparator();    
+    private static final Comparator<RemoteFileDescContext> ALT_DEPRIORITIZER = new RFDAltDeprioritizer();
     
     
     /**
      * new hosts (as RFDs) that we've learned about
      */
-    private Set<RemoteFileDesc> newHosts;
+    private Set<RemoteFileDescContext> newHosts;
     
     /**
      * Mapping IpPort -> RFD to which we have sent pings.
@@ -52,18 +52,18 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
      * RFD.  Used to check whether we receive a pong from someone we have sent
      * a ping to.
      */
-    private TreeMap<IpPort, RemoteFileDesc> pingedHosts;
+    private TreeMap<IpPort, RemoteFileDescContext> pingedHosts;
     
     /**
      * A set containing the unique remote file locations that we have pinged.  It
      * differs from pingedHosts because it contains only RemoteFileDesc objects 
      */
-    private Set<RemoteFileDesc> testedLocations;
+    private Set<RemoteFileDescContext> testedLocations;
     
     /**
      * RFDs that have responded to our pings.
      */
-    private TreeSet<RemoteFileDesc> verifiedHosts;
+    private TreeSet<RemoteFileDescContext> verifiedHosts;
     
     /**
      * The urn to use to create pings
@@ -96,19 +96,19 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         this.udpPinger = udpPinger;
         this.messageRouter = messageRouter;
         this.remoteFileDescFactory = remoteFileDescFactory;
-        pingedHosts = new TreeMap<IpPort, RemoteFileDesc>(IpPort.COMPARATOR);
-        testedLocations = new HashSet<RemoteFileDesc>();
-        newHosts = new HashSet<RemoteFileDesc>();
-        verifiedHosts = new TreeSet<RemoteFileDesc>(RFD_COMPARATOR);
+        pingedHosts = new TreeMap<IpPort, RemoteFileDescContext>(IpPort.COMPARATOR);
+        testedLocations = new HashSet<RemoteFileDescContext>();
+        newHosts = new HashSet<RemoteFileDescContext>();
+        verifiedHosts = new TreeSet<RemoteFileDescContext>(RFD_COMPARATOR);
     }
     
     @Override
-    public synchronized boolean addToPool(Collection<? extends RemoteFileDesc> c)  {
-        List<? extends RemoteFileDesc> l;
+    public synchronized boolean addToPool(Collection<? extends RemoteFileDescContext> c)  {
+        List<? extends RemoteFileDescContext> l;
         if (c instanceof List)
-            l = (List<? extends RemoteFileDesc>)c;
+            l = (List<? extends RemoteFileDescContext>)c;
         else
-            l = new ArrayList<RemoteFileDesc>(c);
+            l = new ArrayList<RemoteFileDescContext>(c);
         Collections.sort(l, ALT_DEPRIORITIZER);
         return addInternal(l);
     }
@@ -116,9 +116,9 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     /**
      * adds the collection of hosts to to the internal structures
      */
-    private boolean addInternal(Collection<? extends RemoteFileDesc> c) {
+    private boolean addInternal(Collection<? extends RemoteFileDescContext> c) {
         boolean ret = false;
-        for(RemoteFileDesc rfd : c) { 
+        for(RemoteFileDescContext rfd : c) { 
             if (addInternal(rfd))
                 ret = true;
         }
@@ -128,13 +128,13 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     @Override
-    public synchronized boolean addToPool(RemoteFileDesc host){
+    public synchronized boolean addToPool(RemoteFileDescContext host){
         boolean ret = addInternal(host);
         pingNewHosts();
         return ret;
     }
     
-    private boolean addInternal(RemoteFileDesc host) {
+    private boolean addInternal(RemoteFileDescContext host) {
         // initialize the sha1 if we don't have one
         if (sha1 == null) {
             if( host.getSHA1Urn() != null)
@@ -165,24 +165,24 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         
         // initialize the guid if we don't have one
         if (myGUID == null && meshHandler != null) {
-            myGUID = new GUID(GUID.makeGuid());
+            myGUID = new GUID();
             messageRouter.registerMessageListener(myGUID.bytes(),this);
         }
         
         return ret;
     }
     
-    private boolean knowsAboutHost(RemoteFileDesc host) {
+    private boolean knowsAboutHost(RemoteFileDescContext host) {
         return newHosts.contains(host) || 
             verifiedHosts.contains(host) || 
             testedLocations.contains(host);
     }
     
     @Override
-    public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
+    public synchronized RemoteFileDescContext getBest() throws NoSuchElementException {
         if (!hasMore())
             return null;
-        RemoteFileDesc ret;
+        RemoteFileDescContext ret;
         
         // try a verified host
         if (!verifiedHosts.isEmpty()){
@@ -193,13 +193,13 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         else {
             LOG.debug("getting a non-verified host");
             // use the legacy ranking logic to select a non-verified host
-            Iterator<RemoteFileDesc> dual =
-                new DualIterator<RemoteFileDesc>(testedLocations.iterator(),newHosts.iterator());
+            Iterator<RemoteFileDescContext> dual =
+                new DualIterator<RemoteFileDescContext>(testedLocations.iterator(),newHosts.iterator());
             ret = LegacyRanker.getBest(dual);
             newHosts.remove(ret);
             testedLocations.remove(ret);
-            if (ret.needsPush()) {
-                for(IpPort ipp : ret.getPushProxies())
+            if (ret.getRemoteFileDesc().needsPush()) {
+                for(IpPort ipp : ret.getRemoteFileDesc().getPushProxies())
                     pingedHosts.remove(ipp);
             } else
                 pingedHosts.remove(ret);
@@ -208,7 +208,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         pingNewHosts();
         
         if (LOG.isDebugEnabled())
-            LOG.debug("the best host we came up with is "+ret+" "+ret.getPushAddr());
+            LOG.debug("the best host we came up with is "+ret+" "+ret.getRemoteFileDesc().getPushAddr());
         return ret;
     }
     
@@ -239,22 +239,23 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         
         // prepare a batch of hosts to ping
         int batch = DownloadSettings.PING_BATCH.getValue();
-        List<RemoteFileDesc> toSend = new ArrayList<RemoteFileDesc>(batch);
+        List<IpPort> toSend = new ArrayList<IpPort>(batch);
         int sent = 0;
-        for (Iterator<RemoteFileDesc> iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
-            RemoteFileDesc rfd = iter.next();
-            if (rfd.isBusy(now))
+        for (Iterator<RemoteFileDescContext> iter = newHosts.iterator(); iter.hasNext() && sent < batch;) {
+            RemoteFileDescContext rfdContext = iter.next();
+            RemoteFileDesc rfd = rfdContext.getRemoteFileDesc();
+            if (rfdContext.isBusy(now))
                 continue;
             iter.remove();
             
             if (rfd.needsPush()) {
-                if (rfd.getPushProxies().size() > 0 && rfd.getSHA1Urn() != null)
-                    pingProxies(rfd);
+                if (rfd.getPushProxies().size() > 0 && rfdContext.getSHA1Urn() != null)
+                    pingProxies(rfdContext);
             } else {
-                pingedHosts.put(rfd,rfd);
+                pingedHosts.put(rfd,rfdContext);
                 toSend.add(rfd);
             }
-            testedLocations.add(rfd);
+            testedLocations.add(rfdContext);
             sent++;
         }
         
@@ -271,14 +272,14 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     
     
     @Override
-    protected Collection<RemoteFileDesc> getPotentiallyBusyHosts() {
+    protected Collection<RemoteFileDescContext> getPotentiallyBusyHosts() {
         return newHosts;
     }
     
     /**
      * schedules a push ping to each proxy of the given host
      */
-    private void pingProxies(RemoteFileDesc rfd) {
+    private void pingProxies(RemoteFileDescContext rfd) {
         if (networkManager.acceptedIncomingConnection() || 
                 (networkManager.canDoFWT() && rfd.supportsFWTransfer())) {
             HeadPing pushPing = 
@@ -318,8 +319,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     public void processMessage(Message m, ReplyHandler handler) {
         
         MeshHandler mesh;
-        RemoteFileDesc rfd;
-        Collection<RemoteFileDesc> alts = null;
+        RemoteFileDescContext rfd;
+        Collection<RemoteFileDescContext> alts = null;
         // this -> meshHandler NOT ok
         synchronized(this) {
             if (!running)
@@ -417,8 +418,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     @Override
-    public synchronized Collection<RemoteFileDesc> getShareableHosts(){
-        List<RemoteFileDesc>  ret = new ArrayList<RemoteFileDesc> (verifiedHosts.size()+newHosts.size()+testedLocations.size());
+    public synchronized Collection<RemoteFileDescContext> getShareableHosts(){
+        List<RemoteFileDescContext>  ret = new ArrayList<RemoteFileDescContext> (verifiedHosts.size()+newHosts.size()+testedLocations.size());
         ret.addAll(verifiedHosts);
         ret.addAll(newHosts);
         ret.addAll(testedLocations);
@@ -433,8 +434,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     /**
      * class that actually does the preferencing of RFDs
      */
-    private static final class RFDComparator implements Comparator<RemoteFileDesc> {
-        public int compare(RemoteFileDesc pongA, RemoteFileDesc pongB) {
+    private static final class RFDComparator implements Comparator<RemoteFileDescContext> {
+        public int compare(RemoteFileDescContext pongA, RemoteFileDescContext pongB) {
             // Multicasts are best
             if (pongA.isReplyToMulticast() != pongB.isReplyToMulticast()) {
                 if (pongA.isReplyToMulticast())
@@ -474,8 +475,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
      * a ranker that deprioritizes RFDs from altlocs, used to make sure
      * we ping the hosts that actually returned results first
      */
-    private static final class RFDAltDeprioritizer implements Comparator<RemoteFileDesc>{
-        public int compare(RemoteFileDesc rfd1, RemoteFileDesc rfd2) {
+    private static final class RFDAltDeprioritizer implements Comparator<RemoteFileDescContext>{
+        public int compare(RemoteFileDescContext rfd1, RemoteFileDescContext rfd2) {
             if (rfd1.isFromAlternateLocation() != rfd2.isFromAlternateLocation()) {
                 if (rfd1.isFromAlternateLocation())
                     return 1;

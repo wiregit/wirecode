@@ -2,8 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Collection;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-
 /**
  * A class that ranks sources for a download. 
  * 
@@ -17,25 +15,25 @@ public abstract class AbstractSourceRanker implements SourceRanker {
      */
     protected MeshHandler meshHandler;
 
-    public boolean addToPool(Collection<? extends RemoteFileDesc> hosts) {
+    public boolean addToPool(Collection<? extends RemoteFileDescContext> hosts) {
         boolean ret = false;
-        for(RemoteFileDesc host : hosts) {
+        for(RemoteFileDescContext host : hosts) {
             if (addToPool(host))
                 ret = true;
         }
         return ret;
     }
     
-    public abstract boolean addToPool(RemoteFileDesc host);
+    public abstract boolean addToPool(RemoteFileDescContext host);
 	
     public abstract boolean hasMore();
     
-    public abstract RemoteFileDesc getBest();
+    public abstract RemoteFileDescContext getBest();
     
     /**
      * @return the collection of hosts that can be shared with other rankers
      */
-    public abstract Collection<RemoteFileDesc> getShareableHosts();
+    public abstract Collection<RemoteFileDescContext> getShareableHosts();
     
     public abstract int getNumKnownHosts();
     
@@ -46,7 +44,7 @@ public abstract class AbstractSourceRanker implements SourceRanker {
     public synchronized int getNumBusyHosts() {
         int ret = 0;
         long now = System.currentTimeMillis();
-        for(RemoteFileDesc rfd : getPotentiallyBusyHosts()) {
+        for(RemoteFileDescContext rfd : getPotentiallyBusyHosts()) {
             if (rfd.isBusy(now))
                 ret++;
         }
@@ -60,7 +58,7 @@ public abstract class AbstractSourceRanker implements SourceRanker {
         // waitTime is in seconds
         int waitTime = Integer.MAX_VALUE;
         long now = System.currentTimeMillis();
-        for(RemoteFileDesc rfd : getPotentiallyBusyHosts()) {
+        for(RemoteFileDescContext rfd : getPotentiallyBusyHosts()) {
             if (!rfd.isBusy(now))
                 continue;
             waitTime = Math.min(waitTime, rfd.getWaitTime(now));
@@ -70,7 +68,7 @@ public abstract class AbstractSourceRanker implements SourceRanker {
         return (waitTime*1000);
     }
     
-    protected abstract Collection<RemoteFileDesc> getPotentiallyBusyHosts();
+    protected abstract Collection<RemoteFileDescContext> getPotentiallyBusyHosts();
     
     public synchronized void stop() {
         clearState();

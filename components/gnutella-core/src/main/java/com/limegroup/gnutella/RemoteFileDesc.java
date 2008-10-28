@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
 
 import com.limegroup.gnutella.downloader.DownloadStatsTracker;
@@ -26,75 +25,15 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     public void setSerializeProxies();
 
     /**
-     * Returns true if this is a partial source
-     */
-    public boolean isPartialSource();
-
-    /**
      * @return whether this rfd points to myself.
      */
     public boolean isMe(byte[] myClientGUID);
-
-    /**
-     * Accessor for the available ranges.
-     */
-    public IntervalSet getAvailableRanges();
-
-    /**
-     * Mutator for the available ranges.
-     */
-    public void setAvailableRanges(IntervalSet availableRanges);
-
-    /**
-     * Returns the current failed count.
-     */
-    public int getFailedCount();
-
-    /**
-     * Increments the failed count by one.
-     */
-    public void incrementFailedCount();
-
-    /**
-     * Resets the failed count back to zero.
-     */
-    public void resetFailedCount();
 
     /**
      * Determines whether or not this RemoteFileDesc was created
      * from an alternate location.
      */
     public boolean isFromAlternateLocation();
-
-    /**
-     * @return true if this host is still busy and should not be retried
-     */
-    public boolean isBusy();
-
-    public boolean isBusy(long now);
-
-    /**
-     * @return time to wait until this host will be ready to be retried
-     * in seconds
-     */
-    public int getWaitTime(long now);
-
-    /**
-     * Mutator for _earliestRetryTime. 
-     * @param seconds number of seconds to wait before retrying
-     */
-    public void setRetryAfter(int seconds);
-
-    /**
-     * @return Returns the _THEXFailed.
-     */
-    public boolean hasTHEXFailed();
-
-    /**
-     * Having THEX with this host is no good. We can get our THEX from anybody,
-     * so we won't bother again. 
-     */
-    public void setTHEXFailed();
 
     /**
      * Sets this RFD as downloading.
@@ -153,10 +92,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
      * @return the push address.
      */
     public PushEndpoint getPushAddr();
-
-    public void setQueueStatus(int status);
-
-    public int getQueueStatus();
 
     public void setSpamRating(float rating);
 

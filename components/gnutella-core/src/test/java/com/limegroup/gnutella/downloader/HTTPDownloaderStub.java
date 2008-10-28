@@ -26,7 +26,7 @@ import com.limegroup.gnutella.tigertree.ThexReaderFactory;
  */
 public class HTTPDownloaderStub extends HTTPDownloader {
 
-    public HTTPDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
+    public HTTPDownloaderStub(RemoteFileDescContext rfd, VerifyingFile incompleteFile,
             NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
             DownloadManager downloadManager, CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,

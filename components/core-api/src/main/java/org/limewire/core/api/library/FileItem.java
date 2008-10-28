@@ -12,8 +12,14 @@ public interface FileItem {
         IMAGE, TITLE, AUTHOR, ALBUM, LENGTH, GENRE, BITRATE, TRACK, SAMPLE_RATE, YEAR, RATING, COMMENTS, HEIGHT, MISCELLANEOUS
     }
     
+    /**
+     * @return the name without the extension
+     */
     String getName();
     
+    /**
+     * @return the full file name including extension
+     */
     String getFileName(); 
     
     long getSize();

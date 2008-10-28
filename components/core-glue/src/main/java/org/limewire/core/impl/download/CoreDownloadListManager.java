@@ -240,9 +240,6 @@ public class CoreDownloadListManager implements DownloadListManager {
         RemoteFileDesc sha1RFD = null;
         for(int i = 0; i < rfds.length; i++) {
             RemoteFileDesc next = rfds[i];
-            // this has been moved down until the download is actually started
-            // next.setDownloading(true);
-            next.setRetryAfter(0);
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
             alts.remove(next); // Removes an alt that matches the IpPort of the RFD

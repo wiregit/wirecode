@@ -189,11 +189,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	Endpoint e = new Endpoint("1.2.3.5",12345);
     	RemoteFileDesc other = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(newRFD("incomplete"), e);
     	HTTPDownloaderFactory httpDownloaderFactory =injector.getInstance(HTTPDownloaderFactory.class);
-    	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, other, null, false);
+    	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, new RemoteFileDescContext(other), null, false);
     	
     	ManagedDownloaderImpl md = (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd}, null, null, null, false);
         DownloadWorkerFactory downloadWorkerFactory = injector.getInstance(DownloadWorkerFactory.class);
-        AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, rfd, null);
+        AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, new RemoteFileDescContext(rfd), null);
         worker.setHTTPDownloader(fakeDownloader);
         
         List<DownloadWorker> l = new LinkedList<DownloadWorker>();
@@ -681,9 +681,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.networkInstanceUtils = networkInstanceUtils;
         }
         
-        public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
+        public HTTPDownloader create(Socket socket, RemoteFileDescContext rfdContext,
                 VerifyingFile incompleteFile, boolean inNetwork) {
-            return new AltLocDownloaderStub(rfd, networkManager,
+            return new AltLocDownloaderStub(rfdContext, networkManager,
                     alternateLocationFactory, downloadManager, creationTimeCache.get(),
                     bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
@@ -695,17 +695,17 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	private boolean _stubFalts;
         private final RemoteFileDesc rfd;
         
-    	public AltLocDownloaderStub(RemoteFileDesc rfd,
+    	public AltLocDownloaderStub(RemoteFileDescContext rfdContext,
                                     NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                                     DownloadManager downloadManager, CreationTimeCache creationTimeCache,
                                     BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
                                     PushEndpointFactory pushEndpointFactory,
                                     RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
                                     TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
-            super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
+            super(rfdContext, null, networkManager, alternateLocationFactory, downloadManager,
                     creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
-            this.rfd = rfd;
+            this.rfd = rfdContext.getRemoteFileDesc();
         }
     	
     	public boolean _addedFailed,_addedSuccessfull;
@@ -756,7 +756,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         }
         
         public DownloadWorker create(DownloadWorkerSupport manager,
-                RemoteFileDesc rfd, VerifyingFile vf) {
+                RemoteFileDescContext rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
                     socketsManager, networkManager);
@@ -766,7 +766,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static class AltLocWorkerStub extends DownloadWorkerStub {
         private volatile HTTPDownloader httpDownloader;
         
-        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
+        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDescContext rfd, VerifyingFile vf,
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,

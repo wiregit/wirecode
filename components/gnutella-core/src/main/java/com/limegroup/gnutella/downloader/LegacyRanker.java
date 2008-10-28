@@ -19,14 +19,14 @@ public class LegacyRanker extends AbstractSourceRanker {
     
     private static final Log LOG = LogFactory.getLog(LegacyRanker.class);
 
-	private final Set<RemoteFileDesc> rfds;  
+	private final Set<RemoteFileDescContext> rfds;  
 	
 	public LegacyRanker() {
-		rfds = new HashSet<RemoteFileDesc>();
+		rfds = new HashSet<RemoteFileDescContext>();
 	}
 	
 	@Override
-    public synchronized boolean addToPool(RemoteFileDesc host) {
+    public synchronized boolean addToPool(RemoteFileDescContext host) {
         if (LOG.isDebugEnabled())
             LOG.debug("adding host "+host+" to be ranked");
 		return rfds.add(host);
@@ -44,11 +44,11 @@ public class LegacyRanker extends AbstractSourceRanker {
      * @return the best file/endpoint location 
      */
 	@Override
-    public synchronized RemoteFileDesc getBest() {
+    public synchronized RemoteFileDescContext getBest() {
 		if (!hasMore())
             return null;
         
-        RemoteFileDesc ret = getBest(rfds.iterator());
+        RemoteFileDescContext ret = getBest(rfds.iterator());
         //The best rfd found so far
         boolean removed = rfds.remove(ret);
         assert removed : "unable to remove RFD.";
@@ -59,8 +59,8 @@ public class LegacyRanker extends AbstractSourceRanker {
         return ret;
     }
     
-    static RemoteFileDesc getBest(Iterator<RemoteFileDesc> iter) {
-        RemoteFileDesc ret= iter.next();
+    static RemoteFileDescContext getBest(Iterator<RemoteFileDescContext> iter) {
+        RemoteFileDescContext ret= iter.next();
         
         long now = System.currentTimeMillis();
         //Find max of each (remaining) element, storing in max.
@@ -70,28 +70,32 @@ public class LegacyRanker extends AbstractSourceRanker {
         //3) Find a better quality host (avoid dud locations)
         //4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
-            RemoteFileDesc rfd= iter.next();
+            // define in loop to reflect current selection of ret
+            RemoteFileDesc retRfd = ret.getRemoteFileDesc();
+            
+            RemoteFileDescContext rfdContext= iter.next();
+            RemoteFileDesc rfd = rfdContext.getRemoteFileDesc();
             
             // 1.            
-            if (rfd.isBusy(now))
+            if (rfdContext.isBusy(now))
                 continue;
 
             if (ret.isBusy(now))
-                ret=rfd;
+                ret=rfdContext;
             // 2.
-            else if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
-                ret=rfd;
+            else if (rfd.getSHA1Urn()!=null && retRfd.getSHA1Urn()==null)
+                ret=rfdContext;
             // 3 & 4.
             // (note the use of == so that the comparison is only done
             //  if both rfd & ret either had or didn't have a SHA1)
-            else if ((rfd.getSHA1Urn()==null) == (ret.getSHA1Urn()==null)) {
+            else if ((rfd.getSHA1Urn()==null) == (retRfd.getSHA1Urn()==null)) {
                 // 3.
-                if (rfd.getQuality() > ret.getQuality())
-                    ret=rfd;
-                else if (rfd.getQuality() == ret.getQuality()) {
+                if (rfd.getQuality() > retRfd.getQuality())
+                    ret=rfdContext;
+                else if (rfd.getQuality() == retRfd.getQuality()) {
                     // 4.
-                    if (rfd.getSpeed() > ret.getSpeed())
-                        ret=rfd;
+                    if (rfd.getSpeed() > retRfd.getSpeed())
+                        ret=rfdContext;
                 }            
             }
         }
@@ -105,12 +109,12 @@ public class LegacyRanker extends AbstractSourceRanker {
 	}
 
     @Override
-    public Collection<RemoteFileDesc> getShareableHosts() {
+    public Collection<RemoteFileDescContext> getShareableHosts() {
         return rfds;
     }
     
     @Override
-    protected Collection<RemoteFileDesc> getPotentiallyBusyHosts() {
+    protected Collection<RemoteFileDescContext> getPotentiallyBusyHosts() {
         return rfds;
     }
     

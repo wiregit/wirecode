@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.IntervalSet;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
@@ -87,40 +86,11 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      */
     private final PushEndpoint _pushAddr;
 		
-
-    /**
-     * The list of available ranges.
-     * This is NOT SERIALIZED.
-     */
-    private IntervalSet _availableRanges = null;
-    
-    /**
-     * The last known queue status of the remote host
-     * negative values mean free slots
-     */
-    private int _queueStatus = Integer.MAX_VALUE;
-    
-    /**
-     * The number of times this download has failed while attempting
-     * to transfer data.
-     */
-    private int _failedCount = 0;
-
-    /**
-     * The earliest time to retry this host in milliseconds since 01-01-1970
-     */
-    private volatile long _earliestRetryTime = 0;
-
     /**
      * The cached hash code for this RFD.
      */
     private int _hashCode = 0;
 
-    /**
-     * Whether or not THEX retrieval has failed with this host.
-     */
-    private boolean _THEXFailed = false;
-    
     /**
      * Whether or not this RFD is/was used for downloading.
      */
@@ -227,57 +197,12 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isPartialSource()
-     */
-    public boolean isPartialSource() {
-        return (_availableRanges != null);
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#isMe(byte[])
      */
     public boolean isMe(byte[] myClientGUID) {
         return needsPush() ? 
                 Arrays.equals(_clientGUID, myClientGUID) :
                     networkInstanceUtils.isMe(getAddress(),getPort());
-    }
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getAvailableRanges()
-     */
-    public IntervalSet getAvailableRanges() {
-        try {
-            return _availableRanges.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setAvailableRanges(org.limewire.collection.IntervalSet)
-     */
-    public void setAvailableRanges(IntervalSet availableRanges) {
-        this._availableRanges = availableRanges;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getFailedCount()
-     */
-    public int getFailedCount() {
-        return _failedCount;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#incrementFailedCount()
-     */
-    public void incrementFailedCount() {
-        _failedCount++;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#resetFailedCount()
-     */
-    public void resetFailedCount() {
-        _failedCount = 0;
     }
     
     /* (non-Javadoc)
@@ -288,39 +213,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isBusy()
-     */
-    public boolean isBusy() {
-        return isBusy(System.currentTimeMillis());
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isBusy(long)
-     */
-    public boolean isBusy(long now) {
-        return now < _earliestRetryTime;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getWaitTime(long)
-     */
-    public int getWaitTime(long now) {
-        return (isBusy(now) ? 
-                (int) (_earliestRetryTime - now)/1000 + 1:
-                0 );
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setRetryAfter(int)
-     */
-    public void setRetryAfter(int seconds) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("setting retry after to be [" + seconds + 
-                      "] seconds for " + this);        
-        _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getCreationTime()
      */
     public long getCreationTime() {
@@ -328,20 +220,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
 
 	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#hasTHEXFailed()
-     */
-    public boolean hasTHEXFailed() {
-        return _THEXFailed;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setTHEXFailed()
-     */
-    public void setTHEXFailed() {
-        _THEXFailed = true;
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#setDownloading(boolean)
      */
     public void setDownloading(boolean dl) {
@@ -655,20 +533,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         return null;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setQueueStatus(int)
-     */
-    public void setQueueStatus(int status) {
-        _queueStatus = status;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getQueueStatus()
-     */
-    public int getQueueStatus() {
-        return _queueStatus;
-    }
-
 	public InetSocketAddress getInetSocketAddress() {
 		InetAddress addr = getInetAddress();
 		if (addr != null) {

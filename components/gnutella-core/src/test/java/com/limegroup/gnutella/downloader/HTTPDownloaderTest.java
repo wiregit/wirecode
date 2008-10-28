@@ -336,7 +336,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         File f = new File("sam");
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(length);
         vf.open(f);
-        HTTPDownloader dl = httpDownloaderFactory.create(null, rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(null, new RemoteFileDescContext(rfd), vf, false);
 
         PrivilegedAccessor.setValue(dl, "_amountToRead", new Long(rfd.getSize()));
 
@@ -513,7 +513,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         Socket socket = new NIOSocket("127.0.0.1", server.getLocalPort());
         Socket accept = server.accept();
 
-        HTTPDownloader dl = httpDownloaderFactory.create(socket, rfd, vf, false);
+        HTTPDownloader dl = httpDownloaderFactory.create(socket, new RemoteFileDescContext(rfd), vf, false);
         func.apply(dl);
 
         dl.initializeTCP();
@@ -551,7 +551,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", 1, 1, "file", 1000, new byte[16], 1, false, 1,
                 false, null, UrnHelper.URN_SETS[0], false, false, "TEST", IpPort.EMPTY_SET, -1, 0,
                 false);
-        HTTPDownloader d = httpDownloaderFactory.create(null, rfd, null, false);
+        HTTPDownloader d = httpDownloaderFactory.create(null, new RemoteFileDescContext(rfd), null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;
     }

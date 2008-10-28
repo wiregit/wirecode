@@ -159,7 +159,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     new Comparator<RemoteFileItem>() {
                 @Override
                 public int compare(RemoteFileItem o1, RemoteFileItem o2) {
-                    return o1.getName().compareTo(o2.getName());
+                    return o1.getUrn().compareTo(o2.getUrn());
                 }
             });
             

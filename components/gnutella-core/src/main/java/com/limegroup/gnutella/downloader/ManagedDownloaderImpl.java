@@ -16,6 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -215,6 +217,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  elements of type RemoteFileDesc and URLRemoteFileDesc
      */
     private Set<RemoteFileDesc> cachedRFDs;
+    
+    private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 
 	/**
 	 * The ranker used to select the next host we should connect to
@@ -934,7 +938,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private synchronized void initializeRanker() {
         ranker.setMeshHandler(this);
-        ranker.addToPool(cachedRFDs);
+        ranker.addToPool(getContexts(cachedRFDs));
     }
     
     /**
@@ -1370,7 +1374,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
          //       LOG.trace("added rfd: " + rfd);
         }
         
-        if ( ranker.addToPool(copy) ) {
+        if ( ranker.addToPool(getContexts(copy)) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
             receivedNewSources = true;
@@ -1669,7 +1673,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
         for(RemoteFileDesc rfd : cachedRFDs)
-            rfd.setRetryAfter(0);
+            getContext(rfd).setRetryAfter(0);
 
         if(paused) {
             paused = false;
@@ -2156,11 +2160,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Starts a new Worker thread for the given <code>RemoteFileDesc</code>.
      */
-    private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = downloadWorkerFactory.create(this, rfd, commonOutFile);
+    private void startWorker(final RemoteFileDescContext rfdContext) {
+        DownloadWorker worker = downloadWorkerFactory.create(this, rfdContext, commonOutFile);
         synchronized(this) {
             _workers.add(worker);
-            currentRFDs.add(rfd);
+            currentRFDs.add(rfdContext.getRemoteFileDesc());
         }        
         worker.start();
     }        
@@ -2348,13 +2352,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     // see if we need to update our ranker
                     ranker = getSourceRanker(ranker);
 
-                    RemoteFileDesc rfd = ranker.getBest();
+                    RemoteFileDescContext rfd = ranker.getBest();
 
                     if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
                         if (rfd.isBusy()) {
-                            addRFD(rfd);
+                            addToRanker(rfd);
                         } else {
                             if(LOG.isDebugEnabled())
                                 LOG.debug("Staring worker for RFD: " + rfd);
@@ -2413,7 +2417,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return false;
     }
 	
-    public synchronized void addRFD(RemoteFileDesc rfd) {
+    public synchronized void addToRanker(RemoteFileDescContext rfd) {
         if (ranker != null)
             ranker.addToPool(rfd);
 	}
@@ -3232,5 +3236,26 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return _hashcode;
         }
     
+    }
+
+    private RemoteFileDescContext getContext(RemoteFileDesc rfd) {
+        RemoteFileDescContext context = remoteFileDescToContext.get(rfd);
+        if (context != null) {
+            return context;
+        }
+        RemoteFileDescContext newContext = new RemoteFileDescContext(rfd);
+        context = remoteFileDescToContext.putIfAbsent(rfd, newContext);
+        if (context != null) {
+            return context;
+        }
+        return newContext;
+    }
+    
+    private Collection<RemoteFileDescContext> getContexts(Collection<? extends RemoteFileDesc> rfds) {
+        List<RemoteFileDescContext> contexts = new ArrayList<RemoteFileDescContext>();
+        for (RemoteFileDesc rfd : rfds) {
+            contexts.add(getContext(rfd));
+        }
+        return contexts;
     }
 }

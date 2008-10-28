@@ -47,7 +47,6 @@ import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.nio.statemachine.ReadState;
 import org.limewire.rudp.RUDPSocket;
 import org.limewire.util.OSUtils;
-import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
@@ -130,7 +129,8 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     static volatile int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
-    private RemoteFileDesc _rfd;
+    private final RemoteFileDesc _rfd;
+    private RemoteFileDescContext rfdContext;
 	private long _index;
 	private String _filename; 
 	private byte[] _guid;
@@ -292,7 +292,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
 
-    HTTPDownloader(Socket socket, RemoteFileDesc rfd,
+    HTTPDownloader(Socket socket, RemoteFileDescContext rfdContext,
             VerifyingFile incompleteFile, boolean inNetwork,
             boolean requireSocket, NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory,
@@ -318,17 +318,17 @@ public class HTTPDownloader implements BandwidthTracker {
         this.thexReaderFactory = thexReaderFactory;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
-        _rfd= Objects.nonNull(rfd, "rfd");
+        _rfd = rfdContext.getRemoteFileDesc();
         _socket=socket;
         _incompleteFile=incompleteFile;
-		_filename = rfd.getFileName();
-		_index = rfd.getIndex();
-		_guid = rfd.getClientGUID();
+		_filename = _rfd.getFileName();
+		_index = _rfd.getIndex();
+		_guid = _rfd.getClientGUID();
 		_amountToRead = 0;
-		_port = rfd.getPort();
-		_host = rfd.getAddress();
-		_chatEnabled = rfd.isChatEnabled();
-        _browseEnabled = rfd.isBrowseHostEnabled();
+		_port = _rfd.getPort();
+		_host = _rfd.getAddress();
+		_chatEnabled = _rfd.isChatEnabled();
+        _browseEnabled = _rfd.isBrowseHostEnabled();
         _locationsReceived = new HashSet<RemoteFileDesc>();
         _goodLocs = new HashSet<DirectAltLoc>();
         _badLocs = new HashSet<DirectAltLoc>();
@@ -728,7 +728,7 @@ public class HTTPDownloader implements BandwidthTracker {
             LOG.warn("Failed to create tree", iox);
         }
         if(tree == null)
-            _rfd.setTHEXFailed();
+            rfdContext.setTHEXFailed();
         else
             _thexSucceeded = true;
         
@@ -831,7 +831,7 @@ public class HTTPDownloader implements BandwidthTracker {
             else if (HTTPHeaderName.AVAILABLE_RANGES.is(header))
                 parseAvailableRangesHeader(value, _rfd);
             else if (HTTPHeaderName.RETRY_AFTER.is(header)) 
-                parseRetryAfterHeader(value, _rfd);
+                parseRetryAfterHeader(value, rfdContext);
             else if (HTTPHeaderName.CREATION_TIME.is(header))
                 parseCreationTimeHeader(value, _rfd);
             else if (HTTPHeaderName.FEATURES.is(header))
@@ -855,8 +855,8 @@ public class HTTPDownloader implements BandwidthTracker {
 				throw new NotSharingException();
             else if (code == 416) {//requested range not available
                 //See if the uploader is up to mischief
-                if(_rfd.isPartialSource()) {
-                    for(Range next : _rfd.getAvailableRanges()) {
+                if(rfdContext.isPartialSource()) {
+                    for(Range next : rfdContext.getAvailableRanges()) {
                         if(_requestedInterval.isSubrange(next))
                             throw new ProblemReadingHeaderException("Bad ranges sent");
                     }
@@ -1274,7 +1274,7 @@ public class HTTPDownloader implements BandwidthTracker {
             }
             availableRanges.add(interval);
         }
-        rfd.setAvailableRanges(availableRanges);
+        rfdContext.setAvailableRanges(availableRanges);
     }
 
     /**
@@ -1284,7 +1284,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException if we could not read 
      * the header
      */
-    private static void parseRetryAfterHeader(String str, RemoteFileDesc rfd) 
+    private static void parseRetryAfterHeader(String str, RemoteFileDescContext rfdContext) 
       throws IOException {
         int seconds = 0;
         try {
@@ -1296,7 +1296,7 @@ public class HTTPDownloader implements BandwidthTracker {
         seconds = Math.max(seconds, MIN_RETRY_AFTER);
         // make sure the value is not larger than MAX_RETRY_AFTER seconds
         seconds = Math.min(seconds, MAX_RETRY_AFTER);
-        rfd.setRetryAfter(seconds);
+        rfdContext.setRetryAfter(seconds);
     }
     
     /**
@@ -1747,6 +1747,10 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
     
+    RemoteFileDescContext getContext() { 
+        return rfdContext;
+    }
+    
     /**
      *  returns true if we have think that the server 
      *  supports HTTP1.1 
@@ -1762,7 +1766,7 @@ public class HTTPDownloader implements BandwidthTracker {
     public boolean hasHashTree() {
         return _thexUri != null 
             && _root32 != null
-            && !_rfd.hasTHEXFailed()
+            && !rfdContext.hasTHEXFailed()
             && !_thexSucceeded;
     }
 
