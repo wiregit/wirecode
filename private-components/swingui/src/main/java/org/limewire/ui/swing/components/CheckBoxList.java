@@ -122,7 +122,7 @@ public class CheckBoxList<E> extends BoxPanel {
 
     private CheckBoxCellEditor editor;
 
-    private boolean checkBoxesVisible;
+    private boolean checkBoxesVisible = true;
 
    
     /**
@@ -236,7 +236,6 @@ public class CheckBoxList<E> extends BoxPanel {
      */
     public void update() {
         ((DefaultTableModel)this.checkBoxList.getModel()).fireTableStructureChanged();
-        //repaint();
     }
      
     /**
@@ -267,7 +266,9 @@ public class CheckBoxList<E> extends BoxPanel {
     }
     
     public void setCheckBoxesVisible(boolean visible) {
-        this.checkBoxesVisible = false;
+        this.checkBoxesVisible = visible;
+        this.update();
+        
     }
     
     /**
@@ -709,9 +710,8 @@ public class CheckBoxList<E> extends BoxPanel {
             if(value != null)
                 checkBox.setData((E)value);
 
-            checkBox.setRemovable(removeable);
             checkBox.setHighlight(row == highLightedRow);
-            
+                        
             if (!selectOff && value != null && value.equals(selected)) {
                 this.checkBox.setBackground(UIManager.getColor("List.selectionBackground"));
                 this.checkBox.setForeground(UIManager.getColor("List.selectionForeground"));
@@ -818,7 +818,6 @@ public class CheckBoxList<E> extends BoxPanel {
                 IconDataCheckBox box = ((IconDataCheckBox)editorComponent);
                 
                 box.setData((E)value);   
-                box.setRemovable(removeable);
                 box.setEnabled(isEnabled());
                 
                 if (disabled.contains(value)) {
@@ -847,21 +846,24 @@ public class CheckBoxList<E> extends BoxPanel {
                 }
                 
                 
-                if (selectOff || isSelected) {
+                if (checkBoxesVisible) {
+                
+                    if (selectOff || isSelected) {
 
-                    boolean decheck = unchecked.contains(value);
+                        boolean decheck = unchecked.contains(value);
 
-                    if (decheck) {
-                        unchecked.remove(value);
-                        checked.add((E)value);
-                    }
-                    else {
-                        unchecked.add((E)value);
-                        checked.remove(value);
-                    }
+                        if (decheck) {
+                            unchecked.remove(value);
+                            checked.add((E)value);
+                        }
+                        else {
+                            unchecked.add((E)value);
+                            checked.remove(value);
+                        }
 
-                    if (checkListener != null) {
-                        checkListener.valueChanged(new CheckBoxListCheckChangeEvent(parent, value, decheck));
+                        if (checkListener != null) {
+                            checkListener.valueChanged(new CheckBoxListCheckChangeEvent(parent, value, decheck));
+                        }
                     }
                 }
 
@@ -1037,7 +1039,7 @@ public class CheckBoxList<E> extends BoxPanel {
             label.setBorder(blankBorder);
             checkBox = new JCheckBox("", true);
             checkBox.setVisible(checkBoxesVisible);
-
+            
             button = new DeleteButton();
       
             add(Box.createHorizontalStrut(4));
@@ -1063,6 +1065,9 @@ public class CheckBoxList<E> extends BoxPanel {
         
         public void setData(E obj) {
             this.obj = obj;
+            
+            checkBox.setVisible(checkBoxesVisible);
+            this.setRemovable(removeable);
             
             String text = provider.getText(obj);
 

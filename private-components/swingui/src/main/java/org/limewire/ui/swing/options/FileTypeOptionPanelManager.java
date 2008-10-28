@@ -5,6 +5,7 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,9 +33,14 @@ import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeEven
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeListener;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionListener;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.MediaType;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 
 
@@ -43,6 +49,8 @@ import org.limewire.util.MediaType;
  *  menu and setup manager.  Includes external interface for saving
  *  and reloading settings.  
  */
+
+@Singleton
 @SuppressWarnings("deprecation")
 public final class FileTypeOptionPanelManager {
 
@@ -52,13 +60,7 @@ public final class FileTypeOptionPanelManager {
 
     public final static String LABEL = I18nMarker
             .marktr("Select the file types that you wish to share with LimeWire.  (This does not automatically share all files with these types.  Only files in your Shared Folders will be shared.)");
-    
-    public final static String URL 
-        = "http://www.limewire.org/wiki/index.php?title=Sharing_Extensions";
-    
-    
-    
-    private Component parent = null;
+        
     private JPanel mainContainer;
     
     private CheckBoxList<Category> sidePanel;
@@ -82,13 +84,15 @@ public final class FileTypeOptionPanelManager {
 
     private Category otherKey;
     
-    public FileTypeOptionPanelManager(Component parent) {
-        this();
-        
-        this.parent = parent;
-    }
+
+    private final CategoryIconManager categoryIconManager;
+    private final IconManager iconManager;
     
-    public FileTypeOptionPanelManager() {
+    @Inject
+    public FileTypeOptionPanelManager(CategoryIconManager categoryIconManager, IconManager iconManager) {
+        this.categoryIconManager = categoryIconManager;
+        this.iconManager = iconManager;
+        
         this.mainContainer   = new JPanel(new BorderLayout());
         
         this.mediaLayout  = new CardLayout();
@@ -232,7 +236,6 @@ public final class FileTypeOptionPanelManager {
             CheckBoxList<String> newPanel = new CheckBoxList<String>(total, notSelected, extensionProvider,
                     CheckBoxList.SELECT_FIRST_OFF);
             
-            newPanel.setDisabledTooltip(I18n.tr("To allow selection enable sharing of sensitive types."));
             newPanel.setCheckChangeListener(refreshListener);
             
             if (total.equals(notSelected)) {
@@ -345,7 +348,7 @@ public final class FileTypeOptionPanelManager {
         if (   text.length() == 0 
             || text.length() > MAX_EXT_LENGTH
            ) {                            
-            JOptionPane.showMessageDialog(this.parent, malformedMsg);
+            JOptionPane.showMessageDialog(this.mainContainer, malformedMsg);
             return false;
         }
         
@@ -362,7 +365,7 @@ public final class FileTypeOptionPanelManager {
             CheckBoxList<String> panel = this.panels.get(type); 
             
             if (panel == null) {
-                JOptionPane.showMessageDialog(this.parent, malformedMsg);
+                JOptionPane.showMessageDialog(this.mainContainer, malformedMsg);
                 return false;    
             }
          
@@ -377,7 +380,7 @@ public final class FileTypeOptionPanelManager {
             CheckBoxList<String> panel = this.panels.get(this.otherKey); 
             
             if (panel == null) {
-                JOptionPane.showMessageDialog(this.parent, malformedMsg);
+                JOptionPane.showMessageDialog(this.mainContainer, malformedMsg);
                 return false;    
             }
             
@@ -403,7 +406,7 @@ public final class FileTypeOptionPanelManager {
         }
         
         public void actionPerformed(ActionEvent e) {
-            int answer = JOptionPane.showConfirmDialog(parent, 
+            int answer = JOptionPane.showConfirmDialog(mainContainer, 
                     new Object[] {new MultiLineLabel(I18n
                             .tr("This options clears any extension sharing changes you made and sets LimeWire's extension sharing preferences to the original preferences. Do you wish to continue?"), 300)},
                             I18n.tr("Extension Sharing Settings"), JOptionPane.YES_NO_OPTION);
@@ -496,7 +499,7 @@ public final class FileTypeOptionPanelManager {
     
     // Providers   
     
-    private static class ExtensionProvider implements CheckBoxList.TextProvider<String> {
+    private class ExtensionProvider implements CheckBoxList.TextProvider<String> {
         
         private Set<String> mediaNames;
         
@@ -520,7 +523,7 @@ public final class FileTypeOptionPanelManager {
                 throw new IllegalArgumentException();
             }
             
-            Icon icon = null;// TODO: IconManager.instance().getIconForExtension(obj);
+            Icon icon = iconManager.getIconForExtension(obj);
             
             if (icon == null) {
                 return null;
@@ -542,14 +545,29 @@ public final class FileTypeOptionPanelManager {
                 throw new IllegalArgumentException();
             }
             
-            Icon icon = null; // TODO: IconManager.instance().getIconForExtension(obj);
-            return null; // TODO: ? icon : new GUIUtils.EmptyIcon(obj, 16, 16);
+            Icon icon = iconManager.getIconForExtension(obj);
+            
+            return icon != null ? icon : new Icon() {
+
+                @Override
+                public int getIconHeight() {
+                    return 16;
+                }
+
+                @Override
+                public int getIconWidth() {
+                    return 16;
+                }
+
+                @Override
+                public void paintIcon(Component c, Graphics g, int x, int y) {
+                }};
         }
         
     }
     
     
-    private static class MediaProvider 
+    private class MediaProvider 
         implements CheckBoxList.TextProvider<Category> {
         
         public String getText(Category obj) {
@@ -562,7 +580,7 @@ public final class FileTypeOptionPanelManager {
         }
 
         public Icon getIcon(Category obj) {
-            return null; // TODO: obj.getIcon();
+            return categoryIconManager.getIcon(obj);
         }
     }
         
