@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 
@@ -56,13 +57,21 @@ public interface FileList extends Iterable<FileDesc> {
     void addFolder(File folder);
     
     /**
-     * Adds a file to the list.
+     * Asynchronously adds a file to the list.
+     * The returned Future can be used to retrieve the resulting FileDesc.
+     * If there is an error adding the file, Future.get will throw an {@link ExecutionException}.
+     * If the FileDesc is created but cannot be added to this list, Future.get will
+     * return null.
      */
     Future<FileDesc> add(File file);
     
     /**
-     * Adds the specific file, using the given LimeXMLDocuments as the default
+     * Asynchronously adds the specific file, using the given LimeXMLDocuments as the default
      * documents for that file.
+     * The returned Future can be used to retrieve the resulting FileDesc.
+     * If there is an error adding the file, Future.get will throw an {@link ExecutionException}.
+     * If the FileDesc is created but cannot be added to this list, Future.get will
+     * return null. 
      */
     Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents);
     

@@ -12,11 +12,9 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.net.TLSManager;
-import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -44,8 +42,8 @@ public class MulticastTest extends LimeTestCase {
     
     private  UnicastedHandler U_HANDLER;
         
-	private static final String MP3_NAME =
-        "com/limegroup/gnutella/metadata/mpg2layI_0h_128k_frame54_22050hz_joint_CRCOrig_test33.mp3";
+	private static final String FILE_NAME =
+        "com/limegroup/gnutella/metadata/metadata.mp3";
 
     private MessageRouterImpl messageRouter;
 
@@ -86,13 +84,6 @@ public class MulticastTest extends LimeTestCase {
         String ip = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { ip });
         NetworkSettings.PORT.setValue(TEST_PORT);
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
-        File mp3 = TestUtils.getResourceFile(MP3_NAME);
-        assertTrue(mp3.exists());
-        File result = new File(_sharedDir, "metadata.mp3");
-        FileUtils.copy(mp3, result);
-        assertTrue(result.exists());
-
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
@@ -102,7 +93,6 @@ public class MulticastTest extends LimeTestCase {
 		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-
         ConnectionSettings.MULTICAST_PORT.setValue(9021);
         ConnectionSettings.ALLOW_MULTICAST_LOOPBACK.setValue(true);
 	}
@@ -142,6 +132,8 @@ public class MulticastTest extends LimeTestCase {
         
         FileManagerTestUtils.waitForLoad(fileManager,3000);
         
+        File file = TestUtils.getResourceFile(FILE_NAME);
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get());        
         assertEquals("unexpected number of shared files", 1, fileManager.getGnutellaSharedFileList().size() );
     }
     
@@ -406,8 +398,6 @@ public class MulticastTest extends LimeTestCase {
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "metadata.mp3").exists());
         
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, 
                                new GUID(guid));
