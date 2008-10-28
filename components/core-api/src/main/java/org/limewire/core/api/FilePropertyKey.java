@@ -4,8 +4,8 @@
 package org.limewire.core.api;
 
 public enum FilePropertyKey {
-    TITLE,
-    AUTHOR,
+    TITLE,//for audo files this is the track name -- TODO this is confusing
+    AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
     BITRATE, // ex. 128, 160, 192, 224, 320
     COMMENTS,
     COMPANY, //TODO this property is not being set on items
