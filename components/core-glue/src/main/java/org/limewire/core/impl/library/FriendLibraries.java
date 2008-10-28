@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.collection.MultiIterator;
 import org.limewire.collection.StringTrie;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.PresenceLibrary;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -108,28 +109,45 @@ public class FriendLibraries {
             while(listChanges.next()) {
                 if(listChanges.getType() == ListEvent.INSERT) {
                     RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
-                    LOG.debugf("adding file {0} for {1}, indexing under:", newFile.getName(), presenceId);
-                    addToIndex(newFile, newFile.getName());
-                    StringTokenizer st = new StringTokenizer(newFile.getName());
-                    if(st.countTokens() > 1) {
-                        while (st.hasMoreElements()) {
-                            String word = st.nextToken();
-                            addToIndex(newFile, word);
-                        }
-                    }
+                    index(newFile);
                 }
             }
         }
 
-        private void addToIndex(RemoteFileItem newFile, String word) {
+        private void index(RemoteFileItem newFile) {
+            String fileName = newFile.getName();
+            indexSentence(library.fileIndex, newFile, fileName);
+            
+            for(FilePropertyKey filePropertyKey : FilePropertyKey.getIndexableKeys()) {
+                Object property = newFile.getProperty(filePropertyKey);
+                if(property != null) {
+                    String sentence = property.toString();
+                    indexSentence(library.metaDataIndex, newFile, sentence);
+                }
+            }
+        }
+
+        private void indexSentence(LockableStringTrie<List<RemoteFileItem>> index, RemoteFileItem newFile, String sentence) {
+            LOG.debugf("adding file {0} for {1}, indexing under:", newFile.getName(), presenceId);
+            addToIndex(index, newFile, sentence);
+            StringTokenizer st = new StringTokenizer(sentence);
+            if(st.countTokens() > 1) {
+                while (st.hasMoreElements()) {
+                    String word = st.nextToken();
+                    addToIndex(index, newFile, word);
+                }
+            }
+        }
+
+        private void addToIndex(LockableStringTrie<List<RemoteFileItem>> index, RemoteFileItem newFile, String word) {
             LOG.debugf("\t {0}", word);
             List<RemoteFileItem> filesForWord;            
             library.writeLock();
             try {
-                filesForWord = library.fileIndex.get(word);
+                filesForWord = index.get(word);
                 if (filesForWord == null) {
                     filesForWord = new ArrayList<RemoteFileItem>();
-                    library.fileIndex.add(word, filesForWord);
+                    index.add(word, filesForWord);
                 }
                 filesForWord.add(newFile);
             } finally {
