@@ -186,10 +186,15 @@ public class FriendLibraries {
             library.readLock();
             try {
                 libraryResultsCopy = filterAndCopy(library.fileIndex.getPrefixedBy(s), category);
+                iterators.add(iterator(libraryResultsCopy));
+                if(includeMetaDataMatches) {
+                    libraryResultsCopy = filterAndCopy(library.metaDataIndex.getPrefixedBy(s), category);
+                    iterators.add(iterator(libraryResultsCopy));
+                }
             } finally {
                 library.readUnlock();
             }
-            iterators.add(iterator(libraryResultsCopy));
+           
         }
         return new MultiIterator<RemoteFileItem>(iterators);
     }
