@@ -1,8 +1,12 @@
 package org.limewire.core.impl.library;
 
+import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
+import org.limewire.core.api.library.LibraryFileList;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.FileItem;
@@ -12,10 +16,28 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 
-public class FileListAdapter implements LocalFileList {
+public class FileListAdapter implements LocalFileList, LibraryFileList {
 
     private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
     private final EventList<LocalFileItem> swingEventList = new SwingThreadProxyEventList<LocalFileItem>(eventList);
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public LibraryState getState() {
+        return LibraryState.LOADED;
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+    
     
     @Override
     public EventList<LocalFileItem> getSwingModel() {
@@ -48,5 +70,17 @@ public class FileListAdapter implements LocalFileList {
     @Override
     public int size() {
         return eventList.size();
+    }
+    
+    @Override
+    public boolean contains(File file) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean contains(URN urn) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

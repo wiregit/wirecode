@@ -1,15 +1,18 @@
 package org.limewire.core.impl.library;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
 
@@ -33,13 +36,15 @@ class LibraryManagerImpl implements LibraryManager {
 
     
     @Override
-    public LocalFileList getLibraryManagedList() {
+    public LibraryFileList getLibraryManagedList() {
         return libraryList;
     }
 
     private static class LibraryFileListImpl extends LocalFileListImpl implements LibraryFileList {
         private final ManagedFileList managedList;    
         private final ConcurrentHashMap<File, LocalFileItem> lookup;
+        private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
+        private volatile LibraryState libraryState = LibraryState.LOADING;
         
         LibraryFileListImpl(ManagedFileList managedList, final CoreLocalFileItemFactory coreLocalFileItemFactory) {
             super(new BasicEventList<LocalFileItem>());
@@ -72,12 +77,18 @@ class LibraryManagerImpl implements LibraryManager {
             this.managedList.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
                 @Override
                 public void handleEvent(ManagedListStatusEvent event) {
+                    LibraryState oldState = libraryState;
                     switch(event.getType()) {
                     case LOAD_STARTED:
                         threadSafeList.clear();
                         lookup.clear();
+                        libraryState = LibraryState.LOADING;
+                        break;
+                    case LOAD_COMPLETE:
+                        libraryState = LibraryState.LOADED;
                         break;
                     }
+                    changeSupport.firePropertyChange("state", oldState, libraryState);
                 }
             });
         }
@@ -103,7 +114,24 @@ class LibraryManagerImpl implements LibraryManager {
                 return fileDesc != null && ! (fileDesc instanceof IncompleteFileDesc);
             }
             return false;
+        }
+
+        @Override
+        public void addPropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.addPropertyChangeListener(listener);
+        }
+
+        @Override
+        public LibraryState getState() {
+            return libraryState;
+        }
+
+        @Override
+        public void removePropertyChangeListener(PropertyChangeListener listener) {
+            changeSupport.removePropertyChangeListener(listener);
         }    
+        
+        
     }
     
 

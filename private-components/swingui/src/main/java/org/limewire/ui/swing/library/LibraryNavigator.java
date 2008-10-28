@@ -42,6 +42,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FriendLibrary;
+import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
@@ -126,9 +127,18 @@ public class LibraryNavigator extends JXPanel {
         setLayout(new MigLayout("insets 0, gap 0"));
         add(titleLabel, "growx, alignx left, aligny top,  wrap");
        
+        LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         addNavPanel(new NavPanel(Me.ME,
                 createMyCategories(navigator, myLibraryFactory,
-                        libraryManager.getLibraryManagedList().getSwingModel()), LibraryState.LOADED));
+                        libraryList.getSwingModel()), libraryList.getState()));
+        libraryList.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals("state")) {
+                    updateNavPanelForFriend(Me.ME, (LibraryState)evt.getNewValue());
+                }
+            }
+        });
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override
