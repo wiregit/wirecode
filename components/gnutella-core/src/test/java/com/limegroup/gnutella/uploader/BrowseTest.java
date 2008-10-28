@@ -143,7 +143,7 @@ public class BrowseTest extends LimeTestCase {
             assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
             fileManager.getGnutellaSharedFileList().getReadLock().lock();
             try {
-                for(FileDesc result : fileManager.getGnutellaSharedFileList().iterable()) {
+                for(FileDesc result : fileManager.getGnutellaSharedFileList()) {
                     boolean contained = files.remove(result.getFileName());
                     assertTrue("File is missing in browse response: " + result.getFileName(), contained);
                 }

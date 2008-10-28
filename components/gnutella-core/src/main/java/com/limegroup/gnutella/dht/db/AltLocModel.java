@@ -69,9 +69,10 @@ public class AltLocModel implements StorableModel {
         
         FileList sharedFiles = fileManager.get().getGnutellaSharedFileList();
         synchronized (values) {
-            synchronized(sharedFiles) {
+            sharedFiles.getReadLock().lock();
+            try {
                 // Step One: Add every new FileDesc to the Map
-                for(FileDesc fd : sharedFiles.iterable()) {
+                for(FileDesc fd : sharedFiles) {
                     URN urn = fd.getSHA1Urn();
                     KUID primaryKey = KUIDUtils.toKUID(urn);
                     if (!values.containsKey(primaryKey)) {
@@ -86,6 +87,8 @@ public class AltLocModel implements StorableModel {
                         values.put(primaryKey, new Storable(primaryKey, value));
                     }
                 }
+            } finally {
+                sharedFiles.getReadLock().unlock();
             }
             
             // Step Two: Remove every Storable that is no longer

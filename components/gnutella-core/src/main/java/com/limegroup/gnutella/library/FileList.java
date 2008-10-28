@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -13,7 +14,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A collection of FileDescs.
  */
-public interface FileList {
+public interface FileList extends Iterable<FileDesc> {
 
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt> or
@@ -89,18 +90,21 @@ public interface FileList {
     boolean contains(FileDesc fileDesc);
     
     /**
-     * Returns an iterable that returns iterator().
-     * The returned Iterable is *NOT* thread safe.
+     * Returns an iterator over all FileDescs.
+     * The returned iterator is *NOT* thread safe.
      * You must lock on FileList while using it.
      */
-    Iterable<FileDesc> iterable();
+    Iterator<FileDesc> iterator();
     
     /**
-     * Returns an iterable that is thread-safe, albeit
-     * slower and more inefficient than the non-thread-safe variety.
-     * Only use this if you must iterate in passes.
+     * Returns an iterable that is thread-safe and can
+     * be used over a period of time (iterating through
+     * it piecemeal, with time lapses).  The returned
+     * iterable is much slower and more inefficient than the
+     * default iterator, though, so only use it if absolutely
+     * necessary.
      */
-    Iterable<FileDesc> threadSafeIterable();
+    Iterable<FileDesc> pausableIterator();
     
     /**
      * Returns the number of files in this list. 

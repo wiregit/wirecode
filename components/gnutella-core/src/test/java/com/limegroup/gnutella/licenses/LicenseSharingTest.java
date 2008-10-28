@@ -105,7 +105,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
+	    List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
 	    assertEquals(5, fds.size());
 	    for(FileDesc fd : fds )
 	        assertTrue(fd.toString(), fd.isLicensed());

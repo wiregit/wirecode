@@ -204,26 +204,22 @@ public final class CreationTimeCache {
      * too
      */
     private void pruneTimes(boolean shouldClearURNSetMap) {
-        // if i'm using FM, always grab that lock first and then me.  be quick
-        // about it though :)
-        synchronized (fileManager) {
-            synchronized (this) {
-                Iterator<Map.Entry<URN, Long>> iter = getUrnToTime().entrySet().iterator();
-                while (iter.hasNext()) {
-                    Map.Entry<URN, Long> currEntry = iter.next();
-                    URN currURN = currEntry.getKey();
-                    Long cTime = currEntry.getValue();
-                    
-                    // check to see if file still exists
-                    // NOTE: technically a URN can map to multiple FDs, but I only want
-                    // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                    FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
-                    if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
-                        dirty = true;
-                        iter.remove();
-                        if (shouldClearURNSetMap)
-                            removeURNFromURNSet(currURN, cTime);
-                    }
+        synchronized (this) {
+            Iterator<Map.Entry<URN, Long>> iter = getUrnToTime().entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<URN, Long> currEntry = iter.next();
+                URN currURN = currEntry.getKey();
+                Long cTime = currEntry.getValue();
+                
+                // check to see if file still exists
+                // NOTE: technically a URN can map to multiple FDs, but I only want
+                // to know about one.  getFileDescForUrn prefers FDs over iFDs.
+                FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+                if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
+                    dirty = true;
+                    iter.remove();
+                    if (shouldClearURNSetMap)
+                        removeURNFromURNSet(currURN, cTime);
                 }
             }
         }

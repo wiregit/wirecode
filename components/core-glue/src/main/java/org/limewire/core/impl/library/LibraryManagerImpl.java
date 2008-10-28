@@ -232,7 +232,7 @@ class LibraryManagerImpl implements ShareListManager, LibraryManager {
 
               fileList.getReadLock().lock();
               try {
-                  for(FileDesc fileDesc : fileList.iterable()) {
+                  for(FileDesc fileDesc : fileList) {
                       LocalFileItem newItem = coreLocalFileItemFactory.createCoreLocalFileItem(fileDesc);
                       lookup.put(fileDesc.getFile(), newItem);
                       threadSafeList.add(newItem);

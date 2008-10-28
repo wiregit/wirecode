@@ -2,6 +2,7 @@ package org.limewire.collection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,14 @@ import java.util.Set;
 public class CollectionUtils {
     
     private CollectionUtils() {}
+    
+    public static <T> List<T> listOf(Iterator<T> iterator) {
+        List<T> list = new ArrayList<T>();
+        while(iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
+    }
     
     public static <T> List<T> listOf(Iterable<T> iterable) {
         List<T> list = new ArrayList<T>();
@@ -40,6 +49,23 @@ public class CollectionUtils {
         }
         
         return new ArrayList<T>(c);
+    }
+
+    public static <T> Iterator<T> readOnlyIterator(final Iterator<T> iterator) {
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+            @Override
+            public T next() {
+                return iterator.next();
+            }
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("read only iterator");
+            }
+        };
     }
 
 }

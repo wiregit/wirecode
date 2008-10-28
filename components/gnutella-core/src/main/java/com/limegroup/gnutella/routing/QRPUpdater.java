@@ -147,22 +147,28 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
             }
         }
         FileList gnutella = fileManager.getGnutellaSharedFileList();
-        synchronized(gnutella) {
-            for (FileDesc fd : gnutella.iterable()) {
+        gnutella.getReadLock().lock();
+        try {
+            for (FileDesc fd : gnutella) {
                 queryRouteTable.add(fd.getPath());
             }
+        } finally {
+            gnutella.getReadLock().unlock();
         }
         
         //if partial sharing is allowed, add incomplete file keywords also
         if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() && SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
             FileList incompletes = fileManager.getIncompleteFileList();
-            synchronized(incompletes) {
-                for(FileDesc fd : incompletes.iterable()) {
+            incompletes.getReadLock().lock();
+            try {
+                for(FileDesc fd : incompletes) {
                     IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                     if (ifd.hasUrnsAndPartialData()) {
                         queryRouteTable.add(ifd.getFileName());
                     }
                 }
+            } finally {
+                incompletes.getReadLock().lock();
             }
         }
 

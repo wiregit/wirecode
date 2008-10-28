@@ -655,7 +655,7 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         Map longToUrns = ctCache.getTimeToUrn();
-        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
         for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
             fd.getFile().delete();
@@ -706,7 +706,7 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         
-        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList().iterable());
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
         for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
             fd.getFile().delete();

@@ -20,6 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.InspectableForSize;
@@ -332,13 +333,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             IntSet urnsMatching = urnMap.get(urn);
             if(urnsMatching == null || urnsMatching.size() == 0) {
                 return Collections.emptyList();
+            } else if(urnsMatching.size() == 1) { // Optimal case
+                return Collections.singletonList(files.get(urnsMatching.iterator().next()));
             } else {
-                List<FileDesc> fds = new ArrayList<FileDesc>(urnsMatching.size());
-                Iterator<FileDesc> fdIter = new FileListIterator(this, urnsMatching);
-                while(fdIter.hasNext()) {
-                    fds.add(fdIter.next());
-                }
-                return fds;
+                return CollectionUtils.listOf(new FileListIterator(this, urnsMatching));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -356,12 +354,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Iterable<FileDesc> iterable() {
-        return fileToFileDescMap.values();
+    public Iterator<FileDesc> iterator() {
+        return CollectionUtils.readOnlyIterator(fileToFileDescMap.values().iterator());
     }
     
     @Override
-    public Iterable<FileDesc> threadSafeIterable() {
+    public Iterable<FileDesc> pausableIterator() {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {

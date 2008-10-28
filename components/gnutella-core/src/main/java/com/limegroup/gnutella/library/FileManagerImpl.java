@@ -181,12 +181,15 @@ class FileManagerImpl implements FileManager, Service {
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
                     FileList shareList = getGnutellaSharedFileList();
-                    synchronized(shareList) {
-                        for (FileDesc fd : shareList.iterable()){
+                    shareList.getReadLock().lock();
+                    try {
+                        for (FileDesc fd : shareList){
                             total++;
                             if (parser.evaluate(fd))
                                 matched++;
                         }
+                    } finally {
+                        shareList.getReadLock().unlock();
                     }
                 } catch (IllegalArgumentException badSimpp) {
                     ret.put("error",badSimpp.toString());
@@ -235,7 +238,7 @@ class FileManagerImpl implements FileManager, Service {
             FileList shareList = getGnutellaSharedFileList();
             shareList.getReadLock().lock();
             try {
-                fds = CollectionUtils.listOf(shareList.iterable());
+                fds = CollectionUtils.listOf(shareList);
             } finally {
                 shareList.getReadLock().unlock();
             }

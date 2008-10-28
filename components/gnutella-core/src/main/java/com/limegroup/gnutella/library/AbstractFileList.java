@@ -232,17 +232,12 @@ abstract class AbstractFileList implements FileList {
     }
     
     @Override
-    public Iterable<FileDesc> iterable() {
-        return new Iterable<FileDesc>() {
-            @Override
-            public Iterator<FileDesc> iterator() {
-                return new FileListIterator(AbstractFileList.this, fileDescIndexes);
-            }
-        };
+    public Iterator<FileDesc> iterator() {
+        return new FileListIterator(AbstractFileList.this, fileDescIndexes);
     }
     
     @Override
-    public Iterable<FileDesc> threadSafeIterable() {
+    public Iterable<FileDesc> pausableIterator() {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
@@ -283,9 +278,10 @@ abstract class AbstractFileList implements FileList {
         List<FileDesc> list = new ArrayList<FileDesc>();
         rwLock.readLock().lock();
         try {
-            for(FileDesc fd : iterable()) {
-                if(directory.equals(fd.getFile().getParentFile()))
+            for(FileDesc fd : this) {
+                if(directory.equals(fd.getFile().getParentFile())) {
                     list.add(fd);
+                }
             }
         } finally {
             rwLock.readLock().unlock();

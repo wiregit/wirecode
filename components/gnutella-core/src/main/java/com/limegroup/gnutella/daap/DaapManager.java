@@ -499,9 +499,10 @@ public final class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();    
-        synchronized(sharedFileList) {
-            for(FileDesc fd : sharedFileList.iterable()) {
+        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();
+        sharedFileList.getReadLock().lock();
+        try {
+            for(FileDesc fd : sharedFileList) {
                 String name = fd.getFileName().toLowerCase(Locale.US);
                 boolean audio = isSupportedAudioFormat(name);
                 
@@ -551,6 +552,8 @@ public final class DaapManager {
                     size++;
                 }
             }
+        } finally {
+            sharedFileList.getReadLock().unlock();
         }
         
         // See 1)
