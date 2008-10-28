@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 
 import org.limewire.listener.EventListener;
@@ -57,13 +58,13 @@ public interface FileList extends Iterable<FileDesc> {
     /**
      * Adds a file to the list.
      */
-    void add(File file);
+    Future<FileDesc> add(File file);
     
     /**
      * Adds the specific file, using the given LimeXMLDocuments as the default
      * documents for that file.
      */
-    void add(File file, List<? extends LimeXMLDocument> documents);
+    Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents);
     
     /**
      * Removes the File from this list if there exists a FileDesc wrapper for

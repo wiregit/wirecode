@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -116,27 +120,31 @@ abstract class AbstractFileList implements FileList {
     }
     
     @Override
-    public void add(File file) {
+    public Future<FileDesc> add(File file) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
             saveChange(file, true); // Save early, will RM if it can't become FD.
-            managedList.add(file);
+            return wrapFuture(managedList.add(file));
         } else {
             add(fd);
+            return futureFor(fd);
         }
     }
     
     @Override
-    public void add(File file, List<? extends LimeXMLDocument> documents) {
+    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
             saveChange(file, true); // Save early, will RM if it can't become FD.
-            managedList.add(file, documents);
+            return wrapFuture(managedList.add(file, documents));
         } else {
             add(fd);
+            return futureFor(fd);
         }
     }
     
+    // This is exposed in subclass interfaces -- so it doesn't override
+    // anything here, but subclasses use it.
     public boolean add(FileDesc fileDesc) {
         if(addFileDescImpl(fileDesc)) {
             saveChange(fileDesc.getFile(), true);
@@ -415,6 +423,86 @@ abstract class AbstractFileList implements FileList {
         }
     }
     
+    private Future<FileDesc> wrapFuture(final Future<FileDesc> future) {
+        return new Future<FileDesc>() {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return future.cancel(mayInterruptIfRunning);
+            }
+
+            @Override
+            public FileDesc get() throws InterruptedException, ExecutionException {
+                FileDesc fd = future.get();
+                if(contains(fd)) {
+                    return fd;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
+                    ExecutionException, TimeoutException {
+                FileDesc fd = future.get(timeout, unit);
+                if(contains(fd)) {
+                    return fd;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return future.isCancelled();
+            }
+
+            @Override
+            public boolean isDone() {
+                return future.isDone();
+            }
+        };
+    }
+    
+    private Future<FileDesc> futureFor(final FileDesc fd) {
+        return new Future<FileDesc>() {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public FileDesc get() throws InterruptedException, ExecutionException {
+                if(contains(fd)) {
+                    return fd;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
+                    ExecutionException, TimeoutException {
+                if(contains(fd)) {
+                    return fd;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        };
+    }
+    
+    
+    
     private class ManagedListSynchronizer implements EventListener<FileListChangedEvent> {
         @Override
         public void handleEvent(FileListChangedEvent event) {
@@ -434,6 +522,7 @@ abstract class AbstractFileList implements FileList {
                 remove(event.getFileDesc());
                 break;
             case ADD_FAILED:
+            case CHANGE_FAILED:
                 if(isPending(event.getFile(), event.getFileDesc()) && !contains(event.getFile())) {
                     saveChange(event.getFile(), false);
                 }

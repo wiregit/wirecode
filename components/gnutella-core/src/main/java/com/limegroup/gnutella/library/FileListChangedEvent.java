@@ -6,7 +6,7 @@ import java.io.File;
 public class FileListChangedEvent {
     
     public static enum Type {
-        ADDED, REMOVED, CHANGED, ADD_FAILED,
+        ADDED, REMOVED, CHANGED, ADD_FAILED, CHANGE_FAILED;
     }
     
     private final Type type;

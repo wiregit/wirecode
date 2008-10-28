@@ -24,6 +24,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
@@ -101,7 +102,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
      * will be notified immediately.  Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public void calculateAndCacheUrns(File file, UrnCallback callback) {
+    public Future<Set<URN>> calculateAndCacheUrns(File file, UrnCallback callback) {
         Set<URN> urns;
         synchronized (this) {
             urns = getUrns(file);
@@ -118,11 +119,13 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
                     pendingHashing.put(file, list);
                 }
                 list.add(callback);
-                QUEUE.execute(new Processor(file));
+                return QUEUE.submit(new Processor(file));
             }
         }
-        if (!urns.isEmpty())
-            callback.urnsCalculated(file, urns);
+        
+        assert !urns.isEmpty();
+        callback.urnsCalculated(file, urns);
+        return new SimpleFuture<Set<URN>>(urns);
     }
     
     /**
@@ -354,14 +357,14 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
         }
     }
     
-    private class Processor implements Runnable {
+    private class Processor implements Callable<Set<URN>> {
         private final File file;
         
         Processor(File f) {
             file = f;
         }
         
-        public void run() {
+        public Set<URN> call() {
             Set<URN> urns;
             List<UrnCallback> callbacks;
             
@@ -390,9 +393,11 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
                 // Note that because we already removed this list from the Map,
                 // we don't need to synchronize while iterating over it, because
                 // nothing else can modify it now.
-                for(int i = 0; i < callbacks.size(); i++)
+                for(int i = 0; i < callbacks.size(); i++) {
                     callbacks.get(i).urnsCalculated(file, urns);
+                }
             }
+            return urns;
         }
     }
 

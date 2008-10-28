@@ -14,7 +14,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -23,6 +26,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.listener.EventListener;
@@ -420,12 +424,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     ///////////////////////////////////////////////////////////////
     
-    public void add(File file) {
-        add(file, LimeXMLDocument.EMPTY_LIST);
+    public Future<FileDesc> add(File file) {
+        return add(file, LimeXMLDocument.EMPTY_LIST);
     }    
     
-    public void add(File file, List<? extends LimeXMLDocument> list) {
-        add(file, list, revision.get(), null);
+    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> list) {
+        return add(file, list, revision.get(), null);
     }
     
     /**
@@ -438,16 +442,21 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @param rev - current  version of LimeXMLDocs being used
      * @param oldFileDesc the old FileDesc this is replacing
      */
-    private void add(File file, List<? extends LimeXMLDocument> metadata, int rev,
+    private Future<FileDesc> add(File file, List<? extends LimeXMLDocument> metadata, int rev,
             FileDesc oldFileDesc) {
         LOG.debugf("Attempting to load store or shared file: {0}", file);
+        
+        FileListChangedEvent.Type failEvent = oldFileDesc != null ?
+                FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
 
         // Make sure capitals are resolved properly, etc.
         try {
             file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
-            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file));
-            return;
+            dispatch(new FileListChangedEvent(this, failEvent, file));
+            PendingFuture future = new PendingFuture();
+            future.setException(new AddFailedException(failEvent));
+            return future;
         }
         
         boolean explicitAdd = false;
@@ -458,7 +467,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             
             // Exit if already added.
             if(fileToFileDescMap.containsKey(file)) {
-                return;
+                return new SimpleFuture<FileDesc>(fileToFileDescMap.get(file));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -466,8 +475,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         //make sure a FileDesc can be created from this file
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
-            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file));
-            return;
+            dispatch(new FileListChangedEvent(this, failEvent, file));     
+            PendingFuture future = new PendingFuture();
+            future.setException(new AddFailedException(failEvent));
+            return future;
         }
 
         getLibraryData().addManagedFile(file, explicitAdd);
@@ -488,20 +499,26 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         if(failed) {
-            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file));
+            dispatch(new FileListChangedEvent(this, failEvent, file));
+            PendingFuture future = new PendingFuture();
+            future.setException(new AddFailedException(failEvent));
+            return future;
         } else {
-            urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc));
+            PendingFuture task = new PendingFuture();
+            urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc, task));
+            return task;
         }
     }
     
     /**
      * Constructs a new UrnCallback that will possibly load the file with the given URNs.
+     * @param task 
      */
     private UrnCallback getNewUrnCallback(final File file, final List<? extends LimeXMLDocument> metadata, final int rev, 
-                                final FileDesc oldFileDesc) {
+                                final FileDesc oldFileDesc, final PendingFuture task) {
         return new UrnCallback() {
             public void urnsCalculated(File f, Set<? extends URN> urns) {
-                finishLoadingFileDesc(f, urns, metadata, rev, oldFileDesc);
+                finishLoadingFileDesc(f, urns, metadata, rev, oldFileDesc, task);
             }
 
             
@@ -511,7 +528,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         };
     }
     
-    private void finishLoadingFileDesc(File file, Set<? extends URN> urns, List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc) {
+    private void finishLoadingFileDesc(File file, Set<? extends URN> urns, List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc, PendingFuture task) {
             FileDesc fd = null;
             rwLock.writeLock().lock();
             try {
@@ -530,8 +547,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 rwLock.writeLock().unlock();
             }
             
+            FileListChangedEvent.Type failEvent = oldFileDesc != null ?
+                    FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
+            
             if(fd == null) {
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file));
+                dispatch(new FileListChangedEvent(this, failEvent, file));
+                task.setException(new AddFailedException(failEvent));
                 return;
             }
                 
@@ -553,11 +574,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             }
             
             if(failed) {
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file));
+                dispatch(new FileListChangedEvent(this, failEvent, file));
+                task.setException(new AddFailedException(failEvent));
             } else if(oldFileDesc == null) {
                 dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fd));
+                task.set(fd);
             } else {
                 dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, fd));
+                task.set(fd);
             }
             
             boolean finished = false;
@@ -977,5 +1001,33 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             return f.isDirectory()
                 && isFolderManageable(f, true);
         }        
+    }
+
+    private final static Callable<FileDesc> EMPTY_CALLABLE = new Callable<FileDesc>() {
+        public FileDesc call() { return null; }
+    };
+    
+    /** A future that delegates on another future, occasionally. */
+    private class PendingFuture extends FutureTask<FileDesc> {     
+        public PendingFuture() {
+            super(EMPTY_CALLABLE);
+        }
+        
+        @Override
+        public void run() {
+            // Do nothing -- there is nothing to run.
+        }
+
+        @Override
+        // Raise access so we can set the FD. */
+        public void set(FileDesc v) {
+            super.set(v);
+        }
+
+        @Override
+        // Raise access so we can set the error. */
+        public void setException(Throwable t) {
+            super.setException(t);
+        }
     }
 }

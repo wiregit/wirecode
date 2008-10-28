@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -25,12 +26,12 @@ class IncompleteFileListImpl extends AbstractFileList implements IncompleteFileL
     }
     
     @Override
-    public void add(File file) {
+    public Future<FileDesc> add(File file) {
         throw new UnsupportedOperationException("cannot add from here");
     }
     
     @Override
-    public void add(File file, List<? extends LimeXMLDocument> documents) {
+    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
         throw new UnsupportedOperationException("cannot add from here");
     }
     

@@ -465,8 +465,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.getManagedFileList().remove(file);
-                fileManager.getGnutellaSharedFileList().add(file); // TODO: use reload so it gets re-added to the right list
+                fileManager.getManagedFileList().fileChanged(file, fd.getLimeXMLDocuments());
                 return false;
             }
         }
