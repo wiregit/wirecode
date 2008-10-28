@@ -168,7 +168,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                     }
                 }
             } finally {
-                incompletes.getReadLock().lock();
+                incompletes.getReadLock().unlock();
             }
         }
 
