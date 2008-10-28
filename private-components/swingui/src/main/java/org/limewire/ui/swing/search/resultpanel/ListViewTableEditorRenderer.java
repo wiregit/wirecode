@@ -80,6 +80,7 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Font similarResultsButtonFont;
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
+    @Resource private Icon libraryIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
@@ -404,6 +405,8 @@ implements TableCellEditor, TableCellRenderer {
             return spamIcon;
         } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
             return downloadingIcon;
+        } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
+            return libraryIcon;
         }
         return categoryIconManager.getIcon(vsr.getCategory());
     }
