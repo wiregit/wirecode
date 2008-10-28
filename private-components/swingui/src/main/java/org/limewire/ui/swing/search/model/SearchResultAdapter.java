@@ -47,6 +47,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private boolean visible;
 
     private boolean childrenVisible;
+    
+    private Boolean spamCache;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -211,12 +213,20 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public boolean isSpam() {
-        return coreResults.get(0).isSpam();
+        if (spamCache == null) {
+            spamCache = getSpamBoolean(coreResults.get(0).isSpam());
+        }
+        return spamCache.booleanValue();
+    }
+
+    private Boolean getSpamBoolean(boolean spam) {
+        return spam ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override
     public void setSpam(boolean spam) {
         firePropertyChange("spam", isSpam(), spam);
+        spamCache = getSpamBoolean(spam);
     }
 
     @Override

@@ -35,6 +35,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -142,9 +143,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 }
                 
                 //Push row resizing to the end of the event dispatch queue
-                SwingUtilities.invokeLater(new Runnable() {
+                Runnable runner = new Runnable() {
                     @Override
                     public void run() {
+                        resultsList.setIgnoreRepaints(true);
                         for(int row = 0; row < model.getRowCount(); row++) {
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
@@ -159,8 +161,12 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                                 resultsList.setRowHeight(row, newRowHeight);
                             }
                         }
+                        resultsList.setIgnoreRepaints(false);
+                        resultsList.resizeAndRepaint();
                     }
-                });
+                };
+                
+                SwingUtilities.invokeLater(runner);
             }
         });
         resultsList.setRowHeight(ROW_HEIGHT);
@@ -243,19 +249,24 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     public void download(final VisualSearchResult vsr, final int row) {
-        try {
-            // TODO: Need to go through some of the rigor that
-            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-            // went through.. checking for conflicts, etc.
-            DownloadItem di = resultDownloader.addDownload(
-                search, vsr.getCoreSearchResults());
-            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-             
-            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-        } catch (SaveLocationException sle) {
-            //TODO
-            throw new RuntimeException("FIX ME", sle);
-        }
+        BackgroundExecutorService.schedule(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // TODO: Need to go through some of the rigor that
+                    // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
+                    // went through.. checking for conflicts, etc.
+                    DownloadItem di = resultDownloader.addDownload(
+                        search, vsr.getCoreSearchResults());
+                    di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                     
+                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                } catch (SaveLocationException sle) {
+                    //TODO
+                    throw new RuntimeException("FIX ME", sle);
+                }                
+            }
+        });
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
@@ -299,6 +310,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
+        private boolean ignoreRepaints;
         
         public ListViewTable() {
             super(false);
@@ -315,6 +327,18 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             colors.getEvenHighLighter().setBackground(colors.evenColor);
             colors.getOddHighLighter().setBackground(colors.oddColor);
             return colors;
+        }
+        
+        private void setIgnoreRepaints(boolean ignore) {
+            this.ignoreRepaints = ignore;
+        }
+
+        @Override
+        protected void resizeAndRepaint() {
+            if (ignoreRepaints) {
+                return;
+            }
+            super.resizeAndRepaint();
         }
     }
 }
