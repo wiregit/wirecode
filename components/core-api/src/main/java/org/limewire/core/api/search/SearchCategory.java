@@ -51,7 +51,7 @@ public enum SearchCategory {
      */
     public static SearchCategory forId(Integer id) {
         for(SearchCategory category : values()) {
-            if(category.id == id) {
+            if(id.equals(category.id)) {
                 return category;
             }
         }
