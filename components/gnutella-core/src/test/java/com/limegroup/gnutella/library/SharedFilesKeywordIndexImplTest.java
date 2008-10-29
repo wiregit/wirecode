@@ -38,8 +38,8 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         registry = context.mock(ServiceRegistry.class);
         fileManager = context.mock(FileManager.class);
         managedFileList = context.mock(ManagedFileList.class);
-        sharedFileList = context.mock(FileList.class);
-        incompleteFileList = context.mock(FileList.class);
+        sharedFileList = context.mock(GnutellaFileList.class);
+        incompleteFileList = context.mock(IncompleteFileList.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null, null);
     }
     
