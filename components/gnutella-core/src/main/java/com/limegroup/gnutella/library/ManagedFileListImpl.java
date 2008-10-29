@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -271,7 +272,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     @Override
     public void addFolder(File folder) {
-        throw new UnsupportedOperationException("TODO: Implement Managed Folders");
+        throw new UnsupportedOperationException("Implement Me");
     }
     
     public void addIncompleteFile(File incompleteFile,
@@ -395,13 +396,28 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
+    public Collection<String> getDefaultManagedExtensions() {
+        return fileData.getDefaultManagedExtensions();
+    }
+    
+    @Override
+    public Collection<String> getManagedExtensions() {
+        return fileData.getManagedExtensions();
+    }
+    
+    @Override
+    public void setManagedExtensions(Collection<String> extensions) {
+        throw new UnsupportedOperationException("Implement Me");
+    }
+    
+    @Override
     public void addDirectoryToExcludeFromManaging(File folder) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Implement Me");
     }
 
     @Override
     public void addDirectoryToManageRecursively(File folder) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Implement Me");
     }
 
     @Override

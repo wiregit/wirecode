@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -71,6 +72,21 @@ class LibraryManagerImpl implements LibraryManager {
         @Override
         public List<File> getDirectoriesToManageRecursively() {
             return fileList.getDirectoriesToManageRecursively();
+        }
+        
+        @Override
+        public Collection<String> getDefaultManagedExtensions() {
+            return fileList.getDefaultManagedExtensions();
+        }
+        
+        @Override
+        public Collection<String> getManagedExtensions() {
+            return fileList.getManagedExtensions();
+        }
+        
+        @Override
+        public void setManagedExtensions(Collection<String> extensions) {
+            fileList.setManagedExtensions(extensions);
         }
         
     }

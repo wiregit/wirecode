@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +25,6 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
-import org.limewire.setting.StringArraySetting;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -37,7 +37,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     
     /** Default file extensions. */
-    private static final String DEFAULT_MANAGED_EXTENSIONS =
+    private final String DEFAULT_MANAGED_EXTENSIONS_STRING =
         "asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;mp4;wav;wax;au;aif;aiff;"+
         "ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;flac;fla;"+
         "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
@@ -49,6 +49,9 @@ class LibraryFileData extends AbstractSettingsGroup {
         // Formerly sensitive extensions..
         "doc;pdf;xls;rtf;bak;csv;dat;docx;xlsx;xlam;xltx;xltm;xlsm;xlsb;dotm;" +
         "docm;dotx;dot;qdf;qtx;qph;qel;qdb;qsd;qif;mbf;mny";
+    
+    private final Collection<String> DEFAULT_MANAGED_EXTENSIONS =
+        Collections.unmodifiableList(Arrays.asList(DEFAULT_MANAGED_EXTENSIONS_STRING.split(";")));
     
     private final Set<String> userExtensions = new HashSet<String>();
     private final Set<String> userRemoved = new HashSet<String>();
@@ -302,13 +305,17 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.readLock().lock();
         Set<String> extensions = new HashSet<String>();        
         try {
-            extensions.addAll(Arrays.asList(StringArraySetting.decode(DEFAULT_MANAGED_EXTENSIONS)));
+            extensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
             extensions.addAll(userExtensions);
             extensions.removeAll(userRemoved);
         } finally {
             lock.readLock().unlock();
         }
         return extensions;
+    }
+
+    public Collection<String> getDefaultManagedExtensions() {
+        return DEFAULT_MANAGED_EXTENSIONS;
     }
     
     /** Marks the given file as either shared or not shared with gnutella. */

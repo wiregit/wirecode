@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +170,20 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         @Override
         public List<File> getDirectoriesToManageRecursively() {
             return new ArrayList<File>();
+        }
+
+        @Override
+        public Collection<String> getDefaultManagedExtensions() {
+            return new ArrayList<String>();
+        }
+
+        @Override
+        public Collection<String> getManagedExtensions() {
+            return new ArrayList<String>();
+        }
+
+        @Override
+        public void setManagedExtensions(Collection<String> extensions) {
         }
         
     }

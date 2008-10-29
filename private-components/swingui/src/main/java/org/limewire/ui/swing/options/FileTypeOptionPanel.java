@@ -1,15 +1,8 @@
 package org.limewire.ui.swing.options;
 
-import javax.swing.JFrame;
-
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 
-import com.google.inject.Binder;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Singleton;
 
 
@@ -25,7 +18,7 @@ public final class FileTypeOptionPanel extends OptionPanel {
 
     @Inject
     public FileTypeOptionPanel(FileTypeOptionPanelManager fileTypeOptionPanelManager) {
-        super(I18n.tr(FileTypeOptionPanelManager.TITLE));
+        super(I18n.tr("Sharing Extensions"));
         
         this.manager = fileTypeOptionPanelManager;
         
@@ -50,31 +43,6 @@ public final class FileTypeOptionPanel extends OptionPanel {
     boolean hasChanged() {
         // TODO Auto-generated method stub
         return false;
-    }
-
-
-    
-    public static void main(String args[]) {
-        
-        Injector injector = Guice.createInjector(new Module() {
-            public void configure(Binder binder) {
-                binder.install(new LimeWireUiUtilModule());
-                binder.bind(FileTypeOptionPanel.class);
-            }
-            
-        });
-        
-        
-        
-        JFrame frame = new JFrame();
- 
-        FileTypeOptionPanel a = injector.getInstance(FileTypeOptionPanel.class);
-        
-        a.initOptions();
-        
-        frame.add(a);
-        frame.pack();
-        frame.setVisible(true);
     }
     
 }
