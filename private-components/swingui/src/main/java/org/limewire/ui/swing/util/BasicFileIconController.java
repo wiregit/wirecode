@@ -9,7 +9,6 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.gui.GuiCoreMediator;
 
 /**
  * A FileIconController that uses default icons.
