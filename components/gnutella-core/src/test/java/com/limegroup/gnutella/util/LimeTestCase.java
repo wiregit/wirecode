@@ -238,7 +238,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         _savedDir = new File(_baseDir, "saved");
         _settingsDir = new File(_baseDir, "settings");
         _storeDir = new File(_baseDir, "store");
-        _scratchDir = new File(_scratchDir, "scratch");
+        _scratchDir = new File(_baseDir, "scratch");
 
         _baseDir.mkdirs();
         _savedDir.mkdirs();
