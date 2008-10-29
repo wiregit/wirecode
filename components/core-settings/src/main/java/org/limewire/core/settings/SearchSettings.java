@@ -1,5 +1,6 @@
 package org.limewire.core.settings;
 
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
@@ -472,4 +473,10 @@ public final class SearchSettings extends LimeProps {
      */
     public static final BooleanSetting MOVE_DOWNLOADED_FILES_TO_BOTTOM =
         FACTORY.createBooleanSetting("MOVE_DOWNLOADED_FILES_TO_BOTTOM", true);
+    
+    /**
+     * The default search category for the search bar.
+     */
+    public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
+        FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", SearchCategory.ALL.getId());
 }

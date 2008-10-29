@@ -134,6 +134,7 @@ public class SearchOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
+            SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.setValue(((SearchCategory)defaultSearchSpinner.getSelectedItem()).getId());
             SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.setValue(((SpinnerNumberModel)suggestSpinner.getModel()).getNumber().intValue());
             SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestCheckBox.isSelected());
             SearchSettings.POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH.setValue(((SpinnerNumberModel)searchTabNumberSpinner.getModel()).getNumber().intValue());
@@ -142,7 +143,8 @@ public class SearchOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.getValue() != ((SpinnerNumberModel)suggestSpinner.getModel()).getNumber().intValue()
+            return SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory)defaultSearchSpinner.getSelectedItem()).getId() 
+                || SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.getValue() != ((SpinnerNumberModel)suggestSpinner.getModel()).getNumber().intValue()
                 || SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue() != suggestCheckBox.isSelected()
                 || SearchSettings.POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH.getValue() != ((SpinnerNumberModel)searchTabNumberSpinner.getModel()).getNumber().intValue()
                 || SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue() != searchTabNumberCheckBox.isSelected();
@@ -150,8 +152,7 @@ public class SearchOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            //TODO: implement/init default search value
-            
+            defaultSearchSpinner.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
             //TODO: this setting isn't linked to anything
             suggestSpinner.getModel().setValue(SearchSettings.POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES.getValue());
             //TODO: this setting isn't linked to anything

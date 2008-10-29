@@ -29,6 +29,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -90,6 +91,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         if (!programEnabled)
             combo.removeItem(SearchCategory.PROGRAM);
 
+        combo.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
         combo.setName("TopPanel.combo");
         combo.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
