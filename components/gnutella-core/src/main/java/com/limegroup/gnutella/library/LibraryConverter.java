@@ -12,6 +12,7 @@ import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 
 /**
@@ -30,7 +31,7 @@ class LibraryConverter {
         
         OldLibraryData oldData = new OldLibraryData(); // load if necessary
         for(File folder : OldLibrarySettings.DIRECTORIES_TO_SHARE.getValue()) {
-            if(!LibraryUtils.isSensitiveDirectory(folder)) {
+            if(!LibraryUtils.isSensitiveDirectory(folder) || oldData.SENSITIVE_DIRECTORIES_VALIDATED.contains(folder)) {
                 newData.addDirectoryToManageRecursively(folder);
             }
         }
@@ -63,8 +64,8 @@ class LibraryConverter {
             newData.addManagedFile(file, true);
         }
         
-        for(File file : SharingSettings.getAllSaveDirectories()) {
-            newData.addDirectoryToManageRecursively(file);
+        for(MediaType type : MediaType.getDefaultMediaTypes()) {
+            newData.addDirectoryToManageRecursively(SharingSettings.getFileSettingForMediaType(type).getValue());
         }
         
         newData.addDirectoryToManageRecursively(SharingSettings.getSaveLWSDirectory());
@@ -77,6 +78,9 @@ class LibraryConverter {
         OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
         OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.revertToDefault();
         OldLibrarySettings.EXTENSIONS_TO_SHARE.revertToDefault();
+        for(MediaType type : MediaType.getDefaultMediaTypes()) {
+            SharingSettings.getFileSettingForMediaType(type).revertToDefault();
+        }
     }
     
     private void convertSharedFiles(LibraryFileData data) {
