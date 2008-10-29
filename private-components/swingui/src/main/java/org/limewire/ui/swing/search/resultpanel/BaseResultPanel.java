@@ -24,6 +24,7 @@ import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
 import org.limewire.ui.swing.search.ModeListener;
 import org.limewire.ui.swing.search.RemoteHostActions;
@@ -69,7 +70,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, RemoteHostActions remoteHostActions, SearchResultProperties properties, 
+            Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
@@ -89,7 +90,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final SearchResultProperties properties, 
+            final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         resultsList = new ListViewTable();
         resultsList.setShowGrid(true, false);

@@ -13,6 +13,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 
@@ -27,10 +28,13 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     final private DownloadListManager downloadListManager;
 
     private MagnetLinkFactory magnetFactory;
+    private PropertiesFactory<RemoteFileItem> propertiesFactory;
 
-    public FriendLibraryPopupMenu(DownloadListManager downloadListManager, MagnetLinkFactory magnetFactory) {
+    public FriendLibraryPopupMenu(DownloadListManager downloadListManager, MagnetLinkFactory magnetFactory, 
+            PropertiesFactory<RemoteFileItem> propertiesFactory) {
         this.downloadListManager = downloadListManager;
         this.magnetFactory = magnetFactory;
+        this.propertiesFactory = propertiesFactory;
         
         linkItem = new JMenuItem(linkAction);
         propertiesItem = new JMenuItem(propertiesAction);
@@ -87,8 +91,8 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     private Action propertiesAction = new AbstractAction(I18n.tr("Properties")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO Properties
-            throw new RuntimeException("Implement me");
+            //TODO - Is this correct? Only to show props for first one?
+            propertiesFactory.newProperties().showProperties(fileItems.get(0));
         }
     };
     

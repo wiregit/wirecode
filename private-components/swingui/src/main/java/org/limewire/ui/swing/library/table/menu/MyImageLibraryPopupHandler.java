@@ -11,6 +11,7 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanel;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
 public class MyImageLibraryPopupHandler implements TablePopupHandler {
@@ -23,7 +24,8 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
 
     public MyImageLibraryPopupHandler(LibraryImageSubPanel imagePanel, ImageLibraryPopupParams params) {
         this.imagePanel = imagePanel;
-        this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE, params.libraryManager, params.shareListManager, params.magnetFactory, imagePanel, params.friendList);
+        this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE, params.libraryManager, params.shareListManager, 
+                params.magnetFactory, imagePanel, params.friendList, params.propertiesFactory);
         this.multiSelectPopupMenu = new MyLibraryMultipleSelectionPopupMenu(Category.IMAGE, params.libraryManager, params.shareListManager, imagePanel, params.friendList);
 
     }
@@ -55,13 +57,15 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
         private ShareListManager shareListManager;
         private MagnetLinkFactory magnetFactory;
         private List<SharingTarget> friendList;
+        private PropertiesFactory<LocalFileItem> propertiesFactory;
 
         public ImageLibraryPopupParams(LibraryManager libraryManager, ShareListManager shareListManager, 
-                MagnetLinkFactory magnetFactory, List<SharingTarget> friendList){
+                MagnetLinkFactory magnetFactory, List<SharingTarget> friendList, PropertiesFactory<LocalFileItem> propertiesFactory){
             this.libraryManager = libraryManager;
             this.shareListManager = shareListManager;
             this.magnetFactory = magnetFactory;
             this.friendList = friendList;            
+            this.propertiesFactory = propertiesFactory;
             
         }
     }

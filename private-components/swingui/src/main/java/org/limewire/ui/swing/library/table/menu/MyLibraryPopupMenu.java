@@ -23,6 +23,7 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
@@ -47,14 +48,18 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private List<SharingTarget> friendList;
 
     private MagnetLinkFactory magnetFactory;
+    
+    private final PropertiesFactory<LocalFileItem> propertiesFactory;
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Component repaintComponent, List<SharingTarget> friendList) {
+            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Component repaintComponent, 
+            List<SharingTarget> friendList, PropertiesFactory<LocalFileItem> propertiesFactory) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.magnetFactory = magnetFactory;
         this.repaintComponent = repaintComponent;
         this.friendList = friendList;
+        this.propertiesFactory = propertiesFactory;
         initializeCategory(category);
     }
 
@@ -162,7 +167,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            throw new RuntimeException("implement me");
+            propertiesFactory.newProperties().showProperties(fileItem);
         }
 
     };

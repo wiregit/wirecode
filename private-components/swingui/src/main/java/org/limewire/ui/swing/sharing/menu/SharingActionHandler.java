@@ -4,6 +4,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -14,7 +15,8 @@ public class SharingActionHandler {
     public static final String PROPERTIES = "PROPERTIES";
     public static final String LAUNCH = "LAUNCH";
     
-    public void performAction(final String actionCommand, final LocalFileList fileList, final LocalFileItem item) {
+    public void performAction(final String actionCommand, final LocalFileList fileList, final LocalFileItem item, 
+            final PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         BackgroundExecutorService.schedule(new Runnable(){
             public void run() {
                 if(actionCommand == UNSHARE) {
@@ -22,8 +24,7 @@ public class SharingActionHandler {
                 } else if(actionCommand == LOCATE) {
                     NativeLaunchUtils.launchExplorer(item.getFile());
                 } else if(actionCommand == PROPERTIES) {
-                    //TODO: implement properties menu
-                    throw new UnsupportedOperationException("TODO: implement properties get info");
+                    localFileItemPropsFactory.newProperties().showProperties(item);
                 } else if(actionCommand == LAUNCH) {
                     launch(item);
                 }     

@@ -56,6 +56,9 @@ public abstract class Dialog extends JDialog {
         buttons.add(new JButton(new CancelAction()));
         add(buttons, "cell 1 3");
         
+        description.setLineWrap(true);
+        description.setWrapStyleWord(true);
+        
         overview = new JPanel(new MigLayout("fillx", "[]push[]", "[][][]"));
 
         overview.add(headingLabel);

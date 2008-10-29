@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactoryImpl;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;
@@ -22,12 +24,12 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
 import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
-import org.limewire.ui.swing.search.resultpanel.SearchResultProperties;
-import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesImpl;
+import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesFactoryImpl;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
 
 public class LimeWireUiSearchModule extends AbstractModule {
@@ -80,7 +82,7 @@ public class LimeWireUiSearchModule extends AbstractModule {
         
         bind(RemoteHostActions.class).to(RemoteHostActionsImpl.class);
 
-        bind(SearchResultProperties.class).to(SearchResultPropertiesImpl.class);
+        bind(new TypeLiteral<PropertiesFactory<VisualSearchResult>>(){}).to(SearchResultPropertiesFactoryImpl.class);
         
         bind(SearchHeadingDocumentBuilder.class).to(SearchHeadingDocumentBuilderImpl.class);
         

@@ -13,6 +13,7 @@ import javax.swing.JTable;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ImageListModel;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.sharing.table.SharingTableModel;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
@@ -32,20 +33,23 @@ public class SharingPopupHandler implements TablePopupHandler {
     private final SharingActionHandler actionHandler;
     
     protected final MenuListener menuListener;
+    private final PropertiesFactory<LocalFileItem> localFileItemPropsFactory;
     
     private LocalFileItem fileItem;
     private LocalFileList fileList;
     
-    public SharingPopupHandler(JList list, SharingActionHandler handler) {
+    public SharingPopupHandler(JList list, SharingActionHandler handler, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         this.list = list;
+        this.localFileItemPropsFactory = localFileItemPropsFactory;
         this.actionHandler = handler;
         this.menuListener = new MenuListener();
         
         initialize();
     }
     
-    public SharingPopupHandler(JTable table, SharingActionHandler handler) {
+    public SharingPopupHandler(JTable table, SharingActionHandler handler, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         this.table = table;
+        this.localFileItemPropsFactory = localFileItemPropsFactory;
         this.actionHandler = handler;
         this.menuListener = new MenuListener();
         
@@ -94,7 +98,7 @@ public class SharingPopupHandler implements TablePopupHandler {
 
     private class MenuListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            actionHandler.performAction(e.getActionCommand(), fileList, fileItem);
+            actionHandler.performAction(e.getActionCommand(), fileList, fileItem, localFileItemPropsFactory);
         }
     }
 }

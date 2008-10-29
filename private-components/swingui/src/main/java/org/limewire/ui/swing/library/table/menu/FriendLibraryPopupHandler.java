@@ -8,6 +8,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.table.LibraryTable;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
 public class FriendLibraryPopupHandler implements TablePopupHandler {
@@ -17,9 +18,10 @@ public class FriendLibraryPopupHandler implements TablePopupHandler {
 
     final private FriendLibraryPopupMenu popupMenu;
 
-    public FriendLibraryPopupHandler(LibraryTable<RemoteFileItem> table, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory) {
+    public FriendLibraryPopupHandler(LibraryTable<RemoteFileItem> table, DownloadListManager downloadListManager, 
+            MagnetLinkFactory magnetLinkFactory, PropertiesFactory<RemoteFileItem> propertiesFactory) {
         this.table = table;
-        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager,magnetLinkFactory);
+        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager,magnetLinkFactory, propertiesFactory);
     }
 
     @Override

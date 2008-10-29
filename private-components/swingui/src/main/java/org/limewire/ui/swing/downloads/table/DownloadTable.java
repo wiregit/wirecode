@@ -2,6 +2,7 @@ package org.limewire.ui.swing.downloads.table;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -23,9 +24,10 @@ public class DownloadTable extends MouseableTable {
     private DownloadTableModel model;
 
     @AssistedInject
-	public DownloadTable(DownloadTableCellFactory tableCellFactory, @Assisted EventList<DownloadItem> downloadItems) {		
+	public DownloadTable(DownloadTableCellFactory tableCellFactory, PropertiesFactory<DownloadItem> propertiesFactory,
+	        @Assisted EventList<DownloadItem> downloadItems) {		
 
-        initialise(downloadItems);
+        initialise(downloadItems, propertiesFactory);
         
         setShowGrid(false, false);
         
@@ -33,7 +35,7 @@ public class DownloadTable extends MouseableTable {
         DownloadTableCell rendererMutator = tableCellFactory.create();
         
         DownloadTableEditor editor = new DownloadTableEditor(editorMutator);
-        editor.initialiseEditor(downloadItems);
+        editor.initialiseEditor(downloadItems, propertiesFactory);
         getColumnModel().getColumn(0).setCellEditor(editor);
         
         DownloadTableRenderer renderer = new DownloadTableRenderer(rendererMutator);
@@ -47,11 +49,11 @@ public class DownloadTable extends MouseableTable {
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
 
-    private void initialise(EventList<DownloadItem> downloadItems) {
+    private void initialise(EventList<DownloadItem> downloadItems, PropertiesFactory<DownloadItem> propertiesFactory) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
 
-        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(downloadItems), this);
+        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(downloadItems, propertiesFactory), this);
 
         setPopupHandler(popupHandler);
 

@@ -19,6 +19,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveAllAction;
 import org.limewire.ui.swing.sharing.actions.SharingRemoveTableAction;
 import org.limewire.ui.swing.sharing.components.ConfirmationUnshareButton;
@@ -57,12 +58,13 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
     private SharingRemoveAllAction removeAction;
     private EventList<LocalFileItem> currentEventList;
     
-    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon) {
-        this(name, eventList, tableFormat, true, transferHandler, fileList, panelIcon);
+    public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, 
+            TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
+        this(name, eventList, tableFormat, true, transferHandler, fileList, panelIcon, localFileItemPropsFactory);
     }
     
     public SharingFancyTablePanel(String name, EventList<LocalFileItem> eventList, TableFormat<LocalFileItem> tableFormat, 
-            boolean paintTableHeader, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon) {
+            boolean paintTableHeader, TransferHandler transferHandler, LocalFileList fileList, Icon panelIcon, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         GuiUtils.assignResources(this); 
         
         this.tableFormat = tableFormat;
@@ -83,7 +85,7 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
         // create the table
-        table = createTable(eventList, fileList, tableFormat, transferHandler);
+        table = createTable(eventList, fileList, tableFormat, transferHandler, localFileItemPropsFactory);
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remaining space
         setLayout(new MigLayout("gap 0, insets 18 6 10 6",     //layout constraints
@@ -107,9 +109,10 @@ public class SharingFancyTablePanel extends JPanel implements ListEventListener<
         setVisible(false);
     }
     
-    private SharingTable createTable(EventList<LocalFileItem> eventList, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, TransferHandler transferHandler) {
+    private SharingTable createTable(EventList<LocalFileItem> eventList, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, 
+            TransferHandler transferHandler, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         if( table == null) {
-            table = new SharingTable(eventList, fileList, tableFormat);
+            table = new SharingTable(eventList, fileList, tableFormat, localFileItemPropsFactory);
             table.setTransferHandler(transferHandler);
             table.setSortable(false);
             table.setRowSelectionAllowed(true);

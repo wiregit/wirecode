@@ -2,6 +2,7 @@ package org.limewire.ui.swing.downloads.table;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -22,9 +23,11 @@ public class DownloadActionHandler {
     private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
     private EventList<DownloadItem> downloadItems;
+    private PropertiesFactory<DownloadItem> propertiesFactory;
     
-    public DownloadActionHandler(EventList<DownloadItem> downloadItems){
+    public DownloadActionHandler(EventList<DownloadItem> downloadItems, PropertiesFactory<DownloadItem> propertiesFactory){
         this.downloadItems = downloadItems;
+        this.propertiesFactory = propertiesFactory;
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -43,8 +46,7 @@ public class DownloadActionHandler {
         } else if (actionCommmand == LOCATE_COMMAND){
             NativeLaunchUtils.launchExplorer(item.getDownloadingFile());
         } else if (actionCommmand == PROPERTIES_COMMAND){
-            //TODO properties
-            throw new RuntimeException("Implement "+ actionCommmand  + " " + item.getTitle() + "!");
+            propertiesFactory.newProperties().showProperties(item);
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadItems.remove(item);
         }

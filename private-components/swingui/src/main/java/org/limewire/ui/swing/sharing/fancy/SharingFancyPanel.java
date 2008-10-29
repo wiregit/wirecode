@@ -31,6 +31,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.sharing.SharingShortcutPanel;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.table.SharingAudioTableFormat;
@@ -76,6 +77,7 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
        
     @AssistedInject
     public SharingFancyPanel(CategoryIconManager categoryIconManager, IconManager iconManager, ThumbnailManager thumbnailManager,
+            PropertiesFactory<LocalFileItem> localFileItemPropsFactory,
             @Assisted EventList<LocalFileItem> eventList, @Assisted JScrollPane scrollPane,  @Assisted LocalFileList originalList) {
 
         this.categoryIconManager = categoryIconManager;
@@ -89,15 +91,15 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
 
         createFilteredLists(eventList);
         
-        addTable(music, Category.AUDIO, originalList, new SharingAudioTableFormat(), true);       
-        addTable(video, Category.VIDEO, originalList, new SharingDefaultTableFormat(), false);
-        addTable(doc, Category.DOCUMENT, originalList, new SharingIconTableFormat(), false);       
-        addTable(program, Category.PROGRAM, originalList, new SharingDefaultTableFormat(), false);       
-        addTable(other, Category.OTHER, originalList, new SharingDefaultTableFormat(), true);
+        addTable(music, Category.AUDIO, originalList, new SharingAudioTableFormat(), true, localFileItemPropsFactory);       
+        addTable(video, Category.VIDEO, originalList, new SharingDefaultTableFormat(), false, localFileItemPropsFactory);
+        addTable(doc, Category.DOCUMENT, originalList, new SharingIconTableFormat(), false, localFileItemPropsFactory);       
+        addTable(program, Category.PROGRAM, originalList, new SharingDefaultTableFormat(), false, localFileItemPropsFactory);       
+        addTable(other, Category.OTHER, originalList, new SharingDefaultTableFormat(), true, localFileItemPropsFactory);
         
         imageList = new SharingFancyListPanel(image, filterLists.get(Category.IMAGE),
                 transferHandler, originalList, 
-                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager, localFileItemPropsFactory);
         
         
         imageList.getList().addMouseListener(new MultiTableMouseListener());
@@ -138,10 +140,11 @@ public class SharingFancyPanel extends JPanel implements Scrollable {
     /**
      * Constructs a SharingFancyTablePanel for a given Category
      */
-    private void addTable(String title, Category category, LocalFileList originalList, TableFormat<LocalFileItem> tableFormat, boolean displayHeader) {
+    private void addTable(String title, Category category, LocalFileList originalList, TableFormat<LocalFileItem> tableFormat, 
+            boolean displayHeader, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
        
         SharingFancyTablePanel tablePanel = new SharingFancyTablePanel(title, filterLists.get(category), 
-                tableFormat, displayHeader, transferHandler, originalList, categoryIconManager.getIcon(category));
+                tableFormat, displayHeader, transferHandler, originalList, categoryIconManager.getIcon(category), localFileItemPropsFactory);
         
         tablePanel.getTable().addMouseListener(new MultiTableMouseListener());
         tables.put(title, tablePanel); 

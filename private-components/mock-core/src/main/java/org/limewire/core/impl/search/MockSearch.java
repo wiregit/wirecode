@@ -214,7 +214,9 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
+        		"scb bjk asc bjkajbsc kbk asbc b bascbbasc b " +
+        		"ascb bascb asb cbascbab cb ascbbas cba scbasc");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -225,6 +227,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -248,6 +251,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -273,6 +277,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -296,6 +301,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
+        msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
 
         // Create a search result that will be categorized as "Video".

@@ -33,6 +33,7 @@ import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -61,10 +62,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     private MagnetLinkFactory magnetLinkFactory;
     private CategoryIconManager categoryIconManager;
     private ThumbnailManager thumbnailManager;
+    private PropertiesFactory<LocalFileItem> localItemPropFactory;
+    private PropertiesFactory<RemoteFileItem> remoteItemPropFactory;
 
     @Inject
     public LibraryTableFactoryImpl(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, IconManager iconManager, LibraryManager libraryManager, 
-            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory){
+            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory,
+            PropertiesFactory<LocalFileItem> localItemPropFactory, PropertiesFactory<RemoteFileItem> remoteItemPropFactory){
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
@@ -73,12 +77,14 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         this.player = player;
         this.downloadListManager = downloadListManager;
         this.magnetLinkFactory = magnetLinkFactory;
+        this.localItemPropFactory = localItemPropFactory;
+        this.remoteItemPropFactory = remoteItemPropFactory;
         EventAnnotationProcessor.subscribe(this);
     }
     
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList) {
-        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager, shareListManager,  magnetLinkFactory, friendList);
+        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager, shareListManager,  magnetLinkFactory, friendList, localItemPropFactory);
         return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList, libraryManager.getLibraryManagedList(), 
                 categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
     }
@@ -124,10 +130,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         
         if(friend != null){
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
-            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory));
+            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, 
+                    magnetLinkFactory, remoteItemPropFactory));
         } else {//Local            
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, magnetLinkFactory, friendList));
+            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
+                    magnetLinkFactory, friendList, localItemPropFactory));
         }
         
             libTable.setDropMode(DropMode.ON);

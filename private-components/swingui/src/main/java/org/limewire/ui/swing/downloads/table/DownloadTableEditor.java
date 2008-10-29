@@ -13,6 +13,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -54,11 +55,11 @@ public class DownloadTableEditor implements TableCellEditor {
      * Binds editor to downloadItems so that the editor automatically updates
      * when downloadItems changes and popup menus work.  This is required for Editors
      */
-	public void initialiseEditor(EventList<DownloadItem> downloadItems) {
+	public void initialiseEditor(EventList<DownloadItem> downloadItems, PropertiesFactory<DownloadItem> propertiesFactory) {
         this.editorListener = new DownloadEditorListener();
         this.cellComponent.setEditorListener(this.editorListener);
 	    
-	    this.actionHandler = new DownloadActionHandler(downloadItems);
+	    this.actionHandler = new DownloadActionHandler(downloadItems, propertiesFactory);
 	    
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override

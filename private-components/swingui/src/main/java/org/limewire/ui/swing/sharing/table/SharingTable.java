@@ -7,6 +7,7 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.player.PlayerUtils;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.sharing.menu.SharingActionHandler;
 import org.limewire.ui.swing.sharing.menu.SharingPopupHandler;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -25,9 +26,10 @@ public class SharingTable extends MouseableTable {
     
     private TableColors tableColors;
     
-    public SharingTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
+    public SharingTable(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat,
+            PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
 
-        initialize(sharedItems, fileList, tableFormat);
+        initialize(sharedItems, fileList, tableFormat, localFileItemPropsFactory);
         
         tableColors = new TableColors();
         
@@ -44,7 +46,7 @@ public class SharingTable extends MouseableTable {
         return sharingTableModel.getFileItem(row);
     }
     
-    private void initialize(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat) {
+    private void initialize(EventList<LocalFileItem> sharedItems, LocalFileList fileList, TableFormat<LocalFileItem> tableFormat, PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
         sharingTableModel = new SharingTableModel(sharedItems, fileList, tableFormat);
         setModel(sharingTableModel);
         
@@ -64,7 +66,7 @@ public class SharingTable extends MouseableTable {
 
         setDoubleClickHandler(doubleClickHandler);
         
-        final SharingPopupHandler popupHandler = new SharingPopupHandler(this, new SharingActionHandler());
+        final SharingPopupHandler popupHandler = new SharingPopupHandler(this, new SharingActionHandler(), localFileItemPropsFactory);
         
         setPopupHandler(popupHandler);
     }
