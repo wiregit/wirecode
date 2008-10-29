@@ -13,6 +13,8 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.setting.BooleanSetting;
+import org.limewire.ui.swing.shell.LimeAssociationOption;
+import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
@@ -33,7 +35,7 @@ public class SystemOptionPanel extends OptionPanel {
 
     @Inject
     public SystemOptionPanel() {
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("hidemode 2, insets 15 15 15 15, fillx, wrap", "", ""));
 
         setOpaque(false);
 
@@ -91,6 +93,10 @@ public class SystemOptionPanel extends OptionPanel {
 
         private JCheckBox warnCheckBox;
 
+        private JLabel magnetLabel;
+
+        private JLabel torrentLabel;
+
         private JLabel warnLabel;
 
         public FileAssociationPanel() {
@@ -100,28 +106,31 @@ public class SystemOptionPanel extends OptionPanel {
             magnetCheckBox.setContentAreaFilled(false);
             magnetCheckBox.addActionListener(new ActionListener() {
                 @Override
-                 public void actionPerformed(ActionEvent e) {
-                    updateWarnOption();
-                } 
-             });
-            
-            
+                public void actionPerformed(ActionEvent e) {
+                    updateView();
+                }
+            });
+
             torrentCheckBox = new JCheckBox();
             torrentCheckBox.setContentAreaFilled(false);
             torrentCheckBox.addActionListener(new ActionListener() {
-               @Override
+                @Override
                 public void actionPerformed(ActionEvent e) {
-                   updateWarnOption();
-               } 
+                    updateView();
+                }
             });
             warnCheckBox = new JCheckBox();
             warnCheckBox.setContentAreaFilled(false);
 
             add(magnetCheckBox);
-            add(new JLabel(".magnet files"), "wrap");
+
+            magnetLabel = new JLabel(".magnet files");
+            add(magnetLabel, "wrap");
 
             add(torrentCheckBox);
-            add(new JLabel(".torrent files"), "push");
+
+            torrentLabel = new JLabel(".torrent files");
+            add(torrentLabel, "push");
 
             add(warnCheckBox);
 
@@ -131,12 +140,29 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         void applyOptions() {
-            // TODO integrate shell association code
-            applyOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS);
-            applyOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS);
-            applyOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
+            if (hasChanged(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS)) {
+                applyOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS);
+                LimeAssociationOption magnetAssociationOption = LimeAssociations
+                        .getMagnetAssociation();
+                if (magnetAssociationOption != null) {
+                    magnetAssociationOption.setEnabled(magnetCheckBox.isSelected());
+                }
+            }
+
+            if (hasChanged(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS)) {
+                applyOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS);
+                LimeAssociationOption torrentAssociationOption = LimeAssociations
+                        .getTorrentAssociation();
+                if (torrentAssociationOption != null) {
+                    torrentAssociationOption.setEnabled(torrentCheckBox.isSelected());
+                }
+            }
+
+            if (hasChanged(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
+                applyOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
+            }
             // TODO check warnings on app startup and pop window to handle
-            // issues.
+            // issues where other programs still the association.
         }
 
         private void applyOption(JCheckBox checkBox, BooleanSetting booleanSetting) {
@@ -156,22 +182,33 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            initOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS);
-            initOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS);
-            initOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
-            updateWarnOption();
+            initOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS.getValue()
+                    && LimeAssociations.isMagnetAssociationSupported());
+            initOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS.getValue()
+                    && LimeAssociations.isTorrentAssociationSupported());
+            initOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
+            updateView();
         }
 
-        private void updateWarnOption() {
+        private void updateView() {
             boolean warnShouldBeVisible = magnetCheckBox.isSelected()
                     || torrentCheckBox.isSelected();
-
             warnCheckBox.setVisible(warnShouldBeVisible);
             warnLabel.setVisible(warnShouldBeVisible);
+
+            boolean torrentShouldBeVisible = LimeAssociations.isTorrentAssociationSupported();
+            torrentLabel.setVisible(torrentShouldBeVisible);
+            torrentCheckBox.setVisible(torrentShouldBeVisible);
+
+            boolean magnetShouldBeVisible = LimeAssociations.isMagnetAssociationSupported();
+            magnetCheckBox.setVisible(magnetShouldBeVisible);
+            magnetLabel.setVisible(magnetShouldBeVisible);
+
+            setVisible(torrentShouldBeVisible || magnetShouldBeVisible);
         }
 
-        private void initOption(JCheckBox checkBox, BooleanSetting booleanSetting) {
-            checkBox.setSelected(booleanSetting.getValue());
+        private void initOption(JCheckBox checkBox, boolean value) {
+            checkBox.setSelected(value);
         }
     }
 
