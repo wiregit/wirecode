@@ -20,22 +20,24 @@ import javax.swing.table.DefaultTableModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXHyperlink;
+import org.jdesktop.swingx.JXLabel;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
 
 public abstract class Dialog extends JDialog {
 
-    protected final JLabel headingLabel = new JLabel();
-    protected final JLabel filename = new JLabel();
-    protected final JLabel subheading = new JLabel();
+    protected final JLabel icon = new JLabel();
+    protected final JLabel heading = newLabel();
+    protected final JLabel filename = newLabel();
+    protected final JLabel subheading = newLabel();
     protected final JLabel fileSize = new JLabel();
-    protected final JLabel metadata = new JLabel();
+    protected final JLabel metadata = newLabel();
     protected final JXHyperlink copyToClipboard = new JXHyperlink();
     protected final JTextField title = new JTextField();
     protected final JComboBox genre = new JComboBox();
     protected final JComboBox rating = new JComboBox();
     protected final JTextField year = new JTextField();
-    protected final JTextArea description = new JTextArea();
+    protected final JTextArea description = newTextArea();
     protected final JTextField artist = new JTextField();
     protected final JTextField album = new JTextField();
     protected final JTextField track = new JTextField();
@@ -51,24 +53,35 @@ public abstract class Dialog extends JDialog {
     
     public Dialog() {
         setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
-        JPanel buttons = new JPanel(new MigLayout("", "[][]0", "[]0"));
+        JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
         buttons.add(new JButton(new CancelAction()));
         add(buttons, "cell 1 3");
         
-        description.setLineWrap(true);
-        description.setWrapStyleWord(true);
-        
-        overview = new JPanel(new MigLayout("fillx", "[]push[]", "[][][]"));
+        overview = new JPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
 
-        overview.add(headingLabel);
+        overview.add(icon, "top, left");
+        overview.add(heading);
         overview.add(filename, "wrap");
-        overview.add(subheading);
+        overview.add(subheading, "cell 1 1");
         overview.add(fileSize, "wrap");
-        overview.add(metadata);
+        overview.add(metadata, "cell 1 2");
         overview.add(copyToClipboard);
 
         addOverview();
+    }
+    
+    private JLabel newLabel() {
+        JXLabel label = new JXLabel();
+        label.setLineWrap(true);
+        return label;
+    }
+
+    private JTextArea newTextArea() {
+        JTextArea area = new JTextArea();
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        return area;
     }
 
     protected void showDialog(String fileName) {

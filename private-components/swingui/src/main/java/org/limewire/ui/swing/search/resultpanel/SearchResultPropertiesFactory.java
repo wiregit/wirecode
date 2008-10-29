@@ -14,19 +14,31 @@ import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.CategoryIconManager;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SearchResultPropertiesFactoryImpl implements PropertiesFactory<VisualSearchResult> {
+public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSearchResult> {
+    private final CategoryIconManager iconManager;
+    
+    @Inject
+    public SearchResultPropertiesFactory(CategoryIconManager iconManager) {
+        this.iconManager = iconManager;
+    }
     
     @Override
     public Properties<VisualSearchResult> newProperties() {
-        return new SearchResultPropertiesImpl();
+        return new SearchResultProperties(iconManager);
     }
 
-    private static class SearchResultPropertiesImpl extends Dialog implements Properties<VisualSearchResult> {
-        public SearchResultPropertiesImpl() {
+    private static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
+        private final CategoryIconManager iconManager;
+        
+        public SearchResultProperties(CategoryIconManager iconManager) {
+            this.iconManager = iconManager;
+            
             title.setEditable(false);
             genre.setEditable(false);
             rating.setEditable(false);
@@ -56,7 +68,8 @@ public class SearchResultPropertiesFactoryImpl implements PropertiesFactory<Visu
 
         @Override
         public void showProperties(VisualSearchResult vsr) {
-            headingLabel.setText(vsr.getHeading());
+            icon.setIcon(iconManager.getIcon(vsr.getCategory()));
+            heading.setText(vsr.getHeading());
             filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
             subheading.setText(vsr.getSubHeading());
             fileSize.setText(vsr.getPropertyString(FilePropertyKey.FILE_SIZE));
@@ -64,8 +77,6 @@ public class SearchResultPropertiesFactoryImpl implements PropertiesFactory<Visu
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
             title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
             year.setText(vsr.getPropertyString(FilePropertyKey.YEAR));
-            // TODO - Not sure this is the correct data to display in
-            // description
             description.setText(vsr.getPropertyString(FilePropertyKey.COMMENTS));
 
             // Clear the table
