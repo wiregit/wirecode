@@ -2,11 +2,10 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.OldLibrarySettings;
-import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -30,7 +29,6 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
-@SuppressWarnings("deprecation")
 public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
     private QueryRequestFactory queryRequestFactory;
@@ -55,18 +53,6 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 	@Override
 	public int getNumberOfLeafpeers() {
 	    return 1;
-    }
-	
-    @SuppressWarnings("deprecation")
-    @Override
-    public void setSettings() {
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
-        // get the resource file for com/limegroup/gnutella
-        File mp3 = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/metadata/ID3V24.mp3");
-        assertTrue(mp3.exists());
-        // now move them to the share dir        
-        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
     }
 
     @Override
@@ -96,13 +82,17 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        // get the resource file for com/limegroup/gnutella
+        File file = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/ID3V24.mp3");
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
     }
     
     public void testXMLReturned1() throws Exception {
         drainAll();
 
         // send a query
-        QueryRequest query = queryRequestFactory.createQuery("metadata");
+        QueryRequest query = queryRequestFactory.createQuery("ID3V24");
         ULTRAPEER[0].send(query);
         ULTRAPEER[0].flush();
 

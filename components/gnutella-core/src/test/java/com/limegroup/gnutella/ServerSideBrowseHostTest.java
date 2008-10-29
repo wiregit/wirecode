@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.ByteReader;
@@ -121,16 +122,17 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
     public void testHTTPRequest() throws Exception {
         FilterSettings.MAX_RESPONSES_PER_REPLY.setValue(10);
         
-        // make sure more than FilterSettings.MAX_RESPONSES_PER_REPLY files
-        // are shared
-        for (int i = 0; i < FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() * 2; i++) {
-            File f = new File(_sharedDir, "sharedFile"+i+".txt");
-            f.deleteOnExit();
-            FileUtils.writeObject(f.getAbsolutePath(), new Integer(i));
-        }
         
         FileManager fm = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fm,2000);
+        // make sure more than FilterSettings.MAX_RESPONSES_PER_REPLY files
+        // are shared
+        for (int i = 0; i < FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() * 2; i++) {
+            File f = new File(_scratchDir, "sharedFile"+i+".txt");
+            f.deleteOnExit();
+            FileUtils.writeObject(f, new Integer(i));
+            assertNotNull(fm.getGnutellaSharedFileList().add(f).get(1, TimeUnit.SECONDS));
+        }
 
         assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getGnutellaSharedFileList().size());
         

@@ -4,15 +4,14 @@ import java.io.File;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
-import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -21,6 +20,7 @@ import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.messages.FeatureSearchData;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -43,7 +43,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
-@SuppressWarnings( { "cast", "deprecation" } )
+@SuppressWarnings("cast")
 public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
 
 	/**
@@ -113,22 +113,12 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         ULTRAPEER_2 = blockingConnectionFactory.createConnection("localhost", PORT);
     }
 
-    @SuppressWarnings("deprecation")
     public void setSettings() {
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
         NetworkSettings.PORT.setValue(PORT);
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -151,9 +141,17 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         headersFactory = injector.getInstance(HeadersFactory.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
+        FileManager fileManager = injector.getInstance(FileManager.class);
         
         lifecycleManager.start();
         connectionServices.connect();	
+        
+        // get the resource file for com/limegroup/gnutella
+        File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS));
+        
 		connect();
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 	}

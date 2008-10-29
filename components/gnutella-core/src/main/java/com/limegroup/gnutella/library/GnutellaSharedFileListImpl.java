@@ -110,6 +110,7 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
         if(!sessionFiles.containsKey(file)) {
             data.setSharedWithGnutella(file, added);
         }        
+        
         // Make sure removed things are removed.
         if(!added) {
             sessionFiles.remove(file);

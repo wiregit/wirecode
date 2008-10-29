@@ -93,7 +93,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             Iterable<FileList> lists = browseRequestFileListProvider.getFileLists(request, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
-                iterables.add(list.pausableIterator());
+                iterables.add(list.pausableIterable());
             }
             Iterable<FileDesc> files = new MultiIterable<FileDesc>(iterables.toArray(new Iterable[0]));
             if (!HttpCoreUtils.hasHeaderListValue(request, "Accept", Constants.QUERYREPLY_MIME_TYPE)) {

@@ -11,16 +11,15 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -53,7 +52,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-@SuppressWarnings("all")
 public class LeafRoutingTest extends LimeTestCase {
     private static final int SERVER_PORT = 6669;
     private static final int TIMEOUT=5000;
@@ -102,15 +100,6 @@ public class LeafRoutingTest extends LimeTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
     }        
     
     @Override
@@ -142,6 +131,13 @@ public class LeafRoutingTest extends LimeTestCase {
         
         lifecycleManager.start();
         connectionServices.connect();
+
+        // get the resource file for com/limegroup/gnutella
+        File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS));
+        
         assertEquals("unexpected port", SERVER_PORT, NetworkSettings.PORT.getValue());
         connect();
     }
@@ -476,12 +472,12 @@ public class LeafRoutingTest extends LimeTestCase {
     /** Converts the given X-Try[-Ultrapeer] header value to
      *  a Set of Endpoints. */
     private Set /* of Endpoint */ list2set(String addresses) throws Exception {
-        Set ret=new HashSet();
+        Set<Endpoint> ret=new HashSet<Endpoint>();
         StringTokenizer st = new StringTokenizer(addresses,
             Constants.ENTRY_SEPARATOR);
         while(st.hasMoreTokens()){
             //get an address
-            String address = ((String)st.nextToken()).trim();
+            String address = st.nextToken().trim();
             ret.add(new Endpoint(address));
         }
         return ret;

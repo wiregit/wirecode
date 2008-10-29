@@ -13,10 +13,7 @@ import java.net.Socket;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -29,15 +26,14 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicLineParser;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
@@ -76,7 +72,7 @@ import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
+import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -91,7 +87,6 @@ import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 //ITEST
-@SuppressWarnings("deprecation")
 public class PushUploadTest extends LimeTestCase {
 
     private final int PORT = 6668;
@@ -134,22 +129,18 @@ public class PushUploadTest extends LimeTestCase {
         return buildTestSuite(PushUploadTest.class);
     }
 
-    @SuppressWarnings("deprecation")
     private void doSettings() throws Exception {
+        LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
-
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
-
         FilterSettings.FILTER_DUPLICATES.setValue(false);
-
         ConnectionSettings.NUM_CONNECTIONS.setValue(8);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -163,18 +154,6 @@ public class PushUploadTest extends LimeTestCase {
     protected void setUp() throws Exception {
         doSettings();
 
-        // copy resources
-        File testDir = TestUtils.getResourceFile(testDirName);
-        assertTrue("test directory could not be found", testDir.isDirectory());
-        File testFile = new File(testDir, fileName);
-        assertTrue("test file should exist", testFile.exists());
-        File sharedFile = new File(_sharedDir, fileName);
-        // we must use a separate copy method
-        // because the filename has a # in it which can't be a resource.
-        LimeTestUtils.copyFile(testFile, sharedFile);
-        assertTrue("should exist", sharedFile.exists());
-        assertGreaterThan("should have data", 0, sharedFile.length());
-
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
@@ -185,8 +164,9 @@ public class PushUploadTest extends LimeTestCase {
 
         // start services
         fm = injector.getInstance(FileManager.class);
-        startAndWait(4000);
-        FileDesc fd = fm.getGnutellaSharedFileList().getFileDesc(sharedFile);
+        FileManagerTestUtils.waitForLoad(fm, 1000);
+        File testDir = TestUtils.getResourceFile(testDirName);
+        FileDesc fd = fm.getGnutellaSharedFileList().add(new File(testDir, fileName)).get();
         url = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
         
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
@@ -195,26 +175,6 @@ public class PushUploadTest extends LimeTestCase {
         networkManager = (MyNetworkManager) injector.getInstance(NetworkManager.class);
         
         connectionManager = (MyConnectionManager) injector.getInstance(ConnectionManager.class);
-    }
-    
-    private void startAndWait(long timeout) throws InterruptedException, TimeoutException {
-        final CountDownLatch startedLatch = new CountDownLatch(1);
-        EventListener<ManagedListStatusEvent> listener = new EventListener<ManagedListStatusEvent>() {
-            public void handleEvent(ManagedListStatusEvent evt) {
-                if (evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
-                    startedLatch.countDown();
-                }
-            }            
-        };
-        try {
-            fm.getManagedFileList().addManagedListStatusListener(listener);
-            fm.start();
-            if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
-                throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
-            }
-        } finally {
-            fm.getManagedFileList().addManagedListStatusListener(listener);
-        }
     }
         
 

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -31,7 +32,6 @@ import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.Connectable;
@@ -49,7 +49,6 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteUtils;
-import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
@@ -75,11 +74,10 @@ import com.limegroup.gnutella.messages.Message.Network;
 /**
  * This class tests the QueryReply class.
  */
-@SuppressWarnings({"unchecked", "null", "deprecation"})
+@SuppressWarnings({"unchecked", "null"})
 public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private static final byte[] IP = new byte[] {1, 1, 1, 1};
-    private static final String EXTENSION = "XYZ";
     private static final int MAX_LOCATIONS = 10;
     
     private final byte[] guid = { 0x1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte)0xFF };
@@ -117,12 +115,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	}
 	
     
-	@SuppressWarnings("deprecation")
     public void setUp() throws Exception {
-	    OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
-	    cleanFiles(_sharedDir, false);
 	    injector = LimeTestUtils.createInjector();
 	    
         byte[] data = new byte[16];
@@ -1508,12 +1503,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertNotNull("no files to test against", testFiles);
         assertNotEquals("no files to test against", 0, testFiles.length);
 
-        for (int i = 0; i < testFiles.length; i++) {
-            File shared = new File(_sharedDir, testFiles[i].getName() + "." + EXTENSION);
-            assertTrue("unable to get file", FileUtils.copy(testFiles[i], shared));
-        }
-
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
+        for(File file : testFiles) {
+            fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS);
+        }
 
         assertEquals("unexpected number of shared files", testFiles.length, fileManager.getGnutellaSharedFileList().size());
     }

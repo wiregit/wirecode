@@ -43,11 +43,6 @@ public class FileUtils {
     private static final CopyOnWriteArrayList<FileLocker> fileLockers =
         new CopyOnWriteArrayList<FileLocker>();
     
-
-    public static void writeObject(String fileName, Object obj) 
-    throws IOException{
-        writeObject(new File(fileName),obj);
-    }
     
     /**
      * Writes the passed Object to corresponding file

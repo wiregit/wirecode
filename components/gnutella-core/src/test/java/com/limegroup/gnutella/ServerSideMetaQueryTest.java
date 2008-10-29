@@ -1,15 +1,13 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.OldLibrarySettings;
-import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -28,7 +26,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 /**
  * Checks whether Meta-Queries are correctly answered, etc.
  */
-@SuppressWarnings( { "unchecked", "cast", "deprecation" } )
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideMetaQueryTest extends ClientSideTestCase {
 
     private QueryRequestFactory queryRequestFactory;
@@ -45,36 +43,9 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }      
     
-    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() {
         TIMEOUT = 1250;
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3;wmv;png;bin");
-        // get the resource file for com/limegroup/gnutella
-        File mp3 = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "berkeley.mp3"));
-        mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "meta audio.mp3"));
-        mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "meta video.wmv"));
-        mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/Base32Test.java");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "meta doc.txt"));
-        mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "meta image.png"));
-        mp3 = 
-        TestUtils.getResourceFile("com/limegroup/gnutella/HostCatcherTest.java"); 
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "meta program txt.bin"));
     }
     
 
@@ -90,7 +61,14 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         super.setUp(injector);
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        FileManagerTestUtils.waitForLoad(injector.getInstance(FileManager.class), 500);
+        FileManager fm = injector.getInstance(FileManager.class);
+        FileManagerTestUtils.waitForLoad(fm, 500);
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta doc.txt")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta image.png")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta program txt.bin")).get(1, TimeUnit.SECONDS));
     }
     
     @Singleton

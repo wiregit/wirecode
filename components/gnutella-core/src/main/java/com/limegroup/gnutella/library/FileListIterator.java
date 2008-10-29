@@ -22,7 +22,9 @@ class FileListIterator implements Iterator<FileDesc> {
 
     @Override
     public FileDesc next() {
-        return fileList.getFileDescForIndex(iter.next());
+        FileDesc fd = fileList.getFileDescForIndex(iter.next());
+        assert fd != null : "FD must be non-null, using out of lock maybe?";
+        return fd;
     }
 
     @Override

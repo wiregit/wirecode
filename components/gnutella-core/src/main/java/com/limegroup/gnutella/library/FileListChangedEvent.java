@@ -2,6 +2,8 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 
+import org.limewire.util.StringUtils;
+
 
 public class FileListChangedEvent {
     
@@ -53,6 +55,11 @@ public class FileListChangedEvent {
     
     public FileDesc getOldValue() {
         return oldValue;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 
 }

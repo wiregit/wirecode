@@ -11,16 +11,15 @@ import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -35,7 +34,6 @@ import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -57,7 +55,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
  * redirects properly, etc.  The test includes a leaf attached to 3 
  * Ultrapeers.
  */
-@SuppressWarnings("deprecation")
 public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     private static final int UPLOADER_PORT = 10000;
@@ -113,16 +110,9 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() {
         TIMEOUT = 4000;
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
-        // get the resource file for com/limegroup/gnutella
-        File mp3 = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
-        // now move them to the share dir
-        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
     }   
     
@@ -155,7 +145,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         networkManagerStub.setOOBCapable(true);
         networkManagerStub.setPort(SERVER_PORT);
         
-        FileManagerTestUtils.waitForLoad(fileManager,2000);
+        File file = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/metadata.mp3");
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
                 
         UDP_ACCESS = new DatagramSocket[10];
         for (int i = 0; i < UDP_ACCESS.length; i++)
@@ -339,8 +330,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory);
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "berkeley.txt").exists());
         
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         callback.clearGUID();
@@ -350,8 +339,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertTrue("file should saved", 
             new File( _savedDir, "berkeley.txt").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "berkeley.txt").exists());
 
         {
             // now we should make sure MessageRouter clears the map
@@ -462,8 +449,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "berkeley.txt").exists());
         
         Downloader d = downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         // sleep to make sure the download starts
@@ -475,8 +460,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertTrue("file should saved", 
             new File( _savedDir, "berkeley.txt").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "berkeley.txt").exists());
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
@@ -591,8 +574,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "metadata.mp3").exists());
         
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         UploadSettings.UPLOAD_SPEED.setValue(5);
@@ -610,8 +591,6 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         assertTrue("file should saved", 
             new File( _savedDir, "metadata.mp3").exists());
-        assertTrue("file should be shared",
-            new File(_sharedDir, "metadata.mp3").exists());
 
         // now we should make sure MessageRouter clears the cache
         assertByPassedResultsCacheHasSize(qr.getGUID(), 0);

@@ -43,6 +43,7 @@ abstract class AbstractFileList implements FileList {
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileListChangedEvent> managedListListener;
+    private final EventListener<ManagedListStatusEvent> managedListListener2;
     
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -52,7 +53,9 @@ abstract class AbstractFileList implements FileList {
         this.fileDescIndexes = new IntSet(); 
         this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
         this.managedListListener = new ManagedListSynchronizer();
+        this.managedListListener2 = new ManagedListSynchronizer2();
         this.managedList.addFileListListener(managedListListener);
+        this.managedList.addManagedListStatusListener(managedListListener2);
     }
     
     @Override
@@ -123,7 +126,7 @@ abstract class AbstractFileList implements FileList {
     public Future<FileDesc> add(File file) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
-            saveChange(file, true); // Save early, will RM if it can't become FD.
+            saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
             return wrapFuture(managedList.add(file));
         } else {
             add(fd);
@@ -135,7 +138,7 @@ abstract class AbstractFileList implements FileList {
     public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
-            saveChange(file, true); // Save early, will RM if it can't become FD.
+            saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
             return wrapFuture(managedList.add(file, documents));
         } else {
             add(fd);
@@ -184,7 +187,7 @@ abstract class AbstractFileList implements FileList {
         if(fd != null) {
             return remove(fd);
         } else {
-            saveChange(file, false);
+            saveChange(canonicalize(file), false);
             return false;
         }        
     }
@@ -245,7 +248,7 @@ abstract class AbstractFileList implements FileList {
     }
     
     @Override
-    public Iterable<FileDesc> pausableIterator() {
+    public Iterable<FileDesc> pausableIterable() {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
@@ -266,6 +269,10 @@ abstract class AbstractFileList implements FileList {
 
     @Override
     public void clear() {
+        for(FileDesc fd : pausableIterable()) {
+            fireRemoveEvent(fd);
+        }
+
         rwLock.writeLock().lock();
         try {
             fileDescIndexes.clear();
@@ -394,6 +401,7 @@ abstract class AbstractFileList implements FileList {
 
     public void dispose() {
         managedList.removeFileListListener(managedListListener);
+        managedList.removeManagedListStatusListener(managedListListener2);
     }
     
     /**
@@ -420,6 +428,14 @@ abstract class AbstractFileList implements FileList {
             return fileDescIndexes.min();
         } finally {
             rwLock.readLock().unlock();
+        }
+    }
+    
+    private File canonicalize(File file) {
+        try {
+            return FileUtils.getCanonicalFile(file);
+        } catch(IOException iox) {
+            return file;
         }
     }
     
@@ -460,6 +476,11 @@ abstract class AbstractFileList implements FileList {
             public boolean isDone() {
                 return future.isDone();
             }
+            
+            @Override
+            public String toString() {
+                return "Wrapper of: " + future;
+            }
         };
     }
     
@@ -498,6 +519,11 @@ abstract class AbstractFileList implements FileList {
             public boolean isDone() {
                 return true;
             }
+            
+            @Override
+            public String toString() {
+                return "Future for: " + fd;
+            }
         };
     }
     
@@ -526,6 +552,20 @@ abstract class AbstractFileList implements FileList {
                 if(isPending(event.getFile(), event.getFileDesc()) && !contains(event.getFile())) {
                     saveChange(event.getFile(), false);
                 }
+            }
+        }
+    }
+    
+    private class ManagedListSynchronizer2 implements EventListener<ManagedListStatusEvent> {
+        @Override
+        public void handleEvent(ManagedListStatusEvent event) {
+            // Note: We only need to check for pending on adds,
+            //       because that's the only kind that doesn't
+            //       require it already exists.
+            switch(event.getType()) {
+            case LOAD_STARTED:
+                clear();
+                break;
             }
         }
     }

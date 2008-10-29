@@ -42,7 +42,6 @@ import org.limewire.core.settings.ChatSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
@@ -88,7 +87,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * lowercase characters a-z.
  */
 //ITEST
-@SuppressWarnings("deprecation")
 public class UploadTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -209,7 +207,6 @@ public class UploadTest extends LimeTestCase {
         LimeTestUtils.waitForNIO();
     }
 
-    @SuppressWarnings("deprecation")
     private void doSettings() throws UnknownHostException {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
@@ -217,8 +214,6 @@ public class UploadTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
-
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);

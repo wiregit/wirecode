@@ -4,13 +4,10 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.core.settings.OldLibrarySettings;
-import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -21,7 +18,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -38,7 +34,6 @@ import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProv
  * Tests how the availability of upload slots affects responses, as well
  * as chocking of queries to a leaf.
  */
-@SuppressWarnings("deprecation")
 public class ClientSideSlotResponseTest extends ClientSideTestCase {
     public ClientSideSlotResponseTest(String name) {
         super(name);
@@ -48,49 +43,17 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         return buildTestSuite(ClientSideSlotResponseTest.class);
     }    
     
-    private static Set<String> someFileMatches = new HashSet<String>(2);
+    private Set<String> someFileMatches = new HashSet<String>(2);
     
-    private static final String SOME_FILE = "somefile";
-    private static final String TEXT_FILE = SOME_FILE+".txt";
-    private static final String TORRENT_FILE = SOME_FILE+".torrent";
-    private static final String USER_TORRENT = SOME_FILE+"2.torrent";
-    private static final String APP_TXT = SOME_FILE+"2.txt";
-    private static final String OTHER_TORRENT = "other.torrent";
+    private String SOME_FILE = "somefile";
+    private String TEXT_FILE = "somefile.txt";
+    private String TORRENT_FILE =  "somefile.torrent";
+    private String USER_TORRENT = "somefile2.torrent";
+    private String APP_TXT =  "somefile2.txt";
+    private String OTHER_TORRENT = "other.torrent";
     
-    @SuppressWarnings("deprecation")
-    @Override
-    public void setSettings() throws Exception {
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue(".torrent;.txt");
-    	File textFile = new File(_sharedDir,TEXT_FILE);
-    	File torrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
-    	File userTorrentFile = new File(_sharedDir,USER_TORRENT);
-    	File appTextFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,APP_TXT);
-    	File appTorrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
-    	someFileMatches.add(TEXT_FILE);
-    	someFileMatches.add(TORRENT_FILE);
-    	someFileMatches.add(USER_TORRENT);
-    	someFileMatches.add(APP_TXT);
-    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/gui/GUIBaseTestCase.java"), textFile);
-    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
-    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
-    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
-    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
-        FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
-        fileManager.getGnutellaSharedFileList().addFileListListener(waiter);
-        fileManager.getGnutellaSharedFileList().add(textFile);
-        fileManager.getGnutellaSharedFileList().add(torrentFile);
-        fileManager.getGnutellaSharedFileList().add(userTorrentFile);
-        fileManager.getGnutellaSharedFileList().add(appTextFile);
-        fileManager.getGnutellaSharedFileList().add(appTorrentFile);
-        waiter.waitForLoad();
-        fileManager.getGnutellaSharedFileList().removeFileListListener(waiter);
-                
-    	assertEquals(5, fileManager.getGnutellaSharedFileList().size());
-    }
     
     private UploadManagerStub uploadManagerStub;
-
-    private FileManager fileManager;
 
     private NetworkManagerStub networkManagerStub;
 
@@ -106,9 +69,32 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
             }
         });
-        // done before super.setUp since needed in setSettings which is called from there
-        fileManager = injector.getInstance(FileManager.class);
+        
         super.setUp(injector);
+        
+        File torrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,TORRENT_FILE);
+        File appTextFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE,APP_TXT);
+        File appTorrentFile = new File(LibraryUtils.APPLICATION_SPECIAL_SHARE, OTHER_TORRENT);
+        FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/resources/somefile.torrent"), torrentFile);
+        FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/resources/somefile2.txt"), appTextFile);
+        FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/resources/other.torrent"), appTorrentFile);
+        
+        File textFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/somefile.txt");
+        File userTorrentFile = TestUtils.getResourceFile("com/limegroup/gnutella/resources/somefile2.torrent");
+
+        someFileMatches.add(TEXT_FILE);
+        someFileMatches.add(TORRENT_FILE);
+        someFileMatches.add(USER_TORRENT);
+        someFileMatches.add(APP_TXT);        
+        
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(textFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(torrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(userTorrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(appTextFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(appTorrentFile).get(1, TimeUnit.SECONDS));
+        fileManager.getGnutellaSharedFileList().remove(berkeleyFD);
+        fileManager.getGnutellaSharedFileList().remove(susheelFD);
+        assertEquals(5, fileManager.getGnutellaSharedFileList().size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
@@ -239,24 +225,6 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	List<Response> responses = reply.getResultsAsList();
     	assertEquals(1, responses.size());
     	assertEquals(TORRENT_FILE, responses.get(0).getName());
-    }
-    
-    private static class FileEventListenerWaiter implements EventListener<FileListChangedEvent> {
-        private final CountDownLatch latch;
-        
-        public FileEventListenerWaiter(int waitings) {
-            this.latch = new CountDownLatch(waitings);
-        }
-
-        public void handleEvent(FileListChangedEvent evt) {
-            if(evt.getType() == FileListChangedEvent.Type.ADDED)
-                latch.countDown();            
-        }
-        
-        public void waitForLoad() throws Exception {
-            latch.await(5, TimeUnit.SECONDS);
-        }
-        
     }
 }
 

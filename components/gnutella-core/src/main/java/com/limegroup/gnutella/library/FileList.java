@@ -114,7 +114,7 @@ public interface FileList extends Iterable<FileDesc> {
      * default iterator, though, so only use it if absolutely
      * necessary.
      */
-    Iterable<FileDesc> pausableIterator();
+    Iterable<FileDesc> pausableIterable();
     
     /**
      * Returns the number of files in this list. 

@@ -16,7 +16,6 @@ import junit.framework.Test;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SpeedConstants;
 import org.limewire.listener.EventListener;
@@ -53,7 +52,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * assume that an Ultrapeer will be equally functional.
  * 
  */
-@SuppressWarnings( { "unchecked", "cast", "deprecation" } )
+@SuppressWarnings( { "unchecked", "cast" } )
 public class ServerSideWhatIsNewTest 
     extends ClientSideTestCase {
     private static final int PORT=6669;
@@ -88,7 +87,6 @@ public class ServerSideWhatIsNewTest
         junit.textui.TestRunner.run(suite());
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public void setSettings() throws Exception {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
@@ -99,32 +97,8 @@ public class ServerSideWhatIsNewTest
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        
         //  Required so that the "swarmDownloadCatchesEarlyCreationTest" actually works  =)
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
-        LimeTestUtils.setSharedDirectories( new File[] { _sharedDir, _savedDir } );
-        // get the resource file for com/limegroup/gnutella
-        berkeley = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        susheel = 
-            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir
-        File berkeleyDest = new File(_sharedDir, "berkeley.txt");
-        File susheelDest = new File(_sharedDir, "susheel.txt");
-        
-        FileUtils.copy(berkeley, berkeleyDest);
-        // make sure their creation times are a little different.
-        int sleeps = 0;
-        do {
-            Thread.sleep(10);
-            FileUtils.copy(susheel, susheelDest);
-        } while (susheelDest.lastModified() == berkeleyDest.lastModified() && ++sleeps < 100);
-        if (sleeps >= 10 && susheelDest.lastModified() == berkeleyDest.lastModified())
-            fail("couldn't create a file with newer timestamp");
-        
-        berkeley = berkeleyDest;
-        susheel = susheelDest;
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -140,8 +114,12 @@ public class ServerSideWhatIsNewTest
         creationTimeCache = injector.getInstance(CreationTimeCache.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         downloadServices = injector.getInstance(DownloadServices.class);
-
-        FileManagerTestUtils.waitForLoad(fileManager,500);
+        berkeley =  TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        berkeley.setLastModified(berkeley.lastModified()+1000);
+        susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        susheel.setLastModified(susheel.lastModified()+1000);
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS));
         
         exchangeCapabilitiesMessage();
     }
@@ -350,14 +328,8 @@ public class ServerSideWhatIsNewTest
         assertNotEquals("couldn't set up test",tempFile2.lastModified(), previousTime);
         
         // now move them to the share dir
-        FileUtils.copy(tempFile1, new File(_sharedDir, "tempFile1.txt"));
-        FileUtils.copy(tempFile2, new File(_sharedDir, "tempFile2.txt"));
-        tempFile1 = new File(_sharedDir, "tempFile1.txt");
-        tempFile2 = new File(_sharedDir, "tempFile2.txt");
-        assertTrue(tempFile1.exists());
-        assertTrue(tempFile2.exists());
-
-        FileManagerTestUtils.waitForLoad(fileManager, 1000);
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(tempFile1).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(tempFile2).get(1, TimeUnit.SECONDS));
         assertEquals("Files were not loaded by filemanager", 4, fileManager.getGnutellaSharedFileList().size());
 
         URN tempFile1URN = fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn();
@@ -629,9 +601,10 @@ public class ServerSideWhatIsNewTest
     public void testManualFileDeleteLoadSettings() throws Exception {
         FileManager fm = fileManager;
 
-        tempFile1.delete(); tempFile1 = null;
-        tempFile2.delete(); tempFile2 = null;
-        berkeley.delete(); berkeley = null;
+        fail("fix this test to not delete files, or rewrite to allow deleting");
+//        tempFile1.delete(); tempFile1 = null;
+//        tempFile2.delete(); tempFile2 = null;
+//        berkeley.delete(); berkeley = null;
 
         ((ManagedFileListImpl)fm.getManagedFileList()).loadSettings();
         Thread.sleep(2000);
@@ -658,7 +631,6 @@ public class ServerSideWhatIsNewTest
         List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
         for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
-            fd.getFile().delete();
         }
         longToUrns = ctCache.getTimeToUrn();
         final int UPLOADER_PORT = 10000;
@@ -709,7 +681,6 @@ public class ServerSideWhatIsNewTest
         List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
         for (FileDesc fd : fds) {
             fileManager.getGnutellaSharedFileList().remove(fd.getFile());
-            fd.getFile().delete();
         }
 
         final int UPLOADER_PORT = 20000;

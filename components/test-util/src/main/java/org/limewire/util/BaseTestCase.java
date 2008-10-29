@@ -142,17 +142,19 @@ public abstract class BaseTestCase extends AssertComparisons {
      * Recursively delete a directory.
      */
     protected static void cleanFiles(File dir, boolean deleteDirs) {
-        if ( dir == null ) return;
-        
+        if (dir == null)
+            return;
+
         File[] files = dir.listFiles();
-        for(int i=0; files != null && i < files.length; i++) {
-            if ( files[i].isDirectory() ) {
+        for (int i = 0; files != null && i < files.length; i++) {
+            if (files[i].isDirectory()) {
                 cleanFiles(files[i], deleteDirs);
             } else {
                 files[i].delete();
             }
         }
-        if ( deleteDirs ) dir.delete();
+        if (deleteDirs)
+            dir.delete();
     }
 
     /**

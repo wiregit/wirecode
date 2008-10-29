@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.AssertionFailedError;
@@ -153,17 +155,6 @@ public class AltLocUploadTest extends LimeTestCase {
         
         doSettings();
 
-        File testDir = TestUtils.getResourceFile(testDirName);
-        assertTrue("test directory could not be found", testDir.isDirectory());
-        File testFile = new File(testDir, fileName);
-        assertTrue("test file should exist", testFile.exists());
-        File sharedFile = new File(_sharedDir, fileName);
-        // we must use a separate copy method
-        // because the filename has a # in it which can't be a resource.
-        LimeTestUtils.copyFile(testFile, sharedFile);
-        assertTrue("should exist", sharedFile.exists());
-        assertGreaterThan("should have data", 0, sharedFile.length());
-
         // initialize services
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
@@ -180,8 +171,11 @@ public class AltLocUploadTest extends LimeTestCase {
         
         FileManager fileManager = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fileManager, 2000);
-        
-        fd = fileManager.getGnutellaSharedFileList().getFileDesc(sharedFile);
+        File testDir = TestUtils.getResourceFile(testDirName);
+        assertTrue("test directory could not be found", testDir.isDirectory());
+        File testFile = new File(testDir, fileName);
+        Future<FileDesc> f1 = fileManager.getGnutellaSharedFileList().add(testFile);
+        fd = f1.get(1, TimeUnit.SECONDS);
         assertNotNull(fd);
         
         altLocManager = injector.getInstance(AltLocManager.class);

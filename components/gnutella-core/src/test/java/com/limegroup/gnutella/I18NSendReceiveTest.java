@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -98,33 +99,9 @@ public class I18NSendReceiveTest extends LimeTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         PingPongSettings.PINGS_ACTIVE.setValue(false);
-
-        setUpFiles();
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }
 
-    private static void setUpFiles() throws Exception {
-        
-        File dir = new File("com/limegroup/gnutella/");
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        
-        for(int i = 0; i < FILES.length; i++) {
-            File f = new File(dir, FILES[i]);
-            if(!f.exists()) {
-                f.createNewFile();
-                //make sure its not 0kb
-                FileOutputStream fo = new FileOutputStream(f);
-                BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fo));
-                buf.write("a");
-                buf.flush();
-                buf.close();
-            }
-            FileUtils.copy(f, new File(_sharedDir, FILES[i]));
-        }
-
-    }
 
     @Override
     protected void setUp() throws Exception {
@@ -143,7 +120,23 @@ public class I18NSendReceiveTest extends LimeTestCase {
         
         lifecycleManager.start();
         connectionServices.connect();
-        connect();
+        connect();        
+
+        for(int i = 0; i < FILES.length; i++) {
+            File f = new File(_scratchDir, FILES[i]);
+            if(!f.exists()) {
+                f.createNewFile();
+                //make sure its not 0kb
+                FileOutputStream fo = new FileOutputStream(f);
+                BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fo));
+                buf.write("a");
+                buf.flush();
+                buf.close();
+            }
+            File file = new File(_scratchDir, FILES[i]);
+            FileUtils.copy(f, file);
+            assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+        }
     }
 
     @Override
@@ -307,7 +300,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
     private void addMetaData(String fname, String xmlstr) throws Exception {
         FileManager fm = fileManager;
         FileDesc fd = 
-            fm.getManagedFileList().getFileDesc(new File(_sharedDir, fname));
+            fm.getManagedFileList().getFileDesc(new File(_scratchDir, fname));
         
         LimeXMLDocument newDoc = 
             limeXMLDocumentFactory.createLimeXMLDocument(buildXMLString(xmlstr));

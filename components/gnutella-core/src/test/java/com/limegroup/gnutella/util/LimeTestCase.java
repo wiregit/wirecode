@@ -8,6 +8,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
@@ -23,7 +24,6 @@ import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.LimeCoreGlue;
-import com.limegroup.gnutella.LimeTestUtils;
 
 /**
  * Should be used when the test case requires to change settings.
@@ -31,11 +31,11 @@ import com.limegroup.gnutella.LimeTestUtils;
 public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback {
     
     protected static File _baseDir;
-    protected static File _sharedDir;
     protected static File _savedDir;
     protected static File _storeDir;
     protected static File _incompleteDir;
     protected static File _settingsDir;
+    protected static File _scratchDir;
     
 	/**
 	 * Unassigned port for tests to use.
@@ -67,13 +67,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      */
     protected File getSaveDirectory() {
         return _savedDir;
-    }
-    
-    /**
-     * Get test shared directory
-     */
-    protected File getSharedDirectory() {
-        return _sharedDir;
     }
     
     /**
@@ -198,6 +191,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SettingsGroupManager.instance().revertToDefault();
         LimeProps.instance().getFactory().getRevertSetting().setValue(false);
         MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
+        LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         ApplicationSettings.INITIALIZE_SIMPP.setValue(false);
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
@@ -215,7 +209,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         if(!GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadlessInstance())
             UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-        LimeTestUtils.setSharedDirectories( new File[] { _sharedDir } );
     }
     
     /**
@@ -243,15 +236,15 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
             _baseDir = createNewBaseDirectory( _testClass.getName() );
         }
         _savedDir = new File(_baseDir, "saved");
-        _sharedDir = new File(_baseDir, "shared");
         _settingsDir = new File(_baseDir, "settings");
         _storeDir = new File(_baseDir, "store");
+        _scratchDir = new File(_scratchDir, "scratch");
 
         _baseDir.mkdirs();
         _savedDir.mkdirs();
-        _sharedDir.mkdirs();
         _storeDir.mkdirs();
         _settingsDir.mkdirs();
+        _scratchDir.mkdirs();
         
         // set the settings directory, then immediately change it.
         LimeCoreGlue.preinstall(_settingsDir);

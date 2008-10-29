@@ -365,7 +365,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Iterable<FileDesc> pausableIterator() {
+    public Iterable<FileDesc> pausableIterable() {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
@@ -455,7 +455,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         } catch (IOException e) {
             dispatch(new FileListChangedEvent(this, failEvent, file));
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent));
+            future.setException(new AddFailedException(failEvent, "Can't canonicalize file"));
             return future;
         }
         
@@ -477,7 +477,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
             dispatch(new FileListChangedEvent(this, failEvent, file));     
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent));
+            future.setException(new AddFailedException(failEvent, "File isn't physically manageable"));
             return future;
         }
 
@@ -501,7 +501,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         if(failed) {
             dispatch(new FileListChangedEvent(this, failEvent, file));
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent));
+            future.setException(new AddFailedException(failEvent, "Revisions changed while loading"));
             return future;
         } else {
             PendingFuture task = new PendingFuture();
@@ -529,74 +529,79 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     private void finishLoadingFileDesc(File file, Set<? extends URN> urns, List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc, PendingFuture task) {
-            FileDesc fd = null;
-            rwLock.writeLock().lock();
-            try {
-                if(rev != revision.get()) {
-                    LOG.warn("Revisions changed, dropping share.");
-                } else {
-                    numPendingFiles--;
-                    
-                    // Only load the file if we were able to calculate URNs 
-                    // assume the fd is being shared
-                    if(!urns.isEmpty()) {
-                        fd = createFileDesc(file, urns, files.size());
-                    }
-                }
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-            
-            FileListChangedEvent.Type failEvent = oldFileDesc != null ?
-                    FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
-            
-            if(fd == null) {
-                dispatch(new FileListChangedEvent(this, failEvent, file));
-                task.setException(new AddFailedException(failEvent));
-                return;
-            }
-                
-            // try loading the XML for this fileDesc
-            fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));
-            
-            boolean failed = false;
-            rwLock.writeLock().lock();
-            try {
-                if(contains(file)) {
-                    failed = true;
-                } else {
-                    files.add(fd);
-                    fileToFileDescMap.put(file, fd);
-                    updateUrnIndex(fd);
-                }
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-            
-            if(failed) {
-                dispatch(new FileListChangedEvent(this, failEvent, file));
-                task.setException(new AddFailedException(failEvent));
-            } else if(oldFileDesc == null) {
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fd));
-                task.set(fd);
+        FileDesc fd = null;
+        rwLock.writeLock().lock();
+        try {
+            if(rev != revision.get()) {
+                LOG.warn("Revisions changed, dropping share.");
             } else {
-                dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, fd));
-                task.set(fd);
-            }
-            
-            boolean finished = false;
-            rwLock.writeLock().lock();
-            try {
-                if(numPendingFiles == 0) {
-                    pendingFinished = rev;
-                    finished = true;
+                numPendingFiles--;
+                
+                // Only load the file if we were able to calculate URNs 
+                // assume the fd is being shared
+                if(!urns.isEmpty()) {
+                    fd = createFileDesc(file, urns, files.size());
                 }
-            } finally {
-                rwLock.writeLock().unlock();
-            
-            if (finished) {
-                tryToFinish();
             }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        FileListChangedEvent.Type failEvent = oldFileDesc != null ?
+                FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
+        
+        if(fd == null) {
+            dispatch(new FileListChangedEvent(this, failEvent, file));
+            task.setException(new AddFailedException(failEvent, "Couldn't create FD"));
+            return;
+        }
+            
+        // try loading the XML for this fileDesc
+        fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));
+        
+        boolean failed = false;
+        rwLock.writeLock().lock();
+        try {
+            if(contains(file)) {
+                failed = true;
+                fd = getFileDesc(file);
+            } else {
+                files.add(fd);
+                fileToFileDescMap.put(file, fd);
+                updateUrnIndex(fd);
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        // It is very important that the events get dispatched
+        // prior to setting the value on the task, so that other FileLists
+        // listening to these events can receive & process the event
+        // prior to the future.get() returning.
+        if(failed) {
+            dispatch(new FileListChangedEvent(this, failEvent, file));
+            task.set(fd); // Not a failure set because we already have a file by that name
+        } else if(oldFileDesc == null) {
+            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fd));
+            task.set(fd);
+        } else {
+            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGED, oldFileDesc, fd));
+            task.set(fd);
+        }
+        
+        boolean finished = false;
+        rwLock.writeLock().lock();
+        try {
+            if(numPendingFiles == 0) {
+                pendingFinished = rev;
+                finished = true;
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        if (finished) {
+            tryToFinish();
         }
     }
     
