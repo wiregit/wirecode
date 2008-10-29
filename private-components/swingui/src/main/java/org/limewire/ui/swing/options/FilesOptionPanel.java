@@ -35,6 +35,7 @@ import com.google.inject.Singleton;
 public class FilesOptionPanel extends OptionPanel {
     
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
+    private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
     
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
@@ -43,10 +44,10 @@ public class FilesOptionPanel extends OptionPanel {
     
     // Somebody needs this for testing the options panel without limewire?
     public static FilesOptionPanel createTestingFilesOptionPanel() {
-        return new FilesOptionPanel();
+        return null;//new FilesOptionPanel();
     }
         
-    
+    /*
     private FilesOptionPanel() {
         this(new ManageSaveFoldersOptionPanelFactory() {
 
@@ -62,11 +63,13 @@ public class FilesOptionPanel extends OptionPanel {
             
         });
     }
-    
+    */
     @Inject
-    FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory) { 
+    FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
+            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel) { 
         
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
+        this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
@@ -138,7 +141,7 @@ public class FilesOptionPanel extends OptionPanel {
         public ManageExtensionsPanel() {
             super(I18n.tr("Manage Extensions"));
             
-            extensionsPanel = new ManageFileExtensionsOptionPanel(new OKDialogAction(), new CancelDialogAction());
+            extensionsPanel = manageFileExtensionsOptionPanel;
             
             manageButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     extensionsPanel, I18n.tr("Manage file extensions"),

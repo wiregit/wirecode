@@ -56,11 +56,13 @@ public final class FileTypeOptionPanelManager {
     
     private final ExtensionProvider extensionProvider = new ExtensionProvider();
     private final ExtensionsExtrasProvider extensionExtrasProvider = new ExtensionsExtrasProvider();
+    private final Set<String> mediaNames;
     
     private Set<Category> mediaKeys;
     private Set<Category> mediaUnchecked;   
     private Category currentKey;
     
+    // Used if extensions will be add-able in the future
 //    private CheckBoxList<String> otherPanel;
 //    private Category otherKey;
     
@@ -81,6 +83,11 @@ public final class FileTypeOptionPanelManager {
         this.mainContainer   = new JPanel(new BorderLayout());        
         this.mediaLayout  = new CardLayout();
         this.currentPanel = new JPanel(mediaLayout);
+        
+        mediaNames = new HashSet<String>();
+        for ( MediaType mt : MediaType.getDefaultMediaTypes() ) {
+            mediaNames.add(mt.toString()); // TODO: should be the name, need to confirm
+        }
     }
     
     /**
@@ -334,7 +341,7 @@ public final class FileTypeOptionPanelManager {
         return false;
     }
 
-    public boolean isDirty() {
+    public boolean hasChanged() {
         return !this.originalExtensions.equals(this.getExtensions());
     }
     
@@ -387,18 +394,31 @@ public final class FileTypeOptionPanelManager {
     
     
     
+    private String getDescriptionText(String obj) {
+        if (obj == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        Icon icon = iconManager.getIconForExtension(obj);
+        
+        if (icon == null) {
+            return null;
+        }
+        
+        if (icon.toString().indexOf("@") > -1) {
+            return null;
+        }
+        
+        if (mediaNames.contains(icon.toString())) {
+            return null;
+        }
+        
+        return icon.toString();
+    }
+    
     // Providers   
     
     private class ExtensionProvider implements CheckBoxList.TextProvider<String> {
-        
-        private Set<String> mediaNames;
-        
-        public ExtensionProvider() {
-            mediaNames = new HashSet<String>();
-            for ( MediaType mt : MediaType.getDefaultMediaTypes() ) {
-                mediaNames.add(mt.toString()); // TODO: should be the name, need to confirm
-            }
-        }
         
         public String getText(String obj) {
             if (obj == null) {
@@ -409,30 +429,12 @@ public final class FileTypeOptionPanelManager {
         }
         
         public String getToolTipText(String obj) {
-            if (obj == null) {
-                throw new IllegalArgumentException();
-            }
-            
-            Icon icon = iconManager.getIconForExtension(obj);
-            
-            if (icon == null) {
-                return null;
-            }
-            
-            if (icon.toString().indexOf("@") > -1) {
-                return null;
-            }
-            
-            if (mediaNames.contains(icon.toString())) {
-                return null;
-            }
-            
-            return icon.toString(); 
+            return getDescriptionText(obj);
         }
 
         public Icon getIcon(String obj) {
             if (obj == null) {
-                throw new IllegalArgumentException();
+                throw new NullPointerException("Null object passed to icon lookup.");
             }
             
             Icon icon = iconManager.getIconForExtension(obj);
@@ -501,7 +503,7 @@ public final class FileTypeOptionPanelManager {
 
         @Override
         public String getComment(String obj) {
-            return "Media file.";
+            return getDescriptionText(obj);
         }
 
         @Override
