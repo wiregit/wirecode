@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import junit.framework.Test;
 
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
@@ -11,8 +12,6 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.PingPongSettings;
 import org.limewire.core.settings.UltrapeerSettings;
-
-import junit.framework.Test;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
@@ -129,7 +128,6 @@ public final class PongCachingTest extends LimeTestCase {
         // TODO hack: increment static field server port so each test case has its own port
         SERVER_PORT++;
         NetworkSettings.PORT.setValue(SERVER_PORT);
-        LimeTestUtils.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);

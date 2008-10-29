@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.setting.AbstractSettingsGroup;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.setting.evt.SettingsGroupEvent.EventType;
@@ -15,7 +14,7 @@ import org.limewire.setting.evt.SettingsGroupEvent.EventType;
  */
 @Deprecated
 @SuppressWarnings("deprecation")
-public class OldLibraryData extends AbstractSettingsGroup {
+final class OldLibraryData extends AbstractSettingsGroup {
     
     /**
      * The Container data, storing all the information.

@@ -1,7 +1,8 @@
-package org.limewire.core.settings;
+package com.limegroup.gnutella.library;
 
 import java.io.File;
 
+import org.limewire.core.settings.LimeProps;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.StringArraySetting;
@@ -9,7 +10,7 @@ import org.limewire.setting.StringSetting;
 
 /** List of all old library settings. */
 @Deprecated
-public class OldLibrarySettings extends LimeProps {
+final class OldLibrarySettings extends LimeProps {
     
     private static final String DEFAULT_EXTENSIONS_TO_SHARE =
         "asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;mp4;wav;wax;au;aif;aiff;"+

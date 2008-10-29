@@ -10,16 +10,13 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.nio.NIODispatcher;
@@ -155,11 +152,6 @@ public class LimeTestUtils {
 	    for(int i = 0; i < files.length; i++)
 	        files[i].delete();
 	}
-    
-    public static void setSharedDirectories(File[] dirs) {
-        Set<File> set = new HashSet<File>(Arrays.asList(dirs));
-        OldLibrarySettings.DIRECTORIES_TO_SHARE.setValue(set);
-    }
 
     /**
      * Creates the Guice injector with the limewire default modules and the 

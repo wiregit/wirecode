@@ -12,7 +12,6 @@ import java.util.Properties;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -35,7 +34,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Allows a testcase to easily interact with a fully running LimeWire.
  */
-@SuppressWarnings("deprecation")
 public abstract class PeerTestCase extends LimeTestCase {
     
     public static final int SERVER_PORT = 6669;
@@ -73,7 +71,6 @@ public abstract class PeerTestCase extends LimeTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.NUM_CONNECTIONS.setValue(0);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        

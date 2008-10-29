@@ -41,7 +41,6 @@ import org.jmock.api.Invocation;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
@@ -92,7 +91,6 @@ import com.limegroup.gnutella.uploader.authentication.GnutellaBrowseFileListProv
 import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-@SuppressWarnings("deprecation")
 public class AltLocUploadTest extends LimeTestCase {
 
     private static final int PORT = 6668;
@@ -191,7 +189,6 @@ public class AltLocUploadTest extends LimeTestCase {
         Thread.sleep(1000);
     }
 
-    @SuppressWarnings("deprecation")
     private void doSettings() throws UnknownHostException {
         SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
         FilterSettings.BLACK_LISTED_IP_ADDRESSES
@@ -199,8 +196,6 @@ public class AltLocUploadTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
         NetworkSettings.PORT.setValue(PORT);
-
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);

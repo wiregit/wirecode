@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -63,7 +62,6 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
 	
     @Override
     public void setSettings() throws Exception {
-        LimeTestUtils.setSharedDirectories(new File[0]);
     }
 
     public void quickDrainAll() throws Exception {

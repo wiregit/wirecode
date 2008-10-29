@@ -6,8 +6,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -21,7 +21,6 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.util.TestUtils;
@@ -41,12 +40,9 @@ import com.limegroup.gnutella.util.LimeTestCase;
 /**
  * Test that a client uploads a list of files correctly.
  */
-@SuppressWarnings("deprecation")
 public class BrowseTest extends LimeTestCase {
 
     private final int PORT = 6668;
-
-    private File sharedDirectory;
 
     private HttpClient client;
 
@@ -71,30 +67,8 @@ public class BrowseTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void setUp() throws Exception {
-
-        String directoryName = "com/limegroup/gnutella";
-        sharedDirectory = TestUtils.getResourceFile(directoryName);
-        sharedDirectory = sharedDirectory.getCanonicalFile();
-        assertTrue("Could not find directory: " + directoryName,
-                sharedDirectory.isDirectory());
-
-        File[] testFiles = sharedDirectory.listFiles(new FileFilter() {
-            public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".class");
-            }
-        });
-        assertNotNull("No files to test against", testFiles);
-        assertGreaterThan("Not enough files to test against", 50,
-                testFiles.length);
-
-    
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("class");
-        OldLibrarySettings.DIRECTORIES_TO_SHARE.setValue(Collections
-                .singleton(sharedDirectory));
-
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.PORT.setValue(PORT);
 
@@ -104,7 +78,17 @@ public class BrowseTest extends LimeTestCase {
         messageFactory = injector.getInstance(MessageFactory.class);
         client = injector.getInstance(LimeHttpClient.class);
         
-        FileManagerTestUtils.waitForLoad(fileManager,100000);
+        FileManagerTestUtils.waitForLoad(fileManager,2000);
+        File shareDir = TestUtils.getResourceFile("com/limegroup/gnutella");
+        File[] testFiles = shareDir.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return !file.isDirectory() && file.getName().endsWith(".class");
+            }
+        });
+        assertGreaterThan("Not enough files to test against", 50, testFiles.length);
+        for(File file : testFiles) {
+            assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+        }
         
         host = protocol + "://localhost:" + PORT;
     }

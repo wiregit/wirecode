@@ -1,10 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -17,9 +13,7 @@ import java.net.UnknownHostException;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.service.ErrorCallback;
@@ -30,7 +24,6 @@ import com.google.inject.Guice;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.LogUtils;
 
 /**
  * Utility class that constructs a LimeWire backend for testing

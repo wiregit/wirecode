@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.util.FileUtils;
@@ -70,6 +69,8 @@ class LibraryConverter {
         
         newData.addDirectoryToManageRecursively(SharingSettings.getSaveLWSDirectory());
         
+        newData.addDirectoryToManageRecursively(SharingSettings.getSaveDirectory());
+        
         LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         
         oldData.revertToDefault();
@@ -78,9 +79,6 @@ class LibraryConverter {
         OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.revertToDefault();
         OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.revertToDefault();
         OldLibrarySettings.EXTENSIONS_TO_SHARE.revertToDefault();
-        for(MediaType type : MediaType.getDefaultMediaTypes()) {
-            SharingSettings.getFileSettingForMediaType(type).revertToDefault();
-        }
     }
     
     private void convertSharedFiles(LibraryFileData data) {
