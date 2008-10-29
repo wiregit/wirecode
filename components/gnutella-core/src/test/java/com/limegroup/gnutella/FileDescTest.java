@@ -137,6 +137,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
         "cups","ups","=="
         });
+        Thread.sleep(100); //allow setting event to propagate
         assertFalse(fd.isRareFile());
         fd.incrementCompletedUploads();
         assertFalse(fd.isRareFile());
@@ -148,6 +149,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
         DHTSettings.RARE_FILE_DEFINITION.setValue(new String[] {
                 "badger","badger"
                 });
+        Thread.sleep(100); //allow setting event to propagate
         assertFalse(fd.isRareFile());
     }
 }
