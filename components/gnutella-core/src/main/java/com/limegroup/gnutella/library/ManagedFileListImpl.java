@@ -407,7 +407,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     @Override
     public void setManagedExtensions(Collection<String> extensions) {
-        throw new UnsupportedOperationException("Implement Me");
+        getLibraryData().setManagedExtensions(extensions);
     }
     
     @Override
