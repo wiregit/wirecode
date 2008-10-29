@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -23,7 +23,6 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.core.settings.OldLibrarySettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
@@ -43,7 +42,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-@SuppressWarnings("deprecation")
 public class BrowseHostHandlerTest extends LimeTestCase {
 
     private final int PORT = 6668;
@@ -68,31 +66,9 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     public static void main(String args[]) {
         junit.textui.TestRunner.run(suite());
     }
-
-    @SuppressWarnings("deprecation")
+    
     @Override
     protected void setUp() throws Exception {
-
-        String directoryName = "com/limegroup/gnutella";
-        File sharedDirectory = TestUtils.getResourceFile(directoryName);
-        sharedDirectory = sharedDirectory.getCanonicalFile();
-        assertTrue("Could not find directory: " + directoryName,
-                sharedDirectory.isDirectory());
-
-        File[] testFiles = sharedDirectory.listFiles(new FileFilter() {
-            public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".class");
-            }
-        });
-        assertNotNull("No files to test against", testFiles);
-        assertGreaterThan("Not enough files to test against", 50,
-                testFiles.length);
-
-
-        OldLibrarySettings.EXTENSIONS_TO_SHARE.setValue("class");
-        OldLibrarySettings.DIRECTORIES_TO_SHARE.setValue(Collections
-                .singleton(sharedDirectory));
-
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         NetworkSettings.PORT.setValue(PORT);
 
@@ -105,8 +81,18 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         fileManager = injector.getInstance(FileManager.class);
 
-        FileManagerTestUtils.waitForLoad(fileManager,100000);
-
+        FileManagerTestUtils.waitForLoad(fileManager, 5000);
+        
+        File dir = TestUtils.getResourceFile("com/limegroup/gnutella");
+        File[] testFiles = dir.listFiles(new FileFilter() {
+            public boolean accept(File file) {
+                return !file.isDirectory() && file.getName().endsWith(".class");
+            }
+        });
+        for(File file : testFiles) {
+            assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+        }
+        assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         assertGreaterThan(0, fileManager.getGnutellaSharedFileList().size());
 
         browseHostHandler = injector.getInstance(BrowseHostHandlerManager.class).createBrowseHostHandler(new GUID(), new GUID());
@@ -139,7 +125,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket, null);
+            browseHostHandler.browseHost(socket, new AnonymousPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -152,7 +138,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
-        browseHostHandler.browseHost(socket, null);
+        browseHostHandler.browseHost(socket, new AnonymousPresence());
 
         List<String> files = new ArrayList<String>();
         for(QueryReply reply : queryReplyHandler.replies) {
@@ -201,7 +187,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
         try {
-            browseHostHandler.browseHost(socket, null);
+            browseHostHandler.browseHost(socket, new AnonymousPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -228,7 +214,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket, null);
+            browseHostHandler.browseHost(socket, new AnonymousPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -240,12 +226,64 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new StubFriendPresence("Hello There")));
     }
     
+    private static class AnonymousPresence implements FriendPresence {
+        @Override
+        public byte[] getAuthToken() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        @Override
+        public Friend getFriend() {
+            return new Friend() {
+                @Override
+                public String getId() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+                @Override
+                public String getName() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+                @Override
+                public Network getNetwork() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+                @Override
+                public String getRenderName() {
+                    // TODO Auto-generated method stub
+                    return null;
+                }
+                @Override
+                public boolean isAnonymous() {
+                    return true;
+                }
+                @Override
+                public void setName(String name) {
+                    // TODO Auto-generated method stub
+                    
+                }
+            };
+        }
+        @Override
+        public Address getPresenceAddress() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        @Override
+        public String getPresenceId() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    }
+    
     private static class StubFriendPresence implements FriendPresence {
 
-        private final String presenceId;
+        private final String myId;
 
-        public StubFriendPresence(String presenceId) {
-            this.presenceId = presenceId;
+        public StubFriendPresence(String myId) {
+            this.myId = myId;
         }
         
         @Override
@@ -269,7 +307,16 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
                 @Override
                 public Network getNetwork() {
-                    return null;
+                    return new Network() {
+                        @Override
+                        public String getMyID() {
+                            return myId;
+                        }
+                        @Override
+                        public String getNetworkName() {
+                            return "";
+                        }
+                    };
                 }
 
                 @Override
@@ -296,7 +343,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         @Override
         public String getPresenceId() {
-            return presenceId;
+            return null;
         }
         
     }
