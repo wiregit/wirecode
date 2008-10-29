@@ -7,6 +7,8 @@ import org.limewire.i18n.I18nMarker;
  */
 public interface Presence {
 
+    enum EventType {PRESENCE_NEW, PRESENCE_UPDATE}
+
     enum Type {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error
     }

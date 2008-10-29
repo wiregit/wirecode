@@ -361,15 +361,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
     }
     
-//    private class LibraryGetter implements PresenceListener {
-//        public void presenceChanged(Presence presence) {
-//            if(presence.getType().equals(Presence.Type.available)) {
-//                if(presence instanceof LimePresence) {
-//                    ((LimePresenceImpl) presence).sendGetLibrary();
-//                }
-//            }
-//        }
-//    }
 
     public void addUser(String id, String name) throws XMPPException {
         Roster roster = connection.getRoster();

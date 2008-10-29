@@ -8,7 +8,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -35,9 +35,10 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
             roster.put(user.getId(), new ArrayList<Presence>());
         }
         final String name = user.getName();
-        user.addPresenceListener(new PresenceListener() {
-            public void presenceChanged(Presence presence) {
+        user.addPresenceListener(new EventListener<PresenceEvent>() {
+            public void handleEvent(PresenceEvent event) {
                 synchronized (RosterListenerMock.this) {
+                    Presence presence = event.getSource();
                     String id = StringUtils.parseBareAddress(presence.getJID());
                     if(presence.getType().equals(Presence.Type.available)) {
                         if(roster.get(id) == null) {

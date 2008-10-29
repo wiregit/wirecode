@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.Presence;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -32,7 +33,7 @@ public class FriendsPaneHarness {
                 for(String name : names) {
                     MockUser user = new MockUser("", name);
                     MockPresence presence = new MockPresence(user, randomMode(), "Sort-in", "jid" + i++);
-                    new PresenceUpdateEvent(presence).publish();
+                    new PresenceUpdateEvent(presence, Presence.EventType.PRESENCE_NEW).publish();
                     presences.add(new Duo(presence));
                 }
 
@@ -45,7 +46,7 @@ public class FriendsPaneHarness {
                         while (true) {
                             Duo duo = presences.get(get1to10());
                             duo.presence.setMode(randomMode());
-                            new PresenceUpdateEvent(duo.presence).publish();
+                            new PresenceUpdateEvent(duo.presence, Presence.EventType.PRESENCE_NEW).publish();
                             try {
                                 Thread.sleep(10000);
                             } catch (InterruptedException e) {

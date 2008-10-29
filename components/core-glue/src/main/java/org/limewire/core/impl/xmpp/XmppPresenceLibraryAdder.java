@@ -4,10 +4,12 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
@@ -37,8 +39,11 @@ class XmppPresenceLibraryAdder implements RegisteringEventListener<RosterEvent> 
     }    
 
     private void userAdded(User user) {
-        user.addPresenceListener(new PresenceListener() {            
-            public void presenceChanged(final Presence presence) {
+        user.addPresenceListener(new EventListener<PresenceEvent>() {
+
+            @BlockingEvent
+            public void handleEvent(PresenceEvent event) {
+                Presence presence = event.getSource();
                 if(presence instanceof FriendPresence) {
                     FriendPresence fPresence = (FriendPresence)presence;
                     if(presence.getType().equals(Presence.Type.available)) {

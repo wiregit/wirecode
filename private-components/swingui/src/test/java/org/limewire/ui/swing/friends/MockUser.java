@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.core.api.friend.Network;
+import org.limewire.listener.EventListener;
 
 public class MockUser implements User {
     private String id;
@@ -23,7 +24,7 @@ public class MockUser implements User {
     }
 
     @Override
-    public void addPresenceListener(PresenceListener presenceListener) {
+    public void addPresenceListener(EventListener<PresenceEvent> presenceListener) {
         // TODO Auto-generated method stub
 
     }

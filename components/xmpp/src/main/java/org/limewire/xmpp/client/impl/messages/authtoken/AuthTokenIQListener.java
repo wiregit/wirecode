@@ -14,11 +14,12 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.LimePresenceImpl;
@@ -124,8 +125,11 @@ public class AuthTokenIQListener implements PacketListener {
     }
 
     private void userAdded(User user) {
-        user.addPresenceListener(new PresenceListener() {
-            public void presenceChanged(Presence presence) {
+        user.addPresenceListener(new EventListener<PresenceEvent>() {
+
+            @BlockingEvent
+            public void handleEvent(PresenceEvent event) {
+                Presence presence = event.getSource();
                 if(presence.getType().equals(Presence.Type.available)) {
                     if(presence instanceof LimePresence) {
                         synchronized (AuthTokenIQListener.this) {

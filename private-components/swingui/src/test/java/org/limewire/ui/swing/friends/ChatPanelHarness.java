@@ -16,6 +16,7 @@ import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -69,7 +70,8 @@ public class ChatPanelHarness {
             @Override
             public void actionPerformed(ActionEvent e) {
                 User user = new MockUser(idField.getText(), nameField.getText());
-                new PresenceUpdateEvent(new MockPresence(user, Mode.available, moodField.getText(), idField.getText())).publish();
+                new PresenceUpdateEvent(new MockPresence(user, Mode.available, moodField.getText(), idField.getText()),
+                        Presence.EventType.PRESENCE_NEW).publish();
             }
         });
         builder.append(addFriend, 3);
@@ -89,7 +91,8 @@ public class ChatPanelHarness {
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
             User user = new MockUser(id, "foo");
-            new PresenceUpdateEvent(new MockPresence(user, Mode.available, "hey", id)).publish();
+            new PresenceUpdateEvent(new MockPresence(user, Mode.available, "hey", id),
+                    Presence.EventType.PRESENCE_NEW).publish();
         }
         
         for(int i = 0; i < 50; i++) {

@@ -382,17 +382,20 @@ public class FriendsPane extends JPanel implements FriendRemover {
                     chatFriend.updatePresence(presence);
                 }
                 final ChatFriend initChatFriend = chatFriend;
-                presence.setIncomingChatListener(new IncomingChatListener() {
-                    public MessageReader incomingChat(MessageWriter writer) {
-                        LOG.debugf("{0} is typing a message", presence.getJID());
-                        MessageWriter writerWrapper = new MessageWriterImpl(myID, initChatFriend, writer);
-                        ConversationStartedEvent event = new ConversationStartedEvent(initChatFriend, writerWrapper, false);
-                        event.publish();
-                        //Hang out until a responder has processed this event
-                        event.await();
-                        return new MessageReaderImpl(initChatFriend);
-                    }
-                });
+
+                if (event.isNewPresence()) {
+                    presence.setIncomingChatListener(new IncomingChatListener() {
+                        public MessageReader incomingChat(MessageWriter writer) {
+                            LOG.debugf("{0} is typing a message", presence.getJID());
+                            MessageWriter writerWrapper = new MessageWriterImpl(myID, initChatFriend, writer);
+                            ConversationStartedEvent event = new ConversationStartedEvent(initChatFriend, writerWrapper, false);
+                            event.publish();
+                            //Hang out until a responder has processed this event
+                            event.await();
+                            return new MessageReaderImpl(initChatFriend);
+                        }
+                    });
+                }
                 break;
             case unavailable:
                 if (chatFriend != null) {
@@ -405,7 +408,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         }
         friendsCountUpdater.setFriendsCount(chatFriends.size());
     }
-    
+
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         Message message = event.getMessage();

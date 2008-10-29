@@ -7,9 +7,11 @@ import org.limewire.xmpp.api.client.User;
 public class PresenceUpdateEvent extends AbstractEDTEvent {
     private static final String TOPIC_PREFIX = "presence-";
     private final Presence presence;
+    private final Presence.EventType presenceEventType;
 
-    public PresenceUpdateEvent(Presence presence) {
+    PresenceUpdateEvent(Presence presence, Presence.EventType presenceEventType) {
         this.presence = presence;
+        this.presenceEventType = presenceEventType;
     }
 
     public User getUser() {
@@ -23,7 +25,11 @@ public class PresenceUpdateEvent extends AbstractEDTEvent {
     public static String buildTopic(String friendId) {
         return TOPIC_PREFIX + friendId;
     }
-    
+
+    public boolean isNewPresence() {
+        return presenceEventType == Presence.EventType.PRESENCE_NEW;
+    }
+
     @Override
     public void publish() {
         super.publish(buildTopic(getUser().getId()));
