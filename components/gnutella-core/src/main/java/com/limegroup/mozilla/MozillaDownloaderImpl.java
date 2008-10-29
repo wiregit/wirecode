@@ -174,7 +174,8 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
 
     @Override
     public File getSaveFile() {
-        File saveFile = new File(SharingSettings.getSaveDirectory(), getIncompleteFile().getName());
+        String fileName = getIncompleteFile().getName();
+        File saveFile = new File(SharingSettings.getSaveDirectory(fileName), fileName);
         return saveFile;
     }
     
