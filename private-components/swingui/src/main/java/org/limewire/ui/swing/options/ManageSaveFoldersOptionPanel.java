@@ -2,10 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.Random;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -23,7 +19,6 @@ import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 
@@ -149,17 +144,10 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
             FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
             String newSaveDirString = textField.getText();
             File newSaveDir = new File(newSaveDirString);
-            if(isSaveDirectoryValid(newSaveDir)) {
-                saveDirSetting.setValue(newSaveDir);
-            } else {
-                //revert field back to original value
-                initField(mediaType, textField);
-                //TODO give user feedback
-                throw new UnsupportedOperationException("TODO give feedback to user that this is a bad directory.");
-            }
-        }
+            saveDirSetting.setValue(newSaveDir);
+         }
     }
-
+    
     @Override
     boolean hasChanged() {
         return hasChanged(MediaType.getAudioMediaType(), audioTextField)
@@ -202,69 +190,4 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
             setColumns(40);
         }
     }
-    
-    /**
-     * Utility method for checking whether or not the save directory is valid.
-     * 
-     * @param saveDir the save directory to check for validity
-     * @return <tt>true</tt> if the save directory is valid, otherwise 
-     *  <tt>false</tt>
-     */
-    private static boolean isSaveDirectoryValid(File saveDir) {
-        if(saveDir == null || saveDir.isFile()) 
-            return false;
-
-        if(!saveDir.exists())
-            saveDir.mkdirs();
-        
-        if(!saveDir.isDirectory())
-            return false;
-        
-        FileUtils.setWriteable(saveDir);
-        
-        Random generator = new Random();
-        File testFile = null;
-        for(int i = 0; i < 10 && testFile == null; i++) {
-            StringBuilder name = new StringBuilder();
-            for(int j = 0; j < 8; j++) {
-                name.append((char)('a' + generator.nextInt('z'-'a')));
-            }
-            name.append(".tmp");
-            
-            testFile = new File(saveDir, name.toString());
-            if (testFile.exists()) {
-                testFile = null; // try again!
-            }
-        }
-        
-        if (testFile == null) {
-            return false;
-        }
-        
-        RandomAccessFile testRAFile = null;
-        try {
-            testRAFile = new RandomAccessFile(testFile, "rw");
-         
-            // Try to write something just to make extra sure we're OK.
-            testRAFile.write(7);
-            testRAFile.close();
-        } catch (FileNotFoundException e) {
-            // If we could not open the file, then we can't write to that 
-            // directory.
-            return false;
-        } catch(IOException e) {
-            // The directory is invalid if there was an error writing to it.
-            return false;
-        } finally {
-            // Delete our test file.
-            testFile.delete();
-            try {
-                if(testRAFile != null)
-                    testRAFile.close();
-            } catch (IOException ignored) {}
-        }
-        
-        return saveDir.canWrite();
-    }
-
 }
