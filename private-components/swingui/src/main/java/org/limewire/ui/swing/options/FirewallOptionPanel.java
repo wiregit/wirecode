@@ -78,7 +78,7 @@ public class FirewallOptionPanel extends OptionPanel {
         public ListeningPortPanel() {
             super(I18n.tr("Listening Port"));
             
-            portField = new NumericTextField(5);
+            portField = new NumericTextField(5, 5);
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
@@ -144,7 +144,7 @@ public class FirewallOptionPanel extends OptionPanel {
             buttonGroup.add(portForwardRadioButton);
             buttonGroup.add(doNothingRadioButton);
             
-            portTextField = new NumericTextField(5);
+            portTextField = new NumericTextField(5, 5);
             starLabel = new JLabel(I18n.tr("* You must also configure your router"));
             starLabel.setVisible(false);
             
