@@ -239,6 +239,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 case ADDED:
                 case CHANGED:
                 case REMOVED:
+                case CLEAR:
                     needRebuild = true;
                 }
             }
@@ -250,6 +251,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 case ADDED:
                 case CHANGED:
                 case REMOVED:
+                case CLEAR:
                     needRebuild = true;
                 }   
             }

@@ -279,9 +279,12 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         return resps;
     }
 
-    private void clear() {
-        keywordTrie.clear();
-        incompleteKeywordTrie.clear();
+    private void clear(boolean complete) {
+        if(complete) {
+            keywordTrie.clear();
+        } else {
+            incompleteKeywordTrie.clear();
+        }
     }
     
     private void handleFileListEvent(FileListChangedEvent evt, boolean complete) {
@@ -296,16 +299,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case REMOVED:
             removeFileDesc(evt.getFileDesc(), complete);
             break;
+        case CLEAR:
+            clear(complete);
+            break;
         }
     }
 
     private void handleManagedListStatusEvent(ManagedListStatusEvent evt) {
-        // building tries should be fast and non-blocking so can be done in
-        // dispatch thread
         switch (evt.getType()) {
-        case LOAD_STARTED:
-            clear();
-            break;
         case LOAD_COMPLETE:
             trim();
             break;

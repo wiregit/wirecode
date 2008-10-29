@@ -782,6 +782,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             rwLock.writeLock().unlock();
         }
         
+        dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.CLEAR));
+        
         loadManagedFiles(revision);
 
         LOG.debugf("Finished queueing files for revision: {0}", revision);

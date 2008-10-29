@@ -2,9 +2,7 @@ package org.limewire.core.settings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Set;
 
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
@@ -219,19 +217,6 @@ public class SharingSettings extends LimeProps {
     public static final File getSaveDirectory() { 
     	return DIRECTORY_FOR_SAVING_FILES.getValue();
     }
-    
-    /**  
-      * Gets all potential save directories.  
-     */  
-    public static final Set<File> getAllSaveDirectories() {  
-        Set<File> set = new HashSet<File>(7);  
-        set.add(getSaveDirectory());  
-        synchronized(downloadDirsByDescription) {  
-            for(FileSetting next : downloadDirsByDescription.values()) 
-                set.add(next.getValue());
-        }  
-        return set;  
-    }  
 
     /**
      * Sets the directory to save the purchased songs from the LWS

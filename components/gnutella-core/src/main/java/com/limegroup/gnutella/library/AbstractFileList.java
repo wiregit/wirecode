@@ -43,7 +43,6 @@ abstract class AbstractFileList implements FileList {
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileListChangedEvent> managedListListener;
-    private final EventListener<ManagedListStatusEvent> managedListListener2;
     
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -53,9 +52,7 @@ abstract class AbstractFileList implements FileList {
         this.fileDescIndexes = new IntSet(); 
         this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
         this.managedListListener = new ManagedListSynchronizer();
-        this.managedListListener2 = new ManagedListSynchronizer2();
         this.managedList.addFileListListener(managedListListener);
-        this.managedList.addManagedListStatusListener(managedListListener2);
     }
     
     @Override
@@ -269,15 +266,17 @@ abstract class AbstractFileList implements FileList {
 
     @Override
     public void clear() {
-        for(FileDesc fd : pausableIterable()) {
-            fireRemoveEvent(fd);
-        }
-
+        boolean needsClearing;
         rwLock.writeLock().lock();
         try {
+            needsClearing = fileDescIndexes.size() > 0;
             fileDescIndexes.clear();
         } finally {
             rwLock.writeLock().unlock();
+        }
+        
+        if(needsClearing) {
+            fireClearEvent();
         }
     }
     
@@ -334,7 +333,7 @@ abstract class AbstractFileList implements FileList {
      * Fires an addFileDesc event to all the listeners
      * @param fileDesc that was added
      */
-    protected void fireAddEvent(final FileDesc fileDesc) {
+    protected void fireAddEvent(FileDesc fileDesc) {
         listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADDED, fileDesc));
     }
     
@@ -342,7 +341,7 @@ abstract class AbstractFileList implements FileList {
      * Fires a removeFileDesc event to all the listeners
      * @param fileDesc that was removed
      */
-    protected void fireRemoveEvent(final FileDesc fileDesc) {
+    protected void fireRemoveEvent(FileDesc fileDesc) {
         listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.REMOVED, fileDesc));
     }
 
@@ -351,8 +350,13 @@ abstract class AbstractFileList implements FileList {
      * @param oldFileDesc FileDesc that was there previously
      * @param newFileDesc FileDesc that replaced oldFileDesc
      */
-    protected void fireChangeEvent(final FileDesc oldFileDesc, final FileDesc newFileDesc) {
+    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
         listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.CHANGED, oldFileDesc, newFileDesc));
+    }
+    
+    /** Fires a clear event to all listeners. */
+    protected void fireClearEvent() {
+        listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.CLEAR));
     }
     
     /**
@@ -401,7 +405,6 @@ abstract class AbstractFileList implements FileList {
 
     public void dispose() {
         managedList.removeFileListListener(managedListListener);
-        managedList.removeManagedListStatusListener(managedListListener2);
     }
     
     /**
@@ -552,18 +555,8 @@ abstract class AbstractFileList implements FileList {
                 if(isPending(event.getFile(), event.getFileDesc()) && !contains(event.getFile())) {
                     saveChange(event.getFile(), false);
                 }
-            }
-        }
-    }
-    
-    private class ManagedListSynchronizer2 implements EventListener<ManagedListStatusEvent> {
-        @Override
-        public void handleEvent(ManagedListStatusEvent event) {
-            // Note: We only need to check for pending on adds,
-            //       because that's the only kind that doesn't
-            //       require it already exists.
-            switch(event.getType()) {
-            case LOAD_STARTED:
+                break;
+            case CLEAR:
                 clear();
                 break;
             }

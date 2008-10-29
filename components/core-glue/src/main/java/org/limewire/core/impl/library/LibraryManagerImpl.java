@@ -122,6 +122,10 @@ class LibraryManagerImpl implements LibraryManager {
                         threadSafeList.add(item);
                         lookup.put(item.getFile(), item);
                         break;
+                    case CLEAR:
+                        threadSafeList.clear();
+                        lookup.clear();
+                        break;
                     }
                 }
             });
@@ -131,8 +135,6 @@ class LibraryManagerImpl implements LibraryManager {
                     LibraryState oldState = libraryState;
                     switch(event.getType()) {
                     case LOAD_STARTED:
-                        threadSafeList.clear();
-                        lookup.clear();
                         libraryState = LibraryState.LOADING;
                         break;
                     case LOAD_COMPLETE:

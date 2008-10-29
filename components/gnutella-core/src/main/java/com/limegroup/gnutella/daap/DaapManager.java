@@ -483,6 +483,16 @@ public final class DaapManager {
         }
     }
     
+    private synchronized void handleClearEvent() {
+        for(Song song : urnToSong.values()) {
+            if(song != null) {
+                database.removeSong(autoCommitTxn, song);
+                song.setAttachment(null);
+            }
+        }
+        urnToSong.clear();
+    }
+    
     public synchronized boolean isEnabled() {
         return enabled;
     }
@@ -1156,6 +1166,9 @@ public final class DaapManager {
                     break;
                 case REMOVED:
                     handleRemoveEvent(evt);
+                    break;
+                case CLEAR:
+                    handleClearEvent();
                     break;
                 }
             }

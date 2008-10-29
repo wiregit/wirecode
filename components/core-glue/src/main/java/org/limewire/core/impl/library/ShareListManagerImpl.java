@@ -149,6 +149,10 @@ class ShareListManagerImpl implements ShareListManager {
                 FileItem old = lookup.remove(event.getFileDesc().getFile());
                 threadSafeList.remove(old);
                 break;
+            case CLEAR:
+                lookup.clear();
+                threadSafeList.clear();
+                break;                
             }
         }
     }
@@ -199,6 +203,10 @@ class ShareListManagerImpl implements ShareListManager {
             case REMOVED:
                 FileItem old = lookup.remove(event.getFileDesc().getFile());
                 threadSafeList.remove(old);
+                break;
+            case CLEAR:
+                lookup.clear();
+                threadSafeList.clear();
                 break;
             }
         }

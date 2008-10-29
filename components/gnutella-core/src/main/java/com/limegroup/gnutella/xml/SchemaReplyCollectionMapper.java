@@ -106,6 +106,9 @@ public class SchemaReplyCollectionMapper {
                         case CHANGED:
                             removeFileDesc(event.getOldValue());
                             break; 
+                        case CLEAR:
+                            loadSchemas();
+                            break;
                         }
                     }
                 });
