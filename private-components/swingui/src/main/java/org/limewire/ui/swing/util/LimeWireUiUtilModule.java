@@ -6,6 +6,6 @@ public class LimeWireUiUtilModule extends AbstractModule {
     
     @Override
     protected void configure() {
-        bind(FileIconController.class).to(BasicFileIconController.class);
+        bind(NonBlockFileIconController.class).to(BasicFileIconController.class);
     }
 }

@@ -13,7 +13,7 @@ import com.google.inject.Inject;
 /**
  * A FileIconController that uses default icons.
  */
-public class BasicFileIconController implements FileIconController {
+public class BasicFileIconController extends NonBlockFileIconController {
     
     private final CategoryIconManager categoryIconManager;
     
@@ -51,11 +51,6 @@ public class BasicFileIconController implements FileIconController {
 
     /** Icons are always available immediately. */
     public boolean isIconForFileAvailable(File f) {
-        return true;
-    }
-    
-    /** This basic controller is always valid. */
-    public boolean isValid() {
         return true;
     }
 }

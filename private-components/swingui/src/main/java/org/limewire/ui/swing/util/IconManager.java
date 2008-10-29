@@ -19,16 +19,20 @@ import com.google.inject.Singleton;
 @Singleton
 public class IconManager {
     
+    /** The original basic file icon controller **/
+    private final FileIconController originalFileController;
+    
     /** The current FileIconController. */
     private FileIconController fileController;
     
     private Icon blankIcon;
     
     @Inject
-    IconManager(FileIconController fileIconController) {
+    IconManager(NonBlockFileIconController nonBlockFileIconController) {
         // Always begin with the basic controller,
         // whose contruction can never block.
-        fileController = fileIconController;
+        this.originalFileController = nonBlockFileIconController;
+        fileController = this.originalFileController;
         
         // Then, in a new thread, try to change it to a controller
         // that can block.
@@ -109,7 +113,7 @@ public class IconManager {
      * Returns true if the current controller is already valid.
      */
     private void validate() {
-       // if (!fileController.isValid())
-      //      fileController = new BasicFileIconController();
+        if (!fileController.isValid())
+            fileController = this.originalFileController;
     }
 }
