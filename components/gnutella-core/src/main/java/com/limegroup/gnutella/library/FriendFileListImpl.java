@@ -31,6 +31,11 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         addNewVideoAlways = LibrarySettings.containsFriendShareNewVideo(id);
     }
     
+    @Override
+    public boolean add(FileDesc fileDesc) {
+        return super.add(fileDesc);
+    }
+    
     /**
      * As long as its not a store file it can be added
      */

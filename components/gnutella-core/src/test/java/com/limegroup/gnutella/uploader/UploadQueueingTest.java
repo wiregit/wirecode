@@ -7,9 +7,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Test;
 
@@ -45,7 +43,6 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
@@ -134,58 +131,40 @@ public class UploadQueueingTest extends LimeTestCase {
     }
 
     private void initializeFileManager() throws Exception {
-        Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
-        List<FileDesc> descs = new ArrayList<FileDesc>();
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
-        urn2 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
-        urn3 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-        urn4 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
-        urn5 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
-
         FileDescStub descStub = new FileDescStub("abc1.txt", urn1, 0);
-        urns.put(urn1, descStub);
-        descs.add(descStub);
         rfd1 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 0, "abc1.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
         url1 = LimeTestUtils.getRelativeRequest(urn1);
+        fm.getGnutellaSharedFileList().add(descStub);
 
         descStub = new FileDescStub("abc2.txt", urn2, 1);
-        urns.put(urn2, descStub);
-        descs.add(descStub);
         rfd2 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.2", 1, 1, "abc2.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
        // url2 = LimeTestUtils.getRelativeRequest(urn2);
+        fm.getGnutellaSharedFileList().add(descStub);
 
         descStub = new FileDescStub("abc3.txt", urn3, 2);
-        urns.put(urn3, descStub);
-        descs.add(descStub);
         rfd3 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.3", 1, 2, "abc3.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
        // url3 = LimeTestUtils.getRelativeRequest(urn3);
+        fm.getGnutellaSharedFileList().add(descStub);
 
         descStub = new FileDescStub("abc4.txt", urn4, 3);
-        urns.put(urn4, descStub);
-        descs.add(descStub);
         rfd4 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.4", 1, 3, "abc4.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
         //url4 = LimeTestUtils.getRelativeRequest(urn4);
+        fm.getGnutellaSharedFileList().add(descStub);
 
         descStub = new FileDescStub("abc5.txt", urn5, 4);
-        urns.put(urn5, descStub);
-        descs.add(descStub);
         rfd5 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.5", 1, 4, "abc5.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
        // url5 = LimeTestUtils.getRelativeRequest(urn5);
-
-        FileListStub sharedList = (FileListStub)fm.getGnutellaSharedFileList();
-        sharedList.setUrns(urns);
-        sharedList.setFileDesc(descs);
-        sharedList.setDescs(descs);
+        fm.getGnutellaSharedFileList().add(descStub);
     }
 
     @Override

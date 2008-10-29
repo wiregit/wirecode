@@ -17,16 +17,15 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-@SuppressWarnings("unchecked")
 public class FileDescStub implements FileDesc {
     public static final String DEFAULT_URN =
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final URN DEFAULT_SHA1;
-    public static final Set DEFAULT_SET;
+    public static final Set<URN> DEFAULT_SET;
     public static final int DEFAULT_SIZE = 1126400;
     
     static {
-        DEFAULT_SET = new HashSet();
+        DEFAULT_SET = new HashSet<URN>();
         URN sha1 = null;
         try {
             sha1 = URN.createSHA1Urn(DEFAULT_URN);
@@ -52,6 +51,7 @@ public class FileDescStub implements FileDesc {
     private final String path;
     private final long modified;
     private final long size;
+    
     public FileDescStub(String name, URN urn, int index) {
         this.file = createStubFile(new File(name));
         this.urns = new UrnSet(urn);

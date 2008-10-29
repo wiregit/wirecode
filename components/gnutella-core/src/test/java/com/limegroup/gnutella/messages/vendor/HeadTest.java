@@ -5,11 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -49,9 +45,9 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.GnutellaFileListStub;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -172,10 +168,10 @@ public class HeadTest extends LimeTestCase {
         _rangesOnlyLarge = new IntervalSet();
         _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
-		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_notHave =      FileListStub.NOT_HAVE;
-		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
-        _tlsURN =      URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
+        _notHave =      GnutellaFileListStub.DEFAULT_URN;
+		_haveFull =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+		_havePartial =  URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
+        _tlsURN =       URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
         _largeURN =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
 		
 		_partial = new IncompleteFileDescStub("incomplete",_havePartial,3);
@@ -187,25 +183,16 @@ public class HeadTest extends LimeTestCase {
             }
         };
         _partialLarge.setRangesByte(_rangesLarge.toBytes());
-        FileDescStub complete = new FileDescStub("complete", _haveFull, 2);
-		
-        Map urns = new HashMap();
-        urns.put(_havePartial,_partial);
-        urns.put(_haveFull, complete);
-        urns.put(_largeURN, _partialLarge);
-        List descs = new LinkedList();
-        descs.add(_partial);
-        descs.add(complete);
-        descs.add(_partialLarge);
-        
+
+        FileDescStub complete = new FileDescStub("complete", _haveFull, 2);        
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        FileListStub sharedList = (FileListStub) fileManager.getGnutellaSharedFileList();
-        sharedList.setUrns(urns);
-        sharedList.setFileDesc(descs);
-        sharedList.setDescs(descs);
+        fileManager.getGnutellaSharedFileList().add(complete);
+        fileManager.getGnutellaSharedFileList().add(new FileDescStub("test", _tlsURN, 100));
+        fileManager.getIncompleteFileList().add(_partial);
+        fileManager.getIncompleteFileList().add(_partialLarge);
         
-        assertEquals(_partial,fileManager.getGnutellaSharedFileList().getFileDesc(_havePartial));
-        assertEquals(_partialLarge,fileManager.getGnutellaSharedFileList().getFileDesc(_largeURN));
+        assertEquals(_partial,fileManager.getIncompleteFileList().getFileDesc(_havePartial));
+        assertEquals(_partialLarge,fileManager.getIncompleteFileList().getFileDesc(_largeURN));
         assertEquals(complete,fileManager.getGnutellaSharedFileList().getFileDesc(_haveFull));
         
         

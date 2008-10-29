@@ -180,6 +180,7 @@ import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactoryImpl;
+import com.limegroup.gnutella.uploader.LimeWireUploaderModule;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 import com.limegroup.gnutella.uploader.UploadSlotManagerImpl;
 import com.limegroup.gnutella.util.EventDispatcher;
@@ -236,6 +237,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireSimppModule());
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());
+        binder().install(new LimeWireUploaderModule());
         
         bind(LimeWireCore.class);
         

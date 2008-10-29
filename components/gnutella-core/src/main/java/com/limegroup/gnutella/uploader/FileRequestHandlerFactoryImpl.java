@@ -16,7 +16,7 @@ import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
 import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider;
 
 @Singleton
-public class FileRequestHandlerFactoryImpl {
+class FileRequestHandlerFactoryImpl implements FileRequestHandlerFactory {
     
     private final HTTPUploadSessionManager sessionManager;
 
@@ -65,6 +65,9 @@ public class FileRequestHandlerFactoryImpl {
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
     }
     
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.uploader.FileRequestHandlerFactory#createFileRequestHandler(com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvider, boolean)
+     */
     public FileRequestHandler createFileRequestHandler(HttpRequestFileListProvider fileListProvider, boolean requiresAuthentication) {
         if(!requiresAuthentication) {
             return new FileRequestHandler(sessionManager, fileManager, httpHeaderUtils,

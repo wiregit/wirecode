@@ -31,6 +31,11 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
     }
     
     @Override
+    public boolean add(FileDesc fileDesc) {
+        return super.add(fileDesc);
+    }
+    
+    @Override
     public void clear() {
         applicationShared.set(0);
         sessionFiles.clear();

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.uploader.authentication.HttpRequestFileListProvide
 @Singleton
 public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory {
     
-    private final Provider<FileRequestHandlerFactoryImpl> fileRequestHandlerProvider;
+    private final Provider<FileRequestHandlerFactory> fileRequestHandlerProvider;
     private final Provider<FreeLoaderRequestHandler> freeLoaderRequestHandlerProvider;
     private final Provider<HttpPushRequestHandler> pushProxyRequestHandlerProvider;
     
@@ -19,7 +19,7 @@ public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory 
     
     @Inject
     public HttpRequestHandlerFactoryImpl(
-            Provider<FileRequestHandlerFactoryImpl> fileRequestHandlerProvider,
+            Provider<FileRequestHandlerFactory> fileRequestHandlerProvider,
             Provider<FreeLoaderRequestHandler> freeLoaderRequestHandlerProvider,
             Provider<HttpPushRequestHandler> pushProxyRequestHandlerProvider,
             HTTPHeaderUtils httpHeaderUtils,

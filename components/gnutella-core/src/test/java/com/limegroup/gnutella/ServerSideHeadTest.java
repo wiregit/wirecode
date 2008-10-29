@@ -16,7 +16,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
+import com.limegroup.gnutella.library.GnutellaFileListStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -63,7 +63,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	socket2.setSoTimeout(300);
     	
 
-    	ping1 = new HeadPing(FileListStub.NOT_HAVE);
+    	ping1 = new HeadPing(GnutellaFileListStub.DEFAULT_URN);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
 
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();

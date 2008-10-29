@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,7 +61,6 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.library.IncompleteFileDescStub;
@@ -83,7 +80,6 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private final static int PORT=6666;
     private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
-    private FileListStub fileList;
     private CoreDownloaderFactory gnutellaDownloaderFactory;
     private static NetworkManagerStub networkManager;
     private Injector injector;
@@ -128,7 +124,6 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        fileList = (FileListStub)fileManager.getGnutellaSharedFileList();
         gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         
@@ -162,27 +157,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	URN partialURN = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
         
     	IncompleteFileDescStub partialDesc = new IncompleteFileDescStub("incomplete",partialURN,3);
-    	Map<URN, FileDesc> urnMap = new HashMap<URN, FileDesc>();
-    	urnMap.put(partialURN, partialDesc);
-    	List<FileDesc> descList = new LinkedList<FileDesc>();
-    	descList.add(partialDesc);
-    	File f = new File("incomplete");
-    	Map<File, FileDesc> fileMap = new HashMap<File, FileDesc>();
-    	fileMap.put(f,partialDesc);
-    	
-    	fileList.setFileDesc(descList);
-    	fileList.setUrns(urnMap);
-    	fileList.setFiles(fileMap);
-    	
-    	FileListStub sharedList = (FileListStub) fileManager.getGnutellaSharedFileList();
-    	sharedList.setDescs(descList);
+    	fileManager.getIncompleteFileList().add(partialDesc);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
     	
     	//test that currently we have no altlocs for the incomplete file
     	
-    	FileDesc test = sharedList.getFileDesc(partialURN);
+    	FileDesc test = fileManager.getIncompleteFileList().getFileDesc(partialURN);
     	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
@@ -203,7 +185,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	md.initialize();
     	setDloaders(md, l);
     	setSHA1(md, partialURN);
-    	setIncompleteFile(md, f);
+    	setIncompleteFile(md, partialDesc.getFile());
     	
     	
     	//and see if it behaves correctly
@@ -214,8 +196,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
     	//the altloc should have been added to the file descriptor
-    	test = sharedList.getFileDesc(partialURN);
-    	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
+    	assertEquals(1, altLocManager.getNumLocs(partialURN));
     	
     	//now repeat the test, pretending the uploader wants push altlocs
     	fakeDownloader.setWantsFalts(true);
@@ -228,8 +209,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	assertTrue(fakeDownloader._addedSuccessfull);
     	
     	//make sure the file was added to the file descriptor
-    	test = sharedList.getFileDesc(partialURN);
-    	assertEquals(1, altLocManager.getNumLocs(test.getSHA1Urn()));
+    	assertEquals(1, altLocManager.getNumLocs(partialURN));
     	
     	//rince and repeat, saying this was a bad altloc. 
     	//it should be sent to the other downloaders. 

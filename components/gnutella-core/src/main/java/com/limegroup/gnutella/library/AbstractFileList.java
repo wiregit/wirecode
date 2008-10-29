@@ -145,7 +145,7 @@ abstract class AbstractFileList implements FileList {
     
     // This is exposed in subclass interfaces -- so it doesn't override
     // anything here, but subclasses use it.
-    public boolean add(FileDesc fileDesc) {
+    protected boolean add(FileDesc fileDesc) {
         if(addFileDescImpl(fileDesc)) {
             saveChange(fileDesc.getFile(), true);
             fireAddEvent(fileDesc);

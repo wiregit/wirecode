@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
 
 import junit.framework.Test;
 
@@ -26,11 +23,12 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileDescStub;
-import com.limegroup.gnutella.library.FileListStub;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
+import com.limegroup.gnutella.library.GnutellaFileListStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class FileRequestHandlerTest extends LimeTestCase {
@@ -57,14 +55,6 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Map<URN, FileDesc> urns = new HashMap<URN, FileDesc>();
-        Vector<FileDesc> descs = new Vector<FileDesc>();
-        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
-
-        FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
-        urns.put(urn1, fd1);
-        descs.add(fd1);
-
         sessionManager = new MockHTTPUploadSessionManager();
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
@@ -82,11 +72,13 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 9999, false)));
 
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
-        FileListStub sharedList = (FileListStub)fileManager.getGnutellaSharedFileList();
-        sharedList.setUrns(urns);
-        sharedList.setFileDesc(descs);
-        sharedList.setDescs(descs);
-        fileRequestHandler = injector.getInstance(FileRequestHandler.class);
+        GnutellaFileListStub sharedList = fileManager.getGnutellaSharedFileList();
+        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+        FileDesc fd1 = new FileDescStub("abc1.txt", urn1, 0);
+        sharedList.add(fd1);
+        
+        GnutellaUploadFileListProvider uploadProvider = injector.getInstance(GnutellaUploadFileListProvider.class);
+        fileRequestHandler = injector.getInstance(FileRequestHandlerFactory.class).createFileRequestHandler(uploadProvider, false);
     }
 
     public void testHandleAccept() throws Exception {

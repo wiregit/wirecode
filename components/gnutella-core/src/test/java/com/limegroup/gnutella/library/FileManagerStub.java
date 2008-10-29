@@ -1,27 +1,59 @@
 package com.limegroup.gnutella.library;
 
-import java.util.concurrent.ScheduledExecutorService;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
-public class FileManagerStub extends FileManagerImpl {
+public class FileManagerStub implements FileManager {
 
-    private FileListStub fileListStub;    
+    private ManagedFileListStub managedStub;
+    private IncompleteFileListStub incompleteStub;
+    private GnutellaFileListStub gnutellaStub;    
     
     @Inject
-    public FileManagerStub(ManagedFileListImpl managedList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-        super(managedList, backgroundExecutor);
-    
-        fileListStub = new FileListStub(new LibraryFileData(), this.getManagedFileList());
-        
+    public FileManagerStub() {    
+        gnutellaStub = new GnutellaFileListStub();
+        incompleteStub = new IncompleteFileListStub();
+        managedStub = new ManagedFileListStub();
     }
     
     @Override
-    public GnutellaFileList getGnutellaSharedFileList() {
-        return fileListStub;
+    public GnutellaFileListStub getGnutellaSharedFileList() {
+        return gnutellaStub;
     }
+    
+    @Override
+    public IncompleteFileListStub getIncompleteFileList() {
+        return incompleteStub;
+    }
+    
+    @Override
+    public ManagedFileListStub getManagedFileList() {
+        return managedStub;
+    }   
+
+    
+    @Override
+    public FriendFileList getFriendFileList(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public FriendFileList getOrCreateFriendFileList(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public void removeFriendFileList(String name) {
+        throw new UnsupportedOperationException("not supported");
+    }
+    
+    @Override
+    public void start() {}
+    
+    @Override
+    public void stop() {}
+    
+    
 }
 
