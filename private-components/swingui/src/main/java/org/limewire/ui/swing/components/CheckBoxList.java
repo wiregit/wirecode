@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
@@ -40,6 +42,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -988,6 +991,7 @@ public class CheckBoxList<E> extends BoxPanel {
     public interface ExtrasProvider<E> {
         boolean isSeparated(E obj);
         String getComment(E obj);
+        int getCommentFeildSize(); 
     }
     
     /**
@@ -1023,6 +1027,7 @@ public class CheckBoxList<E> extends BoxPanel {
         private E obj;
         private JCheckBox checkBox;
         private JLabel label;
+        private JLabel commentlabel;
         private DeleteButton button;
         private Border blankBorder;
         private SeperatorBorder sepBorder;
@@ -1033,18 +1038,23 @@ public class CheckBoxList<E> extends BoxPanel {
             super(BoxPanel.X_AXIS);
             
             sepBorder = new SeperatorBorder();
-            blankBorder = BorderFactory.createMatteBorder(4,4,4,4, (Icon)null);
+            blankBorder = BorderFactory.createMatteBorder(4,4,4,0, (Icon)null);
 
             label = new JLabel();
             label.setBorder(blankBorder);
+            
+            commentlabel = new JLabel();
+            commentlabel.setBorder(BorderFactory.createEmptyBorder(4,0,4,0));
+            
             checkBox = new JCheckBox("", true);
             checkBox.setVisible(checkBoxesVisible);
             
             button = new DeleteButton();
-      
+                  
             add(Box.createHorizontalStrut(4));
             add(checkBox);
             add(label);
+            add(commentlabel);
             add(Box.createHorizontalStrut(1));
             add(Box.createHorizontalGlue());
             add(button);
@@ -1053,6 +1063,8 @@ public class CheckBoxList<E> extends BoxPanel {
    
             originalFont = label.getFont();
             boldFont = originalFont.deriveFont(originalFont.getStyle() | Font.BOLD | Font.ITALIC);
+            
+            commentlabel.setFont(this.originalFont);
         }
         
         public E getData() {
@@ -1074,7 +1086,20 @@ public class CheckBoxList<E> extends BoxPanel {
             label.setIcon(provider.getIcon(obj));
             
             if (extrasProvider != null) {
-                label.setText(text+" "+extrasProvider.getComment(obj));
+                
+                label.setText(text + " ");
+
+                
+                Rectangle2D textSize = FontUtils.getLongestTextArea(this.originalFont, text);
+                
+                if (extrasProvider.getCommentFeildSize() > textSize.getWidth()+26) {
+                    label.setPreferredSize(new Dimension(extrasProvider.getCommentFeildSize(), 18));
+                    label.setSize(label.getPreferredSize());
+                    label.setMinimumSize(label.getPreferredSize());
+                    label.setMaximumSize(label.getPreferredSize());
+                }
+                
+                commentlabel.setText(extrasProvider.getComment(obj));
                 
                 if (extrasProvider.isSeparated(obj)) {
                     label.setBorder(sepBorder);

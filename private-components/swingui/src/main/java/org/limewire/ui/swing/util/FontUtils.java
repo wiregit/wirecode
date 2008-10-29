@@ -1,10 +1,13 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Font;
+import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
+import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.JComponent;
 
 public class FontUtils {
@@ -67,4 +70,32 @@ public class FontUtils {
             return false;
     }
 
+    
+    private static String unpackText(Object object) {
+        if (object == null)  return null;
+        
+        if (object instanceof Action) 
+            return ((Action) object).getValue("Name").toString();
+        else
+            return object.toString();
+    }
+    
+    public static Rectangle2D getLongestTextArea(Font font, Object... objects) {
+        FontRenderContext frc = new FontRenderContext(null,false,false);
+        
+        Rectangle2D largestRect = font.getStringBounds(unpackText(objects[0]), 
+                frc);
+        
+        for ( int i=1 ; i<objects.length ; i++ ) {
+            
+            Rectangle2D currentRect = font.getStringBounds(unpackText(objects[i]), 
+                    frc);
+            
+            if (currentRect.getWidth() > largestRect.getWidth()) {
+                largestRect = currentRect;
+            }
+        }        
+        
+        return largestRect;
+    }
 }

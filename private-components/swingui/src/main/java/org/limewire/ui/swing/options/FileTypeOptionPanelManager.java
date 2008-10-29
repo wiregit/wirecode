@@ -69,7 +69,9 @@ public final class FileTypeOptionPanelManager {
     private Map<Category,CheckBoxList<String>> panels;
     
     private final ExtensionProvider extensionProvider = new ExtensionProvider();
-
+    private final ExtensionsExtrasProvider extensionExtrasProvider = new ExtensionsExtrasProvider();
+    
+    
     private Set<Category> mediaKeys;
     private Set<Category> mediaUnchecked;        
 
@@ -231,7 +233,8 @@ public final class FileTypeOptionPanelManager {
             }
 
             
-            CheckBoxList<String> newPanel = new CheckBoxList<String>(total, notSelected, extensionProvider,
+            CheckBoxList<String> newPanel = new CheckBoxList<String>(total, notSelected, 
+                    extensionProvider, extensionExtrasProvider,
                     CheckBoxList.SELECT_FIRST_OFF);
             
             newPanel.setCheckChangeListener(refreshListener);
@@ -259,7 +262,7 @@ public final class FileTypeOptionPanelManager {
         }
         
         this.sidePanel = new CheckBoxList<Category>(this.mediaKeys, this.mediaUnchecked,
-                new MediaProvider(), new MediaExtrasProvider(this.panels),
+                new MediaProvider(), new MediaExtrasProvider(),
                 CheckBoxList.SELECT_FIRST_ON);
         
         this.sidePanel.setPreferredSize(new Dimension(150, 0));
@@ -555,11 +558,11 @@ public final class FileTypeOptionPanelManager {
         
         public String getText(Category obj) {
                     
-            return obj.toString(); // TODO: = old getName()??
+            return obj.toString();
         }
         
         public String getToolTipText(Category obj) {
-            return null; // TODO: obj.getMediaType().getDescriptionKey(); 
+            return null;
         }
 
         public Icon getIcon(Category obj) {
@@ -570,16 +573,16 @@ public final class FileTypeOptionPanelManager {
     private class MediaExtrasProvider
         implements CheckBoxList.ExtrasProvider<Category> {
         
-        Map<Category,CheckBoxList<String>> panels;
-        
-        public MediaExtrasProvider(Map<Category,CheckBoxList<String>> panels) {
-            this.panels = panels;
+        public MediaExtrasProvider() {
+
         }        
         
+        @Override
         public boolean isSeparated(Category obj) {
             return false;
         }
 
+        @Override
         public String getComment(Category obj) {
             CheckBoxList<String> panel = panels.get(obj);
             
@@ -588,6 +591,33 @@ public final class FileTypeOptionPanelManager {
             }
             
             return "(" + panel.getCheckedElements().size() + ")";
+        }
+
+        @Override
+        public int getCommentFeildSize() {
+            return 0;
+        }
+    }    
+    
+    private class ExtensionsExtrasProvider
+        implements CheckBoxList.ExtrasProvider<String> {
+    
+        public ExtensionsExtrasProvider() {
+        }        
+    
+        @Override
+        public boolean isSeparated(String obj) {
+            return false;
+        }
+
+        @Override
+        public String getComment(String obj) {
+            return "Media file.";
+        }
+
+        @Override
+        public int getCommentFeildSize() {
+            return 70;
         }
     }    
 

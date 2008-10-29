@@ -32,6 +32,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.util.FontUtils;
 
 public class LimeComboBox extends JXButton {
     
@@ -284,34 +285,6 @@ public class LimeComboBox extends JXButton {
             return this.pressedTextColour;
     }
     
-    private String unpackText(Object object) {
-        if (object == null)  return null;
-        
-        if (object instanceof Action) 
-            return ((Action) object).getValue("Name").toString();
-        else
-            return object.toString();
-    }
-    
-    private Rectangle2D getLongestTextArea(Object... objects) {
-        FontRenderContext frc = new FontRenderContext(null,false,false);
-        
-        Rectangle2D largestRect = this.getFont().getStringBounds(unpackText(objects[0]), 
-                frc);
-        
-        for ( int i=1 ; i<objects.length ; i++ ) {
-            
-            Rectangle2D currentRect = this.getFont().getStringBounds(unpackText(objects[i]), 
-                    frc);
-            
-            if (currentRect.getWidth() > largestRect.getWidth()) {
-                largestRect = currentRect;
-            }
-        }        
-        
-        return largestRect;
-    }
-    
     private void updateSize() {
         
         if (this.getText() == null && (this.actions == null || this.actions.isEmpty()))
@@ -321,10 +294,10 @@ public class LimeComboBox extends JXButton {
         Rectangle2D labelRect = null;
                 
         if (this.getText() != null && !this.getText().isEmpty()) {
-            labelRect = this.getLongestTextArea(this.getText());
+            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.getText());
         } 
         else {
-            labelRect = this.getLongestTextArea(this.actions.toArray());
+            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.actions.toArray());
         }    
         
         int ix1 = 0;
@@ -402,7 +375,7 @@ public class LimeComboBox extends JXButton {
             }
         } else {
             if (this.selectedAction != null) {
-                g2.drawString(this.unpackText(this.selectedAction), ix1, fm.getAscent()+2);
+                g2.drawString(this.selectedAction.getValue("Name").toString(), ix1, fm.getAscent()+2);
             }
             
             if (icon != null) {
