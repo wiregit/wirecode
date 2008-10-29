@@ -37,7 +37,7 @@ public class BasicFileIconController implements FileIconController {
     
     /** Returns the icon assocated with the extension. */
     
-    // TODO: use named media type to get actual icon
+    // TODO: use named media type approach to get actual icon
     public Icon getIconForExtension(String ext) {
         MediaType mt = null;
         if (ext != null)
