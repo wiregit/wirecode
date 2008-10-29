@@ -197,6 +197,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         {
             try {
                 ctCache.getFiles(0).iterator();
+                fail("failed");
             } catch (IllegalArgumentException expected) {}
         }
 
