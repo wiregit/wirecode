@@ -73,14 +73,16 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Spam Management", "RatingTable",  
         "Download Upgrade Task", "", 
         "LimeWire Store Integration", "LWSIntegrationServicesImpl", 
-        "Saved Files", "SavedFileManager", 
         "DHT Peer Publisher", "DHTPeerPublisherImpl", 
         "Local Socket Listener", "LocalAcceptor", 
         "Various Core Services", "",
         "QRP Updater", "QRPUpdater",
         "Gnutella Connections", "",
         "Firewall Manager", "FirewallServiceImpl",
-        "DAAP", ""};
+        "DAAP", "",
+        "Metadata Loader", "",
+        "What's New Manager", "",
+        "LimeWire Network Keyword Library", ""};
         
         List<String> missing = new ArrayList<String>();
         
