@@ -1,6 +1,5 @@
 package org.limewire.core.settings;
 
-import org.limewire.core.api.search.SearchCategory;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
@@ -478,5 +477,5 @@ public final class SearchSettings extends LimeProps {
      * The default search category for the search bar.
      */
     public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
-        FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", SearchCategory.ALL.getId());
+        FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", 0);
 }
