@@ -25,7 +25,7 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
     public ManageFileExtensionsOptionPanel(FileTypeOptionPanelManager fileTypeOptionPanelManager) {
         this.manager = fileTypeOptionPanelManager;
         
-        this.setLayout(new MigLayout("gapy 10"));
+        this.setLayout(new MigLayout("gapy 10, nogrid, fill"));
         
         Action okAction = new OKDialogAction(); 
         CancelDialogAction cancelAction = new CancelDialogAction();
@@ -38,10 +38,10 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
             
         add(new JLabel(I18n.tr("Select which file extensions belong in Audio, Video, etc..")), "span, wrap");
 
-        this.add(this.manager.getContainer());
+        this.add(this.manager.getContainer(), "span, wrap");
         
-        add(okButton, "skip 1, alignx right, split 2");
-        add(cancelButton);
+        add(okButton, "tag ok");
+        add(cancelButton, "tag cancel");
     }
     
     @Override
