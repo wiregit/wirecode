@@ -281,6 +281,12 @@ public class ApplicationSettings extends LimeProps {
      */
     public static final BooleanSetting HANDLE_TORRENTS = 
     	FACTORY.createBooleanSetting("HANDLE_TORRENTS", true);
+    
+    /**
+     * Whether LimeWire should warn user about file association changes.
+     */
+    public static final BooleanSetting WARN_FILE_ASSOCIATION_CHANGES = 
+        FACTORY.createBooleanSetting("WARN_FILE_ASSOCIATION_CHANGES", true);
     			
     /**
      * Whether or not to use 'secure results' to screen search results.
