@@ -42,7 +42,12 @@ public enum SearchCategory {
     }
     
     public static SearchCategory forId(Integer id) {
-        return perId.get(id);
+        SearchCategory category = perId.get(id);
+        if(category == null) {
+            return SearchCategory.ALL;
+        } else {
+            return category;
+        }
     }
     
     public int getId() {

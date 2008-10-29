@@ -477,5 +477,5 @@ public final class SearchSettings extends LimeProps {
      * The default search category for the search bar.
      */
     public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
-        FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", 0);
+        FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", -1);
 }
