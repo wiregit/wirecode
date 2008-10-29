@@ -25,6 +25,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
+import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
@@ -64,6 +65,10 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     private volatile boolean loaded = false;
 
+    LibraryFileData() {
+        SettingsGroupManager.instance().addSettingsGroup(this);
+    }
+    
     public boolean isLoaded() {
         return loaded;
     }
