@@ -44,6 +44,19 @@ public class XMPPEventHandler {
             }
         }
     }
+
+
+    public boolean hasAutoLogin(String serviceName) {
+        List<XMPPConnection> connections = xmppService.getConnections();
+        for(XMPPConnection connection : connections) {
+            XMPPConnectionConfiguration configuration = connection.getConfiguration();
+            if (configuration.getServiceName().equals(serviceName) &&
+                configuration.isAutoLogin()) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
