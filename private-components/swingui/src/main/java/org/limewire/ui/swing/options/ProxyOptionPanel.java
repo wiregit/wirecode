@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -75,7 +76,7 @@ public class ProxyOptionPanel extends OptionPanel {
         buttonGroup.add(httpRadioButton);
         
         proxyTextField = new JTextField(15);
-        portTextField = new JTextField(5);
+        portTextField = new NumericTextField(5);
         authenticationCheckBox = new JCheckBox();
         authenticationCheckBox.addItemListener(new ProxyButtonListener());
         userNameTextField = new JTextField(15);

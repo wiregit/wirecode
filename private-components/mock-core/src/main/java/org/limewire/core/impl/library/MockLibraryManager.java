@@ -1,6 +1,9 @@
 package org.limewire.core.impl.library;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.Category;
@@ -23,6 +26,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     private FileListAdapter allFileList;
     private FileListAdapter gnutellaList;
     private FriendFileListAdapter friendList;
+    private LibraryData libraryData;
     
     private Map<String, LocalFileList> friendMap;
     
@@ -30,6 +34,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         allFileList = new FileListAdapter();
         gnutellaList = new FileListAdapter();
         friendList = new FriendFileListAdapter();
+        libraryData = new LibraryDataAdapter();
         
         friendMap = new HashMap<String, LocalFileList>();
 
@@ -148,7 +153,23 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
 
     @Override
     public LibraryData getLibraryData() {
-        // TODO Auto-generated method stub
-        return null;
+        return libraryData;
+    }
+    
+    private class LibraryDataAdapter implements LibraryData {
+
+        @Override
+        public void addDirectoryToExcludeFromManaging(File folder) {
+        }
+
+        @Override
+        public void addDirectoryToManageRecursively(File folder) {
+        }
+
+        @Override
+        public List<File> getDirectoriesToManageRecursively() {
+            return new ArrayList<File>();
+        }
+        
     }
 }

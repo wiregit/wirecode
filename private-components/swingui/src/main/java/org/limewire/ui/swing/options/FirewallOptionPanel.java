@@ -13,6 +13,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
@@ -21,7 +22,6 @@ import com.google.inject.Singleton;
 /**
  * Firewall Option Panel
  */
-//TODO: convert to numbertextfield
 @Singleton
 public class FirewallOptionPanel extends OptionPanel {
 
@@ -78,8 +78,7 @@ public class FirewallOptionPanel extends OptionPanel {
         public ListeningPortPanel() {
             super(I18n.tr("Listening Port"));
             
-            portField = new JTextField(5);
-            //TODO: change this to an integerTextField
+            portField = new NumericTextField(5);
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
@@ -145,8 +144,7 @@ public class FirewallOptionPanel extends OptionPanel {
             buttonGroup.add(portForwardRadioButton);
             buttonGroup.add(doNothingRadioButton);
             
-            //TODO: change this to an integerTextField
-            portTextField = new JTextField(5);
+            portTextField = new NumericTextField(5);
             starLabel = new JLabel(I18n.tr("* You must also configure your router"));
             starLabel.setVisible(false);
             

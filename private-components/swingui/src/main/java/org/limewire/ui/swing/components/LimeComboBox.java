@@ -14,7 +14,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
