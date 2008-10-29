@@ -42,28 +42,6 @@ public class FilesOptionPanel extends OptionPanel {
     private LimeWireStorePanel limeWireStorePanel;
     private ITunesPanel iTunesPanel;
     
-    // Somebody needs this for testing the options panel without limewire?
-    public static FilesOptionPanel createTestingFilesOptionPanel() {
-        return null;//new FilesOptionPanel();
-    }
-        
-    /*
-    private FilesOptionPanel() {
-        this(new ManageSaveFoldersOptionPanelFactory() {
-
-            @Override
-            public ManageSaveFoldersOptionPanel create(Action okAction,
-                    CancelDialogAction cancelAction) {
-                
-                return new ManageSaveFoldersOptionPanel(
-                        CategoryIconManager.createTestingCategoryIconManager(),
-                        okAction, cancelAction);
-                
-            }
-            
-        });
-    }
-    */
     @Inject
     FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
             ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel) { 

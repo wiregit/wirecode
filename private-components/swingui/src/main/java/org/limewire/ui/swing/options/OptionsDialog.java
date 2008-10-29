@@ -184,38 +184,6 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         footerPanel.add(cancelButton);
     }
 
-    
-    public static void main(String args[]) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        SwingUtilities.invokeLater(new Runnable(){
-            public void run() {
-                AppFrame appFrame = new AppFrame();
-                
-                OptionsDialog o = new OptionsDialog(appFrame, new LibraryOptionPanel(null), new SearchOptionPanel(), new DownloadOptionPanel(), new SecurityOptionPanel(), new MiscOptionPanel(null), 
-                        new AdvancedOptionPanel(FilesOptionPanel.createTestingFilesOptionPanel(),
-                                new ConnectionsOptionPanel(), new SystemOptionPanel(), 
-                                new ReallyAdvancedOptionPanel(new FirewallOptionPanel(), new ProxyOptionPanel(), new NetworkInterfaceOptionPanel(),
-                                        new PerformanceOptionPanel(), new BitTorrentOptionPanel(), 
-                                        new FilteringOptionPanel(), new SpamOptionPanel(null))));
-                o.setVisible(true);
-            }
-        });
-    }
-
     @Override
     public OptionTabItem addOptionTab(final String title, final OptionsTabNavigator navigator) {
         return new OptionsTabItemImpl(title, navigator);
