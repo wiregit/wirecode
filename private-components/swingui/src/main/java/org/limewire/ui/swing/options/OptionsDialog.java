@@ -83,6 +83,7 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         this.advancedOptionPanel = advancedOptionPanel;
 
         setSize(700,600);
+        setPreferredSize(new Dimension(700,600));
         setResizable(false);
         setModalityType(ModalityType.APPLICATION_MODAL);
         
@@ -91,6 +92,8 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         createComponents();
         
         initOptions();
+        
+        pack();
     }
     
     private void initOptions() {
