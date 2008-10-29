@@ -2,6 +2,7 @@ package org.limewire.ui.swing.options;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -10,6 +11,7 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.network.NetworkManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -25,12 +27,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class FirewallOptionPanel extends OptionPanel {
 
+    private NetworkManager networkManager;
+    
     private ListeningPortPanel listeningPortPanel;
     private RouterConfigPanel routerConfigPanel;
     
     @Inject
-    public FirewallOptionPanel() {
+    public FirewallOptionPanel(NetworkManager networkManager) {
         super();
+        this.networkManager = networkManager;
+        
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
         
         add(getListeningPortPanel(), "pushx, growx");
@@ -88,25 +94,25 @@ public class FirewallOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-//            int currentPort = Integer.parseInt(portField.getText());
-            //TODO: NetworkManager API
-//            if(currentPort != port) {
-//                try {
-//                    NetworkSettings.PORT.setValue(port);
-//                    networkManager.setListeningPort(port);
-//                    port = currentPort;
-//                    networkManager.portChanged();
-//                } catch(IOException ioe) {
+            int currentPort = Integer.parseInt(portField.getText());
+            if(currentPort != port) {
+                try {
+                    NetworkSettings.PORT.setValue(port);
+                    networkManager.setListeningPort(port);
+                    port = currentPort;
+                    networkManager.portChanged();
+                } catch(IOException ioe) {
+                    //TODO: show error dialog if port not available
 //                    GUIMediator.showError(I18n.tr("Port not available. Please select a different port."));
 //                    NetworkSettings.PORT.setValue(port);
 //                    portField.setText(Integer.toString(port));
 //                    throw new IOException("port not available");
-//                } catch(IllegalArgumentException iae) {
+                } catch(IllegalArgumentException iae) {
 //                    GUIMediator.showError(I18n.tr("Please enter a port between 1 and 65535."));
 //                    portField.setText(Integer.toString(port));
 //                    throw new IOException("invalid port");
-//                }
-//            }
+                }
+            }
         }
 
         @Override

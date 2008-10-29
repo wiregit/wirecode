@@ -44,8 +44,9 @@ public class SpamOptionPanel extends OptionPanel {
         clearSpamButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO: spam manager needs a isEmpty method added
                 spamManager.clearFilterData();
+                //disable spam button after first click to give feedback on action performed
+                clearSpamButton.setEnabled(false);
             }
         });
         
@@ -57,18 +58,16 @@ public class SpamOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     boolean hasChanged() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void initOptions() {
-        
+        //always make the spam button clickable
+        clearSpamButton.setEnabled(true);
     }
 }

@@ -9,15 +9,18 @@ import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SpamServices;
 
 @Singleton
 public class SpamManagerImpl implements SpamManager {
 
     private final com.limegroup.gnutella.spam.SpamManager spamManager;
-
+    private final SpamServices spamServices;
+    
     @Inject
-    public SpamManagerImpl(com.limegroup.gnutella.spam.SpamManager spamManager) {
+    public SpamManagerImpl(com.limegroup.gnutella.spam.SpamManager spamManager, SpamServices spamServices) {
         this.spamManager = spamManager;
+        this.spamServices = spamServices;
     }
 
     @Override
@@ -48,4 +51,8 @@ public class SpamManagerImpl implements SpamManager {
         return remoteFileDescs;
     }
 
+    @Override
+    public void reloadIPFilter() {
+        spamServices.reloadIPFilter();
+    }
 }

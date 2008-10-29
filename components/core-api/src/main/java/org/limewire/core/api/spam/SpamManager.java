@@ -8,4 +8,9 @@ public interface SpamManager {
     public void clearFilterData();
     public void handleUserMarkedGood(List<SearchResult> searchResults);
     public void handleUserMarkedSpam(List<SearchResult> searchResults);
+    
+    /**
+     * Reloads the IP Filter data & adjusts spam filters when ready.
+     */
+    public void reloadIPFilter();
 }

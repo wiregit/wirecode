@@ -5,8 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -17,7 +15,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -46,8 +43,6 @@ import com.google.inject.Singleton;
 /**
  * Network Interface Option View
  */
-//TODO: check this for thread safety on glazed lists
-//TODO: fix the table checkbox renderering
 @Singleton
 public class NetworkInterfaceOptionPanel extends OptionPanel {
 
@@ -185,15 +180,6 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
             getColumn(0).setMaxWidth(30);
         }
         
-        //Don't set the cell value when editing is cancelled
-        @Override
-        public void editingStopped(ChangeEvent e) {
-            TableCellEditor editor = getCellEditor();
-            if (editor != null) {          
-                removeEditor();
-            }
-        }
-        
         @Override
         public boolean isCellEditable(int row, int col) {
             if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
@@ -225,9 +211,7 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         }   
     }
     
-    private class NetworkItem {
-        private final PropertyChangeSupport support = new PropertyChangeSupport(this);
-        
+    private class NetworkItem {       
         private boolean isSelected = false;
         private InetAddress address;
         private String displayName;
@@ -251,19 +235,10 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         
         public void setSelected(boolean value) {
             this.isSelected = value;
-            support.firePropertyChange("isSelected", !value, value);
-        }
-        
-        public void addPropertyChangeListener(PropertyChangeListener l) {
-            support.addPropertyChangeListener(l);
-        }
-        
-        public void removePropertyChangeListener(PropertyChangeListener l) {
-            support.removePropertyChangeListener(l);
         }
     }
     
-    private class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, TableCellEditor {
+    private class CheckBoxRenderer extends JRadioButton implements TableCellRenderer, TableCellEditor {
 
         private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
         
@@ -276,8 +251,9 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
                         selectedItem.setSelected(false);
                         selectedItem = currentItem;
                     }
-                    currentItem.setSelected(CheckBoxRenderer.this.isSelected());
-                    CheckBoxRenderer.this.repaint();
+                    currentItem.setSelected(true);
+                    cancelCellEditing();
+                    table.repaint();
                 }
             });
         }

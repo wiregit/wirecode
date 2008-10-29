@@ -7,6 +7,7 @@ import org.limewire.core.impl.browse.MockBrowseModule;
 import org.limewire.core.impl.connection.MockConnectionManagerImpl;
 import org.limewire.core.impl.download.MockDownloadModule;
 import org.limewire.core.impl.library.MockLibraryModule;
+import org.limewire.core.impl.network.MockNetworkModule;
 import org.limewire.core.impl.player.MockPlayerModule;
 import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.core.impl.spam.MockSpamModule;
@@ -24,6 +25,7 @@ public class MockModule extends AbstractModule {
         install(new MockLifeCycleModule());
         install(new MockSpamModule());
         install(new MockSearchModule());
+        install(new MockNetworkModule());
         install(new MockDownloadModule());
         install(new MockLibraryModule());
         install(new MockBrowseModule());

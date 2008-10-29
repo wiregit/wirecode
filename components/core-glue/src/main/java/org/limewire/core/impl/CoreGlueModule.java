@@ -10,6 +10,7 @@ import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.library.CoreGlueLibraryModule;
 import org.limewire.core.impl.lifecycle.LifeCycleManagerImpl;
 import org.limewire.core.impl.mozilla.CoreGlueMozillaModule;
+import org.limewire.core.impl.network.CoreGlueNetworkModule;
 import org.limewire.core.impl.player.CoreGluePlayerModule;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
@@ -32,6 +33,7 @@ public class CoreGlueModule extends AbstractModule {
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueSearchModule());
+        install(new CoreGlueNetworkModule());
         install(new CoreGlueDownloadModule());
         install(new CoreGlueLibraryModule());
         install(new CoreGlueBrowseModule());

@@ -26,6 +26,7 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.IP;
 import org.limewire.ui.swing.util.FontUtils;
@@ -40,12 +41,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class FilteringOptionPanel extends OptionPanel {
     
+    private SpamManager spamManager;
+    
     private BlockHostsPanel blockHostPanel;
     private AllowHostsPanel allowHostsPanel;
     
     @Inject
-    public FilteringOptionPanel() {
+    public FilteringOptionPanel(SpamManager spamManager) {
         super();
+        this.spamManager = spamManager;
+        
         setLayout(new MigLayout("insets 10 10 10 10, fillx, wrap", "", ""));
         
         add(getBlockHostsPanel(), "pushx, growx");
@@ -115,8 +120,7 @@ public class FilteringOptionPanel extends OptionPanel {
             
             FilterSettings.USE_NETWORK_FILTER.setValue(backListCheckBox.isSelected());
             FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(list.toArray(new String[list.size()]));
-         //TODO: convert spam services to new interface
-         //   GuiCoreMediator.getSpamServices().reloadIPFilter();
+            spamManager.reloadIPFilter();
         }
     
         @Override
@@ -163,8 +167,7 @@ public class FilteringOptionPanel extends OptionPanel {
             List<String> list = filterTable.getFilterModel().getModel();
             
             FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(list.toArray(new String[list.size()]));
-            //TODO: convert spam services to new interface
-//            GuiCoreMediator.getSpamServices().reloadIPFilter();
+            spamManager.reloadIPFilter();
         }
     
         @Override
@@ -227,15 +230,6 @@ public class FilteringOptionPanel extends OptionPanel {
         public void addIp(String ip) {
             if(model != null) {
                 model.addIP(ip);
-            }
-        }
-        
-        //Don't set the cell value when editing is cancelled
-        @Override
-        public void editingStopped(ChangeEvent e) {
-            TableCellEditor editor = getCellEditor();
-            if (editor != null) {          
-                removeEditor();
             }
         }
         

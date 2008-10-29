@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.network.NetworkManager;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
@@ -22,6 +23,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class PerformanceOptionPanel extends OptionPanel {
 
+    private NetworkManager networkManager;
+    
     private final String firstMultiLineLabel = I18n.tr("If your computer has a fast internet connection, LimeWire may act as an \"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you notice performacnce issues.");
     private final String secondMultiLineLabel = I18n.tr("LimeWire uses a secure communications mode called TLS, which may use more CPU resources.");
     private final String thirdMultiLineLabel = I18n.tr("Out-of-band Searching helps deliver faster search results to you, but some internet connections may not work well with this feature.");
@@ -32,7 +35,9 @@ public class PerformanceOptionPanel extends OptionPanel {
     private JCheckBox disableOutOfBandSearchCheckBox;
     
     @Inject
-    public PerformanceOptionPanel() {
+    public PerformanceOptionPanel(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getPerformancePanel(), "pushx, growx");
@@ -71,19 +76,26 @@ public class PerformanceOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        // TODO finish them
+        UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(disableUltraPeerCheckBox.isSelected());
+        DHTSettings.DISABLE_DHT_USER.setValue(disableMojitoCheckBox.isSelected());
+        
+        networkManager.setIncomingTLSEnabled(!disableTLS.isSelected());
+        networkManager.setOutgoingTLSEnabled(!disableTLS.isSelected());
+        
         SearchSettings.OOB_ENABLED.setValue(disableOutOfBandSearchCheckBox.isSelected());
+        
+        //TODO: this was in the old code (DisableCapabilitiesPaneItem) needs to be copied over
+//        if((tlsServerChanged || (upChanged && UP_CHECK_BOX.isSelected()) && isSupernode)) {
+//            GuiCoreMediator.getConnectionServices().disconnect();
+//            GuiCoreMediator.getConnectionServices().connect();
+//        }
     }
 
     @Override
     boolean hasChanged() {
         return UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() != disableUltraPeerCheckBox.isSelected() 
         || DHTSettings.DISABLE_DHT_USER.getValue() != disableMojitoCheckBox.isSelected()
-        //TODO: NetworkManager API
-//        || (!GuiCoreMediator.getNetworkManager().isIncomingTLSEnabled() &&
-//            !GuiCoreMediator.getNetworkManager().isOutgoingTLSEnabled())
-//               != TLS_CHECK_BOX.isSelected();
-        
+        || (!networkManager.isIncomingTLSEnabled() && !networkManager.isOutgoingTLSEnabled()) != disableTLS.isSelected()
         || SearchSettings.OOB_ENABLED.getValue() != disableOutOfBandSearchCheckBox.isSelected();
     }
 
@@ -91,10 +103,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     public void initOptions() {
         disableUltraPeerCheckBox.setSelected(UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue());
         disableMojitoCheckBox.setSelected(DHTSettings.DISABLE_DHT_USER.getValue());
-        //TODO: Network manager API
-//        TLS_CHECK_BOX.setSelected(!GuiCoreMediator.getNetworkManager().isIncomingTLSEnabled() ||
-//                !GuiCoreMediator.getNetworkManager().isOutgoingTLSEnabled());
-        
+        disableTLS.setSelected(!networkManager.isIncomingTLSEnabled() || !networkManager.isOutgoingTLSEnabled());
         disableOutOfBandSearchCheckBox.setSelected(SearchSettings.OOB_ENABLED.getValue());
     }
 
