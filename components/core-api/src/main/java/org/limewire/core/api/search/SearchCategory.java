@@ -1,11 +1,12 @@
 package org.limewire.core.api.search;
 
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.limewire.core.api.Category;
 
+/**
+ * All categories that can be searched.
+ */
 public enum SearchCategory {
     ALL(null, 0), 
     AUDIO(Category.AUDIO, 1), 
@@ -18,13 +19,11 @@ public enum SearchCategory {
     ;
     
     private static final EnumMap<Category, SearchCategory> perCategory = new EnumMap<Category, SearchCategory>(Category.class);
-    private static final Map<Integer, SearchCategory> perId = new HashMap<Integer, SearchCategory>();
 
     static {
         for(SearchCategory searchCategory : values()) {
             if(searchCategory.category != null) {
                 perCategory.put(searchCategory.category, searchCategory);
-                perId.put(searchCategory.getId(), searchCategory);
             }
         }
     }
@@ -37,19 +36,34 @@ public enum SearchCategory {
         this.category = category;
     }
     
+    /**
+     * Returns the SearchCategory associated with the given Category.
+     * This will never return {@link SearchCategory#ALL} because Categories
+     * are specific to types.
+     */
     public static SearchCategory forCategory(Category category) {
         return perCategory.get(category);
     }
     
+    /** 
+     * Returns the {@link SearchCategory} associated with the given ID, as
+     * returned by {@link SearchCategory#getId()}.
+     */
     public static SearchCategory forId(Integer id) {
-        SearchCategory category = perId.get(id);
-        if(category == null) {
-            return SearchCategory.ALL;
-        } else {
-            return category;
+        for(SearchCategory category : values()) {
+            if(category.id == id) {
+                return category;
+            }
         }
+        return SearchCategory.ALL;
     }
     
+    /**
+     * Returns the ID associated with this category.  This ID is suitable
+     * for storage in properties that can be reused over multiple sessions.
+     * To get the {@link SearchCategory} associated with the id in later
+     * sessions, use {@link SearchCategory#forId(Integer)}.
+     */
     public int getId() {
         return id;
     }
