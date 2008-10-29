@@ -183,6 +183,8 @@ public final class FileTypeOptionPanelManager {
     
     public void buildUI() {
         
+        if (this.panels.isEmpty()) return;
+        
         this.mainContainer.removeAll();
         this.currentPanel.removeAll();
         
