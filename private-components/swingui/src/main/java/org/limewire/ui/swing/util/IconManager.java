@@ -25,10 +25,10 @@ public class IconManager {
     private Icon blankIcon;
     
     @Inject
-    IconManager() {
+    IconManager(FileIconController fileIconController) {
         // Always begin with the basic controller,
         // whose contruction can never block.
-        fileController = new BasicFileIconController();
+        fileController = fileIconController;
         
         // Then, in a new thread, try to change it to a controller
         // that can block.
@@ -109,7 +109,7 @@ public class IconManager {
      * Returns true if the current controller is already valid.
      */
     private void validate() {
-        if (!fileController.isValid())
-            fileController = new BasicFileIconController();
+       // if (!fileController.isValid())
+      //      fileController = new BasicFileIconController();
     }
 }

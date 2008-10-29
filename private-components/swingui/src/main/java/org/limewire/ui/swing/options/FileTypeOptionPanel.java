@@ -3,6 +3,7 @@ package org.limewire.ui.swing.options;
 import javax.swing.JFrame;
 
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 
 import com.google.inject.Binder;
 import com.google.inject.Guice;
@@ -57,10 +58,13 @@ public final class FileTypeOptionPanel extends OptionPanel {
         
         Injector injector = Guice.createInjector(new Module() {
             public void configure(Binder binder) {
+                binder.install(new LimeWireUiUtilModule());
                 binder.bind(FileTypeOptionPanel.class);
             }
             
         });
+        
+        
         
         JFrame frame = new JFrame();
  

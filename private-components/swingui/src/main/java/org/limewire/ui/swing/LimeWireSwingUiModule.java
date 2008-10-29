@@ -11,6 +11,7 @@ import org.limewire.ui.swing.player.LimeWireUiPlayerModule;
 import org.limewire.ui.swing.search.LimeWireUiSearchModule;
 import org.limewire.ui.swing.sharing.LimeWireUISharingModule;
 import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
+import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 
 import com.google.inject.AbstractModule;
 
@@ -18,6 +19,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        install(new LimeWireUiUtilModule());
         install(new LimeWireUiSearchModule());
         install(new LimeWireUiNavModule());
         install(new LimeWireUiMainframeModule());

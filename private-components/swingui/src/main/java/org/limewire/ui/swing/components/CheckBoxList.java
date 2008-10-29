@@ -1191,6 +1191,7 @@ public class CheckBoxList<E> extends BoxPanel {
         public void addTopMouseListener(MouseListener l) {
             this.addMouseListener(l);
             this.label.addMouseListener(l);
+            this.commentlabel.addMouseListener(l);
         }
         
         

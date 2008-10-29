@@ -6,4 +6,9 @@ package org.limewire.ui.swing.util;
  */
 public class IconManagerStub extends IconManager {
 
+    public IconManagerStub() {
+        //TODO: Inject
+        super(new BasicFileIconController(new CategoryIconManager()));
+    }
+    
 }
