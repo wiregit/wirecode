@@ -104,7 +104,7 @@ public class MockSearch implements Search {
         String query = searchDetails.getSearchQuery();
         query = query.toLowerCase();
         if(query.indexOf("juggl") > -1){
-          addRcordsJuggling(i);
+          addRecordsJuggling(i);
         }
         if(query.indexOf("paris") > -1){
             addRecordsParis(i);
@@ -401,7 +401,6 @@ public class MockSearch implements Search {
         msr.setExtension("avi");
         msr.setResultType(Category.VIDEO);
         msr.setSize(9876L);
-        msr.addSource("127.1.1.21");
         msr.addSource("134.11.4.123");
         msr.setUrn("www.bracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Bracket High School");
@@ -426,9 +425,8 @@ public class MockSearch implements Search {
         msr.setExtension("png");
         msr.setResultType(Category.IMAGE);
         msr.setSize(9876L);
-        msr.addSource("127.1.1.21");
-        msr.addSource("134.11.4.123");
-        msr.setUrn("www.bracket.edu" + i);
+        msr.addSource("135.11.4.123");
+        msr.setUrn("www.Dobracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Monkey Matt");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
         msr.setProperty(FilePropertyKey.COMMENTS,
@@ -451,9 +449,8 @@ public class MockSearch implements Search {
         msr.setExtension("txt");
         msr.setResultType(Category.DOCUMENT);
         msr.setSize(9876L);
-        msr.addSource("127.1.1.21");
-        msr.addSource("134.11.4.123");
-        msr.setUrn("www.bracket.edu" + i);
+        msr.addSource("126.1.1.21");
+        msr.setUrn("www.dbracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Fleet Corrs");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
         msr.setProperty(FilePropertyKey.COMMENTS,
@@ -470,7 +467,129 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.WIDTH, "230");
         msr.setProperty(FilePropertyKey.YEAR, "2007");
         handleSearchResult(msr);
-    }
+        
+        msr = new MockSearchResult();
+        name = "Monkeys are fun";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5876L);
+        msr.addSource("127.1.1.21");
+        msr.addSource("134.11.4.123");
+        msr.addSource("134.11.4.124");
+        msr.setUrn("www.FunPazabracket.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Monkey Fun");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Monkey Wrench to the head";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9376L);
+        msr.addSource("127.5.1.21");
+        msr.setUrn("www.WrenchFerabracket.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Ouch");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Monkeys aren't orangutans";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(2876L);
+        msr.addSource("127.1.5.21");
+        msr.setUrn("www.OalRangbracket.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Moneky High School");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Don't Monkey With me";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(93876L);
+        msr.addSource("127.1.34.21");
+        msr.setUrn("www.Sepbracket.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Mall Of Canada");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "grainy");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2002");
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Monkeys surfing";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(9876L);
+        msr.addSource("127.14.1.21");
+        msr.setUrn("www.SurfBlahBl.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Surfing Monkeys");
+        msr.setProperty(FilePropertyKey.BITRATE, "5000");
+        msr.setProperty(FilePropertyKey.COMMENTS,
+            "Food fight");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
+        msr.setProperty(FilePropertyKey.HEIGHT, "480");
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.LENGTH, "0:48");
+        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.RATING, "8");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.5f);
+        msr.setProperty(FilePropertyKey.QUALITY, "excellent");
+        msr.setProperty(FilePropertyKey.WIDTH, "230");
+        msr.setProperty(FilePropertyKey.YEAR, "2007");
+        handleSearchResult(msr);
+}
     private void addRecordsWater(int i){
         MockSearchResult msr;
         String name;
@@ -536,7 +655,81 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
         handleSearchResult(msr);
         
-    }
+        msr = new MockSearchResult();
+        name = "Slow Mo Water";
+        msr.setExtension("bmp");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(3567L);
+        msr.setUrn("www.H2OFenix.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Salvy Stumpy");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Water Fight";
+        msr.setExtension("jpg");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(3567L);
+        msr.setUrn("www.H2OFight.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Belmar Stumpy");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "City Water";
+        msr.setExtension("bmp");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(3567L);
+        msr.setUrn("www.CityH2O.edu" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Resivoir");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Water Wheel";
+        msr.setExtension("bmp");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(8567L);
+        msr.setUrn("www.H2OWheel.net" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Eric");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Water Leak";
+        msr.setExtension("bmp");
+        msr.setResultType(Category.IMAGE);
+        msr.setSize(5567L);
+        msr.setUrn("www.H2OLeak.com" + i);
+        msr.setProperty(FilePropertyKey.AUTHOR, "Leak");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 27).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+}
     private void addRecordsSpam(int i){
         MockSearchResult msr;
         String name;
@@ -687,7 +880,7 @@ public class MockSearch implements Search {
 
         
     }
-    private void addRcordsJuggling(int i){
+    private void addRecordsJuggling(int i){
 
         MockSearchResult msr;
         String name;
@@ -778,6 +971,68 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.9);
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Juggling Two Jobs";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("143.12.1.21");
+        msr.setUrn("www.Jogsjuggling.org" + i);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+        msr = new MockSearchResult();
+
+        name = "Juggling A Train";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(6678L);
+        msr.addSource("143.12.1.21");
+        msr.addSource("123.32.1.21");
+        msr.setUrn("www.jugglingTrain.org" + i);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Train Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Buggle Juggle";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("143.12.1.21");
+        msr.addSource("123.32.1.21");
+        msr.setUrn("www.Bugglejuggle.org" + i);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Buggle Green");
+        msr.setProperty(FilePropertyKey.DATE_CREATED,
+            new GregorianCalendar(2008, 7, 20).getTimeInMillis());
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
+        handleSearchResult(msr);
+
+        msr = new MockSearchResult();
+        name = "Hugging a Juggler";
+        msr.setExtension("avi");
+        msr.setResultType(Category.VIDEO);
+        msr.setSize(5678L);
+        msr.addSource("123.32.1.21");
+        msr.setUrn("www.Huggingjuggling.org" + i);
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Metty Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         msr.setProperty(FilePropertyKey.RELEVANCE, 0.8f);
@@ -943,6 +1198,44 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.RELEVANCE, 0.7f);
         handleSearchResult(msr);
 
+        msr = new MockSearchResult();
+        name = "Paris Texas isn't Paris France";
+        msr.setExtension("doc");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.12.13.234");
+        msr.setUrn("www.Directions23sola3ddddrsystem.net3");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Teller Now");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Paris in your Rear view mirror";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.12.13.234");
+        msr.setUrn("www.RearViewParis.net3");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Out of Now");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
+        
+        msr = new MockSearchResult();
+        name = "Paris Train";
+        msr.setExtension("txt");
+        msr.setResultType(Category.DOCUMENT);
+        msr.setSize(9876L);
+        msr.addSource("1.12.13.234");
+        msr.setUrn("www.AlwaysOnTime.net3");
+        msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
+        msr.setProperty(FilePropertyKey.NAME, name);
+        msr.setProperty(FilePropertyKey.OWNER, "Now or never");
+        msr.setProperty(FilePropertyKey.RELEVANCE, 0.9f);
+        handleSearchResult(msr);
     }
     static class MockRemoteHost implements RemoteHost {
         private final String description;
