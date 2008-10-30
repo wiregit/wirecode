@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.io.File;
 
 import javax.swing.Action;
@@ -14,6 +15,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -81,7 +83,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
         cancelAction.setOptionPanel(this);
 
-        defaultButton = new JButton();
+        defaultButton = new JButton(new DefaultAction());
         okButton = new JButton(okAction);
         cancelButton = new JButton(cancelAction);
 
@@ -138,6 +140,10 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         applyOption(MediaType.getProgramMediaType(), programTextField);
         applyOption(MediaType.getOtherMediaType(), otherTextField);
     }
+    
+    private void revertToDefault(JTextField textField) {
+        textField.setText(SharingSettings.getSaveDirectory().getAbsolutePath());
+    }
 
     private void applyOption(MediaType mediaType, DisplayTextField textField) {
         if(hasChanged(mediaType, textField)) {
@@ -188,6 +194,24 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
             setEditable(false);
             setBackground(Color.WHITE);
             setColumns(40);
+        }
+    }
+    
+    private class DefaultAction extends AbstractAction {
+
+        public DefaultAction() {
+            putValue(Action.NAME, I18n.tr("Use Default"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Revert directories to the default"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            revertToDefault(audioTextField);
+            revertToDefault(videoTextField);
+            revertToDefault(imageTextField);
+            revertToDefault(documentTextField);
+            revertToDefault(programTextField);
+            revertToDefault(otherTextField);
         }
     }
 }

@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.daap.DaapManager;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
@@ -34,6 +35,7 @@ public class FilesOptionPanel extends OptionPanel {
     
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
+    private final DaapManager daapManager;
     
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
@@ -42,10 +44,11 @@ public class FilesOptionPanel extends OptionPanel {
     
     @Inject
     FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
-            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel) { 
+            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager) { 
         
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;
+        this.daapManager = daapManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
@@ -264,6 +267,7 @@ public class FilesOptionPanel extends OptionPanel {
 
         private JCheckBox shareWithITunesCheckBox;
         private JCheckBox requirePassWordCheckBox;
+        private JLabel passwordLabel;
         private JPasswordField passwordField;
         
         public ITunesPanel() {
@@ -271,6 +275,12 @@ public class FilesOptionPanel extends OptionPanel {
             
             shareWithITunesCheckBox = new JCheckBox();
             shareWithITunesCheckBox.setContentAreaFilled(false);
+            shareWithITunesCheckBox.addItemListener(new ItemListener(){
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    setPasswordVisible(shareWithITunesCheckBox.isSelected());
+                }
+            });
             requirePassWordCheckBox = new JCheckBox();
             requirePassWordCheckBox.setContentAreaFilled(false);
             requirePassWordCheckBox.addItemListener(new ItemListener(){
@@ -282,32 +292,111 @@ public class FilesOptionPanel extends OptionPanel {
             passwordField = new JPasswordField(30);
             passwordField.setEnabled(false);
             
+            passwordLabel = new JLabel("Require password");
+            
             add(shareWithITunesCheckBox, "split");
-            add(new JLabel("Share the audio section of my LimeWire on my local network using iTunes"),"wrap");
+            add(new JLabel("Share the audio section of my LimeWire on my local network using iTunes"), "wrap");
             
             add(requirePassWordCheckBox, "gapleft 25, split");
-            add(new JLabel("Require password"));
+            add(passwordLabel);
             add(passwordField);
+            
+            setPasswordVisible(false);
         }
         
         @Override
         void applyOptions() {
-            DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requirePassWordCheckBox.isSelected());
+//            DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requirePassWordCheckBox.isSelected());
             
             //TODO: do some string checking for password length, etc.. see the old DaapSetting usage
+            
+//            final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
+//
+//            DaapSettings.DAAP_ENABLED.setValue(requirePassWordCheckBox.isSelected());
+////            DaapSettings.DAAP_LIBRARY_NAME.setValue(serviceName);
+//
+//            try {
+//                
+//                if (shareWithITunesCheckBox.isSelected()) {              
+//                    if (!prevEnabled) 
+//                        daapManager.restart();
+//                } else if (prevEnabled) {
+//                    daapManager.stop();
+//                }
+//
+//            } catch (IOException err) {
+////
+////                DaapSettings.DAAP_ENABLED.setValue(prevEnabled);
+////                DaapSettings.DAAP_SERVICE_NAME.setValue(prevServiceName);
+////                DaapSettings.DAAP_LIBRARY_NAME.setValue(prevServiceName);
+////
+//                daapManager.stop();
+////                initOptions();
+////
+////                throw err;
+//            }
+////            
+////            if (password.equals("") && requiresPassword) { 
+////                throw new IOException(); 
+////            }
+////            
+////            if ( ! DaapSettings.DAAP_PASSWORD.equals(password)) {
+////                DaapSettings.DAAP_PASSWORD.setValue(password);
+////            }
+////            
+////            if (requiresUsername) {
+////                password = DaapUtil.calculateHA1(username, password);
+////            }
+////            
+////            if (requiresPassword != prevRequiresPassword 
+////                    || (requiresPassword && !password.equals(prevPassword))) {
+////
+////                DaapSettings.DAAP_REQUIRES_USERNAME.setValue(requiresUsername);
+////                DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requiresPassword);
+////
+//                try {
+////
+////                    // A password is required now or password has changed, 
+////                    // disconnect all users...
+////                    if (requiresPassword) { 
+//                        daapManager.disconnectAll();
+////                    }
+//                    daapManager.updateService();
+////
+//                } catch (IOException err) {                  
+////                    DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(prevRequiresPassword);
+////                    DaapSettings.DAAP_PASSWORD.setValue(prevPassword);
+////
+//                    daapManager.stop();
+////                    initOptions();
+////
+////                    throw err;
+//                }
+////            }
         }
 
         @Override
         boolean hasChanged() {
-            return DaapSettings.DAAP_REQUIRES_PASSWORD.getValue() != requirePassWordCheckBox.isSelected() ||
+            return  DaapSettings.DAAP_ENABLED.getValue() != shareWithITunesCheckBox.isSelected() ||
+                    DaapSettings.DAAP_REQUIRES_PASSWORD.getValue() != requirePassWordCheckBox.isSelected() ||
                     DaapSettings.DAAP_PASSWORD.getValue() != requirePassWordCheckBox.getText();
         }
 
         @Override
         public void initOptions() {
-            //TODO: share with init
-            passwordField.setText(DaapSettings.DAAP_PASSWORD.getValue());
+            shareWithITunesCheckBox.setSelected(DaapSettings.DAAP_ENABLED.getValue() && 
+                    daapManager.isServerRunning());
+
             requirePassWordCheckBox.setSelected(DaapSettings.DAAP_REQUIRES_PASSWORD.getValue());
+            if(requirePassWordCheckBox.isSelected()) {
+                passwordField.setText(DaapSettings.DAAP_PASSWORD.getValue());
+            }
+        }
+        
+        private void setPasswordVisible(boolean value) {
+            requirePassWordCheckBox.setVisible(value);
+            passwordLabel.setVisible(value);
+            passwordField.setVisible(value);
         }
     }
 }
