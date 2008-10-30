@@ -48,6 +48,7 @@ import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -1397,6 +1398,7 @@ public class AltLocUploadTest extends LimeTestCase {
 
         private List<HTTPUploader> activeUploads = new ArrayList<HTTPUploader>();
         
+        @Inject
         TestUploadManager(UploadSlotManager slotManager,
                 HttpRequestHandlerFactory httpRequestHandlerFactory,
                 Provider<HTTPAcceptor> httpAcceptor,
