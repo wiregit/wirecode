@@ -52,7 +52,7 @@ public class UpdateSettings extends LimeProps {
      * The style of updates.
      */
     public static final IntSetting UPDATE_STYLE = 
-        FACTORY.createIntSetting("UPDATE_STYLE", 0).setAlwaysSave(true);
+        FACTORY.createIntSetting("UPDATE_STYLE", 1).setAlwaysSave(true);
     
     /**
      * Failed updates.
