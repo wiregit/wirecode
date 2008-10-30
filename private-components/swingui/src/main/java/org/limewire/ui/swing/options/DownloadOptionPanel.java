@@ -100,10 +100,10 @@ public class DownloadOptionPanel extends OptionPanel {
             shareIncompleteDownloadsCheckBox.setContentAreaFilled(false);
             
             add(shareCompletedDownloadsCheckBox);
-            add(new JLabel("Share files downloaded from the LimeWire Network with the LimeWire Network"), "wrap");
+            add(new JLabel(I18n.tr("Share files downloaded from the LimeWire Network with the LimeWire Network")), "wrap");
             
             add(shareIncompleteDownloadsCheckBox);
-            add(new JLabel("Also share files being downloaded from the LimeWire Network with the LimeWire Network"), "wrap");
+            add(new JLabel(I18n.tr("Also share files being downloaded from the LimeWire Network with the LimeWire Network")), "wrap");
         }
         
         @Override
@@ -147,14 +147,14 @@ public class DownloadOptionPanel extends OptionPanel {
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
             
             add(clearDownloadsCheckBox, "split 2");
-            add(new JLabel("Clear downloads from list when finished"), "wrap");
+            add(new JLabel(I18n.tr("Clear downloads from list when finished")), "wrap");
             
-            add(new JLabel("Save downloads to:"), "split 3");
+            add(new JLabel(I18n.tr("Save downloads to:")), "split 3");
             add(downloadSaveTextField, "span, growx, push");
             add(browseSaveLocationButton, "wrap");
             
             add(autoRenameDuplicateFilesCheckBox, "gapleft 25, split 2");
-            add(new JLabel("If the file already exists, download it with a different name"));
+            add(new JLabel(I18n.tr("If the file already exists, download it with a different name")));
         }
         
         @Override
@@ -231,7 +231,7 @@ public class DownloadOptionPanel extends OptionPanel {
             addToITunesCheckBox.setContentAreaFilled(false);
             
             add(addToITunesCheckBox);
-            add(new JLabel("Add audio files I downloaded from LimeWire to my iTunes Library"), "wrap");
+            add(new JLabel(I18n.tr("Add audio files I downloaded from LimeWire to my iTunes Library")), "wrap");
         }
         
         @Override
