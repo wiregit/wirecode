@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
@@ -76,6 +77,8 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
             subheading.setText(vsr.getSubHeading());
             fileSize.setText(vsr.getPropertyString(FilePropertyKey.FILE_SIZE));
+            genre.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.GENRE) }));
+            rating.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.RATING) }));
             populateMetadata(vsr);
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
             title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
@@ -94,7 +97,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
             showDialog(vsr.getPropertyString(FilePropertyKey.NAME));
         }
-
+        
         private void populateMetadata(VisualSearchResult vsr) {
             Map<String, String> metadata = new LinkedHashMap<String, String>();
             switch(vsr.getCategory()) {
