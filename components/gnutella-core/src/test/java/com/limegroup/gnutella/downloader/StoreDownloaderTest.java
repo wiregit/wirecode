@@ -127,7 +127,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         
         assertTrue(rfd.getUrns().contains(urn));
         
-        assertEquals( url, rfd.getUrl());
+        assertEquals( url, rfd.getUrlPath());
         
         assertEquals( "test.txt", rfd.getFileName());
         

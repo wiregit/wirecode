@@ -429,7 +429,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         }
 
         public Address getPresenceAddress() {
-            return rfd.toAddress();
+            return rfd.getAddress();
         }
 
         public byte[] getAuthToken() {

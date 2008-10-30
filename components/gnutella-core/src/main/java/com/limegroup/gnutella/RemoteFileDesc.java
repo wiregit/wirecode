@@ -1,12 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.auth.Credentials;
 import org.limewire.io.Address;
 
-import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 /**
@@ -52,20 +51,14 @@ public interface RemoteFileDesc extends RemoteFileDetails {
      *
      * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
      */
-    public URL getUrl();
-
+    public String getUrlPath();
+    
     /**
-     * Determines whether or not this host reported a private address.
-     *
-     * @return <tt>true</tt> if the address for this host is private,
-     *  otherwise <tt>false</tt>.  If the address is unknown, returns
-     *  <tt>true</tt>
-     *
-     * TODO:: use InetAddress in this class for the host so that we don't 
-     * have to go through the process of creating one each time we check
-     * it it's a private address
+     * Returns credentials needed for downloading this file from the remote
+     * side
+     * @return null if no credentials are needed
      */
-    public boolean isPrivate();
+    public Credentials getCredentials();
 
     /**
      * @return true if I am not a multicast host and have a hash.
@@ -73,25 +66,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
      * otherwise my port and address need to be valid.
      */
     public boolean isAltLocCapable();
-
-    /**
-     * 
-     * @return whether a push should be sent to this rfd.
-     */
-    public boolean needsPush();
-    
-    /**
-     * 
-     * @return whether a push should be sent to this rfd.
-     * @param statsTracker used to track download statistics
-     */
-    public boolean needsPush(DownloadStatsTracker statsTracker);
-
-    /**
-     * 
-     * @return the push address.
-     */
-    public PushEndpoint getPushAddr();
 
     public void setSpamRating(float rating);
 
@@ -108,6 +82,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     
     public boolean isSpam();
 
-    public Address toAddress();
+    public Address getAddress();
 
 }

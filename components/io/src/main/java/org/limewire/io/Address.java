@@ -8,9 +8,18 @@ package org.limewire.io;
  * It could also include, for example, a client guid and push proxies.
  * It could also be a jabber id, if jabber messages are used as a signaling
  * channel, for example, to execute reverse connections or firewall transfers.
+ * 
+ * Addresses should fulfill provide  meaningful {@link #equals(Object)} and
+ * {@link #hashCode()} implementations.
  */
 public interface Address {
     enum EventType {
         ADDRESS_CHANGED
     }
+    
+    @Override
+    public boolean equals(Object obj);
+    
+    @Override
+    public int hashCode();
 }

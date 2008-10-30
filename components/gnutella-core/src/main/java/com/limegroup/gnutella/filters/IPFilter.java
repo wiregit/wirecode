@@ -2,6 +2,7 @@ package com.limegroup.gnutella.filters;
 
 import java.net.SocketAddress;
 
+import org.limewire.io.Address;
 import org.limewire.io.IP;
 
 /**
@@ -57,6 +58,8 @@ public interface IPFilter extends SpamFilter {
      *  or we are unable to create correct IP address out of it.
      */
     public boolean allow(String addr);
+    
+    public boolean allow(Address address);
     
     /** 
      * Checks if a given host is banned.  This method will be

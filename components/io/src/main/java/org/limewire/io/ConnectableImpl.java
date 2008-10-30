@@ -66,5 +66,24 @@ public class ConnectableImpl implements Connectable {
     public String toString() {
         return ipPort + ", tlsCapable: " + tlsCapable;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Connectable) {
+            Connectable connectable = (Connectable)obj;
+            return getAddress().equals(connectable.getAddress()) 
+            && getPort() == connectable.getPort() 
+            && isTLSCapable() == connectable.isTLSCapable();
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
 }

@@ -15,16 +15,20 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -677,8 +681,6 @@ public class DownloadWorker {
             return;
         }
 
-        final boolean needsPush = _rfd.needsPush(statsTracker);
-
         synchronized (_manager) {
             DownloadStatus state = _manager.getState();
             // If we're just increasing parallelism, stay in DOWNLOADING
@@ -699,24 +701,26 @@ public class DownloadWorker {
         }
 
         if (LOG.isDebugEnabled())
-            LOG.debug("WORKER: attempting connect to " + _rfd.getAddress() + ":"
-                    + _rfd.getPort());
+            LOG.debug("WORKER: attempting connect to " + _rfd.getAddress());
 
         // TODO move to DownloadStatsTracker?
         _manager.incrementTriedHostsCount();
 
+        Address address = _rfd.getAddress();
         if (_rfd.isReplyToMulticast()) {
             // Start with a push connect, fallback to a direct connect, and do
             // not forget the RFD upon push failure.
             connectWithPush(new PushConnector(false, true));
-        } else if (!needsPush) {
-            // Start with a direct connect, fallback to a push connect.
-            connectDirectly(new DirectConnector(true));
-        } else {
+        } else if (address instanceof PushEndpoint) {
             // Start with a push connect, do not fallback to a direct connect,
             // and do
             // forgot the RFD upon push failure.
-            connectWithPush(new PushConnector(true, false));
+            connectWithPush(new PushConnector(true, false));   
+        } else if (address instanceof Connectable) {
+            // Start with a direct connect, fallback to a push connect.
+            connectDirectly((Connectable)address, new DirectConnector(true));
+        } else { 
+            socketsManager.connect(address, PUSH_CONNECT_TIME, new SocketsConnectObserver());
         }
     }
 
@@ -745,9 +749,9 @@ public class DownloadWorker {
      * will return immediately and the given observer will be notified of
      * success or failure.
      */
-    private void connectDirectly(DirectConnector observer) {
+    private void connectDirectly(Connectable connectable, DirectConnector observer) {
         if (!_interrupted.get()) {
-            ConnectType type = _rfd.isTLSCapable()
+            ConnectType type = connectable.isTLSCapable()
                     && TLSManager.isOutgoingTLSEnabled() ? ConnectType.TLS
                     : ConnectType.PLAIN;
             if (LOG.isTraceEnabled())
@@ -756,7 +760,7 @@ public class DownloadWorker {
             _connectObserver = observer;
             try {
                 Socket socket = socketsManager.connect(
-                        new InetSocketAddress(_rfd.getAddress(), _rfd.getPort()),
+                        new InetSocketAddress(connectable.getAddress(), connectable.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
                     observer.setSocket(socket);
@@ -768,6 +772,7 @@ public class DownloadWorker {
         }
     }
 
+    
     /**
      * Attempts to connect by using a push to the remote end. This method will
      * return immediately and the given observer will be notified of success or
@@ -776,13 +781,14 @@ public class DownloadWorker {
     private void connectWithPush(PushConnector observer) {
         if (!_interrupted.get()) {
             if (LOG.isTraceEnabled())
-                LOG.trace("WORKER: attempt push connection to: " + _rfd+" proxies "+_rfd.getPushProxies());
+                LOG.trace("WORKER: attempt push connection to: " + _rfd+" proxies ");
             _connectObserver = null;
 
             // When the push is complete and we have a socket ready to use
             // the acceptor thread is going to notify us using this object
+            
             final PushDetails details = new PushDetails(_rfd.getClientGUID(),
-                    _rfd.getAddress());
+                    _rfd);
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
             pushDownloadManager.get().sendPush(_rfd,
@@ -1066,7 +1072,7 @@ public class DownloadWorker {
         Range interval;
         // If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if (!_downloader.getRemoteFileDesc().isPartialSource()) {
+        if (!rfdContext.isPartialSource()) {
             if (_currentState.isHttp11()) {
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
@@ -1077,7 +1083,7 @@ public class DownloadWorker {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
             try {
-                IntervalSet availableRanges = _downloader.getContext().getAvailableRanges();
+                IntervalSet availableRanges = rfdContext.getAvailableRanges();
 
                 if (_currentState.isHttp11()) {
                     interval = _commonOutFile.leaseWhite(availableRanges,
@@ -1123,7 +1129,7 @@ public class DownloadWorker {
 
         // If this _downloader is a partial source, don't attempt to steal...
         // too confusing, too many problems, etc...
-        if (_downloader.getRemoteFileDesc().isPartialSource()) {
+        if (rfdContext.isPartialSource()) {
             handleNoRanges();
             return false;
         }
@@ -1630,7 +1636,8 @@ public class DownloadWorker {
                 finishConnect();
                 finishWorker();
             } else {
-                connectDirectly(new DirectConnector(false));
+                assert _rfd.isReplyToMulticast() : "only multicast replies have an address to direct connect to";
+                connectDirectly((Connectable)_rfd.getAddress(), new DirectConnector(false));
             }
         }
     }
@@ -1705,5 +1712,32 @@ public class DownloadWorker {
         public boolean isShutdown() {
             return shutdown;
         }
+    }
+    
+    private class SocketsConnectObserver implements ConnectObserver {
+
+        @Override
+        public void handleConnect(Socket socket) throws IOException {
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
+                    _manager instanceof InNetworkDownloader);
+            try {
+                dl.initializeTCP(); // already connected, timeout doesn't
+                                    // matter.
+                statsTracker.successfulDirectConnect();
+            } catch (IOException iox) {
+                shutdown(); // if it immediately IOX's, try a push instead.
+                return;
+            }
+            startDownload(dl);
+        }
+
+        @Override
+        public void handleIOException(IOException iox) {
+        }
+
+        @Override
+        public void shutdown() {
+        }
+        
     }
 }

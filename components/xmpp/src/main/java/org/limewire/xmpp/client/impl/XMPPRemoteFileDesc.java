@@ -2,7 +2,6 @@ package org.limewire.xmpp.client.impl;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URL;
 import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
@@ -49,7 +48,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public URL getUrl() {
+    public String getUrlPath() {
         return null;
     }
 
@@ -124,7 +123,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public Address toAddress() {
+    public Address getAddress() {
         return null;
     }
 

@@ -575,7 +575,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
 		
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
-                "GET " + _rfd.getUrl().getFile() + " HTTP/1.1",
+                "GET " + _rfd.getUrlPath() + " HTTP/1.1",
                 headers,
                 _inNetwork ? tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_INNETWORK_UPSTREAM) :
                              tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM));

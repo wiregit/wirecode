@@ -17,7 +17,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
 
     @Override
     public void register(AddressFactory factory) {
-        factory.addSerializer(this);
+        factory.registerSerializer(this);
     }
     
     @Override

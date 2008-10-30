@@ -96,7 +96,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		RemoteFileDesc rfd =
 		    remoteFileDescFactory.createRemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID, 10, true, 3,
                 true, null, urns, false, false, "", null, -1, false);
-		URL rfdUrl = rfd.getUrl();
+		URL rfdUrl = rfd.getUrlPath();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getAddress();
 		String colonPort = ":"+rfd.getPort();

@@ -39,7 +39,7 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * independent of getName()/getIndex().
      */
     @Override
-    public URL getUrl() {
+    public String getUrlPath() {
         return _url;
     }
     
