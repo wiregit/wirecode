@@ -253,15 +253,14 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // about partial files because we don't add them to the cache.
         // NOTE: this doesn't return Store files. getNewestUrns only
         // returns the top 3 shared files
-        List<URN> urnList = creationTimeCache.get().getFiles(request, 3);
+        Collection<URN> urnList = creationTimeCache.get().getFiles(request, 3);
         if (urnList.size() == 0)
             return Collections.emptySet();
 
         // get the appropriate responses
         Set<Response> resps = new HashSet<Response>(urnList.size());
-        for (int i = 0; i < urnList.size(); i++) {
-            URN currURN = urnList.get(i);
-            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+        for (URN urn : urnList) {
+            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(urn);
 
             // should never happen since we don't add times for IFDs and
             // we clear removed files...

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,9 +59,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * the case that the URNs in the sets of the Time->URNSet lookup are a subset
  * of the URNs in the URN->Time lookup.  For more details, see addTime and
  * commitTime.
- *
- * LOCKING: Note on grabbing the FM lock - if I ever do that, I first grab that
- * lock before grabbing my lock.  Please keep doing that as you add code.
+ * 
  */
 @Singleton
 public final class CreationTimeCache {
@@ -70,7 +69,7 @@ public final class CreationTimeCache {
     /**
      * File where creation times for files are stored.
      */
-    private static final File CTIME_CACHE_FILE = 
+    private final File CTIME_CACHE_FILE = 
         new File(CommonUtils.getUserSettingsDir(), "createtimes.cache");
     
     /**
@@ -292,7 +291,7 @@ public final class CreationTimeCache {
      * want all, give Integer.MAX_VALUE.
      * @return a List ordered by younger URNs.
      */
-    public List<URN> getFiles(final int max)
+    public Collection<URN> getFiles(final int max)
         throws IllegalArgumentException {
         return getFiles(null, max);
     }    
@@ -305,63 +304,61 @@ public final class CreationTimeCache {
      * me. null is fine though.
      * @return a List ordered by younger URNs.
      */
-    public List<URN> getFiles(final QueryRequest request, final int max)
+    public Collection<URN> getFiles(final QueryRequest request, final int max)
         throws IllegalArgumentException {
-        // if i'm using FM, always grab that lock first and then me.  be quick
-        // about it though :)
-        synchronized (fileManager) {
-            synchronized (this) {
-                if (max < 1)
-                    throw new IllegalArgumentException("bad max = " + max);
-                MediaTypeAggregator.Aggregator filter = request == null ?
-                                null : MediaTypeAggregator.getAggregator(request);
+        synchronized (this) {
+            if (max < 1)
+                throw new IllegalArgumentException("bad max = " + max);
+            MediaTypeAggregator.Aggregator filter = request == null ?
+                            null : MediaTypeAggregator.getAggregator(request);
 
-                // may be non-null at loop end
-                List<URN> toRemove = null;
-                List<URN> urnList = new ArrayList<URN>();
+            // may be non-null at loop end
+            List<URN> toRemove = null;
+            Set<URN> urnList = new HashSet<URN>();
+            
+            // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
+            // entries in descending order....
+            for(Set<URN> urns : getTimeToUrn().values()) {
+                if(urnList.size() >= max) {
+                    break;
+                }
                 
-                // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
-                // entries in descending order....
-                for(Set<URN> urns : getTimeToUrn().values()) {
-                    if(urnList.size() >= max)
+                for(URN currURN : urns) {
+                    if(urnList.size() >= max) {
                         break;
+                    }
                     
-                    for(URN currURN : urns) {
-                        if(urnList.size() >= max)
-                            break;
-                        
-                        // we only want shared FDs
-                        FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
-                        if (fd == null) {
-                            if (toRemove == null)
-                                toRemove = new ArrayList<URN>();
-                            toRemove.add(currURN);
-                            continue;
+                    // we only want shared FDs
+                    FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+                    if (fd == null) {
+                        if (toRemove == null) {
+                            toRemove = new ArrayList<URN>();
                         }
+                        toRemove.add(currURN);
+                        continue;
+                    }
 
-                        if (filter == null)
-                            urnList.add(currURN);
-                        else if (filter.allow(fd.getFileName()))
-                            urnList.add(currURN);
+                    if (filter == null || filter.allow(fd.getFileName())) {
+                        urnList.add(currURN);
                     }
                 }
-
-                // clear any ifd's or unshared files that may have snuck into structures
-                if (toRemove != null) {
-                    for (URN currURN : toRemove) {
-                        removeTime(currURN);
-                    }
-                }
-
-                return urnList;
             }
+
+            // clear any ifd's or unshared files that may have snuck into structures
+            if (toRemove != null) {
+                for (URN currURN : toRemove) {
+                    removeTime(currURN);
+                }
+            }
+
+            return urnList;
         }
     }
 
 
     /** Returns all of the files URNs, from youngest to oldest.
      */
-    public List<URN> getFiles() {
+    public Collection<URN> getFiles() {
         return getFiles(Integer.MAX_VALUE);
     }
     
