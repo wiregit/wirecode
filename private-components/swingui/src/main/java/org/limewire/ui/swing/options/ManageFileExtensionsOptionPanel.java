@@ -45,7 +45,8 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
         this.manager.initOptions();
         this.manager.buildUI();
         
-        this.add(this.manager.getContainer(), "span, wrap");
+        if (this.manager.getContainer() != null)
+            this.add(this.manager.getContainer(), "span, wrap");
         
         this.add(okButton, "tag ok");
         this.add(cancelButton, "tag cancel");
