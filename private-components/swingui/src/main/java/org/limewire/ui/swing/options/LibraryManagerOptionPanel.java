@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -93,17 +92,6 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         p.add(new JLabel(I18n.tr("Documents")), "gapright 18");
         
         return p;
-    }
-    
-    public static void main(String args[]) {
-        JFrame f = new JFrame();
-        f.setSize(500,500);
-        
-        LibraryManagerOptionPanel l = new LibraryManagerOptionPanel(null, null, null);
-        f.add(l);
-        
-        f.setDefaultCloseOperation(2);
-        f.setVisible(true);
     }
 
     @Override

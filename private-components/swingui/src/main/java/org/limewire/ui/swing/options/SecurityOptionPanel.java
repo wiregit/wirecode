@@ -92,7 +92,7 @@ public class SecurityOptionPanel extends OptionPanel {
                     warningMessagesPanel, I18n.tr("Warning Messages"),
                     I18n.tr("Settings"), I18n.tr("Choose which warning messags to display")));
             
-            add(new JLabel("Choose which warning messages you want to see when using LimeWire"), "push");
+            add(new JLabel(I18n.tr("Choose which warning messages you want to see when using LimeWire")), "push");
             add(settingsButton);
         }
         
@@ -126,9 +126,9 @@ public class SecurityOptionPanel extends OptionPanel {
                     unsafeOptionPanel, I18n.tr("Configure"),
                     I18n.tr("Unsafe types"), I18n.tr("Configure Documents and Programs")));
             
-            add(new JLabel("For your safety, LimeWire disables you from:"),"wrap");
-            add(new JLabel("-Searching for and sharing Programs with anyone"), "gapleft 25, wrap");
-            add(new JLabel("-Searching for and sharing Documents with the LimeWire Network"), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("For your safety, LimeWire disables you from:")),"wrap");
+            add(new JLabel(I18n.tr("-Searching for and sharing Programs with anyone")), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("-Searching for and sharing Documents with the LimeWire Network")), "gapleft 25, wrap");
             
             add(new JLabel("We strongly recommend you do not enable these settings"), "push");
             add(configureButton);
@@ -172,13 +172,13 @@ public class SecurityOptionPanel extends OptionPanel {
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
                     I18n.tr("Filter Keywords"),I18n.tr("Restrict files with certain words from being displayed in search results")));
             
-            add(new JLabel("In search results..."), "wrap");
+            add(new JLabel(I18n.tr("In search results...")), "wrap");
             
             add(unlicensedCheckBox, "split, gapleft 20");
-            add(new JLabel("Don't show unlicensed or unathorized files"), "wrap");
+            add(new JLabel(I18n.tr("Don't show unlicensed or unathorized files")), "wrap");
             
             add(adultContentCheckBox, "split, gapleft 20");
-            add(new JLabel("Don't show adult content"), "wrap");
+            add(new JLabel(I18n.tr("Don't show adult content")), "wrap");
             
             add(filterKeywordsButton);
         }

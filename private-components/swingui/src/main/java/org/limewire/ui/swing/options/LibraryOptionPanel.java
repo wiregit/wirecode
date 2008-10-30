@@ -89,7 +89,7 @@ public class LibraryOptionPanel extends OptionPanel {
                     I18n.tr("Manage what folders are loaded into your library")));
             
             add(new MultiLineLabel(I18n.tr("Your library is a central location to view, share and unshare your files with the LimeWire Network and your friends."), 700), "wrap");
-            add(new MultiLineLabel(I18n.tr("LimeWire will scan folders and look for files to add to your library. Scanning folders into your Library will no automatically share them."), 600), "wrap");
+            add(new MultiLineLabel(I18n.tr("LimeWire will scan folders and look for files to add to your library. Scanning folders into your Library will not automatically share them."), 600), "wrap");
             add(manageLibraryButton, "align right");
         }
         

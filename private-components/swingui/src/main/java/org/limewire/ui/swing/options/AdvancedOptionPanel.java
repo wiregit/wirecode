@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import javax.swing.JTabbedPane;
 
+import org.limewire.ui.swing.util.I18n;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -33,10 +35,10 @@ public class AdvancedOptionPanel extends OptionPanel {
         
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Color.WHITE);
-        tabbedPane.addTab("Files", filesOptionPanel);
-        tabbedPane.addTab("Connections", connectionsOptionPanel);
-        tabbedPane.addTab("System", systemOptionPanel);
-        tabbedPane.addTab("Super Really Advanced", reallyAdvancedOptionPanel);
+        tabbedPane.addTab(I18n.tr("Files"), filesOptionPanel);
+        tabbedPane.addTab(I18n.tr("Connections"), connectionsOptionPanel);
+        tabbedPane.addTab(I18n.tr("System"), systemOptionPanel);
+        tabbedPane.addTab(I18n.tr("Super Really Advanced"), reallyAdvancedOptionPanel);
         
         add(tabbedPane, "grow");
     }

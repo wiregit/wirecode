@@ -109,12 +109,12 @@ public class ConnectionsOptionPanel extends OptionPanel {
             buttonGroup.add(broadBandButton);
             buttonGroup.add(dialupButton);
             
-            add(new JLabel("Set your connection speed"), "push");
+            add(new JLabel(I18n.tr("Set your connection speed")), "push");
             add(broadBandButton);
-            add(new JLabel("Broadband"),"wrap");
+            add(new JLabel(I18n.tr("Broadband")),"wrap");
 
             add(dialupButton, "skip 1");
-            add(new JLabel("Dial-up"));
+            add(new JLabel(I18n.tr("Dial-up")));
         }
         
         @Override
@@ -171,12 +171,12 @@ public class ConnectionsOptionPanel extends OptionPanel {
             
             limitBandWidthCheckBox.addItemListener(new CheckBoxListener(bandWidthSlider, limitBandWidthCheckBox, bandWidthLabel));
             
-            add(new JLabel("Don't allow more than"), "split");
+            add(new JLabel(I18n.tr("Don't allow more than")), "split");
             add(maxDownloadSpinner, "split");
-            add(new JLabel("downloads at once"), "wrap");
+            add(new JLabel(I18n.tr("downloads at once")), "wrap");
             
             add(limitBandWidthCheckBox, "aligny 50%, split");
-            add(new JLabel("Limit your download bandwidth"), "aligny 50%");
+            add(new JLabel(I18n.tr("Limit your download bandwidth")), "aligny 50%");
             add(bandWidthSlider, "aligny 50%");
             add(bandWidthLabel, "aligny 50%");
         }
@@ -234,17 +234,17 @@ public class ConnectionsOptionPanel extends OptionPanel {
             
             uploadBandwidthCheckBox.addItemListener(new CheckBoxListener(bandWidthSlider, uploadBandwidthCheckBox, bandWidthLabel));
             
-            add(new JLabel("Don't allow more than"), "split");
+            add(new JLabel(I18n.tr("Don't allow more than")), "split");
             add(maxUploadSpinner, "split");
-            add(new JLabel("uploads at once"), "wrap");
+            add(new JLabel(I18n.tr("uploads at once")), "wrap");
             
             add(uploadBandwidthCheckBox, "aligny 50%, split");
-            add(new JLabel("Limit your upload bandwidth"), "aligny 50%, split");
+            add(new JLabel(I18n.tr("Limit your upload bandwidth")), "aligny 50%, split");
             add(bandWidthSlider, "aligny 50%, split");
             add(bandWidthLabel, "aligny 50%, wrap");
             
             add(clearUploadCheckBox, "split");
-            add(new JLabel("Clear uploads from list when finished"));
+            add(new JLabel(I18n.tr("Clear uploads from list when finished")));
         }
         
         @Override

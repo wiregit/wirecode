@@ -84,10 +84,10 @@ public class MiscOptionPanel extends OptionPanel {
             playNotificationsCheckBox.setContentAreaFilled(false);
             
             add(showNotificationsCheckBox);
-            add(new JLabel("Show popup system notifications"), "wrap");
+            add(new JLabel(I18n.tr("Show popup system notifications")), "wrap");
             
             add(playNotificationsCheckBox);
-            add(new JLabel("Play notification sounds"), "wrap");
+            add(new JLabel(I18n.tr("Play notification sounds")), "wrap");
         }
         
         @Override
@@ -136,15 +136,15 @@ public class MiscOptionPanel extends OptionPanel {
             passwordField = new JPasswordField(30);
             
             add(signIntoOnStartupCheckBox, "split");
-            add(new JLabel("Sign into Friends when LimeWire starts"), "wrap");
+            add(new JLabel(I18n.tr("Sign into Friends when LimeWire starts")), "wrap");
 
 //            add(rememberPasswordCheckBox, "split");
 //            add(new JLabel("Remember username and password"), "wrap");
             
-            add(new JLabel("Username"), "gapleft 25, split");
+            add(new JLabel(I18n.tr("Username")), "gapleft 25, split");
             add(usernameTextField, "wrap");
             
-            add(new JLabel("Password"), "gapleft 25, split");
+            add(new JLabel(I18n.tr("Password")), "gapleft 25, split");
             add(passwordField);
         }
         

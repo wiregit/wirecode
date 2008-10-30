@@ -76,7 +76,7 @@ public class FirewallOptionPanel extends OptionPanel {
     
     private class ListeningPortPanel extends OptionPanel {
 
-        private final String description = I18n.tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number if required for direct incoming connections by your firewall.");
+        private final String description = I18n.tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number is required for direct incoming connections by your firewall.");
         private JTextField portField;
         
         private int port;
@@ -129,7 +129,7 @@ public class FirewallOptionPanel extends OptionPanel {
     
     private class RouterConfigPanel extends OptionPanel {
 
-        private final String description = I18n.tr("Using Universal Plug n' Play, LimeWire can automatically configure your router or firewall for optinal performance. If your router does not support Universal Plug n' Play, LimeWire can be set to advertise an external port manually.");
+        private final String description = I18n.tr("Using Universal Plug n' Play, LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support Universal Plug n' Play, LimeWire can be set to advertise an external port manually.");
         private final JRadioButton plugAndPlayRadioButton;
         private final JRadioButton portForwardRadioButton;
         private final JTextField portTextField;
@@ -158,15 +158,15 @@ public class FirewallOptionPanel extends OptionPanel {
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
             add(plugAndPlayRadioButton, "split");
-            add(new JLabel("Use Universal Plug n' Play (Recommended)"), "wrap");
+            add(new JLabel(I18n.tr("Use Universal Plug n' Play (Recommended)")), "wrap");
             
             add(portForwardRadioButton, "split");
-            add(new JLabel("Manual Port Forward:"), "split");
+            add(new JLabel(I18n.tr("Manual Port Forward:")), "split");
             add(portTextField,"split");
             add(starLabel, "wrap");
             
             add(doNothingRadioButton, "split");
-            add(new JLabel("Do Nothing"));
+            add(new JLabel(I18n.tr("Do Nothing")));
             
             portForwardRadioButton.addItemListener(new ItemListener(){
                 @Override

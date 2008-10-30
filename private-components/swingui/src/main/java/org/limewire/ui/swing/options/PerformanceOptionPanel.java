@@ -25,7 +25,7 @@ public class PerformanceOptionPanel extends OptionPanel {
 
     private NetworkManager networkManager;
     
-    private final String firstMultiLineLabel = I18n.tr("If your computer has a fast internet connection, LimeWire may act as an \"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you notice performacnce issues.");
+    private final String firstMultiLineLabel = I18n.tr("If your computer has a fast internet connection, LimeWire may act as an \"Ultrapeer\" or connect to the Mojito DHT. You may disable these if you notice performance issues.");
     private final String secondMultiLineLabel = I18n.tr("LimeWire uses a secure communications mode called TLS, which may use more CPU resources.");
     private final String thirdMultiLineLabel = I18n.tr("Out-of-band Searching helps deliver faster search results to you, but some internet connections may not work well with this feature.");
     

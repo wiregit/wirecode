@@ -126,7 +126,7 @@ public class FilesOptionPanel extends OptionPanel {
                     extensionsPanel, I18n.tr("Manage file extensions"),
                     I18n.tr("Manage"),I18n.tr("Manage file extensions to load")));
             
-            add(new JLabel("Choose the specific file extensions LimeWire scans into your Library"), "push");
+            add(new JLabel(I18n.tr("Choose the specific file extensions LimeWire scans into your Library")), "push");
             add(manageButton);
         }
         
@@ -160,7 +160,7 @@ public class FilesOptionPanel extends OptionPanel {
             configureButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this, saveFolderPanel, 
                     I18n.tr("Manage Save Folders"),I18n.tr("Configure"),I18n.tr("Configure how file types are saved")));
             
-            add(new JLabel("Choose where specific file types get saved"), "push");
+            add(new JLabel(I18n.tr("Choose where specific file types get saved")), "push");
             add(configureButton);
         }
         
@@ -201,7 +201,7 @@ public class FilesOptionPanel extends OptionPanel {
                     storeOptionPanel,I18n.tr("LimeWire Store File Organization"),
                     I18n.tr("Configure file naming"),I18n.tr("Configure how files are automatically named")));
             
-            add(new JLabel("Save store downloads to:"), "split");
+            add(new JLabel(I18n.tr("Save store downloads to:")), "split");
             add(storePathTextField);
             add(browseStorePathButton, "wrap");
             
@@ -292,10 +292,10 @@ public class FilesOptionPanel extends OptionPanel {
             passwordField = new JPasswordField(30);
             passwordField.setEnabled(false);
             
-            passwordLabel = new JLabel("Require password");
+            passwordLabel = new JLabel(I18n.tr("Require password"));
             
             add(shareWithITunesCheckBox, "split");
-            add(new JLabel("Share the audio section of my LimeWire on my local network using iTunes"), "wrap");
+            add(new JLabel(I18n.tr("Share the audio section of my LimeWire on my local network using iTunes")), "wrap");
             
             add(requirePassWordCheckBox, "gapleft 25, split");
             add(passwordLabel);

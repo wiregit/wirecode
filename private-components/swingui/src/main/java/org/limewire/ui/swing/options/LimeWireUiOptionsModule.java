@@ -11,7 +11,5 @@ public class LimeWireUiOptionsModule extends AbstractModule {
         bind(ManageSaveFoldersOptionPanelFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         ManageSaveFoldersOptionPanelFactory.class, ManageSaveFoldersOptionPanel.class));   
-        
     }
-
 }

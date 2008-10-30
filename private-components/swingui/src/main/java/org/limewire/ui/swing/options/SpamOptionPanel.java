@@ -50,7 +50,7 @@ public class SpamOptionPanel extends OptionPanel {
             }
         });
         
-        p.add(new JLabel(I18n.tr("Reset the Spam filter by clearing all files markes as spam")), "push");
+        p.add(new JLabel(I18n.tr("Reset the Spam filter by clearing all files marked as spam")), "push");
         p.add(clearSpamButton);
         
         return p;

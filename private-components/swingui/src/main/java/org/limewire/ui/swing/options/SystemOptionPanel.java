@@ -343,8 +343,7 @@ public class SystemOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("Report bugs to LimeWire")), "wrap");
 
             add(bugMessageCheckBox, "split");
-            bugMessageLabel = new JLabel(I18n
-                    .tr("Show me the bug report before sending it"));
+            bugMessageLabel = new JLabel(I18n.tr("Show me the bug report before sending it"));
             add(bugMessageLabel, "wrap");
         }
 

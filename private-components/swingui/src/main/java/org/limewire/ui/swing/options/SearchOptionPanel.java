@@ -94,14 +94,14 @@ public class SearchOptionPanel extends OptionPanel {
             add(defaultSearchSpinner, "wrap");
             
             add(suggestCheckBox, "split 4");
-            add(new JLabel("Suggest"));
+            add(new JLabel(I18n.tr("Suggest")));
             add(suggestSpinner);
-            add(new JLabel("files from friends when signed on."), "wrap");
+            add(new JLabel(I18n.tr("files from friends when signed on.")), "wrap");
             
             add(searchTabNumberCheckBox,"split 4");
-            add(new JLabel("Remember my"));
+            add(new JLabel(I18n.tr("Remember my")));
             add(searchTabNumberSpinner);
-            add(new JLabel("most recent searches"), "push");
+            add(new JLabel(I18n.tr("most recent searches")), "push");
             
             add(clearNowButton, "alignx right");
         }
@@ -182,13 +182,13 @@ public class SearchOptionPanel extends OptionPanel {
             moveDownloadedFiles.setContentAreaFilled(false);
             
             add(groupSimilarResults);
-            add(new JLabel("Group similar search results"), "wrap");
+            add(new JLabel(I18n.tr("Group similar search results")), "wrap");
             
             add(searchFriendLibrary);
-            add(new JLabel("Also search my friend's libraries when signed on"), "wrap");
+            add(new JLabel(I18n.tr("Also search my friends' libraries when signed on")), "wrap");
             
             add(moveDownloadedFiles);
-            add(new JLabel("Move files I've already downloaded to the botton"));
+            add(new JLabel(I18n.tr("Move files I've already downloaded to the bottom")));
         }
         
         @Override

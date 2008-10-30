@@ -99,7 +99,7 @@ public class BitTorrentOptionPanel extends OptionPanel {
         minUploadLabel.setVisible(false);
         safeBoxLabel = new JLabel(I18n.tr("Safe chunk verification"));
         safeBoxLabel.setVisible(false);
-        experimentLabel = new JLabel(I18n.tr("Experiemental disk access"));
+        experimentLabel = new JLabel(I18n.tr("Experimental disk access"));
         experimentLabel.setVisible(false);
 
         p.add(limewireControl);        

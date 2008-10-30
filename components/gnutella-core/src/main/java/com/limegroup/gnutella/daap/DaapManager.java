@@ -68,7 +68,7 @@ import de.kapsi.net.daap.Transaction;
  * interface between LimeWire and DAAP.
  */
 @Singleton
-public final class DaapManager {
+public final class DaapManager implements org.limewire.core.api.daap.DaapManager {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     
