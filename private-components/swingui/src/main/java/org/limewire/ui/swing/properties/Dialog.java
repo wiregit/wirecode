@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -21,11 +22,14 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXLabel;
+import org.limewire.core.api.URN;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.util.StringUtils;
 
 public abstract class Dialog extends JDialog {
 
+    private static final String HASH = "Hash";
     protected final JLabel icon = new JLabel();
     protected final JLabel heading = newLabel();
     protected final JLabel filename = newLabel();
@@ -60,7 +64,7 @@ public abstract class Dialog extends JDialog {
         
         overview = new JPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
 
-        overview.add(icon, "top, left");
+        overview.add(icon);
         overview.add(heading);
         overview.add(filename, "wrap");
         overview.add(subheading, "cell 1 1");
@@ -137,4 +141,39 @@ public abstract class Dialog extends JDialog {
     }
 
     protected abstract void commit();
+
+    protected void addHashMetadata(URN hash, Map<String, String> metadata) {
+        addMetadata(HASH, hash.toString(), metadata);
+    }
+
+    protected void addDateCreatedMetadata(String dateCreated, Map<String, String> metadata) {
+        addMetadata("Date Created", dateCreated, metadata);
+    }
+
+    protected void addSampleRateMetadata(String sampleRate, Map<String, String> metadata) {
+        addMetadata("Sample Rate", sampleRate, metadata);
+    }
+
+    protected void addBitrateMetadata(String bitRate, Map<String, String> metadata) {
+        addMetadata("Bitrate", bitRate, metadata);
+    }
+
+    protected void addDimensionMetadata(String width, Object height, Map<String, String> metadata) {
+        addMetadata("Dimensions", tr("({0}px X {1}px)", width, height), metadata);
+    }
+
+    private void addMetadata(String label, String value, Map<String, String> metadata) {
+        if (!StringUtils.isEmpty(value)) {
+            metadata.put(tr(label), value);
+        }
+    }
+
+    protected void setMetadataText(Map<String, String> metadata) {
+        StringBuilder bldr = new StringBuilder().append("<html>");
+        for(String key : metadata.keySet()) {
+            bldr.append("<b>").append(key).append("</b>:&nbsp;").append(metadata.get(key)).append("<br/>");
+        }
+        bldr.append("</html>");
+        this.metadata.setText(bldr.toString());
+    }
 }
