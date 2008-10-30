@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
@@ -27,9 +28,11 @@ public class SecurityOptionPanel extends OptionPanel {
     private WarningMessagesPanel warningMessagesPanel;
     private UnsafeTypesPanel unsafeTypesPanel;
     private FilteringPanel filteringPanel;
+    private SpamManager spamManager;
     
     @Inject
-    public SecurityOptionPanel() {
+    public SecurityOptionPanel(SpamManager spamManager) {
+        this.spamManager = spamManager;
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getWarningMessagesPanel(), "pushx, growx");
@@ -161,7 +164,7 @@ public class SecurityOptionPanel extends OptionPanel {
         public FilteringPanel() {
             super(I18n.tr("Filtering"));
             
-            filterKeywordPanel = new FilterKeywordOptionPanel(new OKDialogAction());
+            filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
             unlicensedCheckBox = new JCheckBox();

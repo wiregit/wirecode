@@ -13,4 +13,6 @@ public interface SpamManager {
      * Reloads the IP Filter data & adjusts spam filters when ready.
      */
     public void reloadIPFilter();
+    
+    public void adjustSpamFilters();
 }

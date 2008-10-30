@@ -22,6 +22,7 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXTable;
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.table.AbstractTableFormat;
@@ -39,10 +40,12 @@ public class FilterKeywordOptionPanel extends OptionPanel {
     private JTextField keywordTextField;
     private JButton addKeywordButton;
     private FilterTable filterTable;
+    private SpamManager spamManager;
     
     private EventList<String> eventList;
     
-    public FilterKeywordOptionPanel(Action okAction) {
+    public FilterKeywordOptionPanel(SpamManager spamManager, Action okAction) {
+        this.spamManager = spamManager;
         setLayout(new MigLayout("gapy 10"));
         
         keywordTextField = new JTextField(30);
@@ -76,8 +79,7 @@ public class FilterKeywordOptionPanel extends OptionPanel {
     void applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_WORDS.setValue(values);
-        //TODO: grab spam service filter
-//        GuiCoreMediator.getSpamServices().adjustSpamFilters();
+        spamManager.adjustSpamFilters();
     }
 
     @Override

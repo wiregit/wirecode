@@ -55,4 +55,9 @@ public class SpamManagerImpl implements SpamManager {
     public void reloadIPFilter() {
         spamServices.reloadIPFilter();
     }
+
+    @Override
+    public void adjustSpamFilters() {
+        spamServices.adjustSpamFilters();        
+    }
 }

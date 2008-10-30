@@ -32,4 +32,9 @@ public class MockSpamManagerImpl implements SpamManager {
     @Override
     public void reloadIPFilter() {
     }
+
+    @Override
+    public void adjustSpamFilters() {
+        
+    }
 }
