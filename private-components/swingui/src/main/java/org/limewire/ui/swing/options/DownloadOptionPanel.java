@@ -184,13 +184,13 @@ public class DownloadOptionPanel extends OptionPanel {
         }
 
         @Override
-        boolean hasChanged() { //TODO: rename file checkbox init
+        boolean hasChanged() { 
             return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
                     || !currentSaveDirectory.equals(downloadSaveTextField.getText()) || DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
         }
 
         @Override
-        public void initOptions() { //TODO: rename file setting
+        public void initOptions() { 
             autoRenameDuplicateFilesCheckBox.setSelected(DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
 
