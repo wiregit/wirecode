@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -109,10 +110,11 @@ public class SearchOptionPanel extends OptionPanel {
         private void createComponents() {
             defaultSearchSpinner = new JComboBox(SearchCategory.values());
             defaultSearchSpinner.removeItem(SearchCategory.OTHER);
-            //TODO: fix this
-//            if (!programEnabled)
-//                defaultSearchSpinner.removeItem(SearchCategory.PROGRAM);
-            
+
+            //TODO need to make this more dynamic, since this is a singleton when the property changes, so does this panel
+            if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
+                defaultSearchSpinner.removeItem(SearchCategory.PROGRAM);
+            }
             
             suggestCheckBox = new JCheckBox();
             suggestCheckBox.setContentAreaFilled(false);

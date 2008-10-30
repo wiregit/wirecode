@@ -29,6 +29,7 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
@@ -63,9 +64,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final FancyTabList searchList;
     private final Navigator navigator;
     private final TextFieldWithEnterButton textField;
-
-    // TODO: This needs to be controlled by some other code eventually.
-    private final boolean programEnabled = true;
         
     private final NavItem homeNav;
     
@@ -88,8 +86,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.removeItem(SearchCategory.OTHER);
-        if (!programEnabled)
+        //TODO need to make this more dynamic, since this is a singleton when the property changes, so does this panel
+        if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
             combo.removeItem(SearchCategory.PROGRAM);
+        }
 
         combo.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
         combo.setName("TopPanel.combo");
