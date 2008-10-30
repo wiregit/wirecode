@@ -25,6 +25,7 @@ import org.jdesktop.swingx.JXLabel;
 import org.limewire.core.api.URN;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.StringUtils;
 
 public abstract class Dialog extends JDialog {
@@ -90,10 +91,16 @@ public abstract class Dialog extends JDialog {
 
     protected void showDialog(String fileName) {
         setTitle(tr("\"{0}\" properties", fileName));
-        setPreferredSize(new Dimension(557, 589));
+        
+        setPreferredSize(new Dimension(570,600));
+        setModalityType(ModalityType.APPLICATION_MODAL);
+        
+        setDefaultCloseOperation(2);
 
         pack();
 
+        setLocationRelativeTo(GuiUtils.getMainFrame());
+        
         setVisible(true);
     }
 
