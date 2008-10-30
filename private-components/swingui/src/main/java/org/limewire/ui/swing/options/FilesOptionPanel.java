@@ -306,73 +306,56 @@ public class FilesOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-//            DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requirePassWordCheckBox.isSelected());
+            final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
+           
+            final boolean prevRequiresPassword = DaapSettings.DAAP_REQUIRES_PASSWORD.getValue();
+            final String prevPassword = DaapSettings.DAAP_PASSWORD.getValue();
             
-            //TODO: do some string checking for password length, etc.. see the old DaapSetting usage
+            final boolean requiresPassword = requirePassWordCheckBox.isSelected();
+            String password = new String(passwordField.getPassword());
             
-//            final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
-//
-//            DaapSettings.DAAP_ENABLED.setValue(requirePassWordCheckBox.isSelected());
-////            DaapSettings.DAAP_LIBRARY_NAME.setValue(serviceName);
-//
-//            try {
-//                
-//                if (shareWithITunesCheckBox.isSelected()) {              
-//                    if (!prevEnabled) 
-//                        daapManager.restart();
-//                } else if (prevEnabled) {
-//                    daapManager.stop();
-//                }
-//
-//            } catch (IOException err) {
-////
-////                DaapSettings.DAAP_ENABLED.setValue(prevEnabled);
-////                DaapSettings.DAAP_SERVICE_NAME.setValue(prevServiceName);
-////                DaapSettings.DAAP_LIBRARY_NAME.setValue(prevServiceName);
-////
-//                daapManager.stop();
-////                initOptions();
-////
-////                throw err;
-//            }
-////            
-////            if (password.equals("") && requiresPassword) { 
-////                throw new IOException(); 
-////            }
-////            
-////            if ( ! DaapSettings.DAAP_PASSWORD.equals(password)) {
-////                DaapSettings.DAAP_PASSWORD.setValue(password);
-////            }
-////            
-////            if (requiresUsername) {
-////                password = DaapUtil.calculateHA1(username, password);
-////            }
-////            
-////            if (requiresPassword != prevRequiresPassword 
-////                    || (requiresPassword && !password.equals(prevPassword))) {
-////
-////                DaapSettings.DAAP_REQUIRES_USERNAME.setValue(requiresUsername);
-////                DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requiresPassword);
-////
-//                try {
-////
-////                    // A password is required now or password has changed, 
-////                    // disconnect all users...
-////                    if (requiresPassword) { 
-//                        daapManager.disconnectAll();
-////                    }
-//                    daapManager.updateService();
-////
-//                } catch (IOException err) {                  
-////                    DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(prevRequiresPassword);
-////                    DaapSettings.DAAP_PASSWORD.setValue(prevPassword);
-////
-//                    daapManager.stop();
-////                    initOptions();
-////
-////                    throw err;
-//                }
-////            }
+            if (password.equals("") && requiresPassword) { 
+                //TODO: display error message
+            }
+            
+            //enable daap setting
+            DaapSettings.DAAP_ENABLED.setValue(requirePassWordCheckBox.isSelected());
+            
+            //save password value
+            if (!DaapSettings.DAAP_PASSWORD.equals(password)) {
+                DaapSettings.DAAP_PASSWORD.setValue(password);
+            }           
+  
+            try {               
+                if (requiresPassword != prevRequiresPassword || (requiresPassword && !password.equals(prevPassword))) {
+                    DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(requiresPassword);
+    
+                    // A password is required now or password has changed, 
+                    // disconnect all users...
+                    if (requiresPassword) { 
+                        daapManager.disconnectAll();
+                    }
+                    daapManager.updateService();
+    
+                }
+                
+                if (shareWithITunesCheckBox.isSelected()) {              
+                    if (!prevEnabled) 
+                        daapManager.restart();
+                } else if (prevEnabled) {
+                    daapManager.stop();
+                }
+                
+            } catch (IOException err) {               
+                DaapSettings.DAAP_ENABLED.setValue(prevEnabled);
+                DaapSettings.DAAP_REQUIRES_PASSWORD.setValue(prevRequiresPassword);
+                DaapSettings.DAAP_PASSWORD.setValue(prevPassword);
+
+                daapManager.stop();
+                initOptions();
+
+                //TODO: display error
+            }
         }
 
         @Override
