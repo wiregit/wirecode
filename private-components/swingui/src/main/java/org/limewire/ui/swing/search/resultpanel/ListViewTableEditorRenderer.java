@@ -261,7 +261,7 @@ implements TableCellEditor, TableCellRenderer {
         
         heading.setContentType("text/html");
         heading.setEditable(false);
-        heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+        heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
         heading.setOpaque(false);
         
         heading.addMouseListener(new MouseAdapter() {
@@ -287,7 +287,7 @@ implements TableCellEditor, TableCellRenderer {
         downloadPanel.setOpaque(false);
         downloadPanel.add(itemIconLabel);
 
-        searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "5[]0[]0[]0"));
+        searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
         searchResultTextPanel.add(heading, "wrap");
         searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
