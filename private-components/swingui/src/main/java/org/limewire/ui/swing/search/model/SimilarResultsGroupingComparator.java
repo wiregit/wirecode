@@ -26,7 +26,7 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
         // spam should go to the bottom of the list
         int compare = Boolean.valueOf(spam1).compareTo(Boolean.valueOf(spam2));
 
-        if(SearchSettings.MOVE_DOWNLOADED_FILES_TO_BOTTOM.getValue()) {
+        if(compare == 0 && SearchSettings.MOVE_DOWNLOADED_FILES_TO_BOTTOM.getValue()) {
             boolean library1 = o1.getDownloadState() == BasicDownloadState.LIBRARY;
             boolean library2 = o2.getDownloadState() == BasicDownloadState.LIBRARY;
             compare = Boolean.valueOf(library1).compareTo(Boolean.valueOf(library2));
