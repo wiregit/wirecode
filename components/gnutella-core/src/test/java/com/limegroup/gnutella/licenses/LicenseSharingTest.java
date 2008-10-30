@@ -83,11 +83,11 @@ public final class LicenseSharingTest extends ClientSideTestCase {
         File cc3 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
         File cc4 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
         File wma5 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc1).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc2).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc3).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc4).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(wma5).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc1).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc2).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc3).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(cc4).get(5, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(wma5).get(5, TimeUnit.SECONDS));
         fileManager.getGnutellaSharedFileList().remove(berkeleyFD);
         fileManager.getGnutellaSharedFileList().remove(susheelFD);
 	}
