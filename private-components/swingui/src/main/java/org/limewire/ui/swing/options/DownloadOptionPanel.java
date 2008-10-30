@@ -12,6 +12,7 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
@@ -159,6 +160,7 @@ public class DownloadOptionPanel extends OptionPanel {
         @Override
         void applyOptions() {
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
+            DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(autoRenameDuplicateFilesCheckBox.isSelected());
             final String save = downloadSaveTextField.getText();
             if(!save.equals(currentSaveDirectory)) {
                 try {
@@ -184,11 +186,12 @@ public class DownloadOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() { //TODO: rename file checkbox init
             return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
-                    || !currentSaveDirectory.equals(downloadSaveTextField.getText());
+                    || !currentSaveDirectory.equals(downloadSaveTextField.getText()) || DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() { //TODO: rename file setting
+            autoRenameDuplicateFilesCheckBox.setSelected(DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
 
             //TODO: handle error dialog when download already exists

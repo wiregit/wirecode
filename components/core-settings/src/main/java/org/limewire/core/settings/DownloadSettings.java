@@ -106,5 +106,11 @@ public class DownloadSettings extends LimeProps {
     public static final ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
         FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_HTTP_DISK_PROBLEMS", 0f, 
                 "DownloadSettings.reportDiskProblems", 0f, 1f);
+    
+    /**
+     * Auto rename new downloads with filenames matching old downloads.
+     */
+    public static final BooleanSetting AUTO_RENAME_DUPLICATE_FILES =
+        FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", false);
         
 }

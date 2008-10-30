@@ -136,6 +136,7 @@ public class QuestionsHandler extends LimeWireSettings {
 	 * 0 - ask - default
 	 * 1 - append (#)
 	 * 2 - save as
+	 * TODO this should not be used in the new ui
 	 */
     public static final IntSetting DEFAULT_ACTION_FILE_EXISTS =
         FACTORY.createIntSetting("DEFAULT_ACTION_FILE_EXISTS", 0);
