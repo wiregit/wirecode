@@ -19,7 +19,7 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
     private final JButton okButton;
     private final JButton cancelButton;
     
-    private FileTypeOptionPanelManager manager;
+    private final FileTypeOptionPanelManager manager;
 
     @Inject
     public ManageFileExtensionsOptionPanel(FileTypeOptionPanelManager fileTypeOptionPanelManager) {
@@ -29,24 +29,26 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
         
         Action okAction = new OKDialogAction(); 
         CancelDialogAction cancelAction = new CancelDialogAction();
-            
-        // okAction.setOptionPanel(this);
+
         cancelAction.setOptionPanel(this);
             
         this.okButton = new JButton(okAction);
         this.cancelButton = new JButton(cancelAction);
-            
-        add(new JLabel(I18n.tr("Select which file extensions belong in Audio, Video, etc..")), "span, wrap");
-
-        this.add(this.manager.getContainer(), "span, wrap");
-        
-        add(okButton, "tag ok");
-        add(cancelButton, "tag cancel");
     }
     
     @Override
     public void initOptions() {
+        this.removeAll();
+        
+        this.add(new JLabel(I18n.tr("Select which file extensions belong in Audio, Video, etc..")), "span, wrap");
+        
         this.manager.initOptions();
+        this.manager.buildUI();
+        
+        this.add(this.manager.getContainer(), "span, wrap");
+        
+        this.add(okButton, "tag ok");
+        this.add(cancelButton, "tag cancel");
     }
 
     @Override
