@@ -323,18 +323,13 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             
-            Set<String> extensions = new HashSet<String>();
-            extensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            extensions.addAll(userExtensions);
-            
-            Set<String> newUser = new HashSet<String>();
-            newUser.addAll(extensions);
-            newUser.removeAll(newExtensions);
-            userExtensions.addAll(newUser);
-            
-            extensions.removeAll(newExtensions);
             userRemoved.clear();
-            userRemoved.addAll(extensions);
+            userRemoved.addAll(DEFAULT_MANAGED_EXTENSIONS);
+            userRemoved.removeAll(newExtensions);
+            
+            userExtensions.clear();
+            userExtensions.addAll(newExtensions);
+            userExtensions.removeAll(DEFAULT_MANAGED_EXTENSIONS);
             
         } finally {
             lock.writeLock().unlock();
