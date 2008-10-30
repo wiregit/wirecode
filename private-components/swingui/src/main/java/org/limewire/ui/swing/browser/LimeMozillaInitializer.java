@@ -83,8 +83,7 @@ public class LimeMozillaInitializer {
 
             File[] possibleFlashLocations = new File[] { new File("/usr/lib/flash-plugin/"), new File("/usr/lib/firefox/plugins"),
                     new File("/usr/lib/mozilla/plugins"), new File("/usr/lib/iceweasle"),
-                    new File("/usr/lib/xulrunner") };
-            //TODO might be installed in users home directory ~/.mozilla/plugins
+                    new File("/usr/lib/xulrunner"), new File(CommonUtils.getUserHomeDir(), "/.mozilla/plugins") };
             for (File flashLocation : possibleFlashLocations) {
                 if (flashLocation.exists() && flashLocation.isDirectory()) {
                     boolean foundFlash = false;
