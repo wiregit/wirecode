@@ -1,9 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +16,6 @@ import org.limewire.core.settings.PingPongSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 
 import com.google.inject.Injector;
@@ -124,18 +121,11 @@ public class I18NSendReceiveTest extends LimeTestCase {
 
         for(int i = 0; i < FILES.length; i++) {
             File f = new File(_scratchDir, FILES[i]);
-            if(!f.exists()) {
-                f.createNewFile();
-                //make sure its not 0kb
-                FileOutputStream fo = new FileOutputStream(f);
-                BufferedWriter buf = new BufferedWriter(new OutputStreamWriter(fo));
-                buf.write("a");
-                buf.flush();
-                buf.close();
-            }
-            File file = new File(_scratchDir, FILES[i]);
-            FileUtils.copy(f, file);
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+            FileOutputStream fo = new FileOutputStream(f);
+            fo.write('a');
+            fo.flush();
+            fo.close();
+            assertNotNull(fileManager.getGnutellaSharedFileList().add(f).get(1, TimeUnit.SECONDS));
         }
     }
 
@@ -200,7 +190,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
      * Adds an expected reply to the expected reply list.
      */
     private void addExpectedReply(List list, String name) throws Exception {
-        File f = new File("com/limegroup/gnutella/" + name);
+        File f = new File(_scratchDir, name);
         assertTrue("file: " + name + " doesn't exist", f.exists());
         f = f.getCanonicalFile(); // necessary to get the name as it is on disk
         list.add(I18NConvert.instance().compose(f.getName()));
