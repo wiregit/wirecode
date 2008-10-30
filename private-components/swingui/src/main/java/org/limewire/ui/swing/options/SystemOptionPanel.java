@@ -332,12 +332,6 @@ public class SystemOptionPanel extends OptionPanel {
             betaCheckBox.setContentAreaFilled(false);
             bugCheckBox = new JCheckBox();
             bugCheckBox.setContentAreaFilled(false);
-            bugCheckBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    updateView();
-                }
-            });
 
             bugMessageCheckBox = new JCheckBox();
             bugMessageCheckBox.setContentAreaFilled(false);
@@ -348,16 +342,10 @@ public class SystemOptionPanel extends OptionPanel {
             add(bugCheckBox, "split");
             add(new JLabel(I18n.tr("Report bugs to LimeWire")), "wrap");
 
-            add(bugMessageCheckBox, "gapleft 25, split");
+            add(bugMessageCheckBox, "split");
             bugMessageLabel = new JLabel(I18n
-                    .tr("Show me the bug report before sending it. (if we can)"));
+                    .tr("Show me the bug report before sending it"));
             add(bugMessageLabel, "wrap");
-        }
-
-        private void updateView() {
-            boolean bugMessageVisible = bugCheckBox.isSelected();
-            bugMessageCheckBox.setVisible(bugMessageVisible);
-            bugMessageLabel.setVisible(bugMessageVisible);
         }
 
         @Override
@@ -391,7 +379,6 @@ public class SystemOptionPanel extends OptionPanel {
             initOption(betaCheckBox, UpdateSettings.UPDATE_STYLE.getValue() == 0);
             initOption(bugCheckBox, BugSettings.REPORT_BUGS.getValue());
             initOption(bugMessageCheckBox, BugSettings.SHOW_BUGS.getValue());
-            updateView();
         }
 
         private void initOption(JCheckBox checkBox, boolean value) {
