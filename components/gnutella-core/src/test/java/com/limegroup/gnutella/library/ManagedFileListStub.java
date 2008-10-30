@@ -63,9 +63,4 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     public void setManagedExtensions(Collection<String> extensions) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public void validate(FileDesc fd) {
-    }
-
 }

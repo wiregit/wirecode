@@ -29,9 +29,6 @@ public interface ManagedFileList extends FileList {
     /** Informs the library that the file 'file' has changed. */
     void fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
     
-    /** Validates the given FileDesc, ensuring it is OK to be managed. */
-    void validate(FileDesc fd);
-    
     /** Adds a directory that will not be managed. */
     void addDirectoryToExcludeFromManaging(File folder);
     

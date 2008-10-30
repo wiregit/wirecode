@@ -42,9 +42,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.auth.ContentManager;
-import com.limegroup.gnutella.auth.ContentResponseData;
-import com.limegroup.gnutella.auth.ContentResponseObserver;
+import com.limegroup.gnutella.auth.UrnValidator;
+import com.limegroup.gnutella.auth.ValidationEvent;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -58,8 +57,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private final EventMulticaster<FileListChangedEvent> fileListListenerSupport;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final UrnCache urnCache;
-    private final FileDescFactory fileDescFactory;
-    private final ContentManager contentManager;    
+    private final FileDescFactory fileDescFactory; 
     private final ExecutorService fileLoader;
     
     /** 
@@ -130,25 +128,20 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     /** The last revision that finished both pending & updating. */
     private volatile int loadingFinished = -1;
     
-    /**
-     * A Set of URNs that we're currently requesting validation for.
-     * This is NOT cleared on new revisions, because it'll always be
-     * valid.
-     */
-    private Set<URN> requestingValidation = Collections.synchronizedSet(new HashSet<URN>());
-    
     /** All the library data for this library -- loaded on-demand. */
-    private final LibraryFileData fileData = new LibraryFileData();    
+    private final LibraryFileData fileData = new LibraryFileData();  
+    
+    /** The validator to ask if URNs are OK. */
+    private final UrnValidator urnValidator;
 
     @Inject
     ManagedFileListImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
                         UrnCache urnCache,
                         FileDescFactory fileDescFactory,
-                        ContentManager contentManager,
-                        EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster) {
+                        EventMulticaster<ManagedListStatusEvent> managedListSupportMulticaster,
+                        UrnValidator urnValidator) {
         this.urnCache = urnCache;
         this.fileDescFactory = fileDescFactory;
-        this.contentManager = contentManager;
         this.fileDescMulticaster = fileDescMulticaster;
         this.managedListListenerSupport = managedListSupportMulticaster;
         this.fileListListenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
@@ -158,6 +151,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         this.managedDirectories = new HashSet<File>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
+        this.urnValidator = urnValidator;
     }
     
     LibraryFileData getLibraryData() {
@@ -180,6 +174,19 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                         rwLock.writeLock().unlock();
                     }
                     break;
+                }
+            }
+        });
+        
+        urnValidator.addListener(new EventListener<ValidationEvent>() {
+            @Override
+            public void handleEvent(ValidationEvent event) {
+                switch(event.getType()) {
+                case INVALID:
+                    List<FileDesc> fds = getFileDescsMatching(event.getUrn());
+                    for(FileDesc fd : fds) {
+                        remove(fd);
+                    }
                 }
             }
         });
@@ -424,19 +431,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public List<File> getDirectoriesToManageRecursively() {
         return fileData.getDirectoriesToManageRecursively();
     }
-    
-    public void validate(final FileDesc fd) {
-        if(requestingValidation.add(fd.getSHA1Urn())) {
-            contentManager.request(fd.getSHA1Urn(), new ContentResponseObserver() {
-               public void handleResponse(URN urn, ContentResponseData r) {
-                   requestingValidation.remove(fd.getSHA1Urn());
-                   if(r != null && !r.isOK()) {
-                       remove(fd.getFile());
-                   }
-               }
-            }, 5000);
-        }
-    }    
 
     ///////////////////////////////////////////////////////////////
     
@@ -647,13 +641,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @return
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
-        FileDesc fileDesc = fileDescFactory.createFileDesc(file, urns, index);
-        ContentResponseData r = contentManager.getResponse(fileDesc.getSHA1Urn());
-        // if we had a response & it wasn't good, don't add this FD.
-        if(r != null && !r.isOK())
+        if(urnValidator.isInvalid(UrnSet.getSha1(urns))) {
             return null;
-        else
-            return fileDesc;
+        } else {
+            return fileDescFactory.createFileDesc(file, urns, index);
+        }
     }
 
     public boolean remove(File file) {

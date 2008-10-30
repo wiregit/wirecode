@@ -131,6 +131,12 @@ public class UploadQueueingTest extends LimeTestCase {
     }
 
     private void initializeFileManager() throws Exception {
+        urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
+        urn2 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFF");
+        urn3 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+        urn4 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
+        urn5 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFC");
+        
         FileDescStub descStub = new FileDescStub("abc1.txt", urn1, 0);
         rfd1 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 0, "abc1.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
@@ -144,7 +150,7 @@ public class UploadQueueingTest extends LimeTestCase {
                 false);
        // url2 = LimeTestUtils.getRelativeRequest(urn2);
         fm.getGnutellaSharedFileList().add(descStub);
-
+        
         descStub = new FileDescStub("abc3.txt", urn3, 2);
         rfd3 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.3", 1, 2, "abc3.txt", FileDescStub.DEFAULT_SIZE,
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
@@ -387,7 +393,7 @@ public class UploadQueueingTest extends LimeTestCase {
         HashTreeCacheImpl tigerTreeCache = (HashTreeCacheImpl) injector
                 .getInstance(HashTreeCache.class);
         for (int i = 0; i < 5; i++) {
-            tigerTreeCache.getHashTreeAndWait(fm.getManagedFileList().getFileDescForIndex(i), 1000);
+            tigerTreeCache.getHashTreeAndWait(fm.getGnutellaSharedFileList().getFileDescForIndex(i), 1000);
         }
 
         // first two uploads to get slots
@@ -1168,7 +1174,7 @@ public class UploadQueueingTest extends LimeTestCase {
     private void addThexHeader(HTTPDownloader dl) throws Exception {
         HashTreeCache tigerTreeCache = injector
                 .getInstance(HashTreeCache.class);
-        FileDesc fd = fm.getManagedFileList().getFileDescForIndex((int) dl.getIndex());
+        FileDesc fd = fm.getGnutellaSharedFileList().getFileDescForIndex((int) dl.getIndex());
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader", tigerTreeCache
                 .getHashTree(fd).httpStringValue());
     }

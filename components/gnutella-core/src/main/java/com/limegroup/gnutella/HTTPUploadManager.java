@@ -36,7 +36,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Uploader.UploadStatus;
-import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
@@ -196,8 +196,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
 
-    private final Provider<ContentManager> contentManager;
-
     private final Provider<HTTPAcceptor> httpAcceptor;
     
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
@@ -206,24 +204,27 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private final Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider;
     
+    private final UrnValidator urnValidator;
+    
     @Inject
     public HTTPUploadManager(UploadSlotManager slotManager,
             HttpRequestHandlerFactory httpRequestHandlerFactory,
-            Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
+            Provider<HTTPAcceptor> httpAcceptor,
             Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
             TcpBandwidthStatistics tcpBandwidthStatistics,
             Provider<GnutellaUploadFileListProvider> gnutellaFileListProvider,
-            Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
+            Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
+            UrnValidator urnValidator) {
         this.gnutellaUploadFileListProvider = gnutellaFileListProvider;
         this.gnutellaBrowseFileListProvider = gnutellaBrowseFileListProvider;
         this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
-        this.contentManager = contentManager;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
         this.httpAcceptor = Objects.nonNull(httpAcceptor, "httpAcceptor");
         this.fileManager = Objects.nonNull(fileManager, "fileManager");
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.tcpBandwidthStatistics = Objects.nonNull(tcpBandwidthStatistics, "tcpBandwidthStatistics");
+        this.urnValidator = urnValidator;
     }
     
     public String getServiceName() {
@@ -481,8 +482,9 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         }
 
         FileDesc fd = session.getUploader().getFileDesc();
-        if (!contentManager.get().isVerified(fd.getSHA1Urn())) // spawn a validation
-            fileManager.get().getManagedFileList().validate(fd);
+        if (!urnValidator.isValid(fd.getSHA1Urn())) {
+            urnValidator.validate(fd.getSHA1Urn());
+        }
 
         URN sha1 = fd.getSHA1Urn();
 

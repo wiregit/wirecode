@@ -48,7 +48,6 @@ import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -70,7 +69,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.connection.ConnectionCapabilities;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
@@ -1398,21 +1397,19 @@ public class AltLocUploadTest extends LimeTestCase {
 
         private List<HTTPUploader> activeUploads = new ArrayList<HTTPUploader>();
         
-        @Inject
-        public TestUploadManager(UploadSlotManager slotManager,
+        TestUploadManager(UploadSlotManager slotManager,
                 HttpRequestHandlerFactory httpRequestHandlerFactory,
-                Provider<ContentManager> contentManager,
                 Provider<HTTPAcceptor> httpAcceptor,
-                Provider<FileManager> fileManager,
-                Provider<ActivityCallback> activityCallback, 
+                Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
                 Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
-                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
-            super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
+                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
+                UrnValidator urnValidator) {
+            super(slotManager, httpRequestHandlerFactory, httpAcceptor,
                     fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
-                    gnutellaBrowseFileListProvider);
+                    gnutellaBrowseFileListProvider, urnValidator);
         }
-
+        
         @Override
         public synchronized void addAcceptedUploader(HTTPUploader uploader, HttpContext context) {
             activeUploads.add(uploader);

@@ -17,7 +17,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
-import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.auth.UrnValidator;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -124,14 +124,15 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         @Inject
         UploadManagerStub(UploadSlotManager slotManager,
                 HttpRequestHandlerFactory httpRequestHandlerFactory,
-                Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
+                Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
                 TcpBandwidthStatistics tcpBandwidthStatistics,
                 Provider<GnutellaUploadFileListProvider> gnutellaUploadFileListProvider,
-                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider) {
-            super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
+                Provider<GnutellaBrowseFileListProvider> gnutellaBrowseFileListProvider,
+                UrnValidator urnValidator) {
+            super(slotManager, httpRequestHandlerFactory, httpAcceptor,
                     fileManager, activityCallback, tcpBandwidthStatistics, gnutellaUploadFileListProvider,
-                    gnutellaBrowseFileListProvider);
+                    gnutellaBrowseFileListProvider, urnValidator);
         }
 		@Override
 		public synchronized boolean isServiceable() {

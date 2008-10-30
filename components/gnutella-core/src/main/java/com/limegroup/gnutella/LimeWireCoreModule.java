@@ -69,6 +69,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactoryImpl;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactoryImpl;
+import com.limegroup.gnutella.auth.LimeWireContentAuthModule;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
 import com.limegroup.gnutella.browser.LocalAcceptor;
@@ -238,6 +239,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireBittorrentModule());
         binder().install(new LimeWireLibraryModule());
         binder().install(new LimeWireUploaderModule());
+        binder().install(new LimeWireContentAuthModule());
         
         bind(LimeWireCore.class);
         
