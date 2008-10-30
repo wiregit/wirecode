@@ -5,6 +5,7 @@ import org.limewire.core.api.connection.ConnectionManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.impl.browse.MockBrowseModule;
 import org.limewire.core.impl.connection.MockConnectionManagerImpl;
+import org.limewire.core.impl.daap.MockDaapModule;
 import org.limewire.core.impl.download.MockDownloadModule;
 import org.limewire.core.impl.library.MockLibraryModule;
 import org.limewire.core.impl.network.MockNetworkModule;
@@ -23,6 +24,7 @@ public class MockModule extends AbstractModule {
         bind(Application.class).to(MockApplication.class);
         bind(ConnectionManager.class).to(MockConnectionManagerImpl.class);
         install(new MockLifeCycleModule());
+        install(new MockDaapModule());
         install(new MockSpamModule());
         install(new MockSearchModule());
         install(new MockNetworkModule());
