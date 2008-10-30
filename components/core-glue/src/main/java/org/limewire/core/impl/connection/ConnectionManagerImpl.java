@@ -48,6 +48,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
         return connectionManager.isFullyConnected();
     }
 
+    public boolean isSuperNode() {
+        return connectionManager.isSupernode();
+    }
+    
     /**
      * Finds a managed wrapped listener in the listeners map and delegates the
      * remove listener call to the core connection manager.
@@ -60,4 +64,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
         }
     }
 
+    @Override
+    public void restart() {
+       connectionManager.disconnect(true);
+       connectionManager.connect();
+    }
 }

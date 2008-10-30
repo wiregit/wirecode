@@ -28,4 +28,13 @@ public class MockConnectionManagerImpl implements ConnectionManager {
 
     }
 
+    public boolean isSuperNode() {
+        return false;
+    }
+
+    @Override
+    public void restart() {
+       
+    }
+
 }

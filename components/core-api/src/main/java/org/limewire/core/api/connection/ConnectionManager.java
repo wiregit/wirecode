@@ -10,4 +10,8 @@ public interface ConnectionManager {
 
     public void removeEventListener(ConnectionLifeCycleListener listener);
 
+    public boolean isSuperNode();
+
+    public void restart();
+
 }
