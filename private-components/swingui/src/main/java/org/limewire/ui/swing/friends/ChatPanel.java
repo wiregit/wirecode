@@ -166,7 +166,8 @@ public class ChatPanel extends JPanel implements Displayable {
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
         //close all open chats when we sign-off
-        for(String key : chats.keySet()) {
+        String[] chatKeys = chats.keySet().toArray(new String[chats.size()]);
+        for(String key : chatKeys) {
             closeChat(key);
         }
         setConversationPanel(new JPanel());

@@ -167,6 +167,11 @@ public class FriendsPane extends JPanel implements FriendRemover {
         idleTimer.setCurrentMode(event.getNewMode());
     }
 
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        closeAllChats();
+    }    
+
     private static class IdleTimer extends Timer {
         private AutomatedAvailabilityAction availabilityAction;
         
@@ -507,6 +512,21 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 fireConversationStarted(nextFriend);
             }
         }
+    }
+
+    private void closeAllChats() {
+        for (ChatFriend chatFriend : chatFriends) {
+
+            String userId = chatFriend.getID();
+
+            if (idToFriendMap.get(userId) != null) {
+                idToFriendMap.remove(userId);
+            }
+            chatFriend.stopChat();
+            new CloseChatEvent(chatFriend).publish();
+        }
+        chatFriends.clear();
+        friendsTable.removeAll();
     }
 
     private class FriendCellRenderer implements TableCellRenderer {
