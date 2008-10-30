@@ -82,7 +82,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         setBackgroundPainter(new TopPanelPainter());
         
         textField = new TextFieldWithEnterButton(I18n.tr("Search..."),
-                friendLibraries.getDictionary(SearchCategory.ALL));
+                friendLibraries.getDictionary(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue())));
         textField.setMaximumSize(120);
         textField.setName("TopPanel.searchInput");
         
