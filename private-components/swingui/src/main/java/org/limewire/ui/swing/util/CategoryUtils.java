@@ -11,6 +11,8 @@ public class CategoryUtils {
         
         if (mt == MediaType.getVideoMediaType()) return Category.VIDEO;
         
+        if (mt == MediaType.getImageMediaType()) return Category.IMAGE;
+        
         if (mt == MediaType.getDocumentMediaType()) return Category.DOCUMENT;
         
         if (mt == MediaType.getProgramMediaType()) return Category.PROGRAM;
