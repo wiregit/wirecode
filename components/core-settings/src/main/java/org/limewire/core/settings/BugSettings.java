@@ -17,17 +17,16 @@ public class BugSettings extends LimeProps {
     private BugSettings() {}
 
     /**
-     * Setting for whether or not to automatically report bugs
-     * to the bug servlet.
+     * Setting for whether or not to show bugs before they are reported.
      */
-    public static final BooleanSetting USE_BUG_SERVLET =
-		FACTORY.createBooleanSetting("USE_BUG_SERVLET", false);
+    public static final BooleanSetting SHOW_BUGS =
+		FACTORY.createBooleanSetting("SHOW_BUGS", true);
 		
     /**
-     * Setting for whether or not to completely ignore all bugs.
+     * Setting for whether or not to report bugs
      */
-    public static final BooleanSetting IGNORE_ALL_BUGS =
-        FACTORY.createBooleanSetting("IGNORE_ALL_BUGS", false);
+    public static final BooleanSetting REPORT_BUGS =
+        FACTORY.createBooleanSetting("REPORT_BUGS", true);
         
     /**
      * Setting for whether or not bugs should be logged locally.
@@ -64,11 +63,8 @@ public class BugSettings extends LimeProps {
     public static final StringSetting LAST_ACCEPTABLE_VERSION =
         FACTORY.createRemoteStringSetting("LAST_ACCEPTABLE_BUG_VERSION", "4.9.0", "lastBugVersion");
     
-    /** Setting for whether or not deadlock bugs should be sent. */
+    /** Setting for whether or not deadlock bugs should be sent. Only used in old code. New code checks the ReportBugs Only*/
     public static final BooleanSetting SEND_DEADLOCK_BUGS =
         FACTORY.createBooleanSetting("SEND_DEADLOCK_BUGS", true);
     
-    public static final BooleanSetting SEND_TREE_STORAGE_BUGS =
-        FACTORY.createRemoteBooleanSetting("SEND_TREE_STORAGE_BUGS", 
-                true, "BugSettings.sendTreeStorageBugsBeta");
 }

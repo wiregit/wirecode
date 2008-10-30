@@ -10,8 +10,11 @@ import javax.swing.JRadioButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.core.settings.BugSettings;
 import org.limewire.core.settings.StartupSettings;
+import org.limewire.core.settings.UpdateSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
@@ -124,17 +127,17 @@ public class SystemOptionPanel extends OptionPanel {
 
             add(magnetCheckBox);
 
-            magnetLabel = new JLabel(".magnet files");
+            magnetLabel = new JLabel(I18n.tr(".magnet files"));
             add(magnetLabel, "wrap");
 
             add(torrentCheckBox);
 
-            torrentLabel = new JLabel(".torrent files");
+            torrentLabel = new JLabel(I18n.tr(".torrent files"));
             add(torrentLabel, "push");
 
             add(warnCheckBox);
 
-            warnLabel = new JLabel("Warn me when other programs take these associations");
+            warnLabel = new JLabel(I18n.tr("Warn me when other programs take these associations"));
             add(warnLabel, "wrap");
         }
 
@@ -248,15 +251,15 @@ public class SystemOptionPanel extends OptionPanel {
             buttonGroup.add(exitButton);
 
             add(runAtStartupCheckBox, "split");
-            add(new JLabel("Run LimeWire on System Startup"), "wrap");
+            add(new JLabel(I18n.tr("Run LimeWire on System Startup")), "wrap");
 
             if (!OSUtils.isAnyMac()) {
-                add(new JLabel("When I press X:"), "wrap");
+                add(new JLabel(I18n.tr("When I press X:")), "wrap");
 
                 add(minimizeButton, "gapleft 25, split");
-                add(new JLabel("Minimize to system tray"), "gapafter 20");
+                add(new JLabel(I18n.tr("Minimize to system tray")), "gapafter 20");
                 add(exitButton);
-                add(new JLabel("Exit program"));
+                add(new JLabel(I18n.tr("Exit program")));
             }
         }
 
@@ -320,6 +323,8 @@ public class SystemOptionPanel extends OptionPanel {
 
         private JCheckBox bugMessageCheckBox;
 
+        private JLabel bugMessageLabel;
+
         public UpdatesBugsPanel() {
             super(I18n.tr("Updates and Bugs"));
 
@@ -327,32 +332,70 @@ public class SystemOptionPanel extends OptionPanel {
             betaCheckBox.setContentAreaFilled(false);
             bugCheckBox = new JCheckBox();
             bugCheckBox.setContentAreaFilled(false);
+            bugCheckBox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    updateView();
+                }
+            });
+
             bugMessageCheckBox = new JCheckBox();
             bugMessageCheckBox.setContentAreaFilled(false);
 
             add(betaCheckBox, "split");
-            add(new JLabel("Tell me about Beta updates"), "wrap");
+            add(new JLabel(I18n.tr("Tell me about Beta updates")), "wrap");
 
             add(bugCheckBox, "split");
-            add(new JLabel("Report bugs to LimeWire"), "wrap");
+            add(new JLabel(I18n.tr("Report bugs to LimeWire")), "wrap");
 
             add(bugMessageCheckBox, "gapleft 25, split");
-            add(new JLabel("Show me the bug report before sending it"), "wrap");
+            bugMessageLabel = new JLabel(I18n
+                    .tr("Show me the bug report before sending it. (if we can)"));
+            add(bugMessageLabel, "wrap");
+        }
+
+        private void updateView() {
+            boolean bugMessageVisible = bugCheckBox.isSelected();
+            bugMessageCheckBox.setVisible(bugMessageVisible);
+            bugMessageLabel.setVisible(bugMessageVisible);
         }
 
         @Override
         void applyOptions() {
+            applyOption(bugCheckBox, BugSettings.REPORT_BUGS);
+            applyOption(bugMessageCheckBox, BugSettings.SHOW_BUGS);
+            
+            if(betaCheckBox.isSelected()) {
+                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
+            } else {
+                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
+            }
+        }
 
+        private void applyOption(JCheckBox checkbox, BooleanSetting setting) {
+            setting.setValue(checkbox.isSelected());
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return hasChanged(bugCheckBox, BugSettings.REPORT_BUGS)
+                    || hasChanged(bugMessageCheckBox, BugSettings.SHOW_BUGS);
+        }
+
+        private boolean hasChanged(JCheckBox checkbox, BooleanSetting setting) {
+            return setting.getValue() != checkbox.isSelected();
         }
 
         @Override
         public void initOptions() {
+            initOption(betaCheckBox, UpdateSettings.UPDATE_STYLE.getValue() == 0);
+            initOption(bugCheckBox, BugSettings.REPORT_BUGS.getValue());
+            initOption(bugMessageCheckBox, BugSettings.SHOW_BUGS.getValue());
+            updateView();
+        }
 
+        private void initOption(JCheckBox checkBox, boolean value) {
+            checkBox.setSelected(value);
         }
     }
 }

@@ -204,7 +204,7 @@ public final class BugManager {
         boolean sent = false;
         // never ignore bugs or auto-send when developing.
         if(!LimeWireUtils.isTestingVersion()) {
-    	    if( BugSettings.IGNORE_ALL_BUGS.getValue() )
+    	    if( BugSettings.REPORT_BUGS.getValue() )
     	        return; // ignore.
     	        
             // If we have already sent information about this bug, leave.
@@ -214,7 +214,7 @@ public final class BugManager {
             // If the user wants to automatically send to the servlet, do so.
             // Otherwise, display it for review.
             if( isSendableVersion()) {
-            	if (LimeWireUtils.isAlphaRelease() || BugSettings.USE_BUG_SERVLET.getValue())
+            	if (LimeWireUtils.isAlphaRelease() || ! BugSettings.SHOW_BUGS.getValue())
             		sent = true;
             }
             
@@ -284,9 +284,9 @@ public final class BugManager {
             } else {
                 // Otherwise, we're using a different version than the last time.
                 // Unset 'discard all bugs'.
-                if(BugSettings.IGNORE_ALL_BUGS.getValue()) {
-                    BugSettings.IGNORE_ALL_BUGS.setValue(false);
-                    BugSettings.USE_BUG_SERVLET.setValue(false);
+                if(! BugSettings.REPORT_BUGS.getValue()) {
+                    BugSettings.REPORT_BUGS.setValue(true);
+                    BugSettings.SHOW_BUGS.setValue(true);
                 }
             }
         } catch(Throwable t) {
@@ -494,13 +494,13 @@ public final class BugManager {
         ActionListener alwaysListener = new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if( e.getSource() == alwaysSend ) {
-                    BugSettings.IGNORE_ALL_BUGS.setValue(false);
-                    BugSettings.USE_BUG_SERVLET.setValue(true);
+                    BugSettings.REPORT_BUGS.setValue(true);
+                    BugSettings.SHOW_BUGS.setValue(false);
                 } else if (e.getSource() == alwaysReview ) {
-                    BugSettings.IGNORE_ALL_BUGS.setValue(false);
-                    BugSettings.USE_BUG_SERVLET.setValue(false);
+                    BugSettings.REPORT_BUGS.setValue(true);
+                    BugSettings.SHOW_BUGS.setValue(true);
                 } else if( e.getSource() == alwaysDiscard ) {                    
-                    BugSettings.IGNORE_ALL_BUGS.setValue(true);
+                    BugSettings.REPORT_BUGS.setValue(false);
                 }
             }
         };

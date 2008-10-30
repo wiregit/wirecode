@@ -2,6 +2,7 @@ package com.limegroup.gnutella.version;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.Version;
@@ -73,41 +74,41 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	    UpdateData data;
 	    
         // if we already have 4.6.0, this should find nothing.     
-	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertNull(data);
 	    
 	    // if we're above 4.6.0, this should find nothing.
-	    data = uc.getUpdateDataFor(new Version("4.7.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.7.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertNull(data);
 	    
 	    // if we only want critical updates, this should find nothing.
-	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateInformation.STYLE_CRITICAL, null);
+	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateStyle.STYLE_CRITICAL, null);
 	    assertNull(data);
 	    
 	    // find the english version.
-	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertEquals("en", data.getLanguage());
 	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
 	    assertEquals("4.6.0", data.getUpdateVersion());
-	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertEquals(UpdateStyle.STYLE_MAJOR, data.getUpdateStyle());
 	    assertNull(data.getButton1Text());
 	    assertNull(data.getButton2Text());
 	    
 	    // find the spanish version.
-	    data = uc.getUpdateDataFor(new Version("4.5.123509781 Pro"), "es", true, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.5.123509781 Pro"), "es", true, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("es", data.getLanguage());
 	    assertEquals("Hola, no habla espanol.", data.getUpdateText());
 	    assertEquals("4.6.0", data.getUpdateVersion());
-	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertEquals(UpdateStyle.STYLE_MAJOR, data.getUpdateStyle());
 	    assertEquals("b1", data.getButton1Text());
 	    assertEquals("b2", data.getButton2Text());
 	    
 	    // can't find deutch, so defaults to english.
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "de", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "de", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("en", data.getLanguage());
 	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
 	    assertEquals("4.6.0", data.getUpdateVersion());
-	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertEquals(UpdateStyle.STYLE_MAJOR, data.getUpdateStyle());
 	    assertNull(data.getButton1Text());
 	    assertNull(data.getButton2Text());
     }
@@ -147,62 +148,62 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	    // Note that the upper boundary is always exlusive, whereas the lower boundary is inclusive.
 	    UpdateData data;
 	    
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("FORCED Text", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("FORCED Text", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("FORCED Text", data.getUpdateText());
 	    
-	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text (really old version)", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text (really old version)", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("3.0.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text (really old version)", data.getUpdateText());
 
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertEquals("4.6.0", data.getUpdateVersion());
 	    assertEquals("Major Text", data.getUpdateText());
 
-	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.6.5", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("4.6.5", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertNull(data);
 	    
-	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.7.3", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertNull(data);
-	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.6.5"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertNull(data);
 	    
-	    data = uc.getUpdateDataFor(new Version("4.7.1"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.7.1"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.7.3", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.7.2"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.7.2"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertNull(data);
 	    
-	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("4.8.3", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_MINOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateStyle.STYLE_MINOR, null);
 	    assertEquals("4.8.3", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertEquals("4.8.3", data.getUpdateVersion());
-	    data = uc.getUpdateDataFor(new Version("4.8.3"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    data = uc.getUpdateDataFor(new Version("4.8.3"), "en", false, UpdateStyle.STYLE_MAJOR, null);
 	    assertNull(data);
     }
     
@@ -219,9 +220,9 @@ public final class UpdateCollectionTest extends LimeTestCase {
         
         UpdateData data;
         
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", true, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", true, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("Pro Text", data.getUpdateText());
-	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateStyle.STYLE_BETA, null);
 	    assertEquals("Free Text", data.getUpdateText());
     }
     
@@ -311,7 +312,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
             
             UpdateData data;
             
-    	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+    	    data = uc.getUpdateDataFor(new Version("4.0.0"), "en", false, UpdateStyle.STYLE_BETA, null);
     	    assertNotNull(currentOS, data);
     	    if(windows)
     	        assertEquals(currentOS, "Windows Text", data.getUpdateText());
@@ -324,7 +325,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
     	    if(other)
     	        assertEquals(currentOS, "Other Text", data.getUpdateText());
     	        
-    	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+    	    data = uc.getUpdateDataFor(new Version("4.8.0"), "en", false, UpdateStyle.STYLE_BETA, null);
     	    assertNotNull(currentOS, data);
             if(windows || mac || linux)
                 assertEquals(currentOS, "Windows, Mac, Linux Text", data.getUpdateText());
@@ -332,20 +333,20 @@ public final class UpdateCollectionTest extends LimeTestCase {
                 assertEquals(currentOS, "Other, Unix Text", data.getUpdateText());
             
             // Check the osv limits things
-            data = uc.getUpdateDataFor(new Version("4.9.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+            data = uc.getUpdateDataFor(new Version("4.9.0"), "en", false, UpdateStyle.STYLE_BETA, null);
             if (windows)
                 assertEquals(currentOS, "only Windows version", data.getUpdateText());
             else
                 assertNull(currentOS, data);
             
-            data = uc.getUpdateDataFor(new Version("4.10.0"), "en", false, UpdateInformation.STYLE_BETA, null);
+            data = uc.getUpdateDataFor(new Version("4.10.0"), "en", false, UpdateStyle.STYLE_BETA, null);
             if (linux)
                 assertEquals(currentOS, "only Linux version", data.getUpdateText());
             else
                 assertNull(currentOS,data);
             
-            assertNull(uc.getUpdateDataFor(new Version("4.11.0"), "en", false, UpdateInformation.STYLE_BETA, null));
-            assertNull(uc.getUpdateDataFor(new Version("4.12.0"), "en", false, UpdateInformation.STYLE_BETA, null));
+            assertNull(uc.getUpdateDataFor(new Version("4.11.0"), "en", false, UpdateStyle.STYLE_BETA, null));
+            assertNull(uc.getUpdateDataFor(new Version("4.12.0"), "en", false, UpdateStyle.STYLE_BETA, null));
                 
         } 
         
@@ -380,16 +381,16 @@ public final class UpdateCollectionTest extends LimeTestCase {
 	    // People who have Java [1.5.0_2, ~) are told their java is mysterious.
 	    UpdateData data;
 	    
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, new Version("1.3.0"));
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_MAJOR, new Version("1.3.0"));
 	    assertEquals("Your Java Sucks.", data.getUpdateText());
 	    
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_BETA, new Version("1.4.2"));
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_BETA, new Version("1.4.2"));
 	    assertEquals("Your Java Doesn't Suck.", data.getUpdateText());
 	    
-	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateInformation.STYLE_BETA, new Version("1.5.0_02"));
+	    data = uc.getUpdateDataFor(new Version("2.0.0"), "en", false, UpdateStyle.STYLE_BETA, new Version("1.5.0_02"));
 	    assertEquals("Your Java Is Mysterious.", data.getUpdateText());
 	    
-	    data = uc.getUpdateDataFor(new Version("9.9.9"), "en", false, UpdateInformation.STYLE_BETA, new Version("1.5.0_02"));	    
+	    data = uc.getUpdateDataFor(new Version("9.9.9"), "en", false, UpdateStyle.STYLE_BETA, new Version("1.5.0_02"));	    
 	    assertNull(data);
     }
     
@@ -400,7 +401,7 @@ public final class UpdateCollectionTest extends LimeTestCase {
             "</msg>" +
         "</update>");
         
-        UpdateData data = uc.getUpdateDataFor(new Version("9.9.0"), "en", false, UpdateInformation.STYLE_BETA, null);       
+        UpdateData data = uc.getUpdateDataFor(new Version("9.9.0"), "en", false, UpdateStyle.STYLE_BETA, null);       
         assertEquals("WTG Quotes.", data.getUpdateText());
         assertEquals("\"name with spaces\" after quote", data.getUpdateCommand());
         

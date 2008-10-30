@@ -20,7 +20,8 @@ public class DeadlockBugManager {
         
         LocalClientInfo info = localClientInfoFactory.createLocalClientInfo(bug, threadName, message, false);
         // If it's a sendable version & we're either a beta or the user said to send it, send it
-        if(isSendableVersion() && (LimeWireUtils.isBetaRelease() || BugSettings.SEND_DEADLOCK_BUGS.getValue()))
+        //only checks report bugs and not show bugs, because the app is probably locked up
+        if(isSendableVersion() && (LimeWireUtils.isBetaRelease() || BugSettings.REPORT_BUGS.getValue()))
             sendToServlet(info);
     }
     

@@ -26,6 +26,7 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.updates.UpdateStyle;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
@@ -457,7 +458,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         }
         
         // don't allow someone to set the style to be above major.
-        int style = Math.min(UpdateInformation.STYLE_MAJOR,
+        int style = Math.min(UpdateStyle.STYLE_MAJOR,
                              UpdateSettings.UPDATE_STYLE.getValue());
         
         UpdateData updateInfo = uc.getUpdateDataFor(limeV, 
