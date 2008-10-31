@@ -5,16 +5,13 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
@@ -22,10 +19,7 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -34,12 +28,10 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
-    private URN hash1;
-    private URN hash2;
-    private URN hash3;
-    private URN hash4;
+    private URN hash1, hash2, hash3, hash4;
+    private FileDesc fd1, fd2, fd3, fd4;
     
-    private MyFileManager fileManager;
+    private FileManagerStub fileManager;
     private Injector injector;
 
     /**
@@ -70,13 +62,20 @@ public class CreationTimeCacheTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
             protected void configure() {
-                bind(FileManager.class).to(MyFileManager.class);
+                bind(FileManager.class).to(FileManagerStub.class);
             } 
         });
         
-        fileManager = (MyFileManager)injector.getInstance(FileManager.class);
-        fileManager.setDefaultUrn(hash1);
-        fileManager.setValidUrns(new HashSet<URN>(Arrays.asList(hash1, hash2, hash3, hash4)));
+        fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        
+        fd1 = new FileDescStub("old", hash1, 0);
+        fd2 = new FileDescStub("middle1", hash2, 1);
+        fd3 = new FileDescStub("middle2", hash3, 2);
+        fd4 = new FileDescStub("young", hash4, 3);
+        fileManager.getGnutellaSharedFileList().add(fd1);
+        fileManager.getGnutellaSharedFileList().add(fd2);
+        fileManager.getGnutellaSharedFileList().add(fd3);
+        fileManager.getGnutellaSharedFileList().add(fd4);
     }
 
     ///////////////////////// Actual Tests ////////////////////////////
@@ -152,9 +151,9 @@ public class CreationTimeCacheTest extends LimeTestCase {
             Iterator iter = ctCache.getFiles().iterator();
             assertEquals(hash2, iter.next());
             URN urn = (URN) iter.next();
-            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertTrue("was: " + urn, urn.equals(hash1) || urn.equals(hash4));
             urn = (URN) iter.next();
-            assertTrue(urn.equals(hash1) || urn.equals(hash4));
+            assertTrue("was: " + urn, urn.equals(hash1) || urn.equals(hash4));
             assertEquals(hash3, iter.next());
             assertFalse(iter.hasNext());
         }
@@ -207,7 +206,6 @@ public class CreationTimeCacheTest extends LimeTestCase {
     /** Tests the getFiles().iterator() method.
      */
     public void testSettersAndGetters() throws Exception {
-        MyFileManager fileManager = (MyFileManager)injector.getInstance(FileManager.class);
         Iterator iter = null;
         Map TIME_MAP = null;
         Long old = new Long(1);
@@ -276,7 +274,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         // should have two values but exclude one
         // ---------------------------
-        fileManager.setExcludeURN(hash4);
+        fileManager.getGnutellaSharedFileList().remove(fd4);
         ctCache = new CreationTimeCache(fileManager); // test the deserialization.
         iter = ctCache.getFiles().iterator();
         assertEquals(hash2, iter.next());
@@ -284,9 +282,6 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
         TIME_MAP = getUrnToTime(ctCache);
         assertEquals(1, TIME_MAP.size());
-        ctCache = null;
-        fileManager.clearExcludeURN();
-        // ---------------------------
     }
 
 
@@ -390,52 +385,5 @@ public class CreationTimeCacheTest extends LimeTestCase {
 		File cacheFile = new File(_settingsDir, CREATION_CACHE_FILE);
 		return cacheFile.exists();
 	}
-
-
-
-	@Singleton
-    private static class MyFileManager extends FileManagerImpl {
-//        private FileDesc fd = null;
-//        private URN toExclude = null;
-//        private URN defaultURN;
-//        private Set<URN> validUrns;
-        
-        @Inject
-        public MyFileManager(
-                ManagedFileListImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
-            super(managedFileList, backgroundExecutor);
-        }
-        
-        public void setDefaultUrn(URN urn) {
-//            this.defaultURN = urn;
-        }
-        
-        public void setValidUrns(Set<URN> validUrns) {
-//            this.validUrns = validUrns;
-        }
-
-        public void setExcludeURN(URN urn) {
-//            toExclude = urn;
-        }
-        public void clearExcludeURN() {
-//            toExclude = null;
-        }
-
-        // TODO: Fix this!!!
-//        @Override
-//        public FileDesc getFileDesc(URN urn) {
-//            if (fd == null) {
-//                fd = new FileDescStub("sam", defaultURN, 0);
-//            }
-//            
-//            if ((toExclude != null) && toExclude.equals(urn)) {
-//                return null;
-//            } else if (validUrns.contains(urn)) {
-//                return fd;
-//            } else {
-//                return super.getFileDesc(urn);
-//            }
-//        }
-    }
 
 }

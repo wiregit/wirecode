@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,24 +104,28 @@ public final class CreationTimeCache {
             }
             @Override
             public void initialize() {
-                fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
-                    @Override
-                    public void handleEvent(ManagedListStatusEvent event) {
-                        handleManagedListStatusEvent(event);
-                    }
-                });
-                fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
-                    @Override
-                    public void handleEvent(FileListChangedEvent event) {
-                        handleFileListEvent(event);
-                    }
-                });
+               CreationTimeCache.this.initialize();
             }
             @Override
             public void start() {
             }
             @Override
             public void stop() {
+            }
+        });
+    }
+    
+    void initialize() {
+        fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+            @Override
+            public void handleEvent(ManagedListStatusEvent event) {
+                handleManagedListStatusEvent(event);
+            }
+        });
+        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+            @Override
+            public void handleEvent(FileListChangedEvent event) {
+                handleFileListEvent(event);
             }
         });
     }
@@ -314,7 +319,7 @@ public final class CreationTimeCache {
 
             // may be non-null at loop end
             List<URN> toRemove = null;
-            Set<URN> urnList = new HashSet<URN>();
+            Set<URN> urnList = new LinkedHashSet<URN>();
             
             // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the
             // entries in descending order....
