@@ -57,7 +57,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 8: return getProperty(FilePropertyKey.OWNER);
             case RATING_INDEX: return getProperty(FilePropertyKey.RATING);

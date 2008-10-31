@@ -89,6 +89,11 @@ public class TestSearchResult implements SearchResult {
             public FriendPresence getFriendPresence() {
                 return null;
             }
+
+            @Override
+            public boolean isAnonymous() {
+                return true;
+            }
         });
         return sources;
     }
@@ -120,6 +125,12 @@ public class TestSearchResult implements SearchResult {
     @Override
     public String getMagnetURL() {
         return null;
+    }
+
+
+
+    public int getRelevance() {
+        return 0;
     }
 
 

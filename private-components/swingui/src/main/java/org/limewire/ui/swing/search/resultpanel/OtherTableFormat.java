@@ -51,7 +51,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TYPE_INDEX: return fileExtension; // TODO: RMV translate to verbal desc.
             case SIZE_INDEX: return vsr.getSize();
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 7: return getProperty(FilePropertyKey.OWNER);
             case NUM_FILES_INDEX: return getProperty(FilePropertyKey.FILES_IN_ARCHIVE);

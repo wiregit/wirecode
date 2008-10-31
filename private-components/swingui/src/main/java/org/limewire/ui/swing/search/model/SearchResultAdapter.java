@@ -49,6 +49,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private boolean childrenVisible;
     
     private Boolean spamCache;
+    
+    private Double relevance = null;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
@@ -57,12 +59,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             @Override
             public int compare(RemoteHost o1, RemoteHost o2) {
                 int compare = 0;
-                boolean anonymous1 = o1.getFriendPresence() == null
-                        || o1.getFriendPresence().getFriend() == null
-                        || o1.getFriendPresence().getFriend().isAnonymous();
-                boolean anonymous2 = o2.getFriendPresence() == null
-                        || o2.getFriendPresence().getFriend() == null
-                        || o2.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous1 = o1.isAnonymous();
+                boolean anonymous2 = o2.isAnonymous();
 
                 if (anonymous1 == anonymous2) {
                     compare = o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
@@ -189,9 +187,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         for (SearchResult result : coreResults) {
             int numAdded = 0;
             for(RemoteHost remoteHost : result.getSources()) {
-                boolean anonymous = remoteHost.getFriendPresence() == null
-                || remoteHost.getFriendPresence().getFriend() == null
-                || remoteHost.getFriendPresence().getFriend().isAnonymous();
+                boolean anonymous = remoteHost.isAnonymous();
                 
                 if(!anonymous) {
                     remoteHosts.add(remoteHost);
@@ -401,5 +397,18 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         } else {
            return I18n.tr("Excellent Quality");
         }
+    }
+
+    @Override
+    public double getRelevance() {
+        
+        if(this.relevance == null) {
+            double sum = 0;
+            for(SearchResult searchResult : coreResults) {
+                sum += searchResult.getRelevance();
+            }
+            this.relevance = sum;
+        } 
+        return relevance;
     }
 }

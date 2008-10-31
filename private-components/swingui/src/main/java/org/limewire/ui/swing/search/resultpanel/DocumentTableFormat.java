@@ -51,7 +51,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
             case SIZE_INDEX: return vsr.getSize();
             case DATE_INDEX: return getProperty(FilePropertyKey.DATE_CREATED);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case 6: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 8: return getProperty(FilePropertyKey.OWNER);

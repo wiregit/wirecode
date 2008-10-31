@@ -119,6 +119,34 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
     }
 
+    /**
+     * TODO come up with a better algorithm, right now just using number of sources and friends.
+     * Friends are given a greater weight.
+     */
+    public int getRelevance() {
+        int relevance = 0;
+        for(RemoteHost remoteHost : getSources()) {
+            if(remoteHost.isAnonymous()) {
+                if(remoteHost.isBrowseHostEnabled()) {
+                    relevance += 5;
+                }
+                
+                if(remoteHost.isChatEnabled()) {
+                    relevance += 2;
+                }
+                
+                if(remoteHost.isSharingEnabled()) {
+                    relevance += 10;
+                }
+                
+                relevance++;
+            } else {
+                relevance += 20;
+            }
+        }
+        return relevance;
+    }
+
     public List<IpPort> getAlts() {
         return locs;
     }
@@ -294,6 +322,11 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
             return rfd.getInetSocketAddress().toString();
         }
+
+        @Override
+        public boolean isAnonymous() {
+            return getFriendPresence().getFriend().isAnonymous();
+        }
     }
     
     
@@ -383,6 +416,11 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public String getRenderName() {
             return getFriendPresence().getFriend().getRenderName();
+        }
+
+        @Override
+        public boolean isAnonymous() {
+            return getFriendPresence().getFriend().isAnonymous();
         }
     }
 

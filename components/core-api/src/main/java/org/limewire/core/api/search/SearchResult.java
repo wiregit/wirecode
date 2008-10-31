@@ -29,4 +29,6 @@ public interface SearchResult {
     String getFileName();
     
     String getMagnetURL();
+
+    public int getRelevance();
 }

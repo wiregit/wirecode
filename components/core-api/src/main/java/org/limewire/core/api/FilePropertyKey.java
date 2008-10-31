@@ -23,7 +23,6 @@ public enum FilePropertyKey {
     PLATFORM,//TODO this property is not being set on items
     QUALITY,
     RATING,//TODO this property is not being set on items
-    RELEVANCE,//TODO this property is not being set on items
     SAMPLE_RATE, // ex. 44,100 Hz//TODO this property is not being set on items
     // get size from VisualSearchResult.getSize()
     TRACK_NUMBER,

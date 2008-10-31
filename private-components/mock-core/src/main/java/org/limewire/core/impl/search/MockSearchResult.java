@@ -184,4 +184,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
     public String getMagnetURL() {
         return magnetURL;
     }
+
+    public int getRelevance() {
+        return 0;
+    }
 }

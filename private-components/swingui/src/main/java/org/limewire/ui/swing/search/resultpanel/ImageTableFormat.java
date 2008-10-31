@@ -46,7 +46,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case EXTENSION_INDEX: return fileExtension; // TODO: RMV improve
             case DATE_INDEX: return getProperty(FilePropertyKey.DATE_CREATED);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 6: return getProperty(FilePropertyKey.OWNER);
             default: return null;

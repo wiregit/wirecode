@@ -50,7 +50,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case PLATFORM_INDEX: return getProperty(FilePropertyKey.PLATFORM);
             case COMPANY_INDEX: return getProperty(FilePropertyKey.COMPANY);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case 6: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 8: return getProperty(FilePropertyKey.OWNER);

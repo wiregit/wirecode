@@ -56,7 +56,7 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
             case 7: return getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case 11: return getProperty(FilePropertyKey.OWNER);
             case 12: return vsr.getFileExtension();

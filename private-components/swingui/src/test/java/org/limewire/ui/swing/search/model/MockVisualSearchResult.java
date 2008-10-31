@@ -197,4 +197,9 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public String getSubHeading() {
         return subheading;
     }
+
+    @Override
+    public double getRelevance() {
+        return 0;
+    }
 }

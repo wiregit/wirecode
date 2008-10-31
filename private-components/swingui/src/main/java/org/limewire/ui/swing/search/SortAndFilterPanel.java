@@ -248,18 +248,6 @@ public class SortAndFilterPanel extends JXPanel {
         };
     }
 
-    private static Comparator<VisualSearchResult> getFloatComparator(final FilePropertyKey key,
-            final boolean ascending, final boolean nullsFirst) {
-        return new Comparator<VisualSearchResult>() {
-            @Override
-            public int compare(VisualSearchResult vsr1, VisualSearchResult vsr2) {
-                Float v1 = (Float) vsr1.getProperty(key);
-                Float v2 = (Float) vsr2.getProperty(key);
-                return compareNullCheck(v1, v2, ascending, nullsFirst);
-            }
-        };
-    }
-
     private static Comparator<VisualSearchResult> getLongComparator(final FilePropertyKey key,
             final boolean ascending) {
         return new Comparator<VisualSearchResult>() {
@@ -306,7 +294,13 @@ public class SortAndFilterPanel extends JXPanel {
     
     @SuppressWarnings("unchecked")
     private SimilarResultsGroupingDelegateComparator getRelevanceComparator() {
-        return new SimilarResultsGroupingDelegateComparator(getFloatComparator(FilePropertyKey.RELEVANCE, false, false), getNameComparator(true));
+        return new SimilarResultsGroupingDelegateComparator(new Comparator<VisualSearchResult>() {
+            @Override
+            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+                //descending
+                return compareToNull(o2.getRelevance(), o1.getRelevance(), false);
+            }
+        }, getNameComparator(true));
     }
 
     @SuppressWarnings("unchecked")

@@ -67,4 +67,6 @@ public interface VisualSearchResult extends NavSelectable {
     String getHeading();
 
     String getSubHeading();
+    
+    double getRelevance();
 }

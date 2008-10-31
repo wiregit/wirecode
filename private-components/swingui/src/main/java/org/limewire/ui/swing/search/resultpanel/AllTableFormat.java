@@ -45,7 +45,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return getProperty(FilePropertyKey.RELEVANCE);
+            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case OWNER_INDEX: return getProperty(FilePropertyKey.OWNER);
             default: return null;
