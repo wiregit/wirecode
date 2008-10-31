@@ -49,7 +49,6 @@ import org.limewire.util.CommonUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
@@ -63,8 +62,6 @@ import com.google.inject.Inject;
  */
 public class SortAndFilterPanel extends JXPanel {
 
-    private final LibraryData libraryData;
-    
     private final String COMPANY = tr("Company");
     private final String PLATFORM = tr("Platform");
     private final String TYPE = tr("Type");
@@ -105,24 +102,11 @@ public class SortAndFilterPanel extends JXPanel {
         new TextComponentMatcherEditor<VisualSearchResult>(
             filterBox, filterator, true); // true for "live"
     
-    private Matcher<VisualSearchResult> extMatcher =
-        new Matcher<VisualSearchResult>() {
-            @Override
-            public boolean matches(VisualSearchResult item) {
-                String ext = item.getFileExtension(); 
-                   
-                return libraryData.getManagedExtensions().contains(ext);
-            }
-    };
-            
-
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, LibraryManager libraryManager) {
+    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory) {
         GuiUtils.assignResources(this);
-        
-        this.libraryData = libraryManager.getLibraryData();
         
         this.populateActionList();
         
@@ -232,9 +216,6 @@ public class SortAndFilterPanel extends JXPanel {
         EventList<VisualSearchResult> filteredList =
             GlazedListsFactory.filterList(sortedList, editor);
         
-        EventList<VisualSearchResult> filteredList2 =
-            GlazedListsFactory.filterList(filteredList, extMatcher);
-        
         SelectionListener listener = new SelectionListener() {
             @Override
             public void selectionChanged(Action action) {
@@ -255,7 +236,7 @@ public class SortAndFilterPanel extends JXPanel {
         // Trigger the initial sort.
         sortCombo.setSelectedAction(actions.get(RELEVANCE_ITEM));
 
-        return filteredList2;
+        return filteredList;
     }
 
     private static Comparator<VisualSearchResult> getDateComparator(final FilePropertyKey key,
