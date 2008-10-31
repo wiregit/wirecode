@@ -189,6 +189,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     public long getSize() {
         return rfd.getSize();
     }
+    
     @Override
     public List<RemoteHost> getSources() {
         List<RemoteHost> remoteHosts = new ArrayList<RemoteHost>();
@@ -200,11 +201,8 @@ public class RemoteFileDescAdapter implements SearchResult {
             if(!anonymous) {
                 remoteHosts.add(remoteHost);
             } else if(numAdded < maxToAdd) {
-                int oldSize = remoteHosts.size();
                 remoteHosts.add(remoteHost);
-                if(remoteHosts.size() > oldSize) {
-                    numAdded++;
-                }
+                numAdded++;
             }
         }
         return remoteHosts;
