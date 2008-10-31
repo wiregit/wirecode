@@ -188,4 +188,9 @@ public class MockSearchResult implements Cloneable, SearchResult {
     public int getRelevance() {
         return 0;
     }
+
+    @Override
+    public List<RemoteHost> getFilteredSources() {
+       return getSources();
+    }
 }

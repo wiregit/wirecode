@@ -125,7 +125,7 @@ public class RemoteFileDescAdapter implements SearchResult {
      */
     public int getRelevance() {
         int relevance = 0;
-        for(RemoteHost remoteHost : getSources()) {
+        for(RemoteHost remoteHost : getFilteredSources()) {
             if(remoteHost.isAnonymous()) {
                 if(remoteHost.isBrowseHostEnabled()) {
                     relevance += 5;
@@ -189,7 +189,27 @@ public class RemoteFileDescAdapter implements SearchResult {
     public long getSize() {
         return rfd.getSize();
     }
-
+    @Override
+    public List<RemoteHost> getFilteredSources() {
+        List<RemoteHost> remoteHosts = new ArrayList<RemoteHost>();
+        int maxToAdd = 2;
+        int numAdded = 0;
+        
+        for(RemoteHost remoteHost : getSources()) {
+            boolean anonymous = remoteHost.isAnonymous();
+            if(!anonymous) {
+                remoteHosts.add(remoteHost);
+            } else if(numAdded < maxToAdd) {
+                int oldSize = remoteHosts.size();
+                remoteHosts.add(remoteHost);
+                if(remoteHosts.size() > oldSize) {
+                    numAdded++;
+                }
+            }
+        }
+        return remoteHosts;
+    }
+    
     @Override
     public List<RemoteHost> getSources() {
         return new AbstractList<RemoteHost>() {
