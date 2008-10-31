@@ -56,26 +56,21 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     private LimeProgressBar fullProgressBar;
     private JLabel fullTimeLabel;
    
-    @Resource
-    private Icon warningIcon;
+    @Resource private Icon warningIcon;
+    @Resource private Icon downloadIcon;
+    @Resource private int progressBarWidth;
+    @Resource private Color titleLabelColour;
+    @Resource private Color statusLabelColour;
+    @Resource private Color stalledLabelColour;
+    @Resource private Color finishedLabelColour;
+    @Resource private Color linkColour;
+    @Resource private Color progressBarBorderColour;
+    @Resource private Font statusFontPlain;
+    @Resource private Font statusFontBold;
+    @Resource private Font titleFont;
     
-    @Resource
-    private Icon downloadIcon;
-    
-    
-    // TODO: convert to resources
-    private static final int PROGRESS_BAR_WIDTH =  538;
-    private Color itemLabelColour     = new Color(0x21,0x52,0xa6);
-    private Color statusLabelColour   = new Color(0x31,0x31,0x31);
-    private Color stalledLabelColour  = new Color(0xb3,0x1c,0x20);
-    private Color finishedLabelColour = new Color(0x16,0x7e,0x11);
-    private Color linkColour          = new Color(0x2b,0x5b,0xaa);
-    private Color progressBarBorderColour = new Color(0x8a,0x8a,0x8a);
     
     private ActionListener editorListener = null;
-    
-    private static final Font STATUS_FONT_PLAIN = new Font("Arial", Font.PLAIN, 10);
-    private static final Font STATUS_FONT_BOLD = new Font("Arial", Font.BOLD, 10);
     
     private List<JComponent> textComponents = new ArrayList<JComponent>();
     
@@ -123,12 +118,12 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         minIconLabel = new JLabel();
         
         minTitleLabel = new JLabel();
-        minTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        minTitleLabel.setForeground(itemLabelColour);
+        minTitleLabel.setFont(titleFont);
+        minTitleLabel.setForeground(titleLabelColour);
         textComponents.add(minTitleLabel);
 
         minStatusLabel = new JLabel();
-        minStatusLabel.setFont(STATUS_FONT_PLAIN);
+        minStatusLabel.setFont(statusFontPlain);
         minStatusLabel.setForeground(statusLabelColour);
         textComponents.add(minStatusLabel);
 
@@ -139,17 +134,17 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
         minLinkButton.addActionListener(editorListener);
         minLinkButton.setForeground(linkColour);
-        minLinkButton.setFont(STATUS_FONT_PLAIN);
+        minLinkButton.setFont(statusFontPlain);
                                 
         fullIconLabel = new JLabel();
 
         fullTitleLabel = new JLabel();
-        fullTitleLabel.setFont(new Font("Arial", Font.BOLD, 12));
-        fullTitleLabel.setForeground(itemLabelColour);
+        fullTitleLabel.setFont(titleFont);
+        fullTitleLabel.setForeground(titleLabelColour);
         textComponents.add(fullTitleLabel);
 
         fullStatusLabel = new JLabel();
-        fullStatusLabel.setFont(STATUS_FONT_PLAIN);
+        fullStatusLabel.setFont(statusFontPlain);
         fullStatusLabel.setForeground(statusLabelColour);
         fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         fullStatusLabel.setIconTextGap(0);
@@ -158,7 +153,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         textComponents.add(fullStatusLabel);
 
         fullProgressBar = new LimeProgressBar();
-        Dimension size = new Dimension(PROGRESS_BAR_WIDTH, 16);
+        Dimension size = new Dimension(progressBarWidth, 16);
         fullProgressBar.setMaximumSize(size);
         fullProgressBar.setMinimumSize(size);
         fullProgressBar.setPreferredSize(size);
@@ -166,7 +161,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
                 createLineBorder(progressBarBorderColour));
         
         fullTimeLabel = new JLabel();
-        fullTimeLabel.setFont(STATUS_FONT_PLAIN);
+        fullTimeLabel.setFont(statusFontPlain);
         
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);
@@ -231,7 +226,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         gbc.weighty = 0;
         gbc.gridwidth = 3;
         gbc.gridheight = 0;
-        minPanel.add(Box.createHorizontalStrut(PROGRESS_BAR_WIDTH-16), gbc);
+        minPanel.add(Box.createHorizontalStrut(progressBarWidth-16), gbc);
             
     }
     
@@ -314,7 +309,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
             
             editor.minIconLabel.setIcon(warningIcon);
             editor.minStatusLabel.setForeground(stalledLabelColour);
-            editor.minStatusLabel.setFont(STATUS_FONT_BOLD);
+            editor.minStatusLabel.setFont(statusFontBold);
             
             break;
             
@@ -322,14 +317,14 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
             
             editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
             editor.minStatusLabel.setForeground(finishedLabelColour);
-            editor.minStatusLabel.setFont(STATUS_FONT_BOLD);
+            editor.minStatusLabel.setFont(statusFontBold);
             
             break;
             
         default :
             editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));     
             editor.minStatusLabel.setForeground(statusLabelColour);
-            editor.minStatusLabel.setFont(STATUS_FONT_PLAIN);
+            editor.minStatusLabel.setFont(statusFontPlain);
             
         }
         
