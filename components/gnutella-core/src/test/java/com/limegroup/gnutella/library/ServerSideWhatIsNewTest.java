@@ -18,6 +18,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -55,7 +56,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * assume that an Ultrapeer will be equally functional.
  * 
  */
-@SuppressWarnings( { "unchecked", "cast" } )
+
 public class ServerSideWhatIsNewTest 
     extends ClientSideTestCase {
     private final int PORT=6669;
@@ -227,7 +228,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -260,7 +261,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(2000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+             BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNull(reply);
         }
@@ -278,7 +279,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(2, reply.getResultCount());
@@ -342,7 +343,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -416,7 +417,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+            BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals(3, reply.getResultCount());
@@ -489,7 +490,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(1000);
 
         QueryReply reply = 
-            (QueryReply) BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
+           BlockingConnectionUtils.getFirstInstanceOfMessageType(connection,
                                                        QueryReply.class);
         assertNotNull(reply);
         assertEquals("results: " + reply.getResultsAsList(), 3, reply.getResultCount());
@@ -597,11 +598,11 @@ public class ServerSideWhatIsNewTest
         uploader.start("whatever.txt", UPLOADER_PORT, false);
         Long cTime = new Long(2);
         uploader.setCreationTime(cTime);
-        Set urns = new HashSet();
+        Set<URN> urns = new HashSet<URN>();
         urns.add(TestFile.hash());
         RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class)
                 .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
-                        false, null, urns, false, false, "LIME", new HashSet(), -1, false);
+                        false, null, urns, false, false, "LIME", new HashSet<IpPort>(), -1, false);
         
         int sharedBefore = fileManager.getGnutellaSharedFileList().size();
         final CountDownLatch shareLatch = new CountDownLatch(1);
@@ -662,11 +663,11 @@ public class ServerSideWhatIsNewTest
             uploader[i].setRate(50);
             cTime[i] = new Long(5+i);
             uploader[i].setCreationTime(cTime[i]);
-            Set urns = new HashSet();
+            Set<URN> urns = new HashSet<URN>();
             urns.add(TestFile.hash());
             rfds[i] = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, "anita.txt",
                     TestFile.length(), guid, 1, false, 3, false, null, urns, false, false, "LIME",
-                    new HashSet(), -1, false);
+                    new HashSet<IpPort>(), -1, false);
         }
 
 
