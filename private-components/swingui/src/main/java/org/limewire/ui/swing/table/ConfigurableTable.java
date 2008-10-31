@@ -35,7 +35,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * This class is a subclass of JTable that adds features from Glazed Lists.
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener, RowColorResolver<E> {
+public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener {
     private final Log LOG = LogFactory.getLog(getClass());
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
@@ -78,12 +78,6 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
 
     public EventList<E> getEventList() {
         return eventList;
-    }
-
-    @Override
-    public Color getColorForItemRow(E item) {
-        int index = eventList.indexOf(item);
-        return super.getColorForRow(index);
     }
 
     /**

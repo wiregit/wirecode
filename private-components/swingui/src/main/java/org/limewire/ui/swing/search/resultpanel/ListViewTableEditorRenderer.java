@@ -47,7 +47,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
-import org.limewire.ui.swing.table.RowColorResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -117,7 +116,6 @@ implements TableCellEditor, TableCellRenderer {
         @Assisted String searchText, 
         @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
-        @Assisted RowColorResolver<VisualSearchResult> colorResolver,
         @Assisted Color rowSelectionColor,
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule) {

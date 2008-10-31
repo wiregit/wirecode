@@ -110,7 +110,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList, resultsList.getTableColors().selectionColor);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -121,7 +121,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList, resultsList.getTableColors().selectionColor);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
