@@ -202,4 +202,10 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public double getRelevance() {
         return 0;
     }
+
+    @Override
+    public String getFileName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

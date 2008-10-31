@@ -11,13 +11,18 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.util.BaseTestCase;
 
 public class BasicSearchResultsModelTest extends BaseTestCase {
+    private SearchResultsModel model;
+
     public BasicSearchResultsModelTest(String name) {
         super(name);
     }
+    
+    @Override
+    protected void setUp() throws Exception {
+        model = new BasicSearchResultsModel(new MockPropertiableHeadings());
+    }
 
     public void testGroupingByName2UrnsNameComesEarly() {
-
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -52,7 +57,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName2UrnsNameComesLate() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -87,7 +91,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -129,7 +132,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupByName4Urns() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -178,7 +180,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3Urns() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -221,7 +222,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -266,7 +266,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testGroupingByName3UrnsNameMatchViaTransitiveProperty3GroupHasMoreFiles() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -313,7 +312,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
     }
 
     public void testVisibility() {
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new SimilarResultsFileNameDetector()));
@@ -414,7 +412,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.NAME, "test-foo-bar");
         SearchResult searchResult2 = new TestSearchResult("2", "test-foo-bar.mp3", properties2);
         
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
@@ -450,7 +447,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.TRACK_NAME, "test");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
@@ -491,7 +487,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));
@@ -528,7 +523,6 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         properties2.put(FilePropertyKey.TRACK_NAME, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
-        SearchResultsModel model = new BasicSearchResultsModel();
         model.getGroupedSearchResults()
                 .addListEventListener(
                         new GroupingListEventListener(new AudioMetaDataSimilarResultsDetector()));

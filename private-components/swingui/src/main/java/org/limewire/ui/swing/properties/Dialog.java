@@ -22,6 +22,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXLabel;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
@@ -55,6 +56,7 @@ public abstract class Dialog extends JDialog {
     protected final JPanel overview;
     protected final JPanel details = new JPanel();
     protected final JPanel location = new JPanel();
+    protected Component detailsContainer;
     
     public Dialog() {
         setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
@@ -89,8 +91,28 @@ public abstract class Dialog extends JDialog {
         return area;
     }
 
-    protected void showDialog(String fileName) {
+    protected void showDialog(String fileName, Category category) {
         setTitle(tr("\"{0}\" properties", fileName));
+        
+        switch(category) {
+        case VIDEO:
+            configureVideoDetailsLayout();
+            break;
+        case AUDIO:
+            configureAudioDetailsLayout();
+            break;
+        case DOCUMENT:
+            configureDocumentDetailsLayout();
+            break;
+        case IMAGE:
+            configureImageDetailsLayout();
+            break;
+        case PROGRAM:
+            configureProgramDetailsLayout();
+            break;
+        case OTHER:
+            //no-op: Does not display details
+        }
         
         setPreferredSize(new Dimension(570,600));
         setModalityType(ModalityType.APPLICATION_MODAL);
@@ -117,7 +139,8 @@ public abstract class Dialog extends JDialog {
     }
 
     protected  void addDetails() {
-        add(box("Details", details), "cell 0 1, spanx 2");
+        detailsContainer = box("Details", details);
+        add(detailsContainer, "cell 0 1, spanx 2");
     }
 
     protected void addLocation() {
@@ -182,5 +205,65 @@ public abstract class Dialog extends JDialog {
         }
         bldr.append("</html>");
         this.metadata.setText(bldr.toString());
+    }
+
+    private void configureVideoDetailsLayout() {
+        details.setLayout(new MigLayout("fillx", "[20%!][20%!][]", "[][][][][][]"));
+        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(title, "span, growx, wrap");
+        details.add(new JLabel(tr("Genre")));
+        details.add(new JLabel(tr("Rating")));
+        details.add(new JLabel(tr("Year")), "wrap");
+        details.add(genre);
+        details.add(rating);
+        details.add(year, "growx, wrap");
+        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(description, "grow, span");
+    }
+    
+    private void configureAudioDetailsLayout() {
+        details.setLayout(new MigLayout("fillx", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
+        details.add(new JLabel(tr("Title")));
+        details.add(new JLabel(tr("Artist")), "wrap");
+        details.add(title, "growx");
+        details.add(artist, "span, growx, wrap");
+        details.add(new JLabel(tr("Album")));
+        details.add(new JLabel(tr("Genre")));
+        details.add(new JLabel(tr("Year")));
+        details.add(new JLabel(tr("Track")), "wrap");
+        details.add(album, "growx");
+        details.add(genre);
+        details.add(year);
+        details.add(track, "wrap");
+        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(description, "grow, span");
+    }
+    
+    private void configureImageDetailsLayout() {
+        details.setLayout(new MigLayout("fillx", "[]", "[][][][]"));
+        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(title, "growx, wrap");
+        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(description, "grow");
+    }
+    
+    private void configureProgramDetailsLayout() {
+        details.setLayout(new MigLayout("fillx", "[20%!][]", "[][][][][][]"));
+        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(title, "span, growx, wrap");
+        details.add(new JLabel(tr("Platform")));
+        details.add(new JLabel(tr("Company")), "wrap");
+        details.add(platform);
+        details.add(company, "growx, wrap");
+        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(description, "grow, span");
+    }
+    
+    private void configureDocumentDetailsLayout() {
+        details.setLayout(new MigLayout("fillx", "[]", "[][][][]"));
+        details.add(new JLabel(tr("Author")), "wrap");
+        details.add(author, "growx, wrap");
+        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(description, "grow");
     }
 }

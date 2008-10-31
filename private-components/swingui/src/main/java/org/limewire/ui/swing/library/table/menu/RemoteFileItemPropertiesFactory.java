@@ -22,7 +22,7 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
 
         @Override
         public void showProperties(RemoteFileItem propertiable) {
-            showDialog(propertiable.getFileName());
+            showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
     }
 }

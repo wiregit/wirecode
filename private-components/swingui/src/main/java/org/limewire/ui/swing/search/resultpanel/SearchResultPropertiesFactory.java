@@ -6,11 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
@@ -49,18 +49,6 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             year.setEditable(false);
             description.setEditable(false);
             
-            details.setLayout(new MigLayout("fillx", "[20%!][20%!][]", "[][][][][][]"));
-            details.add(new JLabel(tr("Title")), "wrap");
-            details.add(title, "span, growx, wrap");
-            details.add(new JLabel(tr("Genre")));
-            details.add(new JLabel(tr("Rating")));
-            details.add(new JLabel(tr("Year")), "wrap");
-            details.add(genre);
-            details.add(rating);
-            details.add(year, "growx, wrap");
-            details.add(new JLabel(tr("Description")), "wrap");
-            details.add(description, "grow, span");
-
             addDetails();
 
             location.setLayout(new MigLayout("", "[50%!]", "[]"));
@@ -72,6 +60,10 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
         @Override
         public void showProperties(VisualSearchResult vsr) {
+            if (vsr.getCategory() == Category.OTHER) {
+                remove(detailsContainer);
+            }
+            
             icon.setIcon(iconManager.getIcon(vsr.getCategory()));
             heading.setText(vsr.getHeading());
             filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
@@ -95,7 +87,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
                 }
             }
 
-            showDialog(vsr.getPropertyString(FilePropertyKey.NAME));
+            showDialog(vsr.getPropertyString(FilePropertyKey.NAME), vsr.getCategory());
         }
         
         private void populateMetadata(VisualSearchResult vsr) {

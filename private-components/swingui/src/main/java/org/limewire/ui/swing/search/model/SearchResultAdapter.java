@@ -22,13 +22,9 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.CommonUtils;
-import org.limewire.util.StringUtils;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
 
     private final Log LOG = LogFactory.getLog(getClass());
 
@@ -37,6 +33,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private Map<FilePropertyKey, Object> properties;
 
     private final Set<RemoteHost> remoteHosts;
+    
+    private final PropertiableHeadings propertiableHeadings;
 
     private BasicDownloadState downloadState = BasicDownloadState.NOT_STARTED;
 
@@ -52,8 +50,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     
     private Double relevance = null;
 
-    public SearchResultAdapter(List<SearchResult> sourceValue) {
+    public SearchResultAdapter(List<SearchResult> sourceValue, PropertiableHeadings propertiableHeadings) {
         this.coreResults = sourceValue;
+        this.propertiableHeadings = propertiableHeadings;
 
         this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
             @Override
@@ -90,6 +89,11 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     @Override
     public String getFileExtension() {
         return coreResults.get(0).getFileExtension();
+    }
+    
+    @Override
+    public String getFileName() {
+        return coreResults.get(0).getFileName();
     }
 
     @Override
@@ -270,118 +274,12 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String getHeading() {
-        String name = getProperty(FilePropertyKey.NAME).toString();
-        String renderName = "";
-        switch (getCategory()) {
-        case AUDIO:
-            String artist = getPropertyString(FilePropertyKey.AUTHOR);
-            String title = getPropertyString(FilePropertyKey.TRACK_NAME);
-            if (!StringUtils.isEmpty(artist) && !StringUtils.isEmpty(title)) {
-                renderName = artist + " - " + title;
-            } else {
-                renderName = name;
-            }
-            break;
-        case VIDEO:
-        case IMAGE:
-            renderName = name;
-            break;
-        case DOCUMENT:
-        case PROGRAM:
-        case OTHER:
-        default:
-            renderName = name + "." + getFileExtension();
-        }
-        return renderName.trim();
+        return propertiableHeadings.getHeading(this);
     }
 
     @Override
     public String getSubHeading() {
-        String subheading = "";
-
-        switch (getCategory()) {
-        case AUDIO: {
-            String albumTitle = getPropertyString(FilePropertyKey.TITLE);
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.LENGTH));
-
-            boolean insertHypen = false;
-            if (!StringUtils.isEmpty(albumTitle)) {
-                subheading += albumTitle;
-                insertHypen = true;
-            }
-
-            if (qualityScore != null) {
-                if (insertHypen) {
-                    subheading += " - ";
-                }
-                subheading += toQualityString(qualityScore);
-                insertHypen = true;
-            }
-
-            if (length != null) {
-                if (insertHypen) {
-                    subheading += " - ";
-                }
-                subheading += CommonUtils.seconds2time(length);
-            }
-        }
-            break;
-        case VIDEO: {
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.LENGTH));
-
-            boolean insertHyphen = false;
-            if (qualityScore != null) {
-                subheading += toQualityString(qualityScore);
-                insertHyphen = true;
-            }
-
-            if (length != null) {
-                if (insertHyphen) {
-                    subheading += " - ";
-                }
-                subheading += CommonUtils.seconds2time(length);
-            }
-        }
-            break;
-        case IMAGE: {
-            Object time = getProperty(FilePropertyKey.DATE_CREATED);
-            if (time != null) {
-                subheading = DATE_FORMAT.format(new java.util.Date((Long) time));
-            }
-        }
-            break;
-        case PROGRAM: {
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.FILE_SIZE));
-            if (fileSize != null) {
-                subheading = GuiUtils.toUnitbytes(fileSize);
-            }
-        }
-            break;
-        case DOCUMENT:
-        case OTHER:
-        default: {
-            // subheading = "{application name}";
-            // TODO add name of program used to open this file, not included in
-            // 5.0
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(FilePropertyKey.FILE_SIZE));
-            if (fileSize != null) {
-                subheading = GuiUtils.toUnitbytes(fileSize);
-            }
-        }
-        }
-        return subheading;
-    }
-
-    private String toQualityString(long qualityScore) {
-        if (qualityScore <= 1) {
-            return I18n.tr("Poor Quality");
-        } else if (qualityScore == 2) {
-            return I18n.tr("Good Quality");
-        } else {
-           return I18n.tr("Excellent Quality");
-        }
+        return propertiableHeadings.getSubHeading(this);
     }
 
     @Override

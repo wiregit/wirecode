@@ -1,17 +1,13 @@
 package org.limewire.core.api.library;
 
-import org.limewire.core.api.Category;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 
 /**
  * A File that is displayed in a library
  */
-public interface FileItem {
+public interface FileItem extends PropertiableFile {
     
     String getName();
-    
-    String getFileName(); 
     
     long getSize();
 
@@ -22,13 +18,6 @@ public interface FileItem {
     int getNumHits();
 
     int getNumUploads();
-
-    Category getCategory();
-
-    /**
-     * Returns xml data about this fileItem
-     */
-    Object getProperty(FilePropertyKey key);
 
     URN getUrn();
     

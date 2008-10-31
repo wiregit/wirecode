@@ -20,7 +20,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         @Override
         public void showProperties(DownloadItem propertiable) {
             //TODO - This is probably the wrong string to send to this dialog
-            showDialog(propertiable.getTitle());
+            showDialog(propertiable.getTitle(), propertiable.getCategory());
         }
 
         @Override

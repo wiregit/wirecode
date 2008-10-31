@@ -10,6 +10,7 @@ import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.search.model.SimilarResultsDetector;
 import org.limewire.ui.swing.search.model.SimilarResultsDetectorFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import ca.odell.glazedlists.EventList;
 
@@ -26,17 +27,21 @@ public class SearchResultsModelFactory {
     
     private final DownloadListManager downloadListManager;
     
+    private final PropertiableHeadings propertiableHeadings;
+    
     @Inject
     public SearchResultsModelFactory(SimilarResultsDetectorFactory similarResultsDetectorFactory,
-            SpamManager spamManager, LibraryManager libraryManager, DownloadListManager downloadListManager) {
+            SpamManager spamManager, LibraryManager libraryManager, DownloadListManager downloadListManager,
+            PropertiableHeadings propertiableHeadings) {
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
         this.downloadListManager = downloadListManager;
+        this.propertiableHeadings = propertiableHeadings;
     }
 
     public SearchResultsModel createSearchResultsModel() {
-        SearchResultsModel searchResultsModel = new BasicSearchResultsModel();
+        SearchResultsModel searchResultsModel = new BasicSearchResultsModel(propertiableHeadings);
 
         EventList<VisualSearchResult> visualSearchResults = searchResultsModel
                 .getGroupedSearchResults();

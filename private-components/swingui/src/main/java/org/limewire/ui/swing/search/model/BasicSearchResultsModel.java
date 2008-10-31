@@ -10,6 +10,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -30,12 +31,12 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
     private FunctionList<List<SearchResult>, VisualSearchResult> groupedUrnResults;
 
-    public BasicSearchResultsModel() {
+    public BasicSearchResultsModel(PropertiableHeadings propertiableHeadings) {
         allSearchResults = new BasicEventList<SearchResult>();
         GroupingList<SearchResult> groupingListUrns = GlazedListsFactory.groupingList(
                 allSearchResults, new UrnComparator());
         groupedUrnResults = GlazedListsFactory.functionList(
-                groupingListUrns, new SearchResultGrouper(resultCount));
+                groupingListUrns, new SearchResultGrouper(resultCount, propertiableHeadings));
         observableList = GlazedListsFactory.observableElementList(groupedUrnResults,
                 GlazedLists.beanConnector(VisualSearchResult.class));
     }
@@ -77,9 +78,11 @@ public class BasicSearchResultsModel implements SearchResultsModel {
     private static class SearchResultGrouper implements
             AdvancedFunction<List<SearchResult>, VisualSearchResult> {
         private final AtomicInteger resultCount;
+        private final PropertiableHeadings propertiableHeadings;
 
-        public SearchResultGrouper(AtomicInteger resultCount) {
+        public SearchResultGrouper(AtomicInteger resultCount, PropertiableHeadings propertiableHeadings) {
             this.resultCount = resultCount;
+            this.propertiableHeadings = propertiableHeadings;
         }
 
         @Override
@@ -89,7 +92,7 @@ public class BasicSearchResultsModel implements SearchResultsModel {
 
         @Override
         public VisualSearchResult evaluate(List<SearchResult> sourceValue) {
-            VisualSearchResult adapter = new SearchResultAdapter(sourceValue);
+            VisualSearchResult adapter = new SearchResultAdapter(sourceValue, propertiableHeadings);
 
             resultCount.addAndGet(adapter.getSources().size());
             return adapter;
