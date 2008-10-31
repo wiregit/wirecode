@@ -28,11 +28,20 @@ public class FileListChangedEvent {
     }
     
     public FileListChangedEvent(FileList list, Type type, File file) {
-        assert type == Type.CHANGE_FAILED || type == Type.ADD_FAILED;
+        assert type == Type.ADD_FAILED;
         this.type = Objects.nonNull(type, "type");
         this.list = Objects.nonNull(list, "list");
         this.file = Objects.nonNull(file, "file");
         this.oldValue = null;
+        this.newValue = null;
+    }
+    
+    public FileListChangedEvent(FileList list, Type type, FileDesc oldValue, File newValue) {
+        assert type == Type.CHANGE_FAILED;
+        this.type = Objects.nonNull(type, "type");
+        this.list = Objects.nonNull(list, "list");
+        this.file = Objects.nonNull(newValue, "file");
+        this.oldValue = oldValue;
         this.newValue = null;
     }
     

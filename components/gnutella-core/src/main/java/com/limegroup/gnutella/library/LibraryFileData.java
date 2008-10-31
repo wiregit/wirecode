@@ -322,7 +322,6 @@ class LibraryFileData extends AbstractSettingsGroup {
     void setManagedExtensions(Collection<String> newExtensions) {
         lock.writeLock().lock();
         try {
-            
             userRemoved.clear();
             userRemoved.addAll(DEFAULT_MANAGED_EXTENSIONS);
             userRemoved.removeAll(newExtensions);
@@ -330,7 +329,6 @@ class LibraryFileData extends AbstractSettingsGroup {
             userExtensions.clear();
             userExtensions.addAll(newExtensions);
             userExtensions.removeAll(DEFAULT_MANAGED_EXTENSIONS);
-            
         } finally {
             lock.writeLock().unlock();
         }

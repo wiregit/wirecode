@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -136,5 +137,12 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
             return false;
         }
         return contains(file);
+    }
+    
+    // Raise access
+    @Override
+    public List<FileDesc> getFilesInDirectory(File directory) {
+        // TODO Auto-generated method stub
+        return super.getFilesInDirectory(directory);
     }
 }

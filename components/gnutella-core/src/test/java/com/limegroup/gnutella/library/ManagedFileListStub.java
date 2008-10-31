@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.limewire.listener.EventListener;
 
@@ -26,12 +27,12 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
 
     @Override
-    public void fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
+    public Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         throw new UnsupportedOperationException();   
     }
 
     @Override
-    public void fileRenamed(File oldName, File newName) {
+    public Future<FileDesc> fileRenamed(File oldName, File newName) {
         throw new UnsupportedOperationException();
     }
 

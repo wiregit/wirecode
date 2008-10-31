@@ -192,6 +192,23 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         });
     }
     
+    private FileListChangedEvent dispatchFailure(File file, FileDesc oldFileDesc) {
+        FileListChangedEvent event;
+        if(oldFileDesc != null) {
+            event = new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldFileDesc, file);
+            // First dispatch a CHANGE_FAILED for the new event
+            dispatch(event);
+            // Then dispatch a REMOVE for the old FD.
+            dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, oldFileDesc));
+        } else {
+            event = new FileListChangedEvent(this, FileListChangedEvent.Type.ADD_FAILED, file);
+            // Just dispatch an ADD_FAIL for the file.
+            dispatch(event);
+        }
+        
+        return event;
+    }
+    
     void dispatch(FileListChangedEvent event) {
         fileListListenerSupport.broadcast(event);
     }
@@ -358,11 +375,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
 
     @Override
-    public List<FileDesc> getFilesInDirectory(File directory) {
-        throw new UnsupportedOperationException("cannot iterate on files in directory");
-    }
-
-    @Override
     public Lock getReadLock() {
         return rwLock.readLock();
     }
@@ -456,16 +468,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             FileDesc oldFileDesc) {
         LOG.debugf("Attempting to load store or shared file: {0}", file);
         
-        FileListChangedEvent.Type failEvent = oldFileDesc != null ?
-                FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
-
         // Make sure capitals are resolved properly, etc.
         try {
             file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
-            dispatch(new FileListChangedEvent(this, failEvent, file));
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent, "Can't canonicalize file"));
+            future.setException(new FileListChangeFailedException(event, "Can't canonicalize file"));
             return future;
         }
         
@@ -485,9 +494,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         //make sure a FileDesc can be created from this file
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
-            dispatch(new FileListChangedEvent(this, failEvent, file));     
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);   
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent, "File isn't physically manageable"));
+            future.setException(new FileListChangeFailedException(event, "File isn't physically manageable"));
             return future;
         }
 
@@ -509,9 +518,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         if(failed) {
-            dispatch(new FileListChangedEvent(this, failEvent, file));
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             PendingFuture future = new PendingFuture();
-            future.setException(new AddFailedException(failEvent, "Revisions changed while loading"));
+            future.setException(new FileListChangeFailedException(event, "Revisions changed while loading"));
             return future;
         } else {
             PendingFuture task = new PendingFuture();
@@ -557,12 +566,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             rwLock.writeLock().unlock();
         }
         
-        FileListChangedEvent.Type failEvent = oldFileDesc != null ?
-                FileListChangedEvent.Type.CHANGE_FAILED : FileListChangedEvent.Type.ADD_FAILED;
-        
         if(fd == null) {
-            dispatch(new FileListChangedEvent(this, failEvent, file));
-            task.setException(new AddFailedException(failEvent, "Couldn't create FD"));
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileListChangeFailedException(event, "Couldn't create FD"));
             return;
         }
             
@@ -589,7 +595,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         // listening to these events can receive & process the event
         // prior to the future.get() returning.
         if(failed) {
-            dispatch(new FileListChangedEvent(this, failEvent, file));
+            dispatchFailure(file, oldFileDesc);
             task.set(fd); // Not a failure set because we already have a file by that name
         } else if(oldFileDesc == null) {
             dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.ADDED, fd));
@@ -717,26 +723,32 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
-    public void fileRenamed(File oldName, final File newName) {
+    public Future<FileDesc> fileRenamed(File oldName, final File newName) {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
         oldName = canonicalize(oldName);
         FileDesc fd = removeInternal(oldName);        
-        if (fd != null) {                
+        if (fd != null) {
+            // TODO: It's dangerous to prepopulate, because we might actually
+            //       be called with wrong data, giving us wrong URNs.
             // Prepopulate the cache with new URNs.
             urnCache.addUrns(newName, fd.getUrns());
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
-            add(newName, xmlDocs, revision.get(), fd);
+            return add(newName, xmlDocs, revision.get(), fd);
+        } else {
+            return new SimpleFuture<FileDesc>(null);
         }
     }
     
-    public void fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
+    public Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         LOG.debugf("File Changed: {0}", file);
 
         file = canonicalize(file);
         FileDesc fd = removeInternal(file);        
         if (fd != null) {
-            add(file, xmlDocs, revision.get(), fd);
+            return add(file, xmlDocs, revision.get(), fd);
+        } else {
+            return new SimpleFuture<FileDesc>(null);
         }
     }
     
@@ -949,7 +961,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
             rwLock.readLock().lock();
             try {
-                while (index <= files.size()) {
+                while (index < files.size()) {
                     preview = files.get(index);
                     index++;
                     if (preview != null) {

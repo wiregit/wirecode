@@ -2,6 +2,7 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import com.limegroup.gnutella.URN;
 
@@ -42,5 +43,10 @@ public class GnutellaFileListStub extends AbstractFileListStub implements Gnutel
     @Override
     public boolean isFileApplicationShare(String filename) {
         return false;
+    }
+    
+    @Override
+    public List<FileDesc> getFilesInDirectory(File directory) {
+        return super.getFilesInDirectory(directory);
     }
 }

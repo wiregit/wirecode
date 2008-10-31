@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.limewire.listener.EventListener;
 
@@ -24,10 +25,10 @@ public interface ManagedFileList extends FileList {
     boolean isLoadFinished();
     
     /** Informs the library that the file 'oldName' has been renamed to 'newName'. */
-    void fileRenamed(File oldName, File newName);
+    Future<FileDesc> fileRenamed(File oldName, File newName);
     
     /** Informs the library that the file 'file' has changed. */
-    void fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
+    Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
     
     /** Adds a directory that will not be managed. */
     void addDirectoryToExcludeFromManaging(File folder);

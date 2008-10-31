@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +17,6 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QRPUpdater;
@@ -121,10 +119,6 @@ public class FileManagerTestCase extends LimeTestCase {
         return FileManagerTestUtils.createNewNamedTestFile(size, name, SHARE_EXTENSION, directory);
     }
 
-    protected File createNewTestFile(int size) throws Exception {
-        return createNewNamedTestFile(size, "FileManager_unit_test", _scratchDir);
-    }
-
     protected QueryRequest get_qr(String xml) {
         return queryRequestFactory.createQuery("", xml);
     }
@@ -137,9 +131,7 @@ public class FileManagerTestCase extends LimeTestCase {
         return FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", _storeDir);
     }
 
-    protected URN getURN(File f) throws Exception {
-        return URN.createSHA1Urn(f);
-    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////
     // additional helper methods
@@ -279,20 +271,5 @@ public class FileManagerTestCase extends LimeTestCase {
         fman.getManagedFileList().fileChanged(f1, LimeXMLDocument.EMPTY_LIST);
         fel.await(5000);
         return fel.evt;
-    }
-
-    protected void assertSharedFiles(List<FileDesc> shared, File... expected) {
-        List<File> files = new ArrayList<File>(shared.size());
-        synchronized(shared) {
-            for(FileDesc fd: shared) {
-                files.add(fd.getFile());
-            }
-        }
-        assertEquals(files.size(), expected.length);
-        for(File file : expected) {
-            assertTrue(files.contains(file));
-            files.remove(file);
-        }
-        assertTrue(files.toString(), files.isEmpty());
     }
 }

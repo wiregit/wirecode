@@ -118,8 +118,7 @@ public class AbstractFileListStub implements FileList {
         return matchingFDs;
     }
     
-    @Override
-    public List<FileDesc> getFilesInDirectory(File directory) {
+    protected List<FileDesc> getFilesInDirectory(File directory) {
         List<FileDesc> matchingFDs = new ArrayList<FileDesc>();
         for(FileDesc fd : fileDescList) {
             if(fd.getFile().getParentFile().equals(directory)) {

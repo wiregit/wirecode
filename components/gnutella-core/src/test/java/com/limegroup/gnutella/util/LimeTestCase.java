@@ -191,6 +191,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SettingsGroupManager.instance().revertToDefault();
         LimeProps.instance().getFactory().getRevertSetting().setValue(false);
         MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
+        SharingSettings.FRIENDLY_HASHING.setValue(false);
         LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         ApplicationSettings.INITIALIZE_SIMPP.setValue(false);
         ConnectionSettings.FILTER_CLASS_C.setValue(false);

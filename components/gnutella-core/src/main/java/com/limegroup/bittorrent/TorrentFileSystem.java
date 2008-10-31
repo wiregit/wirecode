@@ -113,8 +113,9 @@ public class TorrentFileSystem {
 				Base32.encode(infoHash)+File.separator+_name);
 		_completeFile = new File(SharingSettings.getSaveDirectory(_name), _name);
 		
-		if (!FileUtils.isReallyParent(SharingSettings.getSaveDirectory(_name), _completeFile))
-		 throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, _completeFile);
+		if (!FileUtils.isReallyParent(SharingSettings.getSaveDirectory(_name), _completeFile)) {
+		    throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, _completeFile);
+		}
 		
         if(data.getFiles() != null) {
             List<BTData.BTFileData> files = data.getFiles();

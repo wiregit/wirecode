@@ -280,8 +280,8 @@ abstract class AbstractFileList implements FileList {
         }
     }
     
-    @Override
-    public List<FileDesc> getFilesInDirectory(File directory) {
+    // Exists here so all subclasses can have access if needed.
+    protected List<FileDesc> getFilesInDirectory(File directory) {
         // Remove case, trailing separators, etc.
         try {
             directory = FileUtils.getCanonicalFile(Objects.nonNull(directory, "directory"));
@@ -550,8 +550,8 @@ abstract class AbstractFileList implements FileList {
             case REMOVED:
                 remove(event.getFileDesc());
                 break;
-            case ADD_FAILED:
             case CHANGE_FAILED:
+            case ADD_FAILED:
                 if(isPending(event.getFile(), event.getFileDesc()) && !contains(event.getFile())) {
                     saveChange(event.getFile(), false);
                 }
