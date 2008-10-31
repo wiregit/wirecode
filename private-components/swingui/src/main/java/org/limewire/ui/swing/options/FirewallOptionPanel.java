@@ -19,12 +19,10 @@ import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Firewall Option Panel
  */
-@Singleton
 public class FirewallOptionPanel extends OptionPanel {
 
     private NetworkManager networkManager;
@@ -178,7 +176,7 @@ public class FirewallOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-
+            //TODO: save options
         }
 
         @Override

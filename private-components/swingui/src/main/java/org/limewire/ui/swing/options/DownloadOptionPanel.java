@@ -20,12 +20,10 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Downloads Option View
  */
-@Singleton
 public class DownloadOptionPanel extends OptionPanel {
 
     private SharingDownloadsPanel sharingDownloadsPanel;

@@ -3,20 +3,25 @@ package org.limewire.ui.swing.options;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.TabAction;
@@ -24,12 +29,11 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.google.inject.Provider;
 
 /**
  * Main Dialog for the Options
  */
-@Singleton
 public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     
     @Resource
@@ -46,15 +50,16 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     private static final String MISC = I18n.tr("Misc");
     private static final String ADVANCED = I18n.tr("Advanced");
     
-    private LibraryOptionPanel libraryOptionPanel;
-    private SearchOptionPanel searchOptionPanel;
-    private DownloadOptionPanel downloadOptionPanel;
-    private SecurityOptionPanel securityOptionPanel;
-    private MiscOptionPanel miscOptionPanel;
-    private AdvancedOptionPanel advancedOptionPanel;
+    private Provider<LibraryOptionPanel> libraryOptionPanel;
+    private Provider<SearchOptionPanel> searchOptionPanel;
+    private Provider<DownloadOptionPanel> downloadOptionPanel;
+    private Provider<SecurityOptionPanel> securityOptionPanel;
+    private Provider<MiscOptionPanel> miscOptionPanel;
+    private Provider<AdvancedOptionPanel> advancedOptionPanel;
     
     private Map<String, OptionTabItem> cards = new HashMap<String,OptionTabItem>();
     private Map<String, OptionPanel> panels = new HashMap<String, OptionPanel>();
+    private List<String> list = new ArrayList<String>();
     private OptionTabItem selectedItem;
     
     private JPanel cardPanel;
@@ -68,10 +73,10 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     private JButton cancelButton;
     
     @Inject
-    public OptionsDialog(AppFrame appFrame, LibraryOptionPanel libraryOptionPanel, SearchOptionPanel searchOptionPanel, 
-            DownloadOptionPanel downloadOptionPanel, SecurityOptionPanel securityOptionPanel, MiscOptionPanel miscOptionPanel,
-            AdvancedOptionPanel advancedOptionPanel) { 
-        super(GuiUtils.getMainFrame(), I18n.tr("Options"));
+    public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
+            Provider<DownloadOptionPanel> downloadOptionPanel, Provider<SecurityOptionPanel> securityOptionPanel,
+            Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel) {
+        super(GuiUtils.getMainFrame(), I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
         
@@ -85,21 +90,12 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         setSize(700,600);
         setPreferredSize(new Dimension(700,600));
         setResizable(false);
-        setModalityType(ModalityType.APPLICATION_MODAL);
         
         setDefaultCloseOperation(2);
         
         createComponents();
         
-        initOptions();
-        
         pack();
-    }
-    
-    private void initOptions() {
-        for(OptionPanel panel : panels.values()) {
-            panel.initOptions();
-        }
     }
     
     public void applyOptions() {
@@ -119,49 +115,65 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         
         headerPanel = new JPanel();
         headerPanel.setBackground(headerColor);
-        
+                
         footerPanel = new JPanel();
         
         add(headerPanel, "wrap");
         add(cardPanel, "wrap");
         add(footerPanel);
         
-        createPanels();
         createFooter();
         createHeader();
         
         select(LIBRARY);
     }
     
-    private void createPanels() {
-        panels.put(LIBRARY, libraryOptionPanel);
-        panels.put(SEARCH, searchOptionPanel);
-        panels.put(DOWNLOADS, downloadOptionPanel);
-        panels.put(SECURITY, securityOptionPanel);
-        panels.put(MISC, miscOptionPanel);
-        panels.put(ADVANCED, advancedOptionPanel);
-        
-        cardPanel.add(panels.get(LIBRARY), LIBRARY);
-        cardPanel.add(panels.get(SEARCH), SEARCH);
-        cardPanel.add(panels.get(DOWNLOADS), DOWNLOADS);
-        cardPanel.add(panels.get(SECURITY), SECURITY);
-        cardPanel.add(panels.get(MISC), MISC);
-        cardPanel.add(panels.get(ADVANCED), ADVANCED);
-        
-        for(OptionPanel panel : panels.values()) 
-            panel.setBackground(backgroundColor);
-    }
-    
     private void createHeader() {
         headerPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0"));
         headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, dividerColor));
         
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(LIBRARY, this))));
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(SEARCH, this))));
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(DOWNLOADS, this))));
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(SECURITY, this))));
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(MISC, this))));
-        headerPanel.add(new FancyOptionTabButton(new TabAction(null, addOptionTab(ADVANCED, this))));
+        
+        MoveDown down = new MoveDown();
+        MoveUp up = new MoveUp();
+        
+        createButton(LIBRARY, libraryOptionPanel, down, up);
+        createButton(SEARCH, searchOptionPanel, down, up);
+        createButton(DOWNLOADS, downloadOptionPanel, down, up);
+        createButton(SECURITY, securityOptionPanel, down, up);
+        createButton(MISC, miscOptionPanel, down, up);
+        createButton(ADVANCED, advancedOptionPanel, down, up);
+    }
+    
+    private void createButton(String title, Provider<? extends OptionPanel> provider, MoveDown down, MoveUp up) {
+        FancyOptionTabButton button = new FancyOptionTabButton(new TabAction(null, addOptionTab(title, this, provider)));
+        
+        button.getActionMap().put(MoveDown.KEY, down);
+        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MoveDown.KEY);
+        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), MoveDown.KEY);
+        
+        button.getActionMap().put(MoveUp.KEY, up);
+        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), MoveUp.KEY);
+        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), MoveUp.KEY);
+        
+        headerPanel.add(button);
+    }
+    
+    private class MoveDown extends AbstractAction {
+        final static String KEY = "MOVE_DOWN";
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            next();
+        }
+    }
+    
+    private class MoveUp extends AbstractAction {
+        final static String KEY = "MOVE_UP";
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            previous();
+        }
     }
     
     private void createFooter() {
@@ -185,18 +197,54 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
     }
 
     @Override
-    public OptionTabItem addOptionTab(final String title, final OptionsTabNavigator navigator) {
-        return new OptionsTabItemImpl(title, navigator);
+    public OptionTabItem addOptionTab(final String title, final OptionsTabNavigator navigator, final Provider<? extends OptionPanel> optionProvider) {
+        return new OptionsTabItemImpl(title, navigator, optionProvider);
     }
     
+    public void next() {
+        for(int i = 0; i < list.size(); i++) {
+            if(list.get(i).equals(selectedItem.getId())) {
+                if(i == list.size() -1) {
+                    select(list.get(0));
+                } else
+                    select(list.get(i+1));
+                break;
+            }
+        }
+    }
+    
+    public void previous() {
+        for(int i = 0; i < list.size(); i++) {
+            if(list.get(i).equals(selectedItem.getId())) {
+                if(i == 0) {
+                    select(list.get(list.size()-1));
+                } else
+                    select(list.get(i-1));
+                break;
+            }
+        }
+    }
 
     @Override
     public void select(String title) {
         if(selectedItem != null)
             ((OptionsTabItemImpl)selectedItem).fireSelected(false);
         selectedItem = cards.get(title);
+        if(!panels.containsKey(title)) {
+            createPanel(selectedItem.getId(), selectedItem.getOptionPanel());
+        }
         ((OptionsTabItemImpl)selectedItem).fireSelected(true);
         cardLayout.show(cardPanel, title);
+    }
+    
+    /**
+     * Lazily loads and inits a subPanel in the OptionDialog
+     */
+    private void createPanel(String id, OptionPanel panel) {
+        panel.setBackground(backgroundColor);
+        panels.put(selectedItem.getId(), panel);
+        cardPanel.add(panels.get(selectedItem.getId()), selectedItem.getId());
+        panel.initOptions();
     }
     
     private class OptionsTabItemImpl implements OptionTabItem {
@@ -204,12 +252,15 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         private final List<TabItemListener> listeners = new CopyOnWriteArrayList<TabItemListener>();
         private final String name;
         private final OptionsTabNavigator navigator;
+        private final Provider<? extends OptionPanel> provider;
         
-        public OptionsTabItemImpl(String title, OptionsTabNavigator navigator) {
+        public OptionsTabItemImpl(String title, OptionsTabNavigator navigator, Provider<? extends OptionPanel> optionProvider) {
             this.name = title;
             this.navigator = navigator;
-
+            this.provider = optionProvider;
+            
             cards.put(title, this);
+            list.add(title);
         }
         
         @Override
@@ -225,6 +276,10 @@ public class OptionsDialog extends JDialog implements OptionsTabNavigator {
         @Override
         public void select() {
             navigator.select(name);
+        }
+        
+        public OptionPanel getOptionPanel() {
+            return provider.get();
         }
 
         @Override

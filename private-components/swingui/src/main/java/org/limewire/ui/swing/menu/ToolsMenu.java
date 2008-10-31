@@ -10,21 +10,23 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
 public class ToolsMenu extends JMenu {
     
     @Inject
-    public ToolsMenu(final OptionsDialog optionDialog) {
+    public ToolsMenu(final Provider<OptionsDialog> optionDialog) {
         super(I18n.tr("Tools"));
         
         add(new AbstractAction(I18n.tr("Options")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!optionDialog.isVisible()) {
-                    optionDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
-                    optionDialog.setVisible(true);
+                OptionsDialog options = optionDialog.get();
+                if(!options.isVisible()) {
+                    options.setLocationRelativeTo(GuiUtils.getMainFrame());
+                    options.setVisible(true);
                 }
             }
         });

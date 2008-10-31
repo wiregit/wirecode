@@ -24,12 +24,10 @@ import org.limewire.core.settings.UploadSettings;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Connections Option View
  */
-@Singleton
 public class ConnectionsOptionPanel extends OptionPanel {
 
     private ConnectionSpeedPanel connectionSpeedPanel;

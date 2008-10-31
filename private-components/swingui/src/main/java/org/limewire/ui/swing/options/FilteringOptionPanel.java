@@ -33,12 +33,10 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Filtering Option View
  */
-@Singleton
 public class FilteringOptionPanel extends OptionPanel {
     
     private SpamManager spamManager;

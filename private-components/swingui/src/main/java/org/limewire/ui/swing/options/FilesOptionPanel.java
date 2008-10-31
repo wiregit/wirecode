@@ -25,12 +25,10 @@ import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Files Option View
  */
-@Singleton
 public class FilesOptionPanel extends OptionPanel {
     
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;

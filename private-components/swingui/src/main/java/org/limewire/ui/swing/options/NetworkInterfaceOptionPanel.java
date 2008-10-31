@@ -38,12 +38,10 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Network Interface Option View
  */
-@Singleton
 public class NetworkInterfaceOptionPanel extends OptionPanel {
 
     private ButtonGroup buttonGroup;

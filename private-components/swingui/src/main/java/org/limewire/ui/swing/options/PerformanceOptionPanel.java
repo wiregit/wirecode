@@ -16,12 +16,10 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Performance Option View
  */
-@Singleton
 public class PerformanceOptionPanel extends OptionPanel {
 
     private final NetworkManager networkManager;

@@ -19,12 +19,10 @@ import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Proxy Option View
  */
-@Singleton
 public class ProxyOptionPanel extends OptionPanel {
     
     private JRadioButton noProxyRadioButton;

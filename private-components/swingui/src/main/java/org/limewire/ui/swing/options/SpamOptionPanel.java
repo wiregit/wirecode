@@ -14,12 +14,10 @@ import org.limewire.core.api.spam.SpamManager;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Spam Option View
  */
-@Singleton
 public class SpamOptionPanel extends OptionPanel {
     
     private SpamManager spamManager;

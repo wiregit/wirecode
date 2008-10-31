@@ -12,6 +12,11 @@ public interface OptionTabItem {
     /** Returns the id of nav item. */
     String getId();
     
+    /**
+     * Returns the OptionPanel associated with this tab
+     */
+    public OptionPanel getOptionPanel();
+    
     /** Adds a NavItemListener. */
     void addTabItemListener(TabItemListener listener);
     

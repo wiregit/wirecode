@@ -18,13 +18,11 @@ import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 
 /**
  * BitTorrent Option View
  */
-@Singleton
 public class BitTorrentOptionPanel extends OptionPanel {
     
     private static final int MIN = 1;

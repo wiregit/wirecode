@@ -22,12 +22,10 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * System Option View
  */
-@Singleton
 public class SystemOptionPanel extends OptionPanel {
 
     private FileAssociationPanel fileAssociationPanel;

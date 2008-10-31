@@ -17,12 +17,10 @@ import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Security Option View
  */
-@Singleton
 public class SecurityOptionPanel extends OptionPanel {
     
     private WarningMessagesPanel warningMessagesPanel;
@@ -187,7 +185,7 @@ public class SecurityOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() { //TODO: the old IgnoreResultTypesPaneItem called SearchMediator.rebuildInputPanel() if adult content changed
+        void applyOptions() {
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
             ContentSettings.USER_WANTS_MANAGEMENTS.setValue(unlicensedCheckBox.isSelected());
             filterKeywordPanel.applyOptions();

@@ -16,12 +16,10 @@ import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Library Option View
  */
-@Singleton
 public class LibraryOptionPanel extends OptionPanel {
 
     private LibraryManagementPanel libraryManagerPanel;
