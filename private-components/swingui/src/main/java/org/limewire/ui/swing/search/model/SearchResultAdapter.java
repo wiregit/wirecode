@@ -177,9 +177,32 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         return getCoreSearchResults().toString();
     }
 
+    /**
+     * Readds the sources from the core search results. 
+     * We are limiting the max number of sources from each search result to 2. 
+     * Friend sources do not count twoard the max.
+     * Spam sources tend to show more alt locs. We want to prevent that behavior.
+     */
     void update() {
+        remoteHosts.clear();
+        int maxAdded = 2;
         for (SearchResult result : coreResults) {
-            remoteHosts.addAll(result.getSources());
+            int numAdded = 0;
+            for(RemoteHost remoteHost : result.getSources()) {
+                boolean anonymous = remoteHost.getFriendPresence() == null
+                || remoteHost.getFriendPresence().getFriend() == null
+                || remoteHost.getFriendPresence().getFriend().isAnonymous();
+                
+                if(!anonymous) {
+                    remoteHosts.add(remoteHost);
+                } else if(numAdded < maxAdded) {
+                    int oldSize = remoteHosts.size();
+                    remoteHosts.add(remoteHost);
+                    if(remoteHosts.size() > oldSize) {
+                        numAdded++;
+                    }
+                }
+            }
         }
     }
 
