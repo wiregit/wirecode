@@ -166,7 +166,7 @@ public class MockVisualSearchResult implements VisualSearchResult {
     }
 
     @Override
-    public URN getURN() {
+    public URN getUrn() {
         return null;
     }
 

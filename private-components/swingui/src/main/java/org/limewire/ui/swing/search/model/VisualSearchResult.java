@@ -56,8 +56,6 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile {
 
     public void setSimilarityParent(VisualSearchResult parent);
     
-    public URN getURN();
-    
     public String getMagnetLink();
 
     String getHeading();

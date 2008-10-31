@@ -204,12 +204,6 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         LOG.debugf("Updating visible to {0} for urn: {1}", visible, getUrn());
     }
 
-    private URN getUrn() {
-        List<SearchResult> coreSearchResults = getCoreSearchResults();
-        SearchResult searchResult = coreSearchResults.get(0);
-        return searchResult.getUrn();
-    }
-
     @Override
     public boolean isChildrenVisible() {
         return childrenVisible;
@@ -247,7 +241,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     }
 
     @Override
-    public URN getURN() {
+    public URN getUrn() {
         return coreResults.get(0).getUrn();
     }
 

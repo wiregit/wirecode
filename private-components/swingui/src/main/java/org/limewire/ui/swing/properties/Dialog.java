@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -23,7 +24,9 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXLabel;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -265,5 +268,30 @@ public abstract class Dialog extends JDialog {
         details.add(author, "growx, wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow");
+    }
+
+    protected void populateMetadata(PropertiableFile propFile) {
+        Map<String, String> metadata = new LinkedHashMap<String, String>();
+        switch(propFile.getCategory()) {
+            case AUDIO:
+                addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
+                addSampleRateMetadata(str(propFile.getProperty(FilePropertyKey.SAMPLE_RATE)), metadata);
+                break;
+            case VIDEO:
+                addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
+                addDimensionMetadata(str(propFile.getProperty(FilePropertyKey.WIDTH)), str(propFile.getProperty(FilePropertyKey.HEIGHT)), metadata);
+                break;
+            case IMAGE:
+                addDimensionMetadata(str(propFile.getProperty(FilePropertyKey.WIDTH)), str(propFile.getProperty(FilePropertyKey.HEIGHT)), metadata);
+                break;
+            case DOCUMENT:
+                addDateCreatedMetadata(str(propFile.getProperty(FilePropertyKey.DATE_CREATED)), metadata);
+        }
+        addHashMetadata(propFile.getUrn(), metadata);
+        setMetadataText(metadata);
+    }
+
+    private String str(Object property) {
+        return property == null ? null : property.toString();
     }
 }

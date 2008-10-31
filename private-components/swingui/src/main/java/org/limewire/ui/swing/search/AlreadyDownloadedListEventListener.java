@@ -36,7 +36,7 @@ public class AlreadyDownloadedListEventListener implements ListEventListener<Vis
                 final VisualSearchResult visualSearchResult = eventList.get(listChanges
                         .getIndex());
                 //TODO should probably check more than just URN, can check the file save path as well.
-                URN urn = visualSearchResult.getURN();
+                URN urn = visualSearchResult.getUrn();
                 if (libraryFileList.contains(urn)) {
                     //first checking library for file
                     visualSearchResult.setDownloadState(BasicDownloadState.LIBRARY);

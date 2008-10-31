@@ -2,8 +2,6 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JScrollPane;
@@ -37,7 +35,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
         return new SearchResultProperties(iconManager);
     }
 
-    private static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
+    public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager iconManager;
         
         public SearchResultProperties(CategoryIconManager iconManager) {
@@ -90,27 +88,6 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             showDialog(vsr.getPropertyString(FilePropertyKey.NAME), vsr.getCategory());
         }
         
-        private void populateMetadata(VisualSearchResult vsr) {
-            Map<String, String> metadata = new LinkedHashMap<String, String>();
-            switch(vsr.getCategory()) {
-                case AUDIO:
-                    addBitrateMetadata(vsr.getPropertyString(FilePropertyKey.BITRATE), metadata);
-                    addSampleRateMetadata(vsr.getPropertyString(FilePropertyKey.SAMPLE_RATE), metadata);
-                    break;
-                case VIDEO:
-                    addBitrateMetadata(vsr.getPropertyString(FilePropertyKey.BITRATE), metadata);
-                    addDimensionMetadata(vsr.getPropertyString(FilePropertyKey.WIDTH), vsr.getProperty(FilePropertyKey.HEIGHT), metadata);
-                    break;
-                case IMAGE:
-                    addDimensionMetadata(vsr.getPropertyString(FilePropertyKey.WIDTH), vsr.getProperty(FilePropertyKey.HEIGHT), metadata);
-                    break;
-                case DOCUMENT:
-                    addDateCreatedMetadata(vsr.getPropertyString(FilePropertyKey.DATE_CREATED), metadata);
-            }
-            addHashMetadata(vsr.getURN(), metadata);
-            setMetadataText(metadata);
-        }
-
         @Override
         protected void commit() {
             // TODO

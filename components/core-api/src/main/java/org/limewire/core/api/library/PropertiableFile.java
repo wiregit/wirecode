@@ -2,6 +2,7 @@ package org.limewire.core.api.library;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
 
 public interface PropertiableFile {
     
@@ -13,4 +14,6 @@ public interface PropertiableFile {
      * Returns xml data about this fileItem
      */
     Object getProperty(FilePropertyKey key);
+    
+    URN getUrn();
 }
