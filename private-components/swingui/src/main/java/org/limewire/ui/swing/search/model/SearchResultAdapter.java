@@ -182,6 +182,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
      * Spam sources tend to show more alt locs. We want to prevent that behavior.
      */
     void update() {
+        relevance = null;
         remoteHosts.clear();
         int maxAdded = 2;
         for (SearchResult result : coreResults) {
