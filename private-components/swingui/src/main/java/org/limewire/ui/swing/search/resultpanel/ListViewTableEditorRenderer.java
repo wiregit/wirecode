@@ -107,7 +107,6 @@ implements TableCellEditor, TableCellRenderer {
     private int mousePressedRow = -1;
     private int mousePressedColumn = -1;
 
-    //TODO - Remove RowColorResolver param if uniform background color change is made permanent
     @AssistedInject
     ListViewTableEditorRenderer(
             CategoryIconManager categoryIconManager,
