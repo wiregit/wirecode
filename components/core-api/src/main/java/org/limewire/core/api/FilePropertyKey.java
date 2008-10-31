@@ -3,6 +3,9 @@
  */
 package org.limewire.core.api;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 public enum FilePropertyKey {
     TITLE,//for audo files this is the track name -- TODO this is confusing
     AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
@@ -29,9 +32,21 @@ public enum FilePropertyKey {
     WIDTH,
     YEAR;
     
-    private static FilePropertyKey[] indexableKeys = {TITLE, AUTHOR, COMMENTS, COMPANY, GENRE, NAME, OWNER, PLATFORM, TRACK_NAME};
+    private final static Collection<FilePropertyKey> indexableKeys = new HashSet<FilePropertyKey>(); 
+
+    static {
+        indexableKeys.add(TITLE);
+        indexableKeys.add(AUTHOR);
+        indexableKeys.add(COMMENTS);
+        indexableKeys.add(COMPANY);
+        indexableKeys.add(GENRE);
+        indexableKeys.add(NAME);
+        indexableKeys.add(OWNER);
+        indexableKeys.add(PLATFORM);
+        indexableKeys.add(TRACK_NAME);
+    };
     
-    public static FilePropertyKey[] getIndexableKeys() {
+    public static Collection<FilePropertyKey> getIndexableKeys() {
         return indexableKeys;
     }
 }
