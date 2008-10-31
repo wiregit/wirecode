@@ -4,8 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -22,6 +22,8 @@ import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
@@ -31,6 +33,9 @@ import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -41,9 +46,9 @@ import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
+import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
-import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
 import org.limewire.ui.swing.painter.TopPanelPainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
@@ -55,8 +60,6 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
@@ -86,11 +89,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         final JComboBox combo = new JComboBox(SearchCategory.values());
         combo.removeItem(SearchCategory.OTHER);
-        //TODO need to make this more dynamic, since this is a singleton when the property changes, so does this panel
-        if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
-            combo.removeItem(SearchCategory.PROGRAM);
-        }
-
+        LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SearchSettingListener(LibrarySettings.PROGRAM_SHARING_ENABLED, SearchCategory.PROGRAM, combo));
+                
         combo.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
         combo.setName("TopPanel.combo");
         combo.addItemListener(new ItemListener() {
@@ -262,6 +262,41 @@ class TopPanel extends JXPanel implements SearchNavigator {
         };
     }
     
+    private final class SearchSettingListener implements SettingListener {
+        private final JComboBox combo;
+        private final BooleanSetting booleanSetting;
+        private final SearchCategory searchCategory;
+        private boolean oldValue;
+        
+
+        /**
+         * Listener tracking changes to the given boolean setting, depending on the setting 
+         * value the provided search category is added or removed from the given combo box.
+         */
+        private SearchSettingListener(BooleanSetting booleanSetting, SearchCategory searchCategory, JComboBox combo) {
+            this.booleanSetting = booleanSetting;
+            this.searchCategory = searchCategory;
+            this.combo = combo;
+            oldValue = booleanSetting.getValue();
+            if (!booleanSetting.getValue()) {
+                combo.removeItem(searchCategory);
+            }
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            boolean newValue = booleanSetting.getValue();
+            if(oldValue != newValue) {
+                if(newValue) {
+                    combo.addItem(searchCategory);
+                } else {
+                    combo.removeItem(searchCategory);
+                }
+                oldValue = newValue;
+            }
+        }
+    }
+
     private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
         private Timer busyTimer;
