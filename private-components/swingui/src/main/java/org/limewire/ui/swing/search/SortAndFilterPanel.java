@@ -101,14 +101,11 @@ public class SortAndFilterPanel extends JXPanel {
     private VisualSearchResultTextFilterator filterator =
         new VisualSearchResultTextFilterator();
     
-    private VisualSearchResultExtensionFilteror extFilteror =
-        new VisualSearchResultExtensionFilteror();
-
     private MatcherEditor<VisualSearchResult> editor =
         new TextComponentMatcherEditor<VisualSearchResult>(
             filterBox, filterator, true); // true for "live"
     
-    private Matcher<VisualSearchResult> extEditor =
+    private Matcher<VisualSearchResult> extMatcher =
         new Matcher<VisualSearchResult>() {
             @Override
             public boolean matches(VisualSearchResult item) {
@@ -236,7 +233,7 @@ public class SortAndFilterPanel extends JXPanel {
             GlazedListsFactory.filterList(sortedList, editor);
         
         EventList<VisualSearchResult> filteredList2 =
-            GlazedListsFactory.filterList(filteredList, extEditor);
+            GlazedListsFactory.filterList(filteredList, extMatcher);
         
         SelectionListener listener = new SelectionListener() {
             @Override
@@ -562,18 +559,6 @@ public class SortAndFilterPanel extends JXPanel {
         sortCombo.setSelectedAction(currentItem);
     }
     
-    
-    private static class VisualSearchResultExtensionFilteror
-        implements TextFilterator<VisualSearchResult> {
-        
-        @Override
-        public void getFilterStrings(
-                List<String> list, VisualSearchResult vsr) {
-            
-            list.add(vsr.getFileExtension());
-        }
-            
-    }
     
     private static class VisualSearchResultTextFilterator
         implements TextFilterator<VisualSearchResult> {
