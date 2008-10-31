@@ -170,9 +170,4 @@ public class TestSearchResult implements SearchResult {
             return urn;
         }
     }
-
-    @Override
-    public List<RemoteHost> getFilteredSources() {
-       return getSources();
-    }
 }

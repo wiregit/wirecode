@@ -183,7 +183,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
         relevance = null;
         remoteHosts.clear();
         for (SearchResult result : coreResults) {
-            remoteHosts.addAll(result.getFilteredSources());
+            remoteHosts.addAll(result.getSources());
         }
     }
 

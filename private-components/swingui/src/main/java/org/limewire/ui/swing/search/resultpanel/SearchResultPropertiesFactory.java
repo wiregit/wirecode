@@ -89,7 +89,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             readOnlyInfoModel.setRowCount(0);
 
             for (SearchResult result : vsr.getCoreSearchResults()) {
-                for (RemoteHost host : result.getFilteredSources()) {
+                for (RemoteHost host : result.getSources()) {
                     readOnlyInfoModel.addRow(new Object[] { host.getRenderName(),
                             result.getFileName() });
                 }

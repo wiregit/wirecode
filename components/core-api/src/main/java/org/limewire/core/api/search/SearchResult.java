@@ -21,16 +21,11 @@ public interface SearchResult {
     long getSize();
     
     /**
-     * Returns all sources identified for a file.
-     */
-    List<RemoteHost> getSources();
-    
-    /**
      * Returns a subset of sources identified for a file. 
      * Limiting the number of sources to friends plus 2 other sources.
      */
-    List<RemoteHost> getFilteredSources();
-
+    List<RemoteHost> getSources();
+    
     URN getUrn();
     
     public boolean isSpam();
