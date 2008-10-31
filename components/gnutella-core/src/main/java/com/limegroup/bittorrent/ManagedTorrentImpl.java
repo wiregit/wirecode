@@ -442,7 +442,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     }
 
     private void saveInfoMapInIncomplete() throws IOException {
-        File file = new File(context.getFileSystem().getBaseFile(), ".dat" + context.getFileSystem().getName());
+        File file = new File(context.getFileSystem().getBaseFile().getParent(), context.getFileSystem().getName() + ".dat");
         FileUtils.writeObject(file, context.getMetaInfo().toMemento());
     }
 
