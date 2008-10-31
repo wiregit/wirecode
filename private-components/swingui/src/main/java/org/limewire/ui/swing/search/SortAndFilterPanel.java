@@ -31,6 +31,8 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.library.LibraryData;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
@@ -47,6 +49,8 @@ import org.limewire.util.CommonUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -59,6 +63,8 @@ import com.google.inject.Inject;
  */
 public class SortAndFilterPanel extends JXPanel {
 
+    private final LibraryData libraryData;
+    
     private final String COMPANY = tr("Company");
     private final String PLATFORM = tr("Platform");
     private final String TYPE = tr("Type");
@@ -94,16 +100,32 @@ public class SortAndFilterPanel extends JXPanel {
 
     private VisualSearchResultTextFilterator filterator =
         new VisualSearchResultTextFilterator();
+    
+    private VisualSearchResultExtensionFilteror extFilteror =
+        new VisualSearchResultExtensionFilteror();
 
-    private TextComponentMatcherEditor<VisualSearchResult> editor =
+    private MatcherEditor<VisualSearchResult> editor =
         new TextComponentMatcherEditor<VisualSearchResult>(
             filterBox, filterator, true); // true for "live"
+    
+    private Matcher<VisualSearchResult> extEditor =
+        new Matcher<VisualSearchResult>() {
+            @Override
+            public boolean matches(VisualSearchResult item) {
+                String ext = item.getFileExtension(); 
+                   
+                return libraryData.getManagedExtensions().contains(ext);
+            }
+    };
+            
 
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory) {
+    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, LibraryManager libraryManager) {
         GuiUtils.assignResources(this);
+        
+        this.libraryData = libraryManager.getLibraryData();
         
         this.populateActionList();
         
@@ -213,6 +235,9 @@ public class SortAndFilterPanel extends JXPanel {
         EventList<VisualSearchResult> filteredList =
             GlazedListsFactory.filterList(sortedList, editor);
         
+        EventList<VisualSearchResult> filteredList2 =
+            GlazedListsFactory.filterList(filteredList, extEditor);
+        
         SelectionListener listener = new SelectionListener() {
             @Override
             public void selectionChanged(Action action) {
@@ -233,7 +258,7 @@ public class SortAndFilterPanel extends JXPanel {
         // Trigger the initial sort.
         sortCombo.setSelectedAction(actions.get(RELEVANCE_ITEM));
 
-        return filteredList;
+        return filteredList2;
     }
 
     private static Comparator<VisualSearchResult> getDateComparator(final FilePropertyKey key,
@@ -537,8 +562,22 @@ public class SortAndFilterPanel extends JXPanel {
         sortCombo.setSelectedAction(currentItem);
     }
     
+    
+    private static class VisualSearchResultExtensionFilteror
+        implements TextFilterator<VisualSearchResult> {
+        
+        @Override
+        public void getFilterStrings(
+                List<String> list, VisualSearchResult vsr) {
+            
+            list.add(vsr.getFileExtension());
+        }
+            
+    }
+    
     private static class VisualSearchResultTextFilterator
-    implements TextFilterator<VisualSearchResult> {
+        implements TextFilterator<VisualSearchResult> {
+        
         @Override
         public void getFilterStrings(
                 List<String> list, VisualSearchResult vsr) {
