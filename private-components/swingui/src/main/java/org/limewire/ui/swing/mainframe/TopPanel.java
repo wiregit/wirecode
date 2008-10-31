@@ -33,9 +33,6 @@ import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.setting.BooleanSetting;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
@@ -57,6 +54,7 @@ import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SearchSettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -262,41 +260,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         };
     }
     
-    private final class SearchSettingListener implements SettingListener {
-        private final JComboBox combo;
-        private final BooleanSetting booleanSetting;
-        private final SearchCategory searchCategory;
-        private boolean oldValue;
-        
-
-        /**
-         * Listener tracking changes to the given boolean setting, depending on the setting 
-         * value the provided search category is added or removed from the given combo box.
-         */
-        private SearchSettingListener(BooleanSetting booleanSetting, SearchCategory searchCategory, JComboBox combo) {
-            this.booleanSetting = booleanSetting;
-            this.searchCategory = searchCategory;
-            this.combo = combo;
-            oldValue = booleanSetting.getValue();
-            if (!booleanSetting.getValue()) {
-                combo.removeItem(searchCategory);
-            }
-        }
-
-        @Override
-        public void settingChanged(SettingEvent evt) {
-            boolean newValue = booleanSetting.getValue();
-            if(oldValue != newValue) {
-                if(newValue) {
-                    combo.addItem(searchCategory);
-                } else {
-                    combo.removeItem(searchCategory);
-                }
-                oldValue = newValue;
-            }
-        }
-    }
-
     private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
         private Timer busyTimer;

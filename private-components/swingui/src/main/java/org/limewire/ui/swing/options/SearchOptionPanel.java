@@ -18,6 +18,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SearchSettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -111,10 +112,7 @@ public class SearchOptionPanel extends OptionPanel {
             defaultSearchSpinner = new JComboBox(SearchCategory.values());
             defaultSearchSpinner.removeItem(SearchCategory.OTHER);
 
-            //TODO need to make this more dynamic, since this is a singleton when the property changes, so does this panel
-            if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
-                defaultSearchSpinner.removeItem(SearchCategory.PROGRAM);
-            }
+            LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SearchSettingListener(LibrarySettings.PROGRAM_SHARING_ENABLED, SearchCategory.PROGRAM, defaultSearchSpinner));
             
             suggestCheckBox = new JCheckBox();
             suggestCheckBox.setContentAreaFilled(false);
