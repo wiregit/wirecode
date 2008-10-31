@@ -12,8 +12,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
@@ -31,7 +29,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
-import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.SectionHeading;
@@ -64,13 +61,11 @@ public class DownloadSummaryPanel extends JPanel {
 
     private JTable table;
 
-	
 	private SectionHeading titleLabel;
 	private JLabel countLabel;
 	private JLabel moreLabel;
 	private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
-    private EventList<DownloadItem> warningList;
     private EventList<DownloadItem> unfinishedList;
     private RangeList<DownloadItem> chokeList;
     
@@ -82,23 +77,15 @@ public class DownloadSummaryPanel extends JPanel {
     
     private CardLayout cardLayout;
 
-    @Resource
-    private Color allCompleteColor;
-    
-    @Resource
-    private Color fontColor;
-
-    // TODO: make resources
-    private Font moreFont = new Font("Arial", Font.PLAIN, 12);
-    private Font itemFont = new Font("Arial", Font.PLAIN, 10);
+    @Resource private Color allCompleteColour;
+    @Resource private Color fontColour;
+    @Resource private Font moreFont;
+    @Resource private Font itemFont;
     
     private boolean selected;
 
-
     private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
 
-
-     
     private void createMoreLabel() {
         moreLabel = new JLabel(I18n.tr("see more downloads")) {
             @Override
@@ -117,7 +104,7 @@ public class DownloadSummaryPanel extends JPanel {
             }
       };
       
-      moreLabel.setForeground(fontColor);
+      moreLabel.setForeground(fontColour);
       moreLabel.setFont(moreFont);
       
       moreLabel.setBorder(BorderFactory.createEmptyBorder(0,LEFT_MARGIN,6,0));
@@ -137,18 +124,17 @@ public class DownloadSummaryPanel extends JPanel {
         completePanel = new JPanel(new BorderLayout());
         completePanel.setOpaque(false);
         completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
-        completeLabel.setForeground(allCompleteColor);
+        completeLabel.setForeground(allCompleteColour);
         completePanel.add(completeLabel);
         
         unfinishedList = GlazedListsFactory.filterList(allList, new DownloadStateExcluder(DownloadState.DONE));
-        warningList = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.ERROR, DownloadState.STALLED)); 
 		
 		titleLabel = new SectionHeading(I18n.tr("Downloads"));
 		titleLabel.setName("DownloadSummaryPanel.titleLabel");
 		
 		countLabel = new JLabel("0 ");
         countLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        countLabel.setForeground(fontColor);
+        countLabel.setForeground(fontColour);
 
         titleLabel.add(countLabel, BorderLayout.EAST);
 
@@ -174,7 +160,6 @@ public class DownloadSummaryPanel extends JPanel {
 		table.setOpaque(false);
 		table.setRowHeight(17);
 		
-		//TODO: sorting
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
 
@@ -232,46 +217,13 @@ public class DownloadSummaryPanel extends JPanel {
             }
 
         });
-
-        //show warning icon when something is added to warningList
-        warningList.addListEventListener(new ListEventListener<DownloadItem>() {
-            @Override
-            public void listChanged(ListEvent<DownloadItem> listChanges) {
-
-                boolean addWarning = false;
-
-                while (listChanges.next()) {
-                    if (listChanges.getType() == ListEvent.INSERT) {
-                        addWarning = true;
-                    }
-                }
-
-                if (addWarning) {
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            setWarningVisible(true);
-                        }
-                    });
-                }
-            }
-
-        });
-        
-        //hide warning icon when clicked
-        addMouseListener(new MouseAdapter(){
-            @Override
-            public void mouseClicked(MouseEvent e){
-                setWarningVisible(false);
-            }
-        });
 	}
 	
 	private void setSelected(boolean selected) {
 	    if (isSelected() != selected) {
             this.selected = selected;
             if (selected) {
-                setBorder(BorderFactory.createLineBorder(fontColor));
+                setBorder(BorderFactory.createLineBorder(fontColour));
             } else {
                 setBorder(null);
             }
@@ -332,19 +284,8 @@ public class DownloadSummaryPanel extends JPanel {
             countLabel.setText(unfinishedList.size() + " ");
 	    }
 	    
-        if (warningList.size() == 0) {
-            setWarningVisible(false);
-        }
 	}
 	
-	private void setWarningVisible(boolean visible){
-	    // TODO: What to do about warnings
-//	    if(visible){
-//	        titleLabel.setIcon(warningIcon);
-//	    } else {
-//	        titleLabel.setIcon(null);
-//	    }
-	}
 	
 	private class DownloadStatusPanelRenderer extends JPanel implements
 			TableCellRenderer {
