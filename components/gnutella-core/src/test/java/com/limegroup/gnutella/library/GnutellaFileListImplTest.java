@@ -79,8 +79,8 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
 
-        addFail("Couldn't create FD", fileList, f1);
-        add(fileList, f2, f3, f4);
+        assertAddFails("Couldn't create FD", fileList, f1);
+        assertAdds(fileList, f2, f3, f4);
 
         assertEquals("unexpected # of files", 3, fileList.size());
         assertFalse(fileList.contains(f1));
@@ -108,7 +108,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
 
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
-        addFail("Couldn't create FD", fileList, f2);
+        assertAddFails("Couldn't create FD", fileList, f2);
         assertFalse("shouldn't be shared", fileList.contains(f2));
     }
     
@@ -117,7 +117,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
 
-        add(fileList, f1);
+        assertAdds(fileList, f1);
         assertEquals(1, managedList.size());
         assertEquals(1, fileList.size());
         assertFalse(fileList.remove(f3));
@@ -136,7 +136,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
 
         // Remove file that's shared. Back to 1 file.
         assertEquals(2, fileList.size());
@@ -152,9 +152,9 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
 
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
         assertTrue(fileList.remove(f2));
-        add(fileList, f3);
+        assertAdds(fileList, f3);
         
         assertEquals(12, fileList.getNumBytes());
         assertEquals(2, fileList.size());
@@ -181,17 +181,17 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         f2 = createNewNamedTestFile(3, "2222", _scratchDir);
         f3 = createNewNamedTestFile(11, "3333", _scratchDir);
         
-        add(fileList, f1, f3);
+        assertAdds(fileList, f1, f3);
         assertEquals(2, fileList.size());        
         assertContainsFiles(CollectionUtils.listOf(fileList), f1, f3);
         
         try {
-            managedList.fileRenamed(f1, new File("c:\\asdfoih")).get(1, TimeUnit.SECONDS);
+            managedList.fileRenamed(f1, new File(_scratchDir, "!<invalid file>")).get(1, TimeUnit.SECONDS);
             fail("should have failed");
         } catch(ExecutionException expected) {}
         assertContainsFiles(CollectionUtils.listOf(fileList), f3);
         
-        fileRenamed(managedList, f3, f2);        
+        assertFileRenames(managedList, f3, f2);        
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
         
         assertNull(managedList.fileRenamed(f1, f3).get(1, TimeUnit.SECONDS));        
@@ -201,7 +201,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     public void testChangeSharedFile() throws Exception {
         f1 = createNewNamedTestFile(100, "name", _scratchDir);
         f2 = createNewTestFile(10, _scratchDir);
-        add(fileList, f1);
+        assertAdds(fileList, f1);
         assertEquals(1, fileList.size());
         
         FileDesc fd = fileList.getFileDesc(f1);
@@ -209,7 +209,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         assertSame(fd, fileList.getFileDesc(urn));
         
         change(f1);
-        fileChanged(managedList, f1);
+        assertFileChanges(managedList, f1);
         assertEquals(1, fileList.size());
         assertNotEquals(urn, getUrn(f1));
         assertEquals(getUrn(f1), fileList.getFileDesc(f1).getSHA1Urn());
@@ -218,10 +218,10 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         assertNotSame(fd, fileList.getFileDesc(fileList.getFileDesc(f1).getSHA1Urn()));
         
         f1.delete();
-        fileChangedFailed("File isn't physically manageable", managedList, f1);
+        assertFileChangedFails("File isn't physically manageable", managedList, f1);
         assertEquals(0, fileList.size());
         
-        fileChangedFailed(null, managedList, f2);
+        assertFileChangedFails(null, managedList, f2);
         assertEquals(0, fileList.size());
     }
 }

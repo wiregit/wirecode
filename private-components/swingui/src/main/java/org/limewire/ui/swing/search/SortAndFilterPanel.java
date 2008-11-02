@@ -31,8 +31,6 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.LibraryData;
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;

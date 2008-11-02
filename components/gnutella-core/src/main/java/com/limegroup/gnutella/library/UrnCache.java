@@ -149,38 +149,6 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
     }
     
     /**
-     * Clears all callbacks for the given file that are owned by the given owner.
-     */
-    public synchronized void clearPendingHashesFor(File file, Object owner) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Clearing all pending hashes for: " + file + ", owned by: " + owner);
-        List<UrnCallback> callbacks = pendingHashing.get(file);
-        if(callbacks != null) {
-            for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = callbacks.get(j);
-                if(c.isOwner(owner))
-                    callbacks.remove(j);
-            }
-            if(callbacks.isEmpty())
-                pendingHashing.remove(file);
-        }
-    }   
-    
-    /**
-     * Adds any URNs that can be locally calculated; may take a while to 
-	 * complete on large files.  After calculation, the items are added
-	 * for future remembering.
-	 *
-	 * @param file the <tt>File</tt> instance to calculate URNs for
-	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances.  If 
-     * the calling thread is interrupted while executing this, returns an empty
-     * set.
-     */
-    public Set<URN> calculateUrns(File file) throws IOException, InterruptedException {
-        return URN.createSHA1AndTTRootUrns(file);
-	}
-    
-    /**
      * Find any URNs remembered from a previous session for the specified
 	 * <tt>File</tt> instance.  The returned <tt>Set</tt> is
 	 * guaranteed to be non-null, but it may be empty.
@@ -191,18 +159,23 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
 	 *  unmodifiable, but possibly empty
      */
     public synchronized Set<URN> getUrns(File file) {
+        long modified = file.lastModified();
         // don't trust failed mod times
-        if (file.lastModified() == 0L)
+        if (modified == 0L) {
 			return Collections.emptySet();
+        }
 
 		UrnSetKey key = new UrnSetKey(file);
-
-        // one or more "urn:" names for this file 
-		Set<URN> cachedUrns = getUrnMap().get(key);
-		if(cachedUrns == null)
-			return Collections.emptySet();
-
-		return cachedUrns;
+		if(key._modTime != modified) {
+		    return Collections.emptySet();
+		} else { 
+    		Set<URN> cachedUrns = getUrnMap().get(key);
+    		if(cachedUrns == null) {
+    			return Collections.emptySet();
+    		} else { 
+    		    return cachedUrns;
+    		}
+		}
     }
     
     /**
@@ -249,11 +222,13 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
         if (!file.exists()) {
             return null;
         }
-        ObjectInputStream ois = null;
+        ConverterObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(file)));
+            // Allow for refactoring from gnutella -> gnutella.library
+            ois.addLookup("com.limegroup.gnutella.UrnCache.UrnSetKey", UrnSetKey.class.getName());
             return (Map)ois.readObject();
 	    } catch(Throwable t) {
 	        LOG.error("Unable to read UrnCache", t);
@@ -381,7 +356,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
                     if(LOG.isDebugEnabled())
                         LOG.debug("Hashing file: " + file);
                     try {
-                        urns = calculateUrns(file);
+                        urns = URN.createSHA1AndTTRootUrns(file);
                         addUrns(file, urns);
                     } catch(IOException ignored) {
                         LOG.warn("Unable to calculate URNs", ignored);
@@ -406,7 +381,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
 	 */
 	private static class UrnSetKey implements Serializable {
 		
-		static final long serialVersionUID = -7183232365833531645L;
+		private static final long serialVersionUID = -7183232365833531645L;
 
 		/**
 		 * Constant for the file modification time.
@@ -447,29 +422,28 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
 		 */
 		int calculateHashCode() {
 			int result = 17;
-			result = result*37 + (int)(_modTime ^(_modTime >>> 32));
 			result = result*37 + _path.hashCode();
 			return result;
 		}
 
 		/**
-		 * Overrides Object.equals so that keys with equal paths and modification
-		 * times will be considered equal.
+		 * Overrides Object.equals so that keys with equal paths will be considered equal.
 		 *
 		 * @param o the <tt>Object</tt> instance to compare for equality
 		 * @return <tt>true</tt> if the specified object is the same instance
-		 *  as this object, or if it has the same modification time and the same
+		 *  as this object, or if it has the same
 		 *  path, otherwise returns <tt>false</tt>
 		 */
 		@Override
         public boolean equals(Object o) {
-			if(this == o) return true;
-			if(!(o instanceof UrnSetKey)) return false;
-			UrnSetKey key = (UrnSetKey)o;
+			if (this == o)
+                return true;
+            if (!(o instanceof UrnSetKey))
+                return false;
+            UrnSetKey key = (UrnSetKey)o;
 
 			// note that the path is guaranteed to be non-null
-			return ((_modTime == key._modTime) &&
-					(_path.equals(key._path)));
+			return _path.equals(key._path);
 		}
 
 		/**

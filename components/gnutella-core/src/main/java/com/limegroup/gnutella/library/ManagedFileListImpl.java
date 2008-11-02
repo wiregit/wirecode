@@ -744,8 +744,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         LOG.debugf("File Changed: {0}", file);
 
         file = canonicalize(file);
-        FileDesc fd = removeInternal(file);        
+        FileDesc fd = removeInternal(file);
         if (fd != null) {
+            urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
         } else {
             return new SimpleFuture<FileDesc>(null);

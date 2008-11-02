@@ -38,7 +38,7 @@ public class FileManagerTestUtils {
         return URN.createSHA1Urn(f);
     }
 
-    public static void addFail(String reason, FileList fileList, File... files) throws Exception {
+    public static void assertAddFails(String reason, FileList fileList, File... files) throws Exception {
         for (File file : files) {
             try {
                 fileList.add(file).get(1, TimeUnit.SECONDS);
@@ -53,17 +53,17 @@ public class FileManagerTestUtils {
         }
     }
 
-    public static void add(FileList fileList, File... files) throws Exception {
+    public static void assertAdds(FileList fileList, File... files) throws Exception {
         for (File file : files) {
             assertNotNull(fileList.add(file).get(1, TimeUnit.SECONDS));
         }
     }
     
-    public static void fileRenamed(ManagedFileList fileList, File old, File newFile) throws Exception {
+    public static void assertFileRenames(ManagedFileList fileList, File old, File newFile) throws Exception {
         assertNotNull(fileList.fileRenamed(old, newFile).get(1, TimeUnit.SECONDS));
     }
     
-    public static void fileRenamedFailed(String reason, ManagedFileList fileList, File old, File newFile) throws Exception {
+    public static void assertFileRenameFails(String reason, ManagedFileList fileList, File old, File newFile) throws Exception {
         FileDesc oldFd = fileList.getFileDesc(old);
         Future<FileDesc> future = fileList.fileRenamed(old, newFile);
         
@@ -85,11 +85,11 @@ public class FileManagerTestUtils {
         }
     }
     
-    public static void fileChanged(ManagedFileList fileList, File file) throws Exception {
+    public static void assertFileChanges(ManagedFileList fileList, File file) throws Exception {
         assertNotNull(fileList.fileChanged(file, LimeXMLDocument.EMPTY_LIST).get(1, TimeUnit.SECONDS));
     }
     
-    public static void fileChangedFailed(String reason, ManagedFileList fileList, File file) throws Exception {
+    public static void assertFileChangedFails(String reason, ManagedFileList fileList, File file) throws Exception {
         FileDesc oldFd = fileList.getFileDesc(file);
         Future<FileDesc> future = fileList.fileChanged(file, LimeXMLDocument.EMPTY_LIST);
         

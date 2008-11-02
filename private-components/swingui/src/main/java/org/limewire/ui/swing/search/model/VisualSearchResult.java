@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.core.api.search.SearchResult;

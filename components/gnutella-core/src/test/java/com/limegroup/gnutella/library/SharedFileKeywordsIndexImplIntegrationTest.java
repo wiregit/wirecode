@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.library.FileManagerTestUtils.add;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.fileChanged;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.fileChangedFailed;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.fileRenamed;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
@@ -55,7 +55,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
     public void testOneSharedFile() throws Exception {
         f1 = createNewTestFile(1, _scratchDir);
 
-        add(fileList, f1);
+        assertAdds(fileList, f1);
 
         // it is important to check the query at all bounds,
         // // including tests for case.
@@ -77,7 +77,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f1 = createNewTestFile(1, _scratchDir);
         f2 = createNewTestFile(3, _scratchDir);
         
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
         
         responses = keywordIndex.query(queryRequestFactory.createQuery("unit", (byte) 3));
         assertNotEquals("responses gave same index", responses[0].getIndex(), responses[1].getIndex());
@@ -92,7 +92,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
 
         // Remove file that's shared. Back to 1 file.
         fileList.remove(f2);
@@ -105,9 +105,9 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
         fileList.remove(f2);
-        add(fileList, f3);
+        assertAdds(fileList, f3);
         
         responses = keywordIndex.query(queryRequestFactory.createQuery("unit", (byte) 3));
         assertEquals("unexpected response length", 2, responses.length);
@@ -123,7 +123,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f2 = createNewNamedTestFile(3, "2222", _scratchDir);
         f3 = createNewNamedTestFile(11, "3333", _scratchDir);
         
-        add(fileList, f1, f3);
+        assertAdds(fileList, f1, f3);
         assertEquals(2, fileList.size());       
         
         responses = keywordIndex.query(queryRequestFactory.createQuery("1111", (byte) 3));
@@ -136,7 +136,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         assertEquals("unexpected response length", 1, responses.length);
         
         try {
-            managedList.fileRenamed(f1, new File("c:\\asdfoih")).get(1, TimeUnit.SECONDS);
+            managedList.fileRenamed(f1, new File(_scratchDir, "!<invalid file>")).get(1, TimeUnit.SECONDS);
             fail("should have failed");
         } catch(ExecutionException expected) {}
         
@@ -149,7 +149,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         responses = keywordIndex.query(queryRequestFactory.createQuery("3333", (byte) 3));
         assertEquals("unexpected response length", 1, responses.length);
         
-        fileRenamed(managedList, f3, f2);
+        assertFileRenames(managedList, f3, f2);
         
         responses = keywordIndex.query(queryRequestFactory.createQuery("1111", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
@@ -176,21 +176,21 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         f1 = createNewNamedTestFile(100, "name", _scratchDir);
         f2 = createNewTestFile(10, _scratchDir);
         
-        add(fileList, f1);
+        assertAdds(fileList, f1);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 1, responses.length);        
         
         change(f1);
-        fileChanged(managedList, f1);
+        assertFileChanges(managedList, f1);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 1, responses.length);
         
         f1.delete();
-        fileChangedFailed("File isn't physically manageable", managedList, f1);
+        assertFileChangedFails("File isn't physically manageable", managedList, f1);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
         
-        fileChangedFailed(null, managedList, f2);
+        assertFileChangedFails(null, managedList, f2);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
     }

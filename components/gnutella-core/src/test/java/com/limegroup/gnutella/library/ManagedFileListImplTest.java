@@ -71,8 +71,8 @@ public class ManagedFileListImplTest extends LimeTestCase {
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
 
-        addFail("Couldn't create FD", fileList, f1);
-        add(fileList, f2, f3, f4);
+        assertAddFails("Couldn't create FD", fileList, f1);
+        assertAdds(fileList, f2, f3, f4);
 
         assertEquals("unexpected # of files", 3, fileList.size());
         assertFalse(fileList.contains(f1));
@@ -100,7 +100,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
 
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
-        addFail("Couldn't create FD", fileList, f2);
+        assertAddFails("Couldn't create FD", fileList, f2);
         assertFalse("shouldn't be shared", fileList.contains(f2));
     }
     
@@ -109,7 +109,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1);
+        assertAdds(fileList, f1);
         assertEquals(1, fileList.size());
         assertFalse(fileList.remove(f3));
         assertEquals(f1, fileList.getFileDescForIndex(0).getFile());
@@ -120,7 +120,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
 
         // Remove file that's shared. Back to 1 file.
         assertEquals(2, fileList.size());
@@ -134,9 +134,9 @@ public class ManagedFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
 
-        add(fileList, f1, f2);
+        assertAdds(fileList, f1, f2);
         assertTrue(fileList.remove(f2));
-        add(fileList, f3);
+        assertAdds(fileList, f3);
 
         assertEquals(2, fileList.size());
         assertNotNull(fileList.getFileDescForIndex(0));
@@ -152,24 +152,24 @@ public class ManagedFileListImplTest extends LimeTestCase {
         f2 = createNewTestFile(3, _scratchDir);
         f3 = createNewTestFile(11, _scratchDir);
         
-        add(fileList, f1, f3);
+        assertAdds(fileList, f1, f3);
         assertEquals(2, fileList.size());        
         
-        fileRenamedFailed("File isn't physically manageable", fileList, f1, new File("c:\\asdfoih"));
+        assertFileRenameFails("File isn't physically manageable", fileList, f1, new File(_scratchDir, "!<invalid file>"));
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f3);
         
-        fileRenamed(fileList, f3, f2);
+        assertFileRenames(fileList, f3, f2);
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
 
-        fileRenamedFailed(null, fileList, f1, f3);
+        assertFileRenameFails(null, fileList, f1, f3);
     }
 
     public void testChangeFile() throws Exception {
         f1 = createNewNamedTestFile(100, "name", _scratchDir);
         f2 = createNewTestFile(10, _scratchDir);
-        add(fileList, f1);
+        assertAdds(fileList, f1);
         assertEquals(1, fileList.size());
         
         FileDesc fd = fileList.getFileDesc(f1);
@@ -177,17 +177,17 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertSame(fd, fileList.getFileDesc(urn));
         
         change(f1);
-        fileChanged(fileList, f1);
+        assertFileChanges(fileList, f1);
         assertEquals(1, fileList.size());
         assertNotEquals(urn, fileList.getFileDesc(f1).getSHA1Urn());
         assertNotSame(fd, fileList.getFileDesc(f1));
         assertNotSame(fd, fileList.getFileDesc(fileList.getFileDesc(f1).getSHA1Urn()));
         
         f1.delete();
-        fileChangedFailed("File isn't physically manageable", fileList, f1);
+        assertFileChangedFails("File isn't physically manageable", fileList, f1);
         assertEquals(0, fileList.size());
         
-        fileChangedFailed(null, fileList, f2);
+        assertFileChangedFails(null, fileList, f2);
         assertEquals(0, fileList.size());
     }
     
