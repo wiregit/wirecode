@@ -3,12 +3,13 @@ package org.limewire.ui.swing.library.table.menu;
 import javax.swing.Icon;
 
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,27 +19,33 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     private final ThumbnailManager thumbnailManager;
     private final CategoryIconManager categoryIconManager;
     private final IconManager iconManager;
+    private final PropertiableHeadings propertiableHeadings;
+    private final MagnetLinkFactory magnetLinkFactory;
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager,
-            IconManager iconManager) {
+            IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
+        this.propertiableHeadings = propertiableHeadings;
+        this.magnetLinkFactory = magnetLinkFactory;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
-        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager);
+        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, propertiableHeadings, magnetLinkFactory);
     }
 
-    private static class LocalFileItemProperties extends Dialog implements
+    private static class LocalFileItemProperties extends AbstractFileItemDialog implements
             Properties<LocalFileItem> {
         private final ThumbnailManager thumbnailManager;
         private final CategoryIconManager categoryIconManager;
         private final IconManager iconManager;
 
-        private LocalFileItemProperties(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, IconManager iconManager) {
+        private LocalFileItemProperties(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, 
+                IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
+            super(propertiableHeadings, magnetLinkFactory);
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
@@ -51,10 +58,8 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
 
         @Override
         public void showProperties(LocalFileItem propertiable) {
-
             icon.setIcon(getIcon(propertiable));
-            
-
+            populateCommonFields(propertiable);
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
 

@@ -291,7 +291,7 @@ public abstract class Dialog extends JDialog {
         setMetadataText(metadata);
     }
 
-    private String str(Object property) {
+    protected String str(Object property) {
         return property == null ? null : property.toString();
     }
 }

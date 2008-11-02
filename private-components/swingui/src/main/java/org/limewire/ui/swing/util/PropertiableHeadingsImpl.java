@@ -16,7 +16,8 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
     
     @Override
     public String getHeading(PropertiableFile propertiable) {
-        String name = propertiable.getProperty(FilePropertyKey.NAME).toString();
+        Object property = propertiable.getProperty(FilePropertyKey.NAME);
+        String name = property == null ? "" : property.toString();
         String renderName = "";
         switch (propertiable.getCategory()) {
         case AUDIO:

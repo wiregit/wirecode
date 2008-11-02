@@ -158,7 +158,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            new MagnetLinkCopier(fileItem, magnetFactory).copyLinkToClipBoard();
+            new MagnetLinkCopier().copyLinkToClipBoard(fileItem, magnetFactory);
         }
 
     };

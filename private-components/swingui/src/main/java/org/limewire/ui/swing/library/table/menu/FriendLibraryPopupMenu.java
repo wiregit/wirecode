@@ -84,7 +84,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     private Action linkAction = new AbstractAction(I18n.tr("Copy Link to Clipboard")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            new MagnetLinkCopier(fileItems.get(0), magnetFactory).copyLinkToClipBoard();
+            new MagnetLinkCopier().copyLinkToClipBoard(fileItems.get(0), magnetFactory);
         }
     };
     

@@ -8,17 +8,8 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 
 public class MagnetLinkCopier {
     
-    private FileItem fileItem;
-    private MagnetLinkFactory magnetFactory;
-
-    public MagnetLinkCopier(FileItem fileItem, MagnetLinkFactory magnetFactory){
-        this.fileItem = fileItem;
-        this.magnetFactory = magnetFactory;
-    }
-    
-    public void copyLinkToClipBoard(){
+    public void copyLinkToClipBoard(FileItem fileItem, MagnetLinkFactory magnetFactory){
         StringSelection sel = new StringSelection(magnetFactory.createMagnetLink(fileItem));
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, sel);
     }
-
 }
