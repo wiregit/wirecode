@@ -123,14 +123,6 @@ public class FileManagerTestCase extends LimeTestCase {
         return queryRequestFactory.createQuery("", xml);
     }
 
-    protected File createNewTestStoreFile() throws Exception{
-        return FileManagerTestUtils.createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
-    }
-
-    protected File createNewTestStoreFile2() throws Exception {
-        return FileManagerTestUtils.createNewNameStoreTestFile2("FileManager_unit_store_test", _storeDir);
-    }
-
 
 
     ////////////////////////////////////////////////////////////////////////////////////

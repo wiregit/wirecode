@@ -2,11 +2,12 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Future;
 
-public interface GnutellaFileList extends FileList {
+public interface GnutellaFileList extends SharedFileList {
 
     /** Adds this FileList just for this session. */
-    void addForSession(File file);
+    Future<FileDesc> addForSession(File file);
 
     /** Returns the size of all files within this list, in <b>bytes</b>. */
     long getNumBytes();

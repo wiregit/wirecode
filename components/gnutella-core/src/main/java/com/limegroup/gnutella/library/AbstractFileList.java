@@ -30,7 +30,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A List of FileDescs that are grouped together 
  */
-abstract class AbstractFileList implements FileList {
+abstract class AbstractFileList implements SharedFileList {
 
     /**  A list of listeners for this list */
     private final EventMulticaster<FileListChangedEvent> listenerSupport;
@@ -39,7 +39,7 @@ abstract class AbstractFileList implements FileList {
     private final IntSet fileDescIndexes;
     
     /** The managed list of all FileDescs. */
-    private final ManagedFileList managedList;
+    private final ManagedFileListImpl managedList;
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileListChangedEvent> managedListListener;
@@ -47,7 +47,7 @@ abstract class AbstractFileList implements FileList {
     /** A rw lock. */
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
-    public AbstractFileList(ManagedFileList managedList) {
+    public AbstractFileList(ManagedFileListImpl managedList) {
         this.managedList = managedList;
         this.fileDescIndexes = new IntSet(); 
         this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
@@ -249,7 +249,7 @@ abstract class AbstractFileList implements FileList {
         return new Iterable<FileDesc>() {
             @Override
             public Iterator<FileDesc> iterator() {
-                return new ThreadSafeFileListIterator(AbstractFileList.this);
+                return new ThreadSafeFileListIterator(AbstractFileList.this, managedList);
             }
         };
     }
@@ -443,7 +443,7 @@ abstract class AbstractFileList implements FileList {
     }
     
     private Future<FileDesc> wrapFuture(final Future<FileDesc> future) {
-        return new Future<FileDesc>() {
+        return new ContainedFuture() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 return future.cancel(mayInterruptIfRunning);
@@ -451,23 +451,13 @@ abstract class AbstractFileList implements FileList {
 
             @Override
             public FileDesc get() throws InterruptedException, ExecutionException {
-                FileDesc fd = future.get();
-                if(contains(fd)) {
-                    return fd;
-                } else {
-                    return null;
-                }
+                return check(future.get());
             }
 
             @Override
             public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
                     ExecutionException, TimeoutException {
-                FileDesc fd = future.get(timeout, unit);
-                if(contains(fd)) {
-                    return fd;
-                } else {
-                    return null;
-                }
+                return check(future.get(timeout, unit));
             }
 
             @Override
@@ -488,7 +478,7 @@ abstract class AbstractFileList implements FileList {
     }
     
     private Future<FileDesc> futureFor(final FileDesc fd) {
-        return new Future<FileDesc>() {
+        return new ContainedFuture() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 return false;
@@ -496,21 +486,13 @@ abstract class AbstractFileList implements FileList {
 
             @Override
             public FileDesc get() throws InterruptedException, ExecutionException {
-                if(contains(fd)) {
-                    return fd;
-                } else {
-                    return null;
-                }
+                return check(fd);
             }
 
             @Override
             public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
                     ExecutionException, TimeoutException {
-                if(contains(fd)) {
-                    return fd;
-                } else {
-                    return null;
-                }
+                return check(fd);
             }
 
             @Override
@@ -530,7 +512,17 @@ abstract class AbstractFileList implements FileList {
         };
     }
     
-    
+    private abstract class ContainedFuture implements Future<FileDesc> {
+        public FileDesc check(FileDesc fd) throws ExecutionException {            
+            if(contains(fd)) {
+                return fd;
+            } else {
+                throw new ExecutionException(new FileListChangeFailedException(
+                        new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
+                        "File can't be added to this list"));
+            }
+        }
+    }
     
     private class ManagedListSynchronizer implements EventListener<FileListChangedEvent> {
         @Override

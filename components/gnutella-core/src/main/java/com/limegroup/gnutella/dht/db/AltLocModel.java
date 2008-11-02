@@ -24,8 +24,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
@@ -67,7 +67,7 @@ public class AltLocModel implements StorableModel {
         List<Storable> toRemove = new ArrayList<Storable>();
         List<Storable> toPublish = new ArrayList<Storable>();
         
-        FileList sharedFiles = fileManager.get().getGnutellaSharedFileList();
+        SharedFileList sharedFiles = fileManager.get().getGnutellaSharedFileList();
         synchronized (values) {
             sharedFiles.getReadLock().lock();
             try {

@@ -6,7 +6,6 @@ import static junit.framework.Assert.fail;
 import static org.limewire.util.AssertComparisons.assertEmpty;
 import static org.limewire.util.AssertComparisons.assertInstanceof;
 import static org.limewire.util.AssertComparisons.assertNotNull;
-import static org.limewire.util.AssertComparisons.assertNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,13 +13,10 @@ import java.io.FileWriter;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -41,8 +37,8 @@ public class FileManagerTestUtils {
     public static void assertAddFails(String reason, FileList fileList, File... files) throws Exception {
         for (File file : files) {
             try {
-                fileList.add(file).get(1, TimeUnit.SECONDS);
-                fail("added!");
+                FileDesc fd = fileList.add(file).get(5, TimeUnit.SECONDS);
+                fail("added: " + fd);
             } catch (ExecutionException expected) {
                 assertInstanceof(FileListChangeFailedException.class, expected.getCause());
                 FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
@@ -59,6 +55,12 @@ public class FileManagerTestUtils {
         }
     }
     
+    public static void assertAddsForSession(GnutellaFileList fileList, File... files) throws Exception {
+        for (File file : files) {
+            assertNotNull(fileList.addForSession(file).get(1, TimeUnit.SECONDS));
+        }
+    }
+    
     public static void assertFileRenames(ManagedFileList fileList, File old, File newFile) throws Exception {
         assertNotNull(fileList.fileRenamed(old, newFile).get(1, TimeUnit.SECONDS));
     }
@@ -66,22 +68,18 @@ public class FileManagerTestUtils {
     public static void assertFileRenameFails(String reason, ManagedFileList fileList, File old, File newFile) throws Exception {
         FileDesc oldFd = fileList.getFileDesc(old);
         Future<FileDesc> future = fileList.fileRenamed(old, newFile);
-        
-        if(oldFd == null) {
-            assertNull(future.get(1, TimeUnit.SECONDS));
-            assertNull(reason);
-        } else {            
-            try {
-                future.get(1, TimeUnit.SECONDS);
-                fail("renamed!");
-            }  catch(ExecutionException expected) {
-                assertInstanceof(FileListChangeFailedException.class, expected.getCause());
-                FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
-                assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
-                assertEquals(newFile, cause.getEvent().getFile());
-                assertEquals(oldFd, cause.getEvent().getOldValue());
-                assertEquals(reason, cause.getReason());
-            }
+
+        try {
+            future.get(1, TimeUnit.SECONDS);
+            fail("renamed!");
+        } catch (ExecutionException expected) {
+            assertInstanceof(FileListChangeFailedException.class, expected.getCause());
+            FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
+            assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertEquals(old, cause.getEvent().getOldFile());
+            assertEquals(newFile, cause.getEvent().getFile());
+            assertEquals(oldFd, cause.getEvent().getOldValue());
+            assertEquals(reason, cause.getReason());
         }
     }
     
@@ -93,21 +91,17 @@ public class FileManagerTestUtils {
         FileDesc oldFd = fileList.getFileDesc(file);
         Future<FileDesc> future = fileList.fileChanged(file, LimeXMLDocument.EMPTY_LIST);
         
-        if(oldFd == null) {
-            assertNull(future.get(1, TimeUnit.SECONDS));
-            assertNull(reason);
-        } else {            
-            try {
-                future.get(1, TimeUnit.SECONDS);
-                fail("renamed!");
-            }  catch(ExecutionException expected) {
-                assertInstanceof(FileListChangeFailedException.class, expected.getCause());
-                FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
-                assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
-                assertEquals(file, cause.getEvent().getFile());
-                assertEquals(oldFd, cause.getEvent().getOldValue());
-                assertEquals(reason, cause.getReason());
-            }
+        try {
+            future.get(1, TimeUnit.SECONDS);
+            fail("renamed!");
+        } catch (ExecutionException expected) {
+            assertInstanceof(FileListChangeFailedException.class, expected.getCause());
+            FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
+            assertEquals(FileListChangedEvent.Type.CHANGE_FAILED, cause.getEvent().getType());
+            assertEquals(file, cause.getEvent().getOldFile());
+            assertEquals(file, cause.getEvent().getFile());
+            assertEquals(oldFd, cause.getEvent().getOldValue());
+            assertEquals(reason, cause.getReason());
         }
     }
     
@@ -129,24 +123,15 @@ public class FileManagerTestUtils {
      * continuing. Also can specify a timeout which will throw an exception if FileManager hasn't 
      * completed in a certain amount of time.
      */
-    public static void waitForLoad(FileManager fileManager, int timeout) throws InterruptedException, TimeoutException {
-        final CountDownLatch loadedLatch = new CountDownLatch(1);
-        EventListener<ManagedListStatusEvent> listener = new EventListener<ManagedListStatusEvent>() {
-            public void handleEvent(ManagedListStatusEvent evt) {
-                if (evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
-                    loadedLatch.countDown();
-                }
-            }            
-        };
-        try {
-            fileManager.getManagedFileList().addManagedListStatusListener(listener);
-            ((ManagedFileListImpl)fileManager.getManagedFileList()).loadSettings();
-            if (!loadedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
-                throw new TimeoutException("Loading of FileManager settings did not complete within " + timeout + " ms");
-            }
-        } finally {
-            fileManager.getManagedFileList().removeManagedListStatusListener(listener);
-        }
+    public static void waitForLoad(FileManager fileManager, int timeout) throws Exception {
+        assertLoads(fileManager.getManagedFileList(), timeout, TimeUnit.MILLISECONDS);
+    }
+    
+    public static void assertLoads(ManagedFileList managedList) throws Exception {
+        assertLoads(managedList, 5, TimeUnit.SECONDS);
+    }
+        public static void assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
+        assertTrue(((ManagedFileListImpl)managedList).loadManagedFiles().await(timeout, unit));
     }
 
     // build xml string for video
@@ -232,5 +217,49 @@ public class FileManagerTestUtils {
 
         return FileUtils.getCanonicalFile(file);
     }
+    
 
+
+    public static File createNewTestStoreFile(File dir) throws Exception{
+        return createNewNameStoreTestFile("FileManager_unit_store_test", dir);
+    }
+
+    public static File createNewTestStoreFile2(File dir) throws Exception {
+        return createNewNameStoreTestFile2("FileManager_unit_store_test", dir);
+    }    
+
+    /**
+     * Same a createNewTestFile but doesn't actually allocate the requested
+     * number of bytes on disk. Instead returns a subclass of File.
+     */
+    public static File createFakeTestFile(long size, File dir) throws Exception {
+        File real = createNewTestFile(1, dir);
+        return new HugeFakeFile(dir, real.getName(), size);
+    }
+
+    private static class HugeFakeFile extends File {
+        private final long length;
+
+        public HugeFakeFile(File dir, String name, long length) {
+            super(dir, name);
+            this.length = length;
+        }
+
+        @Override
+        public long length() {
+            return length;
+        }
+
+        @Override
+        public File getCanonicalFile() {
+            return this;
+        }
+        
+        @Override
+        public File getAbsoluteFile() {
+            return this;
+        }
+    }
+    
+    
 }

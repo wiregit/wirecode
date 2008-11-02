@@ -3,7 +3,9 @@ package com.limegroup.gnutella.library;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +27,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class GnutellaFileListImplTest extends LimeTestCase {
 
-    private ManagedFileList managedList;
+    private ManagedFileListImpl managedList;
     private GnutellaFileList fileList;
     private UrnValidator urnValidator;
     private Injector injector;
@@ -44,10 +46,11 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
-        managedList = injector.getInstance(FileManager.class).getManagedFileList();
+        managedList = (ManagedFileListImpl)injector.getInstance(FileManager.class).getManagedFileList();
         fileList = injector.getInstance(FileManager.class).getGnutellaSharedFileList();
         urnValidator = injector.getInstance(UrnValidator.class);
         injector.getInstance(ServiceRegistry.class).initialize();
+        assertLoads(managedList); // Ensure it starts up & schemas load & all. 
     }
 
     public void testNoSharedFiles() {
@@ -194,7 +197,10 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         assertFileRenames(managedList, f3, f2);        
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
         
-        assertNull(managedList.fileRenamed(f1, f3).get(1, TimeUnit.SECONDS));        
+        try {
+            managedList.fileRenamed(f1, f3).get(1, TimeUnit.SECONDS);
+            fail("should have failed");
+        } catch(ExecutionException expected) {}
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
     }
     
@@ -211,9 +217,8 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         change(f1);
         assertFileChanges(managedList, f1);
         assertEquals(1, fileList.size());
-        assertNotEquals(urn, getUrn(f1));
+        assertNotEquals(urn, fileList.getFileDesc(f1).getSHA1Urn());
         assertEquals(getUrn(f1), fileList.getFileDesc(f1).getSHA1Urn());
-        assertEquals(urn, fileList.getFileDesc(f1).getSHA1Urn());
         assertNotSame(fd, fileList.getFileDesc(f1));
         assertNotSame(fd, fileList.getFileDesc(fileList.getFileDesc(f1).getSHA1Urn()));
         
@@ -221,7 +226,96 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         assertFileChangedFails("File isn't physically manageable", managedList, f1);
         assertEquals(0, fileList.size());
         
-        assertFileChangedFails(null, managedList, f2);
+        assertFileChangedFails("Old file wasn't managed", managedList, f2);
         assertEquals(0, fileList.size());
     }
+    
+    public void testSessionSharing() throws Exception {
+        // create "shared" and "notShared" out of shared directory
+        File shared = createNewNamedTestFile(10, "shared", _scratchDir);
+        File notShared = createNewNamedTestFile(10, "notShared", _scratchDir);
+        File sessionShared = createNewNamedTestFile(10, "sessionShared", _scratchDir);
+        
+        assertAdds(fileList, shared);        
+        assertAddsForSession(fileList, sessionShared);
+
+        // assert that "shared" and "sessionShared" are shared
+        assertEquals(2, fileList.size());
+        assertTrue(fileList.contains(shared));
+        assertTrue(fileList.contains(sessionShared));
+        assertFalse(fileList.contains(notShared));
+        
+        assertTrue(managedList.getLibraryData().isSharedWithGnutella(shared));
+        assertFalse(managedList.getLibraryData().isSharedWithGnutella(sessionShared));
+
+        // reload, session share disappears.
+        assertLoads(managedList);
+        
+        assertEquals(1, fileList.size());
+        assertTrue(fileList.contains(shared));
+        assertFalse(fileList.contains(sessionShared));
+        assertFalse(fileList.contains(notShared));
+    }
+
+    public void testPausableIterator() throws Exception {
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(3, _scratchDir);
+        f3 = createNewTestFile(11, _scratchDir);
+        
+        assertAdds(fileList, f1, f2);
+
+        assertEquals(2, fileList.size());
+        Iterator<FileDesc> it = fileList.pausableIterable().iterator();
+        FileDesc fd = it.next();
+        assertEquals(fd.getFileName(), f1.getName());
+        fd = it.next();
+        assertEquals(fd.getFileName(), f2.getName());
+        assertFalse(it.hasNext());
+        try {
+            fd = it.next();
+            fail("Expected NoSuchElementException, got: " + fd);
+        } catch (NoSuchElementException expected) {}
+
+        it = fileList.pausableIterable().iterator();
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        it.next();
+        fileList.remove(f2);
+        assertFalse(it.hasNext());
+
+        it = fileList.pausableIterable().iterator();
+        fd = it.next();
+        assertFalse(it.hasNext());
+        
+        assertAdds(fileList, f1, f3);
+        it = fileList.pausableIterable().iterator();
+        assertTrue(it.hasNext());
+        it.next();
+        assertTrue(it.hasNext());
+        assertLoads(managedList);
+        assertFalse(it.hasNext());
+        try {
+            it.next();
+            fail("should have thrown");
+        } catch (NoSuchElementException expected) {
+        }
+    }
+    
+    public void testStoreFileDoesntAdd() throws Exception {
+        f1 = createNewTestStoreFile(_storeDir);
+        
+        assertFalse(managedList.contains(f1));
+        assertAddFails("File can't be added to this list", fileList, f1);
+        assertTrue(managedList.contains(f1));
+        
+        f2 = createNewTestStoreFile(_scratchDir);
+        assertFalse(managedList.contains(f2));
+        assertAddFails("File can't be added to this list", fileList, f2);
+        assertTrue(managedList.contains(f2));
+    } 
+    
+    // TODO: Test change from store -> non-store (become shared?)
+    // TODO: Test change non-store -> store (become unshared?)
+    
 }

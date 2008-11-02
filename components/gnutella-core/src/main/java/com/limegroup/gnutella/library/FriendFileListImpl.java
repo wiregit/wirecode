@@ -21,7 +21,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     
     private final LibraryFileData data;
 
-    public FriendFileListImpl(LibraryFileData data, ManagedFileList managedList,  String id) {
+    public FriendFileListImpl(LibraryFileData data, ManagedFileListImpl managedList,  String id) {
         super(managedList);
         this.id = Objects.nonNull(id, "id");
         this.data = data;

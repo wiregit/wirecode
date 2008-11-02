@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.library;
 
-public interface FriendFileList extends FileList {
+public interface FriendFileList extends SharedFileList {
 
     /** Adds the FileDesc to this list. */
     boolean add(FileDesc fileDesc);

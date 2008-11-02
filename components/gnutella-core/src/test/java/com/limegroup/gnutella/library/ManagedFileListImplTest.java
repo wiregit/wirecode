@@ -3,7 +3,9 @@ package com.limegroup.gnutella.library;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import junit.framework.Test;
 
@@ -26,7 +28,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
     private UrnValidator urnValidator;
     private Injector injector;
 
-    private File f1, f2, f3, f4;
+    private File f1, f2, f3, f4, f5;
     private List<FileDesc> fds;
 
     public ManagedFileListImplTest(String name) {
@@ -43,6 +45,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         fileList = (ManagedFileListImpl) injector.getInstance(ManagedFileList.class);
         urnValidator = injector.getInstance(UrnValidator.class);
         fileList.initialize();
+        assertLoads(fileList); // Ensure it starts up & schemas load & all.
     }
 
     public void testNoManagedFiles() {
@@ -113,6 +116,10 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertEquals(1, fileList.size());
         assertFalse(fileList.remove(f3));
         assertEquals(f1, fileList.getFileDescForIndex(0).getFile());
+        
+        assertLoads(fileList);
+        assertEquals(1, fileList.size());
+        assertEquals(f1, fileList.getFileDescForIndex(0).getFile());       
     }
 
     public void testRemovingOneFile() throws Exception {
@@ -127,6 +134,10 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertFalse(fileList.remove(f3));
         assertTrue(fileList.remove(f2));
         assertEquals(1, fileList.size());
+        
+        assertLoads(fileList);
+        assertEquals(1, fileList.size());
+        assertTrue(fileList.contains(f1));
     }
 
     public void testAddAnotherFileDifferentIndex() throws Exception {
@@ -145,6 +156,10 @@ public class ManagedFileListImplTest extends LimeTestCase {
         
         fds = CollectionUtils.listOf(fileList);
         assertContainsFiles(fds, f1, f3);
+        
+        assertLoads(fileList);
+        fds = CollectionUtils.listOf(fileList);
+        assertContainsFiles(fds, f1, f3);        
     }
 
     public void testRenameFiles() throws Exception {
@@ -163,7 +178,11 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
 
-        assertFileRenameFails(null, fileList, f1, f3);
+        assertFileRenameFails("Old file wasn't managed", fileList, f1, f3);
+        
+        assertLoads(fileList);
+        assertEquals(1, fileList.size());
+        assertContainsFiles(CollectionUtils.listOf(fileList), f2);        
     }
 
     public void testChangeFile() throws Exception {
@@ -174,23 +193,90 @@ public class ManagedFileListImplTest extends LimeTestCase {
         
         FileDesc fd = fileList.getFileDesc(f1);
         URN urn = fd.getSHA1Urn();
-        assertSame(fd, fileList.getFileDesc(urn));
+        assertSame(fd, fileList.getFileDescsMatching(urn).get(0));
         
         change(f1);
         assertFileChanges(fileList, f1);
         assertEquals(1, fileList.size());
         assertNotEquals(urn, fileList.getFileDesc(f1).getSHA1Urn());
         assertNotSame(fd, fileList.getFileDesc(f1));
-        assertNotSame(fd, fileList.getFileDesc(fileList.getFileDesc(f1).getSHA1Urn()));
+        assertNotSame(fd, fileList.getFileDescsMatching(fileList.getFileDesc(f1).getSHA1Urn()).get(0));
         
         f1.delete();
         assertFileChangedFails("File isn't physically manageable", fileList, f1);
         assertEquals(0, fileList.size());
         
-        assertFileChangedFails(null, fileList, f2);
+        assertFileChangedFails("Old file wasn't managed", fileList, f2);
         assertEquals(0, fileList.size());
+        
+        assertLoads(fileList);
+        assertEquals(0, fileList.size());     
     }
-    
-    
 
+    public void testIgnoreHugeFiles() throws Exception {
+        long maxSize = 0xFFFFFFFFFFL; // 1TB.
+
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(11, _scratchDir);
+        assertAdds(fileList, f1, f2);
+
+        // Try to add a huge file. (It will be ignored.)
+        f3 = createFakeTestFile(maxSize + 1l, _scratchDir);
+        assertAddFails("File isn't physically manageable", fileList, f3);
+        
+        // Add really big files.
+        f4 = createFakeTestFile(maxSize - 1, _scratchDir);
+        f5 = createFakeTestFile(maxSize, _scratchDir);
+        assertAdds(fileList, f4, f5);
+        
+        assertEquals(4, fileList.size());
+        
+        assertLoads(fileList);
+        assertEquals(4, fileList.size());
+        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f5);
+    }
+
+    public void testPausableIterator() throws Exception {
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(3, _scratchDir);
+        f3 = createNewTestFile(11, _scratchDir);
+        
+        assertAdds(fileList, f1, f2);
+
+        assertEquals(2, fileList.size());
+        Iterator<FileDesc> it = fileList.pausableIterable().iterator();
+        FileDesc fd = it.next();
+        assertEquals(fd.getFileName(), f1.getName());
+        fd = it.next();
+        assertEquals(fd.getFileName(), f2.getName());
+        assertFalse(it.hasNext());
+        try {
+            fd = it.next();
+            fail("Expected NoSuchElementException, got: " + fd);
+        } catch (NoSuchElementException expected) {}
+
+        it = fileList.pausableIterable().iterator();
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        assertTrue(it.hasNext());
+        it.next();
+        fileList.remove(f2);
+        assertFalse(it.hasNext());
+
+        it = fileList.pausableIterable().iterator();
+        fd = it.next();
+        assertFalse(it.hasNext());
+        
+        assertAdds(fileList, f1, f3);
+        it = fileList.pausableIterable().iterator();
+        assertTrue(it.hasNext());
+        it.next();
+        assertTrue(it.hasNext());
+        assertLoads(fileList);
+        assertFalse(it.hasNext());
+        try {
+            it.next();
+            fail("should have thrown");
+        } catch(NoSuchElementException expected) {}
+    }    
 }

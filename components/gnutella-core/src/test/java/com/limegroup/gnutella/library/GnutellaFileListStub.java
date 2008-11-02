@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.limegroup.gnutella.URN;
 
@@ -22,7 +23,7 @@ public class GnutellaFileListStub extends AbstractFileListStub implements Gnutel
     public final static FileDescStub FD_STUB_TWO = new FileDescStub("other.txt");
     
     @Override
-    public void addForSession(File file) {
+    public Future<FileDesc> addForSession(File file) {
         throw new UnsupportedOperationException();
     }
     

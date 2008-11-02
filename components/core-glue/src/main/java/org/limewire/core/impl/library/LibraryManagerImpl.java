@@ -163,8 +163,13 @@ class LibraryManagerImpl implements LibraryManager {
         public boolean contains(URN urn) {
             if(urn instanceof URNImpl) {
                 URNImpl urnImpl = (URNImpl)urn; 
-                FileDesc fileDesc = managedList.getFileDesc(urnImpl.getUrn());
-                return fileDesc != null && ! (fileDesc instanceof IncompleteFileDesc);
+                List<FileDesc> fds = managedList.getFileDescsMatching(urnImpl.getUrn());
+                for(FileDesc fd : fds) {
+                    if(!(fd instanceof IncompleteFileDesc)) {
+                        return true;
+                    }
+                }
+                return false;
             }
             return false;
         }

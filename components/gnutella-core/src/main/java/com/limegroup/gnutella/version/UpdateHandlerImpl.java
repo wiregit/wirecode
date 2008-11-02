@@ -626,16 +626,14 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             
             if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().getManagedFileList().isLoadFinished()) {
                 
-                FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(next.getUpdateURN());
                 //TODO: remove the cast
                 ManagedDownloader md = (ManagedDownloader)downloadManager.get().getDownloaderForURN(next.getUpdateURN());
-                if(LOG.isDebugEnabled())
-                    LOG.debug("Looking for: " + next + ", got: " + fd);
                 
-                if(fd != null && !(fd instanceof IncompleteFileDesc)) {
-                    // if it's already downloaded, stop any existing download.
-                    if(md != null)
+                // Skip to the next one since we already have a complete file.
+                if(hasCompleteFile(next.getUpdateURN())) {
+                    if(md != null) {
                         md.stop();
+                    }
                     continue;
                 }
                 
@@ -847,11 +845,18 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         if (myUrn == null)
             return true;
         
-        FileDesc desc = fileManager.get().getManagedFileList().getFileDesc(myUrn);
+        return hasCompleteFile(myUrn);
+    }
+    
+    private boolean hasCompleteFile(URN urn) {
+        List<FileDesc> fds = fileManager.get().getManagedFileList().getFileDescsMatching(urn);
+        for(FileDesc fd : fds) {
+            if(!(fd instanceof IncompleteFileDesc)) {
+                return true;
+            }
+        }
         
-        if (desc == null)
-            return false;
-        return !(desc instanceof IncompleteFileDesc);
+        return false;
     }
     
     /**

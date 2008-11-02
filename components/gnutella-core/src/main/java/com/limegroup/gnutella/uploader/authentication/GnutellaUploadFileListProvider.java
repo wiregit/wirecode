@@ -5,10 +5,10 @@ import java.util.Arrays;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
-import com.limegroup.gnutella.library.FileList;
-import com.limegroup.gnutella.library.FileManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileList;
 
 /**
  * Returns the file lists for public Gnutella uploads.
@@ -28,7 +28,7 @@ public class GnutellaUploadFileListProvider implements HttpRequestFileListProvid
      * to enable sharing of incomplete files
      */
     @Override
-    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
+    public Iterable<SharedFileList> getFileLists(HttpRequest request, HttpContext httpContext) {
         return Arrays.asList(fileManager.getGnutellaSharedFileList(), fileManager.getIncompleteFileList());
     }
 }

@@ -7,8 +7,8 @@ import org.apache.http.protocol.HttpContext;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileList;
 
 /**
  * Returns the file list for a public Gnutella browse of the client's shared
@@ -28,8 +28,10 @@ public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvid
      * @return {@link FileManager#getGnutellaSharedFileList()}.
      */
     @Override
-    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
-        return Collections.singletonList((FileList)fileManager.getGnutellaSharedFileList());
+    public Iterable<SharedFileList> getFileLists(HttpRequest request, HttpContext httpContext) {
+        // Broken into two lines so it returns the correct type.
+        SharedFileList fileList = fileManager.getGnutellaSharedFileList();
+        return Collections.singletonList(fileList);
     }
 
 }

@@ -189,10 +189,13 @@ public class SchemaReplyCollectionMapper {
      */
     private synchronized void load(FileDescChangeEvent event) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
-        for (LimeXMLReplyCollection col : replies)
+        for (LimeXMLReplyCollection col : replies) {
             col.initialize(event.getSource(), event.getXmlDocs());
-        for (LimeXMLReplyCollection col : replies)
+        }
+        
+        for (LimeXMLReplyCollection col : replies) {
             col.createIfNecessary(event.getSource());
+        }
     }
     
     /**
@@ -200,9 +203,8 @@ public class SchemaReplyCollectionMapper {
      */
     private void loadSchemas() {
         String[] schemas = limeXMLSchemaRepository.get().getAvailableSchemaURIs();
-        for (int i = 0; i < schemas.length; i++) {
-            add(schemas[i], 
-                    limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(schemas[i]));
+        for(String schema : schemas) {
+            add(schema, limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(schema));
         }
     }
 }

@@ -250,7 +250,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         while (iter.hasNext()) {
             URN sha1 = iter.next();
             if (roots.get(sha1) != BUSH) {
-                if (fileManager.getManagedFileList().getFileDesc(sha1) != null)
+                if (!fileManager.getManagedFileList().getFileDescsMatching(sha1).isEmpty())
                     continue;
                 else if (downloadManager.getIncompleteFileManager().getFileForUrn(sha1) != null)
                     continue;

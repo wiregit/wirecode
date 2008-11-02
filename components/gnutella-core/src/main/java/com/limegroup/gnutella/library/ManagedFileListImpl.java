@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -195,7 +196,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private FileListChangedEvent dispatchFailure(File file, FileDesc oldFileDesc) {
         FileListChangedEvent event;
         if(oldFileDesc != null) {
-            event = new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldFileDesc, file);
+            event = new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldFileDesc.getFile(), oldFileDesc, file);
             // First dispatch a CHANGE_FAILED for the new event
             dispatch(event);
             // Then dispatch a REMOVE for the old FD.
@@ -217,6 +218,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         managedListListenerSupport.broadcast(event);
     }
 
+    @Override
     public FileDesc getFileDesc(File file) {
         file = canonicalize(file);        
         rwLock.readLock().lock();
@@ -227,32 +229,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
-    public FileDesc getFileDesc(final URN urn) {
-        if (!urn.isSHA1()) {
-            throw new IllegalArgumentException();
-        }
-        
-        rwLock.readLock().lock();
-        try {
-            IntSet indices = urnMap.get(urn);
-            if (indices == null) {
-                return null;
-            }
-            IntSet.IntSetIterator iter = indices.iterator();
-          
-            //Pick the first non-null non-Incomplete FileDesc.
-            FileDesc ret = null;
-            while ( iter.hasNext() 
-                       && ( ret == null || ret instanceof IncompleteFileDesc) ) {
-                int index = iter.next();
-                ret = files.get(index);
-            }
-            return ret;
-        } finally {
-            rwLock.readLock().unlock();
-        }
-    }
-    
+    @Override
     public FileDesc getFileDescForIndex(int index) {
         rwLock.readLock().lock();
         try {
@@ -299,7 +276,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         throw new UnsupportedOperationException("Implement Me");
     }
     
-    public void addIncompleteFile(File incompleteFile,
+    void addIncompleteFile(File incompleteFile,
                                   Set<? extends URN> urns,
                                   String name,
                                   long size,
@@ -443,15 +420,15 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public List<File> getDirectoriesToManageRecursively() {
         return fileData.getDirectoriesToManageRecursively();
     }
-
-    ///////////////////////////////////////////////////////////////
     
+    @Override
     public Future<FileDesc> add(File file) {
         return add(file, LimeXMLDocument.EMPTY_LIST);
     }    
     
+    @Override
     public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> list) {
-        return add(file, list, revision.get(), null);
+        return add(file, list, revision.get(), null, null);
     }
     
     /**
@@ -465,7 +442,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @param oldFileDesc the old FileDesc this is replacing
      */
     private Future<FileDesc> add(File file, List<? extends LimeXMLDocument> metadata, int rev,
-            FileDesc oldFileDesc) {
+            FileDesc oldFileDesc, CountDownLatch latch) {
         LOG.debugf("Attempting to load store or shared file: {0}", file);
         
         // Make sure capitals are resolved properly, etc.
@@ -524,7 +501,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             return future;
         } else {
             PendingFuture task = new PendingFuture();
-            urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc, task));
+            urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc, task, latch));
             return task;
         }
     }
@@ -534,20 +511,23 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @param task 
      */
     private UrnCallback getNewUrnCallback(final File file, final List<? extends LimeXMLDocument> metadata, final int rev, 
-                                final FileDesc oldFileDesc, final PendingFuture task) {
+                                final FileDesc oldFileDesc, final PendingFuture task, final CountDownLatch latch) {
         return new UrnCallback() {
+            @Override
             public void urnsCalculated(File f, Set<? extends URN> urns) {
-                finishLoadingFileDesc(f, urns, metadata, rev, oldFileDesc, task);
+                finishLoadingFileDesc(f, urns, metadata, rev, oldFileDesc, task, latch);
             }
 
-            
+            @Override
             public boolean isOwner(Object o) {
                 return o == ManagedFileListImpl.this;
             }
         };
     }
     
-    private void finishLoadingFileDesc(File file, Set<? extends URN> urns, List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc, PendingFuture task) {
+    private void finishLoadingFileDesc(File file, Set<? extends URN> urns,
+            List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc,
+            PendingFuture task, CountDownLatch latch) {
         FileDesc fd = null;
         rwLock.writeLock().lock();
         try {
@@ -617,12 +597,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         if (finished) {
-            tryToFinish();
+            tryToFinish(latch);
         }
     }
     
     /** Notification that something finished loading. */
-    private void tryToFinish() {
+    private void tryToFinish(CountDownLatch latch) {
         int rev;
         rwLock.writeLock().lock();
         try {
@@ -637,6 +617,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         loadFinished(rev);
+        if(latch != null) {
+            latch.countDown();
+        }
     }
   
     /**
@@ -654,6 +637,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
 
+    @Override
     public boolean remove(File file) {
         LOG.debugf("Removing file: {0}", file);                
 
@@ -723,6 +707,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
+    @Override
     public Future<FileDesc> fileRenamed(File oldName, final File newName) {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
@@ -734,12 +719,15 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             // Prepopulate the cache with new URNs.
             urnCache.addUrns(newName, fd.getUrns());
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
-            return add(newName, xmlDocs, revision.get(), fd);
+            return add(newName, xmlDocs, revision.get(), fd, null);
         } else {
-            return new SimpleFuture<FileDesc>(null);
+            SimpleFuture<FileDesc> future = new SimpleFuture<FileDesc>(null);
+            future.setException(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldName, null, newName), "Old file wasn't managed"));
+            return future;
         }
     }
     
+    @Override
     public Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         LOG.debugf("File Changed: {0}", file);
 
@@ -747,22 +735,34 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         FileDesc fd = removeInternal(file);
         if (fd != null) {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
-            return add(file, xmlDocs, revision.get(), fd);
+            return add(file, xmlDocs, revision.get(), fd, null);
         } else {
-            return new SimpleFuture<FileDesc>(null);
+            SimpleFuture<FileDesc> future = new SimpleFuture<FileDesc>(null);
+            future.setException(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, file, null, file), "Old file wasn't managed"));
+            return future;
         }
     }
     
-    void loadSettings() {
+    /**
+     * Loads all files from prior sessions.
+     * This returns immediately.  The {@link CountDownLatch} this returns
+     * can be used to wait for the files to finish loading.  If this is
+     * called multiple times in succession before a prior run has finished.
+     * the prior run is canceled and the latches from prior runs will
+     * never complete. 
+     */  
+    CountDownLatch loadManagedFiles() {
         final int currentRevision = revision.incrementAndGet();
         LOG.debugf("Starting new library revision: {0}", currentRevision);
         
+        final CountDownLatch latch = new CountDownLatch(1);
         fileLoader.execute(new Runnable() {
             public void run() {
                 dispatch(new ManagedListStatusEvent(ManagedFileListImpl.this, ManagedListStatusEvent.Type.LOAD_STARTED));
-                loadSettingsInternal(currentRevision);
+                loadSettingsInternal(currentRevision, latch);
             }
         });
+        return latch;
     }
 
     /** 
@@ -771,7 +771,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    private void loadSettingsInternal(int revision) {
+    private void loadSettingsInternal(int revision, CountDownLatch latch) {
         LOG.debugf("Loading Library Revision: {0}", revision);
         
         rwLock.writeLock().lock();
@@ -789,7 +789,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.CLEAR));
         
-        loadManagedFiles(revision);
+        loadManagedFiles(revision, latch);
 
         LOG.debugf("Finished queueing files for revision: {0}", revision);
             
@@ -801,7 +801,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         } finally {
             rwLock.writeLock().unlock();
         }
-        tryToFinish();
+        tryToFinish(latch);
     }
     
     /** Kicks off necessary stuff for loading being done. */
@@ -812,13 +812,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_COMPLETE));
     }
     
+    @Override
     public boolean isLoadFinished() {
         return loadingFinished == revision.get();
     }
 
-    private void loadManagedFiles(int rev) {
-        updateManagedDirectories(LibraryUtils.PROGRAM_SHARE, null, rev);
-        updateManagedDirectories(LibraryUtils.PREFERENCE_SHARE, null, rev);
+    private void loadManagedFiles(int rev, CountDownLatch latch) {
+        updateManagedDirectories(LibraryUtils.PROGRAM_SHARE, null, rev, latch);
+        updateManagedDirectories(LibraryUtils.PREFERENCE_SHARE, null, rev, latch);
 
         List<File> directories = getLibraryData().getDirectoriesToManageRecursively();
         // Sorting is not terribly necessary, but we'll do it anyway...
@@ -832,14 +833,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             if(rev != revision.get()) {
                 break;
             }
-            updateManagedDirectories(directory, null, rev);        
+            updateManagedDirectories(directory, null, rev, latch);        
         }
         
         for(File file : getLibraryData().getManagedFiles()) {
             if(rev != revision.get()) {
                 break;
             }
-            add(file);
+            add(file, LimeXMLDocument.EMPTY_LIST, rev, null, latch);
         }
     }
     
@@ -850,12 +851,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * been added.  This method is thread-safe.  It acquires locks on a
      * per-directory basis.  If the current revision ever changes from the
      * expected revision, this returns immediately.
-     * 
-     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
-     *           children, and parent is directory's shared parent or null if
-     *           directory's parent is not shared.
      */
-     private void updateManagedDirectories(File rootShare, File directory, File parent, int rev, int depth) {
+     private void updateManagedDirectories(File directory, File parent, int rev, CountDownLatch latch) {
          directory = canonicalize(directory);
          if(!directory.exists()) {
              return;
@@ -889,7 +886,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
          }
          
          for(int i = 0; i < fileList.length && rev == revision.get(); i++) {
-             add(fileList[i]);
+             add(fileList[i], LimeXMLDocument.EMPTY_LIST, rev, null, latch);
          }
              
          // Exit quickly (without doing the dir lookup) if revisions changed.
@@ -910,7 +907,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
          File[] dirList = directory.listFiles(new ManagedDirectoryFilter());
          if(dirList != null) {
              for(int i = 0; i < dirList.length && rev == revision.get(); i++) {
-                 updateManagedDirectories(rootShare, dirList[i], directory, rev, depth+1);
+                 updateManagedDirectories(dirList[i], directory, rev, latch);
              }
         }
     }
@@ -918,6 +915,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     void save() {
         dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.SAVE));
         getLibraryData().save();
+    }
+    
+    int revision() {
+        return revision.get();
     }
 
     private boolean isFolderManageable(File folder, boolean excludeExcludedDirectories) {
@@ -942,10 +943,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
 
         return true;
-    }
-
-    private void updateManagedDirectories(File directory, File parent, int revision) {
-        updateManagedDirectories(directory, directory, parent, revision, 1);
     }
     
     private class ThreadSafeManagedListIterator implements Iterator<FileDesc> {        
@@ -1025,6 +1022,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** The filter object to use to determine directories. */
     private class ManagedDirectoryFilter implements FileFilter {
+        @Override
         public boolean accept(File f) {
             return f.isDirectory()
                 && isFolderManageable(f, true);
@@ -1032,6 +1030,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
 
     private final static Callable<FileDesc> EMPTY_CALLABLE = new Callable<FileDesc>() {
+        @Override
         public FileDesc call() { return null; }
     };
     

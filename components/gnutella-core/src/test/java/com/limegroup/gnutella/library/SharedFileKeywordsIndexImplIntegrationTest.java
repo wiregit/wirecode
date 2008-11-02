@@ -1,12 +1,6 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
-import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;
@@ -50,6 +44,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         injector.getInstance(ServiceRegistry.class).initialize();
+        assertLoads(managedList); // Ensure it starts up & schemas load & all.
     }
     
     public void testOneSharedFile() throws Exception {
@@ -160,7 +155,10 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         responses = keywordIndex.query(queryRequestFactory.createQuery("3333", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
         
-        assertNull(managedList.fileRenamed(f1, f3).get(1, TimeUnit.SECONDS));
+        try {
+            managedList.fileRenamed(f1, f3).get(1, TimeUnit.SECONDS);
+            fail("should have failed");
+        } catch(ExecutionException expected) {}
         
         responses = keywordIndex.query(queryRequestFactory.createQuery("1111", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
@@ -190,7 +188,7 @@ public class SharedFileKeywordsIndexImplIntegrationTest extends LimeTestCase {
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
         
-        assertFileChangedFails(null, managedList, f2);
+        assertFileChangedFails("Old file wasn't managed", managedList, f2);
         responses = keywordIndex.query(queryRequestFactory.createQuery("name", (byte) 3));
         assertEquals("unexpected response length", 0, responses.length);
     }

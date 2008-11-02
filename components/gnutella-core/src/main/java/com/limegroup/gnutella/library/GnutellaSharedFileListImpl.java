@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25,7 +26,7 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
     /** A list of application shared files. */
     private final AtomicInteger applicationShared = new AtomicInteger();
     
-    public GnutellaSharedFileListImpl(LibraryFileData data, ManagedFileList managedList) {
+    public GnutellaSharedFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
         super(managedList);
         this.data = data;
         this.numBytes = new AtomicLong();
@@ -49,9 +50,9 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
     }    
     
     @Override
-    public void addForSession(File file) {
+    public Future<FileDesc> addForSession(File file) {
         sessionFiles.put(file, file);
-        super.add(file);
+        return super.add(file);
     }
     
     @Override

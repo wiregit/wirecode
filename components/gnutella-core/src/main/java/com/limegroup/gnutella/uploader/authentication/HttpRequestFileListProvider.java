@@ -4,7 +4,7 @@ package com.limegroup.gnutella.uploader.authentication;
 import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
-import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.HttpException;
 
 /**
@@ -17,5 +17,5 @@ public interface HttpRequestFileListProvider {
      * @throws HttpException if the file list for the request was not found or
      * the request is not authorized
      */
-    Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) throws HttpException;
+    Iterable<SharedFileList> getFileLists(HttpRequest request, HttpContext httpContext) throws HttpException;
 }

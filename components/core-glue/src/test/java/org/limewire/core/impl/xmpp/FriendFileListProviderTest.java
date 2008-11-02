@@ -14,8 +14,8 @@ import org.limewire.http.auth.ServerAuthState;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.HttpException;
 
 public class FriendFileListProviderTest extends BaseTestCase {
@@ -82,7 +82,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
     }
     
     public void testGetFileList() throws Exception {
-        final FileList expectedFileList = context.mock(FileList.class);
+        final SharedFileList expectedFileList = context.mock(SharedFileList.class);
         context.checking(new Expectations() { {
             one(fileManager).getFriendFileList("me@me.com");
             will(returnValue(expectedFileList));
@@ -93,7 +93,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         ServerAuthState serverAuthState = new ServerAuthState();
         serverAuthState.setCredentials(new UsernamePasswordCredentials("me@me.com", "doesnotmatter"));
         httpContext.setAttribute(ServerAuthState.AUTH_STATE, serverAuthState);
-        Iterable<FileList> fileLists = friendFileListProvider.getFileLists(request, httpContext);
+        Iterable<SharedFileList> fileLists = friendFileListProvider.getFileLists(request, httpContext);
         assertSame(expectedFileList, fileLists.iterator().next());
         context.assertIsSatisfied();
     }

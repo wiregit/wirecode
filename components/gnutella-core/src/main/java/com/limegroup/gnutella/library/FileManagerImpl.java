@@ -94,7 +94,7 @@ class FileManagerImpl implements FileManager, Service {
             managedFileList.dispatch(new ManagedListStatusEvent(managedFileList, ManagedListStatusEvent.Type.LOAD_STARTED));
             converter.convert(managedFileList.getLibraryData());
         }
-        managedFileList.loadSettings();
+        managedFileList.loadManagedFiles();
         
         synchronized (this) {
             if (saver == null) {

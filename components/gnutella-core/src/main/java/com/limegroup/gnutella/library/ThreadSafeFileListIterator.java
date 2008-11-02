@@ -5,25 +5,27 @@ import java.util.NoSuchElementException;
 
 class ThreadSafeFileListIterator implements Iterator<FileDesc> {
     
-    // TODO: Fail on revision changes in FileManager
-    
     private final AbstractFileList fileList;
+    private final ManagedFileListImpl managedList;
+    private final int startRevision;
     
     /** Points to the index that is to be examined next. */
     private int index = 0;
     private FileDesc preview;
     
-    public ThreadSafeFileListIterator(AbstractFileList fileList) {
+    public ThreadSafeFileListIterator(AbstractFileList fileList, ManagedFileListImpl managedList) {
         this.fileList = fileList;
         this.index = fileList.getMinIndex();
+        this.managedList = managedList;
+        this.startRevision = managedList.revision();
     }
     
     private boolean preview() {
         assert preview == null;
         
-//        if (_revision != startRevision) {
-//            return false;
-//        }
+        if (managedList.revision() != startRevision) {
+            return false;
+        }
 
         fileList.getReadLock().lock();
         try {
@@ -43,9 +45,9 @@ class ThreadSafeFileListIterator implements Iterator<FileDesc> {
     
     @Override
     public boolean hasNext() {
-//        if (_revision != startRevision) {
-//            return false;
-//        }
+        if (managedList.revision() != startRevision) {
+            return false;
+        }
 
         if (preview != null) {
             if (!fileList.contains(preview)) {

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.library;
 import java.util.List;
 
 import org.limewire.listener.DefaultEvent;
+import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -24,6 +25,11 @@ public class FileDescChangeEvent extends DefaultEvent<FileDesc, FileDescChangeEv
     
     public List<? extends LimeXMLDocument> getXmlDocs() {
         return xmlDocs;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this) + ", super: " + super.toString();
     }
 
 }

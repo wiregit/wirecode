@@ -1,5 +1,6 @@
 package org.limewire.concurrent;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -7,9 +8,15 @@ import java.util.concurrent.TimeUnit;
 public class SimpleFuture<T> implements Future<T> {
     
     private final T t;
+    private volatile Throwable exception;
     
     public SimpleFuture(T t) {
         this.t = t;
+    }
+    
+    /** Sets an exception that will be thrown when get is called. */
+    public void setException(Throwable t) {
+        this.exception = t;
     }
 
     @Override
@@ -18,13 +25,21 @@ public class SimpleFuture<T> implements Future<T> {
     }
 
     @Override
-    public T get() {
-        return t;
+    public T get() throws ExecutionException {
+        if(exception != null) {
+            throw new ExecutionException(exception);
+        } else {
+            return t;
+        }
     }
 
     @Override
-    public T get(long timeout, TimeUnit unit) {
-        return t;
+    public T get(long timeout, TimeUnit unit) throws ExecutionException {
+        if(exception != null) {
+            throw new ExecutionException(exception);
+        } else {
+            return t;
+        }
     }
 
     @Override

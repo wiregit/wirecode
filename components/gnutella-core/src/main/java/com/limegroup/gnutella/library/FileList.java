@@ -23,17 +23,6 @@ public interface FileList extends Iterable<FileDesc> {
      * null if the file is not shared or not a store file.
      */
     FileDesc getFileDesc(File f);
-
-    /**
-     * Returns the <tt>FileDesc</tt> for the specified URN. This only returns
-     * one <tt>FileDesc</tt>, even though multiple indices are possible with
-     * HUGE v. 0.93.
-     * 
-     * @param urn the urn for the file
-     * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-     *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
-     */
-    FileDesc getFileDesc(URN urn);
     
     /**
      * Returns all FileDescs that match this URN.

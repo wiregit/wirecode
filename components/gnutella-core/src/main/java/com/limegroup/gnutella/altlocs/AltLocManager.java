@@ -244,7 +244,7 @@ public class AltLocManager implements EventListener<FileListChangedEvent> {
         case REMOVED:
             URN urn = evt.getFileDesc().getSHA1Urn();
             // Purge if there's no more FDs for this URN.
-            if(evt.getList().getFileDesc(urn) == null) {
+            if(evt.getList().getFileDescsMatching(urn).isEmpty()) {
                 purge(urn);
             }
             break;

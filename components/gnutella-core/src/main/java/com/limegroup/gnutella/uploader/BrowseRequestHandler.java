@@ -36,6 +36,7 @@ import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileList;
+import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -90,7 +91,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         }
         
         try {
-            Iterable<FileList> lists = browseRequestFileListProvider.getFileLists(request, context);
+            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(request, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
                 iterables.add(list.pausableIterable());
