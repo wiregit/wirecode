@@ -15,6 +15,7 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.library.FileManager;
+import com.limegroup.gnutella.library.FriendFileList;
 import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.HttpException;
 
@@ -82,7 +83,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
     }
     
     public void testGetFileList() throws Exception {
-        final SharedFileList expectedFileList = context.mock(SharedFileList.class);
+        final SharedFileList expectedFileList = context.mock(FriendFileList.class);
         context.checking(new Expectations() { {
             one(fileManager).getFriendFileList("me@me.com");
             will(returnValue(expectedFileList));
