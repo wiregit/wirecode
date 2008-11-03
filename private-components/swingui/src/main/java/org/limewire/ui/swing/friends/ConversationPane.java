@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -11,15 +9,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -35,10 +34,13 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.FileOfferFeature;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
@@ -55,22 +57,22 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
-
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 /**
  *
@@ -301,12 +303,6 @@ public class ConversationPane extends JPanel implements Displayable {
                 //Just pushed the download the file button...
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
 
-                // Initiate download of shared file from friend
-                if (!(chatFriend.getPresence() instanceof LimePresence)) {
-                    LOG.error("Can only download from other LimeWire clients");
-                    return;
-                }
-
                 DownloadItem dl;
                 final MessageFileOffer msgWithfileOffer;
                 try {
@@ -317,7 +313,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   dl = downloader.addDownload((LimePresence)chatFriend.getPresence(),
+                   dl = downloader.addDownload(chatFriend.getPresence(),
                            msgWithfileOffer.getFileOffer());
                 } catch(SaveLocationException sle) {
                     throw new RuntimeException("FIX ME", sle); // BROKEN
@@ -360,8 +356,8 @@ public class ConversationPane extends JPanel implements Displayable {
     }
 
     public void offerFile(LocalFileItem file) {
-        if(chatFriend.getPresence() instanceof LimePresence) {
-
+        FriendPresence presence = chatFriend.getPresence();
+        if(presence.getFeature(FileOfferFeature.ID) != null) {
             // update the chat state in case the remote user has not started conversation with us
             try {
                 writer.setChatState(ChatState.active);
@@ -369,9 +365,12 @@ public class ConversationPane extends JPanel implements Displayable {
                 LOG.error("Unable to set chat state prior to file offer", e);
             }
 
-            FileMetaData metadata = file.offer((LimePresence)chatFriend.getPresence());
+            FileOfferer fileOfferer = ((FileOfferFeature)presence.getFeature(FileOfferFeature.ID)).getFeature();
+            FileMetaData metadata = file.offer(fileOfferer);
             new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
                         Message.Type.Sent, metadata)).publish();
+        } else {
+            // TODO
         }
     }
     

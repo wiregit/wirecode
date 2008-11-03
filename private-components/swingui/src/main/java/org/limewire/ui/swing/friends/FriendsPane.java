@@ -15,10 +15,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.AbstractAction;
@@ -76,7 +76,6 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -375,14 +374,14 @@ public class FriendsPane extends JPanel implements FriendRemover {
     public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
         LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
         final Presence presence = event.getPresence();
-        final User user = event.getUser();
-        ChatFriend chatFriend = idToFriendMap.get(user.getId());
+        final Friend friend = event.getFriend();
+        ChatFriend chatFriend = idToFriendMap.get(friend.getId());
         switch(presence.getType()) {
             case available:
                 if(chatFriend == null) {
                     chatFriend = new ChatFriendImpl(presence);
                     chatFriends.add(chatFriend);
-                    idToFriendMap.put(user.getId(), chatFriend);
+                    idToFriendMap.put(friend.getId(), chatFriend);
                 } else {
                     chatFriend.updatePresence(presence);
                 }
@@ -406,7 +405,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 if (chatFriend != null) {
                     chatFriend.releasePresence(presence);
                     if (!chatFriend.isChatting()) {
-                        chatFriends.remove(idToFriendMap.remove(user.getId()));
+                        chatFriends.remove(idToFriendMap.remove(friend.getId()));
                     }
                 } 
                 break;

@@ -1,6 +1,5 @@
 package org.limewire.xmpp.client.impl.messages.authtoken;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -13,18 +12,19 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.client.impl.LimePresenceImpl;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
-import org.xmlpull.v1.XmlPullParserException;
 
 public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
@@ -32,7 +32,7 @@ public class AuthTokenIQListener implements PacketListener {
     private final XMPPConnection connection;
     private final XMPPAuthenticator authenticator;
      
-    private final Map<String, LimePresenceImpl> limePresences = new HashMap<String, LimePresenceImpl>();
+    private final Map<String, Presence> presences = new HashMap<String, Presence>();
     private final RosterEventHandler rosterEventHandler;
 
     public AuthTokenIQListener(XMPPConnection connection,
@@ -44,42 +44,18 @@ public class AuthTokenIQListener implements PacketListener {
 
     public void processPacket(Packet packet) {
         AuthTokenIQ iq = (AuthTokenIQ)packet;
-        try {
-            if(iq.getType().equals(IQ.Type.GET)) {
-                handleGet(iq);
-            } else if(iq.getType().equals(IQ.Type.RESULT)) {
-                handleResult(iq);
-            } else if(iq.getType().equals(IQ.Type.SET)) {
-                handleSet(iq);
-            } else if(iq.getType().equals(IQ.Type.ERROR)) {
-                // TODO
-                //handleError(iq);
-            } else {
-                // TODO
-                //sendError(packet);
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-            // TODO
-            //sendError(packet);
-        } catch (XmlPullParserException e) {
-            LOG.error(e.getMessage(), e);
-            // TODO
-            //sendError(packet);
+        if(iq.getType().equals(IQ.Type.SET)) {
+            handleSet(iq);
         }
     }
 
     private void handleSet(AuthTokenIQ iq) {
         handleAuthTokenUpdate(iq);
     }
-    
-    private void handleResult(AuthTokenIQ addressIQ) {
-        handleAuthTokenUpdate(addressIQ);
-    }
 
     private void handleAuthTokenUpdate(AuthTokenIQ iq) {
         synchronized (this) {
-            LimePresenceImpl presence = limePresences.get(iq.getFrom());
+            Presence presence = presences.get(iq.getFrom());
             if(presence != null) {
                 if(iq.getAuthToken() != null) {
                     if(LOG.isDebugEnabled()) {
@@ -89,26 +65,18 @@ public class AuthTokenIQListener implements PacketListener {
                             LOG.error(e.getMessage(), e);
                         }
                     }
-                    presence.setAuthToken(iq.getAuthToken());
+                    presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
                 }
             }
         }
     }
-    
-    private void handleGet(AuthTokenIQ packet) throws IOException, XmlPullParserException {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("handling auth-token subscription from " + packet.getFrom());
-        }
-        sendResult(packet);
-    }
 
-    private void sendResult(AuthTokenIQ packet) {
-        byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(packet.getFrom())).getBytes(Charset.forName("UTF-8"));
+    private void sendResult(Presence presence) {
+        byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(presence.getJID())).getBytes(Charset.forName("UTF-8"));
         AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
-        queryResult.setTo(packet.getFrom());
-        queryResult.setFrom(packet.getTo());
-        queryResult.setPacketID(packet.getPacketID());
-        queryResult.setType(IQ.Type.RESULT);
+        queryResult.setTo(presence.getJID());
+        queryResult.setFrom(connection.getUser());
+        queryResult.setType(IQ.Type.SET);
         connection.sendPacket(queryResult);
     }
 
@@ -129,17 +97,26 @@ public class AuthTokenIQListener implements PacketListener {
 
             @BlockingEvent
             public void handleEvent(PresenceEvent event) {
-                Presence presence = event.getSource();
+                final Presence presence = event.getSource();
                 if(presence.getType().equals(Presence.Type.available)) {
-                    if(presence instanceof LimePresence) {
-                        synchronized (AuthTokenIQListener.this) {
-                            limePresences.put(presence.getJID(), (LimePresenceImpl)presence);
+                    presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
+                        public void handleEvent(FeatureEvent event) {
+                            if(event.getType() == Feature.EventType.FEATURE_ADDED) {
+                                if(event.getSource().getID().equals(LimewireFeature.ID)) {
+                                    synchronized (AuthTokenIQListener.this) {
+                                        presences.put(presence.getJID(), presence);
+                                        sendResult(presence);
+                                    }
+                                }
+                            } else if(event.getType() == Feature.EventType.FEATURE_REMOVED) {
+                                if(event.getSource().getID().equals(LimewireFeature.ID)) {
+                                    synchronized (AuthTokenIQListener.this) {
+                                        presences.remove(presence.getJID());
+                                    }
+                                }
+                            }
                         }
-                    }
-                } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    synchronized (AuthTokenIQListener.this) {
-                        limePresences.remove(presence.getJID());
-                    }
+                    });
                 }
             }
         });

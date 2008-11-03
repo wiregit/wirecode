@@ -1,6 +1,11 @@
 package org.limewire.core.api.friend;
 
-import org.limewire.io.Address;
+import java.net.URI;
+import java.util.Collection;
+
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.listener.ListenerSupport;
 
 /**
  * A presence for a friend. One friend can have multiple presences.
@@ -20,9 +25,37 @@ public interface FriendPresence {
     String getPresenceId();
 
     /**
-     * An address at which this presence can be contacted.
+     * @return ListenerSupport to add EventListeners to.  Used to listen 
+     * for the addition / removal of features
      */
-    Address getPresenceAddress();
+    ListenerSupport<FeatureEvent> getFeatureListenerSupport();
 
-    byte [] getAuthToken();
+    /**
+     * @return a Collection of Features that this FriendPresence supports
+     */
+    Collection<Feature> getFeatures();
+
+    /**
+     * @param id
+     * @return the Feature corresponding the given id
+     */
+    Feature getFeature(URI id);
+
+    /**
+     * @param id
+     * @return whether this FriendPresence supports all of the input feature ids
+     */
+    boolean hasFeatures(URI... id);
+
+    /**
+     * Adds a new Feature to this FriendPrsence
+     * @param feature the feature to add
+     */
+    void addFeature(Feature feature);
+
+    /**
+     * Removes a feature from this FriendPresence
+     * @param id the feature to remove
+     */
+    void removeFeature(URI id);
 }

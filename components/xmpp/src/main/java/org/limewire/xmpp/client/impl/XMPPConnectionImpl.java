@@ -8,6 +8,7 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
@@ -15,8 +16,12 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.feature.features.FileOfferFeature;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
-import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
@@ -24,9 +29,9 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
@@ -125,6 +130,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
                 connection.disconnect();
                 rosterListeners.removeListener(addressIQListener.getRosterListener());
+                rosterListeners.removeListener(authTokenIQListener.getRosterListener());
                 addressIQListener = null;
                 fileTransferIQListener = null;
                 authTokenIQListener = null;
@@ -147,17 +153,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     }
     
     public void initialize() {
-//        this.rosterListeners.add(new org.limewire.xmpp.client.service.RosterListener() {
-//            public void register(XMPPService xmppService) {
-//                //To change body of implemented methods use File | Settings | File Templates.
-//            }
-//
-//            public void userAdded(User user) {
-//                //user.addPresenceListener(new LibraryGetter());
-//            }
-//            public void userUpdated(User user) {}
-//            public void userDeleted(String id) {}
-//        });
         org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final org.jivesoftware.smack.XMPPConnection connection) {
                 if(XMPPConnectionImpl.this.connection == connection) {
@@ -281,13 +276,9 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                                     updatePresence(user, presence);
                                 }
                             } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                                Presence p = user.getPresence(presence.getFrom());
-                                if(p != null) {
-                                    if(p instanceof LimePresence) {
-                                        user.removePresense(new LimePresenceImpl(presence, connection, user));    
-                                    } else {
-                                        user.removePresense(new PresenceImpl(presence, connection, user));
-                                    }                                    
+                                PresenceImpl p = (PresenceImpl)user.getPresence(presence.getFrom());
+                                if(p != null) {                                    
+                                    user.removePresense(new PresenceImpl(presence, connection, p));                                    
                                 }
                             }
                         }
@@ -320,7 +311,37 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
             return user;
         }
 
-        private void addNewPresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
+        private void addNewPresence(final UserImpl user, final org.jivesoftware.smack.packet.Presence presence) {
+            final PresenceImpl presenceImpl = new PresenceImpl(presence, connection, user);
+            user.addPresense(presenceImpl);
+            
+            Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+                public void run() {
+                    if(supportsLimeWireFeature(presence)) {
+                        LOG.debugf("limewire user {0}, presence {1} detected", user, presence.getFrom());
+                        presenceImpl.addFeature(new LimewireFeature());
+                        presenceImpl.addFeature(new LibraryChangedNotifierFeature(getLibraryChangedNotifier(presence.getFrom())));
+                        presenceImpl.addFeature(new FileOfferFeature(getFileOfferer(presence.getFrom())));
+                    }
+                }
+            }), "disco-info-" + presence.getFrom());
+            t.start();
+
+        }
+
+        private LibraryChangedNotifier getLibraryChangedNotifier(final String from) {
+            return new LibraryChangedNotifier() {
+                public void sendLibraryRefresh() {
+                    final LibraryChangedIQ libraryChangedIQ = new LibraryChangedIQ();
+                    libraryChangedIQ.setType(IQ.Type.SET);
+                    libraryChangedIQ.setTo(from);
+                    libraryChangedIQ.setPacketID(IQ.nextID());
+                    connection.sendPacket(libraryChangedIQ);
+                }    
+            };
+        }
+
+        private boolean supportsLimeWireFeature(org.jivesoftware.smack.packet.Presence presence) {
             DiscoverInfo discoverInfo;
             try {
                 ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
@@ -331,33 +352,28 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     LOG.info(exception.getMessage(), exception);
                 }
             }
-            
-            if (discoverInfo.containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("limewire user " + user + ", presence " + presence.getFrom() + " detected");
-                }
-                try {
-                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection, user);
-                    limePresense.subscribeAndWaitForAddress();
-                    user.addPresense(limePresense);
-                } catch (InvalidDataException e) {
-                    LOG.debug("could not parse address data", e);
-                    user.addPresense(new PresenceImpl(presence, connection, user));
-                }
-            } else {
-                user.addPresense(new PresenceImpl(presence, connection, user));
-            }
+
+            return discoverInfo.containsFeature(XMPPServiceImpl.LW_SERVICE_NS);
         }
 
         private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
-            Presence currentPresence = user.getPresences().get(presence.getFrom());
-            Presence updatedPresence;
-            if(currentPresence instanceof LimePresence) {
-                updatedPresence = new LimePresenceImpl(presence, connection, (LimePresence)currentPresence);    
-            } else {
-                updatedPresence = new PresenceImpl(presence, connection, user);
-            }
-            user.updatePresence(updatedPresence);
+            PresenceImpl currentPresence = (PresenceImpl)user.getPresences().get(presence.getFrom());
+            user.updatePresence(new PresenceImpl(presence, connection, currentPresence));
+        }
+
+        public FileOfferer getFileOfferer(final String jid) {
+            return new FileOfferer() {
+                public void offerFile(FileMetaData file) {
+                    if(LOG.isInfoEnabled()) {
+                        LOG.info("offering file " + file.toString() + " to " + jid);
+                    }
+                    final FileTransferIQ transferIQ = new FileTransferIQ(file, FileTransferIQ.TransferType.OFFER);
+                    transferIQ.setType(IQ.Type.GET);
+                    transferIQ.setTo(jid);
+                    transferIQ.setPacketID(IQ.nextID());
+                    connection.sendPacket(transferIQ);
+                }
+            };
         }
     }
     

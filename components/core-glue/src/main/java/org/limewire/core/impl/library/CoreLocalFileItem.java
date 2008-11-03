@@ -11,13 +11,13 @@ import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -112,7 +112,7 @@ class CoreLocalFileItem implements LocalFileItem {
         return map.get(key);
     }
 
-    public FileMetaData offer(LimePresence presence) {
+    public FileMetaData offer(FileOfferer fileOfferer) {
         FileDetails details = getFileDetails();
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
         fileMetaData.setCreateTime(new Date(details.getCreationTime()));
@@ -122,7 +122,7 @@ class CoreLocalFileItem implements LocalFileItem {
         fileMetaData.setName(details.getFileName());
         fileMetaData.setSize(details.getSize());
         fileMetaData.setURNs(details.getUrns());
-        presence.offerFile(fileMetaData);
+        fileOfferer.offerFile(fileMetaData);
 
         return fileMetaData;
     }

@@ -1,11 +1,14 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.listener.BlockingEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.Presence;
@@ -40,17 +43,24 @@ class XmppPresenceLibraryAdder implements RegisteringEventListener<RosterEvent> 
 
     private void userAdded(User user) {
         user.addPresenceListener(new EventListener<PresenceEvent>() {
-
+            
             @BlockingEvent
-            public void handleEvent(PresenceEvent event) {
-                Presence presence = event.getSource();
-                if(presence instanceof FriendPresence) {
-                    FriendPresence fPresence = (FriendPresence)presence;
-                    if(presence.getType().equals(Presence.Type.available)) {
-                        remoteLibraryManager.addPresenceLibrary(fPresence);
-                    } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                        remoteLibraryManager.removePresenceLibrary(fPresence);
-                    }
+            public void handleEvent(final PresenceEvent presenceEvent) {
+                final Presence presence = presenceEvent.getSource();
+                if(presence.getType().equals(Presence.Type.available)) {
+                    presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
+                        public void handleEvent(FeatureEvent event) {
+                            if(event.getType().equals(Feature.EventType.FEATURE_ADDED)) {
+                                if(presence.hasFeatures(AddressFeature.ID, AuthTokenFeature.ID)) {
+                                    remoteLibraryManager.addPresenceLibrary(presence);
+                                }
+                            } else if(event.getType().equals(Feature.EventType.FEATURE_REMOVED)){
+                                if(!presence.hasFeatures(AddressFeature.ID, AuthTokenFeature.ID)) {
+                                    remoteLibraryManager.removePresenceLibrary(presence);
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });

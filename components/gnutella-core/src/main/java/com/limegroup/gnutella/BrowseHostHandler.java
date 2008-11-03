@@ -23,6 +23,9 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
@@ -35,9 +38,9 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -115,10 +118,13 @@ public class BrowseHostHandler {
         setState(CONNECTING);
         
         try {
-            Socket socket = socketsManager.connect(friendPresence.getPresenceAddress(), (int)EXPIRE_TIME, new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
-            browseHost(socket, friendPresence);
-            browseListener.browseFinished(true);
-            return;
+            AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
+            if(addressFeature != null) {
+                Socket socket = socketsManager.connect((addressFeature).getFeature(), (int)EXPIRE_TIME, new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
+                browseHost(socket, friendPresence);
+                browseListener.browseFinished(true);
+                return;    
+            }            
         } catch (IOException ie) {
             LOG.debug("Error during browse host", ie);
         } catch (URISyntaxException e) {
@@ -200,8 +206,12 @@ public class BrowseHostHandler {
         client.setSocket(socket);
         if(!friendPresence.getFriend().isAnonymous()) {
             String username = friendPresence.getFriend().getNetwork().getMyID();
-            String password = StringUtils.getUTF8String(friendPresence.getAuthToken());
-            client.setCredentials(new UsernamePasswordCredentials(username, password));
+            Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
+            if(feature != null) {
+                AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
+                String password = StringUtils.getUTF8String(authTokenFeature.getFeature());
+                client.setCredentials(new UsernamePasswordCredentials(username, password));
+            }            
         }
         // TODO
         // hardcoding to "http" should work;

@@ -18,6 +18,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -45,10 +46,10 @@ import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -187,7 +188,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
         Connectable publicAddress;
-        Address address = presence.getPresenceAddress();
+        Address address = ((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
         byte[] clientGuid = null;
         boolean firewalled;
         Set<Connectable> proxies = null;

@@ -7,7 +7,7 @@ import java.util.Comparator;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -136,7 +136,8 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     @Override
     public boolean isSignedInToLimewire() {
         synchronized (presenceLock) {
-            return presence instanceof LimePresence;
+            LimewireFeature feature = (LimewireFeature)presence.getFeature(LimewireFeature.ID);
+            return feature != null;
         }
     }
 

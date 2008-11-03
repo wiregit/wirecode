@@ -2,7 +2,7 @@ package org.limewire.core.api.library;
 
 import java.io.File;
 
-import org.limewire.xmpp.api.client.LimePresence;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.xmpp.api.client.FileMetaData;
 
 /**
@@ -12,8 +12,8 @@ public interface LocalFileItem extends FileItem {
     /** Returns the file this is based on. */
     File getFile();
 
-    /** Offers this file to a LimePresence. */
-    FileMetaData offer(LimePresence limePresence);
+    /** Offers this file to a Presence that supports FileOfferFeature. */
+    FileMetaData offer(FileOfferer fileOfferer);
     
     /** Returns true if this is shared with Gnutella. */
     boolean isSharedWithGnutella();

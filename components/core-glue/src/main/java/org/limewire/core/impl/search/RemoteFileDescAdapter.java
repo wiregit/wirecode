@@ -1,11 +1,13 @@
 package org.limewire.core.impl.search;
 
+import java.net.URI;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
@@ -14,12 +16,17 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventListenerList;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
@@ -276,6 +283,8 @@ public class RemoteFileDescAdapter implements SearchResult {
             if (friendPresence != null) {
                 return friendPresence;
             } else {
+                final Map<URI, Feature> features = new HashMap<URI, Feature>();
+                features.put(AddressFeature.ID, new AddressFeature(new ConnectableImpl(rfd)));
                 // create dummy friend presence
                 return new FriendPresence() {
 
@@ -307,15 +316,41 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                             }
 
+                            @Override
                             public Network getNetwork() {
-                                return null;
+                                return null; 
                             }
                         };
                     }
 
                     @Override
-                    public Address getPresenceAddress() {
-                        return new ConnectableImpl(rfd);
+                    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+                        return new EventListenerList<FeatureEvent>();
+                    }
+
+                    public Collection<Feature> getFeatures() {
+                        return features.values();
+                    }
+
+                    public Feature getFeature(URI id) {
+                        return features.get(id);
+                    }
+
+                    public void addFeature(Feature feature) {
+                        features.put(feature.getID(), feature);
+                    }
+
+                    public void removeFeature(URI id) {
+                        features.remove(id);
+                    }
+
+                    public boolean hasFeatures(URI... id) {
+                        for(URI uri : id) {
+                            if(getFeature(uri) == null) {
+                                return false;
+                            }
+                        }
+                        return true;
                     }
 
                     @Override
@@ -323,9 +358,6 @@ public class RemoteFileDescAdapter implements SearchResult {
                         return getFriend().getId();
                     }
 
-                    public byte[] getAuthToken() {
-                        return null;
-                    }
                 };
             }
         }
@@ -371,6 +403,15 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public FriendPresence getFriendPresence() {
+            final Map<URI, Feature> features = new HashMap<URI, Feature>();
+            IpPort ipPort = locs.get(index - 1);
+            Address address;
+            if(ipPort instanceof Connectable) {
+                address = ((Connectable)ipPort);
+            } else {
+                address = new ConnectableImpl(ipPort, false);
+            }
+            features.put(AddressFeature.ID, new AddressFeature(address));
             // create dummy friend presence
             return new FriendPresence() {
 
@@ -403,6 +444,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                         }
 
+                        @Override
                         public Network getNetwork() {
                             return null;
                         }
@@ -410,22 +452,43 @@ public class RemoteFileDescAdapter implements SearchResult {
                 }
 
                 @Override
-                public Address getPresenceAddress() {
-                    IpPort ipPort = locs.get(index - 1);
-                    if(ipPort instanceof Connectable) {
-                        return ((Connectable)ipPort);
-                    } else {
-                        return new ConnectableImpl(ipPort, false);
+                public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+                    return new EventListenerList<FeatureEvent>();
+                }
+
+                @Override
+                public Collection<Feature> getFeatures() {
+                    return features.values();
+                }
+
+                @Override
+                public Feature getFeature(URI id) {
+                    return features.get(id);
+                }
+
+                @Override
+                public void addFeature(Feature feature) {
+                    features.put(feature.getID(), feature);
+                }
+
+                @Override
+                public void removeFeature(URI id) {
+                    features.remove(id);
+                }
+
+                @Override
+                public boolean hasFeatures(URI... id) {
+                    for(URI uri : id) {
+                        if(getFeature(uri) == null) {
+                            return false;
+                        }
                     }
+                    return true;
                 }
 
                 @Override
                 public String getPresenceId() {
                     return getFriend().getId();
-                }
-
-                public byte[] getAuthToken() {
-                    return null;
                 }
             };
         }

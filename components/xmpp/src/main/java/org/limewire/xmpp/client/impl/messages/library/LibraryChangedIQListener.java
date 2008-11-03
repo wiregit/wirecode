@@ -13,7 +13,6 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.UserImpl;
 import org.xmlpull.v1.XmlPullParserException;
@@ -64,8 +63,8 @@ public class LibraryChangedIQListener implements PacketListener {
         }
         if (user != null) {
             Presence presence = user.getPresences().get(packet.getFrom());
-            if(presence != null && presence instanceof LimePresence) {
-                libChangedListeners.handleEvent(new LibraryChangedEvent((LimePresence)presence, LibraryChanged.LIBRARY_CHANGED));
+            if(presence != null) {
+                libChangedListeners.handleEvent(new LibraryChangedEvent(presence, LibraryChanged.LIBRARY_CHANGED));
             }
         }
     }

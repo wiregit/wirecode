@@ -9,6 +9,7 @@ import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
@@ -25,11 +26,11 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 @Singleton
 class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
@@ -77,12 +78,15 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                         new AbstractListEventListener<PresenceLibrary>() {
                             protected void itemAdded(PresenceLibrary presenceLibrary) {
                                 FriendPresence friendPresence = presenceLibrary.getPresence();
-                                Address address = friendPresence.getPresenceAddress();
-                                if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                                    browse(presenceLibrary, friendPresence);
-                                } else {
-                                    presenceLibrary.setState(LibraryState.LOADING);
-                                    librariesToBrowse.add(presenceLibrary);
+                                AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
+                                if(addressFeature != null) {
+                                    Address address = addressFeature.getFeature();
+                                    if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
+                                        browse(presenceLibrary, friendPresence);
+                                    } else {
+                                        presenceLibrary.setState(LibraryState.LOADING);
+                                        librariesToBrowse.add(presenceLibrary);
+                                    }
                                 }
                             }
 
@@ -139,10 +143,13 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 for (Iterator<PresenceLibrary> i = librariesToBrowse.iterator(); i.hasNext();) {
                     PresenceLibrary presenceLibrary = i.next();
                     FriendPresence friendPresence = presenceLibrary.getPresence();
-                    Address address = friendPresence.getPresenceAddress();
-                    if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                        i.remove();
-                        browse(presenceLibrary, friendPresence);
+                    AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
+                    if(addressFeature != null) {
+                        Address address = addressFeature.getFeature();
+                        if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
+                            i.remove();
+                            browse(presenceLibrary, friendPresence);
+                        }
                     }
                 }
             }

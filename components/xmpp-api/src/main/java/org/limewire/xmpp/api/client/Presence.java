@@ -1,11 +1,12 @@
 package org.limewire.xmpp.api.client;
 
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.i18n.I18nMarker;
 
 /**
  * Represents xmpp <code><presence></code> messages.
  */
-public interface Presence {
+public interface Presence extends FriendPresence {
 
     enum EventType {PRESENCE_NEW, PRESENCE_UPDATE}
 

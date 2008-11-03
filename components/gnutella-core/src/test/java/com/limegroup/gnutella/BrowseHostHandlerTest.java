@@ -5,7 +5,9 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,11 +23,13 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
 
@@ -228,11 +232,6 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     
     private static class AnonymousPresence implements FriendPresence {
         @Override
-        public byte[] getAuthToken() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-        @Override
         public Friend getFriend() {
             return new Friend() {
                 @Override
@@ -266,15 +265,33 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 }
             };
         }
-        @Override
-        public Address getPresenceAddress() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-        @Override
+
         public String getPresenceId() {
-            // TODO Auto-generated method stub
-            return null;
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Collection<Feature> getFeatures() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Feature getFeature(URI id) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public boolean hasFeatures(URI... id) {
+            return false;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void addFeature(Feature feature) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void removeFeature(URI id) {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
     
@@ -284,11 +301,6 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         public StubFriendPresence(String myId) {
             this.myId = myId;
-        }
-        
-        @Override
-        public byte[] getAuthToken() {
-            return null;
         }
 
         @Override
@@ -337,15 +349,33 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         }
 
         @Override
-        public Address getPresenceAddress() {
-            return null;
-        }
-
-        @Override
         public String getPresenceId() {
             return null;
         }
-        
+
+        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Collection<Feature> getFeatures() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Feature getFeature(URI id) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public boolean hasFeatures(URI... id) {
+            return false;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void addFeature(Feature feature) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void removeFeature(URI id) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
     }
 
     @Singleton

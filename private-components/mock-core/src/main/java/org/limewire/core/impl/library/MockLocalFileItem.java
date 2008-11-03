@@ -5,8 +5,8 @@ import java.io.File;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.FileMetaData;
 
 //import com.limegroup.gnutella.FileDetails;
@@ -78,7 +78,7 @@ public class MockLocalFileItem implements LocalFileItem {
         return null;
     }
 
-    public FileMetaData offer(LimePresence limePresence) {
+    public FileMetaData offer(FileOfferer fileOfferer) {
         return null;
     }
 

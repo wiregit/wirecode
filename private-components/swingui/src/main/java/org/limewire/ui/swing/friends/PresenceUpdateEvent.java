@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.event.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.User;
 
 public class PresenceUpdateEvent extends AbstractEDTEvent {
     private static final String TOPIC_PREFIX = "presence-";
@@ -14,8 +14,8 @@ public class PresenceUpdateEvent extends AbstractEDTEvent {
         this.presenceEventType = presenceEventType;
     }
 
-    public User getUser() {
-        return presence.getUser();
+    public Friend getFriend() {
+        return presence.getFriend();
     }
 
     public Presence getPresence() {
@@ -32,6 +32,6 @@ public class PresenceUpdateEvent extends AbstractEDTEvent {
 
     @Override
     public void publish() {
-        super.publish(buildTopic(getUser().getId()));
+        super.publish(buildTopic(getFriend().getId()));
     }
 }

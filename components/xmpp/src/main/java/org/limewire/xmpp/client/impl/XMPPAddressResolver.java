@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -84,7 +86,10 @@ public class XMPPAddressResolver implements AddressResolver {
         }
         int toOffset = Math.min(originalId.length(), slash + 10);
         if (originalId.startsWith(resourceId, toOffset)) {
-            return ((FriendPresence)presence).getPresenceAddress();
+            Feature addressFeature = presence.getFeature(AddressFeature.ID);
+            if(addressFeature != null) {
+                return ((AddressFeature)presence).getFeature();
+            }
         }
         return null;
     }

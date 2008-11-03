@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jivesoftware.smack.RosterEntry;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
@@ -86,6 +88,10 @@ public class UserImpl implements User {
     void removePresense(Presence presence) {
         if(LOG.isDebugEnabled()) {
             LOG.debugf("removing presence {0}", presence.getJID());
+        }
+        Collection<Feature> features = presence.getFeatures();
+        for(Feature feature : features) {
+            presence.removeFeature(feature.getID());
         }
         presences.remove(presence.getJID());
         presenceListeners.broadcast(new PresenceEvent(presence, Presence.EventType.PRESENCE_UPDATE));

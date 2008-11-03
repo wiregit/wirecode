@@ -10,7 +10,9 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
@@ -22,10 +24,14 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
+import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.Address;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.util.Base32;
 
 import com.google.inject.AbstractModule;
@@ -418,6 +424,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         public MockFriendPresence(RemoteFileDesc rfd) {
             this.rfd = rfd;
+            addFeature(new AddressFeature(rfd.toAddress()));
+            addFeature(new AuthTokenFeature(new byte []{}));
         }
 
         public Friend getFriend() {
@@ -428,12 +436,28 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public Address getPresenceAddress() {
-            return rfd.toAddress();
+        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public byte[] getAuthToken() {
-            return new byte[0];  //To change body of implemented methods use File | Settings | File Templates.
+        public Collection<Feature> getFeatures() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Feature getFeature(URI id) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public boolean hasFeatures(URI... id) {
+            return false;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void addFeature(Feature feature) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public void removeFeature(URI id) {
+            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 

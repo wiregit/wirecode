@@ -2,11 +2,12 @@ package org.limewire.xmpp.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -17,6 +18,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
+    FeatureEventListener featureEventListener = new FeatureEventListener();
     
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
@@ -47,12 +49,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
                         if(!contains(roster.get(id), presence.getJID())) {
                             roster.get(id).add(presence);
                             presence.setIncomingChatListener(listener);
-                            if(presence instanceof LimePresence) {
-                                System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
-                                // TODO browse host
-                            } else {                            
-                                System.out.println("user " + presence.getJID() + " (" + name + ") available");
-                            }
+                            System.out.println("user " + presence.getJID() + " (" + name + ") available");
                         } else {
                             replace(roster.get(id), presence);
                         }
@@ -61,11 +58,6 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
                             roster.put(id, new ArrayList<Presence>());
                         }
                         remove(id, presence);
-                        if(presence instanceof LimePresence) {
-                            System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
-                        } else {                        
-                            System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
-                        }
                     } else {
                         System.out.println("user presence changed: " + presence.getType());
                     }
@@ -107,5 +99,12 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
 
     private void userDeleted(String id) {
         System.out.println("user deleted: " +id);
-    }    
+    }
+
+    class FeatureEventListener implements EventListener<FeatureEvent> {
+        List<FeatureEvent> featureEvents = new ArrayList<FeatureEvent>();
+        public void handleEvent(FeatureEvent event) {
+            featureEvents.add(event);
+        }
+    }
 }

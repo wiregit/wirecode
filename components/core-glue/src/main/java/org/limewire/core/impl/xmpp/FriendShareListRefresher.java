@@ -4,23 +4,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
+import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 public class FriendShareListRefresher {
 
@@ -71,8 +73,9 @@ public class FriendShareListRefresher {
                             if(user != null) {
                                 Map<String,Presence> presences = user.getPresences();
                                 for(Presence presence : presences.values()) {
-                                    if(presence instanceof LimePresence) {
-                                        ((LimePresence)presence).sendLibraryRefresh();
+                                    Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
+                                    if(notifier != null) {
+                                        notifier.getFeature().sendLibraryRefresh();
                                     }
                                 }
                             }
