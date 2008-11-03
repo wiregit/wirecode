@@ -10,15 +10,25 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
 
-public class CustomCheckBox extends JCheckBox{
+import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.GuiUtils;
+
+public class CustomCheckBox extends JCheckBox {
     
-    // TODO: make resources
-    private int dropOpacity = 150;
-    private Color checkBorder = new Color(0x31,0x31,0x31);
+    @Resource
+    private int dropOpacity;
+    
+    @Resource
+    private Color checkBorder;
+    
+    private final Color dropColour;
     
     public CustomCheckBox(Action action) {
         super(action);
         
+        GuiUtils.assignResources(this);
+        
+        this.dropColour = new Color(0,0,0,dropOpacity);
         this.setOpaque(false);
     }
     
@@ -38,7 +48,7 @@ public class CustomCheckBox extends JCheckBox{
         
         g2.setFont(this.getFont());
         
-        g2.setColor(new Color(0,0,0,dropOpacity));
+        g2.setColor(this.dropColour);
         g2.drawString(label, 16, (int) labelRect.getHeight()+2);
         g2.setColor(Color.WHITE);
         g2.drawString(label, 15, (int) labelRect.getHeight()+1);

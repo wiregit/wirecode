@@ -120,15 +120,6 @@ public class SearchResultsPanel extends JXPanel {
         // for the parameters annotated with @Assisted.
         this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
 
-        // what is this for?
-//        sortAndFilterPanel.addFilterListener(new SearchFilterListener() {
-//            @Override
-//            public void searchFiltered() {
-//                SearchCategory category = getCategory(filteredList);
-//                updateCategory(category);
-//            }
-//        });
-
         sortAndFilterPanel.addModeListener(new ModeListener() {
             @Override
             public void setMode(Mode mode) {

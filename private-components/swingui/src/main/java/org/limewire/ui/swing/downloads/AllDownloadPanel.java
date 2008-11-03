@@ -15,19 +15,11 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-
 public class AllDownloadPanel extends JPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4695453105493573743L;
 	private JXTable table;
 
-	/**
-	 * Create the panel
-	 */
-	
 	@AssistedInject
 	public AllDownloadPanel(DownloadTableFactory downloadTableFactory, @Assisted EventList<DownloadItem> list) {
 		super(new BorderLayout());

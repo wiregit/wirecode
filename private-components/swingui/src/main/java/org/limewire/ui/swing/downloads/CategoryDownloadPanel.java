@@ -32,7 +32,6 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-
 public class CategoryDownloadPanel extends JPanel {
 
     private final DownloadTableFactory downloadTableFactory;
@@ -42,17 +41,12 @@ public class CategoryDownloadPanel extends JPanel {
 	private JPanel tablePanel = new JPanel(new VerticalLayout());
 
 	private List<DownloadTable> tables = new ArrayList<DownloadTable>();
-//	private List<JPanel> titles = new ArrayList<JPanel>();
-	
-//	private EventList<DownloadItem> list;
-	
+
 	private TableColors colors;
 
 	@AssistedInject
 	private CategoryDownloadPanel(DownloadTableFactory downloadTableFactory, @Assisted EventList<DownloadItem> list) {
 	    this.downloadTableFactory = downloadTableFactory;
-	    
-//	    this.list = list;
 	    
 	    colors = new TableColors();
 	    
