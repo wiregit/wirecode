@@ -1,11 +1,8 @@
 package org.limewire.ui.swing.mainframe;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
@@ -13,12 +10,8 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -31,7 +24,6 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
@@ -48,13 +40,11 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
 import org.limewire.ui.swing.painter.TopPanelPainter;
-import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SearchSettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -69,11 +59,17 @@ class TopPanel extends JXPanel implements SearchNavigator {
     private final NavItem homeNav;
     
     @Inject
-    public TopPanel(final SearchHandler searchHandler, Navigator navigator,
+    public TopPanel(final SearchHandler searchHandler,
+                    Navigator navigator,
                     final FriendAutoCompleters friendLibraries,
                     HomePanel homePanel,
-                    StorePanel storePanel) {
+                    StorePanel storePanel,
+                    SearchBar searchBar) {
+        
         GuiUtils.assignResources(this);
+        
+        searchBar.setSearchHandler(searchHandler);
+        
         this.navigator = navigator;
         
         setName("TopPanel");
@@ -84,59 +80,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 friendLibraries.getDictionary(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue())));
         textField.setMaximumSize(120);
         textField.setName("TopPanel.searchInput");
-        
-        final JComboBox combo = new JComboBox(SearchCategory.values());
-        combo.removeItem(SearchCategory.OTHER);
-        LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SearchSettingListener(LibrarySettings.PROGRAM_SHARING_ENABLED, SearchCategory.PROGRAM, combo));
-                
-        combo.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
-        combo.setName("TopPanel.combo");
-        combo.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    SearchCategory category = (SearchCategory)e.getItem();
-                    textField.setAutoCompleteDictionary(friendLibraries.getDictionary(category));
-                }
-            }
-        });
-        JLabel search = new JLabel(I18n.tr("Search"));
-        search.setName("TopPanel.SearchLabel");
-
-        combo.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(
-                JList list, Object value, int index,
-                boolean isSelected, boolean cellHasFocus) {
-                
-                if (value != null) {
-                    switch((SearchCategory) value) {
-                    case ALL: value = I18n.tr("All"); break;
-                    case AUDIO: value = I18n.tr("Music"); break;
-                    case DOCUMENT: value = I18n.tr("Documents"); break;
-                    case IMAGE: value = I18n.tr("Images"); break;
-                    case PROGRAM: value = I18n.tr("Programs"); break;
-                    case VIDEO: value = I18n.tr("Videos"); break;
-                    case OTHER: value = I18n.tr("Other"); break;
-                    default:
-                        throw new IllegalArgumentException(
-                            "invalid category: " + value);
-                    }
-                }
-                
-                return super.getListCellRendererComponent(
-                    list, value, index, isSelected, cellHasFocus);
-            }
-        });
-        
-        textField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String searchText = textField.getText();
-                searchHandler.doSearch(
-                    new DefaultSearchInfo(searchText,
-                        (SearchCategory) combo.getSelectedItem()));
-            }
-        });
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);
         NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
@@ -165,8 +108,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        
         add(homeButton);
         add(storeButton);
-        add(search, "gapleft 50");
-        add(new SearchBar(combo, textField), "gapleft 5");
+        add(searchBar, "gapleft 5, gapright 5");
         add(searchList, "gapleft 4, gaptop 6, grow");
     };
 

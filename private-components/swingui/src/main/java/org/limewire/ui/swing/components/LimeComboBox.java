@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -325,6 +326,13 @@ public class LimeComboBox extends JXButton {
     @Override
     public boolean isOpaque() {
         return false;
+    }
+    
+    
+    @Override
+    public void setFont(Font f) {
+        super.setFont(f);
+        this.updateSize();
     }
     
     @Override

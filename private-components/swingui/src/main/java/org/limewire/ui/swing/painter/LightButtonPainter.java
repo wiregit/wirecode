@@ -58,7 +58,7 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
             g.setPaint(new GradientPaint(0,0, this.highlightGradientTop, 0, height, this.highlightGradientBottom, false));
         }
         
-        g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, this.arcWidth, height-1);
+        g.fillRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, this.arcWidth, height-1);
         
         g.setColor(this.borderColor);
         g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, arcWidth, height-1);

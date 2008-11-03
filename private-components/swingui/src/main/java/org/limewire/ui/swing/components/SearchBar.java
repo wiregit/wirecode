@@ -1,130 +1,157 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.Action;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.api.search.friend.FriendAutoCompleters;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SearchBar extends JXPanel {
-    //TODO: move to properties file
-    private static final int ARC_WIDTH = 20;
-    private static final int GAP = 5;
+
+    private final LimeComboBox comboBox;
+    private final PromptTextField searchField;
+    private final JXButton searchButton;
     
-    public SearchBar(JComboBox comboBox, JComponent textField) {
-        //TODO:proper sizing and colors
+    private final DropDownListAutoCompleteControl dropDownListAutoCompleteControl;
+    private final FriendAutoCompleters friendLibraries;
+    
+    private SearchCategory categoryToSearch; 
+    
+    private final Action programAction;
+    
+    @Inject
+    public SearchBar(LimeComboBoxFactory comboBoxFactory, 
+            final FriendAutoCompleters friendLibraries) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
-        GuiUtils.assignResources(this);
-        comboBox.setPreferredSize(new Dimension(104 - ARC_WIDTH, 22));
-        textField.setPreferredSize(new Dimension(242 - GAP, 22));
-       // setPreferredSize(new Dimension(346, 22));
-        add(comboBox, "gapbefore " + ARC_WIDTH);
-        add(textField, "gapbefore " + GAP);
-
-        textField.setFont(textField.getFont().deriveFont(12));
-        SearchComboUI comboUI = new SearchComboUI(null);
-        comboBox.setUI(comboUI);
-        comboUI.init();
-        comboBox.setOpaque(false);
-        textField.setOpaque(false);
-        setOpaque(false);
-        setBackgroundPainter(new SearchBarPainter(comboBox, textField));
-    }
-
-    private static class SearchBarPainter extends AbstractPainter<JXPanel> {
-        // TODO move colors to properties
-        private Color leftColor = Color.decode("#c2e986");
-        private Color rightColor = Color.WHITE;
-        
-        private JComponent leftComponent;
-
-        //private JComponent rightComponent;
-
-        public SearchBarPainter(JComponent leftComponent, JComponent rightComponent) {
-            this.leftComponent = leftComponent;
-           // this.rightComponent = rightComponent;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.jdesktop.swingx.painter.AbstractPainter#doPaint(java.awt.Graphics2D,
-         *      java.lang.Object, int, int)
-         */
-        @Override
-        protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
-            Shape oldClip = g.getClip();
-            Area rightShape = new Area(
-                    new RoundRectangle2D.Float(leftComponent.getWidth() + ARC_WIDTH, 0, object.getWidth() - leftComponent.getWidth() - ARC_WIDTH, 
-                            object.getHeight(), ARC_WIDTH, object.getHeight()));
-            
-            Area leftArea = new Area(new RoundRectangle2D.Float(0, 0, object.getWidth(), object.getHeight(), ARC_WIDTH, object.getHeight()));
-            leftArea.subtract(rightShape);
-            
-            g.setColor(leftColor);
-            g.fill(leftArea);
-            g.setColor(rightColor);
-            g.fill(rightShape);
-            //get rid of artifacts on left side of right shape.  drawing full right shape would leave artifacts on right side.
-            g.setClip(rightShape.getBounds().x, rightShape.getBounds().y, ARC_WIDTH, object.getHeight());
-            g.draw(rightShape);
-            g.setClip(oldClip);
-        }
-    }
     
-    private static class SearchComboUI extends BasicComboBoxUI{
-//      TODO move to properties
-        private Color leftColor = Color.decode("#c2e986");
-        private Icon buttonIcon;
+        GuiUtils.assignResources(this);
+
+        this.friendLibraries = friendLibraries;
         
-        public SearchComboUI(Icon buttonIcon){
-            this.buttonIcon = buttonIcon;
-        }
+        this.categoryToSearch = SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         
-        public void init(){
-            if(editor instanceof JComponent){
-                JComponent comp = (JComponent)editor;
-                comp.setBorder(new EmptyBorder(0,0,0,0));
-                comp.setOpaque(false);
+        Action actionToSelect = null;
+        Action progAction = null;
+        
+        List<Action> typeActions = new LinkedList<Action>();
+        for ( SearchCategory cat : SearchCategory.values() ) {
+            if (cat == SearchCategory.OTHER)  continue;
+            
+            Action action = new CatagoryAction(cat);
+            if (cat == SearchCategory.PROGRAM) {
+                progAction = action;
+                continue;
             }
             
-            comboBox.setOpaque(false);
-            comboBox.setBorder(new EmptyBorder(0,0,0,0));
-            comboBox.setBackground(leftColor);
+            if (cat == this.categoryToSearch) actionToSelect = action;
+
+            typeActions.add(action);
+        }
+        
+        this.programAction = progAction;
+        
+        this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
+        this.searchField = new PromptTextField(I18n.tr("Search"));
+        this.searchButton = new JXButton("S");
+        
+        this.assertProgramCategory();
+        
+        this.dropDownListAutoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, 
+                friendLibraries.getDictionary(this.categoryToSearch));
+        
+        if (actionToSelect != null)
+            this.comboBox.setSelectedAction(actionToSelect);
+        
+        this.setOpaque(false);
+        this.add(this.comboBox, "gap 30");
+        this.add(this.searchField, "gap 15");
+        this.add(this.searchButton, "gap 15");
+
+        this.searchField.setFont(this.searchField.getFont().deriveFont(12));
+        
+        LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SettingListener() {
             
-//            ListCellRenderer renderer = comboBox.getRenderer();
-//            if (renderer instanceof JLabel){
-//                ((JLabel)renderer).setHorizontalAlignment(SwingConstants.RIGHT);
-//            }
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                assertProgramCategory();
+            }
+            
+        });
+    }
+    
+    private void assertProgramCategory() {
+        if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
+            this.comboBox.removeAction(this.programAction);
+        } else {
+            this.comboBox.addAction(this.programAction);
+        }
+    }
+    
+    public void setSearchHandler(final SearchHandler searchHandler) {
+        
+        ActionListener listener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String searchText = searchField.getText();
+                searchHandler.doSearch(new DefaultSearchInfo(searchText, categoryToSearch));
+            }
+        };
+        
+        this.searchField.addActionListener(listener);
+        this.searchButton.addActionListener(listener);
+    }
+    
+    private static String getName(SearchCategory category) {
+        switch(category) {
+        case ALL:      return I18n.tr("All");
+        case AUDIO:    return I18n.tr("Music"); 
+        case DOCUMENT: return I18n.tr("Documents"); 
+        case IMAGE:    return I18n.tr("Images"); 
+        case PROGRAM:  return I18n.tr("Programs"); 
+        case VIDEO:    return I18n.tr("Videos"); 
+        case OTHER: 
+        default:
+            return I18n.tr("Other");
+             
+        }
+    }
+    
+    private class CatagoryAction extends AbstractAction {
+
+        private final SearchCategory category;
+        
+        CatagoryAction(SearchCategory category) {
+            super(getName(category));
+            
+            this.category = category;
         }
         
         @Override
-        protected JButton createArrowButton() {
-            JButton button = new IconButton(buttonIcon);
-            button.setName("ComboBox.arrowButton");
-            return button;
-        }
-        
-        @Override
-        public void paintCurrentValue(Graphics g,Rectangle bounds,boolean hasFocus) {
-            super.paintCurrentValue(g, bounds, false);
+        public void actionPerformed(ActionEvent arg0) {
+            categoryToSearch = category;
+            
+            dropDownListAutoCompleteControl.setDictionary(friendLibraries.getDictionary(category));
         }
     }
 }
