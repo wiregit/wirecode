@@ -18,6 +18,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.util.OSUtils;
+
 
 
 public class GuiUtils {
@@ -330,6 +332,14 @@ public class GuiUtils {
             return getCodeForCharKey(text.substring(index + 1, index + 2));
         }
         return -1;
+    }
+    
+    /**
+     * Determines if the Start On Startup option is availble.
+     */
+    public static boolean shouldShowStartOnStartupWindow() {
+        return OSUtils.isMacOSX() ||
+               WindowsUtils.isLoginStatusAvailable();
     }
     
 }

@@ -4,9 +4,9 @@ package org.limewire.ui.swing.wizard;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.InstallSettings;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.gui.GUIUtils;
 
 
 public class SetupWizard extends Wizard {
@@ -32,7 +32,7 @@ public class SetupWizard extends Wizard {
             return true;
         }
         if (!InstallSettings.START_STARTUP.getValue()) {
-            return GUIUtils.shouldShowStartOnStartupWindow();
+            return GuiUtils.shouldShowStartOnStartupWindow();
         }
         return false;
     }

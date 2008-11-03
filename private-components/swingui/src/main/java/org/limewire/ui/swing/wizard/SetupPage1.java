@@ -18,10 +18,10 @@ import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.util.MacOSXUtils;
 
 
 public class SetupPage1 extends WizardPage {
