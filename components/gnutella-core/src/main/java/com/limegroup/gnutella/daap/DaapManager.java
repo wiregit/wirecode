@@ -46,8 +46,6 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 import de.kapsi.net.daap.AutoCommitTransaction;
 import de.kapsi.net.daap.DaapAuthenticator;
@@ -80,7 +78,6 @@ public final class DaapManager {
     
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<FileManager> fileManager;
-    private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
@@ -111,13 +108,11 @@ public final class DaapManager {
     @Inject
     public DaapManager( @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         Provider<FileManager> fileManager,
-                        Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
                         Provider<ActivityCallback> activityCallback) {
         this.backgroundExecutor = backgroundExecutor;
         this.fileManager = fileManager;
-        this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.ipFilter = ipFilter;
         this.networkInstanceUtils = networkInstanceUtils;
         this.activityCallback = activityCallback;
@@ -625,15 +620,7 @@ public final class DaapManager {
     private boolean updateSongVideoMeta(Transaction txn, Song song, FileDesc desc) {
         
         song.setAttachment(desc);
-        
-        LimeXMLReplyCollection collection = schemaReplyCollectionMapper.get().getReplyCollection(LimeXMLNames.VIDEO_SCHEMA);
-        
-        if (collection == null) {
-            LOG.error("LimeXMLReplyCollection is null");
-            return false;
-        }
-        
-        LimeXMLDocument doc = collection.getDocForFile(desc.getFile());
+        LimeXMLDocument doc = desc.getXMLDocument(LimeXMLNames.VIDEO_SCHEMA);
         
         if (doc == null) {
             return false;
@@ -757,15 +744,7 @@ public final class DaapManager {
         
         song.setAttachment(desc);
         
-        LimeXMLReplyCollection collection = schemaReplyCollectionMapper.get().getReplyCollection(LimeXMLNames.AUDIO_SCHEMA);
-
-        
-        if (collection == null) {
-            LOG.error("LimeXMLReplyCollection is null");
-            return false;
-        }
-        
-        LimeXMLDocument doc = collection.getDocForFile(desc.getFile());
+        LimeXMLDocument doc = desc.getXMLDocument(LimeXMLNames.AUDIO_SCHEMA);
         
         if (doc == null)
             return false;

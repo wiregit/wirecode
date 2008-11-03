@@ -29,13 +29,16 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class CollectionTest extends LimeTestCase {
 
-    FileDesc[] files = new FileDesc[3];
-    final String fileLocation = "com/limegroup/gnutella/xml/";
-    final File mason = TestUtils.getResourceFile(fileLocation + "nullfile.null");
-    final File test1 = TestUtils.getResourceFile(fileLocation + "test1.mp3");
-    final File test2 = TestUtils.getResourceFile(fileLocation + "test2.mp3");
-    final String audioSchemaURI = "http://www.limewire.com/schemas/audio.xsd";
-    final String videoSchemaURI = "http://www.limewire.com/schemas/video.xsd";
+    private FileDesc[] files = new FileDesc[3];
+    private final String fileLocation = "com/limegroup/gnutella/xml/";
+    private final File mason = TestUtils.getResourceFile(fileLocation + "nullfile.null");
+    private final int MASON_IDX = 0;
+    private final File test1 = TestUtils.getResourceFile(fileLocation + "test1.mp3");
+    private final int TEST1_IDX = 1;
+    private final File test2 = TestUtils.getResourceFile(fileLocation + "test2.mp3");
+    private final int TEST2_IDX = 2;
+    private final String audioSchemaURI = "http://www.limewire.com/schemas/audio.xsd";
+    private final String videoSchemaURI = "http://www.limewire.com/schemas/video.xsd";
 
     private final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
         "audio" + XMLStringUtils.DELIMITER;
@@ -87,11 +90,11 @@ public class CollectionTest extends LimeTestCase {
         
         Set<URN> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
-        files[0] = factory.createFileDesc(mason, urns, 0);
+        files[MASON_IDX] = factory.createFileDesc(mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
-        files[1] = factory.createFileDesc(test1, urns, 1);
+        files[TEST1_IDX] = factory.createFileDesc(test1, urns, 1);
         urns = UrnHelper.calculateAndCacheURN(test2, urnCache);
-        files[2] = factory.createFileDesc(test2, urns, 2);
+        files[TEST2_IDX] = factory.createFileDesc(test2, urns, 2);
 
         
     }
@@ -109,13 +112,9 @@ public class CollectionTest extends LimeTestCase {
         assertEquals("LimeXMLCollection count wrong!", 2, collection.getCount());
 
         // test assocation
-        LimeXMLDocument doc = null;
-        doc = collection.getDocForFile(mason);
-        assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForFile(test1);
-        assertNotNull("Test1 should have a doc!", doc);
-        doc = collection.getDocForFile(test2);
-        assertNotNull("Test2 should have a doc!", doc);
+        assertNull(files[MASON_IDX].getXMLDocument(audioSchemaURI));
+        assertNotNull(files[TEST1_IDX].getXMLDocument(audioSchemaURI));
+        assertNotNull(files[TEST2_IDX].getXMLDocument(audioSchemaURI));
 
         // test keyword generation
         List keywords = collection.getKeyWords();
@@ -150,13 +149,9 @@ public class CollectionTest extends LimeTestCase {
         assertEquals(0, collection.getCount());
 
         // test assocation
-        LimeXMLDocument doc = null;
-        doc = collection.getDocForFile(mason);
-        assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForFile(test1);
-        assertNull("Test1 should not have a doc!", doc);
-        doc = collection.getDocForFile(test2);
-        assertNull("Test2 should not have a doc!", doc);
+        for(FileDesc fd : files) {
+            assertNull(fd.getXMLDocument(videoSchemaURI));
+        }
 
         // test keyword generation
         List keywords = collection.getKeyWords();
@@ -284,12 +279,12 @@ public class CollectionTest extends LimeTestCase {
         assertEquals("LimeXMLCollection count wrong!", 2, videoCollection.getCount());
 
         // test assocation
-        assertNull("Mason should not have a doc!", audioCollection.getDocForFile(mason));
-        assertNotNull("Test1 should have a doc!", audioCollection.getDocForFile(test1));
-        assertNotNull("Test2 should have a doc!", audioCollection.getDocForFile(test2));
-        assertNotNull("Mason should have a doc!", videoCollection.getDocForFile(mason));
-        assertNull("Test1 should not have a doc!", videoCollection.getDocForFile(test1));
-        assertNotNull("Test2 should have a doc!", videoCollection.getDocForFile(test2));
+        assertNull("Mason should not have a doc!", files[MASON_IDX].getXMLDocument(audioSchemaURI));
+        assertNotNull("Test1 should have a doc!", files[TEST1_IDX].getXMLDocument(audioSchemaURI));
+        assertNotNull("Test2 should have a doc!", files[TEST2_IDX].getXMLDocument(audioSchemaURI));
+        assertNotNull("Mason should have a doc!", files[MASON_IDX].getXMLDocument(videoSchemaURI));
+        assertNull("Test1 should not have a doc!",files[TEST1_IDX].getXMLDocument(videoSchemaURI));
+        assertNotNull("Test2 should have a doc!", files[TEST2_IDX].getXMLDocument(videoSchemaURI));
 
 
         // test keyword generation
@@ -359,11 +354,11 @@ public class CollectionTest extends LimeTestCase {
 
 
         //check we get the right docs back from getDocForHash
-        LimeXMLDocument returnDoc = collection.getDocForFile(files[0].getFile());
+        LimeXMLDocument returnDoc = files[0].getXMLDocument(videoSchemaURI);
         assertEquals("didn't get expected xml string (getDocForHash)",
                      newDoc.getXMLString(), returnDoc.getXMLString());
         
-        returnDoc = collection.getDocForFile(files[1].getFile());
+        returnDoc = files[1].getXMLDocument(videoSchemaURI);
         assertEquals("didn't get expected xml string (getDocForHash)",
                      newDoc2.getXMLString(), returnDoc.getXMLString());
         

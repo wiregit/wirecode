@@ -65,7 +65,8 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
     /**
      * The ProcessingQueue that Files are hashed in.
      */
-    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("Hasher");
+    private final ExecutorService QUEUE =
+        ExecutorsHelper.newFixedSizeThreadPool(Runtime.getRuntime().availableProcessors(), "Hasher");
     
     /**
      * The set of files that are pending hashing to the callbacks that are listening to them.
@@ -228,7 +229,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
                     new BufferedInputStream(
                         new FileInputStream(file)));
             // Allow for refactoring from gnutella -> gnutella.library
-            ois.addLookup("com.limegroup.gnutella.UrnCache.UrnSetKey", UrnSetKey.class.getName());
+            ois.addLookup("com.limegroup.gnutella.UrnCache$UrnSetKey", UrnSetKey.class.getName());
             return (Map)ois.readObject();
 	    } catch(Throwable t) {
 	        LOG.error("Unable to read UrnCache", t);
