@@ -31,4 +31,9 @@ public class MockNetworkManagerImpl implements NetworkManager {
     @Override
     public void setListeningPort(int port) throws IOException {
     }
+
+    @Override
+    public boolean addressChanged() {
+        return false;
+    }
 }

@@ -63,6 +63,8 @@ public class AdvancedOptionPanel extends OptionPanel {
     @Override
     void applyOptions() {
         for(OptionPanel panel : list) {
+            if(panel == null)
+                continue;
             panel.applyOptions();
         }
     }
@@ -70,6 +72,8 @@ public class AdvancedOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         for(OptionPanel panel : list) {
+            if(panel == null)
+                continue;
             if(panel.hasChanged())
                 return true;
         }

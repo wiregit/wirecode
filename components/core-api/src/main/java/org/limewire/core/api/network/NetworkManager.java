@@ -15,4 +15,6 @@ public interface NetworkManager {
     public void setListeningPort(int port) throws IOException;
     
     public void portChanged();
+    
+    public boolean addressChanged();
 }

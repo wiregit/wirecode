@@ -248,12 +248,14 @@ public class ConnectionsOptionPanel extends OptionPanel {
         @Override
         void applyOptions() {
             UploadSettings.HARD_MAX_UPLOADS.setValue((Integer)maxUploadSpinner.getModel().getValue());
+            UploadSettings.UPLOAD_SPEED.setValue(bandWidthSlider.getValue());
             SharingSettings.CLEAR_UPLOAD.setValue(clearUploadCheckBox.isSelected());
         }
 
         @Override
         boolean hasChanged() {
             return  UploadSettings.HARD_MAX_UPLOADS.getValue() != (Integer) maxUploadSpinner.getModel().getValue()
+                    || UploadSettings.UPLOAD_SPEED.getValue() != bandWidthSlider.getValue()
                     || SharingSettings.CLEAR_UPLOAD.getValue() != clearUploadCheckBox.isSelected();
         }
 

@@ -184,7 +184,8 @@ public class DownloadOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() { 
             return SharingSettings.CLEAR_DOWNLOAD.getValue() != clearDownloadsCheckBox.isSelected()
-                    || !currentSaveDirectory.equals(downloadSaveTextField.getText()) || DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
+                    || !currentSaveDirectory.equals(downloadSaveTextField.getText()) 
+                    || DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue() != autoRenameDuplicateFilesCheckBox.isSelected();
         }
 
         @Override

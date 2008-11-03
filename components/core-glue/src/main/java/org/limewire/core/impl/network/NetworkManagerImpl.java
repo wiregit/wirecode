@@ -46,4 +46,9 @@ public class NetworkManagerImpl implements NetworkManager {
     public void setListeningPort(int port) throws IOException {
         coreNetworkManager.setListeningPort(port);
     }
+
+    @Override
+    public boolean addressChanged() {
+        return coreNetworkManager.addressChanged();
+    }
 }

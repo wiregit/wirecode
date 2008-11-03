@@ -131,6 +131,10 @@ public class ProxyOptionPanel extends OptionPanel {
         ConnectionSettings.PROXY_PORT.setValue(proxyPort);
         ConnectionSettings.CONNECTION_METHOD.setValue(connectionMethod);
         ConnectionSettings.PROXY_HOST.setValue(proxy);
+        
+        ConnectionSettings.PROXY_USERNAME.setValue(userNameTextField.getText());
+        ConnectionSettings.PROXY_PASS.setValue(passwordField.getPassword().toString());
+        ConnectionSettings.PROXY_AUTHENTICATE.setValue(authenticationCheckBox.isSelected());
     }
 
     @Override
@@ -139,6 +143,16 @@ public class ProxyOptionPanel extends OptionPanel {
             return true;
         if(!ConnectionSettings.PROXY_HOST.getValue().equals(proxyTextField.getText()))
             return true;
+        
+        // authentication:
+        if(ConnectionSettings.PROXY_AUTHENTICATE.getValue() != authenticationCheckBox.isSelected())
+            return true;
+        if(!ConnectionSettings.PROXY_USERNAME.getValue().equals(userNameTextField.getText()))
+            return true;
+        if(!ConnectionSettings.PROXY_PASS.getValue().equals(passwordField.getPassword().toString()))
+            return true;
+        
+        // connection style
         switch(ConnectionSettings.CONNECTION_METHOD.getValue()) {
             case ConnectionSettings.C_SOCKS4_PROXY:
                 return !socksV4RadionButton.isSelected();
@@ -166,6 +180,11 @@ public class ProxyOptionPanel extends OptionPanel {
         
         proxyTextField.setText(proxy);
         portTextField.setText(Integer.toString(proxyPort));
+        
+        //authentication
+        authenticationCheckBox.setSelected(ConnectionSettings.PROXY_AUTHENTICATE.getValue());
+        userNameTextField.setText(ConnectionSettings.PROXY_USERNAME.getValue());
+        passwordField.setText(ConnectionSettings.PROXY_PASS.getValue());
         
         updateState();
     }

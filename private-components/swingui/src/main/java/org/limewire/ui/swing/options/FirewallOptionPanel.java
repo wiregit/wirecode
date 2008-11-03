@@ -14,6 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.network.NetworkManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.io.NetworkUtils;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
@@ -176,12 +177,60 @@ public class FirewallOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-            //TODO: save options
+//            boolean restart = false;
+            //TODO: notify about restart required
+//            boolean oldUPNP = ConnectionSettings.UPNP_IN_USE.getValue();
+            int oldPort = ConnectionSettings.FORCED_PORT.getValue();
+            boolean oldForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+
+            if(plugAndPlayRadioButton.isSelected()) {
+                if(!ConnectionSettings.UPNP_IN_USE.getValue())
+                    ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
+                ConnectionSettings.DISABLE_UPNP.setValue(false);
+//                if(!oldUPNP)
+//                    restart = true;
+            } else if(doNothingRadioButton.isSelected()) {
+                ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
+                ConnectionSettings.DISABLE_UPNP.setValue(true);
+            } else { // PORT.isSelected()
+                int forcedPort = Integer.parseInt(portTextField.getText());
+                if(!NetworkUtils.isValidPort(forcedPort)) {
+                    //TODO: display error message
+//                    GUIMediator.showError(I18n.tr("You must enter a port between 1 and 65535 when manually forcing your port."));
+//                    throw new IOException("bad port: "+forcedPort);
+                }
+                
+                ConnectionSettings.DISABLE_UPNP.setValue(false);
+                ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
+                ConnectionSettings.UPNP_IN_USE.setValue(false);
+                ConnectionSettings.FORCED_PORT.setValue(forcedPort);
+            }
+            
+            // Notify that the address changed if:
+            //    1) The 'forced address' status changed.
+            // or 2) We're forcing and the ports are different.
+            boolean newForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
+            int newPort = ConnectionSettings.FORCED_PORT.getValue();        
+            if(oldForce != newForce)
+                networkManager.addressChanged();
+            if(newForce && (oldPort != newPort))
+                networkManager.portChanged();
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            if(ConnectionSettings.FORCE_IP_ADDRESS.getValue() && !ConnectionSettings.UPNP_IN_USE.getValue()) {
+                if (!portForwardRadioButton.isSelected())
+                    return true;
+            }
+            else if(ConnectionSettings.DISABLE_UPNP.getValue()) {
+                if (!doNothingRadioButton.isSelected())
+                    return true;
+            } else {
+                if (!plugAndPlayRadioButton.isSelected()) 
+                    return true;
+            }
+            return portForwardRadioButton.isSelected() && Integer.parseInt(portTextField.getText()) != ConnectionSettings.FORCED_PORT.getValue();
         }
 
         @Override
@@ -204,5 +253,4 @@ public class FirewallOptionPanel extends OptionPanel {
             starLabel.setVisible(portForwardRadioButton.isSelected());
         }
     }
-
 }
