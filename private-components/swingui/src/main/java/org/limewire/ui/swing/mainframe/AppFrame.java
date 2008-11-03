@@ -79,7 +79,9 @@ public class AppFrame extends SingleFrameApplication {
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));
         
-        show(ui);        
+
+        
+        show(ui.getLayer());        
         restoreView();
         
         ui.goHome();
@@ -90,6 +92,8 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setSize(new Dimension(1024, 768));
 
         started = true;
+        
+        ui.showSetupWizard();
         
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();

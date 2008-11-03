@@ -66,8 +66,13 @@ public final class InstallSettings extends LimeWireSettings {
     /** Whether the association option has been asked */
     public static final IntSetting ASSOCIATION_OPTION =
     	FACTORY.createIntSetting("ASSOCIATION_OPTION", 0);
-    
+
     /** Whether the association option has been asked */
     public static final BooleanSetting EXTENSION_OPTION =
         FACTORY.createBooleanSetting("EXTENSION_OPTION", false);
+    
+
+    /** Whether the legal question has been asked */
+    public static final BooleanSetting LEGAL =
+        FACTORY.createBooleanSetting("LEGAL", false);
 }

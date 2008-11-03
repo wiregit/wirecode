@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.support.BugManager;
@@ -29,6 +30,7 @@ import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.ui.swing.wizard.IntentDialog;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
@@ -98,7 +100,8 @@ public final class Initializer {
         
         // Various startup tasks...
         setupCallbacksAndListeners();     
-        validateStartup(args);
+        validateStartup(args);        
+
         
         // Creates LimeWire itself.
      //   LimeWireUI limewireGUI = createLimeWire(); 
@@ -124,6 +127,9 @@ public final class Initializer {
         // Construct the SetupManager, which may or may not be shown.
 //        final SetupManager setupManager = new SetupManager(limeWireCore.getFirewallService());
 //        stopwatch.resetAndLog("construct SetupManager");
+        
+        //must agree not to use LW for copyright infringement on first running
+        confirmIntent();
 
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
@@ -134,7 +140,7 @@ public final class Initializer {
         // Initialize early UI components, display the setup manager (if necessary),
         // and ensure the save directory is valid.
         initializeEarlyUI(mozillaOverrides);
-//        startSetupManager(setupManager);
+    //    startSetupManager();
         validateSaveDirectory();
         
         // Load the UI, system tray & notification handlers,
@@ -156,6 +162,21 @@ public final class Initializer {
     }
     
     
+    /** shows legal stuff and exits if the user does not agree */
+    private void confirmIntent() {
+        if (!InstallSettings.LEGAL.getValue()) {
+            SwingUtils.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    boolean confirmed = new IntentDialog().confirmLegal();
+                    if (!confirmed) {
+                        System.exit(0);
+                    }
+                }
+            });
+        }
+    }
+
     /** Initializes the very early things. */
     /*
      * DO NOT CHANGE THIS WITHOUT KNOWING WHAT YOU'RE DOING.
@@ -443,8 +464,9 @@ public final class Initializer {
         stopwatch.resetAndLog("return from evt queue");
     }
     
-    /** Starts the SetupManager, if necessary. */
-//    private void startSetupManager(final SetupManager setupManager) {        
+//    /** Starts the SetupManager, if necessary. */
+//    private void startSetupManager() {
+//        final SetupManager setupManager = new SetupManager(limeWireCore.getFirewallService());
 //        // Run through the initialization sequence -- this must always be
 //        // called before GUIMediator constructs the LibraryTree!
 //        GUIMediator.safeInvokeAndWait(new Runnable() {

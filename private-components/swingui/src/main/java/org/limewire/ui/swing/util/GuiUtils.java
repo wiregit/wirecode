@@ -19,6 +19,7 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.ui.swing.mainframe.AppFrame;
 
+
 public class GuiUtils {
 
     private static final Log LOG = LogFactory.getLog(GuiUtils.class);
@@ -330,4 +331,5 @@ public class GuiUtils {
         }
         return -1;
     }
+    
 }
