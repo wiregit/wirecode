@@ -633,7 +633,7 @@ public final class DaapManager {
             return false;
         }
         
-        LimeXMLDocument doc = collection.getDocForHash(desc.getSHA1Urn());
+        LimeXMLDocument doc = collection.getDocForFile(desc.getFile());
         
         if (doc == null) {
             return false;
@@ -765,7 +765,7 @@ public final class DaapManager {
             return false;
         }
         
-        LimeXMLDocument doc = collection.getDocForHash(desc.getSHA1Urn());
+        LimeXMLDocument doc = collection.getDocForFile(desc.getFile());
         
         if (doc == null)
             return false;

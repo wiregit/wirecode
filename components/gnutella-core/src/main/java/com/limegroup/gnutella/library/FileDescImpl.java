@@ -80,7 +80,7 @@ public class FileDescImpl implements FileDesc {
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
 	 */
-	private final List<LimeXMLDocument> _limeXMLDocs = new CopyOnWriteArrayList<LimeXMLDocument>();
+	private final CopyOnWriteArrayList<LimeXMLDocument> _limeXMLDocs = new CopyOnWriteArrayList<LimeXMLDocument>();
 
 	/**
 	 * The number of hits this file has recieved.
@@ -262,7 +262,6 @@ public class FileDescImpl implements FileDesc {
      * @see com.limegroup.gnutella.library.FileDesc#addLimeXMLDocument(com.limegroup.gnutella.xml.LimeXMLDocument)
      */
 	public void addLimeXMLDocument(LimeXMLDocument doc) {
-        
         _limeXMLDocs.add(doc);
         
 	    doc.initIdentifier(FILE);

@@ -450,9 +450,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             file = FileUtils.getCanonicalFile(file);
         } catch (IOException e) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            PendingFuture future = new PendingFuture();
-            future.setException(new FileListChangeFailedException(event, "Can't canonicalize file"));
-            return future;
+            return new PendingFuture(new FileListChangeFailedException(event, "Can't canonicalize file"));
         }
         
         boolean explicitAdd = false;
@@ -471,10 +469,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         //make sure a FileDesc can be created from this file
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);   
-            PendingFuture future = new PendingFuture();
-            future.setException(new FileListChangeFailedException(event, "File isn't physically manageable"));
-            return future;
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            return new PendingFuture(new FileListChangeFailedException(event, "File isn't physically manageable"));
         }
 
         getLibraryData().addManagedFile(file, explicitAdd);
@@ -496,9 +492,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         if(failed) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            PendingFuture future = new PendingFuture();
-            future.setException(new FileListChangeFailedException(event, "Revisions changed while loading"));
-            return future;
+            return new PendingFuture(new FileListChangeFailedException(event, "Revisions changed while loading"));
         } else {
             PendingFuture task = new PendingFuture();
             urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc, task, latch));
@@ -1038,6 +1032,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private class PendingFuture extends FutureTask<FileDesc> {     
         public PendingFuture() {
             super(EMPTY_CALLABLE);
+        }
+        
+        public PendingFuture(Throwable t) {
+            super(EMPTY_CALLABLE);
+            setException(t);
         }
         
         @Override

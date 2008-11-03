@@ -45,7 +45,6 @@ public class ManagedFileListImplTest extends LimeTestCase {
         fileList = (ManagedFileListImpl) injector.getInstance(ManagedFileList.class);
         urnValidator = injector.getInstance(UrnValidator.class);
         fileList.initialize();
-        assertLoads(fileList); // Ensure it starts up & schemas load & all.
     }
 
     public void testNoManagedFiles() {

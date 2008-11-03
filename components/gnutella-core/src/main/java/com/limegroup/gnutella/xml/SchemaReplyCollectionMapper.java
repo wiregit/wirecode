@@ -30,7 +30,7 @@ import com.limegroup.gnutella.library.ManagedListStatusEvent;
 @Singleton
 public class SchemaReplyCollectionMapper {
     
-    private Map<String, LimeXMLReplyCollection> mapper;
+    private final Map<String, LimeXMLReplyCollection> mapper;
     
     protected final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
     protected final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
@@ -85,6 +85,8 @@ public class SchemaReplyCollectionMapper {
             }
             @Override
             public void initialize() {
+                loadSchemas();
+                
                 fileDescSupport.addListener(new EventListener<FileDescChangeEvent>() {
                     @Override
                     public void handleEvent(FileDescChangeEvent event) {
@@ -117,9 +119,6 @@ public class SchemaReplyCollectionMapper {
                     @Override
                     public void handleEvent(ManagedListStatusEvent event) {
                         switch (event.getType()) {
-                        case LOAD_STARTED:
-                            loadSchemas();
-                            break;
                         case LOAD_FINISHING:
                             finishLoading();
                             break;

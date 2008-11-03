@@ -110,11 +110,11 @@ public class CollectionTest extends LimeTestCase {
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = collection.getDocForHash(getHash(mason));
+        doc = collection.getDocForFile(mason);
         assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForHash(getHash(test1));
+        doc = collection.getDocForFile(test1);
         assertNotNull("Test1 should have a doc!", doc);
-        doc = collection.getDocForHash(getHash(test2));
+        doc = collection.getDocForFile(test2);
         assertNotNull("Test2 should have a doc!", doc);
 
         // test keyword generation
@@ -151,11 +151,11 @@ public class CollectionTest extends LimeTestCase {
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = collection.getDocForHash(getHash(mason));
+        doc = collection.getDocForFile(mason);
         assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForHash(getHash(test1));
+        doc = collection.getDocForFile(test1);
         assertNull("Test1 should not have a doc!", doc);
-        doc = collection.getDocForHash(getHash(test2));
+        doc = collection.getDocForFile(test2);
         assertNull("Test2 should not have a doc!", doc);
 
         // test keyword generation
@@ -284,12 +284,12 @@ public class CollectionTest extends LimeTestCase {
         assertEquals("LimeXMLCollection count wrong!", 2, videoCollection.getCount());
 
         // test assocation
-        assertNull("Mason should not have a doc!", audioCollection.getDocForHash(getHash(mason)));
-        assertNotNull("Test1 should have a doc!", audioCollection.getDocForHash(getHash(test1)));
-        assertNotNull("Test2 should have a doc!", audioCollection.getDocForHash(getHash(test2)));
-        assertNotNull("Mason should have a doc!", videoCollection.getDocForHash(getHash(mason)));
-        assertNull("Test1 should not have a doc!", videoCollection.getDocForHash(getHash(test1)));
-        assertNotNull("Test2 should have a doc!", videoCollection.getDocForHash(getHash(test2)));
+        assertNull("Mason should not have a doc!", audioCollection.getDocForFile(mason));
+        assertNotNull("Test1 should have a doc!", audioCollection.getDocForFile(test1));
+        assertNotNull("Test2 should have a doc!", audioCollection.getDocForFile(test2));
+        assertNotNull("Mason should have a doc!", videoCollection.getDocForFile(mason));
+        assertNull("Test1 should not have a doc!", videoCollection.getDocForFile(test1));
+        assertNotNull("Test2 should have a doc!", videoCollection.getDocForFile(test2));
 
 
         // test keyword generation
@@ -359,11 +359,11 @@ public class CollectionTest extends LimeTestCase {
 
 
         //check we get the right docs back from getDocForHash
-        LimeXMLDocument returnDoc = collection.getDocForHash(files[0].getSHA1Urn());
+        LimeXMLDocument returnDoc = collection.getDocForFile(files[0].getFile());
         assertEquals("didn't get expected xml string (getDocForHash)",
                      newDoc.getXMLString(), returnDoc.getXMLString());
         
-        returnDoc = collection.getDocForHash(files[1].getSHA1Urn());
+        returnDoc = collection.getDocForFile(files[1].getFile());
         assertEquals("didn't get expected xml string (getDocForHash)",
                      newDoc2.getXMLString(), returnDoc.getXMLString());
         

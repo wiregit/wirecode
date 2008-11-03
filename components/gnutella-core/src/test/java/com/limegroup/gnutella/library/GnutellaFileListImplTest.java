@@ -50,7 +50,6 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         fileList = injector.getInstance(FileManager.class).getGnutellaSharedFileList();
         urnValidator = injector.getInstance(UrnValidator.class);
         injector.getInstance(ServiceRegistry.class).initialize();
-        assertLoads(managedList); // Ensure it starts up & schemas load & all. 
     }
 
     public void testNoSharedFiles() {
