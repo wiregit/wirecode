@@ -117,6 +117,8 @@ public abstract class Dialog extends JDialog {
             //no-op: Does not display details
         }
         
+        addLocation();
+        
         setPreferredSize(new Dimension(570,600));
         setModalityType(ModalityType.APPLICATION_MODAL);
         
@@ -141,12 +143,12 @@ public abstract class Dialog extends JDialog {
         return panel;
     }
 
-    protected  void addDetails() {
+    private void addDetails() {
         detailsContainer = box("Details", details);
         add(detailsContainer, "cell 0 1, spanx 2");
     }
 
-    protected void addLocation() {
+    private void addLocation() {
         add(box("Location", location), "cell 0 2, spanx 2");
     }
 
@@ -211,7 +213,7 @@ public abstract class Dialog extends JDialog {
     }
 
     private void configureVideoDetailsLayout() {
-        details.setLayout(new MigLayout("fillx", "[20%!][20%!][]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx, nocache", "[20%!][20%!][]", "[][][][][][]"));
         details.add(new JLabel(tr("Title")), "wrap");
         details.add(title, "span, growx, wrap");
         details.add(new JLabel(tr("Genre")));
@@ -222,10 +224,12 @@ public abstract class Dialog extends JDialog {
         details.add(year, "growx, wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow, span");
+        
+        addDetails();
     }
     
     private void configureAudioDetailsLayout() {
-        details.setLayout(new MigLayout("fillx", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx, nocache", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
         details.add(new JLabel(tr("Title")));
         details.add(new JLabel(tr("Artist")), "wrap");
         details.add(title, "growx");
@@ -240,6 +244,8 @@ public abstract class Dialog extends JDialog {
         details.add(track, "wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow, span");
+        
+        addDetails();
     }
     
     private void configureImageDetailsLayout() {
@@ -248,10 +254,12 @@ public abstract class Dialog extends JDialog {
         details.add(title, "growx, wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow");
+        
+        addDetails();
     }
     
     private void configureProgramDetailsLayout() {
-        details.setLayout(new MigLayout("fillx", "[20%!][]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx, nocache", "[20%!][]", "[][][][][][]"));
         details.add(new JLabel(tr("Title")), "wrap");
         details.add(title, "span, growx, wrap");
         details.add(new JLabel(tr("Platform")));
@@ -260,6 +268,8 @@ public abstract class Dialog extends JDialog {
         details.add(company, "growx, wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow, span");
+        
+        addDetails();
     }
     
     private void configureDocumentDetailsLayout() {
@@ -268,6 +278,8 @@ public abstract class Dialog extends JDialog {
         details.add(author, "growx, wrap");
         details.add(new JLabel(tr("Description")), "wrap");
         details.add(description, "grow");
+        
+        addDetails();
     }
 
     protected void populateMetadata(PropertiableFile propFile) {

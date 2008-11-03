@@ -47,13 +47,9 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             year.setEditable(false);
             description.setEditable(false);
             
-            addDetails();
-
-            location.setLayout(new MigLayout("", "[50%!]", "[]"));
+            location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
-
-            addLocation();
         }
 
         @Override
