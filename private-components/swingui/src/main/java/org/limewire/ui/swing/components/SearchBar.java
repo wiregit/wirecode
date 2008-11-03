@@ -18,7 +18,6 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -28,9 +27,7 @@ public class SearchBar extends JXPanel {
     //TODO: move to properties file
     private static final int ARC_WIDTH = 20;
     private static final int GAP = 5;
-    @Resource
-    private Icon buttonIcon;
-
+    
     public SearchBar(JComboBox comboBox, JComponent textField) {
         //TODO:proper sizing and colors
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
@@ -42,7 +39,7 @@ public class SearchBar extends JXPanel {
         add(textField, "gapbefore " + GAP);
 
         textField.setFont(textField.getFont().deriveFont(12));
-        SearchComboUI comboUI = new SearchComboUI(buttonIcon);
+        SearchComboUI comboUI = new SearchComboUI(null);
         comboBox.setUI(comboUI);
         comboUI.init();
         comboBox.setOpaque(false);

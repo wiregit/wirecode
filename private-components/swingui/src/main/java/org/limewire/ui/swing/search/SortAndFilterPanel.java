@@ -108,7 +108,7 @@ public class SortAndFilterPanel extends JXPanel {
         
         this.populateActionList();
         
-        this.sortCombo = comboBoxFactory.createFullComboBox();
+        this.sortCombo = comboBoxFactory.createDarkFullComboBox();
         
         sortLabel.setForeground(Color.WHITE);
         sortLabel.setFont(sortLabelFont);

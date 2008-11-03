@@ -9,10 +9,13 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.PopupButtonPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -41,22 +44,30 @@ public class LimeComboBoxFactory {
     private Icon  fullIcon;
     
     
+    private final AbstractPainter<JXButton> darkButtonPainter;
+    private final AbstractPainter<JXButton> lightButtonPainter;
+    private final AbstractPainter<JXButton> popupButtonPainter;
     
-    
-    LimeComboBoxFactory() {
-        GuiUtils.assignResources(this);        
+    @Inject
+    LimeComboBoxFactory(ButtonPainter darkButtonPainter, 
+            ButtonPainter lightButtonPainter,
+            PopupButtonPainter popupButtonPainter) {
+        GuiUtils.assignResources(this);    
+        
+        this.darkButtonPainter = darkButtonPainter;
+        this.lightButtonPainter = lightButtonPainter;
+        this.popupButtonPainter = popupButtonPainter;
     }
     
-    public LimeComboBox createFullComboBox() {
-        return this.createFullComboBox(null);
+    public LimeComboBox createDarkFullComboBox() {
+        return this.createDarkFullComboBox(null);
     }
     
-    public LimeComboBox createFullComboBox(List<Action> items) {
-    
+    private LimeComboBox createFullComboBox(List<Action> items, AbstractPainter<JXButton> painter) {
+        
         LimeComboBox box = new LimeComboBox(items);
         
-        
-        box.setBackgroundPainter(new ButtonPainter());
+        box.setBackgroundPainter(painter);
         box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
         box.setIcon(this.fullIcon);
         box.setFont(this.fullTextFont);
@@ -66,6 +77,16 @@ public class LimeComboBoxFactory {
         
     }
     
+    public LimeComboBox createLightFullComboBox(List<Action> items) {
+        return createFullComboBox(items, lightButtonPainter);
+    }
+    
+    public LimeComboBox createDarkFullComboBox(List<Action> items) {
+        return createFullComboBox(items, darkButtonPainter);
+    }
+    
+
+    
     public LimeComboBox createMiniComboBox() {
         return createMiniComboBox(null,null);
     }
@@ -74,7 +95,7 @@ public class LimeComboBoxFactory {
     
         LimeComboBox box = new LimeComboBox(items);
         
-        box.setBackgroundPainter(new PopupButtonPainter());
+        box.setBackgroundPainter(popupButtonPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         box.setFont(this.miniTextFont);
         box.setForegrounds(this.miniRegTextColour, 

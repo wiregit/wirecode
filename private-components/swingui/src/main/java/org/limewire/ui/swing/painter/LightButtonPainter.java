@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
@@ -16,16 +17,29 @@ import com.google.inject.Singleton;
  */
 
 @Singleton
-public class PopupButtonPainter extends AbstractPainter<JXButton> {
+public class LightButtonPainter extends AbstractPainter<JXButton> {
+    
+    private final int ANTIALIAS_OFFSET = 1;
     
     @Resource
     private int arcWidth;
-    @Resource
-    private Color backgroundPressed;
-    @Resource
-    private Color backgroundRollover;
     
-    public PopupButtonPainter() {
+    @Resource 
+    private Color borderColor;
+    
+    @Resource 
+    private Color backgroundGradientTop;
+    
+    @Resource 
+    private Color backgroundGradientBottom;
+    
+    @Resource
+    private Color highlightGradientTop;
+    
+    @Resource
+    private Color highlightGradientBottom;
+    
+    public LightButtonPainter() {
         GuiUtils.assignResources(this);
     }
     
@@ -38,13 +52,16 @@ public class PopupButtonPainter extends AbstractPainter<JXButton> {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
         
         if (button.getModel().isPressed()) {
-            g.setColor(this.backgroundPressed);
-            g.fillRoundRect(0, 0, width-1, height-1, arcWidth, height-1);
+            g.setPaint(new GradientPaint(0,0, this.backgroundGradientTop, 0, height, this.backgroundGradientBottom, false));
         }
-        else if (button.getModel().isRollover()) {
-            g.setColor(this.backgroundRollover);
-            g.fillRoundRect(0, 0, width-1, height-1, arcWidth, height-1);
+        else {
+            g.setPaint(new GradientPaint(0,0, this.highlightGradientTop, 0, height, this.highlightGradientBottom, false));
         }
+        
+        g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, this.arcWidth, height-1);
+        
+        g.setColor(this.borderColor);
+        g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, arcWidth, height-1);
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 

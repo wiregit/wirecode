@@ -8,9 +8,13 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.Singleton;
+
 /**
  * Background painter for a gradient button. 
  */
+
+@Singleton
 public class ButtonPainter extends AbstractButtonPainter {
     
     @Resource
