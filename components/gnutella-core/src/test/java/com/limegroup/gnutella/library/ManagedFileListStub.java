@@ -12,15 +12,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class ManagedFileListStub extends AbstractFileListStub implements ManagedFileList {
 
-    @Override
-    public void addDirectoryToExcludeFromManaging(File folder) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void addDirectoryToManageRecursively(File folder) {
-        throw new UnsupportedOperationException();        
-    }
 
     @Override
     public void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {
@@ -61,7 +52,14 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
 
     @Override
-    public void setManagedExtensions(Collection<String> extensions) {
+    public Future<List<Future<FileDesc>>> setManagedExtensions(Collection<String> extensions) {
         throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public Future<List<Future<FileDesc>>> setManagedFolders(
+            Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

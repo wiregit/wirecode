@@ -3,6 +3,8 @@ package com.limegroup.gnutella.library;
 import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,7 +30,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
     private UrnValidator urnValidator;
     private Injector injector;
 
-    private File f1, f2, f3, f4, f5;
+    private File f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15;
     private List<FileDesc> fds;
 
     public ManagedFileListImplTest(String name) {
@@ -277,5 +279,138 @@ public class ManagedFileListImplTest extends LimeTestCase {
             it.next();
             fail("should have thrown");
         } catch(NoSuchElementException expected) {}
-    }    
+    }
+    
+    public void testAddFolder() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "tmp", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "tmp", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "tmp2", _scratchDir);
+        
+        File dir1 = new File(_scratchDir, "sub1");        
+        File dir2 = new File(_scratchDir, "sub2");
+        dir1.mkdirs();
+        dir2.mkdirs();
+        
+        f4 = createNewExtensionTestFile(15, "tmp", dir1);
+        f5 = createNewExtensionTestFile(15, "tmp2", dir2);
+
+        fileList.setManagedExtensions(Collections.singletonList("tmp"));
+        
+        f6 = createNewExtensionTestFile(15, "tmp", _scratchDir);
+        f7 = createNewExtensionTestFile(15, "tmp2", _scratchDir);
+        assertAdds(fileList, f6, f7);
+        
+        assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f6, f7);
+        assertFalse(fileList.contains(f3));
+        
+        assertLoads(fileList);
+        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f6, f7);
+    }
+    
+    public void testChangeExtensions() throws Exception {
+        f1 = createNewExtensionTestFile(1, "tmp1", _scratchDir);
+        f2 = createNewExtensionTestFile(1, "tmp1", _scratchDir);
+        f3 = createNewExtensionTestFile(1, "tmp2", _scratchDir);
+        
+        File dir1 = new File(_scratchDir, "sub1");        
+        File dir2 = new File(_scratchDir, "sub2");
+        File dir3 = new File(_scratchDir, "sub3");
+        File dir4 = new File(_scratchDir, "sub4");
+        File dir5 = new File(_scratchDir, "sub5");
+        dir1.mkdirs();
+        dir2.mkdirs();
+        dir3.mkdirs();
+        dir4.mkdirs();
+        dir5.mkdirs();
+        
+        f4  = createNewExtensionTestFile(1, "tmp1", dir1);
+        f5  = createNewExtensionTestFile(1, "tmp2", dir2);
+        
+        f6  = createNewExtensionTestFile(1, "tmp3", _scratchDir);
+        f7  = createNewExtensionTestFile(1, "tmp3", dir3);
+        
+        f8  = createNewExtensionTestFile(1, "tmp1", dir4);
+        f9  = createNewExtensionTestFile(1, "tmp2", dir4);
+        f10 = createNewExtensionTestFile(1, "tmp3", dir4);
+        
+        fileList.setManagedExtensions(Arrays.asList("tmp1", "tmp3"));
+        
+        f11 = createNewExtensionTestFile(1, "tmp4", _scratchDir);
+        f12 = createNewExtensionTestFile(1, "tmp4", dir4);
+        f13 = createNewExtensionTestFile(1, "tmp4", dir5);
+        f14 = createNewExtensionTestFile(1, "tmp1", dir5);
+        f15 = createNewExtensionTestFile(1, "tmp2", dir5);
+        assertAdds(fileList, f11, f12, f13, f14, f15);
+        
+        assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f6, f7, f8, f10, f11, f12, f13, f14, f15);
+        assertFalse(fileList.contains(f3));
+        
+        assertChangeExtensions(fileList, "tmp2", "tmp3");
+        assertContainsFiles(CollectionUtils.listOf(fileList), f3, f5, f6, f7, f9, f10, f11, f12, f13, f15);
+        
+        assertLoads(fileList);
+        assertContainsFiles(CollectionUtils.listOf(fileList), f3, f5, f6, f7, f9, f10, f11, f12, f13, f15);
+    }
+    
+    public void testSetManagedDirectories() throws Exception {
+        File s1   = new File(_scratchDir, "sub1");        
+        File s2   = new File(_scratchDir, "sub2");
+        File s1a  = new File(s1, "ssub");
+        File s2a  = new File(s2, "ssub");
+        File s1as = new File(s1a, "sssub");
+        File s2as = new File(s2a, "sssub");
+
+        s1.mkdirs();
+        s2.mkdirs();
+        s1a.mkdirs();
+        s2a.mkdirs();
+        s1as.mkdirs();
+        s2as.mkdirs();
+        
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(1, s1);
+        f3 = createNewTestFile(1, s2);
+        f4  = createNewTestFile(1, s1a);
+        f5 = createNewTestFile(1, s2a);
+        f6 = createNewTestFile(1, s1as);
+        f7 = createNewTestFile(1, s2as);
+        
+        assertChangeExtensions(fileList, "tmp");
+        assertEquals(0, fileList.size());
+        
+        List<File> emptyList = Collections.emptyList();
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2as), emptyList);
+        assertContainsFiles(fileList, f7);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2a), emptyList);
+        assertContainsFiles(fileList, f5, f7);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2a), Arrays.asList(s2as));
+        assertContainsFiles(fileList, f5);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        assertContainsFiles(fileList, f3);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        assertContainsFiles(fileList, f3);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(s2), emptyList);
+        assertContainsFiles(fileList, f3, f5, f7);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s1a, s2as));
+        assertContainsFiles(fileList, f1, f2, f3, f5);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s2a));
+        assertContainsFiles(fileList, f1, f2, f3, f4, f6);
+        
+        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), emptyList);
+        assertContainsFiles(fileList, f1, f2, f3, f4, f5, f6, f7);
+        
+        // TODO: Test files that are added but not managed files.
+    }
+    
+
 }

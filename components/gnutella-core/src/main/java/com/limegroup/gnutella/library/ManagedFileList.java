@@ -30,12 +30,6 @@ public interface ManagedFileList extends FileList {
     /** Informs the library that the file 'file' has changed. */
     Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
     
-    /** Adds a directory that will not be managed. */
-    void addDirectoryToExcludeFromManaging(File folder);
-    
-    /** Adds a directory that will be managed recursively. */
-    void addDirectoryToManageRecursively(File folder);
-    
     /** Returns a list of all directories that will be recursively managed. */
     List<File> getDirectoriesToManageRecursively();
     
@@ -45,6 +39,21 @@ public interface ManagedFileList extends FileList {
     /** Gets the current set of managed extensions. */
     Collection<String> getManagedExtensions();
     
-    /** Sets a new collection of managed extensions. */
-    void setManagedExtensions(Collection<String> extensions);
+    /**
+     * Sets a new collection of managed extensions.
+     * Returns a Future of the list of all futures this will add
+     * as part of the extensions changing.
+     */
+    Future<List<Future<FileDesc>>> setManagedExtensions(Collection<String> extensions);
+    
+    /**
+     * Sets the new collection of managed folders.  Folders listed in 
+     * 'recursiveFoldersToManage' will be recursively managed and
+     * folders in 'foldersToExclude' will not be managed.
+     * 
+     * This is different than {@link FileList#addFolder(File)} because it
+     * will replace existing managed folders.
+     */
+    Future<List<Future<FileDesc>>> setManagedFolders(Collection<File> recursiveFoldersToManage,
+                                                     Collection<File> foldersToExclude);
 }

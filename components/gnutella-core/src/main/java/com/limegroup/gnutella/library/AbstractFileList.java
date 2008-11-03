@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.IntSet;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -112,11 +113,13 @@ abstract class AbstractFileList implements SharedFileList {
     }
     
     @Override
-    public void addFolder(File folder) {
+    public Future<List<Future<FileDesc>>> addFolder(File folder) {
         // TODO: Add the folder to managelist as a managed folder,
         //       then iterate through the contents and share every resulting
         //       FD.
-        
+        managedList.addFolder(folder);
+        List<Future<FileDesc>> data = Collections.emptyList();
+        return new SimpleFuture<List<Future<FileDesc>>>(data);        
     }
     
     @Override

@@ -42,8 +42,11 @@ public interface FileList extends Iterable<FileDesc> {
      * Depending on the kind of FileList, this may either add all
      * current contents of the folder, or the folder itself (allowing
      * for future items in the folder to be added).
+     * 
+     * Returns a Future from which the list of all FDs that are going
+     * to be added is returned.
      */
-    void addFolder(File folder);
+    Future<List<Future<FileDesc>>> addFolder(File folder);
     
     /**
      * Asynchronously adds a file to the list.

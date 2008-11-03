@@ -10,20 +10,6 @@ import java.util.List;
 public interface LibraryData {
     
     /**
-     * Adds a directory that will not be scanned for managed files.
-     * This will have no effect if a parent of this folder is not already
-     * in the list of recursively managed directories.
-     */
-    void addDirectoryToExcludeFromManaging(File folder);
-    
-    /**
-     * Adds a directory to scan recursively for managed files.
-     * The only files included in management will be those that have
-     * extensions matching the managed extensions.
-     */
-    void addDirectoryToManageRecursively(File folder);
-    
-    /**
      * Returns a list of all directories that will be managed recursively.
      */
     List<File> getDirectoriesToManageRecursively();

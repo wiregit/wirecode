@@ -47,7 +47,7 @@ public class AbstractFileListStub implements SharedFileList {
     }
     
     @Override
-    public void addFolder(File folder) {
+    public Future<List<Future<FileDesc>>> addFolder(File folder) {
         throw new UnsupportedOperationException("Cannot add files");
     }
     

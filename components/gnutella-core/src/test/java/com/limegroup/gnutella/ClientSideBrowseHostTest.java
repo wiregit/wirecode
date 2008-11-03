@@ -420,10 +420,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     
     class MockFriendPresence implements FriendPresence {
 
-        private final RemoteFileDesc rfd;
+//        private final RemoteFileDesc rfd;
 
         public MockFriendPresence(RemoteFileDesc rfd) {
-            this.rfd = rfd;
+//            this.rfd = rfd;
             addFeature(new AddressFeature(rfd.toAddress()));
             addFeature(new AuthTokenFeature(new byte []{}));
         }

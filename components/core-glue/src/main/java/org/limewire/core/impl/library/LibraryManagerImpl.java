@@ -51,22 +51,10 @@ class LibraryManagerImpl implements LibraryManager {
     
     private static class LibraryDataImpl implements LibraryData {
 
-        ManagedFileList fileList;
+        private final ManagedFileList fileList;
         
         public LibraryDataImpl(ManagedFileList fileList) {
             this.fileList = fileList;
-        }
-        
-        @Override
-        public void addDirectoryToExcludeFromManaging(File folder) {
-            // TODO Auto-generated method stub
-            
-        }
-
-        @Override
-        public void addDirectoryToManageRecursively(File folder) {
-            // TODO Auto-generated method stub
-            
         }
 
         @Override

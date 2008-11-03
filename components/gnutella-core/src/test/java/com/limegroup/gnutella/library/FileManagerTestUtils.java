@@ -12,11 +12,15 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -27,7 +31,11 @@ public class FileManagerTestUtils {
 
 
     public static File createNewTestFile(int size, File dir) throws Exception {
-        return createNewNamedTestFile(size, "FileManager_unit_test", "tmp", dir);
+        return createNewExtensionTestFile(size, "tmp", dir);
+    }
+    
+    public static File createNewExtensionTestFile(int size, String ext, File dir) throws Exception {
+        return createNewNamedTestFile(size, "FileManager_unit_test", ext, dir); 
     }
 
     public static URN getUrn(File f) throws Exception {
@@ -105,6 +113,13 @@ public class FileManagerTestUtils {
         }
     }
     
+    public static void assertSetManagedDirectories(ManagedFileList fileList, Collection<File> dirs, Collection<File> excludeDirs) throws Exception {
+        assertFutureListFinishes(fileList.setManagedFolders(dirs, excludeDirs), 5, TimeUnit.SECONDS);
+    }
+    
+    public static void assertContainsFiles(Iterable<FileDesc> iterable, File... expectedFiles) {
+        assertContainsFiles(CollectionUtils.listOf(iterable), expectedFiles);
+    }
     
     public static void assertContainsFiles(List<FileDesc> fds, File... expectedFiles) {
         List<File> files = new ArrayList<File>(fds.size());
@@ -116,6 +131,14 @@ public class FileManagerTestUtils {
             assertTrue("did not contain: " + file, files.remove(file));
         }
         assertEmpty(files);
+    }
+    
+    public static void assertAddsFolder(FileList fileList, File folder) throws Exception {
+        assertFutureListFinishes(fileList.addFolder(folder), 5, TimeUnit.SECONDS);
+    }
+    
+    public static void assertChangeExtensions(ManagedFileList fileList, String... extensions) throws Exception {
+        assertFutureListFinishes(fileList.setManagedExtensions(Arrays.asList(extensions)), 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -130,8 +153,36 @@ public class FileManagerTestUtils {
     public static void assertLoads(ManagedFileList managedList) throws Exception {
         assertLoads(managedList, 5, TimeUnit.SECONDS);
     }
-        public static void assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
-        assertTrue(((ManagedFileListImpl)managedList).loadManagedFiles().await(timeout, unit));
+
+    public static void assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
+        Future<List<Future<FileDesc>>> loadFuture = ((ManagedFileListImpl) managedList).loadManagedFiles();
+        assertFutureListFinishes(loadFuture, timeout, unit);
+    }
+    
+    public static void assertFutureListFinishes(Future<List<Future<FileDesc>>> future, long timeout, TimeUnit unit) throws Exception {
+        long left = unit.toNanos(timeout);
+        long start = System.nanoTime();
+        List<Future<FileDesc>> futures = future.get(timeout, unit);
+        left -= System.nanoTime() - start;
+        if(left <= 0) {
+            throw new TimeoutException("timed out waiting for futures to load");
+        } else {
+            waitForFutures(futures, left, TimeUnit.NANOSECONDS);
+        }
+    }
+    
+    private static void waitForFutures(List<? extends Future<?>> futures, long timeout, TimeUnit unit) throws Exception {
+        long left = unit.toNanos(timeout);
+        for(Future<?> future : futures) {
+            long start = System.nanoTime();
+            try {
+                future.get(left, TimeUnit.NANOSECONDS);
+            } catch(ExecutionException ignored) {}
+            left -= System.nanoTime() - start;
+            if(left <= 0) {
+                throw new TimeoutException("timed out waiting for futures to load");
+            }
+        }
     }
 
     // build xml string for video

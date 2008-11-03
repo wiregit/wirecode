@@ -75,9 +75,6 @@ public class XMPPAddressResolver implements AddressResolver {
      * the presence.
      */
     private Address getMatchingAddress(XMPPAddress address, String resourceId, Presence presence) {
-        if (!(presence instanceof FriendPresence)) {
-            return  null;
-        }
         String originalId = address.getId();
         int slash = originalId.indexOf('/');
         if (slash == -1) {
