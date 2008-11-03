@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
@@ -15,6 +16,7 @@ import org.limewire.core.api.network.NetworkManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.NetworkUtils;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
@@ -101,15 +103,19 @@ public class FirewallOptionPanel extends OptionPanel {
                     port = currentPort;
                     networkManager.portChanged();
                 } catch(IOException ioe) {
-                    //TODO: show error dialog if port not available
-//                    GUIMediator.showError(I18n.tr("Port not available. Please select a different port."));
-//                    NetworkSettings.PORT.setValue(port);
-//                    portField.setText(Integer.toString(port));
-//                    throw new IOException("port not available");
+                    FocusJOptionPane.showMessageDialog(FirewallOptionPanel.this, 
+                            I18n.tr("The port chosen {0}, is already in use.", currentPort),
+                            I18n.tr("Network Port Error"),
+                            JOptionPane.ERROR_MESSAGE);
+                    NetworkSettings.PORT.setValue(port);
+                    portField.setText(Integer.toString(port));
                 } catch(IllegalArgumentException iae) {
-//                    GUIMediator.showError(I18n.tr("Please enter a port between 1 and 65535."));
-//                    portField.setText(Integer.toString(port));
-//                    throw new IOException("invalid port");
+                    //TODO: this should be enforced by the textbox
+                    FocusJOptionPane.showMessageDialog(FirewallOptionPanel.this, 
+                            I18n.tr("The port chosen {0}, must be between 1 and 65535", currentPort),
+                            I18n.tr("Network Port Error"),
+                            JOptionPane.ERROR_MESSAGE);
+                    portField.setText(Integer.toString(port));
                 }
             }
         }

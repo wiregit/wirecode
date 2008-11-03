@@ -10,6 +10,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
@@ -18,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.daap.DaapManager;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
@@ -194,7 +196,7 @@ public class FilesOptionPanel extends OptionPanel {
             storeOptionPanel.setPreferredSize(new Dimension(350, 140));
             
             storePathTextField = new JTextField(40);
-            browseStorePathButton = new JButton(new BrowseDirectoryAction(getParent(), storePathTextField));
+            browseStorePathButton = new JButton(new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField));
             configureNamingButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     storeOptionPanel,I18n.tr("LimeWire Store File Organization"),
                     I18n.tr("Configure file naming"),I18n.tr("Configure how files are automatically named")));
@@ -218,13 +220,11 @@ public class FilesOptionPanel extends OptionPanel {
                     }
                     SharingSettings.setSaveLWSDirectory(saveDir);
                     currentSaveDirectory = save;
-                } catch(IOException ioe) {
-                    //TODO: error message
-//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
-                    storePathTextField.setText(currentSaveDirectory);
-                } catch(NullPointerException npe) {
-                    //TODO: error message
-//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                } catch(Exception ioe) {
+                    FocusJOptionPane.showMessageDialog(FilesOptionPanel.this, 
+                            I18n.tr("Could not save Store download directory, reverted to old directory"),
+                            I18n.tr("Save Folder Error"),
+                            JOptionPane.ERROR_MESSAGE);
                     storePathTextField.setText(currentSaveDirectory);
                 }
             }
@@ -244,14 +244,15 @@ public class FilesOptionPanel extends OptionPanel {
             try {
                 File file = SharingSettings.getSaveLWSDirectory();
                 if (file == null) {
-                    throw (new FileNotFoundException());
+                    file = SharingSettings.DEFAULT_SAVE_LWS_DIR;
+                    if(file == null)
+                        throw (new FileNotFoundException());
                 }
                 currentSaveDirectory = file.getCanonicalPath();
                 storePathTextField.setText(file.getCanonicalPath());
             } catch (FileNotFoundException fnfe) {
                 // simply use the empty string if we could not get the save
                 // directory.
-                //TODO: change this to a real setting?? 
                 currentSaveDirectory = "";
                 storePathTextField.setText("");
             } catch (IOException ioe) {
@@ -313,7 +314,13 @@ public class FilesOptionPanel extends OptionPanel {
             String password = new String(passwordField.getPassword());
             
             if (password.equals("") && requiresPassword) { 
-                //TODO: display error message
+                FocusJOptionPane.showMessageDialog(FilesOptionPanel.this, 
+                        I18n.tr("Daap Password cannot be null, iTunes settings not saved"),
+                        I18n.tr("iTunes Error"),
+                        JOptionPane.ERROR_MESSAGE);
+                
+                initOptions();
+                return;
             }
             
             //enable daap setting
@@ -352,7 +359,10 @@ public class FilesOptionPanel extends OptionPanel {
                 daapManager.stop();
                 initOptions();
 
-                //TODO: display error
+                FocusJOptionPane.showMessageDialog(FilesOptionPanel.this, 
+                        I18n.tr("Could not restart the Daap connection"),
+                        I18n.tr("Daap Error"),
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
 

@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
@@ -15,6 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
@@ -140,7 +142,7 @@ public class DownloadOptionPanel extends OptionPanel {
             downloadSaveTextField = new JTextField();
             downloadSaveTextField.setEditable(false);
             downloadSaveTextField.setBackground(Color.WHITE);
-            browseSaveLocationButton = new JButton(new BrowseDirectoryAction(getParent(), downloadSaveTextField));
+            browseSaveLocationButton = new JButton(new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField));
             autoRenameDuplicateFilesCheckBox = new JCheckBox();
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
             
@@ -169,13 +171,11 @@ public class DownloadOptionPanel extends OptionPanel {
                     }
                     SharingSettings.setSaveDirectory(saveDir);
                     currentSaveDirectory = save;
-                } catch(IOException ioe) {
-                    //TODO: error message
-//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
-                    downloadSaveTextField.setText(currentSaveDirectory);
-                } catch(NullPointerException npe) {
-                    //TODO: error message
-//                    GUIMediator.showError(I18n.tr("Invalid folder for saving files. Please use another folder or revert to the default."));
+                } catch(Exception ioe) {
+                    FocusJOptionPane.showMessageDialog(DownloadOptionPanel.this, 
+                            I18n.tr("Could not save download directory, reverted to old directory"),
+                            I18n.tr("Save Folder Error"),
+                            JOptionPane.ERROR_MESSAGE);
                     downloadSaveTextField.setText(currentSaveDirectory);
                 }
             }
@@ -192,20 +192,19 @@ public class DownloadOptionPanel extends OptionPanel {
         public void initOptions() { 
             autoRenameDuplicateFilesCheckBox.setSelected(DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue());
             clearDownloadsCheckBox.setSelected(SharingSettings.CLEAR_DOWNLOAD.getValue());
-
-            //TODO: handle error dialog when download already exists
             
             try {
                 File file = SharingSettings.getSaveDirectory();
                 if (file == null) {
-                    throw (new FileNotFoundException());
+                    file = SharingSettings.DEFAULT_SAVE_DIR;
+                    if(file == null)
+                        throw (new FileNotFoundException());
                 }
                 currentSaveDirectory = file.getCanonicalPath();
                 downloadSaveTextField.setText(file.getCanonicalPath());
             } catch (FileNotFoundException fnfe) {
                 // simply use the empty string if we could not get the save
                 // directory.
-                //TODO: change this to a real setting?? 
                 currentSaveDirectory = "";
                 downloadSaveTextField.setText("");
             } catch (IOException ioe) {

@@ -61,6 +61,7 @@ public class FocusJOptionPane {
         visibleDialogs.add(messageString);
         
         boolean dispose = false;
+        parentComponent = getWindowForComponent(parentComponent);
         if(parentComponent == null) {
             parentComponent = createFocusComponent();
             dispose = true;
@@ -82,6 +83,7 @@ public class FocusJOptionPane {
     public static int showConfirmDialog(Component parentComponent, Object message, String title,
             int optionType) throws HeadlessException {
         boolean dispose = false;
+        parentComponent = getWindowForComponent(parentComponent);
         if(parentComponent == null) {
             parentComponent = createFocusComponent();
             dispose = true;
@@ -139,7 +141,7 @@ public class FocusJOptionPane {
         return dialog;
     }
     
-    static Window getWindowForComponent(Component parentComponent) 
+    public static Window getWindowForComponent(Component parentComponent) 
     throws HeadlessException {
         if (parentComponent == null)
             return GuiUtils.getMainFrame();
