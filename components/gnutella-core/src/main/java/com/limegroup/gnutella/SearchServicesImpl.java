@@ -7,6 +7,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.MediaType;
+import org.limewire.util.I18NConvert;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -18,6 +19,7 @@ import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.util.QueryUtils;
 
 @Singleton
 public class SearchServicesImpl implements SearchServices {
@@ -145,26 +147,30 @@ public class SearchServicesImpl implements SearchServices {
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, java.lang.String, com.limegroup.gnutella.MediaType)
      */
     public void query(final byte[] guid, 
-    						 final String query, 
+    						 String query, 
     						 final String richQuery, 
     						 final MediaType type) {
             QueryRequest qr = null;
-            if (networkManager.get().isIpPortValid() && (new GUID(guid)).addressesMatch(networkManager.get().getAddress(), 
-                    networkManager.get().getPort())) {
-                // if the guid is encoded with my address, mark it as needing out
-                // of band support.  note that there is a VERY small chance that
-                // the guid will be address encoded but not meant for out of band
-                // delivery of results.  bad things may happen in this case but 
-                // it seems tremendously unlikely, even over the course of a 
-                // VERY long lived client
-                qr = queryRequestFactory.get().createOutOfBandQuery(guid, query, richQuery, type);
-                outOfBandStatistics.addSentQuery();
-            } else {
-                qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
+            query = QueryUtils.removeIllegalChars(query);
+            query = I18NConvert.instance().getNorm(query);
+            if(query.length() > 0) {
+                if (networkManager.get().isIpPortValid() && (new GUID(guid)).addressesMatch(networkManager.get().getAddress(), 
+                        networkManager.get().getPort())) {
+                    // if the guid is encoded with my address, mark it as needing out
+                    // of band support.  note that there is a VERY small chance that
+                    // the guid will be address encoded but not meant for out of band
+                    // delivery of results.  bad things may happen in this case but 
+                    // it seems tremendously unlikely, even over the course of a 
+                    // VERY long lived client
+                    qr = queryRequestFactory.get().createOutOfBandQuery(guid, query, richQuery, type);
+                    outOfBandStatistics.addSentQuery();
+                } else {                
+                    qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
+                }
+            
+            
+                recordAndSendQuery(qr, type);
             }
-            
-            
-            recordAndSendQuery(qr, type);
     }
 
     /* (non-Javadoc)

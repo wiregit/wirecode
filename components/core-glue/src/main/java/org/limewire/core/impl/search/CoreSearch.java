@@ -32,7 +32,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.geocode.CachedGeoLocation;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.util.QueryUtils;
 
 public class CoreSearch implements Search {
 
@@ -98,11 +97,8 @@ public class CoreSearch implements Search {
         searchGuid = searchServices.newQueryGUID();
         listenerList.addQueryReplyListener(searchGuid, qrListener);
         
-        String gnutellaSearch = QueryUtils.removeIllegalChars(searchDetails.getSearchQuery());
-        if(gnutellaSearch.length() > 0) {
-            searchServices.query(searchGuid, gnutellaSearch, "",
-                    MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
-        }
+        searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
+                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
         
         backgroundExecutor.execute(new Runnable() {
             @Override

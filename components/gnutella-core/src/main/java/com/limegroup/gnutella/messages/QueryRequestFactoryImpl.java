@@ -6,7 +6,6 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.I18NConvert;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
@@ -147,7 +146,6 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createOutOfBandQuery(byte[] guid, String query,
             String xmlQuery) {
-        query = I18NConvert.instance().getNorm(query);
         if (query == null) {
             throw new NullPointerException("null query");
         }
@@ -168,7 +166,6 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createOutOfBandQuery(byte[] guid, String query,
             String xmlQuery, MediaType type) {
-        query = I18NConvert.instance().getNorm(query);
         if (query == null) {
             throw new NullPointerException("null query");
         }
@@ -272,26 +269,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createQuery(byte[], java.lang.String, java.lang.String)
      */
     public QueryRequest createQuery(byte[] guid, String query, String xmlQuery) {
-        query = I18NConvert.instance().getNorm(query);
-        if (guid == null) {
-            throw new NullPointerException("null guid");
-        }
-        if (guid.length != 16) {
-            throw new IllegalArgumentException("invalid guid length");
-        }
-        if (query == null) {
-            throw new NullPointerException("null query");
-        }
-        if (xmlQuery == null) {
-            throw new NullPointerException("null xml query");
-        }
-        if (query.length() == 0 && xmlQuery.length() == 0) {
-            throw new IllegalArgumentException("empty query");
-        }
-        if (xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
-            throw new IllegalArgumentException("invalid XML");
-        }
-        return create(guid, query, xmlQuery);
+        return createQuery(guid, query, xmlQuery, null);
     }
 
     /* (non-Javadoc)
@@ -299,7 +277,6 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      */
     public QueryRequest createQuery(byte[] guid, String query, String xmlQuery,
             MediaType type) {
-        query = I18NConvert.instance().getNorm(query);
         if (guid == null) {
             throw new NullPointerException("null guid");
         }
