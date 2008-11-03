@@ -2,8 +2,13 @@ package org.limewire.ui.swing;
 
 import java.awt.Frame;
 import java.awt.Image;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.JLabel;
@@ -17,8 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
-import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
+import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
@@ -31,6 +36,7 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.wizard.IntentDialog;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
@@ -164,7 +170,22 @@ public final class Initializer {
     
     /** shows legal stuff and exits if the user does not agree */
     private void confirmIntent() {
-        if (!InstallSettings.LEGAL.getValue()) {
+
+        File versionFile = new File(CommonUtils.getUserSettingsDir(), "versions.props");
+
+        Properties properties = new Properties();
+        
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(versionFile);
+            properties.load(inputStream);
+        } catch (IOException iox) {
+        } finally {
+            IOUtils.close(inputStream);
+        }
+
+        String exists = properties.getProperty(LimeWireUtils.getLimeWireVersion());
+        if (exists == null || !exists.equals("true")) {
             SwingUtils.invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
@@ -174,8 +195,19 @@ public final class Initializer {
                     }
                 }
             });
+
+            properties.put(LimeWireUtils.getLimeWireVersion(), "true");
+            FileOutputStream outputStream = null;
+            try {
+                outputStream = new FileOutputStream(versionFile);
+                properties.store(outputStream, "Started & Ran Versions");
+            } catch (IOException ignored) {
+            } finally {
+                IOUtils.close(outputStream);
+            }
         }
     }
+  
 
     /** Initializes the very early things. */
     /*

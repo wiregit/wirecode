@@ -13,7 +13,6 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -97,7 +96,6 @@ public class IntentDialog extends JDialog {
     
     private void finish(boolean agreed){
         this.agreed = agreed;
-        InstallSettings.LEGAL.setValue(agreed);
         setVisible(false);
     }
     
