@@ -114,10 +114,15 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
 
 
         // necessary to fill table with stripes and have scrollbar appear
-        // properly
-        scrollPane.addComponentListener(new ComponentAdapter() {
+        // properly        
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                adjustSize();
+            }
+            
+            @Override
+            public void componentShown(ComponentEvent e){
                 adjustSize();
             }
         });
@@ -171,9 +176,11 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
     
     private void adjustSize(){
         if (scrollComponent.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
+            //force layer to take up entire scrollpane so stripes are shown
             layer.setPreferredSize(scrollPane.getViewport().getSize());
         } else {
-            layer.setPreferredSize(scrollComponent.getPreferredSize());
+            //layer can handle its own sizing
+            layer.setPreferredSize(null);
         }
     }
     
