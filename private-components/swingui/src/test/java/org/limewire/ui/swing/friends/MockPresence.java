@@ -1,10 +1,17 @@
 package org.limewire.ui.swing.friends;
 
+import java.util.Collection;
+import java.net.URI;
+
 import org.limewire.xmpp.api.client.IncomingChatListener;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.listener.ListenerSupport;
 
 public class MockPresence implements Presence {
     private String status;
@@ -68,5 +75,37 @@ public class MockPresence implements Presence {
     public void setIncomingChatListener(IncomingChatListener listener) {
         // TODO Auto-generated method stub
 
+    }
+
+    public Friend getFriend() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String getPresenceId() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Collection<Feature> getFeatures() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Feature getFeature(URI id) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean hasFeatures(URI... id) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void addFeature(Feature feature) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void removeFeature(URI id) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }
