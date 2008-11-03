@@ -26,7 +26,7 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
         comparator = new SimilarResultsGroupingComparator() {
             @Override
             protected int doCompare(VisualSearchResult result1, VisualSearchResult result2) {
-                return 0;
+                return result1.getHeading().compareTo(result2.getHeading());
             }
         };
 
@@ -50,17 +50,17 @@ public class SimilarResultsGroupingComparatorTest extends TestCase {
 
     public void testSorting3() {
         populate(simResult2, simResult1, parent, nonParent1, nonParent2);
-        assertOrder(PARENT, SIMILAR2, SIMILAR1, NON_PARENT_1, NON_PARENT_2);
+        assertOrder( NON_PARENT_1, NON_PARENT_2, PARENT, SIMILAR2, SIMILAR1);
     }
 
     public void testSorting4() {
         populate(simResult1, simResult2, nonParent1, parent, nonParent2);
-        assertOrder(PARENT, SIMILAR1, SIMILAR2, NON_PARENT_2, NON_PARENT_1);
+        assertOrder(NON_PARENT_1, NON_PARENT_2, PARENT, SIMILAR1, SIMILAR2);
         
         results.clear();
 
         populate(parent, nonParent2, simResult2, nonParent1, simResult1);
-        assertOrder(PARENT, SIMILAR2, SIMILAR1, NON_PARENT_2, NON_PARENT_1);
+        assertOrder(NON_PARENT_1, NON_PARENT_2, PARENT, SIMILAR2, SIMILAR1);
     }
     
     private void populate(VisualSearchResult... results) {

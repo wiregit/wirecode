@@ -76,18 +76,18 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, similarResults0.size());
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(3, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, similarResults1.size());
+        Assert.assertEquals(1, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(1, coreResults1.size());
 
-        Assert.assertNull(group0.getSimilarityParent());
-        Assert.assertEquals(group0, group1.getSimilarityParent());
+        Assert.assertNull(group1.getSimilarityParent());
+        Assert.assertEquals(group1, group0.getSimilarityParent());
     }
 
     public void testGroupingByName2UrnsNameComesLateMultipleAdds() {
@@ -117,18 +117,18 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Assert.assertEquals(2, results.size());
         VisualSearchResult group0 = results.get(0);
         List<VisualSearchResult> similarResults0 = group0.getSimilarResults();
-        Assert.assertEquals(1, similarResults0.size());
+        Assert.assertEquals(0, similarResults0.size());
         List<SearchResult> coreResults0 = group0.getCoreSearchResults();
         Assert.assertEquals(9, coreResults0.size());
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, similarResults1.size());
+        Assert.assertEquals(1, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(3, coreResults1.size());
 
-        Assert.assertNull(group0.getSimilarityParent());
-        Assert.assertEquals(group0, group1.getSimilarityParent());
+        Assert.assertNull(group1.getSimilarityParent());
+        Assert.assertEquals(group1, group0.getSimilarityParent());
     }
 
     public void testGroupByName4Urns() {
@@ -296,19 +296,19 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
 
         VisualSearchResult group1 = results.get(1);
         List<VisualSearchResult> similarResults1 = group1.getSimilarResults();
-        Assert.assertEquals(0, similarResults1.size());
+        Assert.assertEquals(2, similarResults1.size());
         List<SearchResult> coreResults1 = group1.getCoreSearchResults();
         Assert.assertEquals(2, coreResults1.size());
 
         VisualSearchResult group2 = results.get(2);
         List<VisualSearchResult> similarResults2 = group2.getSimilarResults();
-        Assert.assertEquals(2, similarResults2.size());
+        Assert.assertEquals(0, similarResults2.size());
         List<SearchResult> coreResults2 = group2.getCoreSearchResults();
         Assert.assertEquals(3, coreResults2.size());
 
-        Assert.assertNull(group2.getSimilarityParent());
-        Assert.assertEquals(group2, group1.getSimilarityParent());
-        Assert.assertEquals(group2, group0.getSimilarityParent());
+        Assert.assertNull(group1.getSimilarityParent());
+        Assert.assertEquals(group1, group2.getSimilarityParent());
+        Assert.assertEquals(group1, group0.getSimilarityParent());
     }
 
     public void testVisibility() {
