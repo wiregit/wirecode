@@ -36,7 +36,6 @@ import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -84,8 +83,6 @@ public class DownloadSummaryPanel extends JPanel {
     @Resource private Font moreFont;
     @Resource private Font itemFont;
     
-    private boolean selected;
-
     private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
 
     private void createMoreLabel() {
@@ -183,16 +180,6 @@ public class DownloadSummaryPanel extends JPanel {
 		addListeners();
 		
         final NavItem item = navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
-        item.addNavItemListener(new NavItemListener() {
-            @Override
-            public void itemRemoved() {                
-            }
-            
-            @Override
-            public void itemSelected(boolean selected) {
-                setSelected(selected);
-            }
-        });
         
         addMouseListener(new ActionHandListener(new ActionListener(){
             @Override
@@ -220,22 +207,7 @@ public class DownloadSummaryPanel extends JPanel {
 
         });
 	}
-	
-	private void setSelected(boolean selected) {
-	    if (isSelected() != selected) {
-            this.selected = selected;
-            if (selected) {
-                setBorder(BorderFactory.createLineBorder(fontColour));
-            } else {
-                setBorder(null);
-            }
-        }
-    }
-	
-	private boolean isSelected(){
-	    return selected;
-	}
-    
+	    
 	//hide panel if there are no downloads.  show it if there are
     private void adjustVisibility() {
         if (allList.size() > 0) {

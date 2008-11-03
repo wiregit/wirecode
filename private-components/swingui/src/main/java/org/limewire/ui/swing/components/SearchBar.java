@@ -53,7 +53,7 @@ public class SearchBar extends JXPanel {
 
     private static class SearchBarPainter extends AbstractPainter<JXPanel> {
         // TODO move colors to properties
-        private Color leftColor = Color.decode("#bfd8e9");
+        private Color leftColor = Color.decode("#c2e986");
         private Color rightColor = Color.WHITE;
         
         private JComponent leftComponent;
@@ -94,7 +94,7 @@ public class SearchBar extends JXPanel {
     
     private static class SearchComboUI extends BasicComboBoxUI{
 //      TODO move to properties
-        private Color leftColor = Color.decode("#bfd8e9");
+        private Color leftColor = Color.decode("#c2e986");
         private Icon buttonIcon;
         
         public SearchComboUI(Icon buttonIcon){
