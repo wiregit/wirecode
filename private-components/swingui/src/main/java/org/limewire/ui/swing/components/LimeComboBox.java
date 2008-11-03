@@ -507,47 +507,4 @@ public class LimeComboBox extends JXButton {
     public void addUpdateHandler(UpdateHandler updateHandler) {
         this.updateHandler = updateHandler;        
     }
-    
-
-    // Test harness
-    public static void main(String[] args) {
-        
-        JFrame window = new JFrame();
-        
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.setBackground(Color.WHITE);
-        
-        Action one = new AbstractAction("  one") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        };
-        Action two = new AbstractAction("two two    ") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        };
-        AbstractAction three = new AbstractAction("threethree three") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        };
-        
-        Action[] actions = new Action[] {one,two,three};
-        
-        LinkedList<Action> actList = new LinkedList<Action>();
-        
-        for ( Action a : actions)
-            actList.add(a);
-        
-      //  panel.add(new LimeComboBoxFactory().createFullComboBox(actList));
-        
-        panel.add(new LimeComboBoxFactory().createMiniComboBox("hello",actList));
-        
-        window.add(panel);
-        window.pack();
-        window.validate();
-        window.setVisible(true);
-        window.setSize(new Dimension(500,500));
-    }
 }
