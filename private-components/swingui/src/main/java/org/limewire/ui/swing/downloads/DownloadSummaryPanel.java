@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -27,6 +28,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
@@ -158,7 +160,7 @@ public class DownloadSummaryPanel extends JPanel {
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
-		table.setRowHeight(17);
+		table.setRowHeight(28);
 		
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
@@ -289,18 +291,20 @@ public class DownloadSummaryPanel extends JPanel {
 	
 	private class DownloadStatusPanelRenderer extends JPanel implements
 			TableCellRenderer {
-		private JLabel nameLabel = new JLabel();
-
-		private JLabel percentLabel = new JLabel();
+		
+	    private final JLabel nameLabel;
+		private final LimeProgressBar progressBar;
 
 		public DownloadStatusPanelRenderer() {
 			super(new GridBagLayout());
+			
 			nameLabel = new JLabel();
-            percentLabel = new JLabel();
+			progressBar = new LimeProgressBar(0,100);
+			progressBar.setPreferredSize(
+			        new Dimension((int)progressBar.getPreferredSize().getWidth(), 10));
 
             nameLabel.setFont(itemFont);
-            percentLabel.setFont(itemFont);
-            
+                        
 			setOpaque(false);
 			GridBagConstraints gbc = new GridBagConstraints();
 
@@ -311,28 +315,14 @@ public class DownloadSummaryPanel extends JPanel {
 			gbc.anchor = GridBagConstraints.WEST;
 			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
 			nameLabel.setOpaque(false);
-			gbc.insets = new Insets(0, LEFT_MARGIN, 0, 0);
+			gbc.insets = new Insets(0, LEFT_MARGIN, 0, LEFT_MARGIN);
 			add(nameLabel, gbc);
 
-			gbc.gridx = 1;
-			gbc.weightx = 0;
-			gbc.anchor = GridBagConstraints.EAST;
-			percentLabel.setAlignmentY(JLabel.RIGHT_ALIGNMENT);
-			
-			add(percentLabel, gbc);
+			gbc.gridy = 1;
+			gbc.weightx = 1;
+			add(progressBar, gbc);
 		}
 		
-		@Override
-		public void setForeground(Color c) {
-            super.setForeground(c);
-            //prevent NPE at super construction
-            if (nameLabel != null) {
-                nameLabel.setForeground(c);
-            }
-            if (percentLabel != null) {
-                percentLabel.setForeground(c);
-            }
-        }
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table,
@@ -340,7 +330,7 @@ public class DownloadSummaryPanel extends JPanel {
 				int column) {
             DownloadItem item = (DownloadItem) value;
             nameLabel.setText(item.getTitle());
-            percentLabel.setText(item.getPercentComplete() + "%");
+            progressBar.setValue(item.getPercentComplete());
             return this;
         }
 	}

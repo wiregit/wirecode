@@ -59,7 +59,7 @@ public class SplashWindow {
         textLabel.setOpaque(false);
         FontUtils.changeStyle(textLabel, Font.BOLD);
         
-        progressBar = new LimeJProgressBar();
+        progressBar = new LimeProgressBar();
         progressBar.setOpaque(false);
         int width = progressBar.getPreferredSize().width;
         progressBar.setPreferredSize(new Dimension(width, 13));

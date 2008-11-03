@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.downloads;
+package org.limewire.ui.swing.components;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -9,16 +9,18 @@ import java.awt.Graphics2D;
 
 import javax.swing.JProgressBar;
 
+import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.GuiUtils;
+
 /**
  * Grayed out when setEnabled(false)
  */
 public class LimeProgressBar extends JProgressBar {
     
-    // TODO: convert to resources
-    private Color barBackgroundGradientTop = new Color(0xe4,0xe4,0xe4);
-    private Color barBackgroundGradientBottom = new Color(0xc4,0xc4,0xc4);
-    private Color barForegroundGradientTop = new Color(0x16,0x68,0xa8);
-    private Color barForegroundGradientBottom = new Color(0x22,0x50,0xa4);
+    @Resource private Color barBackgroundGradientTop;
+    @Resource private Color barBackgroundGradientBottom;
+    @Resource private Color barForegroundGradientTop;
+    @Resource private Color barForegroundGradientBottom;
     
 	private static final Composite DISABLED_COMPOSITE = AlphaComposite
 			.getInstance(AlphaComposite.SRC_ATOP).derive(.3f);
@@ -27,10 +29,12 @@ public class LimeProgressBar extends JProgressBar {
 	
 	public LimeProgressBar(int min, int max){
 	    super(min, max);
+	    
+	    GuiUtils.assignResources(this);
 	}
 	
 	public LimeProgressBar(){
-        super();
+	    GuiUtils.assignResources(this);        
     }
 
 	@Override
@@ -47,7 +51,6 @@ public class LimeProgressBar extends JProgressBar {
 			    int height = this.getHeight();
 			    int width = this.getWidth();
 			   
-
 			    int progress = (int) (width * this.getPercentComplete());
 			    
 			    g2.setPaint(new GradientPaint(0,1, barBackgroundGradientTop, 0, height-2, barBackgroundGradientBottom));
