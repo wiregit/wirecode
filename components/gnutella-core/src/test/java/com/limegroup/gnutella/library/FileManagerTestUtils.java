@@ -113,7 +113,7 @@ public class FileManagerTestUtils {
         }
         
         for(File file : expectedFiles) {
-            assertTrue(files.remove(file));
+            assertTrue("did not contain: " + file, files.remove(file));
         }
         assertEmpty(files);
     }

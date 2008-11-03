@@ -8,15 +8,16 @@ import java.util.concurrent.TimeUnit;
 public class SimpleFuture<T> implements Future<T> {
     
     private final T t;
-    private volatile Throwable exception;
+    private final Throwable exception;
     
     public SimpleFuture(T t) {
         this.t = t;
+        this.exception = null;
     }
     
-    /** Sets an exception that will be thrown when get is called. */
-    public void setException(Throwable t) {
-        this.exception = t;
+    public SimpleFuture(Throwable throwable) {
+        this.t = null;
+        this.exception = throwable;
     }
 
     @Override
