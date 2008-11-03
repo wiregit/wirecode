@@ -167,7 +167,7 @@ public class LimeXMLReplyCollection {
         
         // Then try and see it, with validation and all.
         if(doc != null) {
-            doc = validate(doc, fd.getFile(), fd);
+            doc = validate(doc, fd);
             if(doc != null) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding old document for file: " + fd.getFile() + ", doc: " + doc);
@@ -227,11 +227,11 @@ public class LimeXMLReplyCollection {
      * 2) If it's valid (if not, attempts to reparse it.  If it can't, drops it).
      * 3) If it's corrupted (if so, fixes & writes the fixed one to disk).
      */
-    private LimeXMLDocument validate(LimeXMLDocument doc, File file, FileDesc fd) {
+    private LimeXMLDocument validate(LimeXMLDocument doc, FileDesc fd) {
         if(!doc.isCurrent()) {
             if(LOG.isDebugEnabled())
-                LOG.debug("reconstructing old document: " + file);
-            LimeXMLDocument tempDoc = constructDocument(file);
+                LOG.debug("reconstructing old document: " + fd.getFile());
+            LimeXMLDocument tempDoc = constructDocument(fd.getFile());
             if (tempDoc != null) {
                 doc = update(doc, tempDoc);
             } else {
@@ -242,7 +242,7 @@ public class LimeXMLReplyCollection {
         // Verify the doc has information in it.
         if(!doc.isValid()) {
             //If it is invalid, try and rebuild it.
-            doc = constructDocument(file);
+            doc = constructDocument(fd.getFile());
             if(doc == null)
                 return null;
         }   
@@ -250,7 +250,7 @@ public class LimeXMLReplyCollection {
         // check to see if it's corrupted and if so, fix it.
         if( AudioMetaData.isCorrupted(doc) ) {
             doc = AudioMetaData.fixCorruption(doc, limeXMLDocumentFactory);
-            mediaFileToDisk(fd, file.getPath(), doc);
+            mediaFileToDisk(fd, doc);
         }
         
         return doc;
@@ -644,17 +644,17 @@ public class LimeXMLReplyCollection {
     /**
      * Writes this media file to disk, using the XML in the doc.
      */
-    public MetaDataState mediaFileToDisk(FileDesc fd, String fileName, LimeXMLDocument doc) {
+    public MetaDataState mediaFileToDisk(FileDesc fd, LimeXMLDocument doc) {
         MetaDataState writeState = MetaDataState.UNCHANGED;
         
         if(LOG.isDebugEnabled())
-            LOG.debug("writing: " + fileName + " to disk.");
+            LOG.debug("writing: " + fd.getFile() + " to disk.");
         
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the metadata to disk....
-        MetaDataWriter writer = getEditorIfNeeded(fileName, doc);
+        MetaDataWriter writer = getEditorIfNeeded(fd.getFile(), doc);
         if (writer != null)  {
-            writeState = commitMetaData(fileName, writer);
+            writeState = commitMetaData(fd, writer);
         }
         assert writeState != MetaDataState.INCORRECT_FILETYPE : "trying to write data to unwritable file";
 
@@ -669,21 +669,21 @@ public class LimeXMLReplyCollection {
      * @return An Editor to use when committing or null if nothing 
      *  should be editted.
      */
-    private MetaDataWriter getEditorIfNeeded(String fileName, LimeXMLDocument doc) {
+    private MetaDataWriter getEditorIfNeeded(File file, LimeXMLDocument doc) {
         // check if an editor exists for this file, if no editor exists
         //  just store data in xml repository only
-        if( !LimeXMLUtils.isSupportedEditableFormat(fileName)) 
+        if( !LimeXMLUtils.isSupportedEditableFormat(file.getName())) 
         	return null;
         
         //get the editor for this file and populate it with the XML doc info
-        MetaDataWriter newValues = new MetaDataWriter(fileName, metaDataFactory);
+        MetaDataWriter newValues = new MetaDataWriter(file.getPath(), metaDataFactory);
         newValues.populate(doc);
         
         
         // try reading the file off of disk
         MetaData existing = null;
         try {
-            existing = metaDataFactory.parse(new File(fileName));
+            existing = metaDataFactory.parse(file);
         } catch (IOException e) {
             return null;
         }
@@ -703,7 +703,7 @@ public class LimeXMLReplyCollection {
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private MetaDataState commitMetaData(String fileName, MetaDataWriter editor) {
+    private MetaDataState commitMetaData(FileDesc fd, MetaDataWriter editor) {
         //write to mp3 file...
         MetaDataState retVal = editor.commitMetaData();
         if(LOG.isDebugEnabled())
@@ -715,34 +715,30 @@ public class LimeXMLReplyCollection {
             retVal == MetaDataState.INCORRECT_FILETYPE)
             return retVal;
             
-        File file = new File(fileName);
-        FileDesc fd = fileManager.get().getManagedFileList().getFileDesc(file);
-        
         // if a FileDesc for this file exists, write out the changes to disk
         // and update the FileDesc in the FileManager
-        if(fd != null) {
-            List<LimeXMLDocument> currentXmlDocs = fd.getLimeXMLDocuments();
-            if (LimeXMLUtils.isEditableFormat(file)) {
-                try {
-                      //TODO: Disk IO being performed here!!
-                      LimeXMLDocument newAudioXmlDoc = metaDataReader.readDocument(file);
-                      LimeXMLDocument oldAudioXmlDoc = getAudioDoc(currentXmlDocs);
-                      
-                      if(!oldAudioXmlDoc.equals(newAudioXmlDoc)) {
-                          currentXmlDocs = mergeAudioDocs(currentXmlDocs, oldAudioXmlDoc, newAudioXmlDoc);
-                      }
-                  } catch (IOException e) {
-                      // if we were unable to read this document,
-                      // then simply add the file without metadata.
-                      currentXmlDocs = Collections.emptyList();
+        List<LimeXMLDocument> currentXmlDocs = fd.getLimeXMLDocuments();
+        if (LimeXMLUtils.isEditableFormat(fd.getFile())) {
+            try {
+                  //TODO: Disk IO being performed here!!
+                  LimeXMLDocument newAudioXmlDoc = metaDataReader.readDocument(fd.getFile());
+                  LimeXMLDocument oldAudioXmlDoc = getAudioDoc(currentXmlDocs);
+                  
+                  if(!oldAudioXmlDoc.equals(newAudioXmlDoc)) {
+                      currentXmlDocs = mergeAudioDocs(currentXmlDocs, oldAudioXmlDoc, newAudioXmlDoc);
                   }
-            }
-            //Since the hash of the file has changed, the metadata pertaining 
-            //to other schemas will be lost unless we update those tables
-            //with the new hashValue. 
-            //NOTE:This is the only time the hash will change-(mp3 and audio)
-            fileManager.get().getManagedFileList().fileChanged(file, currentXmlDocs);
+              } catch (IOException e) {
+                  // if we were unable to read this document,
+                  // then simply add the file without metadata.
+                  currentXmlDocs = Collections.emptyList();
+              }
         }
+        //Since the hash of the file has changed, the metadata pertaining 
+        //to other schemas will be lost unless we update those tables
+        //with the new hashValue. 
+        //NOTE:This is the only time the hash will change-(mp3 and audio)
+        fileManager.get().getManagedFileList().fileChanged(fd.getFile(), currentXmlDocs);
+        
         return retVal;
     }
     
