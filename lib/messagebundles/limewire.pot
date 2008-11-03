@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-10-27 11:30-0400\n"
+"POT-Creation-Date: 2008-11-03 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,7 +41,7 @@ msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:44
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:12
-#: core/com/limegroup/gnutella/daap/DaapManager.java:190
+#: core/com/limegroup/gnutella/daap/DaapManager.java:185
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
@@ -54,7 +54,7 @@ msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:46
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:16
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:73
 msgid "Other"
 msgstr ""
 
@@ -209,23 +209,23 @@ msgstr ""
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:20
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
 msgid "Free to chat"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:21
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
 msgid "Available"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
 msgid "Away"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
 msgid "Away for a while"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:26
 msgid "Do not disturb"
 msgstr ""
 
@@ -264,11 +264,11 @@ msgstr ""
 msgid "Stale Connection Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:115
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:107
 msgid "Various Core Services"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:120
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:112
 msgid "Gnutella Connections"
 msgstr ""
 
@@ -298,7 +298,7 @@ msgstr ""
 msgid "HTTP Request Listening"
 msgstr ""
 
-#: core/com/limegroup/gnutella/HTTPUploadManager.java:230
+#: core/com/limegroup/gnutella/HTTPUploadManager.java:231
 msgid "Upload Management"
 msgstr ""
 
@@ -375,27 +375,27 @@ msgstr ""
 msgid "Magnet Processor"
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:75
+#: core/com/limegroup/gnutella/daap/DaapManager.java:73
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:76
+#: core/com/limegroup/gnutella/daap/DaapManager.java:74
 msgid ""
 "LimeWire encountered an error in the Digital Audio Access Protocol (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:188
+#: core/com/limegroup/gnutella/daap/DaapManager.java:183
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:98
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:186
 msgid "What's New"
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:189
+#: core/com/limegroup/gnutella/daap/DaapManager.java:184
 msgid "Creative Commons"
 msgstr ""
 
@@ -411,14 +411,9 @@ msgstr ""
 msgid "Download Upgrade Task"
 msgstr ""
 
-#: core/com/limegroup/gnutella/library/FileManagerImpl.java:289
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:815
+#: core/com/limegroup/gnutella/library/FileManagerImpl.java:75
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:812
 msgid "Shared Files"
-msgstr ""
-
-#: core/com/limegroup/gnutella/library/SavedFileManager.java:55
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:86
-msgid "Saved Files"
 msgstr ""
 
 #: core/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
@@ -429,7 +424,7 @@ msgstr ""
 msgid "Static Messages"
 msgstr ""
 
-#: core/com/limegroup/gnutella/routing/QRPUpdater.java:223
+#: core/com/limegroup/gnutella/routing/QRPUpdater.java:229
 msgid "QRP Updater"
 msgstr ""
 
@@ -441,7 +436,7 @@ msgstr ""
 msgid "Spam Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:998
+#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1004
 msgid "Update Checks"
 msgstr ""
 
@@ -592,7 +587,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:142
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:157
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:264
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:43
 msgid "License"
 msgstr ""
@@ -631,6 +626,10 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
+msgstr ""
+
+#: core/com/limegroup/gnutella/xml/SchemaReplyCollectionMapper.java:84
+msgid "Metadata Loader"
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:108
@@ -936,7 +935,7 @@ msgid "Apply"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Console.java:172
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:861
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:856
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
 msgstr ""
@@ -987,12 +986,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:266
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:348
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:875
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:870
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:931
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:378
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:239
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:782
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:788
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:765
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:771
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:159
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
 #: gui/com/limegroup/gnutella/gui/wizard/WizardButtonActionManager.java:90
@@ -1162,43 +1161,43 @@ msgstr ""
 msgid "KB/s"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:267
+#: gui/com/limegroup/gnutella/gui/Initializer.java:266
 #, java-format
 msgid "Starting {0}"
 msgstr ""
 
 #. Load up the HTML engine.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:369
+#: gui/com/limegroup/gnutella/gui/Initializer.java:368
 msgid "Loading HTML Engine..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:392
+#: gui/com/limegroup/gnutella/gui/Initializer.java:391
 msgid "Loading Browser..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:435
+#: gui/com/limegroup/gnutella/gui/Initializer.java:434
 msgid "Loading User Interface..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:454
+#: gui/com/limegroup/gnutella/gui/Initializer.java:453
 msgid "Loading Core Components..."
 msgstr ""
 
 #. Initialize IconManager.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:507
+#: gui/com/limegroup/gnutella/gui/Initializer.java:506
 msgid "Loading Icons..."
 msgstr ""
 
 #. Touch the I18N stuff to ensure it loads properly.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:516
+#: gui/com/limegroup/gnutella/gui/Initializer.java:515
 msgid "Loading Internationalization Support..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:581
+#: gui/com/limegroup/gnutella/gui/Initializer.java:580
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:587
+#: gui/com/limegroup/gnutella/gui/Initializer.java:586
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "firewall program blocking LimeWire's access to the internet or loopback "
@@ -1206,7 +1205,7 @@ msgid ""
 "internet and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:593
+#: gui/com/limegroup/gnutella/gui/Initializer.java:592
 msgid ""
 "LimeWire could not create a temporary preferences folder.\n"
 "\n"
@@ -1218,11 +1217,11 @@ msgid ""
 "LimeWire will now exit.  Thank You."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:603
+#: gui/com/limegroup/gnutella/gui/Initializer.java:602
 #: gui/com/limegroup/gnutella/gui/MessageService.java:80
 #: gui/com/limegroup/gnutella/gui/MessageService.java:96
 #: gui/com/limegroup/gnutella/gui/MessageService.java:212
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:900
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:883
 msgid "Error"
 msgstr ""
 
@@ -1407,9 +1406,9 @@ msgstr ""
 #. * The delete action.
 #.
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:65
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:781
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:787
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:764
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:770
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1248
 msgid "Delete"
 msgstr ""
 
@@ -1465,7 +1464,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:470
 #: gui/com/limegroup/gnutella/gui/MessageService.java:507
 #: gui/com/limegroup/gnutella/gui/MessageService.java:559
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:838
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:821
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:25
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:265
 msgid "Message"
@@ -1579,161 +1578,145 @@ msgstr ""
 msgid "Remove Selected Item"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:134
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:133
 msgid "Loading Status Window..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:488
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:487
 msgid "LimeWire has not detected a firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:491
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:490
 msgid "LimeWire has detected a firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:501
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:500
 msgid "You are not connected to the LimeWire Store"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:504
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:503
 msgid "You are connected to the LimeWire Store"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:596
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:595
 msgid "Connection"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:599
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:598
 msgid "Disconnected"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:600
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:599
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:603
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:602
 msgid "Starting"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:604
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:603
 msgid "You are currently connecting to the network"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:607
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:606
 msgid "Poor"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:608
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:607
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:611
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:610
 msgid "Fair"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:612
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:611
 msgid "Your connection to the network is getting stronger"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:615
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:614
 msgid "Good"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:616
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:615
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:620
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:619
 msgid "Excellent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:621
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:620
 msgid "Your connection to the network is very strong"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:624
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:623
 msgid "Turbo-Charged"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:625
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:624
 msgid "Your connection to the network is extremely strong"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:626
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:625
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:633
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:632
 msgid "Waking Up"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:634
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:633
 msgid "LimeWire is waking up from sleep mode"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:745
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:744
 msgid "Show Connection Quality"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:761
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:760
 msgid "Show Shared Files Count"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:777
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:776
 msgid "Show Language Status"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:798
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:797
 msgid "Show Firewall Status"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:814
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:813
 msgid "Show Store Indicator"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:830
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:829
 msgid "Show Bandwidth Consumption"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:846
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:845
 msgid "Show Media Player"
 msgstr ""
 
-#. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:914
-#, java-format
-msgid "You are sharing {0} file"
-msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
-
-#. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:917
-#, java-format
-msgid "You are sharing {0} file (Loading...)"
-msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
-
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:994
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 msgid "Downloads:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:1001
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:1000
 msgid "Uploads:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:1008
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:1013
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
 msgid "Total Upstream:"
 msgstr ""
 
@@ -2685,7 +2668,7 @@ msgid "Open:"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:237
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:246
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:244
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:119
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:207
 msgid "Browse..."
@@ -2706,28 +2689,28 @@ msgid "Close the Program"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:867
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1227
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:862
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1209
 msgid "Launch"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:29
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1229
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1211
 msgid "Launch Selected Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:54
+#: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:51
 msgid "My Shared Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:58
+#: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:55
 #, java-format
 msgid "View My {0} Shared Files"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:818
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:813
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:579
 #, java-format
 msgid "Search for Keywords: {0}"
@@ -2747,23 +2730,13 @@ msgstr ""
 msgid "Search for {0}: {1}"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:28
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:34
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:25
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:31
 msgid "Share New File..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:35
+#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:32
 msgid "Share"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:65
-#, java-format
-msgid "The file \"{0}\" is already shared."
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:69
-#, java-format
-msgid "LimeWire was unable to share the file \"{0}\"."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareNewFolderAction.java:14
@@ -2836,7 +2809,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:45
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:983
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:978
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
@@ -3280,50 +3253,50 @@ msgstr ""
 msgid "BitTorrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:225
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:220
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
 msgid "Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:267
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:262
 msgid "Loading Download Window..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:303
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:843
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:298
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:838
 msgid "Find More Sources for Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:305
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:845
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:300
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:840
 msgid "Find Sources"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:307
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:847
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:302
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:842
 msgid "Try to Find Additional Sources for Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:311
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:850
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1015
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:306
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:845
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1010
 msgid "Resume Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:313
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:852
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1017
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1322
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:308
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:847
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1012
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1304
 msgid "Resume"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:315
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:854
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1019
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:310
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:849
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1014
 msgid "Reattempt Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:463
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:458
 #, java-format
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
@@ -3331,22 +3304,22 @@ msgid ""
 "list of available skins."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:465
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:460
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:180
 msgid "&Refresh Skins"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:466
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:461
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:27
 msgid "&View"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:467
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:462
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:62
 msgid "&Apply Skins"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:471
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:466
 #, java-format
 msgid ""
 "You have downloaded a new skin titled {0}. Would you like to use this new "
@@ -3354,119 +3327,119 @@ msgid ""
 msgstr ""
 
 #. could not read torrent file or bad torrent file.
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:526
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:521
 #, java-format
 msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:685
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:680
 msgid "Choose Save Location"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:787
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:782
 msgid "Search..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:859
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:854
 msgid "Clear Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:863
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:858
 msgid "Clear Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:865
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:860
 msgid "Launch Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:869
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:864
 msgid "Launch Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:873
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:934
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:868
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:929
 msgid "Cancel Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:938
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:872
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:933
 msgid "Cancel Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:879
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:996
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:874
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:991
 msgid "Preview Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:881
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:998
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:876
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:993
 msgid "Preview"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:883
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1000
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:878
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:995
 msgid "Preview Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:952
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:947
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
 msgid "Chat with Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:965
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:960
 msgid "Clear All Inactive Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:967
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:962
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:45
 msgid "Clear Inactive"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:969
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:964
 msgid "Remove Inactive Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1033
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1028
 msgid "Pause Download"
 msgstr ""
 
 #. *
 #. * Constant for the pause button.
 #.
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1035
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1030
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:95
 msgid "Pause"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1037
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1032
 msgid "Pause Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1050
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1052
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:941
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1045
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1047
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:939
 msgid "Explore"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1054
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1049
 msgid "Open Folder Containing the File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1068
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1063
 msgid "Move the Selected Download Closer to Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1088
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1083
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1108
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1103
 msgid "Change File Location..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1111
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1106
 msgid "Edit the Final Filename of the Download"
 msgstr ""
 
@@ -3540,7 +3513,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1015
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:998
 #, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr ""
@@ -3722,73 +3695,73 @@ msgstr ""
 msgid "Learn more about this option..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:69
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:67
 msgid "Save Folder and Shared Folders"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:82
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:80
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. You "
 "can also choose folders you would like to share with other users running "
 "LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:84
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:82
 msgid ""
 "LimeWire now downloads files to a new, different folder.  Please confirm the "
 "folder where you would like your files to be downloaded. You can also choose "
 "folders you would like to share with other users running LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:105
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:103
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:49
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
 msgid "Save Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:127
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:125
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:152
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:31
 msgid "Shared Folders"
 msgstr ""
 
 #. These need another message.
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:196
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:194
 msgid ""
 "The save folder is invalid. You may not have permissions to write to the "
 "selected folder.  Please choose another save folder."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:207
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:205
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:214
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:212
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:218
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:216
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:234
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:232
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:88
 msgid "Use Default"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:235
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:233
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:89
 msgid "Use the Default Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:247
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:245
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:120
 msgid "Choose Another Folder"
 msgstr ""
@@ -3823,29 +3796,29 @@ msgstr ""
 msgid "Incomplete Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:23
+#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:22
 msgid "Individual Store Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:29
+#: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:28
 msgid "List of All Individual Purchased Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:111
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:110
 msgid "Loading Library Window..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:387
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:392
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:1026
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:386
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:391
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:1024
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:391
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:390
 msgid "Configure..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:407
+#: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:406
 msgid "Songs purchased from the LimeWire Store"
 msgstr ""
 
@@ -3854,7 +3827,7 @@ msgid "Search In Shared Files:"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:75
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:298
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:297
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:576
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 msgid "Search"
@@ -3919,7 +3892,7 @@ msgid "This folder is not shared."
 msgstr ""
 
 #. for sharing gnutella
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:231
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:372
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:18
@@ -3927,7 +3900,7 @@ msgid "Sharing"
 msgstr ""
 
 #. advanced options
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:281
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:280
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:325
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:348
@@ -3936,157 +3909,161 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:672
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:655
 msgid ""
 "LimeWire cannot publish this file because it was unable to find a schema for "
 "audio files."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:777
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:760
 msgid "Move to Recycle Bin"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:778
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:761
 msgid "Move to Trash"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:827
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:810
 msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:893
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:876
 msgid ""
 "The following files could not be deleted. They may be in use by another "
 "application or are currently being downloaded to."
 msgstr ""
 
 #. notify the user that renaming failed
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:965
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:948
 msgid ""
 "Unable to rename the file '{0}'. It may be in use by another application."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1023
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1006
 #, java-format
 msgid "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1242
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1224
 msgid "Enqueue"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1226
 msgid "Add Selected Files to the Playlist"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1268
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1250
 msgid "Delete Selected Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1281
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1263
 msgid "Describe..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1283
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1265
 msgid "Add Description to Selected File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1296
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1278
 msgid "Publish..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1298
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1280
 msgid "Publish under Creative Commons License"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1311
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1293
 msgid "Edit License..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1324
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1306
 msgid "Continue Downloading Selected Incomplete File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1337
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1319
 msgid "Rename"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1351
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1333
 msgid "Share File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1378
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:111
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1360
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:113
 msgid "Stop Sharing File"
 msgid_plural "Stop Sharing Files"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1405
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:888
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1387
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:886
 msgid "Share Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1435
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:832
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1417
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:830
 msgid "Stop Sharing Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1462
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1444
 msgid "Show Magnet Details"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1474
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1456
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:165
 msgid "View License"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:618
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:83
+msgid "Saved Files"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:615
 msgid "LimeWire cannot stop sharing this folder."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:620
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:617
 msgid "Are you sure you want to stop sharing this folder?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:688
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:685
 msgid ""
 "LimeWire will not allow you delete to the folder reserved for incomplete "
 "files."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:843
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:841
 #: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:120
 msgid "Store"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:855
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:853
 msgid "Add Folder Contents to Playlist"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:898
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:896
 msgid "Hide .torrent Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:900
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:898
 msgid "Show .torrent Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:927
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:925
 msgid "Refresh"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:928
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:926
 msgid "Reload Shared Folders"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:942
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:940
 msgid "Open Library Folder"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:1025
+#: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:1023
 msgid "Configure Sharing Options"
 msgstr ""
 
@@ -4117,11 +4094,11 @@ msgstr ""
 msgid "Folder's files and some subfolders are shared."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:16
+#: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:15
 msgid "Individually Shared Files"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:22
+#: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:21
 msgid "List of All Individually Shared Files"
 msgstr ""
 
@@ -4397,7 +4374,7 @@ msgid "Exit"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:54
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:510
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:500
 msgid "Restore Defaults"
 msgstr ""
 
@@ -4571,7 +4548,7 @@ msgid "Loading Options Window..."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:166
-#: gui/com/limegroup/gnutella/gui/options/OptionsPaneManager.java:129
+#: gui/com/limegroup/gnutella/gui/options/OptionsPaneManager.java:128
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
 msgstr ""
@@ -4939,11 +4916,11 @@ msgstr ""
 msgid "Do not display junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:26
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:25
 msgid "Shared Extensions"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:28
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:27
 msgid "You can choose which file extensions you would like to share."
 msgstr ""
 
@@ -4952,16 +4929,16 @@ msgstr ""
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #.
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:35
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:34
 msgid "Extensions:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:61
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:60
 msgid "Use Defaults"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:63
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:511
+#: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:62
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:501
 msgid "Share the Default File Extensions"
 msgstr ""
 
@@ -5858,16 +5835,16 @@ msgstr ""
 msgid "All"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:196
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:198
 #, java-format
 msgid "You are sharing {0} files. You can control which files LimeWire shares."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:208
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:210
 msgid "Configure"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:209
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:211
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:39
 msgid "Library"
 msgstr ""
@@ -6162,68 +6139,64 @@ msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:46
 msgid "Sharing Extensions"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:49
 msgid ""
 "Select the file types that you wish to share with LimeWire.  (This does not "
 "automatically share all files with these types.  Only files in your Shared "
 "Folders will be shared.)"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:72
 msgid "My Extensions"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
-msgid "To allow selection enable sharing of sensitive types."
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:430
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:420
 msgid "The extension name was not valid, could not add."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:486
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:476
 msgid "Add New Extension"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:487
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:477
 msgid "Add a New Extension to My Extensions"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:491
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:481
 msgid "Enter the extension pattern:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:492
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:518
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:482
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:508
 msgid "Extension Sharing Settings"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:517
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:507
 msgid ""
 "This options clears any extension sharing changes you made and sets "
 "LimeWire's extension sharing preferences to the original preferences. Do you "
 "wish to continue?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:530
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:520
 msgid "Do Not Share Sensitive File Types"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:531
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:521
 msgid ""
 "This stops LimeWire from sharing certain files that may contain sensitive "
 "information."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:747
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:738
 msgid "File types you added to share."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:751
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:742
 msgid "Other types of files."
 msgstr ""
 
@@ -6543,7 +6516,7 @@ msgid "<< Back"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/wizard/WizardButtonActionManager.java:123
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:162
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:161
 msgid "Finish"
 msgstr ""
 
@@ -6569,17 +6542,25 @@ msgid ""
 "of this file?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:39
+#. *
+#. * This class provides a dialog that displays the RDF representation of the
+#. * license for a shared file. It listens to
+#. * <tt>FileManagerEvents<tt> and pops-up when the URN of a particular file has been recalculated.
+#. *
+#. * @see CCPublishWizard
+#.
+#. implements MetaDataEventListener
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:38
 msgid "License RDF Output"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:45
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:44
 msgid ""
 "In order to publish your file, please insert the following code in your "
 "verification page at:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:147
+#: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:146
 msgid "Copy to Clipboard"
 msgstr ""
 
@@ -6617,53 +6598,72 @@ msgstr ""
 msgid "Please enter a valid year for the file you want to publish."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:53
+#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:45
 msgid "Kind:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:79
+#. SchemaReplyCollectionMapper map = GuiCoreMediator.getSchemaReplyCollectionMapper();
+#. LimeXMLReplyCollection collection = map.getReplyCollection(schemaUri);
+#. LimeXMLDocument doc = null; //collection.getDocForFileDesc(fd);
+#. LimeXMLSchemaRepository rep = GuiCoreMediator.getLimeXMLSchemaRepository();
+#. LimeXMLSchema schema = rep.getSchema(schemaUri);
+#. if (doc != null) {
+#. for(SchemaFieldInfo infoField : schema.getCanonicalizedFields()) {
+#. String field = infoField.getCanonicalizedFieldName();
+#.
+#. if (skipField(field))
+#. continue;
+#.
+#. String value = doc.getValue(field);
+#.
+#. if (value != null && !value.equals("")) {
+#. String name = MetaEditorUtil.getStringResource(field);
+#. add(name, value);
+#. }
+#. }
+#. }
+#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:71
 msgid "Size:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:83
+#: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:75
 msgid "Date Modified:"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:86
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:89
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:92
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:112
 msgid "Internal Document Error. Data could not be saved."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:168
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:201
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:156
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:189
 msgid "Internal Error. Data could not be saved."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:178
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:166
 msgid "Nothing to save."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:181
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:169
 msgid "File not found or corrupt file. Data could not be saved"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:184
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:172
 msgid "Read Write Error. Data could not be saved."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:187
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:190
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:175
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:178
 msgid "File Corrupt. Data could not be saved."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:198
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:186
 msgid "Incorrect format entered. Changes will not be saved."
 msgstr ""
 
 #. unable to remove or write to disk
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:227
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:215
 msgid "Unable to remove data."
 msgstr ""
 
