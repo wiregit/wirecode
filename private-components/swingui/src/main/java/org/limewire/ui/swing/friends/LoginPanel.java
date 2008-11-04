@@ -123,7 +123,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
      * Method used to set initial button characteristics when login panel ui loads up
      */
     private void setInitialButtonState() {
-        setSignInButtonEnabled(!(xmppEventHandler.hasAutoLogin(GMAIL_SERVICE_NAME)));
+        setSignInComponentsEnabled(!(xmppEventHandler.hasAutoLogin(GMAIL_SERVICE_NAME)));
     }
     
     @Override
@@ -188,7 +188,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                 if (error == LoginErrorState.UsernameOrPasswordError) {
                     passwordField.setText("");
                 }
-                setSignInButtonEnabled(true);
+                setSignInComponentsEnabled(true);
             }
 
         });
@@ -212,14 +212,18 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         return builder.getPanel();
     }
 
-    private void setSignInButtonEnabled(boolean isEnabled) {
+    private void setSignInComponentsEnabled(boolean isEnabled) {
         signInButton.setEnabled(isEnabled);
         signInButton.setText(isEnabled ? SIGNIN_ENABLED_TEXT : SIGNIN_DISABLED_TEXT);
+
+        userNameField.setEnabled(isEnabled);
+        passwordField.setEnabled(isEnabled);
+        rememberMeCheckbox.setEnabled(isEnabled);
     }
 
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        setSignInButtonEnabled(true);            
+        setSignInComponentsEnabled(true);
     }
     
     private JPanel getDetailsPanel() {
@@ -280,7 +284,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
         }
         
         public void actionPerformed(ActionEvent e) {
-            setSignInButtonEnabled(false);
+            setSignInComponentsEnabled(false);
             String userNameFieldValue = userNameField.getText().trim();
             final String serviceName = networkGroup.getSelection().getActionCommand();
             if (GMAIL_SERVICE_NAME.equals(serviceName)) {
@@ -303,7 +307,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                             @Override
                             public void run() {
                                 setTopPanelMessage(normalTopPanel());
-                                setSignInButtonEnabled(true);
+                                setSignInComponentsEnabled(true);
                             }
                         });
 

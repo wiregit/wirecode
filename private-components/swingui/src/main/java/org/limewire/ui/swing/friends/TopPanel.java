@@ -200,7 +200,7 @@ public class TopPanel extends JPanel {
     }
     
     @EventSubscriber
-    public void handleConversationStarted(ConversationStartedEvent event) {
+    public void handleConversationStarted(ConversationSelectedEvent event) {
         if (event.isLocallyInitiated()) {
             ChatFriend chatFriend = event.getFriend();
             friendAvailabiltyIcon.setText(getAvailabilityHTML(chatFriend.getMode()));

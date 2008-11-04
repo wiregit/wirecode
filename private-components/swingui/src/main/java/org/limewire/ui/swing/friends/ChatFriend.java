@@ -34,6 +34,8 @@ public interface ChatFriend {
     void setActiveConversation(boolean active);
     
     boolean isSignedInToLimewire();
+
+    boolean isSignedIn();
     
     void startChat();
     

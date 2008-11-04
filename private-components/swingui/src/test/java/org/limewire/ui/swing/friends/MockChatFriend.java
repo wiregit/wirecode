@@ -127,6 +127,11 @@ class MockChatFriend implements ChatFriend {
     }
 
     @Override
+    public boolean isSignedIn() {
+        return false;
+    }
+
+    @Override
     public boolean isReceivingUnviewedMessages() {
         return receivingUnviewedMessages;
     }

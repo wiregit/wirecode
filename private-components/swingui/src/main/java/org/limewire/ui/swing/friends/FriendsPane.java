@@ -392,7 +392,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
                         public MessageReader incomingChat(MessageWriter writer) {
                             LOG.debugf("{0} is typing a message", presence.getJID());
                             MessageWriter writerWrapper = new MessageWriterImpl(myID, initChatFriend, writer);
-                            ConversationStartedEvent event = new ConversationStartedEvent(initChatFriend, writerWrapper, false);
+                            ConversationSelectedEvent event = new ConversationSelectedEvent(initChatFriend, writerWrapper, false);
                             event.publish();
                             //Hang out until a responder has processed this event
                             event.await();
@@ -419,7 +419,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
         LOG.debugf("All Messages listener: from {0} text: {1} topic: {2}", message.getSenderName(), message.toString(), topic);
         ChatFriend chatFriend = idToFriendMap.get(message.getFriendID());
         if (!chatFriend.isActiveConversation() && message.getType() != Type.Sent) {
-            chatFriend.startChat();
             chatFriend.setReceivingUnviewedMessages(true);
             if (!friendTimerMap.containsKey(chatFriend)) {
                 AlternatingIconTimer iconTimer = new AlternatingIconTimer(chatFriend);
@@ -453,17 +452,20 @@ public class FriendsPane extends JPanel implements FriendRemover {
     public void fireConversationStarted(Friend friend) {
         ChatFriend chatFriend = idToFriendMap.get(friend.getId());
         if(chatFriend != null) {
-            fireConversationStarted(chatFriend);
+            startOrSelectConversation(chatFriend);
             new DisplayFriendsToggleEvent(Boolean.TRUE).publish();
         } else {
             //TODO notify that chat no longer possible.
         }
     }
 
-    private void fireConversationStarted(ChatFriend chatFriend) {
-        MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
-        MessageWriter writerWrapper = new MessageWriterImpl(myID, chatFriend, writer);
-        new ConversationStartedEvent(chatFriend, writerWrapper, true).publish();
+    private void startOrSelectConversation(ChatFriend chatFriend) {
+        MessageWriter writerWithEventDispatch = null;
+        if (!chatFriend.isChatting() && chatFriend.isSignedIn()) {
+            MessageWriter writer = chatFriend.createChat(new MessageReaderImpl(chatFriend));
+            writerWithEventDispatch = new MessageWriterImpl(myID, chatFriend, writer);
+        }
+        new ConversationSelectedEvent(chatFriend, writerWithEventDispatch, true).publish();
         setActiveConversation(chatFriend);
     }
 
@@ -495,6 +497,9 @@ public class FriendsPane extends JPanel implements FriendRemover {
         if (chatFriend != null) {
 
             chatFriend.stopChat();
+            if (!chatFriend.isSignedIn()) {
+                chatFriends.remove(idToFriendMap.remove(chatFriend.getFriend().getId()));
+            }
             new CloseChatEvent(chatFriend).publish();
             
             ChatFriend nextFriend = null;
@@ -508,22 +513,16 @@ public class FriendsPane extends JPanel implements FriendRemover {
             }
 
             if (nextFriend != null) {
-                fireConversationStarted(nextFriend);
+                startOrSelectConversation(nextFriend);
             }
         }
     }
 
     private void closeAllChats() {
         for (ChatFriend chatFriend : chatFriends) {
-
-            String userId = chatFriend.getID();
-
-            if (idToFriendMap.get(userId) != null) {
-                idToFriendMap.remove(userId);
-            }
-            chatFriend.stopChat();
-            new CloseChatEvent(chatFriend).publish();
+            closeChat(chatFriend);
         }
+        idToFriendMap.clear();
         chatFriends.clear();
         friendsTable.removeAll();
     }
@@ -703,7 +702,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
             }
             
             if (e.getClickCount() == 2 || chatFriend.isChatting()) {
-                fireConversationStarted(chatFriend);
+                startOrSelectConversation(chatFriend);
              }
         }
     }
@@ -831,7 +830,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                fireConversationStarted(chatFriend);
+                startOrSelectConversation(chatFriend);
             }
         }
     }

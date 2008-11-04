@@ -134,9 +134,9 @@ public class ChatPanel extends JPanel implements Displayable {
     }
     
     @EventSubscriber
-    public void handleAddConversation(ConversationStartedEvent event) {
+    public void handleSelectedConversation(ConversationSelectedEvent event) {
         ChatFriend chatFriend = event.getFriend();
-        LOG.debugf("ConversationStartedEvent with friend: {0}", chatFriend.getName());
+        LOG.debugf("ConversationSelectedEvent with friend: {0}", chatFriend.getName());
         ConversationPane chatPane = chats.get(chatFriend.getID());
         if (chatPane == null) {
             chatPane = conversationFactory.create(event.getWriter(), chatFriend, getLoggedInID());
@@ -148,7 +148,7 @@ public class ChatPanel extends JPanel implements Displayable {
         }
         
         chatPane.handleDisplay();
-        
+
         event.unlock();
         LOG.debug("unlocked");
     }

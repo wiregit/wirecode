@@ -6,14 +6,14 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.ui.swing.event.AbstractEDTEvent;
 import org.limewire.xmpp.api.client.MessageWriter;
 
-public class ConversationStartedEvent extends AbstractEDTEvent {
+public class ConversationSelectedEvent extends AbstractEDTEvent {
     private final ChatFriend chatFriend;
     private final MessageWriter writer;
     //On-off switch to signal that this event has been processed and normal execution can continue can continue
     private final CountDownLatch latch = new CountDownLatch(1);
     private final boolean locallyInitiated;
 
-    ConversationStartedEvent(ChatFriend chatFriend, MessageWriter writer, boolean locallyInitiated) {
+    ConversationSelectedEvent(ChatFriend chatFriend, MessageWriter writer, boolean locallyInitiated) {
         this.chatFriend = chatFriend;
         this.writer = writer;
         this.locallyInitiated = locallyInitiated;
@@ -27,6 +27,10 @@ public class ConversationStartedEvent extends AbstractEDTEvent {
 
     public MessageWriter getWriter() {
         return writer;
+    }
+
+    public boolean hasWriter() {
+        return writer != null;
     }
     
     public void unlock() {

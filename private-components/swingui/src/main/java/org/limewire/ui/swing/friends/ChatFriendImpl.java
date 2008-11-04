@@ -142,6 +142,11 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
     }
 
     @Override
+    public boolean isSignedIn() {
+        return (presence != null);
+    }
+
+    @Override
     public boolean isReceivingUnviewedMessages() {
         return hasUnviewedMessages;
     }
