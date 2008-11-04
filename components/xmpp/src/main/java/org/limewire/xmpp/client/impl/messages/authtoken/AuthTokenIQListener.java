@@ -94,12 +94,12 @@ public class AuthTokenIQListener implements PacketListener {
 
     private void userAdded(User user) {
         user.addPresenceListener(new EventListener<PresenceEvent>() {
-
-            @BlockingEvent
             public void handleEvent(PresenceEvent event) {
                 final Presence presence = event.getSource();
                 if(presence.getType().equals(Presence.Type.available)) {
                     presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
+                        
+                        @BlockingEvent
                         public void handleEvent(FeatureEvent event) {
                             if(event.getType() == Feature.EventType.FEATURE_ADDED) {
                                 if(event.getSource().getID().equals(LimewireFeature.ID)) {
