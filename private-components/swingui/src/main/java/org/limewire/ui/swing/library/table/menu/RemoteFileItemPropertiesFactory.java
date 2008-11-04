@@ -35,6 +35,8 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
     private static class RemoteFileItemProperties extends AbstractFileItemDialog implements Properties<RemoteFileItem> {
         private final CategoryIconManager categoryIconManager;
         private @Resource Font smallFont;
+        private @Resource Font mediumFont;
+        private @Resource Font largeFont;
         
         public RemoteFileItemProperties(CategoryIconManager categoryIconManager,
                 PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
@@ -52,6 +54,16 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
         @Override
         protected Font getSmallFont() {
             return smallFont;
+        }
+
+        @Override
+        protected Font getLargeFont() {
+            return largeFont;
+        }
+
+        @Override
+        protected Font getMediumFont() {
+            return mediumFont;
         }
 
         @Override

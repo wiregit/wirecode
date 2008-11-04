@@ -11,6 +11,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
+import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.LibraryNavigator;
@@ -37,21 +38,25 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
     private final Navigator navigator;
+    private final MetaDataManager metaDataManager;
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager,
-            IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory, Navigator navigator) {
+            IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory, 
+            Navigator navigator, MetaDataManager metaDataManager) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.propertiableHeadings = propertiableHeadings;
         this.magnetLinkFactory = magnetLinkFactory;
         this.navigator = navigator;
+        this.metaDataManager = metaDataManager;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
-        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, propertiableHeadings, magnetLinkFactory, navigator);
+        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, propertiableHeadings, 
+                magnetLinkFactory, navigator, metaDataManager);
     }
 
     private static class LocalFileItemProperties extends AbstractFileItemDialog implements
@@ -60,17 +65,22 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final CategoryIconManager categoryIconManager;
         private final IconManager iconManager;
         private final Navigator navigator;
+        private final MetaDataManager metaDataManager;
+        private LocalFileItem displayedItem;
         
         private @Resource Font smallFont;
+        private @Resource Font mediumFont;
+        private @Resource Font largeFont;
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, 
                 IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
-                Navigator navigator) {
+                Navigator navigator, MetaDataManager metaDataManager) {
             super(propertiableHeadings, magnetLinkFactory);
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
             this.navigator = navigator;
+            this.metaDataManager = metaDataManager;
             GuiUtils.assignResources(this);
         }
         
@@ -78,20 +88,32 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         protected Font getSmallFont() {
             return smallFont;
         }
+        
+        @Override
+        protected Font getLargeFont() {
+            return largeFont;
+        }
+
+        @Override
+        protected Font getMediumFont() {
+            return mediumFont;
+        }
 
         @Override
         protected void commit() {
-
+            metaDataManager.save(displayedItem);
         }
 
         @Override
         public void showProperties(final LocalFileItem propertiable) {
+            this.displayedItem = propertiable;
+            
             icon.setIcon(getIcon(propertiable));
             populateCommonFields(propertiable);
-            localFileLocation.setText(propertiable.getFileName());
+            localFileLocation.setText(propertiable.getFile().getAbsolutePath());
             
-            location.setLayout(new MigLayout("", "[]push[]15[]", "[]"));
-            location.add(localFileLocation);
+            location.setLayout(new MigLayout("", "[]10[]15[]", "[]"));
+            location.add(localFileLocation, "push");
             location.add(locateOnDisk);
             location.add(locateInLibrary);
             

@@ -22,6 +22,8 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
     
     private static class DownloadItemProperties extends Dialog implements Properties<DownloadItem>{
         private @Resource Font smallFont;
+        private @Resource Font mediumFont;
+        private @Resource Font largeFont;
         
         public DownloadItemProperties() {
             GuiUtils.assignResources(this);
@@ -30,6 +32,16 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         @Override
         protected Font getSmallFont() {
             return smallFont;
+        }
+        
+        @Override
+        protected Font getLargeFont() {
+            return largeFont;
+        }
+
+        @Override
+        protected Font getMediumFont() {
+            return mediumFont;
         }
 
         @Override

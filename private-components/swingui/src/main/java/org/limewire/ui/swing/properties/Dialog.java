@@ -35,6 +35,17 @@ import org.limewire.util.StringUtils;
 
 public abstract class Dialog extends JDialog {
 
+    private static final String AUTHOR = "Author";
+    private static final String COMPANY = "Company";
+    private static final String PLATFORM = "Platform";
+    private static final String TRACK = "Track";
+    private static final String ALBUM = "Album";
+    private static final String ARTIST = "Artist";
+    private static final String DESCRIPTION = "Description";
+    private static final String YEAR = "Year";
+    private static final String RATING = "Rating";
+    private static final String GENRE = "Genre";
+    private static final String TITLE = "Title";
     private static final String HASH = "Hash";
     protected final JLabel icon = new JLabel();
     protected final JLabel heading = newLabel();
@@ -70,7 +81,10 @@ public abstract class Dialog extends JDialog {
     public Dialog() {
         GuiUtils.assignResources(this);
         
-        setFont(getSmallFont(), filename, subheading, fileSize, metadata, copyToClipboard, locateOnDisk, locateInLibrary);
+        setFont(getMediumFont(), heading, filename, fileSize);
+        setFont(getSmallFont(), subheading, metadata, copyToClipboard, locateOnDisk, locateInLibrary,
+                title, genre, rating, year, description, artist, album, track, author, platform,
+                company, localFileLocation);
         
         setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
         JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
@@ -92,6 +106,8 @@ public abstract class Dialog extends JDialog {
     }
     
     protected abstract Font getSmallFont();
+    protected abstract Font getMediumFont();
+    protected abstract Font getLargeFont();
 
     protected void setFont(Font font, JComponent... components) {
         for(JComponent comp : components) {
@@ -155,7 +171,9 @@ public abstract class Dialog extends JDialog {
 
     private Component box(String string, JComponent component) {
         JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]", "[][][]"));
-        panel.add(new JLabel(tr(string)), "wrap");
+        JLabel label = new JLabel(tr(string));
+        label.setFont(getLargeFont());
+        panel.add(label, "wrap");
         panel.add(Line.createHorizontalLine(), "wrap");
         panel.add(component);
         return panel;
@@ -212,7 +230,9 @@ public abstract class Dialog extends JDialog {
     }
 
     protected void addDimensionMetadata(String width, Object height, Map<String, String> metadata) {
-        addMetadata("Dimensions", tr("({0}px X {1}px)", width, height), metadata);
+        if (height != null && width != null) {
+            addMetadata("Dimensions", tr("({0}px X {1}px)", width, height), metadata);
+        }
     }
 
     private void addMetadata(String label, String value, Map<String, String> metadata) {
@@ -229,18 +249,24 @@ public abstract class Dialog extends JDialog {
         bldr.append("</html>");
         this.metadata.setText(bldr.toString());
     }
+    
+    private JLabel newSmallLabel(String text) {
+        JLabel label = new JLabel(tr(text));
+        label.setFont(getSmallFont());
+        return label;
+    }
 
     private void configureVideoDetailsLayout() {
         details.setLayout(new MigLayout("fillx, nocache", "[20%!][20%!][]", "[][][][][][]"));
-        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "span, growx, wrap");
-        details.add(new JLabel(tr("Genre")));
-        details.add(new JLabel(tr("Rating")));
-        details.add(new JLabel(tr("Year")), "wrap");
+        details.add(newSmallLabel(GENRE));
+        details.add(newSmallLabel(RATING));
+        details.add(newSmallLabel(YEAR), "wrap");
         details.add(genre);
         details.add(rating);
         details.add(year, "growx, wrap");
-        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
         
         addDetails();
@@ -248,19 +274,19 @@ public abstract class Dialog extends JDialog {
     
     private void configureAudioDetailsLayout() {
         details.setLayout(new MigLayout("fillx, nocache", "[50%!][20%!]0[10%][10%]", "[][][][][][]"));
-        details.add(new JLabel(tr("Title")));
-        details.add(new JLabel(tr("Artist")), "wrap");
+        details.add(newSmallLabel(TITLE));
+        details.add(newSmallLabel(ARTIST), "wrap");
         details.add(title, "growx");
         details.add(artist, "span, growx, wrap");
-        details.add(new JLabel(tr("Album")));
-        details.add(new JLabel(tr("Genre")));
-        details.add(new JLabel(tr("Year")));
-        details.add(new JLabel(tr("Track")), "wrap");
+        details.add(newSmallLabel(ALBUM));
+        details.add(newSmallLabel(GENRE));
+        details.add(newSmallLabel(YEAR));
+        details.add(newSmallLabel(TRACK), "wrap");
         details.add(album, "growx");
         details.add(genre);
         details.add(year);
         details.add(track, "wrap");
-        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
         
         addDetails();
@@ -268,9 +294,9 @@ public abstract class Dialog extends JDialog {
     
     private void configureImageDetailsLayout() {
         details.setLayout(new MigLayout("fillx", "[]", "[][][][]"));
-        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "growx, wrap");
-        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow");
         
         addDetails();
@@ -278,13 +304,13 @@ public abstract class Dialog extends JDialog {
     
     private void configureProgramDetailsLayout() {
         details.setLayout(new MigLayout("fillx, nocache", "[20%!][]", "[][][][][][]"));
-        details.add(new JLabel(tr("Title")), "wrap");
+        details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "span, growx, wrap");
-        details.add(new JLabel(tr("Platform")));
-        details.add(new JLabel(tr("Company")), "wrap");
+        details.add(newSmallLabel(PLATFORM));
+        details.add(newSmallLabel(COMPANY), "wrap");
         details.add(platform);
         details.add(company, "growx, wrap");
-        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
         
         addDetails();
@@ -292,9 +318,9 @@ public abstract class Dialog extends JDialog {
     
     private void configureDocumentDetailsLayout() {
         details.setLayout(new MigLayout("fillx", "[]", "[][][][]"));
-        details.add(new JLabel(tr("Author")), "wrap");
+        details.add(newSmallLabel(AUTHOR), "wrap");
         details.add(author, "growx, wrap");
-        details.add(new JLabel(tr("Description")), "wrap");
+        details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow");
         
         addDetails();

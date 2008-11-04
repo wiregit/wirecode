@@ -42,6 +42,8 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager iconManager;
         private @Resource Font smallFont;
+        private @Resource Font mediumFont;
+        private @Resource Font largeFont;
         
         public SearchResultProperties(CategoryIconManager iconManager) {
             this.iconManager = iconManager;
@@ -63,7 +65,15 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             return smallFont;
         }
 
+        @Override
+        protected Font getLargeFont() {
+            return largeFont;
+        }
 
+        @Override
+        protected Font getMediumFont() {
+            return mediumFont;
+        }
 
         @Override
         public void showProperties(VisualSearchResult vsr) {
