@@ -81,7 +81,8 @@ public class AppFrame extends SingleFrameApplication {
         
 
         
-        show(ui.getLayer());        
+        // TODO fix
+        show(ui);//.getLayer());        
         restoreView();
         
         ui.goHome();
@@ -93,7 +94,8 @@ public class AppFrame extends SingleFrameApplication {
 
         started = true;
         
-        ui.showSetupWizard();
+        // TODO fix
+        //ui.showSetupWizard();
         
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
