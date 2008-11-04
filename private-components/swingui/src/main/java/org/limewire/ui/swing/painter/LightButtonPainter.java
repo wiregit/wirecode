@@ -18,8 +18,9 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class LightButtonPainter extends AbstractPainter<JXButton> {
-    
-    private final int ANTIALIAS_OFFSET = 1;
+        
+    @Resource
+    private int arcHeight;
     
     @Resource
     private int arcWidth;
@@ -48,8 +49,8 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
         // get original antialiasing value for reset
         Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         
-        //turn on antialiasing
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
+        //turn off antialiasing
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);    
         
         if (button.getModel().isPressed()) {
             g.setPaint(new GradientPaint(0,0, this.backgroundGradientTop, 0, height, this.backgroundGradientBottom, false));
@@ -58,12 +59,28 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
             g.setPaint(new GradientPaint(0,0, this.highlightGradientTop, 0, height, this.highlightGradientBottom, false));
         }
         
-        g.fillRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, this.arcWidth, height-1);
+        g.fillRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
+        
+        
+        // Draw shading
+        g.setColor(lighten(this.borderColor,60));
+        g.drawRoundRect(0, 1, width-1, height-3, this.arcWidth, this.arcHeight);
+        g.drawLine(this.arcWidth/2, height-2, width-this.arcWidth/2, height-2);
+        g.setColor(lighten(this.borderColor,100));
+        g.drawLine(this.arcWidth/2, 1, width-this.arcWidth/2, 1);
+        g.setColor(lighten(this.borderColor,80));
+        g.drawLine(width-2, this.arcHeight/2, width-2, height-this.arcHeight/2);
         
         g.setColor(this.borderColor);
-        g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, arcWidth, height-1);
+        g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
+    }
+    
+    public Color lighten(Color orig, int intensity) {
+        return new Color(orig.getRed() + intensity,
+                orig.getGreen() + intensity,
+                orig.getBlue() + intensity);
     }
 }

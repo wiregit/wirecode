@@ -297,7 +297,7 @@ public class LimeComboBox extends JXButton {
             
         
         if (this.getText() != null) {
-            g2.drawString(this.getText(), ix1, fm.getAscent()+2);
+            g2.drawString(this.getText(), ix1, fm.getAscent()+3);
             
             if (icon != null) {
                 icon.paintIcon(this, g2, this.getWidth() - ix2 + 3, 
