@@ -7,12 +7,13 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+
+import org.limewire.ui.swing.util.PaintUtils;
 
 public class PromptTextField extends JTextField implements FocusListener {
     
@@ -94,16 +95,9 @@ public class PromptTextField extends JTextField implements FocusListener {
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         
-        // get original antialiasing value for reset
-        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);        
         paintTextArea(g2);        
         super.paintComponent(g);
         paintPrompt(g2);
-        
-        // reset antialiasing propery
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
     
     protected void paintTextArea(Graphics2D g2) {
@@ -119,7 +113,7 @@ public class PromptTextField extends JTextField implements FocusListener {
             FontMetrics fm = g2.getFontMetrics();
             Border border = getBorder();
             int x = border != null ? border.getBorderInsets(this).left : 0;
-            g2.drawString(promptText, x, fm.getAscent() + 3);
+            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 3);
         }
     }
 }

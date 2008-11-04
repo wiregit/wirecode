@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -29,6 +30,7 @@ import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.PaintUtils;
 
 public class LimeComboBox extends JXButton {
     
@@ -265,8 +267,10 @@ public class LimeComboBox extends JXButton {
     protected void paintComponent(Graphics g) {
 
         Graphics2D g2 = (Graphics2D) g;        
-        
+
+        Object origHints = g2.getRenderingHints();
         this.getBackgroundPainter().paint(g2, this, this.getWidth(), this.getHeight());  
+        g2.setRenderingHints((Map<?, ?>) origHints);
         
         g2.setFont(this.getFont());
         
@@ -297,7 +301,7 @@ public class LimeComboBox extends JXButton {
             
         
         if (this.getText() != null) {
-            g2.drawString(this.getText(), ix1, fm.getAscent()+3);
+            PaintUtils.drawSmoothString(g2, this.getText(), ix1, fm.getAscent()+2);
             
             if (icon != null) {
                 icon.paintIcon(this, g2, this.getWidth() - ix2 + 3, 
@@ -305,7 +309,7 @@ public class LimeComboBox extends JXButton {
             }
         } else {
             if (this.selectedAction != null) {
-                g2.drawString(this.selectedAction.getValue("Name").toString(), ix1, fm.getAscent()+2);
+                PaintUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, fm.getAscent()+3);
             }
             
             if (icon != null) {
@@ -314,6 +318,7 @@ public class LimeComboBox extends JXButton {
                         this.getHeight()/2 - icon.getIconHeight()/2);
             }
         }
+
     }
 
     private void initModel() {

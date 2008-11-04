@@ -9,6 +9,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PaintUtils;
 
 import com.google.inject.Singleton;
 
@@ -46,9 +47,10 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
     
     @Override
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
+        
         // get original antialiasing value for reset
         Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        
+
         //turn off antialiasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);    
         
@@ -63,12 +65,12 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
         
         
         // Draw shading
-        g.setColor(lighten(this.borderColor,60));
+        g.setColor(PaintUtils.lighten(this.borderColor,60));
         g.drawRoundRect(0, 1, width-1, height-3, this.arcWidth, this.arcHeight);
         g.drawLine(this.arcWidth/2, height-2, width-this.arcWidth/2, height-2);
-        g.setColor(lighten(this.borderColor,100));
+        g.setColor(PaintUtils.lighten(this.borderColor,100));
         g.drawLine(this.arcWidth/2, 1, width-this.arcWidth/2, 1);
-        g.setColor(lighten(this.borderColor,80));
+        g.setColor(PaintUtils.lighten(this.borderColor,80));
         g.drawLine(width-2, this.arcHeight/2, width-2, height-this.arcHeight/2);
         
         g.setColor(this.borderColor);
@@ -76,11 +78,5 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
-    }
-    
-    public Color lighten(Color orig, int intensity) {
-        return new Color(orig.getRed() + intensity,
-                orig.getGreen() + intensity,
-                orig.getBlue() + intensity);
     }
 }
