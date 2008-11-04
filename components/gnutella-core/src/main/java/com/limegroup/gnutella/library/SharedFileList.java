@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.library;
 
+import java.io.File;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import com.limegroup.gnutella.URN;
 
 public interface SharedFileList extends FileList {
@@ -13,5 +17,17 @@ public interface SharedFileList extends FileList {
      *         <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
     FileDesc getFileDesc(URN urn);
+    
+    /**
+     * Adds this directory to the ManagedFileList and adds all 
+     * manageable files in the given folder to this list.
+     * 
+     * This has the effect of adding recursively adding all
+     * manageable files from this folder as managed files, and
+     * adding the files in the folder (non-recursively) to 
+     * this list.
+     */
+    @Override
+    public Future<List<Future<FileDesc>>> addFolder(File folder);
 
 }

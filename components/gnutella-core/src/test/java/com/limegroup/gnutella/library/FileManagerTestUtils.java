@@ -133,12 +133,12 @@ public class FileManagerTestUtils {
         assertEmpty(files);
     }
     
-    public static void assertAddsFolder(FileList fileList, File folder) throws Exception {
-        assertFutureListFinishes(fileList.addFolder(folder), 5, TimeUnit.SECONDS);
+    public static List<FileDesc> assertAddsFolder(FileList fileList, File folder) throws Exception {
+        return assertFutureListFinishes(fileList.addFolder(folder), 5, TimeUnit.SECONDS);
     }
     
-    public static void assertChangeExtensions(ManagedFileList fileList, String... extensions) throws Exception {
-        assertFutureListFinishes(fileList.setManagedExtensions(Arrays.asList(extensions)), 5, TimeUnit.SECONDS);
+    public static List<FileDesc> assertChangeExtensions(ManagedFileList fileList, String... extensions) throws Exception {
+        return assertFutureListFinishes(fileList.setManagedExtensions(Arrays.asList(extensions)), 5, TimeUnit.SECONDS);
     }
 
     /**

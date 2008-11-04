@@ -35,9 +35,7 @@ class LibraryConverter {
             }
         }
         
-        for(File folder : oldData.DIRECTORIES_NOT_TO_SHARE) {
-            newData.addDirectoryToExcludeFromManaging(folder);
-        }
+        newData.setDirectoriesToExcludeFromManaging(oldData.DIRECTORIES_NOT_TO_SHARE);
         
         for(File file : oldData.SPECIAL_FILES_TO_SHARE) {
             newData.addManagedFile(file, true);

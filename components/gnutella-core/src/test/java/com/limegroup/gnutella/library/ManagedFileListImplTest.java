@@ -317,11 +317,11 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertAdds(fileList, f6, f7);
         
         assertAddsFolder(fileList, _scratchDir);
-        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f6, f7);
+        assertContainsFiles(fileList, f1, f2, f4, f6, f7);
         assertFalse(fileList.contains(f3));
         
         assertLoads(fileList);
-        assertContainsFiles(CollectionUtils.listOf(fileList), f1, f2, f4, f6, f7);
+        assertContainsFiles(fileList, f1, f2, f4, f6, f7);
     }
     
     public void testChangeExtensions() throws Exception {

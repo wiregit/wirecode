@@ -155,6 +155,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         this.urnValidator = urnValidator;
     }
     
+    /** Gets the library data, loading it if necessary. */
     LibraryFileData getLibraryData() {
         if(!fileData.isLoaded()) {
             fileData.load();
@@ -162,6 +163,15 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return fileData;
     }
     
+    /**
+     * Runs the callable in the managed filelist thread & returns a Future used
+     * to get its result.
+     */
+    <V> Future<V> submit(Callable<V> callable) {
+        return fileLoader.submit(callable);
+    }
+    
+    /** Initializes all listeners. */
     void initialize() {
         fileDescMulticaster.addListener(new EventListener<FileDescChangeEvent>() {
             @Override
@@ -193,6 +203,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         });
     }
     
+    /**
+     * Dispatches a failure, sending a CHANGE_FAILED & REMOVE event if
+     * oldFileDesc is non-null, an ADD_FAILED otherwise.
+     */
     private FileListChangedEvent dispatchFailure(File file, FileDesc oldFileDesc) {
         FileListChangedEvent event;
         if(oldFileDesc != null) {
@@ -242,6 +256,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
+    /** Attempts to canonicalize the file, returning the file if canonicalization fails. */
     private File canonicalize(File file) {
         try {
             return FileUtils.getCanonicalFile(file);
@@ -364,10 +379,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             calculateManagedDirsImpl(subdir, files);
         }
     }
-    
+
     @Override
     public Future<List<Future<FileDesc>>> addFolder(File f) {
-        final File folder = canonicalize(f);        
+        final File folder = canonicalize(f);   
+        
+        // This is not actually needed for correctness,
+        // but is a nice quick way to avoid going to another
+        // thread.
         rwLock.readLock().lock();
         try {
             if(managedDirectories.contains(folder)) {
@@ -389,6 +408,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         });
     }
     
+    /** Adds this incomplete file to the list of managed files */
     void addIncompleteFile(File incompleteFile,
                            Set<? extends URN> urns,
                            String name,
@@ -689,6 +709,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         };
     }
     
+    /** Finishes the process of loading the FD, now that URNs are known. */
     private void finishLoadingFileDesc(File file, Set<? extends URN> urns,
             List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc,
             PendingFuture task) {
@@ -790,11 +811,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
   
     /**
-     * Creates a file descriptor for a given file and a set of urns
-     * @param file - file to create descriptor for
-     * @param urns - urns to use
-     * @param index - index to use
-     * @return
+     * Creates an FD for the file.  Returns null if the FD cannot be created
+     * (because the URN validator says it's not valid, for example).
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
         if(urnValidator.isInvalid(UrnSet.getSha1(urns))) {
@@ -816,6 +834,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return fd != null;
     }
     
+    /**
+     * Removes the FD for this file, returning the FD that was removed.
+     * This does NOT dispatch a remove event.  It will update the libraryData
+     * to signify the file should not be shared, though.
+     * 
+     * The file should be canonicalized already.
+     */
     private FileDesc removeInternal(File file) {
         FileDesc fd;
         boolean exclude;
@@ -835,6 +860,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return fd;
     }
     
+    /** Removes the given FD. */
     private void removeFileDesc(File file, FileDesc fd) {
         removeUrnIndex(fd);
         FileDesc rm = files.set(fd.getIndex(), null);
@@ -1000,11 +1026,22 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             updateManagedDirectories(extensions, directory, rev, true, true, futures);        
         }
         
+        Set<File> managedDirs = new HashSet<File>();
+        rwLock.readLock().lock();
+        try {
+            managedDirs.addAll(managedDirectories);
+        } finally {
+            rwLock.readLock().unlock();
+        }
+        
         for(File file : getLibraryData().getManagedFiles()) {
             if(rev != revision.get()) {
                 break;
             }
-            futures.add(add(file, LimeXMLDocument.EMPTY_LIST, rev, null));
+            // Load files that aren't in managed dirs & aren't manageable files.
+            if(!managedDirs.contains(file.getParentFile()) || !hasManageableExtension(file)) {
+                futures.add(add(file, LimeXMLDocument.EMPTY_LIST, rev, null));
+            }
         }
         
         return futures;
@@ -1089,15 +1126,21 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
          }
     }
 
+    /** Dispatches a SAVE event & tells library data to save. */
     void save() {
         dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.SAVE));
         getLibraryData().save();
     }
     
+    /** Returns the current revision.  Revisions are incmemented when loadManagedFiles is called. */
     int revision() {
         return revision.get();
     }
 
+    /**
+     * Returns true if this folder is manageable.  If excludeExcludedDirectories is true,
+     * this will *NOT* check against the list of excluded subdirectories.
+     */
     private boolean isFolderManageable(File folder, boolean excludeExcludedDirectories) {
         if (!folder.isDirectory() || !folder.canRead() || !folder.exists()) {
             return false;
@@ -1122,6 +1165,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return true;
     }
     
+    /** An iterator that works over changes to the list. */
     private class ThreadSafeManagedListIterator implements Iterator<FileDesc> {        
         /** Points to the index that is to be examined next. */
         private int startRevision = revision.get();
@@ -1183,13 +1227,19 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** Returns true if file has a manageable extension.  Case is ignored. */
     boolean hasManageableExtension(File file) {
-        String extension = FileUtils.getFileExtension(file);
-        return extensions.contains(extension.toLowerCase(Locale.US));
+        return extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US));
     }
     
+    /** Returns a filter used to get manageable files. */
+    FileFilter newManageableFilter() {
+        return new ManageableFileFilter(extensions);
+    }
+    
+    /** A filter used to see if a file is manageable. */
     private class ManageableFileFilter implements FileFilter {
         private final Set<String> extensions;
         
+        /** Constructs the filter with the given set of allowed extensions. */
         public ManageableFileFilter(Collection<String> extensions) {
             this.extensions = new HashSet<String>(extensions);
         }
@@ -1212,6 +1262,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }        
     }
 
+    /** A simple empty callable for use in PendingFuture. */
     private final static Callable<FileDesc> EMPTY_CALLABLE = new Callable<FileDesc>() {
         @Override
         public FileDesc call() { return null; }

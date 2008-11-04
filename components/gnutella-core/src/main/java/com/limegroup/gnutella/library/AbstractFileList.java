@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.IntSet;
-import org.limewire.concurrent.SimpleFuture;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -111,15 +111,24 @@ abstract class AbstractFileList implements SharedFileList {
             }
         }
     }
-    
+
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(File folder) {
-        // TODO: Add the folder to managelist as a managed folder,
-        //       then iterate through the contents and share every resulting
-        //       FD.
+    public Future<List<Future<FileDesc>>> addFolder(final File folder) {
         managedList.addFolder(folder);
-        List<Future<FileDesc>> data = Collections.emptyList();
-        return new SimpleFuture<List<Future<FileDesc>>>(data);        
+        
+        return managedList.submit(new Callable<List<Future<FileDesc>>>() {
+            @Override
+            public List<Future<FileDesc>> call() throws Exception {
+                File[] potentials = folder.listFiles(managedList.newManageableFilter());
+                List<Future<FileDesc>> futures = new ArrayList<Future<FileDesc>>();
+                for(File file : potentials) {
+                    if(!contains(file)) {
+                        futures.add(add(file));
+                    }
+                }
+                return futures;
+            }
+        });
     }
     
     @Override
@@ -460,7 +469,21 @@ abstract class AbstractFileList implements SharedFileList {
             @Override
             public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
                     ExecutionException, TimeoutException {
-                return check(future.get(timeout, unit));
+                try {
+                    return check(future.get(timeout, unit));
+                } catch(ExecutionException ee) {
+                    // We can fail because files are already added --
+                    // if that's why we failed, then we return the file anyway.
+                    if(ee.getCause() instanceof FileListChangeFailedException) {
+                        FileListChangeFailedException fe = (FileListChangeFailedException)ee.getCause();
+                        if(fe.getEvent().getType() == FileListChangedEvent.Type.ADD_FAILED) {
+                            if(contains(fe.getEvent().getFile())) {
+                                return getFileDesc(fe.getEvent().getFile());
+                            }
+                        }
+                    }
+                    throw ee;
+                }
             }
 
             @Override
@@ -545,14 +568,21 @@ abstract class AbstractFileList implements SharedFileList {
             case REMOVED:
                 remove(event.getFileDesc());
                 break;
-            case CHANGE_FAILED:
-            case ADD_FAILED:
-                if(isPending(event.getFile(), event.getFileDesc()) && !contains(event.getFile())) {
-                    saveChange(event.getFile(), false);
-                }
-                break;
             case CLEAR:
                 clear();
+                break;
+            case CHANGE_FAILED:
+            case ADD_FAILED:
+                // This can fail for double-adds, meaning the FD really does exist.
+                // If that's why it failed, we pretend this is really an add.
+                FileDesc fd = managedList.getFileDesc(event.getFile());
+                if(fd == null) { // File doesn't exist, it was a real failure.
+                    if(isPending(event.getFile(), null) && !contains(event.getFile())) {
+                        saveChange(event.getFile(), false);
+                    }           
+                } else if(isPending(event.getFile(), fd)) {
+                    add(fd);
+                }
                 break;
             }
         }

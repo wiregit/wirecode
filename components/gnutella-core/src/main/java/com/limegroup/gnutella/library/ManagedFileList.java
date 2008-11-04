@@ -56,4 +56,11 @@ public interface ManagedFileList extends FileList {
      */
     Future<List<Future<FileDesc>>> setManagedFolders(Collection<File> recursiveFoldersToManage,
                                                      Collection<File> foldersToExclude);
+    
+    /**
+     * Adds manageable files in this directory and recursively all
+     * subdirectories as managed files.
+     */
+    @Override
+    public Future<List<Future<FileDesc>>> addFolder(File folder);
 }

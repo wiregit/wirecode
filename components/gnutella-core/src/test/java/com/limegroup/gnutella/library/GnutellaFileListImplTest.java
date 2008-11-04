@@ -1,8 +1,23 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddsFolder;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddsForSession;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertContainsFiles;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestStoreFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -32,7 +47,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     private UrnValidator urnValidator;
     private Injector injector;
 
-    private File f1, f2, f3, f4;
+    private File f1, f2, f3, f4, f5;
     private List<FileDesc> sharedFiles;
 
     public GnutellaFileListImplTest(String name) {
@@ -316,5 +331,37 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     
     // TODO: Test change from store -> non-store (become shared?)
     // TODO: Test change non-store -> store (become unshared?)
+    
+    public void testAddFolder() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "tmp", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "tmp", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "tmp2", _scratchDir);
+        
+        File dir1 = new File(_scratchDir, "sub1");        
+        File dir2 = new File(_scratchDir, "sub2");
+        dir1.mkdirs();
+        dir2.mkdirs();
+        
+        f4 = createNewExtensionTestFile(15, "tmp", dir1);
+        f5 = createNewExtensionTestFile(15, "tmp2", dir2);
+
+        managedList.setManagedExtensions(Collections.singletonList("tmp"));
+        
+        List<FileDesc> fdList;
+        
+        fdList = assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(fdList, f1, f2);
+        assertContainsFiles(fileList, f1, f2);
+        // TODO: The below check has a race-condition 
+        //       ...The subdir might not be managed yet.
+        assertContainsFiles(managedList, f1, f2, f4); // subdir managed, not shared!
+        
+        assertLoads(managedList);
+        assertContainsFiles(fileList, f1, f2);
+        assertContainsFiles(managedList, f1, f2, f4);
+        
+        assertFalse(fileList.contains(f5));
+        assertFalse(managedList.contains(f5));
+    }
     
 }

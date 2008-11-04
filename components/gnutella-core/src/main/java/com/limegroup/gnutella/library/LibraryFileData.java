@@ -223,22 +223,13 @@ class LibraryFileData extends AbstractSettingsGroup {
         return canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.getValue()).equals(folder);
     }
     
-    /** Adds a new directory to exclude from recursive management. */
-    void addDirectoryToExcludeFromManaging(File folder) {
-        lock.writeLock().lock();
-        try {
-            directoriesNotToManage.add(folder);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-    
     /** Sets the new directory to exclude from recursive management. */
     void setDirectoriesToExcludeFromManaging(Collection<File> folders) {
         lock.writeLock().lock();
         try {
             directoriesNotToManage.clear();
             directoriesNotToManage.addAll(folders);
+            directoriesToManageRecursively.removeAll(folders);
         } finally {
             lock.writeLock().unlock();
         }
@@ -259,6 +250,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         lock.writeLock().lock();
         try {
             directoriesToManageRecursively.add(folder);
+            directoriesNotToManage.remove(folder);
         } finally {
             lock.writeLock().unlock();
         }
@@ -270,6 +262,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         try {
             directoriesToManageRecursively.clear();
             directoriesToManageRecursively.addAll(folders);
+            directoriesNotToManage.removeAll(folders);
         } finally {
             lock.writeLock().unlock();
         }

@@ -36,6 +36,11 @@ class IncompleteFileListImpl extends AbstractFileList implements IncompleteFileL
     }
     
     @Override
+    public Future<List<Future<FileDesc>>> addFolder(File folder) {
+        throw new UnsupportedOperationException("cannot add from here");
+    }
+    
+    @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
         return fileDesc instanceof IncompleteFileDesc;
     }
