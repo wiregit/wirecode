@@ -110,6 +110,36 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
+        addConnectionWarnings(search, searchPanel);
+        
+        startSearch(search, searchPanel);
+    }
+
+    private void startSearch(final Search search, final SearchResultsPanel searchPanel) {
+        //prevent search from starting until lifecycle manager completes loading
+        if(lifeCycleManager.isStarted()) {
+            search.start();
+        } else {
+             searchPanel.setLifeCycleComplete(false);
+             lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
+                 final EventListener<LifeCycleEvent> eventListener = this;
+                 public void handleEvent(LifeCycleEvent event) {
+                     if(event == LifeCycleEvent.STARTED) {
+                         SwingUtils.invokeLater(new Runnable() {
+                             public void run() {
+                                 searchPanel.setLifeCycleComplete(true);
+                                 search.start();
+                           
+                             }
+                         });
+                         lifeCycleManager.removeListener(eventListener);
+                     }
+                 }
+             });   
+        }
+    }
+
+    private void addConnectionWarnings(final Search search, final SearchResultsPanel searchPanel) {
         //display search warning message until fully connected to limewire.
         if(!connectionManager.isConnected() || !connectionManager.isFullyConnected()) {
             searchPanel.setFullyConnected(false);
@@ -164,28 +194,6 @@ class SearchHandlerImpl implements SearchHandler {
                 }
                 
             });
-        }
-        
-        //prevent search from starting until lifecycle manager completes loading
-        if(lifeCycleManager.isStarted()) {
-            search.start();
-        } else {
-             searchPanel.setLifeCycleComplete(false);
-             lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
-                 final EventListener<LifeCycleEvent> eventListener = this;
-                 public void handleEvent(LifeCycleEvent event) {
-                     if(event == LifeCycleEvent.STARTED) {
-                         SwingUtils.invokeLater(new Runnable() {
-                             public void run() {
-                                 searchPanel.setLifeCycleComplete(true);
-                                 search.start();
-                           
-                             }
-                         });
-                         lifeCycleManager.removeListener(eventListener);
-                     }
-                 }
-             });   
         }
     }
 }
