@@ -129,7 +129,7 @@ public class PromptTextField extends JTextField implements FocusListener {
             FontMetrics fm = g2.getFontMetrics();
             Border border = getBorder();
             int x = border != null ? border.getBorderInsets(this).left : 0;
-            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 2);
+            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 3);
         }
     }
 }

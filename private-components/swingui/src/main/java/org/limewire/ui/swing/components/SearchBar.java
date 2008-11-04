@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -72,8 +74,17 @@ public class SearchBar extends JXPanel {
         this.programAction = progAction;
         
         this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
+        this.comboBox.setPreferredSize(new Dimension((int)this.comboBox.getPreferredSize().getWidth(), 22));
+        
         this.searchField = new PromptTextField(I18n.tr("Search"));
-        this.searchButton = new JXButton("S");
+        this.searchField.setName("SearchBar.searchField");
+        
+        this.searchButton = new JXButton();
+        this.searchButton.setName("SearchBar.searchButton");
+        this.searchButton.setBorderPainted(false);
+        this.searchButton.setBackground(new Color(0,0,0,0));
+        this.searchButton.setOpaque(false);
+        this.searchButton.setPreferredSize(new Dimension(16,16));
         
         this.assertProgramCategory();
         
@@ -86,7 +97,7 @@ public class SearchBar extends JXPanel {
         this.setOpaque(false);
         this.add(this.comboBox);
         this.add(this.searchField, "gap 5");
-        this.add(this.searchButton, "gap 15");
+        this.add(this.searchButton, "gap 0");
 
         this.searchField.setFont(this.searchField.getFont().deriveFont(12));
         
