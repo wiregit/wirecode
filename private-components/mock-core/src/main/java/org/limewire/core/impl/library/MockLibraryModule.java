@@ -27,7 +27,7 @@ public class MockLibraryModule extends AbstractModule {
         EventMulticaster<FriendShareListEvent> friendShareListMulticaster = new EventMulticasterImpl<FriendShareListEvent>(); 
         bind(new TypeLiteral<EventListener<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
         bind(new TypeLiteral<ListenerSupport<FriendShareListEvent>>(){}).toInstance(friendShareListMulticaster);
-        bind(MetaDataManager.class).to(MetaDataManagerImpl.class);
+        bind(MetaDataManager.class).to(MockMetaDataManager.class);
     }
 
 }
