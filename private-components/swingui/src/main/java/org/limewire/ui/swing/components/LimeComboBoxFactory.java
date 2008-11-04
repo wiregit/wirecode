@@ -79,9 +79,14 @@ public class LimeComboBoxFactory {
     }
     
     public LimeComboBox createLightFullComboBox(List<Action> items) {
-        LimeComboBox box = createFullComboBox(items, lightButtonPainter);
         
-        box.setForeground(Color.BLACK);
+        LimeComboBox box = new LimeComboBox(items);
+        
+        box.setBackgroundPainter(this.lightButtonPainter);
+        box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
+        box.setIcon(this.miniRegIcon);
+        box.setFont(this.fullTextFont);
+        box.setForeground(this.miniRegTextColour);
         
         return box;
     }

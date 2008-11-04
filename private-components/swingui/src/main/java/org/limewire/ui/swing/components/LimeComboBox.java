@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,61 +58,17 @@ public class LimeComboBox extends JXButton {
             this.selectedAction = actions.get(0);
         else
             this.selectedAction = null;
-        
-        this.setModel(this.getModel());
-        
-        this.addMouseListener(new MouseAdapter() {
-            private boolean hide = false;
-            
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                if (menu == null)  return;
-                
-                if (menu.isVisible()) this.hide = true;                
-            }
 
-            @Override
-            public void mouseExited(MouseEvent e) {
-                this.hide = false;                
-            }
-            
-            @Override
-            public void mousePressed(MouseEvent e) {
-                
-                if (menu == null)  return;
-                
-                if (this.hide) {
-                    this.hide = false;
-                    return;
-                }
-                
-                updateMenu();
-                        
-                if (getText() == null)
-                    menu.setPreferredSize(new Dimension(getWidth(), 
-                            (int) menu.getPreferredSize().getHeight()));
-                
-                menu.show((Component) e.getSource(), 0, getHeight()-1);
-                
-                this.hide = true;
-            }
-        });
+        
+        this.initModel();
     }
-    
-    public void createPopupMenu() {
-        this.menu = new JPopupMenu();
-        this.initMenu();
-    }
-    
-    
-    
+
     public void overrideMenu(JPopupMenu menu) {
         this.isMenuOverrided = true;
         this.menu = menu;
         this.initMenu();
     }
 
-    
     public void  addActions(List<Action> actions) {
         if (actions == null) return;
         
@@ -187,6 +142,15 @@ public class LimeComboBox extends JXButton {
             this.updateSize();
     }
 
+    public void addUpdateHandler(UpdateHandler updateHandler) {
+        this.updateHandler = updateHandler;        
+    }
+
+    
+    public void addSelectionListener(SelectionListener listener) {
+        selectionListeners.add(listener);
+    }
+    
     @Override 
     public void setModel(final ButtonModel delegate) {
         super.setModel(new ButtonModel() {
@@ -282,47 +246,6 @@ public class LimeComboBox extends JXButton {
             return this.pressedTextColour;
     }
     
-    private void updateSize() {
-        
-        if (this.getText() == null && (this.actions == null || this.actions.isEmpty()))
-            return;
-        
-        
-        Rectangle2D labelRect = null;
-                
-        if (this.getText() != null && !this.getText().isEmpty()) {
-            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.getText());
-        } 
-        else {
-            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.actions.toArray());
-        }    
-        
-        int ix1 = 0;
-        int ix2 = 0;
-        int iy1 = 0;
-        int iy2 = 0;
-        
-        if (this.getBorder() != null) {
-            Insets insets = this.getBorder().getBorderInsets(this);
-            ix1 = insets.left;
-            ix2 = insets.right;
-            iy1 = insets.top;
-            iy2 = insets.bottom;
-        }
-        
-        this.setPreferredSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
-                (int)labelRect.getHeight()  + iy1 + iy2));
-        
-        this.setSize(this.getPreferredSize());
-        
-        this.setMinimumSize(this.getPreferredSize());
-                
-        this.revalidate();
-        this.repaint();
-
-    }
-    
-        
     @Override
     public boolean isOpaque() {
         return false;
@@ -334,6 +257,9 @@ public class LimeComboBox extends JXButton {
         super.setFont(f);
         this.updateSize();
     }
+    
+    
+    
     
     @Override
     protected void paintComponent(Graphics g) {
@@ -389,42 +315,91 @@ public class LimeComboBox extends JXButton {
             }
         }
     }
-    
-    
-    // Wraps an action to provide selection listening for the combo box
-    
-    private class SelectionActionWrapper extends AbstractAction {
-        
 
-        private final Action wrappedAction;
+    private void initModel() {
+        this.setModel(this.getModel());
         
-        public SelectionActionWrapper(Action actionToWrap) {
-            this.wrappedAction = actionToWrap;
-        }
-        
-        @Override 
-        public Object getValue(String s) {
-            return this.wrappedAction.getValue(s);
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-            // Change selection in parent combo box
-            selectedAction = this.wrappedAction;
-
-            // Fire the parent listeners
-            for ( SelectionListener listener : selectionListeners )
-                listener.selectionChanged(wrappedAction);
+        this.addMouseListener(new MouseAdapter() {
+            private boolean hide = false;
             
-            // Call original action
-            this.wrappedAction.actionPerformed(e);   
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (menu == null)  return;
+                
+                if (menu.isVisible()) this.hide = true;                
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                this.hide = false;                
+            }
             
-            repaint();
-        }
-        
+            @Override
+            public void mousePressed(MouseEvent e) {
+                
+                if (menu == null)  return;
+                
+                if (this.hide) {
+                    this.hide = false;
+                    return;
+                }
+                
+                updateMenu();
+                        
+                if (getText() == null)
+                    menu.setPreferredSize(new Dimension(getWidth(), 
+                            (int) menu.getPreferredSize().getHeight()));
+                
+                menu.show((Component) e.getSource(), 0, getHeight()-1);
+                
+                this.hide = true;
+            }
+        });
+    }
+
+    private void createPopupMenu() {
+        this.menu = new JPopupMenu();
+        this.initMenu();
     }
     
+    private void updateSize() {
+        
+        if (this.getText() == null && (this.actions == null || this.actions.isEmpty()))
+            return;
+        
+        Rectangle2D labelRect = null;
+                
+        if (this.getText() != null && !this.getText().isEmpty()) {
+            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.getText());
+        } 
+        else {
+            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.actions.toArray());
+        }    
+        
+        int ix1 = 0;
+        int ix2 = 0;
+        int iy1 = 0;
+        int iy2 = 0;
+        
+        if (this.getBorder() != null) {
+            Insets insets = this.getBorder().getBorderInsets(this);
+            ix1 = insets.left;
+            ix2 = insets.right;
+            iy1 = insets.top;
+            iy2 = insets.bottom;
+        }
+        
+        this.setPreferredSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
+                (int)labelRect.getHeight()  + iy1 + iy2));
+        
+        this.setSize(this.getPreferredSize());
+        
+        this.setMinimumSize(this.getPreferredSize());
+                
+        this.revalidate();
+        this.repaint();
+
+    }
     
     private void updateMenu() {
         
@@ -476,30 +451,9 @@ public class LimeComboBox extends JXButton {
         this.menu.setBackground(Color.WHITE);
         this.menu.setForeground(Color.BLACK);
         this.menu.setFont(this.getFont());
-        
-        this.menu.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-            }
-            @Override
-            public void mouseEntered(MouseEvent e) {
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-            }
-            @Override
-            public void mousePressed(MouseEvent e) {
-            }
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            } 
-        });
     }
     
-   
-    public void addSelectionListener(SelectionListener listener) {
-        selectionListeners.add(listener);
-    }
+
     
     public interface SelectionListener {
         public void selectionChanged(Action item);
@@ -509,7 +463,37 @@ public class LimeComboBox extends JXButton {
         public void fireUpdate();
     }
     
-    public void addUpdateHandler(UpdateHandler updateHandler) {
-        this.updateHandler = updateHandler;        
+    // Wraps an action to provide selection listening for the combo box
+    
+    private class SelectionActionWrapper extends AbstractAction {
+        
+
+        private final Action wrappedAction;
+        
+        public SelectionActionWrapper(Action actionToWrap) {
+            this.wrappedAction = actionToWrap;
+        }
+        
+        @Override 
+        public Object getValue(String s) {
+            return this.wrappedAction.getValue(s);
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            // Change selection in parent combo box
+            selectedAction = this.wrappedAction;
+
+            // Fire the parent listeners
+            for ( SelectionListener listener : selectionListeners )
+                listener.selectionChanged(wrappedAction);
+            
+            // Call original action
+            this.wrappedAction.actionPerformed(e);   
+            
+            repaint();
+        }
+        
     }
 }
