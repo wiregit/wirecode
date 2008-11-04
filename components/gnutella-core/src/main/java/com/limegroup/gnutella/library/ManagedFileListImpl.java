@@ -628,7 +628,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             // Exit if already added.
             if(fileToFileDescMap.containsKey(file)) {
                 LOG.debugf("Not loading because file already loaded {0}", file);
-                return new SimpleFuture<FileDesc>(fileToFileDescMap.get(file));
+                FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+                return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "File already managed"));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -730,8 +731,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             task.setException(new FileListChangeFailedException(event, "Couldn't create FD"));
         } else if(failed) {
             LOG.debugf("Couldn't load FD because FD with file {0} exists already.  FD: {1}", file, fd);
-            dispatchFailure(file, oldFileDesc);
-            task.set(fd); // pseudo-success because we already have a FD by that name
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileListChangeFailedException(event, "File already managed"));
         } else { // SUCCESS!
             // try loading the XML for this fileDesc
             fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));

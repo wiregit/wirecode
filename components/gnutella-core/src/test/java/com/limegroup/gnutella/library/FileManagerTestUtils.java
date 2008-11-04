@@ -113,8 +113,8 @@ public class FileManagerTestUtils {
         }
     }
     
-    public static void assertSetManagedDirectories(ManagedFileList fileList, Collection<File> dirs, Collection<File> excludeDirs) throws Exception {
-        assertFutureListFinishes(fileList.setManagedFolders(dirs, excludeDirs), 5, TimeUnit.SECONDS);
+    public static List<FileDesc> assertSetManagedDirectories(ManagedFileList fileList, Collection<File> dirs, Collection<File> excludeDirs) throws Exception {
+        return assertFutureListFinishes(fileList.setManagedFolders(dirs, excludeDirs), 5, TimeUnit.SECONDS);
     }
     
     public static void assertContainsFiles(Iterable<FileDesc> iterable, File... expectedFiles) {
@@ -146,20 +146,20 @@ public class FileManagerTestUtils {
      * continuing. Also can specify a timeout which will throw an exception if FileManager hasn't 
      * completed in a certain amount of time.
      */
-    public static void waitForLoad(FileManager fileManager, int timeout) throws Exception {
-        assertLoads(fileManager.getManagedFileList(), timeout, TimeUnit.MILLISECONDS);
+    public static List<FileDesc> waitForLoad(FileManager fileManager, int timeout) throws Exception {
+        return assertLoads(fileManager.getManagedFileList(), timeout, TimeUnit.MILLISECONDS);
     }
     
-    public static void assertLoads(ManagedFileList managedList) throws Exception {
-        assertLoads(managedList, 5, TimeUnit.SECONDS);
+    public static List<FileDesc> assertLoads(ManagedFileList managedList) throws Exception {
+        return assertLoads(managedList, 5, TimeUnit.SECONDS);
     }
 
-    public static void assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
+    public static List<FileDesc> assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
         Future<List<Future<FileDesc>>> loadFuture = ((ManagedFileListImpl) managedList).loadManagedFiles();
-        assertFutureListFinishes(loadFuture, timeout, unit);
+        return assertFutureListFinishes(loadFuture, timeout, unit);
     }
     
-    public static void assertFutureListFinishes(Future<List<Future<FileDesc>>> future, long timeout, TimeUnit unit) throws Exception {
+    public static List<FileDesc> assertFutureListFinishes(Future<List<Future<FileDesc>>> future, long timeout, TimeUnit unit) throws Exception {
         long left = unit.toNanos(timeout);
         long start = System.nanoTime();
         List<Future<FileDesc>> futures = future.get(timeout, unit);
@@ -167,22 +167,24 @@ public class FileManagerTestUtils {
         if(left <= 0) {
             throw new TimeoutException("timed out waiting for futures to load");
         } else {
-            waitForFutures(futures, left, TimeUnit.NANOSECONDS);
+            return waitForFutures(futures, left, TimeUnit.NANOSECONDS);
         }
     }
     
-    private static void waitForFutures(List<? extends Future<?>> futures, long timeout, TimeUnit unit) throws Exception {
+    private static List<FileDesc> waitForFutures(List<Future<FileDesc>> futures, long timeout, TimeUnit unit) throws Exception {
+        List<FileDesc> fdList = new ArrayList<FileDesc>();
         long left = unit.toNanos(timeout);
-        for(Future<?> future : futures) {
+        for(Future<FileDesc> future : futures) {
             long start = System.nanoTime();
             try {
-                future.get(left, TimeUnit.NANOSECONDS);
+                fdList.add(future.get(left, TimeUnit.NANOSECONDS));
             } catch(ExecutionException ignored) {}
             left -= System.nanoTime() - start;
             if(left <= 0) {
                 throw new TimeoutException("timed out waiting for futures to load");
             }
         }
+        return fdList;
     }
 
     // build xml string for video

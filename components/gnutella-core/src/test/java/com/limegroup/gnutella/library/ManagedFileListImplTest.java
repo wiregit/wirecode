@@ -1,6 +1,22 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.library.FileManagerTestUtils.*;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAdds;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertAddsFolder;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertChangeExtensions;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertContainsFiles;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChangedFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileChanges;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenameFails;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertFileRenames;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertLoads;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.assertSetManagedDirectories;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.change;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createFakeTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewExtensionTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewNamedTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.createNewTestFile;
+import static com.limegroup.gnutella.library.FileManagerTestUtils.getUrn;
 
 import java.io.File;
 import java.util.Arrays;
@@ -268,7 +284,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         fd = it.next();
         assertFalse(it.hasNext());
         
-        assertAdds(fileList, f1, f3);
+        assertAdds(fileList, f3);
         it = fileList.pausableIterable().iterator();
         assertTrue(it.hasNext());
         it.next();
@@ -380,36 +396,129 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertChangeExtensions(fileList, "tmp");
         assertEquals(0, fileList.size());
         
-        List<File> emptyList = Collections.emptyList();
+        List<File> emptyList = Collections.emptyList();        
+        List<FileDesc> fdList; // Will contain the list of newly added FDs.
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2as), emptyList);
-        assertContainsFiles(fileList, f7);
+        // Add initial directory (no subdirs)
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2as), emptyList);
+        assertContainsFiles(fdList, f7); // Assert new additions.
+        assertContainsFiles(fileList, f7); // Assert complete contents.
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2a), emptyList);
+        // Switch to a parent dir, assert subdir stays.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2a), emptyList);
+        assertContainsFiles(fdList, f5);
         assertContainsFiles(fileList, f5, f7);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2a), Arrays.asList(s2as));
+        // Now restrict subdir.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2a), Arrays.asList(s2as));
         assertContainsFiles(fileList, f5);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        // Add even further toplevel, restrict different subdir.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        assertContainsFiles(fdList, f3);
         assertContainsFiles(fileList, f3);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        // No changes!
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2), Arrays.asList(s2a));
+        assertEmpty(fdList);
         assertContainsFiles(fileList, f3);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(s2), emptyList);
+        // Unrestrict subdirs.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s2), emptyList);
+        assertContainsFiles(fdList, f5, f7);
         assertContainsFiles(fileList, f3, f5, f7);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s1a, s2as));
+        // Add topmost dir, restrict two different levels of subdirs.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s1a, s2as));
+        assertContainsFiles(fdList, f1, f2);
         assertContainsFiles(fileList, f1, f2, f3, f5);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s2a));
+        // Change restriction in to different level in one branch of subdir.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s2a));
+        assertContainsFiles(fdList, f4, f6);
         assertContainsFiles(fileList, f1, f2, f3, f4, f6);
         
-        assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), emptyList);
+        // Unrestrict everything.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), emptyList);
+        assertContainsFiles(fdList, f5, f7);
         assertContainsFiles(fileList, f1, f2, f3, f4, f5, f6, f7);
+    }
+    
+    public void testSetManagedDirectoriesWithExplicitlyAddedFiles() throws Exception {
+        File s1   = new File(_scratchDir, "sub1");  
+        s1.mkdirs();
         
-        // TODO: Test files that are added but not managed files.
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(1, s1);
+        f4 = createNewExtensionTestFile(1, "tmp1", s1);
+        f5 = createNewExtensionTestFile(1, "tmp", s1);
+        f6 = createNewExtensionTestFile(1, "tmp", _scratchDir);
+        f7 = createNewExtensionTestFile(1, "tmp1", _scratchDir);
+        
+        assertChangeExtensions(fileList, "tmp");
+        assertEquals(0, fileList.size());
+        
+        assertAdds(fileList, f4);
+        
+        List<File> emptyList = Collections.emptyList();        
+        List<FileDesc> fdList; // Will contain the list of newly added FDs.
+        
+        // Add directory that contains a special file.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s1), emptyList);
+        assertContainsFiles(fdList, f5, f2); // Assert new additions.
+        assertContainsFiles(fileList, f5, f4, f2); // Assert complete contents.
+        
+        // Remove directory that contains shared & added.
+        fdList = assertSetManagedDirectories(fileList, emptyList, emptyList);
+        assertEmpty(fdList); // Nothing added.
+        assertContainsFiles(fileList, f4); // f4 remains -- added w/o managed extension.
+        
+        // Add a file that is a managed extension.
+        assertAdds(fileList, f5);
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s1), emptyList); 
+        assertContainsFiles(fdList, f2);
+        assertContainsFiles(fileList, f5, f4, f2);
+        
+        // Now when we remove it, it is removed with that directory.
+        fdList = assertSetManagedDirectories(fileList, emptyList, emptyList);
+        assertEmpty(fdList); // Nothing added.
+        assertContainsFiles(fileList, f4); // f5 is removed!
+        
+        // Add a managed & unmanaged file outside of the managed dir.
+        assertAdds(fileList, f6, f7);
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(s1), emptyList); 
+        assertContainsFiles(fdList, f2, f5);
+        assertContainsFiles(fileList, f6, f7, f5, f4, f2);   
+        
+        // Remove and make sure both varieties of added files outside
+        // the managed dirs are kept.
+        fdList = assertSetManagedDirectories(fileList, emptyList, emptyList);
+        assertEmpty(fdList); // Nothing added.
+        assertContainsFiles(fileList, f6, f7, f4);        
+        
+        // Assert reloading gives us the right stuff.
+        fdList = assertLoads(fileList);
+        assertContainsFiles(fdList, f6, f7, f4);
+        assertContainsFiles(fileList, f6, f7, f4);
+        
+        // Now manage -- things should be added.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), emptyList);
+        assertContainsFiles(fdList, f1, f2, f5);
+        assertContainsFiles(fileList, f1, f2, f4, f5, f6, f7);
+        
+        // Remove toplevel -- only non-managed extensions should remain.
+        fdList = assertSetManagedDirectories(fileList, emptyList, emptyList);
+        assertEmpty(fdList);
+        assertContainsFiles(fileList, f4, f7);
+        
+        // Some additional checks w/ exclusions, just to make sure they work.
+        fdList = assertSetManagedDirectories(fileList, Arrays.asList(_scratchDir), Arrays.asList(s1));
+        assertContainsFiles(fdList, f1, f6);
+        assertContainsFiles(fileList, f1, f4, f6, f7);
+        
+        fdList = assertSetManagedDirectories(fileList, emptyList, emptyList);
+        assertEmpty(fdList);
+        assertContainsFiles(fileList, f4, f7);     
     }
     
 
