@@ -1,18 +1,29 @@
 package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 
 import javax.swing.Icon;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.images.ThumbnailManager;
+import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Inject;
@@ -25,20 +36,22 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     private final IconManager iconManager;
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
+    private final Navigator navigator;
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager,
-            IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
+            IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory, Navigator navigator) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.propertiableHeadings = propertiableHeadings;
         this.magnetLinkFactory = magnetLinkFactory;
+        this.navigator = navigator;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
-        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, propertiableHeadings, magnetLinkFactory);
+        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, propertiableHeadings, magnetLinkFactory, navigator);
     }
 
     private static class LocalFileItemProperties extends AbstractFileItemDialog implements
@@ -46,14 +59,18 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final ThumbnailManager thumbnailManager;
         private final CategoryIconManager categoryIconManager;
         private final IconManager iconManager;
+        private final Navigator navigator;
+        
         private @Resource Font smallFont;
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, 
-                IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
+                IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
+                Navigator navigator) {
             super(propertiableHeadings, magnetLinkFactory);
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
+            this.navigator = navigator;
             GuiUtils.assignResources(this);
         }
         
@@ -68,9 +85,38 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         }
 
         @Override
-        public void showProperties(LocalFileItem propertiable) {
+        public void showProperties(final LocalFileItem propertiable) {
             icon.setIcon(getIcon(propertiable));
             populateCommonFields(propertiable);
+            localFileLocation.setText(propertiable.getFileName());
+            
+            location.setLayout(new MigLayout("", "[]push[]15[]", "[]"));
+            location.add(localFileLocation);
+            location.add(locateOnDisk);
+            location.add(locateInLibrary);
+            
+            locateOnDisk.setAction(new AbstractAction(I18n.tr("locate on disk")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NativeLaunchUtils.launchExplorer(propertiable.getFile());
+                }
+            });
+            
+            locateInLibrary.setAction(new AbstractAction(I18n.tr("locate in library")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    setVisible(false);
+                    navigator.getNavItem(
+                            NavCategory.LIBRARY,
+                            LibraryNavigator.NAME_PREFIX + propertiable.getCategory()).select(new NavSelectable<URN>() {
+                                @Override
+                                public URN getNavSelectionId() {
+                                    return propertiable.getUrn();
+                                }
+                            });
+                }
+            });
+            
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
 

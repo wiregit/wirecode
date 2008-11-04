@@ -55,7 +55,12 @@ public abstract class Dialog extends JDialog {
     protected final JComboBox platform = new JComboBox();
     protected final JTextField company = new JTextField();
     protected final DefaultTableModel readOnlyInfoModel = new DefaultTableModel();
+    protected final DefaultTableModel sharingWithModel = new DefaultTableModel();
+    protected final JLabel localFileLocation = newLabel();
+    protected final JXHyperlink locateOnDisk = new JXHyperlink();
+    protected final JXHyperlink locateInLibrary = new JXHyperlink();
     protected final JTable readOnlyInfo = new JTable(readOnlyInfoModel);
+    protected final JTable sharingWith = new JTable(sharingWithModel);
     
     protected final JPanel overview;
     protected final JPanel details = new JPanel();
@@ -65,7 +70,7 @@ public abstract class Dialog extends JDialog {
     public Dialog() {
         GuiUtils.assignResources(this);
         
-        setFont(getSmallFont(), filename, subheading, fileSize, metadata, copyToClipboard);
+        setFont(getSmallFont(), filename, subheading, fileSize, metadata, copyToClipboard, locateOnDisk, locateInLibrary);
         
         setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
         JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
