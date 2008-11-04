@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.http.HttpException;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.InvalidDataException;
+import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -96,13 +97,14 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
+            SocketsManager socketsManager) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider, socketsManager);
     }
     
     @Override

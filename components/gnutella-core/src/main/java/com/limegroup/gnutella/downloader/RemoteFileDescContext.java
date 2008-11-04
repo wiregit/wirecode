@@ -2,7 +2,9 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.auth.Credentials;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.Address;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -154,5 +156,17 @@ class RemoteFileDescContext {
     
     public void setQueueStatus(int queueStatus) {
         this.queueStatus = queueStatus;
+    }
+    
+    public Address getAddress() {
+        return remoteFileDesc.getAddress();
+    }
+    
+    public Credentials getCredentials() {
+        return remoteFileDesc.getCredentials();
+    }
+    
+    public boolean isFromAlternateLocation() {
+        return remoteFileDesc.isFromAlternateLocation();
     }
 }

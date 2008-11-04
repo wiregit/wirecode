@@ -20,6 +20,8 @@ public class ConnectableImpl implements Connectable {
     private final IpPort ipPort;
     private final boolean tlsCapable;
     
+    private int hashCode = -1;
+    
     /** Constructs a Connectable that delegates to the IpPort and may be tls capable. */
     public ConnectableImpl(IpPort ipPort, boolean tlsCapable) {
         this.ipPort = ipPort;
@@ -83,7 +85,14 @@ public class ConnectableImpl implements Connectable {
     
     @Override
     public int hashCode() {
-        return super.hashCode();
+        int hash = hashCode;
+        if (hash == -1) {
+            hash = getInetAddress().hashCode();
+            hash = hash * 31 + getPort();
+            hash = hash * 31 + (tlsCapable ? 1 : 0);
+            hashCode = hash;
+        }
+        return hashCode;
     }
 
 }

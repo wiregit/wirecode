@@ -23,6 +23,9 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.auth.Credentials;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.protocol.HTTP;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntervalSet;
@@ -239,9 +242,6 @@ public class HTTPDownloader implements BandwidthTracker {
     private Set<PushAltLoc> _writtenBadPushLocs;
 
     
-	private int _port;
-	private String _host;
-	
 	private boolean _chatEnabled = false; // for now
     private boolean _browseEnabled = false; // also for now
     private String _server = "";
@@ -325,8 +325,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		_index = _rfd.getIndex();
 		_guid = _rfd.getClientGUID();
 		_amountToRead = 0;
-		_port = _rfd.getPort();
-		_host = _rfd.getAddress();
 		_chatEnabled = _rfd.isChatEnabled();
         _browseEnabled = _rfd.isBrowseHostEnabled();
         _locationsReceived = new HashSet<RemoteFileDesc>();
@@ -494,7 +492,7 @@ public class HTTPDownloader implements BandwidthTracker {
         List<Header> headers = new ArrayList<Header>();
         Set<HTTPHeaderValue> features = new HashSet<HTTPHeaderValue>();
         
-        headers.add(HTTPHeaderName.HOST.create(_host + ":" + _port));
+        headers.add(HTTPHeaderName.HOST.create(getHostAddress()));
         headers.add(HTTPHeaderName.USER_AGENT.create(ConstantHTTPHeaderValue.USER_AGENT));
         
         if (supportQueueing) {
@@ -573,6 +571,11 @@ public class HTTPDownloader implements BandwidthTracker {
         if ( amountDownloaded > 0 ) {
             headers.add(HTTPHeaderName.DOWNLOADED.create("" + amountDownloaded));
         }
+        
+        Credentials credentials = rfdContext.getCredentials();
+        if (credentials != null) {
+            headers.add(createBasicAuthHeader(credentials));
+        }
 		
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _rfd.getUrlPath() + " HTTP/1.1",
@@ -589,6 +592,14 @@ public class HTTPDownloader implements BandwidthTracker {
         _headerReader = reader;
 	}
     
+    Header createBasicAuthHeader(Credentials credentials) {
+        return BasicScheme.authenticate(credentials, HTTP.DEFAULT_PROTOCOL_CHARSET, false);
+    }
+    
+    private String getHostAddress() {
+        return _socket.getInetAddress().getHostAddress() + ":" + _socket.getPort();
+    }
+
     /** Adds some locations to the set of locations we'll write, and stores them in the already-written set. */
     private <T extends AlternateLocation> void writeAlternateLocations(List<Header> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {        
         //We don't want to hold locks while doing network operations, so we use
@@ -669,12 +680,12 @@ public class HTTPDownloader implements BandwidthTracker {
     public void requestHashTree(URN sha1, IOStateObserver observer) {
         if (LOG.isDebugEnabled())
             LOG.debug("requesting HashTree for " + _thexUri + 
-                      " from " +_host + ":" + _port);
+                      " from " + _rfd.getAddress());
         
         observerHandler.setDelegate(observer);
         
         List<Header >headers = new ArrayList<Header>();
-        headers.add(HTTPHeaderName.HOST.create(_host + ":" + _port));
+        headers.add(HTTPHeaderName.HOST.create(getHostAddress()));
         headers.add(HTTPHeaderName.USER_AGENT.create(ConstantHTTPHeaderValue.USER_AGENT));
         
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
@@ -1363,10 +1374,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 }
 
                 // try to update the FWT version and external address we know for this host
-            	try {
-            	    updatePEAddress();
-                    pushEndpointCache.get().setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
-                } catch (IOException ignored) {}
+                updatePEAddress();
+                pushEndpointCache.get().setFWTVersionSupported(_rfd.getClientGUID(),FWTVersion);
             }
         }
     }
@@ -1376,7 +1385,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private void parseTHEXHeader (String str) {
         if(LOG.isDebugEnabled())
-            LOG.debug(_host + ":" + _port +">" + str);
+            LOG.debug(getHostAddress() +">" + str);
         
         if (str.indexOf(";") > 0) {
             StringTokenizer tok = new StringTokenizer(str, ";");
@@ -1408,16 +1417,11 @@ public class HTTPDownloader implements BandwidthTracker {
      * the given host, and updates the rfd
      */
     private void parseProxiesHeader(String str) {
-        if (_rfd.getPushAddr()==null || str==null || str.length()<12) 
+        if (str==null || str.length()<12) 
             return;
         
-        try {
-            pushEndpointCache.get().overwriteProxies(_rfd.getClientGUID(),str);
-            updatePEAddress();
-        }catch(IOException tooBad) {
-            // invalid header - ignore it.
-        }
-        
+        pushEndpointCache.get().overwriteProxies(_rfd.getClientGUID(),str);
+        updatePEAddress();
     }
 
     /**
@@ -1437,7 +1441,7 @@ public class HTTPDownloader implements BandwidthTracker {
         }
     }
     
-    private void updatePEAddress() throws IOException {
+    private void updatePEAddress() {
         if (_socket instanceof RUDPSocket) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
             if (networkInstanceUtils.isValidExternalIpPort(newAddr))
@@ -1740,7 +1744,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public long getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
-	public int getPort() {return _port;}
+	public int getPort() {return _socket.getPort();}
 	
     /**
      * Returns the RemoteFileDesc passed to this' constructor.
@@ -1797,7 +1801,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     @Override
     public String toString() {
-        return "<"+_host+":"+_port+", "+getFileName()+">";
+        return "<"+ getHostAddress() +", "+getFileName()+">";
     }
     
     public static void setThrottleSwitching(boolean on) {

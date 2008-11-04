@@ -22,7 +22,8 @@ public interface SourceRanker {
     public boolean hasMore();
 
     /**
-     * @return the source that should be tried next
+     * @return the source that should be tried next or <code>null</code>
+     * if there is none
      */
     public RemoteFileDescContext getBest();
 

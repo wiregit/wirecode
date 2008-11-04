@@ -33,6 +33,9 @@ public class FirewalledAddress implements Address {
         this.fwtVersion = fwtVersion;
     }
     
+    /**
+     * @return an invalid address if public address it not known
+     */
     public Connectable getPublicAddress() {
         return publicAddress;
     }

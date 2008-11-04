@@ -5,6 +5,7 @@ import java.net.Socket;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
@@ -15,6 +16,7 @@ import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
+@Singleton
 public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
     
     private final NetworkManager networkManager;

@@ -18,6 +18,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -788,7 +789,7 @@ public class DownloadWorker {
             // the acceptor thread is going to notify us using this object
             
             final PushDetails details = new PushDetails(_rfd.getClientGUID(),
-                    _rfd);
+                    ((IpPort)_rfd.getAddress()).getAddress());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
             pushDownloadManager.get().sendPush(_rfd,

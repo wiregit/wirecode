@@ -61,7 +61,7 @@ public class RemoteHostMemento implements Serializable {
     /**
      * Encodes address as address-type:utf8(base64(serialized-address))
      */
-    public static String getSerializedAddress(Address address, AddressFactory addressFactory) {
+    public static String serializeAddress(Address address, AddressFactory addressFactory) {
         AddressSerializer serializer = addressFactory.getSerializer(address.getClass());
         assert serializer != null : "for address class: " + address.getClass();
         StringBuilder builder = new StringBuilder(serializer.getAddressType());
@@ -75,7 +75,7 @@ public class RemoteHostMemento implements Serializable {
         }
     }
     
-    Address deserializeAddress(String addressString, AddressFactory addressFactory) {
+    static Address deserializeAddress(String addressString, AddressFactory addressFactory) {
         StringTokenizer st = new StringTokenizer(addressString, ":");
         if (st.hasMoreTokens()) {
             String type = st.nextToken();
@@ -117,7 +117,10 @@ public class RemoteHostMemento implements Serializable {
     public URL getCustomUrl() { return (URL)propertiesMap.get(Keys.CUSTOM_URL); }
     
     public Address getAddress(AddressFactory addressFactory, PushEndpointFactory pushEndpointFactory) throws IOException {
-        String address = (String) propertiesMap.get(Keys.ADDRESS);
+        return getAddress((String) propertiesMap.get(Keys.ADDRESS), addressFactory, pushEndpointFactory);
+    }
+        
+    public Address getAddress(String address, AddressFactory addressFactory, PushEndpointFactory pushEndpointFactory) throws IOException {
         if (address != null) {
             return deserializeAddress(address, addressFactory);
         }

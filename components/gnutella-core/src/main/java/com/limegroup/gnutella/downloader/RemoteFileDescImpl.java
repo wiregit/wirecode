@@ -96,8 +96,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     
     private final long _size;
     
-    private static final DownloadStatsTracker STATS_TRACKER_STUB = new DownloadStatsTrackerStub();
-
     private final Address address;
 
     private final AddressFactory addressFactory;
@@ -426,7 +424,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#toMemento()
      */
     public RemoteHostMemento toMemento() {
-        return new RemoteHostMemento(RemoteHostMemento.getSerializedAddress(address, addressFactory), _filename, _index, _clientGUID, _speed,
+        return new RemoteHostMemento(RemoteHostMemento.serializeAddress(address, addressFactory), _filename, _index, _clientGUID, _speed,
                 _size, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
                 _browseHostEnabled,_vendor, _http11); 
     }
@@ -438,22 +436,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             return _xmlDoc.getXMLString();
     }
     
-    private static class DownloadStatsTrackerStub implements DownloadStatsTracker {
-        public Object inspect() {
-                return "this is a stub";
-            }
-
-            public void successfulDirectConnect() {}
-
-            public void failedDirectConnect() {}
-
-            public void successfulPushConnect() {}
-
-            public void failedPushConnect() {}
-
-            public void increment(DownloadStatsTracker.PushReason reason) {}    
-    }
-
     @Override
     public boolean isSpam() {
         return getSpamRating() >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),

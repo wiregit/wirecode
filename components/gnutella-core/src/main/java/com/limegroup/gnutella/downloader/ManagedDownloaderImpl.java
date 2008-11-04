@@ -31,8 +31,10 @@ import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.PermanentAddress;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -216,6 +218,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  elements of type RemoteFileDesc and URLRemoteFileDesc
      */
     private Set<RemoteFileDesc> cachedRFDs;
+    
+    /**
+     * Set of {@link RemoteFileDesc remote file descs} that can't be resolved
+     * or connected to yet.
+     */
+    private Set<RemoteFileDesc> unconnectableRFDs;
     
     private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 
@@ -438,6 +446,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final RemoteFileDescFactory remoteFileDescFactory;
     protected final Provider<PushList> pushListProvider;
 
+    private final SocketsManager socketsManager;
+
     /**
      * Creates a new ManagedDownload to download the given files.
      * 
@@ -459,7 +469,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
+            SocketsManager socketsManager) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
@@ -467,6 +478,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.downloadCallback = downloadCallback;
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
+        this.socketsManager = socketsManager;
         this.requeryManager = requeryManagerFactory.createRequeryManager(new RequeryListenerImpl());
         this.queryRequestFactory = queryRequestFactory;
         this.onDemandUnicaster = onDemandUnicaster;
@@ -1353,11 +1365,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // do not download from ourselves
             if (rfd.isMe(myGUID)) {
                 iter.remove();
-            } else { 
-                prepareRFD(rfd,cache);
+                continue;
             }
-         //   if(LOG.isTraceEnabled())
-         //       LOG.trace("added rfd: " + rfd);
+            
+            prepareRFD(rfd,cache);
+            
+            if (!canResolve(rfd) && !canConnect(rfd)) {
+                unconnectableRFDs.add(rfd);
+                iter.remove();
+            }
         }
         
         if ( ranker.addToPool(getContexts(copy)) ) {
@@ -1368,6 +1384,14 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         return true;
     }
+
+    private boolean canResolve(RemoteFileDesc rfd) {
+        return socketsManager.canResolve(rfd.getAddress());
+    }
+    
+    private boolean canConnect(RemoteFileDesc rfd) {
+        return socketsManager.canConnect(rfd.getAddress());
+    }
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
         if(getSha1Urn() == null && rfd.getSHA1Urn() != null) {
@@ -1376,7 +1400,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
 
         //add to allFiles for resume purposes if caching...
-        if(cache) 
+        if(cache || rfd.getAddress() instanceof PermanentAddress) 
             cachedRFDs.add(rfd);        
     }
     
@@ -1384,9 +1408,20 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasNewSources()
      */
     public boolean hasNewSources() {
-        return !paused && receivedNewSources;
+        return (!paused && receivedNewSources) || hasNewConnectableSources();
     }
     
+    private boolean hasNewConnectableSources() {
+        boolean newConnectableSources = false;
+        for (RemoteFileDesc rfd : unconnectableRFDs) {
+            if (canResolve(rfd) || canConnect(rfd)) {
+                newConnectableSources = true;
+                addDownloadForced(rfd, true);
+            }
+        }
+        return newConnectableSources;
+    }
+
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#shouldBeRestarted()
      */
@@ -2403,6 +2438,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	}
     
     public synchronized void forgetRFD(RemoteFileDesc rfd) {
+        // don't remove permanent addresses
+        if (rfd.getAddress() instanceof PermanentAddress) {
+            return;
+        }
         if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
             // remember our last RFD
             rfd.setSerializeProxies();
@@ -3161,4 +3200,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         return contexts;
     }
+    
+    
 }

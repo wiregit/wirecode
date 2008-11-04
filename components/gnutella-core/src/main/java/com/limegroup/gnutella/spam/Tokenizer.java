@@ -9,6 +9,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -93,7 +95,10 @@ public class Tokenizer {
 			set.add(getUrnToken(desc));
 		set.add(getSizeToken(desc));
         set.add(getVendorToken(desc));
-		set.add(getAddressToken(desc));
+        Token addressToken = getAddressToken(desc);
+        if (addressToken != null) {
+            set.add(addressToken);
+        }
 		Token[] tokens = new Token[set.size()];
 		tokens = set.toArray(tokens);
 		return tokens;
@@ -119,7 +124,10 @@ public class Tokenizer {
 				set.add(getUrnToken(descs[i]));
 			set.add(getSizeToken(descs[i]));
             set.add(getVendorToken(descs[i]));
-			set.add(getAddressToken(descs[i]));
+            Token addressToken = getAddressToken(descs[i]);
+            if (addressToken != null) {
+                set.add(addressToken);
+            }
 		}
 		Token[] tokens = new Token[set.size()];
 		tokens = set.toArray(tokens);
@@ -199,11 +207,16 @@ public class Tokenizer {
 	 * 
 	 * @param desc
 	 *            the RemoteFileDesc we are tokenizing
-	 * @return a new AddressToken
+	 * @return a new AddressToken or <code>null</code> if the address is
+	 * private or a not a Gnutella address
 	 */
 	private Token getAddressToken(RemoteFileDesc desc) {
-		return new AddressToken(desc.getInetAddress().getAddress(), desc
-				.getPort(), ipFilter);
+	    Address address = desc.getAddress();
+	    if (address instanceof Connectable) {
+	        Connectable connectable = (Connectable)address;
+	        return new AddressToken(connectable.getInetAddress().getAddress(), connectable.getPort(), ipFilter);
+	    }
+		return null;
 	}
 
 	/**

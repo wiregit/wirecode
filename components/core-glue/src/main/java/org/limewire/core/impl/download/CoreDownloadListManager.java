@@ -186,13 +186,9 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
-        Connectable publicAddress;
         Address address = presence.getPresenceAddress();
         byte[] clientGuid = null;
-        boolean firewalled;
-        Set<Connectable> proxies = null;
-        int fwtVersion = 0;
-
+        
         Set<String> urnsAsString = fileMeta.getURNsAsString();
         Set<URN> urns = new HashSet<URN>();
         for (String urnStr : urnsAsString) {
@@ -203,24 +199,10 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
         }
 
-        if (address instanceof FirewalledAddress) {
-            firewalled = true;
-            FirewalledAddress fwAddress = (FirewalledAddress) address;
-            publicAddress = fwAddress.getPublicAddress();
-            clientGuid = fwAddress.getClientGuid().bytes();
-            proxies = fwAddress.getPushProxies();
-            fwtVersion = fwAddress.getFwtVersion();
-        } else {
-            assert address instanceof Connectable;
-            firewalled = false;
-            publicAddress = (Connectable) address;
-        }
-
-        return remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
+        return remoteFileDescFactory.createRemoteFileDesc(address,
                 fileMeta.getIndex(), fileMeta.getName(), fileMeta.getSize(), clientGuid,
                 0, false, 0, true, null, urns, false,
-                firewalled, null, proxies, fileMeta.getCreateTime().getTime(), fwtVersion,
-                publicAddress.isTLSCapable());
+                null, fileMeta.getCreateTime().getTime());
     }
 
 

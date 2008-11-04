@@ -177,7 +177,7 @@ public class Main {
     
         public void handleQueryResult(RemoteFileDesc rfd , QueryReply queryReply, Set<? extends IpPort> loc) {
             synchronized(System.out) {
-                System.out.println("Query hit from "+rfd.getAddress()+":"+rfd.getPort()+":");
+                System.out.println("Query hit from "+rfd.getAddress() + ":");
                 System.out.println("   "+rfd.getFileName());
             }
         }

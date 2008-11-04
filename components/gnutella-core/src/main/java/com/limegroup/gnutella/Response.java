@@ -8,6 +8,7 @@ import org.limewire.io.IpPort;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 
@@ -104,6 +105,6 @@ public interface Response {
     /**
      * Returns this Response as a RemoteFileDesc.
      */
-    public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, RemoteFileDescFactory remoteFileDescFactory);
+    public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory) throws UnknownHostException;
 }
 

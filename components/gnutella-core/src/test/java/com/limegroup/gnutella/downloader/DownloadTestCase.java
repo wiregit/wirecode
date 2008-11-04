@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
@@ -43,7 +44,6 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.library.FileManager;
@@ -60,7 +60,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected final Log LOG = LogFactory.getLog(getClass());
 
-    protected final GUID guid = new GUID(GUID.makeGuid());
+    protected final GUID guid = new GUID();
 
     protected static final String filePath = "com/limegroup/gnutella/downloader/DownloadTestData/";
 
@@ -370,17 +370,16 @@ public abstract class DownloadTestCase extends LimeTestCase {
         assertNull("verifying file should be null", vf);
     }
 
-    protected RemoteFileDesc newRFD(int port, boolean useTLS) {
-        return remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, null, false, false, "", null, -1,
-                useTLS);
+    protected RemoteFileDesc newRFD(int port, boolean useTLS) throws Exception {
+        return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, URN.NO_URN_SET, false, "", -1);
     }
 
-    protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) {
+    protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) throws Exception {
         return newRFDWithURN(port, null, useTLS);
     }
 
-    protected RemoteFileDesc newRFDWithURN(int port, String urn, boolean useTLS) {
+    protected RemoteFileDesc newRFDWithURN(int port, String urn, boolean useTLS) throws Exception {
         Set<URN> set = new HashSet<URN>();
         try {
             // for convenience, don't require that they pass the urn.
@@ -392,27 +391,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
         } catch (Exception e) {
             fail("SHA1 not created for: " + savedFile, e);
         }
-        return remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, set, false, false, "", null, -1,
-                useTLS);
-    }
-
-    protected RemoteFileDesc newRFDPush(int port, int suffix) throws Exception {
-        return newRFDPush(port, suffix, 1);
-    }
-
-    protected RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception {
-        PushAltLoc al = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
-                + ";127.0.0." + proxySuffix + ":" + port, TestFile.hash());
-        al.updateProxies(true);
-
-        Set<URN> urns = new HashSet<URN>();
-        urns.add(TestFile.hash());
-
-        return remoteFileDescFactory.createRemoteFileDesc("127.0.0." + rfdSuffix, 6346, 0, savedFile.getName(),
-                TestFile
-                        .length(), 100, false, 1, false, null, urns, false, true, "ALT", 0, al
-                .getPushAddress());
+        return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, set, false, "", -1);
     }
 
     /** Returns true if the complete file exists and is complete */

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.InvalidDataException;
@@ -14,6 +15,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.net.address.AddressFactory;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -197,6 +200,32 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
      */
     public PushEndpoint createForSelf() {
         return selfProvider.get(); 
+    }
+
+    @Override
+    public Address deserialize(byte[] serializedAddress) throws IOException {
+        return createPushEndpoint(StringUtils.getUTF8String(serializedAddress));
+    }
+
+    @Override
+    public Class<? extends Address> getAddressClass() {
+        return PushEndpoint.class;
+    }
+
+    @Override
+    public String getAddressType() {
+        return "push-endpoint";
+    }
+
+    @Override
+    @Inject
+    public void register(AddressFactory factory) {
+        factory.registerSerializer(this);
+    }
+
+    @Override
+    public byte[] serialize(Address address) throws IOException {
+        return StringUtils.toUTF8Bytes(((PushEndpoint)address).httpStringValue());
     }    
 
 }

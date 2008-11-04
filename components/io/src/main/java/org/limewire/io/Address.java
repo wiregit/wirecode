@@ -17,9 +17,7 @@ public interface Address {
         ADDRESS_CHANGED
     }
     
-    @Override
     public boolean equals(Object obj);
     
-    @Override
     public int hashCode();
 }

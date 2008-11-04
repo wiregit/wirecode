@@ -1,19 +1,14 @@
 package org.limewire.xmpp.client.impl;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Set;
 
+import org.apache.http.auth.Credentials;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.Address;
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -27,16 +22,6 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     public XMPPRemoteFileDesc(XMPPAddress xmmAddress) {
     }
     
-    @Override
-    public PushEndpoint getPushAddr() {
-        return null;
-    }
-
-    @Override
-    public int getQueueStatus() {
-        return 0;
-    }
-
     @Override
     public int getSecureStatus() {
         return 0;
@@ -78,36 +63,12 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public boolean isPartialSource() {
-        return availableRanges != null;
-    }
-
-    @Override
-    public boolean isPrivate() {
-        return false;
-    }
-
-    @Override
     public boolean isSpam() {
         return false;
     }
 
     @Override
-    public boolean needsPush() {
-        return false;
-    }
-
-    @Override
-    public boolean needsPush(DownloadStatsTracker statsTracker) {
-        return false;
-    }
-
-    @Override
     public void setDownloading(boolean dl) {
-    }
-
-    @Override
-    public void setQueueStatus(int status) {
     }
 
     @Override
@@ -120,11 +81,6 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public void setSpamRating(float rating) {
-    }
-
-    @Override
-    public Address getAddress() {
-        return null;
     }
 
     @Override
@@ -173,11 +129,6 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public Set<? extends IpPort> getPushProxies() {
-        return null;
-    }
-
-    @Override
     public int getQuality() {
         return 0;
     }
@@ -202,11 +153,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
         return false;
     }
 
-    @Override
-    public boolean isFirewalled() {
-        return false;
-    }
-
+    
     @Override
     public boolean isHTTP11() {
         return http11;
@@ -228,41 +175,14 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     }
 
     @Override
-    public boolean supportsFWTransfer() {
-        return false;
-    }
-
-    @Override
-    public boolean isTLSCapable() {
-        Address address = this.resolvedAddress;
-        if (address != null) {
-            if (address instanceof Connectable) {
-                return ((Connectable)address).isTLSCapable();
-            } else if (address instanceof FirewalledAddress) {
-                return ((FirewalledAddress)address).getPrivateAddress().isTLSCapable();
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public String getAddress() {
+    public Address getAddress() {
         return null;
     }
 
     @Override
-    public InetAddress getInetAddress() {
+    public Credentials getCredentials() {
         return null;
     }
 
-    @Override
-    public InetSocketAddress getInetSocketAddress() {
-        return null;
-    }
-
-    @Override
-    public int getPort() {
-        return 0;
-    }
 
 }

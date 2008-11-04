@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.Set;
 
 import org.apache.http.HttpException;
+import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 
@@ -68,10 +69,15 @@ public interface RemoteFileDescFactory {
      * @throws <tt>NullPointerException</tt> if the host argument is 
      *  <tt>null</tt> or if the file name is <tt>null</tt>
      */
-    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
             long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast, boolean firewalled, String vendor, Set<? extends IpPort> proxies,
-            long createTime, boolean tlsCapable);
+            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime);
+    
+    public RemoteFileDesc createRemoteFileDesc(Address address, long index, String filename,
+            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
+            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast, String vendor,
+            long createTime, boolean http1);
 
     /** 
      * Constructs a new RemoteFileDescImpl with metadata.
@@ -108,12 +114,6 @@ public interface RemoteFileDescFactory {
             long size, int speed, boolean chat, int quality, boolean browseHost, LimeXMLDocument xmlDoc,
             Set<? extends URN> urns, boolean replyToMulticast, boolean firewalled, String vendor, long createTime, PushEndpoint pe);
 
-    /**
-     * Constructs a URLRemoteFileDesc, whose getUrl method will return that URL.
-     */
-    public RemoteFileDesc createUrlRemoteFileDesc(String host, int port, String filename, long size,
-            Set<? extends URN> urns, URL url);
-    
     /**
      * Constructs a URLRemoteFileDesc, looking up the size from the URL if no size is known.<p>
      * 

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.net.SocketsManager;
 import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
@@ -60,13 +61,15 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
+            SocketsManager socketsManager) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider,
+                socketsManager);
     }
     
     /* (non-Javadoc)
