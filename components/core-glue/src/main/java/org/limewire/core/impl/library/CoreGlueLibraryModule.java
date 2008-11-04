@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.MagnetLinkFactory;
+import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.inject.AbstractModule;
@@ -33,6 +34,7 @@ public class CoreGlueLibraryModule extends AbstractModule {
                 .toProvider(
                         FactoryProvider.newFactory(CoreLocalFileItemFactory.class,
                                 CoreLocalFileItem.class));
+        bind(MetaDataManager.class).to(MetaDataManagerImpl.class);
     }
 
 }
