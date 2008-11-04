@@ -84,8 +84,8 @@ public class SearchBar extends JXPanel {
             this.comboBox.setSelectedAction(actionToSelect);
         
         this.setOpaque(false);
-        this.add(this.comboBox, "gap 30");
-        this.add(this.searchField, "gap 15");
+        this.add(this.comboBox);
+        this.add(this.searchField, "gap 5");
         this.add(this.searchButton, "gap 15");
 
         this.searchField.setFont(this.searchField.getFont().deriveFont(12));
@@ -106,6 +106,10 @@ public class SearchBar extends JXPanel {
         } else {
             this.comboBox.addAction(this.programAction);
         }
+    }
+    
+    public void setText(String text) {
+        this.searchField.setText(text);
     }
     
     public void setSearchHandler(final SearchHandler searchHandler) {

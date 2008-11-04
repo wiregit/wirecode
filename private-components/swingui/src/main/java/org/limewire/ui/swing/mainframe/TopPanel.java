@@ -19,18 +19,15 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
-import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
-import org.limewire.ui.swing.components.TextFieldWithEnterButton;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -52,9 +49,10 @@ import com.google.inject.Singleton;
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
     
+    private final SearchBar searchBar;
+    
     private final FancyTabList searchList;
     private final Navigator navigator;
-    private final TextFieldWithEnterButton textField;
         
     private final NavItem homeNav;
     
@@ -68,18 +66,14 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         GuiUtils.assignResources(this);
         
-        searchBar.setSearchHandler(searchHandler);
+        this.searchBar = searchBar;        
+        this.searchBar.setSearchHandler(searchHandler);
         
         this.navigator = navigator;
         
         setName("TopPanel");
         
         setBackgroundPainter(new TopPanelPainter());
-        
-        textField = new TextFieldWithEnterButton(I18n.tr("Search..."),
-                friendLibraries.getDictionary(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue())));
-        textField.setMaximumSize(120);
-        textField.setName("TopPanel.searchInput");
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);
         NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
@@ -108,13 +102,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        
         add(homeButton);
         add(storeButton);
-        add(searchBar, "gapleft 5, gapright 5");
+        add(searchBar, "gapleft 65, gapright 30");
         add(searchList, "gapleft 4, gaptop 6, grow");
     };
 
     @Override
     public boolean requestFocusInWindow() {
-        return textField.requestFocusInWindow();
+        return searchBar.requestFocusInWindow();
     }
 
     @Override
@@ -148,7 +142,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
             @Override
             public void itemSelected(boolean selected) {
-                textField.setText(item.getId());
+                searchBar.setText(item.getId());
                 action.putValue(Action.SELECTED_KEY, selected);
             }
         });

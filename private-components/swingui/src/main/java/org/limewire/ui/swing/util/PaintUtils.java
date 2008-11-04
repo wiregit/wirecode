@@ -27,6 +27,26 @@ public class PaintUtils {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
     
+    /**
+     * Draws a rounded border like box at a given location and size with 
+     *  shadowing darkness defined by 3 intensity values
+     */
+    public static void drawRoundedBorder(Graphics g, int x, int y, int width, 
+            int height, int arcWidth, int arcHeight, Color c, int i1, int i2, int i3) {
+
+        // Draw shading
+        g.setColor(PaintUtils.lighten(c,i1));
+        g.drawRoundRect(x, y+1, width, height-2, arcWidth, arcHeight);
+        g.drawLine(x+arcWidth/2, y+height-1, x+width-arcWidth/2, y+height-1);
+        g.setColor(PaintUtils.lighten(c,i2));
+        g.drawLine(x+arcWidth/2, y+1, x+width-arcWidth/2, y+1);
+        g.setColor(PaintUtils.lighten(c,i3));
+        g.drawLine(x+width-1, y+arcHeight/2, x+width-1, y+height-arcHeight/2);
+        
+        g.setColor(c);
+        g.drawRoundRect(x, y, width, height, arcWidth, arcHeight);
+    }
+    
     
     /**
      * Produces a new lighted colour value by a given intensity from a base colour 

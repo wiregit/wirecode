@@ -13,11 +13,22 @@ import java.awt.event.FocusListener;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PaintUtils;
 
 public class PromptTextField extends JTextField implements FocusListener {
     
     private String promptText;
+    
+    @Resource
+    private int arcWidth;
+    
+    @Resource
+    private int arcHeight;
+        
+    @Resource 
+    private Color borderColour;
     
     public PromptTextField() {
         this("");
@@ -25,6 +36,9 @@ public class PromptTextField extends JTextField implements FocusListener {
     
     public PromptTextField(String promptText) {
         super();
+        
+        GuiUtils.assignResources(this);
+        
         init(true);
         setPromptText(promptText);
     }
@@ -41,7 +55,7 @@ public class PromptTextField extends JTextField implements FocusListener {
         this.setOpaque(false);
         this.setBorder(new TextBorder());
         if(setSize) {
-            this.setPreferredSize(new Dimension(150, 19));
+            this.setPreferredSize(new Dimension(200, 20));
             this.setMinimumSize(this.getPreferredSize());
             this.setSize(this.getPreferredSize());
         }
@@ -102,9 +116,11 @@ public class PromptTextField extends JTextField implements FocusListener {
     
     protected void paintTextArea(Graphics2D g2) {
         g2.setColor(Color.WHITE);
-        g2.fillRoundRect(0, 1, getWidth()-1, getHeight()-1, 10, getHeight());  
-        g2.setColor(new Color(0,0,0,92));        
-        g2.drawRoundRect(0, 1, this.getWidth()-1, this.getHeight()-1, 10, this.getHeight());     
+        g2.fillRoundRect(0, 0, getWidth()-1, getHeight()-1, 10, getHeight());
+        
+        PaintUtils.drawRoundedBorder(g2, 0, 0, getWidth()-1, getHeight()-1, 
+                this.arcWidth, this.arcHeight, this.borderColour,
+                120, 80, 100);
     }
     
     protected void paintPrompt(Graphics2D g2) {
@@ -113,7 +129,7 @@ public class PromptTextField extends JTextField implements FocusListener {
             FontMetrics fm = g2.getFontMetrics();
             Border border = getBorder();
             int x = border != null ? border.getBorderInsets(this).left : 0;
-            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 3);
+            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 2);
         }
     }
 }

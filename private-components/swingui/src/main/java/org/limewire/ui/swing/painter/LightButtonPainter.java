@@ -20,14 +20,15 @@ import com.google.inject.Singleton;
 @Singleton
 public class LightButtonPainter extends AbstractPainter<JXButton> {
         
-    @Resource
-    private int arcHeight;
-    
+
     @Resource
     private int arcWidth;
     
+    @Resource
+    private int arcHeight;
+    
     @Resource 
-    private Color borderColor;
+    private Color borderColour;
     
     @Resource 
     private Color backgroundGradientTop;
@@ -64,17 +65,10 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
         g.fillRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
         
         
-        // Draw shading
-        g.setColor(PaintUtils.lighten(this.borderColor,60));
-        g.drawRoundRect(0, 1, width-1, height-3, this.arcWidth, this.arcHeight);
-        g.drawLine(this.arcWidth/2, height-2, width-this.arcWidth/2, height-2);
-        g.setColor(PaintUtils.lighten(this.borderColor,100));
-        g.drawLine(this.arcWidth/2, 1, width-this.arcWidth/2, 1);
-        g.setColor(PaintUtils.lighten(this.borderColor,80));
-        g.drawLine(width-2, this.arcHeight/2, width-2, height-this.arcHeight/2);
+        PaintUtils.drawRoundedBorder(g, 0, 0, width-1, height-1, 
+                this.arcWidth, this.arcHeight, this.borderColour,
+                60, 80, 100);
         
-        g.setColor(this.borderColor);
-        g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
