@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
 import org.limewire.core.api.connection.ConnectionLifeCycleListener;
@@ -109,6 +110,62 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
+        //display search warning message until fully connected to limewire.
+        if(!connectionManager.isConnected() || !connectionManager.isFullyConnected()) {
+            searchPanel.setFullyConnected(false);
+            connectionManager.addEventListener( new ConnectionLifeCycleListener() {
+               private final ConnectionLifeCycleListener connectionLifecycleListener = this;
+               @Override
+                public void handleEvent(ConnectionLifeCycleEventType eventType) {
+                   if(eventType == ConnectionLifeCycleEventType.CONNECTED) {
+                       if(connectionManager.isFullyConnected()) {
+                           SwingUtils.invokeLater(new Runnable() {
+                               public void run() {
+                                   searchPanel.setFullyConnected(true);
+                               }
+                           });
+                           connectionManager.removeEventListener(connectionLifecycleListener);
+                       }
+                   }
+                } 
+            });
+            
+            //override warning message if a certain number of search results comes in, for now 10, 
+            //we assume that while not fully connected, we have a good enough search going
+            search.addSearchListener(new SearchListener() {
+                private final AtomicInteger numberOfResults = new AtomicInteger(0);
+                
+                @Override
+                public void handleSearchResult(SearchResult searchResult) {
+                    if(numberOfResults.addAndGet(1) > 10) {
+                        SwingUtils.invokeLater(new Runnable() {
+                            public void run() {
+                                //while not fully connected, assume the connections we have are enough 
+                                //based on the number of results coming in.
+                                searchPanel.setFullyConnected(true);
+                            }});
+                        search.removeSearchListener(this);
+                    }
+                }
+
+                @Override
+                public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
+                    
+                }
+
+                @Override
+                public void searchStarted() {
+                    
+                }
+
+                @Override
+                public void searchStopped() {
+                    
+                }
+                
+            });
+        }
+        
         //prevent search from starting until lifecycle manager completes loading
         if(lifeCycleManager.isStarted()) {
             search.start();
@@ -129,27 +186,6 @@ class SearchHandlerImpl implements SearchHandler {
                      }
                  }
              });   
-        }
-       
-        //display search warning message until fully connected to limewire.
-        if(!connectionManager.isConnected() || !connectionManager.isFullyConnected()) {
-            searchPanel.setFullyConnected(false);
-            connectionManager.addEventListener( new ConnectionLifeCycleListener() {
-               private final ConnectionLifeCycleListener connectionLifecycleListener = this;
-               @Override
-                public void handleEvent(ConnectionLifeCycleEventType eventType) {
-                   if(eventType == ConnectionLifeCycleEventType.CONNECTED) {
-                       if(connectionManager.isFullyConnected()) {
-                           SwingUtils.invokeLater(new Runnable() {
-                               public void run() {
-                                   searchPanel.setFullyConnected(true);
-                               }
-                           });
-                           connectionManager.removeEventListener(connectionLifecycleListener);
-                       }
-                   }
-                } 
-            });
         }
     }
 }
