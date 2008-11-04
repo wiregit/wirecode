@@ -1,13 +1,17 @@
 package org.limewire.ui.swing.library.table.menu;
 
+import java.awt.Font;
+
 import javax.swing.Icon;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
@@ -42,6 +46,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final ThumbnailManager thumbnailManager;
         private final CategoryIconManager categoryIconManager;
         private final IconManager iconManager;
+        private @Resource Font smallFont;
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, 
                 IconManager iconManager, PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
@@ -49,6 +54,12 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
+            GuiUtils.assignResources(this);
+        }
+        
+        @Override
+        protected Font getSmallFont() {
+            return smallFont;
         }
 
         @Override

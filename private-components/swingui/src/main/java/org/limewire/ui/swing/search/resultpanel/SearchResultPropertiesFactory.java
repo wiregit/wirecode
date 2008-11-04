@@ -2,12 +2,15 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.Font;
+
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
@@ -17,6 +20,7 @@ import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,9 +41,11 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager iconManager;
+        private @Resource Font smallFont;
         
         public SearchResultProperties(CategoryIconManager iconManager) {
             this.iconManager = iconManager;
+            GuiUtils.assignResources(this);
             
             title.setEditable(false);
             genre.setEditable(false);
@@ -51,6 +57,13 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
         }
+        
+        @Override
+        protected Font getSmallFont() {
+            return smallFont;
+        }
+
+
 
         @Override
         public void showProperties(VisualSearchResult vsr) {

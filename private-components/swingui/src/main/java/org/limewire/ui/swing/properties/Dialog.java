@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,6 +63,10 @@ public abstract class Dialog extends JDialog {
     protected Component detailsContainer;
     
     public Dialog() {
+        GuiUtils.assignResources(this);
+        
+        setFont(getSmallFont(), filename, subheading, fileSize, metadata, copyToClipboard);
+        
         setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
         JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
@@ -81,6 +86,14 @@ public abstract class Dialog extends JDialog {
         addOverview();
     }
     
+    protected abstract Font getSmallFont();
+
+    protected void setFont(Font font, JComponent... components) {
+        for(JComponent comp : components) {
+            comp.setFont(font);
+        }
+    }
+
     private JLabel newLabel() {
         JXLabel label = new JXLabel();
         label.setLineWrap(true);
@@ -119,7 +132,7 @@ public abstract class Dialog extends JDialog {
         
         addLocation();
         
-        setPreferredSize(new Dimension(570,600));
+        setPreferredSize(new Dimension(620,650));
         setModalityType(ModalityType.APPLICATION_MODAL);
         
         setDefaultCloseOperation(2);
