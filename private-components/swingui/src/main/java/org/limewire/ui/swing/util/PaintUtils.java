@@ -49,11 +49,21 @@ public class PaintUtils {
     
     
     /**
-     * Produces a new lighted colour value by a given intensity from a base colour 
+     * Produces a new lightened colour value by a given intensity from a base colour 
      */
     public static Color lighten(Color orig, int intensity) {
-        return new Color(orig.getRed() + intensity,
+        try {
+            return new Color(orig.getRed() + intensity,
                 orig.getGreen() + intensity,
                 orig.getBlue() + intensity);
+        } catch (IllegalArgumentException e) {
+            if (intensity > 0) {
+                // Return an empty colour the colour is brightened by too much
+                return new Color(0,0,0,0);
+            } else {
+                // Return an black if colour is darkened by too much
+                return Color.BLACK;
+            }
+        }
     }
 }

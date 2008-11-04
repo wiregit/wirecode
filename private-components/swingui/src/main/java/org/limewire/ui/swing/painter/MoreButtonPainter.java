@@ -7,7 +7,7 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
 
 /** Painter for the 'more' button. */
-public class MoreButtonPainter extends AbstractButtonPainter {
+public class MoreButtonPainter extends AbstractBeveledButtonPainter {
     
     @Resource
     private int arcWidth;

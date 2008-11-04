@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
  */
 
 @Singleton
-public class LightButtonPainter extends AbstractButtonPainter {
+public class GreenButtonPainter extends AbstractButtonPainter {
         
     @Resource
     private int arcWidth;
@@ -38,10 +38,11 @@ public class LightButtonPainter extends AbstractButtonPainter {
     @Resource
     private Color highlightGradientBottom;
     
-    public LightButtonPainter() {
+    public GreenButtonPainter() {
         GuiUtils.assignResources(this);
     }
     
+    // TODO: Proper shading
     @Override
     protected void setButtonColours(JXButton button, ButtonColours colours) {    
         colours.arcHeight = this.arcHeight;
@@ -54,17 +55,17 @@ public class LightButtonPainter extends AbstractButtonPainter {
             colours.borderColour = this.borderColour;
             colours.backgroundGradientTop = this.backgroundGradientTop;
             colours.backgroundGradientBottom = this.backgroundGradientBottom;
-            colours.i1 = 60;
-            colours.i2 = 80;
-            colours.i3 = 100;
+            colours.i1 = 255;
+            colours.i2 = 255;
+            colours.i3 = 255;
         } 
-        else { // TODO: flip colours
+        else {
             colours.borderColour = this.borderColour;
             colours.backgroundGradientTop = this.highlightGradientTop;
             colours.backgroundGradientBottom = this.highlightGradientBottom;
-            colours.i1 = 60;
-            colours.i2 = 80;
-            colours.i3 = 100;
+            colours.i1 = 255;
+            colours.i2 = 255;
+            colours.i3 = 255;
         }
     }
 }

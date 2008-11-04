@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
  */
 
 @Singleton
-public class ButtonPainter extends AbstractButtonPainter {
+public class ButtonPainter extends AbstractBeveledButtonPainter {
     
     @Resource
     private int arcWidth;

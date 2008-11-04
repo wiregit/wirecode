@@ -7,49 +7,48 @@ import java.awt.RenderingHints;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.ui.swing.util.PaintUtils;
+
+/**
+ * Background painter for a gradient button. 
+ */
 
 abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
-    
-    private final ButtonColors colors = new ButtonColors();
-        
-    private final int ANTIALIAS_OFFSET = 1;
-    
+
+    private final ButtonColours colours = new ButtonColours();
+   
     @Override
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
-        setButtonColors(button, colors);
+        
+        this.setButtonColours(button, colours);
         
         // get original antialiasing value for reset
         Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+
+        //turn off antialiasing
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);    
         
-        //turn on antialiasing
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
-          
-        // draw the border
-        g.setPaint(new GradientPaint(0,0, colors.borderTop, 0, height, colors.borderBottom, false));
-        g.drawRoundRect(0, 0+ANTIALIAS_OFFSET, width-1, height-1, colors.arcWidth, colors.arcHeight);
+        g.setPaint(new GradientPaint(0,0, colours.backgroundGradientTop, 0, height, colours.backgroundGradientBottom, false));
         
-        // draw the main gradient
-        g.setPaint(new GradientPaint(0, 1, colors.backgroundTop, 0, height-1, colors.backgroundBottom, false));
-        g.fillRoundRect(1, 1+ANTIALIAS_OFFSET, width-3, height-3, colors.arcWidth, colors.arcHeight);
+        g.fillRoundRect(0, 0, width-1, height-1, colours.arcWidth, colours.arcHeight);
         
-        // draw the highlight
-        g.setPaint(new GradientPaint(0,1, colors.bevelTop, 0,height-3, colors.bevelBottom, false));
-        g.drawRoundRect(1, 1+ANTIALIAS_OFFSET, width-3, height-3, colors.arcWidth, colors.arcHeight);
+        
+        PaintUtils.drawRoundedBorder(g, 0, 0, width-1, height-1, 
+                colours.arcWidth, colours.arcHeight, colours.borderColour,
+                colours.i1, colours.i2, colours.i3);
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
     }
     
-    protected abstract void setButtonColors(JXButton button, ButtonColors colors);
+    protected abstract void setButtonColours(JXButton button, ButtonColours colors);
     
-    protected static class ButtonColors {
-        protected Color borderTop;
-        protected Color borderBottom;
-        protected Color backgroundTop;
-        protected Color backgroundBottom;
-        protected Color bevelTop;
-        protected Color bevelBottom;
+    protected static class ButtonColours {
         protected int arcWidth;
         protected int arcHeight;
+        protected Color borderColour;
+        protected Color backgroundGradientTop;
+        protected Color backgroundGradientBottom;
+        protected int i1, i2, i3;
     }
 }

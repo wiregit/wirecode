@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -20,6 +20,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.painter.GreenButtonPainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -82,9 +83,11 @@ public class SearchBar extends JXPanel {
         this.searchButton = new JXButton();
         this.searchButton.setName("SearchBar.searchButton");
         this.searchButton.setBorderPainted(false);
-        this.searchButton.setBackground(new Color(0,0,0,0));
+        this.searchButton.setBackgroundPainter(new GreenButtonPainter());
         this.searchButton.setOpaque(false);
-        this.searchButton.setPreferredSize(new Dimension(16,16));
+        this.searchButton.setPreferredSize(new Dimension(22,22));
+        this.searchButton.setMinimumSize(this.searchButton.getPreferredSize());
+        this.searchButton.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
         this.assertProgramCategory();
         
@@ -97,7 +100,7 @@ public class SearchBar extends JXPanel {
         this.setOpaque(false);
         this.add(this.comboBox);
         this.add(this.searchField, "gap 5");
-        this.add(this.searchButton, "gap 0");
+        this.add(this.searchButton, "gap 5");
 
         this.searchField.setFont(this.searchField.getFont().deriveFont(12));
         
