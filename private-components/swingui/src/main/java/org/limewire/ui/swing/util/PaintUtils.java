@@ -58,10 +58,10 @@ public class PaintUtils {
                 orig.getBlue() + intensity);
         } catch (IllegalArgumentException e) {
             if (intensity > 0) {
-                // Return an empty colour the colour is brightened by too much
+                // Return transparent if the colour is brightened by too much
                 return new Color(0,0,0,0);
             } else {
-                // Return an black if colour is darkened by too much
+                // Return black if colour is darkened by too much
                 return Color.BLACK;
             }
         }
