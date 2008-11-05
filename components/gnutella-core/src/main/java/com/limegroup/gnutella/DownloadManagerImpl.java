@@ -318,8 +318,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     public synchronized boolean hasInNetworkDownload() {
         if(innetworkCount > 0)
             return true;
-        for(Iterator<CoreDownloader> i = waiting.iterator(); i.hasNext(); ) {
-            if(i.next().getDownloadType() == DownloaderType.INNETWORK)
+        for(CoreDownloader d : waiting) {
+            if(d.getDownloadType() == DownloaderType.INNETWORK)
                 return true;
         }
         return false;
@@ -1017,16 +1017,16 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
      */
     public synchronized void remove(CoreDownloader downloader, 
                                     boolean completed) {
-        boolean isRemoved = active.remove(downloader);
-        if(downloader.getDownloadType() == DownloaderType.INNETWORK)
-            innetworkCount--;
-        // make sure an active download was removed prior to decrementing this index
-        if(downloader.getDownloadType() == DownloaderType.STORE && isRemoved)
-            storeDownloadCount--;
-        
-        if(downloader.getDownloadType() == DownloaderType.MOZILLA && isRemoved)
-            mozillaDownloadCount--;
-        
+        if(active.remove(downloader)) {
+            DownloaderType type = downloader.getDownloadType();
+            // These counters only apply to active downloads
+            if(type == DownloaderType.INNETWORK)
+                innetworkCount--;
+            else if(type == DownloaderType.STORE)
+                storeDownloadCount--;
+            else if(type == DownloaderType.MOZILLA)
+                mozillaDownloadCount--;
+        }
         waiting.remove(downloader);
         if(completed)
             cleanupCompletedDownload(downloader, true);

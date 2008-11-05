@@ -59,6 +59,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.antivirus.AntiVirusManager;
+import com.limegroup.gnutella.antivirus.AntiVirusManager.VirusScanResult;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
@@ -1894,29 +1896,19 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         // Scan the file for viruses
         if(DownloadSettings.SCAN_FOR_VIRUSES.getValue()) {
-            String[] cmd = DownloadSettings.VIRUS_SCANNER.getValue();
-            String[] cmd1 = new String[cmd.length + 1];
-            for(int i = 0; i < cmd.length; i++)
-                cmd1[i] = cmd[i];
-            cmd1[cmd.length] = incompleteFile.getAbsolutePath();
-            try {
-                Process p = Runtime.getRuntime().exec(cmd1);
-                int exitCode = p.waitFor();
-                if(exitCode == 0) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug(getSaveFile().getName() + " is infected");
-                    incompleteFile.delete();
-                    return DownloadStatus.INFECTED_FILE;
-                } else if (exitCode != 0) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Virus scanner exit code " + exitCode);
-                }
-            } catch(Exception x) {
+            VirusScanResult res = AntiVirusManager.scan (incompleteFile);
+            if(res == VirusScanResult.INFECTED) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("Error while scanning for viruses: " + x);
+                    LOG.debug(getSaveFile().getName() + " is infected");
+                incompleteFile.delete();
+                return DownloadStatus.INFECTED_FILE;
+            } else if(res == VirusScanResult.UNKNOWN) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug(getSaveFile().getName() + " was not scanned");
+                // FIXME: warn the user that the file wasn't scanned
             }
         }
-        
+                
         // Save the file to disk.
         return saveFile(fileHash);
     }
