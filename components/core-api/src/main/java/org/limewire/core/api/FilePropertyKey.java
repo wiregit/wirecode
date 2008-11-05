@@ -14,7 +14,6 @@ public enum FilePropertyKey {
     COMPANY,//for video files this is the studio, for applications the publisher
     DATE_CREATED,
     FILE_SIZE, // in bytes
-    FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...) //TODO this property is not being set on items
     GENRE,
     HEIGHT,
     LENGTH, // in seconds
