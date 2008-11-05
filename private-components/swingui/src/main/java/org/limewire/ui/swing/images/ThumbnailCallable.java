@@ -1,11 +1,18 @@
 package org.limewire.ui.swing.images;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -13,6 +20,7 @@ import javax.swing.JList;
 import javax.swing.SwingUtilities;
 
 import org.limewire.ui.swing.util.GraphicsUtilities;
+import org.limewire.util.FileUtils;
 
 /**
  * Loads an image and creates a thumbnail of it on the ImageExceturService thread. 
@@ -115,10 +123,14 @@ public class ThumbnailCallable implements Callable<Void> {
         }
         BufferedImage image = null;
         try {  
-            image = ImageIO.read(file);
+            image = getSubSampleImage(file);
         } catch (Throwable e) {
-            handleUpdate(errorIcon);
-            return null;
+            try {
+                image = ImageIO.read(file);
+            } catch(Throwable ee) {
+                handleUpdate(errorIcon);
+                return null;
+            }
         }  
         if(image == null) {
             handleUpdate(errorIcon);
@@ -126,7 +138,6 @@ public class ThumbnailCallable implements Callable<Void> {
         }
         // if the image is larger than our viewport, resize the image before saving
         if(image.getWidth() > ThumbnailManager.WIDTH || image.getHeight() > ThumbnailManager.HEIGHT) { 
-            //TODO: this seems to fail regularly if width > 2 * height or height > 2 * width
             // image manipulation can cause a whole host of errors, it should always be wrapped in a try/catch block
             try { 
                 image = GraphicsUtilities.createRatioPreservedThumbnail(image, ThumbnailManager.WIDTH, ThumbnailManager.HEIGHT);
@@ -166,5 +177,31 @@ public class ThumbnailCallable implements Callable<Void> {
                 }
             });
         }
+    }
+    
+    private static final float subSamplingFactor = ThumbnailManager.WIDTH * 4.20f;
+    
+    /**
+     * Loads a file into a BufferedImage. If the image is longer than a subSamplingFactor, 
+     * rows are sampled out to reduce the size of the BufferedImage. This can go a long way
+     * towards reducing OutOfMemoryExceptions when loading large compressed images.
+     */
+    private BufferedImage getSubSampleImage(File file) throws FileNotFoundException, IOException {
+        final ImageReader imgReader = ImageIO.getImageReadersBySuffix( FileUtils.getFileExtension(file) ).next(); 
+        final ImageInputStream bufferedInput = ImageIO.createImageInputStream( new BufferedInputStream( new FileInputStream( file ) ) ); 
+        
+        imgReader.setInput(bufferedInput); 
+        
+        int imgHeight = imgReader.getHeight( 0 );
+        int imgWidth = imgReader.getWidth( 0 ); 
+
+        int longEdge = (Math.max(imgHeight, imgWidth));
+        int subSample = (int)(longEdge/subSamplingFactor); 
+ 
+        final ImageReadParam readParam = imgReader.getDefaultReadParam();
+        if(subSample > 1) {
+            readParam.setSourceSubsampling(subSample, subSample, 0, 0);
+        } 
+        return imgReader.read(0, readParam); 
     }
 }

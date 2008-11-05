@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.8 2008-10-29 16:31:11 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.9 2008-11-05 19:15:02 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -458,53 +458,61 @@ public class GraphicsUtilities {
 
         int previousWidth = width;
         int previousHeight = height;
-
-        do {               
-            if (width > maxTargetWidth) {
-                width /= 2;
-                if (width < maxTargetWidth) {
-                    width = maxTargetWidth;
+        try {
+            do {               
+                if (width > maxTargetWidth) {
+                    width /= 2;
+                    if (width < maxTargetWidth) {
+                        width = maxTargetWidth;
+                    }
+                    height = (int) (width / ratioWH);
+                } else if (height > maxTargetHeight) {
+                    height /= 2;
+                    if (height < maxTargetHeight) {
+                        height = maxTargetHeight;
+                    }
+                    width = (int) (height / ratioHW);
                 }
-                height = (int) (width / ratioWH);
-            } else if (height > maxTargetHeight) {
-                height /= 2;
-                if (height < maxTargetHeight) {
-                    height = maxTargetHeight;
+    
+                if (temp == null || isTranslucent) {
+                    try {
+                        temp = createCompatibleImage(image, width, height);
+                    } catch(Throwable e) {
+                        temp = new BufferedImage(width, height, image.getType());
+                    }
+                    if(g2 != null)
+                        g2.dispose();
+                    g2 = temp.createGraphics();
+                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 }
-                width = (int) (height / ratioHW);
-            }
-
-            if (temp == null || isTranslucent) { 
-                try {
-                    temp = createCompatibleImage(image, width, height);
-                } catch(Throwable e) {
-                    temp = new BufferedImage(width, height, image.getType());
-                }
-                if(g2 != null)
-                    g2.dispose();
-                g2 = temp.createGraphics();
-                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            }
-            g2.drawImage(thumb, 0, 0, width, height,
-                    0, 0, previousWidth, previousHeight, null);
-
-            previousWidth = width;
-            previousHeight = height;
-
-            thumb = temp;
-        } while ( (width > maxTargetWidth) || (height > maxTargetHeight));
-
-        g2.dispose();
+                g2.drawImage(thumb, 0, 0, width, height,
+                        0, 0, previousWidth, previousHeight, null);
+    
+                previousWidth = width;
+                previousHeight = height;
+    
+                thumb = temp;
+            } while ( (width > maxTargetWidth) || (height > maxTargetHeight));
+        } finally {
+            temp.flush();
+            g2.dispose();
+            image.flush();
+        }
 
         if (width != thumb.getWidth() || height != thumb.getHeight()) {
-            temp = createCompatibleImage(image, width, height);
-            g2 = temp.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2.drawImage(thumb, 0, 0, width, height, 0, 0, width, height, null);
-            g2.dispose();
-            thumb = temp;
+            try {
+                temp = createCompatibleImage(thumb, width, height);
+                g2 = temp.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.drawImage(thumb, 0, 0, width, height, 0, 0, width, height, null);
+
+                thumb = temp;
+            } finally {
+                g2.dispose();
+                temp.flush();
+            }
         }
         
         return thumb;
@@ -600,7 +608,7 @@ public class GraphicsUtilities {
         g2.dispose();
 
         if (width != thumb.getWidth() || height != thumb.getHeight()) {
-            temp = createCompatibleImage(image, width, height);
+            temp = createCompatibleImage(thumb, width, height);
             g2 = temp.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -692,7 +700,7 @@ public class GraphicsUtilities {
         g2.dispose();
 
         if (width != thumb.getWidth() || height != thumb.getHeight()) {
-            temp = createCompatibleImage(image, width, height);
+            temp = createCompatibleImage(thumb, width, height);
             g2 = temp.createGraphics();
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
