@@ -17,16 +17,14 @@ public enum FilePropertyKey {
     FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...) //TODO this property is not being set on items
     GENRE,
     HEIGHT,
-    LENGTH, // in time (hh:mm:ss)
+    LENGTH, // in seconds
     NAME,
     PLATFORM,
     QUALITY,
     RATING,
     SAMPLE_RATE, // ex. 44,100 Hz//TODO this property is not being set on items
-    // get size from VisualSearchResult.getSize()
     TRACK_NUMBER,
     ALBUM,
-    // get type from VisualSearchResult.getFileExtension()
     WIDTH,
     YEAR;
     
