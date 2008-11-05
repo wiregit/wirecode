@@ -58,12 +58,9 @@ public class RemoteFileDescAdapter implements SearchResult {
         extension = FileUtils.getFileExtension(rfd.getFileName());
         category = MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(extension));
 
-        FilePropertyKeyPopulator.set(properties, FilePropertyKey.NAME, FileUtils.getFilenameNoExtension(rfd.getFileName()));
-        FilePropertyKeyPopulator.set(properties, FilePropertyKey.DATE_CREATED, rfd.getCreationTime());
-
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();
-        FilePropertyKeyPopulator.populateProperties(fileName, fileSize, properties, doc);
+        FilePropertyKeyPopulator.populateProperties(fileName, fileSize, rfd.getCreationTime(), properties, doc);
     }
 
     /**

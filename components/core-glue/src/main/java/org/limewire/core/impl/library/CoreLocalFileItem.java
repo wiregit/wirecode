@@ -58,7 +58,7 @@ class CoreLocalFileItem implements LocalFileItem {
             synchronized (this) {
                 if(propertiesMap == null) {    
                     propertiesMap = Collections.synchronizedMap(new HashMap<FilePropertyKey, Object>());
-                    FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), propertiesMap, doc);
+                    FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(),fileDesc.getFile().lastModified(), fileDesc.getFileSize(), propertiesMap, doc);
                 }
             }
         }

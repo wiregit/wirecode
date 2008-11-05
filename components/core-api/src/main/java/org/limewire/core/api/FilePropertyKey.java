@@ -13,7 +13,7 @@ public enum FilePropertyKey {
     COMMENTS,
     COMPANY, //TODO this property is not being set on items
     DATE_CREATED,
-    FILE_SIZE, // in megabytes
+    FILE_SIZE, // in bytes
     FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...) //TODO this property is not being set on items
     GENRE,
     HEIGHT,

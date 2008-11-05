@@ -16,7 +16,12 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
  */
 public class FilePropertyKeyPopulator {
     public static void populateProperties(String fileName, long fileSize,
-            Map<FilePropertyKey, Object> properties, LimeXMLDocument doc) {
+            long creationTime, Map<FilePropertyKey, Object> properties, LimeXMLDocument doc) {
+        
+        set(properties, FilePropertyKey.NAME, FileUtils.getFilenameNoExtension(fileName));
+        set(properties, FilePropertyKey.DATE_CREATED, creationTime);
+        set(properties, FilePropertyKey.FILE_SIZE, fileSize);
+        
         String extension = FileUtils.getFileExtension(fileName);
         if (doc != null) {
             if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
