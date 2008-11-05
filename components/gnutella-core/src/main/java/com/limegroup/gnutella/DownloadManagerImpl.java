@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -145,6 +146,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
     private final IncompleteFileManager incompleteFileManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final BTMetaInfoFactory btMetaInfoFactory;
+
+    private final PushEndpointFactory pushEndpointFactory;
     
     @Inject
     public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
@@ -157,7 +160,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
             RemoteFileDescFactory remoteFileDescFactory,
-            BTMetaInfoFactory btMetaInfoFactory) {
+            BTMetaInfoFactory btMetaInfoFactory,
+            PushEndpointFactory pushEndpointFactory) {
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -169,6 +173,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         this.incompleteFileManager = incompleteFileManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.btMetaInfoFactory = btMetaInfoFactory;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
 
     /* (non-Javadoc)
@@ -985,7 +990,12 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         //that would cause a conflict with downloader y.  Check for this.
         for(Response r : responses) {
             // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(queryReply, remoteFileDescFactory);
+            RemoteFileDesc rfd;
+            try {
+                rfd = r.toRemoteFileDesc(queryReply, remoteFileDescFactory, pushEndpointFactory);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
             for(Downloader current : downloaders) {
                 if ( !(current instanceof ManagedDownloader))
                     continue; // can't add sources to torrents yet
