@@ -4,6 +4,7 @@ package com.limegroup.gnutella.filters;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.io.Address;
 import org.limewire.io.IP;
 import org.limewire.io.NetworkInstanceUtils;
 
@@ -57,5 +58,11 @@ public class HostileFilter extends  AbstractIPFilter {
     @Override
     protected boolean allowImpl(IP ip) {
         return !hostileHosts.contains(ip);
+    }
+
+    @Override
+    public boolean allow(Address address) {
+        // TODO fberger
+        return false;
     }
 }
