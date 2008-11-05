@@ -11,7 +11,7 @@ public enum FilePropertyKey {
     AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
     BITRATE, // ex. 128, 160, 192, 224, 320
     COMMENTS,
-    COMPANY, //TODO this property is not being set on items
+    COMPANY,//for video files this is the studio, for applications the publisher
     DATE_CREATED,
     FILE_SIZE, // in bytes
     FILES_IN_ARCHIVE, // # of files in an archive file (zip, tar, ...) //TODO this property is not being set on items

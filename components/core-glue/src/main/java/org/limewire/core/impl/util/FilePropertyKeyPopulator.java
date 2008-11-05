@@ -57,7 +57,8 @@ public class FilePropertyKeyPopulator {
                 set(properties, FilePropertyKey.YEAR, doc.getValue(LimeXMLNames.VIDEO_YEAR));
                 set(properties, FilePropertyKey.TITLE, doc.getValue(LimeXMLNames.VIDEO_TITLE));
                 set(properties, FilePropertyKey.RATING, doc.getValue(LimeXMLNames.VIDEO_RATING));
-
+                set(properties, FilePropertyKey.COMPANY, doc.getValue(LimeXMLNames.VIDEO_STUDIO));
+                
                 Long bitrate = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.VIDEO_BITRATE));
                 Long length = CommonUtils.parseLongNoException(doc
@@ -77,6 +78,7 @@ public class FilePropertyKeyPopulator {
                 set(properties, FilePropertyKey.AUTHOR, doc
                         .getValue(LimeXMLNames.APPLICATION_PUBLISHER));
                 set(properties, FilePropertyKey.PLATFORM, doc.getValue(LimeXMLNames.APPLICATION_PLATFORM));
+                set(properties, FilePropertyKey.COMPANY, doc.getValue(LimeXMLNames.APPLICATION_PUBLISHER));
             } else if (LimeXMLNames.DOCUMENT_SCHEMA.equals(doc.getSchemaURI())) {
                 set(properties, FilePropertyKey.NAME, doc.getValue(LimeXMLNames.DOCUMENT_TITLE));
                 set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.DOCUMENT_AUTHOR));
