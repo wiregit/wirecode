@@ -4,7 +4,6 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
 
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
@@ -17,14 +16,13 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int ACTION_INDEX = 3;
     private static final int NAME_INDEX = 0;
     private static final int NUM_SOURCES_INDEX = 6;
-    private static final int OWNER_INDEX = 7;
     private static final int RELEVANCE_INDEX = 4;
     private static final int SIZE_INDEX = 2;
     private static final int TYPE_INDEX = 1;
 
     public AllTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX, tr("Name"), tr("Type"), tr("Size"), "",
-                tr("Relevance"), tr("Extension"), tr("People with file"), tr("Owner"));
+                tr("Relevance"), tr("Extension"), tr("People with file"));
     }
 
     @Override
@@ -47,7 +45,6 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case ACTION_INDEX: return vsr;
             case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case OWNER_INDEX: return getProperty(FilePropertyKey.OWNER);
             default: return null;
         }
     }

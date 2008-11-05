@@ -19,10 +19,9 @@ public enum FilePropertyKey {
     HEIGHT,
     LENGTH, // in time (hh:mm:ss)
     NAME,
-    OWNER,//TODO this property is not being set on items
-    PLATFORM,//TODO this property is not being set on items
+    PLATFORM,
     QUALITY,
-    RATING,//TODO this property is not being set on items
+    RATING,
     SAMPLE_RATE, // ex. 44,100 Hz//TODO this property is not being set on items
     // get size from VisualSearchResult.getSize()
     TRACK_NUMBER,
@@ -41,7 +40,6 @@ public enum FilePropertyKey {
         indexableKeys.add(COMPANY);
         indexableKeys.add(GENRE);
         indexableKeys.add(NAME);
-        indexableKeys.add(OWNER);
         indexableKeys.add(PLATFORM);
     };
     

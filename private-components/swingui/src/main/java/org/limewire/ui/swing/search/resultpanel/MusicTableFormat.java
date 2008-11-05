@@ -27,7 +27,7 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Artist"), tr("Album"), tr("Length"), tr("Quality"),
                 "", tr("Bitrate"), tr("Genre"), tr("Track"), tr("Relevance"),
-                tr("People with file"), tr("Owner"), tr("Extension"), tr("Sample Rate"));
+                tr("People with file"), tr("Extension"), tr("Sample Rate"));
     }
 
     @Override
@@ -58,9 +58,8 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
             case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 11: return getProperty(FilePropertyKey.OWNER);
-            case 12: return vsr.getFileExtension();
-            case 13: return getProperty(FilePropertyKey.SAMPLE_RATE);
+            case 11: return vsr.getFileExtension();
+            case 12: return getProperty(FilePropertyKey.SAMPLE_RATE);
             default: return null;
         }
     }

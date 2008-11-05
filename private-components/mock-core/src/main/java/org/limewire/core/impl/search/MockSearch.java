@@ -136,7 +136,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
 
         handleSearchResult(msr);
 
@@ -152,7 +151,6 @@ public class MockSearch implements Search {
                 new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
         
         handleSearchResult(msr);
 
@@ -168,7 +166,6 @@ public class MockSearch implements Search {
                 new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 1.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Ross Geller");
         
         handleSearchResult(msr);
 
@@ -185,7 +182,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.FILE_SIZE, 2.8);
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:19");
-        msr.setProperty(FilePropertyKey.OWNER, "Phoebe Buffet");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         handleSearchResult(msr);
 
@@ -207,7 +203,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
@@ -230,7 +225,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
@@ -253,7 +247,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
@@ -276,7 +269,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
@@ -299,7 +291,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
-        msr.setProperty(FilePropertyKey.OWNER, "Monica Geller");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
         msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
@@ -346,7 +337,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -369,7 +359,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -391,7 +380,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -413,7 +401,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -435,7 +422,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -457,7 +443,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Matt Meddler");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -479,7 +464,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Fleet Corrs");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -503,7 +487,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -525,7 +508,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -547,7 +529,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -569,7 +550,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -591,7 +571,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Jo Hendricks");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "230");
@@ -615,7 +594,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -630,7 +608,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Moss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -645,7 +622,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 4, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Sarah Thistle");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -660,7 +636,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 4, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Spencer");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -675,7 +650,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -690,7 +664,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -705,7 +678,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -720,7 +692,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -735,7 +706,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 6, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -750,7 +720,6 @@ public class MockSearch implements Search {
             new GregorianCalendar(2008, 7, 27).getTimeInMillis());
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.7);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Floss Sential");
         handleSearchResult(msr);
 }
     private void addRecordsSpam(int i){
@@ -769,7 +738,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.COMPANY, "FriendSoft");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.4);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Ding Bing");
         msr.setProperty(FilePropertyKey.PLATFORM, "Mac OS X");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 9, 2).getTimeInMillis());
@@ -787,7 +755,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.swimming.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 0.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Mister Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -813,7 +780,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "John Stone");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -829,7 +795,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.catering.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Chef Sarah");
         handleSearchResult(msr);
        
         msr = new MockSearchResult();
@@ -843,7 +808,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(FilePropertyKey.OWNER, "Brent Sarah");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.YEAR, "2008");
@@ -860,7 +824,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.COMMENTS,
             "don't itch");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(FilePropertyKey.OWNER, "John Hill");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -881,7 +844,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "John Stone");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -905,7 +867,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.juggling.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -919,7 +880,6 @@ public class MockSearch implements Search {
         msr.setUrn("similar-www.juggling.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -933,7 +893,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.asdf.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Michael Madison");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -947,7 +906,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.asdf3asdf.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Michael Madison");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -961,7 +919,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.ddasdrf.net");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 15.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Michael Crede");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -975,7 +932,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.3asdfNet.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -989,7 +945,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.Jogsjuggling.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -1004,7 +959,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.jugglingTrain.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Train Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -1019,7 +973,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.Bugglejuggle.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Buggle Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -1033,7 +986,6 @@ public class MockSearch implements Search {
         msr.setUrn("similar-www.juggling.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Greg Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -1048,7 +1000,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.Huggingjuggling.org" + i);
         msr.setProperty(FilePropertyKey.FILE_SIZE, 50.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Metty Green");
         msr.setProperty(FilePropertyKey.DATE_CREATED,
             new GregorianCalendar(2008, 7, 20).getTimeInMillis());
         handleSearchResult(msr);
@@ -1067,7 +1018,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.23sola3rsystem.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1085,7 +1035,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "0:48");
-        msr.setProperty(FilePropertyKey.OWNER, "Chandler Bing");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "somewhat grainy");
         msr.setProperty(FilePropertyKey.WIDTH, "640");
@@ -1103,7 +1052,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(FilePropertyKey.OWNER, "Brent Sarah");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -1121,7 +1069,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.COMMENTS,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
-        msr.setProperty(FilePropertyKey.OWNER, "Sarah");
         msr.setProperty(FilePropertyKey.RATING, "8");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -1137,7 +1084,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.23sola3ddddrsystem.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -1149,7 +1095,6 @@ public class MockSearch implements Search {
         msr.addSource("1.13.1.12");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 31.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Sammy Teufle");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1161,7 +1106,6 @@ public class MockSearch implements Search {
         msr.addSource("22.13.1.12");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 31.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Sammy Teufle");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1173,7 +1117,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.tadsf3iza.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 11.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "John Bakker");
         handleSearchResult(msr);
         msr = new MockSearchResult();
 
@@ -1185,7 +1128,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.23sol3324a3rsystem.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Fred Teller");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1197,7 +1139,6 @@ public class MockSearch implements Search {
         msr.addSource("1.13.1.12");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 31.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Sammy Teufle");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1209,7 +1150,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.figiza.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 1.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "John Derrick");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1221,7 +1161,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.azdfaiza4.com");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 10.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Eric Johanson");
         handleSearchResult(msr);
 
         msr = new MockSearchResult();
@@ -1233,7 +1172,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.Directions23sola3ddddrsystem.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Teller Now");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -1245,7 +1183,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.RearViewParis.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Out of Now");
         handleSearchResult(msr);
         
         msr = new MockSearchResult();
@@ -1257,7 +1194,6 @@ public class MockSearch implements Search {
         msr.setUrn("www.AlwaysOnTime.net3");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.NAME, name);
-        msr.setProperty(FilePropertyKey.OWNER, "Now or never");
         handleSearchResult(msr);
     }
     static class MockRemoteHost implements RemoteHost {

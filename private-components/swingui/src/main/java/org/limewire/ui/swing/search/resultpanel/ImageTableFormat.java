@@ -24,7 +24,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public ImageTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Extension"), tr("Date created"), "", tr("Relevance"),
-                tr("People with File"), tr("Owner"));
+                tr("People with File"));
     }
 
     @Override
@@ -48,7 +48,6 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case ACTION_INDEX: return vsr;
             case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 6: return getProperty(FilePropertyKey.OWNER);
             default: return null;
         }
     }

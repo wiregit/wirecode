@@ -17,7 +17,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int ACTION_INDEX = 4;
     private static final int EXTENSION_INDEX = 1;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_FILES_INDEX = 8;
+    private static final int NUM_FILES_INDEX = 7;
     private static final int NUM_SOURCES_INDEX = 6;
     private static final int RELEVANCE_INDEX = 5;
     private static final int SIZE_INDEX = 3;
@@ -26,7 +26,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public OtherTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Extension"), tr("Type"), tr("Size"), "",
-                tr("Relevance"), tr("People with File"), tr("Owner"), tr("Number of Files"));
+                tr("Relevance"), tr("People with File"), tr("Number of Files"));
     }
 
     @Override
@@ -53,7 +53,6 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case ACTION_INDEX: return vsr;
             case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 7: return getProperty(FilePropertyKey.OWNER);
             case NUM_FILES_INDEX: return getProperty(FilePropertyKey.FILES_IN_ARCHIVE);
             default: return null;
         }

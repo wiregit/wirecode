@@ -25,7 +25,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public ProgramTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Size"), tr("Platform"), tr("Company"), "",
-                tr("Relevance"), tr("Extension"), tr("People with File"), tr("Owner"),
+                tr("Relevance"), tr("Extension"), tr("People with File"),
                 tr("Author"));
     }
 
@@ -53,8 +53,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case RELEVANCE_INDEX: return vsr.getRelevance();
             case 6: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 8: return getProperty(FilePropertyKey.OWNER);
-            case 9: return getProperty(FilePropertyKey.AUTHOR);
+            case 8: return getProperty(FilePropertyKey.AUTHOR);
             default: return null;
         }
     }
