@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.wizard;
 
 
+import java.awt.Frame;
+
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.InstallSettings;
@@ -9,21 +11,35 @@ import org.limewire.ui.swing.util.GuiUtils;
 import com.google.inject.Inject;
 
 
-public class SetupWizard extends Wizard {
+public class SetupWizard {
+    
+    private Wizard wizard;
     
     @Inject
-    public SetupWizard(LibraryManager libraryManager){
-        createPages(libraryManager.getLibraryData());
+    public SetupWizard(LibraryManager libraryManager){        
+        if (shouldShowWizard()) {
+            createWizard(libraryManager.getLibraryData());
+        }
     }
-
     
-    protected void createPages(LibraryData libraryData){
+    public boolean shouldShowWizard(){
+        return needsPage1() || needsPage2();
+    }
+    
+    public void showDialogIfNeeded(Frame owner) {
+        if (shouldShowWizard()) {
+            wizard.showDialogIfNeeded(owner);
+        }
+    }
+        
+    private void createWizard(LibraryData libraryData){
+        wizard = new Wizard();
         if(needsPage1()){
-            addPage(new SetupPage1());
+            wizard.addPage(new SetupPage1());
         }        
 
         if(needsPage2()){
-            addPage(new SetupPage2(libraryData));
+            wizard.addPage(new SetupPage2(libraryData));
         }
     }
     

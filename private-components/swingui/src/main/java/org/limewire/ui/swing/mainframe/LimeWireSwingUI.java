@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -19,7 +18,6 @@ import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.wizard.SetupWizard;
 
 import com.google.inject.Inject;
 
@@ -28,7 +26,6 @@ public class LimeWireSwingUI extends JPanel {
     private final TopPanel topPanel;
     private final TrayNotifier trayNotifier;
     private final JMenuBar menuBar;
-    private final SetupWizard setupWizard;
     
 	@Inject
     public LimeWireSwingUI(
@@ -36,13 +33,12 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, FriendsPanel friendsPanel,
             TrayNotifier trayNotifier, AudioPlayer player,
-            LimeMenuBar limeMenuBar, SetupWizard setupWizard) {
+            LimeMenuBar limeMenuBar) {
     	GuiUtils.assignResources(this);
     	        
     	this.trayNotifier = trayNotifier;
     	this.topPanel = topPanel;
     	this.menuBar = limeMenuBar;
-    	this.setupWizard = setupWizard;
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -88,11 +84,7 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridheight = GridBagConstraints.REMAINDER;
         add(statusPanel, gbc);
     }
-	
-	
-	public void showSetupWizard(){
-        setupWizard.showDialogIfNeeded((Frame)getTopLevelAncestor());
-	}
+
     
     public void goHome() {
         topPanel.goHome();

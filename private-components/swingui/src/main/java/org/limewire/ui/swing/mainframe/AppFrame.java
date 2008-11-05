@@ -30,6 +30,7 @@ import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.wizard.SetupWizard;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -97,22 +98,24 @@ public class AppFrame extends SingleFrameApplication {
 
         started = true;
         
-        
+        SetupWizard wizard = localInjector.getInstance(SetupWizard.class);
 
-        JXPanel glassPane = new JXPanel();
-        glassPane.setOpaque(false);
-        glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
-            @Override
-            protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
-                g.setPaint(glassPaneColor);
-                g.fillRect(0, 0, width, height);
-            }
-        });
-        getMainView().getFrame().setGlassPane(glassPane);
-        
-        glassPane.setVisible(true);  
-        ui.showSetupWizard();
-        glassPane.setVisible(false);  
+        if (wizard.shouldShowWizard()) {
+            JXPanel glassPane = new JXPanel();
+            glassPane.setOpaque(false);
+            glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
+                @Override
+                protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
+                    g.setPaint(glassPaneColor);
+                    g.fillRect(0, 0, width, height);
+                }
+            });
+            getMainView().getFrame().setGlassPane(glassPane);
+
+            glassPane.setVisible(true);
+            wizard.showDialogIfNeeded(getMainFrame());
+            glassPane.setVisible(false);
+        }
         
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
