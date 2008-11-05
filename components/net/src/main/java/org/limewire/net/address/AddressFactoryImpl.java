@@ -30,7 +30,11 @@ public class AddressFactoryImpl implements AddressFactory {
             serializer = getSerializer(c, interfaces);
             c = c.getSuperclass();
         } while (serializer == null && c != null);
-        throw new IllegalArgumentException("no serializer available for: " + addressClass);
+        if(serializer != null) {
+            return serializer;
+        } else {
+            throw new IllegalArgumentException("no serializer available for: " + addressClass);
+        }
     }
 
     private AddressSerializer getSerializer(Class addressClass, Class[] interfaces) {
