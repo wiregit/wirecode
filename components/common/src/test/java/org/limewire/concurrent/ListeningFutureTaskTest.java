@@ -499,7 +499,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         @Override
         @SwingEDTEvent
         public void handleEvent(FutureEvent<Object> event) {
-            assert event == null;
+            assert this.event == null;
             this.thread = Thread.currentThread();
             this.event = event;
             latch.countDown();
@@ -513,7 +513,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         @Override
         public void handleEvent(FutureEvent<Object> event) {
-            assert event == null;
+            assert this.event == null;
             this.event = event;
             this.thread = Thread.currentThread();
             latch.countDown();
