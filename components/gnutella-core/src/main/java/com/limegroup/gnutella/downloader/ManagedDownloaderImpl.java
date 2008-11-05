@@ -223,7 +223,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Set of {@link RemoteFileDesc remote file descs} that can't be resolved
      * or connected to yet.
      */
-    private Set<RemoteFileDesc> unconnectableRFDs;
+    private final Set<RemoteFileDesc> unconnectableRFDs = new HashSet<RemoteFileDesc>();
     
     private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 

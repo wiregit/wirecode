@@ -20,7 +20,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.ByteUtils;
 

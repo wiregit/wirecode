@@ -21,6 +21,7 @@ public class XMPPRemoteFileDescDeserializer implements RemoteFileDescDeserialize
     private AddressFactory addressFactory;
     private XMPPAddressResolver addressResolver;
 
+    @Inject
     public XMPPRemoteFileDescDeserializer(AddressFactory addressFactory, XMPPAddressResolver addressResolver) {
         this.addressFactory = addressFactory;
         this.addressResolver = addressResolver;
