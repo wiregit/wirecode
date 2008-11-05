@@ -1,13 +1,13 @@
 package org.limewire.net.address;
 
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.inject.Singleton;
 
 @Singleton
 public class AddressFactoryImpl implements AddressFactory {
@@ -23,7 +23,17 @@ public class AddressFactoryImpl implements AddressFactory {
     }
 
     public AddressSerializer getSerializer(Class<? extends Address> addressClass) {
-        Class [] interfaces = addressClass.getInterfaces();
+        Class c = addressClass;
+        AddressSerializer serializer;
+        do {
+            Class[] interfaces = c.getInterfaces();
+            serializer = getSerializer(c, interfaces);
+            c = c.getSuperclass();
+        } while (serializer == null && c != null);
+        throw new IllegalArgumentException("no serializer available for: " + addressClass);
+    }
+
+    private AddressSerializer getSerializer(Class addressClass, Class[] interfaces) {
         AddressSerializer serializer = serializerClassMap.get(addressClass);
         if(serializer != null) {
             return serializer;
@@ -36,7 +46,7 @@ public class AddressFactoryImpl implements AddressFactory {
                 }
             }
         }
-        throw new IllegalArgumentException("no serializer available for: " + addressClass);
+        return null;
     }
 
     public AddressSerializer getSerializer(String addressType) {
