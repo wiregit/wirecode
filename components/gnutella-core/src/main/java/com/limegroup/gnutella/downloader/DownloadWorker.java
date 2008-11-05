@@ -1719,6 +1719,7 @@ public class DownloadWorker {
 
         @Override
         public void handleConnect(Socket socket) throws IOException {
+            LOG.debug("got a socket");
             HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
@@ -1734,10 +1735,12 @@ public class DownloadWorker {
 
         @Override
         public void handleIOException(IOException iox) {
+            LOG.debug("could not connect", iox);
         }
 
         @Override
         public void shutdown() {
+            LOG.debug("shut down");
         }
         
     }
