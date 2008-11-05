@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public enum FilePropertyKey {
     TITLE,//for audio this is the track name
-    AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
+    AUTHOR,//for audio files this represents the artists name
     BITRATE, // ex. 128, 160, 192, 224, 320
     COMMENTS,
     COMPANY,//for video files this is the studio, for applications the publisher
