@@ -15,6 +15,7 @@ import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
+import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -27,12 +28,14 @@ import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 class CoreLocalFileItem implements LocalFileItem {
 
     private final Category category;
-    private final Map<FilePropertyKey,Object> map;
+    private volatile Map<FilePropertyKey,Object> propertiesMap;
     private final FileDesc fileDesc;
+    private final LimeXMLDocument doc;
     private final LocalFileDetailsFactory detailsFactory;
     private final CreationTimeCache creationTimeCache;
 
@@ -40,12 +43,28 @@ class CoreLocalFileItem implements LocalFileItem {
     public CoreLocalFileItem(@Assisted FileDesc fileDesc, LocalFileDetailsFactory detailsFactory,
             CreationTimeCache creationTimeCache) {
         this.fileDesc = fileDesc;
+        this.doc = fileDesc.getXMLDocument();
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
         this.category = getCategory(fileDesc.getFile());
-        this.map = Collections.synchronizedMap(new HashMap<FilePropertyKey,Object>());
     }
     
+    /**
+     * Lazily builds the properties map for this local file item. 
+     * Uses double checked locking to prevent multiple threads from creating this map.
+     */
+    private Map<FilePropertyKey, Object> getPropertiesMap() {
+        if( propertiesMap == null ) {
+            synchronized (this) {
+                if(propertiesMap == null) {    
+                    propertiesMap = Collections.synchronizedMap(new HashMap<FilePropertyKey, Object>());
+                    FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), propertiesMap, doc);
+                }
+            }
+        }
+        return propertiesMap;
+    }
+
     @Override
     public int getFriendShareCount() {
         return fileDesc.getShareListCount();
@@ -100,16 +119,10 @@ class CoreLocalFileItem implements LocalFileItem {
         String ext = FileUtils.getFileExtension(file);
         return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));
     }
-    
-//    private void setLimeXMLDocument(LimeXMLDocument document) {
-//        if(document == null)
-//            return;
-//        document.get
-//    }
 
     @Override
     public Object getProperty(FilePropertyKey key) {
-        return map.get(key);
+        return getPropertiesMap().get(key);
     }
 
     public FileMetaData offer(FileOfferer fileOfferer) {
@@ -275,7 +288,7 @@ class CoreLocalFileItem implements LocalFileItem {
 
     @Override
     public void setProperty(FilePropertyKey key, Object value) {
-        map.put(key, value);        
+        getPropertiesMap().put(key, value);        
     }
     
 }
