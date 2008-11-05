@@ -22,7 +22,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         switch (propertiable.getCategory()) {
         case AUDIO:
             String artist = getPropertyString(propertiable, FilePropertyKey.AUTHOR);
-            String title = getPropertyString(propertiable, FilePropertyKey.TRACK_NAME);
+            String title = getPropertyString(propertiable, FilePropertyKey.TITLE);
             if (!StringUtils.isEmpty(artist) && !StringUtils.isEmpty(title)) {
                 renderName = artist + " - " + title;
             } else {
@@ -57,7 +57,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
 
         switch (propertiable.getCategory()) {
         case AUDIO: {
-            String albumTitle = getPropertyString(propertiable, FilePropertyKey.TITLE);
+            String albumTitle = getPropertyString(propertiable, FilePropertyKey.ALBUM);
             Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
             Long length = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.LENGTH));
 

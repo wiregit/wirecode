@@ -101,9 +101,8 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             rating.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.RATING) }));
             populateMetadata(vsr);
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
-            album.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
-            FilePropertyKey key = vsr.getCategory() == Category.AUDIO ? FilePropertyKey.TRACK_NAME : FilePropertyKey.TITLE; 
-            title.setText(vsr.getPropertyString(key));
+            album.setText(vsr.getPropertyString(FilePropertyKey.ALBUM));
+            title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
             
             year.setText(vsr.getPropertyString(FilePropertyKey.YEAR));
             description.setText(vsr.getPropertyString(FilePropertyKey.COMMENTS));

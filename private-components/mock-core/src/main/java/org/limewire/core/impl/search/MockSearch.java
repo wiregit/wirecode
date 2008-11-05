@@ -197,7 +197,7 @@ public class MockSearch implements Search {
         msr.setSize(4234L);
         msr.addSource("555.2.1.21");
         msr.setUrn("www.miza.com");
-        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
@@ -222,7 +222,7 @@ public class MockSearch implements Search {
         msr.setSize(1234L);
         msr.setUrn("www.solarsystem.net" + i);
         msr.addSource("525.2.1.21");
-        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
@@ -245,7 +245,7 @@ public class MockSearch implements Search {
         msr.setSize(1234L);
         msr.setUrn("www.solarsystem2.net" + i);
         msr.addSource("973.2.1.21");
-        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
@@ -268,7 +268,7 @@ public class MockSearch implements Search {
         msr.setSize(21234L);
         msr.addSource("523.32.1.9130");
         msr.setUrn("similar-www.solarsystem.net2");
-        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
@@ -291,7 +291,7 @@ public class MockSearch implements Search {
         msr.setSize(71234L);
         msr.setUrn("www.miza.com");
         msr.addSource("123.12.1.21");
-        msr.setProperty(FilePropertyKey.TITLE, "Nightfall");
+        msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
         msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");

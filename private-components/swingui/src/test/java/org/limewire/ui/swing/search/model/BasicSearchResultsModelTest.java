@@ -444,7 +444,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         SearchResult searchResult1 = new TestSearchResult("1", "test.mp3", properties1);
         Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
         properties2.put(FilePropertyKey.NAME, "blah123");
-        properties2.put(FilePropertyKey.TRACK_NAME, "test");
+        properties2.put(FilePropertyKey.TITLE, "test");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         model.getGroupedSearchResults()
@@ -482,8 +482,8 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         SearchResult searchResult1 = new TestSearchResult("1", "test-blah.mp3", properties1);
         Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
         properties2.put(FilePropertyKey.NAME, "blah123");
-        properties2.put(FilePropertyKey.TITLE, "test");
-        properties2.put(FilePropertyKey.TRACK_NAME, "blah");
+        properties2.put(FilePropertyKey.ALBUM, "test");
+        properties2.put(FilePropertyKey.TITLE, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         
@@ -520,7 +520,7 @@ public class BasicSearchResultsModelTest extends BaseTestCase {
         Map<FilePropertyKey, Object> properties2 = new HashMap<FilePropertyKey, Object>();
         properties2.put(FilePropertyKey.NAME, "blah123");
         properties2.put(FilePropertyKey.AUTHOR, "test");
-        properties2.put(FilePropertyKey.TRACK_NAME, "blah");
+        properties2.put(FilePropertyKey.TITLE, "blah");
         SearchResult searchResult2 = new TestSearchResult("2", "blah123.mp3", properties2);
         
         model.getGroupedSearchResults()

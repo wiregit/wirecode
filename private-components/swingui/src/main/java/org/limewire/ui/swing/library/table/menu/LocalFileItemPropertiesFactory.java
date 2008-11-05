@@ -16,7 +16,6 @@ import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
@@ -180,13 +179,12 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             connectComboSelectionListener(genre, FilePropertyKey.GENRE);
             connectComboSelectionListener(rating, FilePropertyKey.RATING);
             connectComboSelectionListener(platform, FilePropertyKey.PLATFORM);
-            connectTextDocumentListener(album, FilePropertyKey.TITLE);
+            connectTextDocumentListener(album, FilePropertyKey.ALBUM);
             connectTextDocumentListener(author, FilePropertyKey.AUTHOR);
             connectTextDocumentListener(artist, FilePropertyKey.AUTHOR);
             connectTextDocumentListener(company, FilePropertyKey.COMPANY);
             connectTextDocumentListener(year, FilePropertyKey.YEAR);
-            connectTextDocumentListener(title, propertiable.getCategory() == Category.AUDIO ? 
-                    FilePropertyKey.TRACK_NAME : FilePropertyKey.TITLE);
+            connectTextDocumentListener(title, FilePropertyKey.TITLE);
             connectTextDocumentListener(track, FilePropertyKey.TRACK_NUMBER);
             connectTextDocumentListener(description, FilePropertyKey.COMMENTS);
 

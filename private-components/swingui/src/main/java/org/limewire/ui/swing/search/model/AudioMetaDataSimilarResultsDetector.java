@@ -49,26 +49,26 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
         Map<FilePropertyKey, String> metaData = getMetadata(searchResult);
 
         String artist = metaData.get(FilePropertyKey.AUTHOR);
-        String album = metaData.get(FilePropertyKey.TITLE);
-        String track = metaData.get(FilePropertyKey.TRACK_NAME);
+        String album = metaData.get(FilePropertyKey.ALBUM);
+        String track = metaData.get(FilePropertyKey.TITLE);
 
         if (!StringUtils.isEmpty(track)) {
             if (!StringUtils.isEmpty(artist)) {
                 String artistTrack = metaData.get(FilePropertyKey.AUTHOR) + "-"
-                        + metaData.get(FilePropertyKey.TRACK_NAME);
+                        + metaData.get(FilePropertyKey.TITLE);
                 names.add(artistTrack);
 
                 if (!StringUtils.isEmpty(album)) {
                     String artistAlbumTrack = metaData.get(FilePropertyKey.AUTHOR) + "-"
-                            + metaData.get(FilePropertyKey.TITLE) + "-"
-                            + metaData.get(FilePropertyKey.TRACK_NAME);
+                            + metaData.get(FilePropertyKey.ALBUM) + "-"
+                            + metaData.get(FilePropertyKey.TITLE);
                     names.add(artistAlbumTrack);
                 }
             }
 
             if (!StringUtils.isEmpty(album)) {
-                String albumTrack = metaData.get(FilePropertyKey.TITLE) + "-"
-                        + metaData.get(FilePropertyKey.TRACK_NAME);
+                String albumTrack = metaData.get(FilePropertyKey.ALBUM) + "-"
+                        + metaData.get(FilePropertyKey.TITLE);
                 names.add(albumTrack);
             }
         }
@@ -77,8 +77,8 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
     private Map<FilePropertyKey, String> getMetadata(SearchResult result) {
         String name = result.getProperty(FilePropertyKey.NAME).toString();
         Map<FilePropertyKey, String> metadataCopy = new HashMap<FilePropertyKey, String>();
-        copyProperty(result, metadataCopy, FilePropertyKey.TRACK_NAME);
         copyProperty(result, metadataCopy, FilePropertyKey.TITLE);
+        copyProperty(result, metadataCopy, FilePropertyKey.ALBUM);
         copyProperty(result, metadataCopy, FilePropertyKey.AUTHOR);
 
         StringTokenizer st = new StringTokenizer(name, "-");
@@ -90,13 +90,13 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
 
         if (!nameParts.empty()) {
             String trackName = nameParts.pop();
-            if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.TRACK_NAME))) {
-                metadataCopy.put(FilePropertyKey.TRACK_NAME, trackName);
+            if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.TITLE))) {
+                metadataCopy.put(FilePropertyKey.TITLE, trackName);
             }
             if (!nameParts.empty()) {
                 String albumOrArtist = nameParts.pop();
-                if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.TITLE))) {
-                    metadataCopy.put(FilePropertyKey.TITLE, albumOrArtist);
+                if (StringUtils.isEmpty(metadataCopy.get(FilePropertyKey.ALBUM))) {
+                    metadataCopy.put(FilePropertyKey.ALBUM, albumOrArtist);
                 }
                 if (!nameParts.empty()) {
                     String artist = nameParts.pop();
@@ -106,8 +106,8 @@ public class AudioMetaDataSimilarResultsDetector extends AbstractNameSimilarResu
                 }
             }
         }
-        cleanProperty(metadataCopy, FilePropertyKey.TRACK_NAME);
         cleanProperty(metadataCopy, FilePropertyKey.TITLE);
+        cleanProperty(metadataCopy, FilePropertyKey.ALBUM);
         cleanProperty(metadataCopy, FilePropertyKey.AUTHOR);
 
         return metadataCopy;

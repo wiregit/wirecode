@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 
-import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -37,11 +36,11 @@ abstract class AbstractFileItemDialog extends Dialog {
                 new MagnetLinkCopier().copyLinkToClipBoard(propertiable, magnetLinkFactory);
             }
         });
-        title.setText(str(propertiable.getProperty(propertiable.getCategory() == Category.AUDIO ? FilePropertyKey.TRACK_NAME : FilePropertyKey.TITLE)));
+        title.setText(str(propertiable.getProperty(FilePropertyKey.TITLE)));
         artist.setText(str(propertiable.getProperty(FilePropertyKey.AUTHOR)));
         author.setText(str(propertiable.getProperty(FilePropertyKey.AUTHOR)));
         company.setText(str(propertiable.getProperty(FilePropertyKey.COMPANY)));
-        album.setText(str(propertiable.getProperty(FilePropertyKey.TITLE)));
+        album.setText(str(propertiable.getProperty(FilePropertyKey.ALBUM)));
         year.setText(str(propertiable.getProperty(FilePropertyKey.YEAR)));
         track.setText(str(propertiable.getProperty(FilePropertyKey.TRACK_NUMBER)));
         description.setText(str(propertiable.getProperty(FilePropertyKey.COMMENTS)));

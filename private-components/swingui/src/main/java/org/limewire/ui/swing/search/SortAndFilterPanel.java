@@ -308,7 +308,7 @@ public class SortAndFilterPanel extends JXPanel {
     private SimilarResultsGroupingComparator getComparator(String item) {
 
         if (ALBUM.equals(item)) {
-            return getStringPropertyPlusNameComparator(FilePropertyKey.TITLE, true);
+            return getStringPropertyPlusNameComparator(FilePropertyKey.ALBUM, true);
         }
 
         if (ARTIST.equals(item)) {

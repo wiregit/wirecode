@@ -25,7 +25,7 @@ public class FilePropertyKeyPopulator {
         String extension = FileUtils.getFileExtension(fileName);
         if (doc != null) {
             if (LimeXMLNames.AUDIO_SCHEMA.equals(doc.getSchemaURI())) {
-                set(properties, FilePropertyKey.TITLE, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
+                set(properties, FilePropertyKey.ALBUM, doc.getValue(LimeXMLNames.AUDIO_ALBUM));
                 set(properties, FilePropertyKey.AUTHOR, doc.getValue(LimeXMLNames.AUDIO_ARTIST));
                 set(properties, FilePropertyKey.BITRATE, doc.getValue(LimeXMLNames.AUDIO_BITRATE));
                 set(properties, FilePropertyKey.COMMENTS, doc.getValue(LimeXMLNames.AUDIO_COMMENTS));
@@ -34,7 +34,7 @@ public class FilePropertyKeyPopulator {
                 set(properties, FilePropertyKey.TRACK_NUMBER, doc
                         .getValue(LimeXMLNames.AUDIO_TRACK));
                 set(properties, FilePropertyKey.YEAR, doc.getValue(LimeXMLNames.AUDIO_YEAR));
-                set(properties, FilePropertyKey.TRACK_NAME, doc.getValue(LimeXMLNames.AUDIO_TITLE));
+                set(properties, FilePropertyKey.TITLE, doc.getValue(LimeXMLNames.AUDIO_TITLE));
 
                 Long bitrate = CommonUtils.parseLongNoException(doc
                         .getValue(LimeXMLNames.AUDIO_BITRATE));

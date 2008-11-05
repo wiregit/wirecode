@@ -31,8 +31,8 @@ public class SharingAudioTableFormat extends AbstractTableFormat<LocalFileItem> 
                     return name;
                 else 
                     return fileItem.getName();
-            case SONG_INDEX: return fileItem.getProperty(FilePropertyKey.TRACK_NAME);
-            case ALBUM_INDEX: return fileItem.getProperty(FilePropertyKey.TITLE);
+            case SONG_INDEX: return fileItem.getProperty(FilePropertyKey.TITLE);
+            case ALBUM_INDEX: return fileItem.getProperty(FilePropertyKey.ALBUM);
             case ACTIONS_INDEX: return fileItem;
         }
         throw new IllegalStateException("Unknown column:" + column);

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public enum FilePropertyKey {
-    TITLE,//for audo files this is the album name -- TODO this is confusing
+    TITLE,//for audio this is the track name
     AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
     BITRATE, // ex. 128, 160, 192, 224, 320
     COMMENTS,
@@ -26,7 +26,7 @@ public enum FilePropertyKey {
     SAMPLE_RATE, // ex. 44,100 Hz//TODO this property is not being set on items
     // get size from VisualSearchResult.getSize()
     TRACK_NUMBER,
-    TRACK_NAME,
+    ALBUM,
     // get type from VisualSearchResult.getFileExtension()
     WIDTH,
     YEAR;
@@ -34,6 +34,7 @@ public enum FilePropertyKey {
     private final static Collection<FilePropertyKey> indexableKeys = new HashSet<FilePropertyKey>(); 
 
     static {
+        indexableKeys.add(ALBUM);
         indexableKeys.add(TITLE);
         indexableKeys.add(AUTHOR);
         indexableKeys.add(COMMENTS);
@@ -42,7 +43,6 @@ public enum FilePropertyKey {
         indexableKeys.add(NAME);
         indexableKeys.add(OWNER);
         indexableKeys.add(PLATFORM);
-        indexableKeys.add(TRACK_NAME);
     };
     
     public static Collection<FilePropertyKey> getIndexableKeys() {

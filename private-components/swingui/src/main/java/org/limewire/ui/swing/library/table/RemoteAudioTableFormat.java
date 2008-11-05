@@ -66,7 +66,7 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
         case ARTIST_COL:
             return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_COL:
-            return baseObject.getProperty(FilePropertyKey.TITLE);
+            return baseObject.getProperty(FilePropertyKey.ALBUM);
         case LENGTH_COL:
             return baseObject.getProperty(FilePropertyKey.LENGTH);
         case GENRE_COL:
@@ -76,7 +76,7 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
         case SIZE_COL:
             return baseObject.getSize();
         case TRACK_COL:
-            return baseObject.getProperty(FilePropertyKey.TRACK_NAME);
+            return baseObject.getProperty(FilePropertyKey.TITLE);
         case SAMPLE_RATE_COL:
             return baseObject.getProperty(FilePropertyKey.SAMPLE_RATE);
         case MODIFIED_COL:

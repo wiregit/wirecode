@@ -49,7 +49,7 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         switch (index) {
             case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
             case ARTIST_INDEX: return getProperty(FilePropertyKey.AUTHOR);
-            case ALBUM_INDEX: return getProperty(FilePropertyKey.TITLE);
+            case ALBUM_INDEX: return getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case ACTION_INDEX: return vsr;
