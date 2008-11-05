@@ -6,7 +6,9 @@ import java.awt.Font;
 
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -49,15 +51,24 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             this.iconManager = iconManager;
             GuiUtils.assignResources(this);
             
-            title.setEditable(false);
-            genre.setEditable(false);
-            rating.setEditable(false);
-            year.setEditable(false);
-            description.setEditable(false);
+            disableEdit(genre, rating, platform);
+            disableEdit(album, author, artist, company, year, title, track, description);
             
             location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
+        }
+        
+        private void disableEdit(JTextComponent... comps) {
+            for (JTextComponent comp : comps) {
+                comp.setEditable(false);
+            }
+        }
+        
+        private void disableEdit(JComboBox... combos) {
+            for(JComboBox combo : combos) {
+                combo.setEditable(false);
+            }
         }
         
         @Override
@@ -90,7 +101,10 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             rating.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.RATING) }));
             populateMetadata(vsr);
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
-            title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
+            album.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
+            FilePropertyKey key = vsr.getCategory() == Category.AUDIO ? FilePropertyKey.TRACK_NAME : FilePropertyKey.TITLE; 
+            title.setText(vsr.getPropertyString(key));
+            
             year.setText(vsr.getPropertyString(FilePropertyKey.YEAR));
             description.setText(vsr.getPropertyString(FilePropertyKey.COMMENTS));
 
