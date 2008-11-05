@@ -399,8 +399,6 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         }
         rfdContext.setQueueStatus(headPong.getQueueStatus());
         rfdContext.setAvailableRanges(headPong.getRanges());
-        rfdContext.getRemoteFileDesc().setSerializeProxies();
-        rfdContext.getRemoteFileDesc().setTLSCapable(headPong.isTLSCapable());
     }
 
     public synchronized void registered(byte[] guid) {

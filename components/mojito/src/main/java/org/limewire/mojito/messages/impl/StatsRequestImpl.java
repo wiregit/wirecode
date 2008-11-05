@@ -43,7 +43,7 @@ public class StatsRequestImpl extends AbstractRequestMessage
     
     private final byte[] signature;
     
-    private int secureStatus = INSECURE;
+    private Status secureStatus = Status.INSECURE;
     
     public StatsRequestImpl(Context context, 
             Contact contact, MessageID messageId, StatisticType request) {
@@ -65,16 +65,16 @@ public class StatsRequestImpl extends AbstractRequestMessage
         return request;
     }
 
-    public void setSecureStatus(int secureStatus) {
+    public void setSecureStatus(Status secureStatus) {
         this.secureStatus = secureStatus;
     }
 
-    public int getSecureStatus() {
+    public Status getSecureStatus() {
         return secureStatus;
     }
     
     public boolean isSecure() {
-        return secureStatus == SECURE;
+        return secureStatus == Status.SECURE;
     }
 
     public byte[] getSecureSignature() {

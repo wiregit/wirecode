@@ -32,6 +32,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.FileNotFoundException;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.downloader.RemoteFileDescImpl;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
@@ -301,11 +302,11 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         for(SerialRemoteFileDesc rfd : rfds) {
             try {
                 Address address = getAddress(rfd);
-                RemoteHostMemento memento = new RemoteHostMemento(RemoteHostMemento.serializeAddress(address, addressFactory), rfd.getFilename(), rfd
+                RemoteHostMemento memento = new RemoteHostMemento(address, rfd.getFilename(), rfd
                         .getIndex(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getSize(), rfd
                         .isChatEnabled(), rfd.getQuality(), rfd.isReplyToMulticast(), rfd
                         .getXml(), rfd.getUrns(), rfd.isBrowseHostEnabled(),
-                        rfd.getVendor(), rfd.isHttp11());
+                        rfd.getVendor(), rfd.isHttp11(), RemoteFileDescImpl.TYPE, addressFactory);
                 if(rfd instanceof SerialUrlRemoteFileDesc)
                     memento.setCustomUrl(((SerialUrlRemoteFileDesc)rfd).getUrl());
                 mementos.add(memento);

@@ -2,10 +2,6 @@ package com.limegroup.gnutella;
 
 
 public interface HostDetails {
-    /** Sets whether or not this host is TLS capable. */
-    // TODO push up into Connectable?
-    void setTLSCapable(boolean tlsCapable);
-
     /** 
      * Accessor for HTTP11.
      *

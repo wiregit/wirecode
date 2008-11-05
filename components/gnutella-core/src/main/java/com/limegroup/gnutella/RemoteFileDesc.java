@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.http.auth.Credentials;
 import org.limewire.io.Address;
+import org.limewire.security.SecureMessage.Status;
 
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
@@ -21,8 +22,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     /** Typed reference to an empty list of RemoteFileDescs. */
     public static final List<RemoteFileDesc> EMPTY_LIST = Collections.emptyList();
 
-    public void setSerializeProxies();
-
     /**
      * @return whether this rfd points to myself.
      */
@@ -35,21 +34,7 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     public boolean isFromAlternateLocation();
 
     /**
-     * Sets this RFD as downloading.
-     */
-    public void setDownloading(boolean dl);
-
-    /**
-     * Determines if this RFD is downloading.
-     *
-     * @return whether or not this is downloading
-     */
-    public boolean isDownloading();
-
-    /**
-     * Returns an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>.
-     *
-     * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
+     * Returns the url encoded HTTP request path.
      */
     public String getUrlPath();
     
@@ -71,9 +56,9 @@ public interface RemoteFileDesc extends RemoteFileDetails {
 
     public float getSpamRating();
 
-    public int getSecureStatus();
+    public Status getSecureStatus();
 
-    public void setSecureStatus(int secureStatus);
+    public void setSecureStatus(Status secureStatus);
 
     /**
      * Returns a memento that can be used for serializing this object.

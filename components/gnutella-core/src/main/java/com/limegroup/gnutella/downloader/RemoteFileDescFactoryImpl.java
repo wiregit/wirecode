@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -52,6 +54,8 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     private final Provider<LimeHttpClient> httpClientProvider;
     
     private final AddressFactory addressFactory;
+    
+    private final ConcurrentMap<String, RemoteFileDescDeserializer> deserializers = new ConcurrentHashMap<String, RemoteFileDescDeserializer>();
 
     @Inject
     public RemoteFileDescFactoryImpl(LimeXMLDocumentFactory limeXMLDocumentFactory,
@@ -239,6 +243,17 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     public RemoteFileDesc createFromMemento(RemoteHostMemento remoteHostMemento)
             throws InvalidDataException {
         try {
+            RemoteFileDescDeserializer deserializer = deserializers.get(remoteHostMemento.getType());
+            if (deserializer != null) {
+                return deserializer.createRemoteFileDesc(remoteHostMemento.getAddress(addressFactory, pushEndpointFactory), remoteHostMemento.getIndex(), 
+                        remoteHostMemento.getFileName(),
+                        remoteHostMemento.getSize(), remoteHostMemento.getClientGuid(),
+                        remoteHostMemento.getSpeed(), remoteHostMemento.isChat(), remoteHostMemento
+                        .getQuality(), remoteHostMemento.isBrowseHost(),
+                        xml(remoteHostMemento.getXml()), remoteHostMemento.getUrns(),
+                        remoteHostMemento.isReplyToMulticast(), 
+                        remoteHostMemento.getVendor(), -1L);
+            }
             if (remoteHostMemento.getCustomUrl() != null) {
                 return createUrlRemoteFileDesc(remoteHostMemento.getAddress(addressFactory, pushEndpointFactory),
                         remoteHostMemento.getFileName(), remoteHostMemento
@@ -278,6 +293,12 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
             String vendor, long createTime, boolean http1) {
         return new RemoteFileDescImpl(address, index, filename, size, clientGUID, speed, chat, quality,
                 browseHost, xmlDoc, urns, replyToMulticast, vendor, createTime, http1, addressFactory);
+    }
+
+    @Override
+    public void register(String type, RemoteFileDescDeserializer remoteFileDescDeserializer) {
+        RemoteFileDescDeserializer other = deserializers.putIfAbsent(type, remoteFileDescDeserializer);
+        assert other == null : "two deserializers registered for: " + type;
     }
 
 }

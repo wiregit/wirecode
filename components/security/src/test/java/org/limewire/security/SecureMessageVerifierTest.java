@@ -11,6 +11,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.BaseTestCase;
 
 
@@ -51,7 +52,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         cb.waitForReply();
         assertEquals(m1, cb.getSecureMessage());
         assertEquals(true, cb.getPassed());
-        assertEquals(SecureMessage.SECURE, m1.getSecureStatus());
+        assertEquals(Status.SECURE, m1.getSecureStatus());
     }
     
     /** Tests a bad message doesn't secure. */
@@ -69,7 +70,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         cb.waitForReply();
         assertEquals(m1, cb.getSecureMessage());
         assertEquals(false, cb.getPassed());
-        assertEquals(SecureMessage.FAILED, m1.getSecureStatus());
+        assertEquals(Status.FAILED, m1.getSecureStatus());
     }
     
     /** Tests a message with no signature. */
@@ -81,7 +82,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         cb.waitForReply();
         assertEquals(m1, cb.getSecureMessage());
         assertEquals(false, cb.getPassed());
-        assertEquals(SecureMessage.INSECURE, m1.getSecureStatus());       
+        assertEquals(Status.INSECURE, m1.getSecureStatus());       
     }
     
     /** Tests attempting to secure with no public key. */
@@ -98,7 +99,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         cb.waitForReply();
         assertEquals(m1, cb.getSecureMessage());
         assertEquals(false, cb.getPassed());
-        assertEquals(SecureMessage.INSECURE, m1.getSecureStatus());              
+        assertEquals(Status.INSECURE, m1.getSecureStatus());              
     }
     
     /** Tests attempting to secure with a different signature. */
@@ -117,7 +118,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
         cb.waitForReply();
         assertEquals(m1, cb.getSecureMessage());
         assertEquals(false, cb.getPassed());
-        assertEquals(SecureMessage.FAILED, m1.getSecureStatus());
+        assertEquals(Status.FAILED, m1.getSecureStatus());
     }    
 
     /** Verifier that'll use our fake public key. */
@@ -157,17 +158,17 @@ public class SecureMessageVerifierTest extends BaseTestCase {
 
     /** An Adapter so we can do different stuff easily if we want. */
     private static class SecureMessageAdapter implements SecureMessage {
-        private int secureStatus = -10;
+        private Status secureStatus = null;
 
         public byte[] getSecureSignature() {
             return null;
         }
 
-        public int getSecureStatus() {
+        public Status getSecureStatus() {
             return secureStatus;
         }
 
-        public void setSecureStatus(int secureStatus) {
+        public void setSecureStatus(Status secureStatus) {
             this.secureStatus = secureStatus;
         }
 

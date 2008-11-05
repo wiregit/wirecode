@@ -18,7 +18,9 @@ import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescImpl;
 
 /** A memento for a remote host. */
 public class RemoteHostMemento implements Serializable {
@@ -31,14 +33,14 @@ public class RemoteHostMemento implements Serializable {
         HOST, PORT, FILENAME, INDEX, CLIENTGUID,
         SPEED, SIZE, CHAT, QUALITY, REPLY_TO_MULTICAST,
         XML, URNS, BH, FIREWALLED, VENDOR, HTTP11,
-        TLS, PUSH_ADDR, CUSTOM_URL, ADDRESS
+        TLS, PUSH_ADDR, CUSTOM_URL, ADDRESS, TYPE
     }
     
     private final Map<Keys, Serializable> propertiesMap;
     
-    public RemoteHostMemento(String addressString, String filename, long index, byte[] clientGuid,
+    public RemoteHostMemento(Address address, String filename, long index, byte[] clientGuid,
             int speed, long size, boolean chat, int quality, boolean replyToMulticast, String xml,
-            Set<URN> urns, boolean browseHost, String vendor, boolean http1) {
+            Set<URN> urns, boolean browseHost, String vendor, boolean http1, String type, AddressFactory addressFactory) {
 
         this.propertiesMap = new HashMap<Keys, Serializable>(Keys.values().length);
 
@@ -55,7 +57,8 @@ public class RemoteHostMemento implements Serializable {
         propertiesMap.put(Keys.BH, browseHost);
         propertiesMap.put(Keys.VENDOR, vendor);
         propertiesMap.put(Keys.HTTP11, http1);
-        propertiesMap.put(Keys.ADDRESS, addressString);
+        propertiesMap.put(Keys.ADDRESS, serializeAddress(address, addressFactory));
+        propertiesMap.put(Keys.TYPE, type);
     }
 
     /**
@@ -115,6 +118,20 @@ public class RemoteHostMemento implements Serializable {
     public boolean isTls() { return (Boolean)propertiesMap.get(Keys.TLS); }
     public String getPushAddr() { return (String)propertiesMap.get(Keys.PUSH_ADDR); }
     public URL getCustomUrl() { return (URL)propertiesMap.get(Keys.CUSTOM_URL); }
+    
+    /**
+     * Returns the type of the remote host memento which is used for deserializing
+     * the correct type of {@link RemoteFileDesc}.
+     * 
+     * @return {@link RemoteFileDescImpl#TYPE} in case no type is set
+     */
+    public String getType() { 
+        String type = (String) propertiesMap.get(Keys.TYPE);
+        if (type != null) {
+            return type;
+        }
+        return RemoteFileDescImpl.TYPE;
+    }
     
     public Address getAddress(AddressFactory addressFactory, PushEndpointFactory pushEndpointFactory) throws IOException {
         return getAddress((String) propertiesMap.get(Keys.ADDRESS), addressFactory, pushEndpointFactory);

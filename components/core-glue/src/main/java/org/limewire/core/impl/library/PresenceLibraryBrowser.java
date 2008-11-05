@@ -16,7 +16,9 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.core.impl.xmpp.XMPPRemoteFileDescDeserializer;
 import org.limewire.io.Address;
+import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -24,6 +26,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
+import org.limewire.xmpp.client.impl.XMPPAddress;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -47,12 +50,15 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     private final List<PresenceLibrary> librariesToBrowse = Collections.synchronizedList(new ArrayList<PresenceLibrary>());
 
+    private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager, XMPPRemoteFileDescDeserializer remoteFileDescDeserializer) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
         this.socketsManager = socketsManager;
+        this.remoteFileDescDeserializer = remoteFileDescDeserializer;
         socketsManager.addListener(new ConnectivityChangeListener());
     }
 
@@ -108,6 +114,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
                 if(!friendPresence.getFriend().isAnonymous()) {
+                    // copy construct to add injectables and change address to xmpp address 
+                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDescAdapter.getRfd(), new XMPPAddress(friendPresence.getPresenceId())), remoteFileDescAdapter.getQueryReply(), new IpPortSet(remoteFileDescAdapter.getAlts()));
                     remoteFileDescAdapter.setFriendPresence(friendPresence);
                 }
                 RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
@@ -123,7 +131,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             }
         });
     }
-
+    
     /**
      * Is notified of better connection capabilities and iterates over the list of unbrowsable
      * presence libraries to see if they can be browsed now.

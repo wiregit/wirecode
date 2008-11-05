@@ -41,11 +41,13 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String extension;
     private final String fileName;
     
-    private volatile FriendPresence friendPresence;    
+    private volatile FriendPresence friendPresence;
+    private final QueryReply queryReply;    
 
     public RemoteFileDescAdapter(RemoteFileDesc rfd, QueryReply queryReply,
             Set<? extends IpPort> locs) {
         this.rfd = rfd;
+        this.queryReply = queryReply;
         this.locs = new ArrayList<IpPort>(locs);        
         this.properties = new HashMap<PropertyKey, Object>();
         fileName = rfd.getFileName();
@@ -509,5 +511,9 @@ public class RemoteFileDescAdapter implements SearchResult {
             }
         } 
         return quality;
+    }
+    
+    public QueryReply getQueryReply() {
+        return queryReply;
     }
 }

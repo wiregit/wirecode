@@ -122,4 +122,9 @@ public interface RemoteFileDescFactory {
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
             throws IOException, URISyntaxException, HttpException, InterruptedException;
 
+    /**
+     * Registers a {@link RemoteFileDescDeserializer} for a type. Type is the type
+     * returned by {@link RemoteHostMemento#getType()}.
+     */
+    public void register(String type, RemoteFileDescDeserializer remoteFileDescDeserializer);
 }

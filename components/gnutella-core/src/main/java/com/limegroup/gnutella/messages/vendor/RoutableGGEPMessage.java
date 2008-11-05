@@ -31,7 +31,7 @@ public class RoutableGGEPMessage extends AbstractVendorMessage implements Secure
     static final String TO_ADDRESS_KEY = "TO";
 
     /** Whether or not this message has been verified as secure. */
-    private int _secureStatus = SecureMessage.INSECURE;
+    private Status _secureStatus = Status.INSECURE;
     
     /**
      * The ggep field that this message is.
@@ -161,11 +161,11 @@ public class RoutableGGEPMessage extends AbstractVendorMessage implements Secure
         }
     }
 
-    public int getSecureStatus() {
+    public Status getSecureStatus() {
         return _secureStatus;
     }
 
-    public void setSecureStatus(int secureStatus) {
+    public void setSecureStatus(Status secureStatus) {
         _secureStatus = secureStatus;
     }
 

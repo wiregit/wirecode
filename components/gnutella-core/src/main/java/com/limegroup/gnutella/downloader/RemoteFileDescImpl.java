@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -12,9 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.auth.Credentials;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.GUID;
@@ -27,7 +25,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 /**
  * A default implementation for {@link RemoteFileDesc}.
  */
-class RemoteFileDescImpl implements RemoteFileDesc {
+public class RemoteFileDescImpl implements RemoteFileDesc {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
 
@@ -48,6 +46,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	private final boolean _browseHostEnabled;
 
     private final String _vendor;
+    
+    public static final String TYPE = "RFD";
     
     /**
      * Whether or not the remote host supports HTTP/1.1
@@ -74,25 +74,17 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     private int _hashCode = 0;
 
     /**
-     * Whether or not this RFD is/was used for downloading.
-     */
-    private volatile boolean _isDownloading = false;
-    
-    /**
      * The creation time of this file.
      */
     private final long _creationTime;
     
-    /** Whether to serialize the push proxies */
-    private volatile boolean _serializeProxies = false;
-	
-	/**
+    /**
 	 * the spam rating of this rfd.
 	 */
 	private float _spamRating = 0.f;
     
     /** the security of this RemoteFileDesc. */
-    private int _secureStatus = SecureMessage.INSECURE;
+    private Status _secureStatus = Status.INSECURE;
     
     private final long _size;
     
@@ -100,20 +92,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 
     private final AddressFactory addressFactory;
 
-    /**
-     * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE object is passed a new one is created.
-     */
-    RemoteFileDescImpl (String host, int port, long index, String filename,
-            long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            boolean firewalled, String vendor, long createTime,
-            boolean tlsCapable, boolean http11, AddressFactory addressFactory) throws UnknownHostException {
-        this(new ConnectableImpl(host, port, tlsCapable), index, filename, size, clientGUID,
-                speed, chat, quality, browseHost, xmlDoc, urns, replyToMulticast, vendor,
-                createTime, http11, addressFactory);
-    }
-    
     public RemoteFileDescImpl(Address address, long index, String filename,
             long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
@@ -146,23 +124,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         _urns = Collections.unmodifiableSet(urns);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setSerializeProxies()
-     */
-    public void setSerializeProxies() {
-        _serializeProxies = true;
-    }
-    
     /** Returns true if the host supports TLS. */
     public boolean isTLSCapable() {
         return _tlsCapable;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setTLSCapable(boolean)
-     */
-    public void setTLSCapable(boolean tlsCapable) {
-        _tlsCapable = tlsCapable;
     }
     
     /* (non-Javadoc)
@@ -199,18 +163,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public long getCreationTime() {
         return _creationTime;
     }
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setDownloading(boolean)
-     */
-    public void setDownloading(boolean dl) {
-        _isDownloading = dl;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isDownloading()
-     */
-    public boolean isDownloading() { return _isDownloading; }
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getIndex()
@@ -409,14 +361,14 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getSecureStatus()
      */
-    public int getSecureStatus() {
+    public Status getSecureStatus() {
         return _secureStatus;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#setSecureStatus(int)
      */
-    public void setSecureStatus(int secureStatus) {
+    public void setSecureStatus(Status secureStatus) {
         this._secureStatus = secureStatus;
     }
     
@@ -424,9 +376,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#toMemento()
      */
     public RemoteHostMemento toMemento() {
-        return new RemoteHostMemento(RemoteHostMemento.serializeAddress(address, addressFactory), _filename, _index, _clientGUID, _speed,
+        return new RemoteHostMemento(address, _filename, _index, _clientGUID, _speed,
                 _size, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
-                _browseHostEnabled,_vendor, _http11); 
+                _browseHostEnabled,_vendor, _http11, TYPE, addressFactory); 
     }
     
     private String xmlString() {

@@ -46,8 +46,8 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.TLSManager;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
@@ -1396,11 +1396,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ByteArrayOutputStream payload = new ByteArrayOutputStream();        
         GGEP ggep = new GGEP(true);
         QueryReply reply = newSecureQueryReply(ggep, indexes, payload);
-        assertEquals(SecureMessage.INSECURE, reply.getSecureStatus());
-        reply.setSecureStatus(SecureMessage.FAILED);
-        assertEquals(SecureMessage.FAILED, reply.getSecureStatus());
-        reply.setSecureStatus(SecureMessage.SECURE);
-        assertEquals(SecureMessage.SECURE, reply.getSecureStatus());
+        assertEquals(Status.INSECURE, reply.getSecureStatus());
+        reply.setSecureStatus(Status.FAILED);
+        assertEquals(Status.FAILED, reply.getSecureStatus());
+        reply.setSecureStatus(Status.SECURE);
+        assertEquals(Status.SECURE, reply.getSecureStatus());
     }
     
     public void testSecurityTokenBytesSetAndParsed() throws IllegalArgumentException, IOException, BadPacketException {

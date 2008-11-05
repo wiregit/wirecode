@@ -1800,10 +1800,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (getSha1Urn() != null)
             altLocManager.removeListener(getSha1Urn(), this);
         requeryManager.cleanUp();
-        if(cachedRFDs != null) {
-            for(RemoteFileDesc rfd : cachedRFDs)
-				rfd.setDownloading(false);
-        }       
     }
 
     /** 
@@ -2444,7 +2440,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
             // remember our last RFD
-            rfd.setSerializeProxies();
             cachedRFDs.add(rfd);
         }
     }

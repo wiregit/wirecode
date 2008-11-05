@@ -17,8 +17,11 @@ public class CoreGlueXMPPService implements Service {
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
     private final Provider<FriendFileListProvider> authenticatingBrowseFriendListProvider;
     
-    private final static String FRIEND_BROWSE_PATTERN = "/friend/browse/*";
-    private final static String FRIEND_DOWNLOAD_PATTERN = "/friend/download/*";
+    final static String FRIEND_BROWSE_PREFIX = "/friend/browse/";
+    final static String FRIEND_DOWNLOAD_PREFIX = "/friend/download/";
+    
+    final static String FRIEND_BROWSE_PATTERN = FRIEND_BROWSE_PREFIX + "*";
+    final static String FRIEND_DOWNLOAD_PATTERN = FRIEND_DOWNLOAD_PREFIX + "*";
 
     @Inject
     public CoreGlueXMPPService(Provider<HTTPAcceptor> httpAcceptor, HttpRequestHandlerFactory httpRequestHandlerFactory,
