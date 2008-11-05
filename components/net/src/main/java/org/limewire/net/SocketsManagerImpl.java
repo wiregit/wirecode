@@ -18,6 +18,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
@@ -32,6 +34,8 @@ import com.google.inject.Singleton;
 /** Factory for creating Sockets. */
 @Singleton
 public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<ConnectivityChangeEvent>, ListenerSupport<ConnectivityChangeEvent> {
+    
+    private static Log LOG = LogFactory.getLog(SocketsManagerImpl.class);
     
     private final SocketController socketController;
     
@@ -206,6 +210,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
         if (resolver != null) {
             resolver.resolve(address, timeout, observer);
         } else {
+            LOG.debugf("not resolver found for: {0}", address);
             observer.resolved(address);
         }
     }

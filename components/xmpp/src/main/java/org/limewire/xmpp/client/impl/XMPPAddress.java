@@ -33,5 +33,9 @@ public class XMPPAddress implements PermanentAddress {
     public String getId() {
         return StringUtils.parseBareAddress(id);
     }
-            
+
+    @Override
+    public String toString() {
+        return org.limewire.util.StringUtils.toString(this);
+    }
 }

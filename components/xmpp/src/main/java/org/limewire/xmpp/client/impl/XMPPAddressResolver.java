@@ -48,7 +48,8 @@ public class XMPPAddressResolver implements AddressResolver {
     public boolean canResolve(Address address) {
         if (address instanceof XMPPAddress) {
             XMPPAddress friendIdAddress = (XMPPAddress)address;
-            return getPresence(friendIdAddress) != null;
+            boolean canResolve = getPresence(friendIdAddress) != null;
+            LOG.debugf("could/could not resolve {0}: {1}", address, canResolve);
         }
         return false;
     }
