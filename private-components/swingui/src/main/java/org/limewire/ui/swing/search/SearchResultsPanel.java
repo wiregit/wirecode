@@ -313,8 +313,15 @@ public class SearchResultsPanel extends JXPanel {
 
             @Override
             public void paint(Graphics2D g, FancyTab object, int width, int height) {
-                g.setColor(tabSelectionTopGradientColor);
-                g.fillRoundRect(5,5, width-10, height-10, 8,8);
+                g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionTopGradientColor, 
+                        20.0f, 33.0f, tabSelectionBottomGradientColor));
+                
+                g.fillRoundRect(6,6, width-1-6, height-9-1, 12,10);
+                
+                g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionBorderTopGradientColor, 
+                        20.0f, 33.0f, tabSelectionBorderBottomGradientColor));
+                
+                g.drawRoundRect(6,6, width-1-6, height-9-1, 12,10);
             }
             
         };
