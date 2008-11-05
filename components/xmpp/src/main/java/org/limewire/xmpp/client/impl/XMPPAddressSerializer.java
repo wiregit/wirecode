@@ -7,6 +7,7 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
@@ -16,6 +17,7 @@ import com.google.inject.Singleton;
 public class XMPPAddressSerializer implements AddressSerializer {
 
     @Override
+    @Inject
     public void register(AddressFactory factory) {
         factory.registerSerializer(this);
     }
