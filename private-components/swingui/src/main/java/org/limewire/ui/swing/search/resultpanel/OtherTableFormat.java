@@ -16,22 +16,20 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int ACTION_INDEX = 4;
     private static final int EXTENSION_INDEX = 1;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 6;
-    private static final int RELEVANCE_INDEX = 5;
+    private static final int NUM_SOURCES_INDEX = 5;
     private static final int SIZE_INDEX = 3;
     private static final int TYPE_INDEX = 2;
     
     public OtherTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Extension"), tr("Type"), tr("Size"), "",
-                tr("Relevance"), tr("People with File"));
+                tr("People with File"));
     }
 
     @Override
     public Class getColumnClass(int index) {
         return index == NAME_INDEX ? Component.class :
             index == NUM_SOURCES_INDEX ? Integer.class :
-            index == RELEVANCE_INDEX ? Integer.class :
             index == SIZE_INDEX ? Integer.class :
             super.getColumnClass(index);
     }
@@ -48,7 +46,6 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TYPE_INDEX: return fileExtension; // TODO: RMV translate to verbal desc.
             case SIZE_INDEX: return vsr.getSize();
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             default: return null;
         }

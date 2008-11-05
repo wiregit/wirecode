@@ -17,15 +17,14 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int ACTION_INDEX = 4;
     private static final int COMPANY_INDEX = 3;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 7;
+    private static final int NUM_SOURCES_INDEX = 6;
     private static final int PLATFORM_INDEX = 2;
-    private static final int RELEVANCE_INDEX = 5;
     private static final int SIZE_INDEX = 1;
     
     public ProgramTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Size"), tr("Platform"), tr("Company"), "",
-                tr("Relevance"), tr("Extension"), tr("People with File"),
+                tr("Extension"), tr("People with File"),
                 tr("Author"));
     }
 
@@ -33,7 +32,6 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Class getColumnClass(int index) {
         return index == NAME_INDEX ? Component.class :
             index == NUM_SOURCES_INDEX ? Integer.class :
-            index == RELEVANCE_INDEX ? Integer.class :
             index == SIZE_INDEX ? Integer.class :
             super.getColumnClass(index);
     }
@@ -50,10 +48,9 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case PLATFORM_INDEX: return getProperty(FilePropertyKey.PLATFORM);
             case COMPANY_INDEX: return getProperty(FilePropertyKey.COMPANY);
             case ACTION_INDEX: return vsr;
-            case RELEVANCE_INDEX: return vsr.getRelevance();
-            case 6: return fileExtension;
+            case 5: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 8: return getProperty(FilePropertyKey.AUTHOR);
+            case 7: return getProperty(FilePropertyKey.AUTHOR);
             default: return null;
         }
     }

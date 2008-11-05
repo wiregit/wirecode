@@ -18,15 +18,14 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
     private static final int BITRATE_INDEX = 6;
     private static final int LENGTH_INDEX = 3;
     private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 10;
+    private static final int NUM_SOURCES_INDEX = 9;
     private static final int QUALITY_INDEX = 4;
-    private static final int RELEVANCE_INDEX = 9;
     private static final int TRACK_INDEX = 8;
 
     public MusicTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Artist"), tr("Album"), tr("Length"), tr("Quality"),
-                "", tr("Bitrate"), tr("Genre"), tr("Track"), tr("Relevance"),
+                "", tr("Bitrate"), tr("Genre"), tr("Track"),
                 tr("People with file"), tr("Extension"));
     }
 
@@ -35,7 +34,6 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
         Class clazz =
             index == BITRATE_INDEX ? Integer.class :
             index == NUM_SOURCES_INDEX ? Integer.class :
-            index == RELEVANCE_INDEX ? Integer.class :
             index == TRACK_INDEX ? Integer.class :
             super.getColumnClass(index);
         //System.out.println("MusicTableFormat: index = " + index);
@@ -56,9 +54,8 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
             case 7: return getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
-            case RELEVANCE_INDEX: return vsr.getRelevance();
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 11: return vsr.getFileExtension();
+            case 10: return vsr.getFileExtension();
             default: return null;
         }
     }
