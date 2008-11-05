@@ -79,6 +79,7 @@ public class FancyTabList extends JXPanel {
 
     private FancyTab createAndPrepareTab(TabActionMap actionMap) {
         final FancyTab tab = new FancyTab(actionMap, tabGroup, props);
+        
         tab.addRemoveActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -313,7 +314,7 @@ public class FancyTabList extends JXPanel {
     /** Sets the painter to be used when the tab is selected. */
     public void setSelectionPainter(Painter<?> selectedPainter) {
         for (FancyTab tab : tabs) {
-            if (tab.isHighlighted()) {
+            if (tab.isSelected()) {
                 tab.setBackgroundPainter(selectedPainter);
             }
         }
