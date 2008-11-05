@@ -113,6 +113,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         case DOCUMENT:
             libTable = new LibraryTable<T>(eventList, new DocumentTableFormat<T>());
             libTable.getColumnModel().getColumn(DocumentTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             break;
         case IMAGE:
             libTable = new LibraryTable<T>(eventList, new ImageTableFormat<T>());
@@ -120,9 +121,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         case OTHER:
             libTable = new LibraryTable<T>(eventList, new OtherTableFormat<T>());
             libTable.getColumnModel().getColumn(OtherTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(OtherTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             break;
         case PROGRAM:
             libTable = new LibraryTable<T>(eventList, new ProgramTableFormat<T>());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             break;
         default:
             throw new IllegalArgumentException("Unknown category: " + category);

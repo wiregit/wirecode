@@ -187,21 +187,31 @@ public class ThumbnailCallable implements Callable<Void> {
      * towards reducing OutOfMemoryExceptions when loading large compressed images.
      */
     private BufferedImage getSubSampleImage(File file) throws FileNotFoundException, IOException {
-        final ImageReader imgReader = ImageIO.getImageReadersBySuffix( FileUtils.getFileExtension(file) ).next(); 
-        final ImageInputStream bufferedInput = ImageIO.createImageInputStream( new BufferedInputStream( new FileInputStream( file ) ) ); 
         
-        imgReader.setInput(bufferedInput); 
+        BufferedImage image;
+        ImageInputStream bufferedInput = null;
         
-        int imgHeight = imgReader.getHeight( 0 );
-        int imgWidth = imgReader.getWidth( 0 ); 
-
-        int longEdge = (Math.max(imgHeight, imgWidth));
-        int subSample = (int)(longEdge/subSamplingFactor); 
- 
-        final ImageReadParam readParam = imgReader.getDefaultReadParam();
-        if(subSample > 1) {
-            readParam.setSourceSubsampling(subSample, subSample, 0, 0);
-        } 
-        return imgReader.read(0, readParam); 
+        try {
+            final ImageReader imgReader = ImageIO.getImageReadersBySuffix( FileUtils.getFileExtension(file) ).next(); 
+            bufferedInput = ImageIO.createImageInputStream( new BufferedInputStream( new FileInputStream( file ) ) ); 
+            
+            imgReader.setInput(bufferedInput); 
+            
+            int imgHeight = imgReader.getHeight( 0 );
+            int imgWidth = imgReader.getWidth( 0 ); 
+    
+            int longEdge = (Math.max(imgHeight, imgWidth));
+            int subSample = (int)(longEdge/subSamplingFactor); 
+     
+            final ImageReadParam readParam = imgReader.getDefaultReadParam();
+            if(subSample > 1) {
+                readParam.setSourceSubsampling(subSample, subSample, 0, 0);
+            } 
+            image = imgReader.read(0, readParam);
+        } finally {
+            if(bufferedInput != null)
+                bufferedInput.close();
+        }
+        return image; 
     }
 }

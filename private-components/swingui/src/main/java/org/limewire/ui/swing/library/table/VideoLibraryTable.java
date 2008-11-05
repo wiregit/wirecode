@@ -14,6 +14,7 @@ public class VideoLibraryTable<T extends FileItem> extends LibraryTable<T> {
 //        getColumnModel().getColumn(VideoTableFormat.PLAY_COL).setCellEditor(playEditor);
 //        getColumnModel().getColumn(VideoTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor());
         getColumnModel().getColumn(VideoTableFormat.LENGTH_COL).setCellRenderer(new TimeRenderer());
+        getColumnModel().getColumn(VideoTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
         
     }
 
