@@ -19,7 +19,7 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
     private static final String EMPTY_STRING = "";
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
-        new PropertyKeyComparator(FilePropertyKey.GENRE, FilePropertyKey.BITRATE, FilePropertyKey.TRACK_NUMBER, FilePropertyKey.SAMPLE_RATE);
+        new PropertyKeyComparator(FilePropertyKey.GENRE, FilePropertyKey.BITRATE, FilePropertyKey.TRACK_NUMBER);
     private final PropertyKeyComparator VIDEO_COMPARATOR = 
         new PropertyKeyComparator(FilePropertyKey.YEAR, FilePropertyKey.RATING, FilePropertyKey.COMMENTS, FilePropertyKey.HEIGHT, 
                                   FilePropertyKey.WIDTH, FilePropertyKey.BITRATE);

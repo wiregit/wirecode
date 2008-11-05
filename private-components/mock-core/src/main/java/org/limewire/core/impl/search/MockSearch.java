@@ -205,7 +205,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -227,7 +226,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -249,7 +247,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -271,7 +268,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);
@@ -293,7 +289,6 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.LENGTH, "4:31");
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         msr.setProperty(FilePropertyKey.QUALITY, "excellent quality");
-        msr.setProperty(FilePropertyKey.SAMPLE_RATE, "44,100 Hz");
         msr.setProperty(FilePropertyKey.TRACK_NUMBER, "3");
         msr.setProperty(FilePropertyKey.YEAR, "2008");
         handleSearchResult(msr);

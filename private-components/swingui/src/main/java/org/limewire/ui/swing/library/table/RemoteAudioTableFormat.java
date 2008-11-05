@@ -16,8 +16,7 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
     public static final int BITRATE_COL = GENRE_COL + 1;
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int TRACK_COL = SIZE_COL + 1;
-    public static final int SAMPLE_RATE_COL = TRACK_COL + 1;
-    public static final int MODIFIED_COL = SAMPLE_RATE_COL + 1;
+    public static final int MODIFIED_COL = TRACK_COL + 1;
     public static final int ACTION_COL = MODIFIED_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
@@ -46,8 +45,6 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
             return I18n.tr("Size");
         case TRACK_COL:
             return I18n.tr("Track");
-        case SAMPLE_RATE_COL:
-            return I18n.tr("Sample Rate");
         case MODIFIED_COL:
             return I18n.tr("Modified");
         case ACTION_COL:
@@ -77,8 +74,6 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
             return baseObject.getSize();
         case TRACK_COL:
             return baseObject.getProperty(FilePropertyKey.TITLE);
-        case SAMPLE_RATE_COL:
-            return baseObject.getProperty(FilePropertyKey.SAMPLE_RATE);
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
@@ -95,7 +90,7 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { MODIFIED_COL, SAMPLE_RATE_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
+        return new int[] { MODIFIED_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
     }
 
     @Override

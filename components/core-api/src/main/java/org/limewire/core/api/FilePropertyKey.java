@@ -22,7 +22,6 @@ public enum FilePropertyKey {
     PLATFORM,
     QUALITY,
     RATING,
-    SAMPLE_RATE, // ex. 44,100 Hz//TODO this property is not being set on items
     TRACK_NUMBER,
     ALBUM,
     WIDTH,

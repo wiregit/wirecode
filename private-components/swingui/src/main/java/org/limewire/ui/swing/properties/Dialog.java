@@ -221,10 +221,6 @@ public abstract class Dialog extends JDialog {
         addMetadata("Date Created", dateCreated, metadata);
     }
 
-    protected void addSampleRateMetadata(String sampleRate, Map<String, String> metadata) {
-        addMetadata("Sample Rate", sampleRate, metadata);
-    }
-
     protected void addBitrateMetadata(String bitRate, Map<String, String> metadata) {
         addMetadata("Bitrate", bitRate, metadata);
     }
@@ -331,7 +327,6 @@ public abstract class Dialog extends JDialog {
         switch(propFile.getCategory()) {
             case AUDIO:
                 addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
-                addSampleRateMetadata(str(propFile.getProperty(FilePropertyKey.SAMPLE_RATE)), metadata);
                 break;
             case VIDEO:
                 addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
