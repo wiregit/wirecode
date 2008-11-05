@@ -39,12 +39,13 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         gnutellaLabel = new JLabel(shareGnutellaIcon);
         friendsLabel = new JLabel(shareFriendsIcon);
         shareButton = new IconButton(shareButtonIcon, shareButtonIcon, shareButtonPressedIcon);
+        shareButton.setBorder(null);
         shareButton.addActionListener(shareAction);
 
         friendsLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
         friendsLabel.setIconTextGap(4);
         
-        setLayout(new MigLayout("hidemode 0"));
+        setLayout(new MigLayout("insets 2 5 2 5, hidemode 0, aligny 50%"));
         add(gnutellaLabel);
         add(friendsLabel, "pushx");
         add(shareButton);

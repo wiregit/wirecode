@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.decorator.ColorHighlighter;
@@ -41,11 +42,15 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     private ShareTableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
+    private TableCellRenderer defaultRenderer;
+    
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
         super(new LibraryTableModel<T>(libraryItems, format));
         
         this.format = format;
 
+        defaultRenderer = new DefaultLibraryRenderer();
+        
         tableColors = new TableColors();
         setStripesPainted(true);
         setColumnControlVisible(true);
@@ -60,6 +65,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
        
         setFillsViewportHeight(true);
         setDragEnabled(true);
+        setDefaultRenderer(Object.class, defaultRenderer);
     }
     
     public void enableSharing(LibrarySharePanel librarySharePanel) {

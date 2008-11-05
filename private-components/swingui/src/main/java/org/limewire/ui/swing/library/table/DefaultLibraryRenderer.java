@@ -2,25 +2,26 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
 
+import javax.swing.BorderFactory;
 import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 
-import org.limewire.util.CommonUtils;
+public class DefaultLibraryRenderer extends DefaultTableCellRenderer {
 
-public class TimeRenderer extends DefaultLibraryRenderer {
+    private Border border;
     
-    public TimeRenderer(){
-        setHorizontalAlignment(SwingConstants.RIGHT);
+    public DefaultLibraryRenderer() {
+        border = BorderFactory.createEmptyBorder(0,5,0,5);
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    
+        setBorder(border);
         
-        if (value != null) {
-            setText(CommonUtils.seconds2time(Long.valueOf((String)value))); 
-        }
         return this;
     }
 }
