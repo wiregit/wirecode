@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
@@ -26,6 +28,7 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -79,6 +82,12 @@ public class SearchResultsPanel extends JXPanel {
     @Resource private Color toolbarBottomGradientColor;
     @Resource private Color tabHighlightTopGradientColor;
     @Resource private Color tabHighlightBottomGradientColor;
+    @Resource private Color tabSelectionTopGradientColor;
+    @Resource private Color tabSelectionBottomGradientColor;
+    @Resource private Color tabSelectionTextColor;
+    @Resource private Color tabSelectionBorderTopGradientColor;;
+    @Resource private Color tabSelectionBorderBottomGradientColor;;
+    
 
     private boolean lifeCycleComplete = true;
 
@@ -210,6 +219,7 @@ public class SearchResultsPanel extends JXPanel {
         RectanglePainter tabHighlight = new RectanglePainter();
         tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
                                                     20.0f, 33.0f, tabHighlightBottomGradientColor));
+        
         tabHighlight.setBorderPaint(null);
         
         FancyTabList searchTab = searchTabItems.getSearchTab();
@@ -217,8 +227,8 @@ public class SearchResultsPanel extends JXPanel {
         searchTab.setUnderlineEnabled(false);
         searchTab.setHighlightPainter(tabHighlight);
         
-        searchTab.setSelectionPainter(tabHighlight);
-        searchTab.setTabTextSelectedColor(Color.WHITE);
+        searchTab.setSelectionPainter(createTabSelectionPainter());
+        searchTab.setTabTextSelectedColor(tabSelectionTextColor);
         
         add(searchTab, "growy");
         add(sortAndFilterPanel, "wrap, align right");
@@ -296,5 +306,17 @@ public class SearchResultsPanel extends JXPanel {
         } else {
             messagePanel.setVisible(false);
         }
+    }
+    
+    private Painter<FancyTab> createTabSelectionPainter() {
+        return new Painter<FancyTab>() {
+
+            @Override
+            public void paint(Graphics2D g, FancyTab object, int width, int height) {
+                g.setColor(tabSelectionTopGradientColor);
+                g.fillRoundRect(5,5, width-10, height-10, 8,8);
+            }
+            
+        };
     }
 }

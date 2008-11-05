@@ -15,12 +15,12 @@ import org.limewire.ui.swing.util.PaintUtils;
 
 abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
 
-    private final ButtonColours colours = new ButtonColours();
+    protected final ButtonProps props = new ButtonProps();
    
     @Override
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
         
-        this.setButtonColours(button, colours);
+        this.setButtonColours(button);
         
         // get original antialiasing value for reset
         Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
@@ -28,27 +28,29 @@ abstract class AbstractButtonPainter extends AbstractPainter<JXButton> {
         //turn off antialiasing
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);    
         
-        g.setPaint(new GradientPaint(0,0, colours.backgroundGradientTop, 0, height, colours.backgroundGradientBottom, false));
+        g.setPaint(new GradientPaint(0,0, props.backgroundGradientTop, 0, height, props.backgroundGradientBottom, false));
         
-        g.fillRoundRect(0, 0, width-1, height-1, colours.arcWidth, colours.arcHeight);
+        g.fillRoundRect(0, 0, width-1, height-1, props.arcWidth, props.arcHeight);
         
         
         PaintUtils.drawRoundedBorder(g, 0, 0, width-1, height-1, 
-                colours.arcWidth, colours.arcHeight, colours.borderColour,
-                colours.i1, colours.i2, colours.i3);
+                props.arcWidth, props.arcHeight, props.border,
+                props.borderBevel1, props.borderBevel2, props.borderBevel3);
         
         // reset antialiasing propery
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
     }
     
-    protected abstract void setButtonColours(JXButton button, ButtonColours colors);
+    protected abstract void setButtonColours(JXButton button);
     
-    protected static class ButtonColours {
+    protected static class ButtonProps {
         protected int arcWidth;
         protected int arcHeight;
-        protected Color borderColour;
+        protected Color border;
+        protected Color borderBevel1;
+        protected Color borderBevel2;
+        protected Color borderBevel3;
         protected Color backgroundGradientTop;
         protected Color backgroundGradientBottom;
-        protected int i1, i2, i3;
     }
 }

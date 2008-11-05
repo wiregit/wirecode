@@ -7,6 +7,7 @@ import javax.swing.ButtonModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PaintUtils;
 
 import com.google.inject.Singleton;
 
@@ -40,32 +41,30 @@ public class GreenButtonPainter extends AbstractButtonPainter {
     
     public GreenButtonPainter() {
         GuiUtils.assignResources(this);
+
+        props.arcHeight = this.arcHeight;
+        props.arcWidth = this.arcWidth;
+
+        props.border = this.borderColour;
+        
+        props.borderBevel1 = PaintUtils.lighten(backgroundGradientTop, -10);
+        props.borderBevel2 = PaintUtils.lighten(backgroundGradientTop, -20);
+        props.borderBevel3 = PaintUtils.lighten(backgroundGradientTop, -30);
     }
     
-    // TODO: Proper shading
     @Override
-    protected void setButtonColours(JXButton button, ButtonColours colours) {    
-        colours.arcHeight = this.arcHeight;
-        colours.arcWidth = this.arcWidth;
+    protected void setButtonColours(JXButton button) {    
         
         ButtonModel model = button.getModel();
 
         //isSelected() for toggle buttons
         if(model.isPressed() || model.isSelected()) {
-            colours.borderColour = this.borderColour;
-            colours.backgroundGradientTop = this.backgroundGradientTop;
-            colours.backgroundGradientBottom = this.backgroundGradientBottom;
-            colours.i1 = 255;
-            colours.i2 = 255;
-            colours.i3 = 255;
+            props.backgroundGradientTop = this.highlightGradientTop;
+            props.backgroundGradientBottom = this.highlightGradientBottom;
         } 
         else {
-            colours.borderColour = this.borderColour;
-            colours.backgroundGradientTop = this.highlightGradientTop;
-            colours.backgroundGradientBottom = this.highlightGradientBottom;
-            colours.i1 = 255;
-            colours.i2 = 255;
-            colours.i3 = 255;
+            props.backgroundGradientTop = this.backgroundGradientTop;
+            props.backgroundGradientBottom = this.backgroundGradientBottom;
         }
     }
 }

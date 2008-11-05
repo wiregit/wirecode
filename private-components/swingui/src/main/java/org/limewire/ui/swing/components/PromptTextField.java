@@ -30,39 +30,39 @@ public class PromptTextField extends JTextField implements FocusListener {
     @Resource 
     private Color borderColour;
     
-    public PromptTextField() {
-        this("");
-    }
+    private final Color borderBevel1;
+    private final Color borderBevel2;
+    private final Color borderBevel3;
     
-    public PromptTextField(String promptText) {
-        super();
-        
+    public PromptTextField() {
         GuiUtils.assignResources(this);
         
-        init(true);
-        setPromptText(promptText);
-    }
-    
-    public PromptTextField(String promptText, int columns) {
-        super(columns);
-        init(false);
-        setPromptText(promptText);
-    }
-    
-    private void init(boolean setSize) {
+        this.borderBevel1 = PaintUtils.lighten(this.borderColour, 120);
+        this.borderBevel2 = PaintUtils.lighten(this.borderColour, 80); 
+        this.borderBevel3 = PaintUtils.lighten(this.borderColour, 100);
+        
         TextFieldClipboardControl.install(this);
         addFocusListener(this);
         this.setOpaque(false);
         this.setBorder(new TextBorder());
-        if(setSize) {
-            this.setPreferredSize(new Dimension(200, 20));
-            this.setMinimumSize(this.getPreferredSize());
-            this.setSize(this.getPreferredSize());
-        }
+
+        this.setPreferredSize(new Dimension(200, 22));
+    }
+    
+    public PromptTextField(String promptText) {
+        this();
+        
+        this.setPromptText(promptText);
+    }
+    
+    public PromptTextField(String promptText, int columns) {
+        this(promptText);
+        
+        this.setColumns(columns);
     }
     
     public void setPromptText(String text){
-        promptText = text;
+        this.promptText = text;
     }
     
     private class TextBorder implements Border {
@@ -120,16 +120,16 @@ public class PromptTextField extends JTextField implements FocusListener {
         
         PaintUtils.drawRoundedBorder(g2, 0, 0, getWidth()-1, getHeight()-1, 
                 this.arcWidth, this.arcHeight, this.borderColour,
-                120, 80, 100);
+                this.borderBevel1, this.borderBevel2, this.borderBevel3);
     }
     
     protected void paintPrompt(Graphics2D g2) {
-        if (!hasFocus() && getText().isEmpty()) {
+        if (!hasFocus() && getText().isEmpty() && this.promptText != null) {
             g2.setColor(Color.LIGHT_GRAY);
             FontMetrics fm = g2.getFontMetrics();
             Border border = getBorder();
             int x = border != null ? border.getBorderInsets(this).left : 0;
-            PaintUtils.drawSmoothString(g2, promptText, x, fm.getAscent() + 3);
+            PaintUtils.drawSmoothString(g2, this.promptText, x, fm.getAscent() + 3);
         }
     }
 }

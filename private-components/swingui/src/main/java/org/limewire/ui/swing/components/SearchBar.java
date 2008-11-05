@@ -88,6 +88,7 @@ public class SearchBar extends JXPanel {
         this.searchButton.setPreferredSize(new Dimension(22,22));
         this.searchButton.setMinimumSize(this.searchButton.getPreferredSize());
         this.searchButton.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        this.searchButton.setFocusPainted(false);
         
         this.assertProgramCategory();
         
@@ -131,6 +132,8 @@ public class SearchBar extends JXPanel {
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (searchField.getText().isEmpty())  return;
+                
                 String searchText = searchField.getText();
                 searchHandler.doSearch(new DefaultSearchInfo(searchText, categoryToSearch));
             }
