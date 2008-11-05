@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public enum FilePropertyKey {
-    TITLE,//for audo files this is the track name -- TODO this is confusing
+    TITLE,//for audo files this is the album name -- TODO this is confusing
     AUTHOR,//for audio files this represents the artists name as well -- TODO this is confusing
     BITRATE, // ex. 128, 160, 192, 224, 320
     COMMENTS,
