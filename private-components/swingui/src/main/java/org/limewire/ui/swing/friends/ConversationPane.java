@@ -36,16 +36,22 @@ import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
+import org.limewire.core.api.friend.feature.features.FileOfferer;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
@@ -61,6 +67,7 @@ import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -348,30 +355,52 @@ public class ConversationPane extends JPanel implements Displayable {
             }
         }
     }
-
-    public void offerFile(File file) {
-        FriendPresence presence = chatFriend.getPresence();
-        if(presence.getFeature(FileOfferFeature.ID) != null) {
-            // update the chat state in case the remote user has not started conversation with us
-            try {
-                writer.setChatState(ChatState.active);
-            } catch (XMPPException e) {
-                LOG.error("Unable to set chat state prior to file offer", e);
+    
+    public void offerFolder(File folder, ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
+        // TODO: Change this to show event immediately & update as status changes.
+        future.addFutureListener(new EventListener<FutureEvent<List<ListeningFuture<LocalFileItem>>>>() {
+            @Override
+            public void handleEvent(FutureEvent<List<ListeningFuture<LocalFileItem>>> event) {
+                if(event.getResult() != null) {
+                    for(ListeningFuture<LocalFileItem> future : event.getResult()) {
+                        offerFile(null, future);
+                    }
+                }
             }
+        });
+    }
 
-            // TODO: Listen for the file being added to the library &
-            //       update the MFOI based on status.
-            //       Send to offerer when File becomes FileItem.
-            
-// TODO: Fix drops to friends!!            
-//            FileOfferer fileOfferer = ((FileOfferFeature)presence.getFeature(FileOfferFeature.ID)).getFeature();
-//            FileMetaData metadata = file.toMetadata();
-//            fileOfferer.offerFile(metadata);
-//            new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
-//                        Message.Type.Sent, metadata)).publish();
-        } else {
-            // TODO
-        }
+    public void offerFile(File file, ListeningFuture<LocalFileItem> future) {
+        // TODO: Change this to show event immediately & update as status changes.
+        future.addFutureListener(new EventListener<FutureEvent<LocalFileItem>>() {
+            @SwingEDTEvent
+            @Override
+            public void handleEvent(FutureEvent<LocalFileItem> event) {
+               if(event.getResult() != null) {
+                   FriendPresence presence = chatFriend.getPresence();
+                   if(presence.getFeature(FileOfferFeature.ID) != null) {
+                       // update the chat state in case the remote user has not started conversation with us
+                       try {
+                           writer.setChatState(ChatState.active);
+                       } catch (XMPPException e) {
+                           LOG.error("Unable to set chat state prior to file offer", e);
+                       }
+
+                       // TODO: Listen for the file being added to the library &
+                       //       update the MFOI based on status.
+                       //       Send to offerer when File becomes FileItem.
+                       FileOfferer fileOfferer = ((FileOfferFeature)presence.getFeature(FileOfferFeature.ID)).getFeature();
+                       FileMetaData metadata = event.getResult().toMetadata();
+                       fileOfferer.offerFile(metadata);
+                       new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
+                                   Message.Type.Sent, metadata)).publish();
+                   } else {
+                       // TODO
+                   }
+               }
+            } 
+        });
+        
     }
     
     private class FriendShareDropTarget extends ShareDropTarget {
@@ -400,8 +429,13 @@ public class ConversationPane extends JPanel implements Displayable {
         }
         
         @Override
-        protected void acceptedFile(File file) {
-            offerFile(file);
+        protected void acceptedFile(File file, ListeningFuture<LocalFileItem> future) {
+            offerFile(file, future);
+        }
+        
+        @Override
+        protected void acceptedFolder(File folder, ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
+            offerFolder(folder, future);
         }
     }
 }

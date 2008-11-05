@@ -2,7 +2,11 @@ package org.limewire.core.impl.library;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
@@ -50,13 +54,16 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
     
     @Override
-    public void addFolder(File folder) {
-        
+    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
+        List<ListeningFuture<LocalFileItem>> list = Collections.emptyList();
+        return new SimpleFuture<List<ListeningFuture<LocalFileItem>>>(list);
     }
     
     @Override
-    public void addFile(File file) {
-        eventList.add(new MockLocalFileItem(file.getName(), 1000,12345,23456, 0,0, Category.IMAGE));
+    public ListeningFuture<LocalFileItem> addFile(File file) {
+        LocalFileItem item = new MockLocalFileItem(file.getName(), 1000,12345,23456, 0,0, Category.IMAGE);
+        eventList.add(item);
+        return new SimpleFuture<LocalFileItem>(item);
     }
 
     @Override

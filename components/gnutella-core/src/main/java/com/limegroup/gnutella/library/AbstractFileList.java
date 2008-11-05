@@ -10,18 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.IntSet;
-import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.ListeningFutureDelegator;
+import org.limewire.concurrent.SimpleFuture;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.util.FileUtils;
@@ -457,117 +454,30 @@ abstract class AbstractFileList implements SharedFileList {
         }
     }
     
-    private ListeningFuture<FileDesc> wrapFuture(final ListeningFuture<FileDesc> future) {
-        return new ContainedFuture() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return future.cancel(mayInterruptIfRunning);
-            }
-
-            @Override
-            public FileDesc get() throws InterruptedException, ExecutionException {
-                return check(future.get());
-            }
-
-            @Override
-            public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
-                    ExecutionException, TimeoutException {
-                try {
-                    return check(future.get(timeout, unit));
-                } catch(ExecutionException ee) {
-                    // We can fail because files are already added --
-                    // if that's why we failed, then we return the file anyway.
-                    if(ee.getCause() instanceof FileListChangeFailedException) {
-                        FileListChangeFailedException fe = (FileListChangeFailedException)ee.getCause();
-                        if(fe.getEvent().getType() == FileListChangedEvent.Type.ADD_FAILED) {
-                            if(contains(fe.getEvent().getFile())) {
-                                return getFileDesc(fe.getEvent().getFile());
-                            }
-                        }
-                    }
-                    throw ee;
-                }
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return future.isCancelled();
-            }
-
-            @Override
-            public boolean isDone() {
-                return future.isDone();
-            }
-            
-            @Override
-            public String toString() {
-                return "Wrapper of: " + future;
-            }
-            
-            @Override
-            public void addFutureListener(final EventListener<FutureEvent<FileDesc>> listener) {
-                final Future<FileDesc> parentThis = this;
-                future.addFutureListener(new EventListener<FutureEvent<FileDesc>>() {
-                    @Override
-                    public void handleEvent(FutureEvent<FileDesc> event) {
-                        // Recreate the event so that it's using the contained check.
-                        EventListenerList.dispatch(listener, FutureEvent.createEvent(parentThis));
-                    }
-                });
-            }
-            
-        };
+    private FileDesc throwExecutionExceptionIfNotContains(FileDesc fd) throws ExecutionException {            
+        if(contains(fd)) {
+            return fd;
+        } else {
+            throw new ExecutionException(new FileListChangeFailedException(
+                    new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
+                    "File can't be added to this list"));
+        }
     }
+    
+    private ListeningFuture<FileDesc> wrapFuture(final ListeningFuture<FileDesc> future) {
+        return new ListeningFutureDelegator<FileDesc, FileDesc>(future) {
+            @Override
+            protected FileDesc convertSource(FileDesc source) throws ExecutionException {
+                return throwExecutionExceptionIfNotContains(source);
+            }
+        };
+    }    
     
     private ListeningFuture<FileDesc> futureFor(final FileDesc fd) {
-        return new ContainedFuture() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
-
-            @Override
-            public FileDesc get() throws InterruptedException, ExecutionException {
-                return check(fd);
-            }
-
-            @Override
-            public FileDesc get(long timeout, TimeUnit unit) throws InterruptedException,
-                    ExecutionException, TimeoutException {
-                return check(fd);
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return true;
-            }
-            
-            @Override
-            public String toString() {
-                return "Future for: " + fd;
-            }
-            
-            @Override
-            public void addFutureListener(EventListener<FutureEvent<FileDesc>> listener) {
-                EventListenerList.dispatch(listener, FutureEvent.createEvent(this));
-            }
-        };
-    }
-    
-    private abstract class ContainedFuture implements ListeningFuture<FileDesc> {
-        public FileDesc check(FileDesc fd) throws ExecutionException {            
-            if(contains(fd)) {
-                return fd;
-            } else {
-                throw new ExecutionException(new FileListChangeFailedException(
-                        new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.ADD_FAILED, fd.getFile()),
-                        "File can't be added to this list"));
-            }
+        try {
+            return new SimpleFuture<FileDesc>(throwExecutionExceptionIfNotContains(fd));
+        } catch(ExecutionException ee) {
+            return new SimpleFuture<FileDesc>(ee);
         }
     }
     

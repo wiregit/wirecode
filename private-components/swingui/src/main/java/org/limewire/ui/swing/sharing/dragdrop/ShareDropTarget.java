@@ -9,7 +9,10 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
+import java.util.List;
 
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.util.DNDUtils;
 
@@ -71,11 +74,10 @@ public class ShareDropTarget implements DropTargetListener {
                 for(File file : droppedFiles) {
                     if(file != null) {
                         if(file.isDirectory()) {
-                            currentModel.addFolder(file);
+                            acceptedFolder(file, currentModel.addFolder(file));
                         } else {
-                            currentModel.addFile(file);
+                            acceptedFile(file, currentModel.addFile(file));
                         }
-                        acceptedFile(file);
                     }
                 }
                 
@@ -93,7 +95,12 @@ public class ShareDropTarget implements DropTargetListener {
     }
     
     /** A hook for subclasses that want to perform processing on all files that were accepted. */
-    protected void acceptedFile(File files) {
+    protected void acceptedFile(File file, ListeningFuture<LocalFileItem> future) {
+        // no-op by default.
+    }
+    
+    /** A hook for subclasses that want to perform processing on folders that were accepted. */
+    protected void acceptedFolder(File folder, ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
         // no-op by default.
     }
 }

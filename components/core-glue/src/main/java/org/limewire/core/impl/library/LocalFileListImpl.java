@@ -5,10 +5,14 @@ package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
@@ -16,12 +20,12 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.listener.EventListener;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TransformedList;
 
 abstract class LocalFileListImpl implements LocalFileList {
     protected final EventList<LocalFileItem> baseList;
@@ -30,7 +34,7 @@ abstract class LocalFileListImpl implements LocalFileList {
     protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
     
 
-    private final Map<File, FileItem> lookup;
+    private final Map<File, LocalFileItem> lookup;
     private final CoreLocalFileItemFactory fileItemFactory;
     
     LocalFileListImpl(EventList<LocalFileItem> eventList, CoreLocalFileItemFactory fileItemFactory) {
@@ -38,7 +42,7 @@ abstract class LocalFileListImpl implements LocalFileList {
         this.threadSafeList = GlazedListsFactory.threadSafeList(eventList);
         this.readOnlyList = GlazedListsFactory.readOnlyList(threadSafeList);
         this.fileItemFactory = fileItemFactory;
-        this.lookup = new ConcurrentHashMap<File, FileItem>();
+        this.lookup = new ConcurrentHashMap<File, LocalFileItem>();
 
     }
     
@@ -46,8 +50,8 @@ abstract class LocalFileListImpl implements LocalFileList {
     protected abstract FileList getCoreFileList();
     
     @Override
-    public void addFile(File file) {
-        getCoreFileList().add(file);
+    public ListeningFuture<LocalFileItem> addFile(File file) {
+        return new Wrapper((getCoreFileList().add(file)));
     }
 
     @Override
@@ -56,8 +60,8 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     @Override
-    public void addFolder(File folder) {
-        getCoreFileList().addFolder(folder);
+    public ListeningFuture<List<ListeningFuture<LocalFileItem>>> addFolder(File folder) {
+        return new ListWrapper((getCoreFileList().addFolder(folder)));
     }
 
     @Override
@@ -148,4 +152,32 @@ abstract class LocalFileListImpl implements LocalFileList {
             }
         };
     }
+    
+    private class ListWrapper extends ListeningFutureDelegator<List<ListeningFuture<FileDesc>>, List<ListeningFuture<LocalFileItem>>> {
+        public ListWrapper(ListeningFuture<List<ListeningFuture<FileDesc>>> delegate) {
+            super(delegate);
+        }
+        
+        @Override
+        protected List<ListeningFuture<LocalFileItem>> convertSource(List<ListeningFuture<FileDesc>> source) {
+            List<ListeningFuture<LocalFileItem>> replaced = new ArrayList<ListeningFuture<LocalFileItem>>(source.size());
+            for(ListeningFuture<FileDesc> future : source) {
+                replaced.add(new Wrapper(future));
+            }
+            return replaced;
+        }
+    }
+    
+    private class Wrapper extends ListeningFutureDelegator<FileDesc, LocalFileItem> {
+        public Wrapper(ListeningFuture<FileDesc> delegate) {
+            super(delegate);
+        }
+        
+        @Override
+        protected LocalFileItem convertSource(FileDesc source) {
+            return lookup.get(source.getFile());
+        }
+    }
+    
+    
 }

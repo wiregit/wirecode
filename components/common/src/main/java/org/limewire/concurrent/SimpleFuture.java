@@ -21,6 +21,11 @@ public class SimpleFuture<T> implements ListeningFuture<T> {
         this.t = null;
         this.exception = new ExecutionException(throwable);
     }
+    
+    public SimpleFuture(ExecutionException ee) {
+        this.t = null;
+        this.exception = ee;
+    }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
