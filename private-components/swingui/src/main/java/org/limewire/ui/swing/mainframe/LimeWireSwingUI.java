@@ -4,19 +4,13 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
-import java.awt.color.ColorSpace;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.image.ColorConvertOp;
 
-import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
-import org.jdesktop.jxlayer.JXLayer;
-import org.jdesktop.jxlayer.plaf.effect.BufferedImageOpEffect;
-import org.jdesktop.jxlayer.plaf.ext.LockableUI;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.menu.LimeMenuBar;
@@ -34,8 +28,6 @@ public class LimeWireSwingUI extends JPanel {
     private final TopPanel topPanel;
     private final TrayNotifier trayNotifier;
     private final JMenuBar menuBar;
-    private final JXLayer<JComponent> layer;
-    private final LockableUI lockableUI;
     private final SetupWizard setupWizard;
     
 	@Inject
@@ -95,26 +87,11 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = GridBagConstraints.REMAINDER;
         add(statusPanel, gbc);
-        
-        lockableUI = new LockableUI();
-        ColorConvertOp gray = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
-        BufferedImageOpEffect imageEffect = new BufferedImageOpEffect(gray);
-        lockableUI.setLockedEffects(imageEffect);
-        layer = new JXLayer<JComponent>(this, lockableUI);        
     }
 	
-	public JXLayer<JComponent> getLayer(){
-	    return layer;
-	}
-	
-	public void setLocked(boolean locked) {
-        lockableUI.setLocked(locked);
-    }
 	
 	public void showSetupWizard(){
-	    setLocked(true);	    
         setupWizard.showDialogIfNeeded((Frame)getTopLevelAncestor());
-	    setLocked(false);
 	}
     
     public void goHome() {

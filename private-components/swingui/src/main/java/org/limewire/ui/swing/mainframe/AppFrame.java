@@ -3,11 +3,13 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
@@ -18,6 +20,8 @@ import javax.swing.plaf.ColorUIResource;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.Modules;
@@ -50,6 +54,8 @@ public class AppFrame extends SingleFrameApplication {
     /** Default background color for panels */
     @Resource
     private Color bgColor;
+    @Resource
+    private Color glassPaneColor;
 
     public static boolean isStarted() {
         return started;
@@ -77,12 +83,9 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setJMenuBar(ui.getMenuBar());
         
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
-        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));
-        
+        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));        
 
-        
-        // TODO fix
-        show(ui);//.getLayer());        
+        show(ui);      
         restoreView();
         
         ui.goHome();
@@ -94,8 +97,22 @@ public class AppFrame extends SingleFrameApplication {
 
         started = true;
         
-        // TODO fix
-        //ui.showSetupWizard();
+        
+
+        JXPanel glassPane = new JXPanel();
+        glassPane.setOpaque(false);
+        glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
+            @Override
+            protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
+                g.setPaint(glassPaneColor);
+                g.fillRect(0, 0, width, height);
+            }
+        });
+        getMainView().getFrame().setGlassPane(glassPane);
+        
+        glassPane.setVisible(true);  
+        ui.showSetupWizard();
+        glassPane.setVisible(false);  
         
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
