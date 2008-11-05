@@ -272,5 +272,10 @@ class CoreLocalFileItem implements LocalFileItem {
     public boolean isIncomplete() {
         return fileDesc instanceof IncompleteFileDesc;
     }
+
+    @Override
+    public void setProperty(FilePropertyKey key, Object value) {
+        map.put(key, value);        
+    }
     
 }

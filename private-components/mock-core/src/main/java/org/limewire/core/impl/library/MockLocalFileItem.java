@@ -116,4 +116,9 @@ public class MockLocalFileItem implements LocalFileItem {
     public boolean isIncomplete() {
         return false;
     }
+
+    @Override
+    public void setProperty(FilePropertyKey key, Object value) {
+        
+    }
 }
