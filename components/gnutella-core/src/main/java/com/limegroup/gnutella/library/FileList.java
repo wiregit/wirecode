@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.URN;
@@ -43,7 +43,7 @@ public interface FileList extends Iterable<FileDesc> {
      * Returns a Future from which the list of all FDs that are going to be
      * added is returned.
      */
-    Future<List<Future<FileDesc>>> addFolder(File folder);
+    ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
 
     /**
      * Asynchronously adds a file to the list. The returned Future can be used
@@ -51,7 +51,7 @@ public interface FileList extends Iterable<FileDesc> {
      * Future.get will throw an {@link ExecutionException}. If the FileDesc is
      * created but cannot be added to this list, Future.get will return null.
      */
-    Future<FileDesc> add(File file);
+    ListeningFuture<FileDesc> add(File file);
 
     /**
      * Asynchronously adds the specific file, using the given LimeXMLDocuments
@@ -61,7 +61,7 @@ public interface FileList extends Iterable<FileDesc> {
      * created but cannot be added to this list, Future.get will also throw an
      * exception.
      */
-    Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents);
+    ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents);
 
     /**
      * Removes the File from this list if there exists a FileDesc wrapper for

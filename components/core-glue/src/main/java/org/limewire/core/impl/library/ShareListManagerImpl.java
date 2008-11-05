@@ -1,14 +1,11 @@
 package org.limewire.core.impl.library;
 
 import java.awt.EventQueue;
-import java.io.File;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
@@ -104,111 +101,39 @@ class ShareListManagerImpl implements ShareListManager {
         }
     }
     
-    private class GnutellaFileList extends LocalFileListImpl implements EventListener<FileListChangedEvent> {
+    private class GnutellaFileList extends LocalFileListImpl {
 
         private final com.limegroup.gnutella.library.GnutellaFileList shareList;
         
-        private final ConcurrentHashMap<File, FileItem> lookup;
-        
         public GnutellaFileList(com.limegroup.gnutella.library.GnutellaFileList shareList) {
-            super(new BasicEventList<LocalFileItem>());
-            
+            super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);            
             this.shareList = shareList;
-            this.shareList.addFileListListener(this);
-            lookup = new ConcurrentHashMap<File, FileItem>();
+            this.shareList.addFileListListener(newEventListener());
         }
         
         @Override
-        public void addFile(File file) {
-            shareList.add(file);
-        }
-
-        @Override
-        public void removeFile(File file) {
-            shareList.remove(file);
-        }
-        
-        @Override
-        public void handleEvent(FileListChangedEvent event) {
-            LocalFileItem newItem;
-            switch(event.getType()) {
-            case ADDED:
-                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());  
-                lookup.put(event.getFileDesc().getFile(), newItem);
-                threadSafeList.add(newItem);
-                break;
-            case CHANGED:
-                FileItem oldItem = lookup.remove(event.getOldValue().getFile());
-                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
-                lookup.put(event.getFileDesc().getFile(), newItem);
-
-                threadSafeList.remove(oldItem);
-                threadSafeList.add(newItem);
-                break;
-            case REMOVED:
-                FileItem old = lookup.remove(event.getFileDesc().getFile());
-                threadSafeList.remove(old);
-                break;
-            case CLEAR:
-                lookup.clear();
-                threadSafeList.clear();
-                break;                
-            }
+        protected com.limegroup.gnutella.library.GnutellaFileList getCoreFileList() {
+            return shareList;
         }
     }
 
     
-    private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList, EventListener<FileListChangedEvent> {
+    private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList {
 
         private final FileManager fileManager;
-        private final String name;        
-        private final Map<File, FileItem> lookup;
+        private final String name;
         private volatile boolean committed = false;
+        private volatile EventListener<FileListChangedEvent> eventListener;
         
         FriendFileListImpl(FileManager fileManager, String name) {
-            super(combinedFriendShareLists.createMemberList());
-            
+            super(combinedFriendShareLists.createMemberList(), coreLocalFileItemFactory);            
             this.fileManager = fileManager;
             this.name = name;
-            this.lookup = new ConcurrentHashMap<File, FileItem>();
         }
         
         @Override
-        public void addFile(File file) {
-            fileManager.getFriendFileList(name).add(file);
-        }
-
-        @Override
-        public void removeFile(File file) {
-            fileManager.getFriendFileList(name).remove(file);
-        }
-        
-        @Override
-        public void handleEvent(FileListChangedEvent event) {
-            LocalFileItem newItem;
-            switch(event.getType()) {
-            case ADDED:
-                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
-                lookup.put(event.getFileDesc().getFile(), newItem);
-                threadSafeList.add(newItem);
-                break;
-            case CHANGED:
-                FileItem oldItem = lookup.remove(event.getOldValue().getFile());
-                newItem = coreLocalFileItemFactory.createCoreLocalFileItem(event.getFileDesc());
-                lookup.put(event.getFileDesc().getFile(), newItem);
-
-                threadSafeList.remove(oldItem);
-                threadSafeList.add(newItem);
-                break;
-            case REMOVED:
-                FileItem old = lookup.remove(event.getFileDesc().getFile());
-                threadSafeList.remove(old);
-                break;
-            case CLEAR:
-                lookup.clear();
-                threadSafeList.clear();
-                break;
-            }
+        protected com.limegroup.gnutella.library.FriendFileList getCoreFileList() {
+            return fileManager.getFriendFileList(name);
         }
         
         @Override
@@ -216,14 +141,15 @@ class ShareListManagerImpl implements ShareListManager {
             super.dispose();
             if(committed) {
                 combinedFriendShareLists.removeMemberList(baseList);
-                fileManager.getFriendFileList(name).removeFileListListener(this);
+                getCoreFileList().removeFileListListener(eventListener);
             }
         }
         
         /* Commits to using this list. */
         void commit() {
             committed = true;
-            fileManager.getOrCreateFriendFileList(name).addFileListListener(this);
+            eventListener = newEventListener();
+            fileManager.getOrCreateFriendFileList(name).addFileListListener(eventListener);
             combinedFriendShareLists.addMemberList(baseList);
             
             com.limegroup.gnutella.library.FileList fileList =
@@ -232,9 +158,7 @@ class ShareListManagerImpl implements ShareListManager {
               fileList.getReadLock().lock();
               try {
                   for(FileDesc fileDesc : fileList) {
-                      LocalFileItem newItem = coreLocalFileItemFactory.createCoreLocalFileItem(fileDesc);
-                      lookup.put(fileDesc.getFile(), newItem);
-                      threadSafeList.add(newItem);
+                      addFileDesc(fileDesc);
                   }
               } finally {
                   fileList.getReadLock().unlock();
@@ -242,27 +166,27 @@ class ShareListManagerImpl implements ShareListManager {
         }
         
         public boolean isAddNewAudioAlways() {
-            return fileManager.getFriendFileList(name).isAddNewAudioAlways();
+            return getCoreFileList().isAddNewAudioAlways();
         }
         
         public void setAddNewAudioAlways(boolean value) {
-            fileManager.getFriendFileList(name).setAddNewAudioAlways(value);
+            getCoreFileList().setAddNewAudioAlways(value);
         }
         
         public boolean isAddNewVideoAlways() {
-            return fileManager.getFriendFileList(name).isAddNewVideoAlways();
+            return getCoreFileList().isAddNewVideoAlways();
         }
         
         public void setAddNewVideoAlways(boolean value) {
-            fileManager.getFriendFileList(name).setAddNewVideoAlways(value);
+            getCoreFileList().setAddNewVideoAlways(value);
         }
         
         public boolean isAddNewImageAlways() {
-            return fileManager.getFriendFileList(name).isAddNewImageAlways();
+            return getCoreFileList().isAddNewImageAlways();
         }
         
         public void setAddNewImageAlways(boolean value) {
-            fileManager.getFriendFileList(name).setAddNewImageAlways(value);
+            getCoreFileList().setAddNewImageAlways(value);
         }
     } 
     

@@ -3,8 +3,8 @@ package com.limegroup.gnutella.library;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Future;
 
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -25,10 +25,10 @@ public interface ManagedFileList extends FileList {
     boolean isLoadFinished();
     
     /** Informs the library that the file 'oldName' has been renamed to 'newName'. */
-    Future<FileDesc> fileRenamed(File oldName, File newName);
+    ListeningFuture<FileDesc> fileRenamed(File oldName, File newName);
     
     /** Informs the library that the file 'file' has changed. */
-    Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
+    ListeningFuture<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs);
     
     /** Returns a list of all directories that will be recursively managed. */
     List<File> getDirectoriesToManageRecursively();
@@ -44,7 +44,7 @@ public interface ManagedFileList extends FileList {
      * Returns a Future of the list of all futures this will add
      * as part of the extensions changing.
      */
-    Future<List<Future<FileDesc>>> setManagedExtensions(Collection<String> extensions);
+    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> extensions);
     
     /**
      * Sets the new collection of managed folders.  Folders listed in 
@@ -54,7 +54,7 @@ public interface ManagedFileList extends FileList {
      * This is different than {@link FileList#addFolder(File)} because it
      * will replace existing managed folders.
      */
-    Future<List<Future<FileDesc>>> setManagedFolders(Collection<File> recursiveFoldersToManage,
+    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedFolders(Collection<File> recursiveFoldersToManage,
                                                      Collection<File> foldersToExclude);
     
     /**
@@ -62,5 +62,5 @@ public interface ManagedFileList extends FileList {
      * subdirectories as managed files.
      */
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(File folder);
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
 }

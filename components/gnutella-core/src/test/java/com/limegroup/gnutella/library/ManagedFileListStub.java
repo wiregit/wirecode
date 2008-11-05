@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Future;
 
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -18,12 +18,12 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
 
     @Override
-    public Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
+    public ListeningFuture<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         throw new UnsupportedOperationException();   
     }
 
     @Override
-    public Future<FileDesc> fileRenamed(File oldName, File newName) {
+    public ListeningFuture<FileDesc> fileRenamed(File oldName, File newName) {
         throw new UnsupportedOperationException();
     }
 
@@ -52,12 +52,12 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
 
     @Override
-    public Future<List<Future<FileDesc>>> setManagedExtensions(Collection<String> extensions) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> extensions) {
         throw new UnsupportedOperationException();
     }
     
     @Override
-    public Future<List<Future<FileDesc>>> setManagedFolders(
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedFolders(
             Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude) {
         // TODO Auto-generated method stub
         return null;

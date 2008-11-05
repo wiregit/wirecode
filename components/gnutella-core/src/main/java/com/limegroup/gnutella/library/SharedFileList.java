@@ -2,7 +2,8 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Future;
+
+import org.limewire.concurrent.ListeningFuture;
 
 import com.limegroup.gnutella.URN;
 
@@ -28,6 +29,6 @@ public interface SharedFileList extends FileList {
      * this list.
      */
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(File folder);
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
 
 }

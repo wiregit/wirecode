@@ -67,6 +67,7 @@ public class FriendShareListRefresher {
         public void handleEvent(final FriendShareListEvent event) {
             if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
                 event.getFileList().getModel().addListEventListener(new ListEventListener<LocalFileItem>() {
+                    @SuppressWarnings("unchecked")
                     public void listChanged(ListEvent<LocalFileItem> listChanges) {
                         if(FILE_MANAGER_LOADED.get()) {
                             User user = users.get(event.getFriend().getId());

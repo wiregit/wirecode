@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -40,8 +42,6 @@ import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
-import org.limewire.core.api.friend.feature.features.FileOfferer;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.i18n.I18nMarker;
@@ -57,22 +57,16 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
 
 /**
  *
@@ -93,7 +87,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final String loggedInID;
     private final MessageWriter writer;
     private final ChatFriend chatFriend;
-    private final ShareListManager libraryManager;
+    private final ShareListManager shareListManager;
     private final IconManager iconManager;
     private final FriendSharingDisplay friendSharingDisplay;
     private ResizingInputPanel inputPanel;
@@ -109,7 +103,7 @@ public class ConversationPane extends JPanel implements Displayable {
         this.conversationName = chatFriend.getName();
         this.friendId = chatFriend.getID();
         this.loggedInID = loggedInID;
-        this.libraryManager = libraryManager;
+        this.shareListManager = libraryManager;
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
         this.downloader = downloader;
@@ -141,7 +135,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
 
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, new ShareLocalFileList());
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         editor.setDropTarget(friendShare.getDropTarget());
         scroll.getViewport().add(editor);
 
@@ -271,7 +265,7 @@ public class ConversationPane extends JPanel implements Displayable {
         panel.add(inputPanel, BorderLayout.CENTER);
 
         JTextComponent inputComponent = inputPanel.getInputComponent();
-        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, new ShareLocalFileList());
+        FriendShareDropTarget friendShare = new FriendShareDropTarget(inputComponent, shareListManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         inputComponent.setDropTarget(friendShare.getDropTarget());
 
         return panel;
@@ -355,7 +349,7 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
 
-    public void offerFile(LocalFileItem file) {
+    public void offerFile(File file) {
         FriendPresence presence = chatFriend.getPresence();
         if(presence.getFeature(FileOfferFeature.ID) != null) {
             // update the chat state in case the remote user has not started conversation with us
@@ -365,21 +359,24 @@ public class ConversationPane extends JPanel implements Displayable {
                 LOG.error("Unable to set chat state prior to file offer", e);
             }
 
-            FileOfferer fileOfferer = ((FileOfferFeature)presence.getFeature(FileOfferFeature.ID)).getFeature();
-            FileMetaData metadata = file.offer(fileOfferer);
-            new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
-                        Message.Type.Sent, metadata)).publish();
+            // TODO: Listen for the file being added to the library &
+            //       update the MFOI based on status.
+            //       Send to offerer when File becomes FileItem.
+            
+// TODO: Fix drops to friends!!            
+//            FileOfferer fileOfferer = ((FileOfferFeature)presence.getFeature(FileOfferFeature.ID)).getFeature();
+//            FileMetaData metadata = file.toMetadata();
+//            fileOfferer.offerFile(metadata);
+//            new MessageReceivedEvent(new MessageFileOfferImpl(loggedInID, null, friendId,
+//                        Message.Type.Sent, metadata)).publish();
         } else {
             // TODO
         }
     }
     
     private class FriendShareDropTarget extends ShareDropTarget {
-        private final ShareLocalFileList fileList;
-
-        public FriendShareDropTarget(JComponent component, ShareLocalFileList fileList) {
+        public FriendShareDropTarget(JComponent component, LocalFileList fileList) {
             super(component, fileList);
-            this.fileList = fileList;
         }
 
         @Override
@@ -401,54 +398,10 @@ public class ConversationPane extends JPanel implements Displayable {
                 dtde.rejectDrag();
             }
         }
-
-        @Override
-        protected void dropCompleted() {
-            if (fileList.size() > 0) {
-                for(LocalFileItem item : fileList.getSwingModel()) {
-                    offerFile(item);
-                }
-                fileList.clear();
-            }
-        }
-    }
-    
-    private class ShareLocalFileList implements LocalFileList {
-        private final EventList<LocalFileItem> eventList = GlazedLists.threadSafeList(new BasicEventList<LocalFileItem>());
         
         @Override
-        public EventList<LocalFileItem> getSwingModel() {
-            return eventList;
+        protected void acceptedFile(File file) {
+            offerFile(file);
         }
-        
-        @Override
-        public EventList<LocalFileItem> getModel() {
-            return eventList;
-        }
-        
-        @Override
-        public void addFile(File file) {
-            LocalFileList friendList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
-            friendList.addFile(file);
-            for (LocalFileItem item : friendList.getModel()) {
-                if (file.getPath().equals(item.getFile().getPath())) {
-                    eventList.add(item);
-                }
-            }
-        }
-
-        @Override
-        public void removeFile(File file) {
-            //TODO: how do you convert a File into a LocalFileItem?
-        }
-
-        @Override
-        public int size() {
-            return eventList.size();
-        }
-
-        public void clear() {
-            eventList.clear();
-        }    
     }
 }

@@ -9,15 +9,9 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.settings.LibrarySettings;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.DNDUtils;
-import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
 /**
  * A drop target for adding a drop listener to a component. The drop listener
@@ -35,24 +29,12 @@ import org.limewire.util.MediaType;
 //TODO: users recieve no feedback when program or documents files are dropped and rejected.
 public class ShareDropTarget implements DropTargetListener {
 
-    private DropTarget dropTarget;
+    private final DropTarget dropTarget;
     private LocalFileList fileList;
     
-    /**
-     * Boolean value to ignore the document sharing setting in SharingSettings.
-     * If true, SharingSettings.DOCUMENT_SHARING_ENABLED value is ignored, if
-     * false, SharingSettings.DOCUMENT_SHARING_ENABLED value is  heeded.
-     */
-    private boolean alwaysShareDocuments;
-    
     public ShareDropTarget(Component component, LocalFileList fileList) {
-        this(component, fileList, true);
-    }
-    
-    public ShareDropTarget(Component component, LocalFileList fileList, boolean alwaysShareDocuments) {
         dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
         this.fileList = fileList;
-        this.alwaysShareDocuments = alwaysShareDocuments;
     }
     
     public void setModel(LocalFileList fileList) {
@@ -85,33 +67,18 @@ public class ShareDropTarget implements DropTargetListener {
             try {
                 final LocalFileList currentModel = fileList;
                 final File[] droppedFiles = DNDUtils.getFiles(transferable); 
-                
-                final List<File> acceptedFiles = new ArrayList<File>();
           
-                // perform the file IO operations on its own thread. 
-                //TODO: give feedback for failed adds.\
-               
-                BackgroundExecutorService.schedule(new Runnable(){
-                    public void run() {
-                        for(int i = 0; i < droppedFiles.length; i++) { 
-                            File file = droppedFiles[i];
-                            if(file == null)
-                                continue;
-                            if(file.isDirectory()) {
-                                readDirectory(file, acceptedFiles);
-                            }
-                            else if(isAllowed(FileUtils.getFileExtension(file.getName()))) { 
-                                acceptedFiles.add(file);
-                            }
-                        }
-
-                        for(File file : acceptedFiles) {       
+                for(File file : droppedFiles) {
+                    if(file != null) {
+                        if(file.isDirectory()) {
+                            currentModel.addFolder(file);
+                        } else {
                             currentModel.addFile(file);
                         }
-                        dropCompleted();
+                        acceptedFile(file);
                     }
-                });
-
+                }
+                
                 dtde.dropComplete(true);
             } catch (Exception e) {
             	dtde.dropComplete(false);
@@ -120,53 +87,13 @@ public class ShareDropTarget implements DropTargetListener {
           		dtde.rejectDrop();
           }
     }
-    
-    /**
-     * Notification method for subclasses to indicate that all
-     * files accepted by the drop have been added to the model.
-     */
-    protected void dropCompleted() {
-        //no-op
-    }
 
     @Override
     public void dropActionChanged(DropTargetDragEvent dtde) {
     }
     
-    /**
-     * Reads files in a directory. Subdirectories are ignored and any allowed file
-     * within this directory is added to the accept list.
-     */
-    private void readDirectory(File directory, List filesList) {
-        for(File file : directory.listFiles()) {
-            if(!file.isDirectory() && isAllowed(FileUtils.getFileExtension(file.getName()))) {
-                fileList.addFile(file);
-            }
-        }
+    /** A hook for subclasses that want to perform processing on all files that were accepted. */
+    protected void acceptedFile(File files) {
+        // no-op by default.
     }
-    
-    /**
-     * Tests whether the file is droppable. If the file is of type Program or Document,
-     * the validity is based on SharingSettings, otherwise the file is accepted.
-     * 
-     * @param fileExtension - the file extension to test
-     * @return true if the file is allowed, false otherwise.
-     */
-    private boolean isAllowed(String fileExtension) {
-        if(!fileExtension.isEmpty()) {        
-            if(!alwaysShareDocuments && !LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue()) {
-                MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
-                if(type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {
-                    return false;
-                }
-            }
-            if(!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
-                MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
-                if(type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS))
-                    return false;
-            }
-        }
-        return true;
-    }
-
 }

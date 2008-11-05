@@ -18,7 +18,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.collection.IntSet;
+import org.limewire.concurrent.FutureEvent;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.util.FileUtils;
@@ -113,14 +116,14 @@ abstract class AbstractFileList implements SharedFileList {
     }
 
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(final File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(final File folder) {
         managedList.addFolder(folder);
         
-        return managedList.submit(new Callable<List<Future<FileDesc>>>() {
+        return managedList.submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
-            public List<Future<FileDesc>> call() throws Exception {
+            public List<ListeningFuture<FileDesc>> call() throws Exception {
                 File[] potentials = folder.listFiles(managedList.newManageableFilter());
-                List<Future<FileDesc>> futures = new ArrayList<Future<FileDesc>>();
+                List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
                 for(File file : potentials) {
                     if(!contains(file)) {
                         futures.add(add(file));
@@ -132,7 +135,7 @@ abstract class AbstractFileList implements SharedFileList {
     }
     
     @Override
-    public Future<FileDesc> add(File file) {
+    public ListeningFuture<FileDesc> add(File file) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
@@ -144,7 +147,7 @@ abstract class AbstractFileList implements SharedFileList {
     }
     
     @Override
-    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
+    public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
         FileDesc fd = managedList.getFileDesc(file);
         if(fd == null) {
             saveChange(canonicalize(file), true); // Save early, will RM if it can't become FD.
@@ -454,7 +457,7 @@ abstract class AbstractFileList implements SharedFileList {
         }
     }
     
-    private Future<FileDesc> wrapFuture(final Future<FileDesc> future) {
+    private ListeningFuture<FileDesc> wrapFuture(final ListeningFuture<FileDesc> future) {
         return new ContainedFuture() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -500,10 +503,23 @@ abstract class AbstractFileList implements SharedFileList {
             public String toString() {
                 return "Wrapper of: " + future;
             }
+            
+            @Override
+            public void addFutureListener(final EventListener<FutureEvent<FileDesc>> listener) {
+                final Future<FileDesc> parentThis = this;
+                future.addFutureListener(new EventListener<FutureEvent<FileDesc>>() {
+                    @Override
+                    public void handleEvent(FutureEvent<FileDesc> event) {
+                        // Recreate the event so that it's using the contained check.
+                        EventListenerList.dispatch(listener, FutureEvent.createEvent(parentThis));
+                    }
+                });
+            }
+            
         };
     }
     
-    private Future<FileDesc> futureFor(final FileDesc fd) {
+    private ListeningFuture<FileDesc> futureFor(final FileDesc fd) {
         return new ContainedFuture() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -535,10 +551,15 @@ abstract class AbstractFileList implements SharedFileList {
             public String toString() {
                 return "Future for: " + fd;
             }
+            
+            @Override
+            public void addFutureListener(EventListener<FutureEvent<FileDesc>> listener) {
+                EventListenerList.dispatch(listener, FutureEvent.createEvent(this));
+            }
         };
     }
     
-    private abstract class ContainedFuture implements Future<FileDesc> {
+    private abstract class ContainedFuture implements ListeningFuture<FileDesc> {
         public FileDesc check(FileDesc fd) throws ExecutionException {            
             if(contains(fd)) {
                 return fd;

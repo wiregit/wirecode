@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 
@@ -32,12 +32,12 @@ public class AbstractFileListStub implements SharedFileList {
     }
     
     @Override
-    public Future<FileDesc> add(File file) {
+    public ListeningFuture<FileDesc> add(File file) {
         throw new UnsupportedOperationException("Cannot add files");        
     }
     
     @Override
-    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
+    public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> documents) {
         throw new UnsupportedOperationException("Cannot add files");
     }
     
@@ -47,7 +47,7 @@ public class AbstractFileListStub implements SharedFileList {
     }
     
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(File folder) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder) {
         throw new UnsupportedOperationException("Cannot add files");
     }
     

@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -28,6 +26,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningFuture;
+import org.limewire.concurrent.ListeningFutureTask;
+import org.limewire.concurrent.ListeningRunnableFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
@@ -167,8 +168,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * Runs the callable in the managed filelist thread & returns a Future used
      * to get its result.
      */
-    <V> Future<V> submit(Callable<V> callable) {
-        return fileLoader.submit(callable);
+    <V> ListeningFuture<V> submit(Callable<V> callable) {
+        ListeningRunnableFuture<V> future = new ListeningFutureTask<V>(callable);
+        fileLoader.execute(future);
+        return future;
     }
     
     /** Initializes all listeners. */
@@ -287,7 +290,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Future<List<Future<FileDesc>>> setManagedFolders(
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedFolders(
             Collection<File> recursiveFoldersToManage,
             Collection<File> foldersToExclude) {
         getLibraryData().setDirectoriesToManageRecursively(recursiveFoldersToManage);
@@ -303,9 +306,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         final int startRevision = revision.get();
         
-        return fileLoader.submit(new Callable<List<Future<FileDesc>>>() {
+        return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
-            public List<Future<FileDesc>> call() throws Exception {
+            public List<ListeningFuture<FileDesc>> call() throws Exception {
                 if(startRevision != revision.get()) {
                     return Collections.emptyList();
                 }
@@ -345,7 +348,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                     dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.REMOVED, fd));
                 }
 
-                List<Future<FileDesc>> added = new ArrayList<Future<FileDesc>>();
+                List<ListeningFuture<FileDesc>> added = new ArrayList<ListeningFuture<FileDesc>>();
                 for(File dir : addedDirs) {
                     updateManagedDirectories(extensions, dir, startRevision, false, false, added);
                 }
@@ -381,7 +384,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
 
     @Override
-    public Future<List<Future<FileDesc>>> addFolder(File f) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File f) {
         final File folder = canonicalize(f);   
         
         // This is not actually needed for correctness,
@@ -390,18 +393,18 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         rwLock.readLock().lock();
         try {
             if(managedDirectories.contains(folder)) {
-                List<Future<FileDesc>> list = Collections.emptyList();
-                return new SimpleFuture<List<Future<FileDesc>>>(list);
+                List<ListeningFuture<FileDesc>> list = Collections.emptyList();
+                return new SimpleFuture<List<ListeningFuture<FileDesc>>>(list);
             }
         } finally {
             rwLock.readLock().unlock();
         }
         
         getLibraryData().addDirectoryToManageRecursively(folder);
-        return fileLoader.submit(new Callable<List<Future<FileDesc>>>() {
+        return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
-            public List<Future<FileDesc>> call() {
-                List<Future<FileDesc>> futures = new ArrayList<Future<FileDesc>>();
+            public List<ListeningFuture<FileDesc>> call() {
+                List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
                 updateManagedDirectories(extensions, folder, revision.get(), true, true, futures);
                 return futures;
             }
@@ -535,7 +538,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Future<List<Future<FileDesc>>> setManagedExtensions(Collection<String> newManagedExtensions) {
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> newManagedExtensions) {
         // Go through and collect a list of removed FDs.
         List<FileDesc> removed = new ArrayList<FileDesc>();
         final Collection<String> newExtensions = new HashSet<String>(newManagedExtensions);
@@ -574,12 +577,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
 
         // Go through all managed directories & add any files for new extensions.
-        Future<List<Future<FileDesc>>> future;
+        ListeningFuture<List<ListeningFuture<FileDesc>>> future;
         if(!newExtensions.isEmpty()) {
-            future = fileLoader.submit(new Callable<List<Future<FileDesc>>>() {
+            future = submit(new Callable<List<ListeningFuture<FileDesc>>>() {
                 @Override
-                public List<Future<FileDesc>> call() {
-                    List<Future<FileDesc>> futures = new ArrayList<Future<FileDesc>>();
+                public List<ListeningFuture<FileDesc>> call() {
+                    List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
                     Set<File> directoryCopy;
                     rwLock.readLock().lock();
                     try {
@@ -595,8 +598,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 }
             });
         } else {
-            List<Future<FileDesc>> futures = Collections.emptyList();
-            future = new SimpleFuture<List<Future<FileDesc>>>(futures);
+            List<ListeningFuture<FileDesc>> futures = Collections.emptyList();
+            future = new SimpleFuture<List<ListeningFuture<FileDesc>>>(futures);
         }            
         
         return future;
@@ -608,12 +611,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Future<FileDesc> add(File file) {
+    public ListeningFuture<FileDesc> add(File file) {
         return add(file, LimeXMLDocument.EMPTY_LIST);
     }    
     
     @Override
-    public Future<FileDesc> add(File file, List<? extends LimeXMLDocument> list) {
+    public ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> list) {
         return add(file, list, revision.get(), null);
     }
     
@@ -626,7 +629,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @param rev - current  version of LimeXMLDocs being used
      * @param oldFileDesc the old FileDesc this is replacing
      */
-    private Future<FileDesc> add(File file, List<? extends LimeXMLDocument> metadata, int rev,
+    private ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> metadata, int rev,
             FileDesc oldFileDesc) {
         LOG.debugf("Attempting to load file: {0}", file);
         
@@ -901,7 +904,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Future<FileDesc> fileRenamed(File oldName, final File newName) {
+    public ListeningFuture<FileDesc> fileRenamed(File oldName, final File newName) {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
         oldName = canonicalize(oldName);
@@ -919,7 +922,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     @Override
-    public Future<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
+    public ListeningFuture<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         LOG.debugf("File Changed: {0}", file);
 
         file = canonicalize(file);
@@ -937,13 +940,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * This returns immediately with a Future that contains
      * the list of all Future FileDescs that will be added.
      */  
-    Future<List<Future<FileDesc>>> loadManagedFiles() {
+    ListeningFuture<List<ListeningFuture<FileDesc>>> loadManagedFiles() {
         final int currentRevision = revision.incrementAndGet();
         LOG.debugf("Starting new library revision: {0}", currentRevision);
         
-        Future<List<Future<FileDesc>>> future = fileLoader.submit(new Callable<List<Future<FileDesc>>>() {
+        ListeningFuture<List<ListeningFuture<FileDesc>>> future = submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
-            public List<Future<FileDesc>> call() {
+            public List<ListeningFuture<FileDesc>> call() {
                 dispatch(new ManagedListStatusEvent(ManagedFileListImpl.this, ManagedListStatusEvent.Type.LOAD_STARTED));
                 return loadSettingsInternal(currentRevision);
             }
@@ -957,7 +960,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    private List<Future<FileDesc>> loadSettingsInternal(int revision) {
+    private List<ListeningFuture<FileDesc>> loadSettingsInternal(int revision) {
         LOG.debugf("Loading Library Revision: {0}", revision);
         
         rwLock.writeLock().lock();
@@ -975,7 +978,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.CLEAR));
         
-        List<Future<FileDesc>> futures = loadManagedFiles(revision);
+        List<ListeningFuture<FileDesc>> futures = loadManagedFiles(revision);
 
         LOG.debugf("Finished queueing files for revision: {0}", revision);
             
@@ -1004,8 +1007,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return loadingFinished == revision.get();
     }
 
-    private List<Future<FileDesc>> loadManagedFiles(int rev) {
-        List<Future<FileDesc>> futures = new ArrayList<Future<FileDesc>>();
+    private List<ListeningFuture<FileDesc>> loadManagedFiles(int rev) {
+        List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
         
         // TODO: We want to always share this stuff, not just approved extensions.
         updateManagedDirectories(extensions, LibraryUtils.PROGRAM_SHARE, rev, false, true, futures);
@@ -1057,7 +1060,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      */
     private void updateManagedDirectories(Collection<String> managedExts, File directory, int rev,
             boolean recurse, boolean validateDir,
-            List<Future<FileDesc>> futures) {
+            List<ListeningFuture<FileDesc>> futures) {
         LOG.debugf("Adding [{0}] to managed directories", directory);
          
          directory = canonicalize(directory);
@@ -1269,7 +1272,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     };
     
     /** A future that delegates on another future, occasionally. */
-    private class PendingFuture extends FutureTask<FileDesc> {     
+    private class PendingFuture extends ListeningFutureTask<FileDesc> {
         public PendingFuture() {
             super(EMPTY_CALLABLE);
         }

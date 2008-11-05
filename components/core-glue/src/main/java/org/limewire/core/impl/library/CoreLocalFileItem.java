@@ -11,7 +11,6 @@ import java.util.StringTokenizer;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.search.MediaTypeConverter;
@@ -125,7 +124,7 @@ class CoreLocalFileItem implements LocalFileItem {
         return getPropertiesMap().get(key);
     }
 
-    public FileMetaData offer(FileOfferer fileOfferer) {
+    public FileMetaData toMetadata() {
         FileDetails details = getFileDetails();
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
         fileMetaData.setCreateTime(new Date(details.getCreationTime()));
@@ -135,8 +134,6 @@ class CoreLocalFileItem implements LocalFileItem {
         fileMetaData.setName(details.getFileName());
         fileMetaData.setSize(details.getSize());
         fileMetaData.setURNs(details.getUrns());
-        fileOfferer.offerFile(fileMetaData);
-
         return fileMetaData;
     }
 

@@ -155,14 +155,14 @@ public class FileManagerTestUtils {
     }
 
     public static List<FileDesc> assertLoads(ManagedFileList managedList, long timeout, TimeUnit unit) throws Exception {
-        Future<List<Future<FileDesc>>> loadFuture = ((ManagedFileListImpl) managedList).loadManagedFiles();
+        Future<? extends List<? extends Future<FileDesc>>> loadFuture = ((ManagedFileListImpl) managedList).loadManagedFiles();
         return assertFutureListFinishes(loadFuture, timeout, unit);
     }
     
-    public static List<FileDesc> assertFutureListFinishes(Future<List<Future<FileDesc>>> future, long timeout, TimeUnit unit) throws Exception {
+    public static List<FileDesc> assertFutureListFinishes(Future<? extends List<? extends Future<FileDesc>>> future, long timeout, TimeUnit unit) throws Exception {
         long left = unit.toNanos(timeout);
         long start = System.nanoTime();
-        List<Future<FileDesc>> futures = future.get(timeout, unit);
+        List<? extends Future<FileDesc>> futures = future.get(timeout, unit);
         left -= System.nanoTime() - start;
         if(left <= 0) {
             throw new TimeoutException("timed out waiting for futures to load");
@@ -171,7 +171,7 @@ public class FileManagerTestUtils {
         }
     }
     
-    private static List<FileDesc> waitForFutures(List<Future<FileDesc>> futures, long timeout, TimeUnit unit) throws Exception {
+    private static List<FileDesc> waitForFutures(List<? extends Future<FileDesc>> futures, long timeout, TimeUnit unit) throws Exception {
         List<FileDesc> fdList = new ArrayList<FileDesc>();
         long left = unit.toNanos(timeout);
         for(Future<FileDesc> future : futures) {

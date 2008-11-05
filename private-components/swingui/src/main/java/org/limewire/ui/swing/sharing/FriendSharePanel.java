@@ -242,8 +242,8 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
                 sharingFancyPanel.setModel(filteredList, fileList);         
             
             if(dropTarget == null) {
-                dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList, true);
-                emptyDropTarget = new ShareDropTarget(emptyPanel, fileList, true);                
+                dropTarget = new ShareDropTarget(FriendSharePanel.this, fileList);
+                emptyDropTarget = new ShareDropTarget(emptyPanel, fileList);                
             } else {
                 dropTarget.setModel(fileList);
                 emptyDropTarget.setModel(fileList);

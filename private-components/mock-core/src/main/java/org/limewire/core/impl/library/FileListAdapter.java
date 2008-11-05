@@ -50,6 +50,11 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
     }
     
     @Override
+    public void addFolder(File folder) {
+        
+    }
+    
+    @Override
     public void addFile(File file) {
         eventList.add(new MockLocalFileItem(file.getName(), 1000,12345,23456, 0,0, Category.IMAGE));
     }

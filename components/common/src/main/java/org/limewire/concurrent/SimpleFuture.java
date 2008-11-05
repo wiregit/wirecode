@@ -1,14 +1,16 @@
 package org.limewire.concurrent;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
+
 /** A future that is designed to return what is passed into its constructor. */
-public class SimpleFuture<T> implements Future<T> {
+public class SimpleFuture<T> implements ListeningFuture<T> {
     
     private final T t;
-    private final Throwable exception;
+    private final ExecutionException exception;
     
     public SimpleFuture(T t) {
         this.t = t;
@@ -17,7 +19,7 @@ public class SimpleFuture<T> implements Future<T> {
     
     public SimpleFuture(Throwable throwable) {
         this.t = null;
-        this.exception = throwable;
+        this.exception = new ExecutionException(throwable);
     }
 
     @Override
@@ -28,7 +30,7 @@ public class SimpleFuture<T> implements Future<T> {
     @Override
     public T get() throws ExecutionException {
         if(exception != null) {
-            throw new ExecutionException(exception);
+            throw exception;
         } else {
             return t;
         }
@@ -37,7 +39,7 @@ public class SimpleFuture<T> implements Future<T> {
     @Override
     public T get(long timeout, TimeUnit unit) throws ExecutionException {
         if(exception != null) {
-            throw new ExecutionException(exception);
+            throw exception;
         } else {
             return t;
         }
@@ -51,6 +53,11 @@ public class SimpleFuture<T> implements Future<T> {
     @Override
     public boolean isDone() {
         return true;
+    }
+    
+    @Override
+    public void addFutureListener(EventListener<FutureEvent<T>> listener) {
+        EventListenerList.dispatch(listener, FutureEvent.createEvent(this));
     }
 
 }

@@ -12,6 +12,16 @@ import org.limewire.util.Objects;
 
 /**
  * Maintains event listeners and broadcasts events to all listeners.
+ * <p>
+ * The annotations {@link SwingEDTEvent} and {@link BlockingEvent} can be added
+ * to implementations of {@link EventListener#handleEvent(Object)} in order to 
+ * allow those events to be dispatched on the EDT thread or a new thread.
+ * <p>
+ * If classes want to delegate implementations of {@link EventListener}, it is
+ * important that the delegate listener's <code>handleEvent(E)</code> method
+ * is called via {@link EventListenerList#dispatch(EventListener, Object)}.  This
+ * ensures that the event is dispatched appropriately, according to the 
+ * annotation on the delegate listener.
  */
 public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E> {
     
@@ -25,6 +35,16 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
     
     public EventListenerList(Class loggerKey) {
         log = LogFactory.getLog(loggerKey); 
+    }
+    
+    /**
+     * Dispatches the event to the listener. This scans the listener for
+     * annotations and dispatches in the correct thread, according to the
+     * annotation.
+     */
+    public static <E> void dispatch(EventListener<E> listener, E event) {
+        EventListener<E> proxy = new ListenerProxy<E>(Objects.nonNull(listener, "listener"));
+        proxy.handleEvent(event);
     }
     
     /** Adds the listener. */
