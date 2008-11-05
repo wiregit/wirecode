@@ -60,34 +60,66 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Override
     public PresenceLibrary addPresenceLibrary(FriendPresence presence) {
-        FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
-        return friendLibrary.getOrCreatePresenceLibrary(presence);
+        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
+        lock.lock();
+        try {
+            FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
+            Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
+            friendLibLock.lock();
+            try {
+                return friendLibrary.getOrCreatePresenceLibrary(presence);
+            } finally {
+                friendLibLock.unlock();
+            }  
+        } finally {
+            lock.unlock();
+        }
     }
     
     @Override
     public void removeFriendLibrary(Friend friend) {
-        FriendLibraryImpl friendLibrary = getFriendLibrary(friend);
-        Lock lock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
+        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
         lock.lock();
-        while(friendLibrary.allPresenceLibraries.size() > 0) {
-            friendLibrary.removePresenceLibrary(friendLibrary.allPresenceLibraries.get(0).getPresence());
+        try {
+            FriendLibraryImpl friendLibrary = getFriendLibrary(friend);
+            Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
+            friendLibLock.lock();
+            try {
+                while(friendLibrary.allPresenceLibraries.size() > 0) {
+                    friendLibrary.removePresenceLibrary(friendLibrary.allPresenceLibraries.get(0).getPresence());
+                }
+                removeFriendLibrary(friendLibrary);
+            } finally {
+                friendLibLock.unlock();    
+            }                 
+        } finally {
+            lock.unlock();
         }
-        lock.unlock();
-        removeFriendLibrary(friendLibrary);
     }
     
     @Override
     public void removePresenceLibrary(FriendPresence presence) {
-        FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
-        if (friendLibrary != null) {
-            friendLibrary.removePresenceLibrary(presence);
-            // TODO race condition
-            if (friendLibrary.size() == 0) {
-                removeFriendLibrary(friendLibrary);
+        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
+        lock.lock();
+        try {
+            FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
+            if (friendLibrary != null) {
+                Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
+                friendLibLock.lock();
+                try {
+                    friendLibrary.removePresenceLibrary(presence); 
+                    if (friendLibrary.size() == 0) {
+                        removeFriendLibrary(friendLibrary);
+                    }
+                } finally {
+                    friendLibLock.unlock();    
+                }
             }
-        }
+        } finally {
+            lock.unlock();
+        }                       
     }
-    
+
     private FriendLibraryImpl findFriendLibrary(Friend friend) {
         for(FriendLibrary library : allFriendLibraries) {
             if(library.getFriend().getId().equals(friend.getId())) {
@@ -98,19 +130,13 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
 
     private FriendLibraryImpl getOrCreateFriendLibrary(Friend friend) {
-        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
-        lock.lock();
-        try {
-            FriendLibraryImpl library = findFriendLibrary(friend);
-            if(library == null) {
-                library = new FriendLibraryImpl(friend);
-                library.commit();
-                allFriendLibraries.add(library);
-            }
-            return library;
-        } finally {
-            lock.unlock();
+        FriendLibraryImpl library = findFriendLibrary(friend);
+        if(library == null) {
+            library = new FriendLibraryImpl(friend);
+            library.commit();
+            allFriendLibraries.add(library);
         }
+        return library;
     }
 
     @Override
@@ -129,14 +155,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
 
     private void removeFriendLibrary(FriendLibraryImpl friendLibrary) {
-        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
-        lock.lock();
-        try {
-            allFriendLibraries.remove(friendLibrary);
-            friendLibrary.dispose();
-        } finally {
-            lock.unlock();
-        }
+        allFriendLibraries.remove(friendLibrary);
+        friendLibrary.dispose();
     }
 
     private static class FriendLibraryImpl implements FriendLibrary {
@@ -228,37 +248,22 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         private PresenceLibraryImpl getOrCreatePresenceLibrary(FriendPresence presence) {
-            PresenceLibraryImpl library;
-            
-            Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
-            lock.lock();
-            try {
-                library = findPresenceLibrary(presence);
-                if(library == null) {
-                    library = new PresenceLibraryImpl(presence, createMemberList());
-                    allPresenceLibraries.add(library);
-                    addMemberList(library);
-                    library.commit();
-                }
-            } finally {
-                lock.unlock();
-            }
-            
+            PresenceLibraryImpl library = findPresenceLibrary(presence);
+            if(library == null) {
+                library = new PresenceLibraryImpl(presence, createMemberList());
+                allPresenceLibraries.add(library);
+                addMemberList(library);
+                library.commit();
+            }            
             return library;
         }
 
         private void removePresenceLibrary(FriendPresence presence) {
-            Lock lock = allPresenceLibraries.getReadWriteLock().writeLock();
-            lock.lock();
-            try {
-                PresenceLibraryImpl presenceLibrary = findPresenceLibrary(presence);
-                if(presenceLibrary != null) {
-                    allPresenceLibraries.remove(presenceLibrary);
-                    presenceLibrary.dispose();
-                    removeMemberList(presenceLibrary);
-                }
-            } finally {
-                lock.unlock();
+            PresenceLibraryImpl presenceLibrary = findPresenceLibrary(presence);
+            if(presenceLibrary != null) {
+                allPresenceLibraries.remove(presenceLibrary);
+                presenceLibrary.dispose();
+                removeMemberList(presenceLibrary);
             }
         }
 
