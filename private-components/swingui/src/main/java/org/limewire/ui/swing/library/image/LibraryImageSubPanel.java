@@ -101,6 +101,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);
         renderer.setOpaque(false);
         JComponent buttonRenderer = new ShareTableRendererEditor(null);
+        buttonRenderer.setOpaque(false);
         buttonRenderer.setPreferredSize(buttonPanelDimension);
         buttonRenderer.setSize(buttonPanelDimension);
         renderer.setButtonComponent(buttonRenderer);
