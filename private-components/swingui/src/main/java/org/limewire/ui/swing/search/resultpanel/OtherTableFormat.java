@@ -24,7 +24,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public OtherTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Extension"), tr("Type"), tr("Size"), "",
-                tr("Relevance"), tr("People with File"), tr("Number of Files"));
+                tr("Relevance"), tr("People with File"));
     }
 
     @Override
