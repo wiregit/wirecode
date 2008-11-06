@@ -2,39 +2,28 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 
-import javax.swing.JComponent;
+import org.jdesktop.swingx.painter.Painter;
 
-import org.jdesktop.swingx.painter.CompoundPainter;
-import org.jdesktop.swingx.painter.RectanglePainter;
-import org.jdesktop.swingx.painter.AbstractAreaPainter.Style;
-
-public class SearchTabSelectionPainter extends CompoundPainter<JComponent> {
+public class SearchTabSelectionPainter implements Painter {
     
     
     public SearchTabSelectionPainter() {
-        RectanglePainter background = new RectanglePainter();
-        background.setStyle(Style.FILLED);
-        background.setFillPaint(Color.decode("#787878"));
-        background.setRoundHeight(10);
-        background.setRoundWidth(10);
-        background.setFillHorizontal(true);
-        background.setFillVertical(true);
-        background.setRounded(true);
-        background.setPaintStretched(true);
         
-        RectanglePainter gradient = new RectanglePainter();
-        gradient.setStyle(Style.FILLED);
-        gradient.setFillPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
-        gradient.setRoundHeight(10);
-        gradient.setRoundWidth(10);
-        gradient.setFillHorizontal(true);
-        gradient.setFillVertical(true);
-        gradient.setRounded(true);
-        gradient.setPaintStretched(true);
-        
-        setPainters(background,
-                    gradient);
-
     }
+
+    @Override
+    public void paint(Graphics2D g, Object object, int width, int height) {
+        Area compound = new Area(new RoundRectangle2D.Float(0, 0, width-1, height-1, 10, 10));
+        
+        compound.add(new Area(new Rectangle2D.Float(0,height-11,width-1,height-1)));
+        
+        g.setPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
+        g.fill(compound);
+    }
+
 }
