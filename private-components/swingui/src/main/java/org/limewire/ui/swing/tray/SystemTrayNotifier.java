@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -120,6 +121,8 @@ class SystemTrayNotifier implements TrayNotifier {
 	
 	@Override
 	public boolean isExitEvent(EventObject event) {
+	    if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue())
+	        return true;
 	    if(event != null && event.getSource() instanceof MenuItem) {
 	        MenuItem item = (MenuItem)event.getSource();
 	        return item.getParent() == popupMenu;
