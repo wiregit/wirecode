@@ -3,7 +3,6 @@ package org.limewire.concurrent;
 import java.awt.EventQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,7 +15,7 @@ import org.limewire.util.BaseTestCase;
 
 public class ListeningFutureTaskTest  extends BaseTestCase {
     
-    private ExecutorService q;
+    private ListeningExecutorService q;
     
 
     public ListeningFutureTaskTest(String name) {
@@ -38,8 +37,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -60,8 +58,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);      
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -85,8 +82,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);        
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -106,8 +102,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensBeforeCompletesCancelsDuringRun() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);      
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -130,8 +125,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);      
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -154,8 +148,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensAfterCompletes() throws Exception {
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         waitForFuture(task); 
         
         Listener listener = new Listener();
@@ -171,8 +164,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensAfterCompletesWithException() throws Exception {
         Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);   
+        ListeningFuture<Object> task = q.submit(runner, result); 
         waitForFuture(task);       
         
         Listener listener = new Listener();
@@ -194,8 +186,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         
         task.cancel(false);
         waitForFuture(task);
@@ -215,8 +206,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensAfterCompletesCancelsDuringRun() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(true);
         waitForFuture(task);
@@ -235,8 +225,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);      
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(false);
         waitForFuture(task);        
@@ -258,8 +247,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);     
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -280,8 +268,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);       
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -305,8 +292,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);        
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -326,8 +312,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensBeforeCompletesCancelsDuringRun() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);     
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -350,8 +335,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);       
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -374,8 +358,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensAfterCompletes() throws Exception {
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         waitForFuture(task); 
         
         AnnotatedListener listener = new AnnotatedListener();
@@ -392,8 +375,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensAfterCompletesWithException() throws Exception {
         Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);   
+        ListeningFuture<Object> task = q.submit(runner, result);  
         waitForFuture(task);       
         
         AnnotatedListener listener = new AnnotatedListener();
@@ -416,8 +398,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         
         Runner runner = new Runner();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         
         task.cancel(false);
         waitForFuture(task);
@@ -438,8 +419,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensAfterCompletesCancelsDuringRun() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);
+        ListeningFuture<Object> task = q.submit(runner, result);
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(true);
         waitForFuture(task);
@@ -459,8 +439,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
     public void testAnnotatedListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         RunWaiter runner = new RunWaiter();
         Object result = new Object();
-        ListeningFutureTask<Object> task = new ListeningFutureTask<Object>(runner, result);
-        q.execute(task);        
+        ListeningFuture<Object> task = q.submit(runner, result);    
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(false);
         waitForFuture(task);        

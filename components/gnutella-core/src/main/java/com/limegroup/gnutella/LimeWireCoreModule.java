@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
@@ -364,10 +365,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         
-        bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
+        bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
-        bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);
-        bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
+        bindAll(Names.named("dhtExecutor"), ListeningExecutorService.class, DHTExecutorProvider.class, Executor.class, ExecutorService.class);
+        bindAll(Names.named("messageExecutor"), ListeningExecutorService.class, MessageExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
                         
         // These are bound because they are Singletons & Services, and must be started.
@@ -410,9 +411,9 @@ public class LimeWireCoreModule extends AbstractModule {
     }
     
     @Singleton
-    private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+    private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
         @Override
-        protected ExecutorService createObject() {
+        protected ListeningExecutorService createObject() {
             return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
         }
     }
@@ -426,17 +427,17 @@ public class LimeWireCoreModule extends AbstractModule {
     }
     
     @Singleton
-    private static class MessageExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+    private static class MessageExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
         @Override
-        protected ExecutorService createObject() {
+        protected ListeningExecutorService createObject() {
             return ExecutorsHelper.newProcessingQueue("Message-Executor");
         }
     }
 
     @Singleton
-    private static class DHTExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+    private static class DHTExecutorProvider extends AbstractLazySingletonProvider<ListeningExecutorService> {
         @Override
-        protected ExecutorService createObject() {
+        protected ListeningExecutorService createObject() {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }
     }    

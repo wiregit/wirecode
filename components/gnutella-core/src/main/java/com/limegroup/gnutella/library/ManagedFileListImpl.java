@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -26,9 +25,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
-import org.limewire.concurrent.ListeningRunnableFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
@@ -60,7 +59,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     private final UrnCache urnCache;
     private final FileDescFactory fileDescFactory; 
-    private final ExecutorService fileLoader;
+    private final ListeningExecutorService fileLoader;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -169,9 +168,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * to get its result.
      */
     <V> ListeningFuture<V> submit(Callable<V> callable) {
-        ListeningRunnableFuture<V> future = new ListeningFutureTask<V>(callable);
-        fileLoader.execute(future);
-        return future;
+        return fileLoader.submit(callable);
     }
     
     /** Initializes all listeners. */
