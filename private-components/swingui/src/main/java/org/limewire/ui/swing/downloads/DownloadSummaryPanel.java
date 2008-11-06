@@ -31,7 +31,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
-import org.limewire.ui.swing.downloads.table.DownloadTableModel;
+import org.limewire.ui.swing.downloads.table.HorizontalDownloadTableModel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -153,7 +153,7 @@ public class DownloadSummaryPanel extends JPanel {
 		
 		chokeList = GlazedListsFactory.rangeList(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-		table = new JTable(new DownloadTableModel(chokeList));
+		table = new JTable(new HorizontalDownloadTableModel(sortedList));
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
