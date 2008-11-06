@@ -1,43 +1,56 @@
 package org.limewire.concurrent;
 
-import java.awt.EventQueue;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
+
+import org.limewire.service.ErrorCallback;
+import org.limewire.service.ErrorCallbackStub;
+import org.limewire.service.ErrorService;
 
 import junit.framework.Test;
 
-import org.limewire.listener.EventListener;
-import org.limewire.listener.SwingEDTEvent;
-import org.limewire.util.BaseTestCase;
-
-public class ListeningFutureTaskTest  extends BaseTestCase {
+public class ListeningFutureSimpleTimerTest extends ListeningFutureTaskTest {
     
-    protected ListeningExecutorService q;
-    
+    private ScheduledListeningExecutorService sq;
+    private ErrorCallback oldService;
+    private ErrorCallbackStub serviceStub;
 
-    public ListeningFutureTaskTest(String name) {
+    public ListeningFutureSimpleTimerTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(ListeningFutureTaskTest.class);
+        return buildTestSuite(ListeningFutureSimpleTimerTest.class);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        sq = new SimpleTimer(true);
+        q = sq;
+        
+        oldService = ErrorService.getErrorCallback();
+        serviceStub = new ErrorCallbackStub();
+        ErrorService.setErrorCallback(serviceStub);
     }
     
     @Override
-    protected void setUp() throws Exception {
-        q = ExecutorsHelper.newProcessingQueue("PQ");
+    protected void tearDown() throws Exception {
+        ErrorService.setErrorCallback(oldService);
+        assertEquals(0, serviceStub.getExceptionCount());
     }
     
-    public void testListensBeforeCompletes() throws Exception {
+    public void testIsSimpleTimer() {
+        assertInstanceof(SimpleTimer.class, q);
+    }
+    
+    public void testScheduledListensBeforeCompletes() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -52,13 +65,13 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(runner.thread, listener.thread);
     }
     
-    public void testListensBeforeCompletesWithException() throws Exception {
+    public void testScheduledListensBeforeCompletesWithException() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);      
+        Caller runner = new Caller(result, true);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);   
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -74,15 +87,19 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals("Boo!", ee.getCause().getMessage());
         
         assertEquals(runner.thread, listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertEquals("Boo!", serviceStub.getException(0).getMessage());
+        serviceStub.clear();
     }
     
-    public void testListensBeforeCompletesCancelsWithoutRun() throws Exception {
+    public void testScheduledListensBeforeCompletesCancelsWithoutRun() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);        
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);       
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -99,10 +116,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(Thread.currentThread(), listener.thread); // from cancel thread.
     }
     
-    public void testListensBeforeCompletesCancelsDuringRun() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledListensBeforeCompletesCancelsDuringRun() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);      
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);    
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -120,12 +137,16 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertTrue(runner.interrupted);
         
         assertEquals(Thread.currentThread(), listener.thread); // from cancel thread.
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertInstanceof(InterruptedException.class, serviceStub.getException(0).getCause());
+        serviceStub.clear();
     }
     
-    public void testListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);      
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);    
         
         Listener listener = new Listener();
         task.addFutureListener(listener);
@@ -145,10 +166,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(Thread.currentThread(), listener.thread); // from cancel thread.
     }
     
-    public void testListensAfterCompletes() throws Exception {
-        Runner runner = new Runner();
+    public void testScheduledListensAfterCompletes() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         waitForFuture(task); 
         
         Listener listener = new Listener();
@@ -161,10 +182,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(Thread.currentThread(), listener.thread);
     }
     
-    public void testListensAfterCompletesWithException() throws Exception {
-        Runner runner = new Runner(true);
+    public void testScheduledListensAfterCompletesWithException() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result); 
+        Caller runner = new Caller(result, true);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         waitForFuture(task);       
         
         Listener listener = new Listener();
@@ -178,15 +199,19 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals("Boo!", ee.getCause().getMessage());
         
         assertEquals(Thread.currentThread(), listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertEquals("Boo!", serviceStub.getException(0).getMessage());
+        serviceStub.clear();
     }
     
-    public void testListenAfterCompletesCancelsWithoutRun() throws Exception {
+    public void testScheduledListenAfterCompletesCancelsWithoutRun() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         
         task.cancel(false);
         waitForFuture(task);
@@ -203,10 +228,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(Thread.currentThread(), listener.thread);
     }
     
-    public void testListensAfterCompletesCancelsDuringRun() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledListensAfterCompletesCancelsDuringRun() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS); 
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(true);
         waitForFuture(task);
@@ -220,12 +245,16 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertTrue(runner.interrupted);
         
         assertEquals(Thread.currentThread(), listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertInstanceof(InterruptedException.class, serviceStub.getException(0).getCause());
+        serviceStub.clear();
     }
     
-    public void testListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);      
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS); 
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(false);
         waitForFuture(task);        
@@ -241,13 +270,13 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(Thread.currentThread(), listener.thread);
     }
     
-    public void testAnnotatedListensBeforeCompletes() throws Exception {
+    public void testScheduledAnnotatedListensBeforeCompletes() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);     
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);      
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -262,13 +291,13 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(dispatchThread(), listener.thread);
     }
     
-    public void testAnnotatedListensBeforeCompletesWithException() throws Exception {
+    public void testScheduledAnnotatedListensBeforeCompletesWithException() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner(true);
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);       
+        Caller runner = new Caller(result, true);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 100, TimeUnit.MILLISECONDS);  
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -284,15 +313,19 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals("Boo!", ee.getCause().getMessage());
         
         assertEquals(dispatchThread(), listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertEquals("Boo!", serviceStub.getException(0).getMessage());
+        serviceStub.clear();
     }
     
-    public void testAnnotatedListensBeforeCompletesCancelsWithoutRun() throws Exception {
+    public void testScheduledAnnotatedListensBeforeCompletesCancelsWithoutRun() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);        
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);  
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -309,10 +342,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(dispatchThread(), listener.thread); // from cancel thread.
     }
     
-    public void testAnnotatedListensBeforeCompletesCancelsDuringRun() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledAnnotatedListensBeforeCompletesCancelsDuringRun() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);     
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -330,12 +363,16 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertTrue(runner.interrupted);
         
         assertEquals(dispatchThread(), listener.thread); // from cancel thread.
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertInstanceof(InterruptedException.class, serviceStub.getException(0).getCause());
+        serviceStub.clear();
     }
     
-    public void testAnnotatedListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledAnnotatedListensBeforeCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);       
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);  
         
         AnnotatedListener listener = new AnnotatedListener();
         task.addFutureListener(listener);
@@ -355,10 +392,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(dispatchThread(), listener.thread); // from cancel thread.
     }
     
-    public void testAnnotatedListensAfterCompletes() throws Exception {
-        Runner runner = new Runner();
+    public void testScheduledAnnotatedListensAfterCompletes() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         waitForFuture(task); 
         
         AnnotatedListener listener = new AnnotatedListener();
@@ -372,10 +409,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(dispatchThread(), listener.thread);
     }
     
-    public void testAnnotatedListensAfterCompletesWithException() throws Exception {
-        Runner runner = new Runner(true);
+    public void testScheduledAnnotatedListensAfterCompletesWithException() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);  
+        Caller runner = new Caller(result, true);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         waitForFuture(task);       
         
         AnnotatedListener listener = new AnnotatedListener();
@@ -390,15 +427,19 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals("Boo!", ee.getCause().getMessage());
         
         assertEquals(dispatchThread(), listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertEquals("Boo!", serviceStub.getException(0).getMessage());
+        serviceStub.clear();
     }
     
-    public void testAnnotatedListenAfterCompletesCancelsWithoutRun() throws Exception {
+    public void testScheduledAnnotatedListenAfterCompletesCancelsWithoutRun() throws Exception {
         RunWaiter waiter = new RunWaiter();
-        q.execute(waiter);
+        sq.execute(waiter);
         
-        Runner runner = new Runner();
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        Caller runner = new Caller(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         
         task.cancel(false);
         waitForFuture(task);
@@ -416,10 +457,10 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertEquals(dispatchThread(), listener.thread);
     }
     
-    public void testAnnotatedListensAfterCompletesCancelsDuringRun() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledAnnotatedListensAfterCompletesCancelsDuringRun() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(true);
         waitForFuture(task);
@@ -434,12 +475,16 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertTrue(runner.interrupted);
         
         assertEquals(dispatchThread(), listener.thread);
+        
+        assertEquals(1, serviceStub.getExceptionCount());
+        assertInstanceof(InterruptedException.class, serviceStub.getException(0).getCause());
+        serviceStub.clear();
     }
     
-    public void testAnnotatedListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
-        RunWaiter runner = new RunWaiter();
+    public void testScheduledAnnotatedListensAfterCompletesCancelsDuringRunWithoutAllowedCausesCancelToo() throws Exception {
         Object result = new Object();
-        ListeningFuture<Object> task = q.submit(runner, result);    
+        CallWaiter runner = new CallWaiter(result);
+        ListeningFuture<Object> task = sq.schedule((Callable<Object>)runner, 500, TimeUnit.MILLISECONDS);
         runner.enter.await(1, TimeUnit.SECONDS);
         task.cancel(false);
         waitForFuture(task);        
@@ -454,92 +499,38 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertFalse(runner.interrupted);
         
         assertEquals(dispatchThread(), listener.thread);
+    } 
+    
+    private class CallWaiter extends RunWaiter implements Callable<Object> {
+        private final Object result;
+
+        public CallWaiter(Object result) {
+            this.result = result;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            run();
+            return result;
+        }
     }
     
-    protected Thread dispatchThread() throws Exception {
-        final AtomicReference<Thread> threadRef = new AtomicReference<Thread>();
-        EventQueue.invokeAndWait(new Runnable() {
-            @Override
-            public void run() {
-                threadRef.set(Thread.currentThread());
-            }
-        });
-        assertNotNull(threadRef.get());
-        return threadRef.get();
-    }
-    
-    protected void waitForFuture(Future<?> future) {
-        try {
-            future.get(1, TimeUnit.SECONDS);
-        } catch(Throwable ignored) {}
-    }
-    
-    protected static class AnnotatedListener implements EventListener<FutureEvent<Object>> {
-        protected final CountDownLatch latch = new CountDownLatch(1);
-        protected volatile FutureEvent<Object> event;
-        protected volatile Thread thread;
+    private class Caller extends Runner implements Callable<Object> {
+        private final Object result;
+        
+        public Caller(Object result) {
+            this(result, false);
+        }
+        
+        public Caller(Object result, boolean throwException) {
+            super(throwException);
+            this.result = result;
+        }
         
         @Override
-        @SwingEDTEvent
-        public void handleEvent(FutureEvent<Object> event) {
-            assert this.event == null;
-            this.thread = Thread.currentThread();
-            this.event = event;
-            latch.countDown();
+        public Object call() throws Exception {
+            run();
+            return result;
         }
-    }
-    
-    protected static class Listener implements EventListener<FutureEvent<Object>> {
-        protected final CountDownLatch latch = new CountDownLatch(1);
-        protected volatile FutureEvent<Object> event;
-        protected volatile Thread thread;
-        
-        @Override
-        public void handleEvent(FutureEvent<Object> event) {
-            assert this.event == null;
-            this.event = event;
-            this.thread = Thread.currentThread();
-            latch.countDown();
-        }
-    }
-    
-    protected static class RunWaiter implements Runnable {
-        protected CountDownLatch enter = new CountDownLatch(1);
-        protected CountDownLatch latch = new CountDownLatch(1);
-        protected volatile boolean interrupted;
-        
-        @Override
-        public void run() {
-            enter.countDown();
-            
-            try {
-                latch.await();
-            } catch(InterruptedException ie) {
-                interrupted = true;
-                throw new RuntimeException(ie);
-            }
-        }
-    }
-    
-    protected static class Runner implements Runnable {
-        private final boolean throwException;
-        protected volatile Thread thread;
-        
-        public Runner() {
-            this(false);
-        }
-        
-        public Runner(boolean throwException) {
-            this.throwException = throwException;
-        }        
-        
-        @Override
-        public void run() {
-            thread = Thread.currentThread();
-            if(throwException) {
-                throw new RuntimeException("Boo!");
-            }
-        }
-    }
-    
+    }    
 }

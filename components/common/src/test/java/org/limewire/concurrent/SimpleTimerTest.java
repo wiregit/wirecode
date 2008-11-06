@@ -147,5 +147,5 @@ public class SimpleTimerTest extends BaseTestCase {
         long get(int i) {
             return _runs.get(i);
         }
-    }	    
+    }
 }

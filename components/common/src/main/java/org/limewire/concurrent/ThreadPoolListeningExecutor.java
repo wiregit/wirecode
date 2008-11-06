@@ -17,37 +17,37 @@ import org.limewire.listener.EventListener;
  * This allows an {@link EventListener} of {@link FutureEvent} to be added to
  * the Futures with {@link ListeningFuture#addFutureListener(EventListener)}.
  */
-public class ListeningThreadPoolExecutor extends ThreadPoolExecutor implements
+public class ThreadPoolListeningExecutor extends ThreadPoolExecutor implements
         ListeningExecutorService {
 
-    public ListeningThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+    public ThreadPoolListeningExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
             TimeUnit unit, BlockingQueue<Runnable> workQueue, RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
     }
 
-    public ListeningThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+    public ThreadPoolListeningExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
             TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory,
             RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
     }
 
-    public ListeningThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+    public ThreadPoolListeningExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
             TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
     }
 
-    public ListeningThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+    public ThreadPoolListeningExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime,
             TimeUnit unit, BlockingQueue<Runnable> workQueue) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
     }
 
     @Override
-    protected <T> ListeningRunnableFuture<T> newTaskFor(Callable<T> callable) {
+    protected <T> RunnableListeningFuture<T> newTaskFor(Callable<T> callable) {
         return new ListeningFutureTask<T>(callable);
     }
 
     @Override
-    protected <T> ListeningRunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+    protected <T> RunnableListeningFuture<T> newTaskFor(Runnable runnable, T value) {
         return new ListeningFutureTask<T>(runnable, value);
     }
 

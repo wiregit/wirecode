@@ -73,8 +73,8 @@ public class ExecutorsHelper {
      * 
      * @param factory the factory used for creating a new processing thread 
      */
-    public static ListeningThreadPoolExecutor newSingleThreadExecutor(ThreadFactory factory) {
-        ListeningThreadPoolExecutor tpe = new ListeningThreadPoolExecutor(1, 1,
+    public static ThreadPoolListeningExecutor newSingleThreadExecutor(ThreadFactory factory) {
+        ThreadPoolListeningExecutor tpe = new ThreadPoolListeningExecutor(1, 1,
                 5L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 factory);
@@ -91,7 +91,7 @@ public class ExecutorsHelper {
      */
     public static ListeningExecutorService newThreadPool(String name) {
         return unconfigurableExecutorService(
-                new ListeningThreadPoolExecutor(0, Integer.MAX_VALUE,
+                new ThreadPoolListeningExecutor(0, Integer.MAX_VALUE,
                         5L, TimeUnit.SECONDS,
                         new SynchronousQueue<Runnable>(),
                         daemonThreadFactory(name)));
@@ -108,7 +108,7 @@ public class ExecutorsHelper {
      */
     public static ListeningExecutorService newThreadPool(ThreadFactory factory) {
         return unconfigurableExecutorService(
-                new ListeningThreadPoolExecutor(0, Integer.MAX_VALUE,
+                new ThreadPoolListeningExecutor(0, Integer.MAX_VALUE,
                         5L, TimeUnit.SECONDS,
                         new SynchronousQueue<Runnable>(),
                         factory));
@@ -120,7 +120,7 @@ public class ExecutorsHelper {
      * until an executing item is finished and then be processed.
      */
     public static ExecutorService newFixedSizeThreadPool(int size, String name) {
-        ListeningThreadPoolExecutor tpe =  new ListeningThreadPoolExecutor(size, size,
+        ThreadPoolListeningExecutor tpe =  new ThreadPoolListeningExecutor(size, size,
                 5L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 daemonThreadFactory(name));

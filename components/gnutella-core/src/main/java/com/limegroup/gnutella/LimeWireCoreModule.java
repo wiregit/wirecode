@@ -8,6 +8,7 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
@@ -366,7 +367,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
-        bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
+        bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
         bindAll(Names.named("dhtExecutor"), ListeningExecutorService.class, DHTExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("messageExecutor"), ListeningExecutorService.class, MessageExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
@@ -419,9 +420,9 @@ public class LimeWireCoreModule extends AbstractModule {
     }
     
     @Singleton
-    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledListeningExecutorService> {
         @Override
-        protected ScheduledExecutorService createObject() {
+        protected ScheduledListeningExecutorService createObject() {
             return new SimpleTimer(true);
         }
     }
