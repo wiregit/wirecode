@@ -215,7 +215,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
     
     @Override
-    public void connect(Address addr, int timeout, ConnectObserver observer) {
+    public void connect(Address addr, ConnectObserver observer) {
         FirewalledAddress address = (FirewalledAddress)addr;
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(address, SPECIAL_INDEX, "fake",
@@ -224,7 +224,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer, address);
         pushHandlers.add(handlerAdapter);
         sendPush(fakeRFD, new MultiShutdownableConnectObserverAdapter(observer));
-        scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
+        scheduleExpirerFor(handlerAdapter, 60 * 1000);
     }
     
     private void scheduleExpirerFor(final PushedSocketHandlerAdapter handlerAdapter, int timeout) {

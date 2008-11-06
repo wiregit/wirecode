@@ -721,7 +721,7 @@ public class DownloadWorker {
             // Start with a direct connect, fallback to a push connect.
             connectDirectly((Connectable)address, new DirectConnector(true));
         } else { 
-            socketsManager.connect(address, PUSH_CONNECT_TIME, new SocketsConnectObserver());
+            socketsManager.connect(address, new SocketsConnectObserver());
         }
     }
 

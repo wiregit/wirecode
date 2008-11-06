@@ -89,7 +89,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
             GUID guid = new GUID();
             Connectable hostAddress = new ConnectableImpl(new ConnectableImpl("localhost", 1111, false));
             FirewalledAddress address = new FirewalledAddress(new ConnectableImpl("0.0.0.0", 1, false), hostAddress, guid, proxies, 0);
-            pushDownloadManager.connect(address, 15 * 1000, observer);
+            pushDownloadManager.connect(address, observer);
             server.latch.await(2, TimeUnit.SECONDS);
             GiveWritingSocket socket = new GiveWritingSocket(guid, networkManager.getPort());
             Socket receivedSocket = observer.getSocket(5, TimeUnit.SECONDS);

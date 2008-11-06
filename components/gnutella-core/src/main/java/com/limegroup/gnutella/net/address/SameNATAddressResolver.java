@@ -114,7 +114,7 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
      * mark it as resolved.
      */
     @Override
-    public void resolve(Address addr, int timeout, AddressResolutionObserver observer) {
+    public void resolve(Address addr, AddressResolutionObserver observer) {
         FirewalledAddress address = (FirewalledAddress)addr;
         assert isBehindThisNAT(address) : "not behind same NAT: " + address;
         observer.resolved(address.getPrivateAddress());

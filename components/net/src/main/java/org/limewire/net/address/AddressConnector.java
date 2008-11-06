@@ -24,6 +24,6 @@ public interface AddressConnector {
      * Connects asynchronously to the given address and notifies 
      * <code>observer</code> of the established socket.
      */
-    void connect(Address address, int timeout, ConnectObserver observer);
+    void connect(Address address, ConnectObserver observer);
     
 }

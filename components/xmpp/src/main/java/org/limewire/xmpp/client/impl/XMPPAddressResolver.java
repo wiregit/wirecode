@@ -50,6 +50,7 @@ public class XMPPAddressResolver implements AddressResolver {
             XMPPAddress friendIdAddress = (XMPPAddress)address;
             boolean canResolve = getPresence(friendIdAddress) != null;
             LOG.debugf("could/could not resolve {0}: {1}", address, canResolve);
+            return canResolve;
         }
         return false;
     }
@@ -61,7 +62,7 @@ public class XMPPAddressResolver implements AddressResolver {
      * is not online for example
      */
     public FriendPresence getPresence(XMPPAddress address) {
-        String id = address.getFullId();
+        String id = address.getId();
         for (XMPPConnection connection : xmppService.getConnections()) {
             User user = connection.getUser(id);
             if (user != null) {
@@ -87,16 +88,16 @@ public class XMPPAddressResolver implements AddressResolver {
         if (!(presence instanceof FriendPresence)) {
             return  null;
         }
-        String originalId = address.getId();
+        String originalId = address.getFullId();
         int slash = originalId.indexOf('/');
         if (slash == -1) {
             LOG.debugf("no slash in full id: {0}", originalId);
             return null;
         }
-        // only look at the first 10 characters of the resource string, since jabber servers
+        // only look at the first 5 characters of the resource string, since jabber servers
         // add their own random characters
-        int toOffset = Math.min(originalId.length(), slash + 10);
-        if (originalId.startsWith(resourceId, toOffset)) {
+        int toOffset = Math.min(originalId.length(), slash + 5);
+        if (originalId.substring(0, toOffset).equals(resourceId.substring(0, toOffset))) {
             FriendPresence friendPresence = (FriendPresence)presence;
             // only return address if auth-token is available too, otherwise
             // the address is worthless still
@@ -108,7 +109,7 @@ public class XMPPAddressResolver implements AddressResolver {
     }
 
     @Override
-    public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
+    public void resolve(Address address, AddressResolutionObserver observer) {
         XMPPAddress xmppAddress = (XMPPAddress)address;
         FriendPresence resolvedPresence = getPresence(xmppAddress);
         if (resolvedPresence == null) {

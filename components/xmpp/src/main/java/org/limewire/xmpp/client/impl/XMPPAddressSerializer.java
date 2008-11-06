@@ -40,7 +40,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
     @Override
     public byte[] serialize(Address address) throws IOException {
         XMPPAddress xmppAddress = (XMPPAddress)address;
-        return StringUtils.toUTF8Bytes(xmppAddress.getId());
+        return StringUtils.toUTF8Bytes(xmppAddress.getFullId());
     }
 
 }

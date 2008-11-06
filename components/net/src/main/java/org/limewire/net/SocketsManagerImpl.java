@@ -162,18 +162,17 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     }
     
     @Override
-    public <T extends ConnectObserver> T connect(Address address, final int timeout, final T observer) {
+    public <T extends ConnectObserver> T connect(Address address, final T observer) {
         // feel free to rework this logic with more use cases that don't fit the model
         // for example we're only doing one cycle of address resolution, might have to 
         // be done iteratively if addresses are resolved to address that need more resolution
         if (address == null) { 
             throw new NullPointerException("address must not be null");
         }
-        AddressResolutionObserver proxy = new AddressResolutionObserver() {
+        resolve(address, new AddressResolutionObserver() {
             @Override
-            public void resolved(Address... addresses) {
-                MultiAddressConnector connector = new MultiAddressConnector(addresses, timeout, observer);
-                connector.connectNext();
+            public void resolved(Address address) {
+                connectUnresolved(address, observer);
             }
             @Override
             public void handleIOException(IOException iox) {
@@ -183,15 +182,14 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
             public void shutdown() {
                 observer.shutdown();
             }
-        };
-        resolve(address, timeout, proxy);
+        }); 
         return observer;
     }
     
-    private void connectUnresolved(Address address, int timeout, ConnectObserver observer) {
+    private void connectUnresolved(Address address, ConnectObserver observer) {
         AddressConnector connector = getConnector(address);
         if (connector != null) {
-            connector.connect(address, timeout, observer);
+            connector.connect(address, observer);
         } else {
             observer.handleIOException(new ConnectException("no connector ready to connect to: " + address));
             observer.shutdown();
@@ -199,60 +197,38 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     }
 
     @Override
-    public void resolve(Address address, int timeout, AddressResolutionObserver observer) {
+    public <T extends AddressResolutionObserver> T resolve(Address address, final T observer) {
         // feel free to rework this logic with more use cases that don't fit the model
         if (address == null) { 
             throw new NullPointerException("address must not be null");
         }
-        // this can also be changed to allow multiple resolvers to resolve the same
-        // address and re-resolve the resolved addresses too
         AddressResolver resolver = getResolver(address);
         if (resolver != null) {
-            resolver.resolve(address, timeout, observer);
+            resolver.resolve(address, new AddressResolutionObserver() {
+                @Override
+                public void resolved(Address address) {
+                    if (canResolve(address)) {
+                        resolve(address, this);
+                    } else {
+                        observer.resolved(address);
+                    }
+                }
+                @Override
+                public void handleIOException(IOException iox) {
+                    observer.handleIOException(iox);
+                }
+                @Override
+                public void shutdown() {
+                    observer.shutdown();
+                }
+            });
         } else {
             LOG.debugf("not resolver found for: {0}", address);
-            observer.resolved(address);
+            observer.handleIOException(new IOException(address + " cannot be resolved"));
         }
+        return observer;
     }
     
-    private class MultiAddressConnector implements ConnectObserver {
-
-        private final ConnectObserver delegate;
-        private final Address[] addresses;
-        private int index = 0;
-        private final int timeout;
-
-        public MultiAddressConnector(Address[] addresses, int timeout, ConnectObserver delegate) {
-            this.addresses = addresses;
-            this.timeout = timeout;
-            this.delegate = delegate;
-        }
-        
-        public void connectNext() {
-            connectUnresolved(addresses[index++], timeout, this);
-        }
-        
-        @Override
-        public void handleConnect(Socket socket) throws IOException {
-            delegate.handleConnect(socket);
-        }
-
-        @Override
-        public void handleIOException(IOException iox) {
-            if (index < addresses.length) {
-                connectNext();
-            } else {
-                delegate.handleIOException(iox);
-            }
-        }
-
-        @Override
-        public void shutdown() {
-            delegate.shutdown();
-        }
-        
-    }
-
     @Override
     public void registerConnector(AddressConnector connector) {
         addressConnectors.add(connector);

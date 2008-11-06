@@ -35,11 +35,11 @@ public class ConnectableConnector implements AddressConnector {
     }
 
     @Override
-    public void connect(Address address, int timeout, ConnectObserver observer) {
+    public void connect(Address address, ConnectObserver observer) {
         Connectable connectable = (Connectable)address;
         try {
             ConnectType type = connectable.isTLSCapable() && tlsManager.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
-            socketsManager.connect(connectable.getInetSocketAddress(), timeout, observer, type);
+            socketsManager.connect(connectable.getInetSocketAddress(), 10 * 1000, observer, type);
         } catch (IOException e) {
             observer.handleIOException(e);
         }
