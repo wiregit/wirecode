@@ -118,8 +118,28 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 .getCreationTimeAsLong(fd.getSHA1Urn()), fd.getFileSize(), ranges, 
                 verified, fd.getTTROOTUrn());
 
-        return createResponse(fd.getIndex(), fd.getFileSize(),
-                fd.getFileName(), -1, fd.getUrns(), null, container, null);
+        LimeXMLDocument doc = getLimeXmlDoc(fd);
+        
+        Response response =  createResponse(fd.getIndex(), fd.getFileSize(),
+                fd.getFileName(), -1, fd.getUrns(), doc, container, null);
+        
+        return response;
+    }
+
+   /**
+    * If the FileDesc has no XML documents, null is returned. If the FileDesc
+    * has one XML document, that document is returned. If the FileDesc
+    * has multiple XML documents, null is returned. The reasoning behind returning null
+    *  when there are multiple XML docs is that presumably
+    * the query will be a 'rich' query, and we want to include only the schema
+    * that was in the query.
+    */
+    private LimeXMLDocument getLimeXmlDoc(FileDesc fileDesc) {
+        List<LimeXMLDocument> docs = fileDesc.getLimeXMLDocuments();
+        if (docs.size() == 1) {
+            return docs.get(0);
+        }
+        return null;
     }
 
     /* (non-Javadoc)

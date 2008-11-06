@@ -27,7 +27,9 @@ public interface ResponseFactory {
     
     /**
      * Constructs a new <tt>Response</tt> instance from the data in the
-     * specified <tt>FileDesc</tt>.
+     * specified <tt>FileDesc</tt>. LimeXmlDocument is set by default if 
+     * the data is available. It can be unset by calling response.setDocument(null)
+     * to save bandwidth over the wire.
      * 
      * @param fd the <tt>FileDesc</tt> containing the data to construct this
      *        <tt>Response</tt> -- must not be <tt>null</tt>

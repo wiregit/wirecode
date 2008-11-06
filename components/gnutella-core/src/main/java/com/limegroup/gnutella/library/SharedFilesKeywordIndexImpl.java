@@ -209,9 +209,11 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             Response resp = responseFactory.get().createResponse(desc);
             if (includeXML) {
-                addXMLToResponse(resp, desc);
                 if (doc != null && resp.getDocument() != null && !isValidXMLMatch(resp, doc))
                     continue;
+            } else {
+            	//remove xml doc to save bandwidth
+                resp.setDocument(null);
             }
             responses.add(resp);
         }
@@ -269,8 +271,9 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             // Formulate the response
             Response r = responseFactory.get().createResponse(desc);
-            if (includeXML)
-                addXMLToResponse(r, desc);
+            if(!includeXML) {
+                r.setDocument(null);
+            }
 
             // Cache it
             resps.add(r);
@@ -472,28 +475,6 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
 
     /**
-     * Adds XML to the response. This assumes that shouldIncludeXMLInResponse
-     * was already consulted and returned true.
-     * 
-     * If the FileDesc has no XML documents, this does nothing. If the FileDesc
-     * has one XML document, this sets it as the response doc. If the FileDesc
-     * has multiple XML documents, this does nothing. The reasoning behind not
-     * setting the document when there are multiple XML docs is that presumably
-     * the query will be a 'rich' query, and we want to include only the schema
-     * that was in the query.
-     * 
-     * @param response the <tt>Response</tt> instance that XML should be added
-     *        to
-     * @param fd the <tt>FileDesc</tt> that provides access to the
-     *        <tt>LimeXMLDocuments</tt> to add to the response
-     */
-    private void addXMLToResponse(Response response, FileDesc fd) {
-        List<LimeXMLDocument> docs = fd.getLimeXMLDocuments();
-        if (docs.size() == 1)
-            response.setDocument(docs.get(0));
-    }
-
-    /**
      * Utility method to perform standardized keyword extraction for the given
      * <tt>FileDesc</tt>. This handles extracting keywords according to
      * locale-specific rules.
@@ -610,6 +591,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                     continue;
                 } else { // we found a file with the right name
                     res = responseFactory.get().createResponse(fd);
+                    res.setDocument(null);
                     fd.incrementHitCount();
                     activityCallback.handleSharedFileUpdate(fd.getFile());
                 }

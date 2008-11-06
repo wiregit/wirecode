@@ -90,12 +90,16 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         File dir = TestUtils.getResourceFile("com/limegroup/gnutella");
         File[] testFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File file) {
-                return !file.isDirectory() && file.getName().endsWith(".class");
+                return !file.isDirectory() && (file.getName().endsWith(".class"));
             }
         });
         for(File file : testFiles) {
             assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
         }
+        
+        File testMp3 = TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3");
+        assertNotNull(fileManager.getGnutellaSharedFileList().add(testMp3).get(1, TimeUnit.SECONDS));
+        
         assertGreaterThan("Not enough files to test against", 50, testFiles.length);
         assertGreaterThan(0, fileManager.getGnutellaSharedFileList().size());
 
@@ -149,8 +153,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             Response[] results = reply.getResultsArray();
             for (Response result : results) {
                 files.add(result.getName());
-                assertTrue("Expected .class or LimeWire file, got: " + result.getName(),
-                        result.getName().endsWith(".class") || result.getName().toLowerCase().startsWith("limewire"));
+                assertTrue("Expected .class, .mp3 or LimeWire file, got: " + result.getName(),
+                        result.getName().endsWith(".class") || result.getName().endsWith(".mp3") || result.getName().toLowerCase().startsWith("limewire"));
             }
         }
 
@@ -163,6 +167,50 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 assertTrue("File is missing in browse response: "
                     + result.getFileName(), contained);
             }
+        } finally {
+            fileManager.getGnutellaSharedFileList().getReadLock().unlock();
+        }
+        assertTrue("Browse returned more results than shared: " + files,
+                files.isEmpty());
+    }
+    
+    public void testBrowseHostWithLimeXml() throws Exception {
+        Connectable host = new ConnectableImpl("localhost", PORT, false); // TODO true
+        SocketsManager.ConnectType type = SocketsManager.ConnectType.PLAIN;  // TODO ConnectType.TLS
+        Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
+                                                BrowseHostHandler.DIRECT_CONNECT_TIME, type);
+
+        browseHostHandler.browseHost(socket, new AnonymousPresence());
+
+        boolean mp3Found = false;
+        List<String> files = new ArrayList<String>();
+        for(QueryReply reply : queryReplyHandler.replies) {
+            Response[] results = reply.getResultsArray();
+            for (Response result : results) {
+                String fileName = result.getName();
+                files.add(fileName);
+                if(fileName.endsWith(".mp3")) {
+                    mp3Found = true;
+                }
+            }
+        }
+
+        assertTrue(mp3Found);
+        assertEquals(fileManager.getGnutellaSharedFileList().size(), files.size());
+
+        fileManager.getGnutellaSharedFileList().getReadLock().lock();
+        boolean limeXmlFound = false;
+        try {
+            for(FileDesc result : fileManager.getGnutellaSharedFileList()) {
+                boolean contained = files.remove(result.getFileName());
+                assertTrue("File is missing in browse response: "
+                    + result.getFileName(), contained);
+                if(result.getFileName().endsWith(".mp3") && result.getXMLDocument() != null ) {
+                    limeXmlFound = true;
+                }
+            }
+            
+            assertTrue(limeXmlFound);
         } finally {
             fileManager.getGnutellaSharedFileList().getReadLock().unlock();
         }
