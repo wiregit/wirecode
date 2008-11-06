@@ -45,7 +45,7 @@ class FileRequestParser {
             throw new IOException("invalid request");
         }
         
-        String uriRes = uri.substring(0, index);
+        String uriRes = uri.substring(index);
         
         URN urn = URN.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
     
