@@ -184,17 +184,20 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
 
             // Get the string that is being dropped.
             Transferable t = info.getTransferable();
-            List<File> fileList;
+            final List<File> fileList;
             try {
                 fileList = (List<File>)t.getTransferData(DataFlavor.javaFileListFlavor);
             } 
             catch (Exception e) { return false; }
             
-            //TODO: move off EDT
-              for(File file : fileList){
-                  libraryManager.getLibraryManagedList().addFile(file);
-              }
-    
+            BackgroundExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    for (File file : fileList) {
+                        libraryManager.getLibraryManagedList().addFile(file);
+                    }
+                }
+            });
             return true;
         }
 
