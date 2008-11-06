@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import javax.swing.JScrollPane;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
@@ -14,5 +16,5 @@ public interface LibraryTableFactory {
     <T extends FileItem>LibraryTable<T> createTable(Category category,
             EventList<T> eventList, Friend friend);
     
-    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList);
+    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane);
 }

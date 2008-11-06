@@ -104,11 +104,14 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
 
         } else {//Category.IMAGE
             //TODO merge with table for disposing and enabling sharing
-            LibraryImagePanel imagePanel = tableFactory.createImagePanel(eventList);
+            scrollPane = new JScrollPane();
+            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            LibraryImagePanel imagePanel = tableFactory.createImagePanel(eventList, scrollPane);
             imagePanel.enableSharing(sharePanel);
-            layer = new JXLayer<JComponent>(imagePanel, new AbstractLayerUI<JComponent>());
-            scrollPane = new JScrollPane(layer);
+            
+            scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            layer = new JXLayer<JComponent>(scrollPane, new AbstractLayerUI<JComponent>());
             
             scrollComponent = imagePanel;
             disposable = imagePanel;

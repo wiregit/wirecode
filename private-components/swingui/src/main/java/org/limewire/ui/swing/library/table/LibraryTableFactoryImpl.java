@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -83,10 +84,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
     }
     
     @Override
-    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList) {
+    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager, shareListManager,  magnetLinkFactory, friendList, localItemPropFactory);
         return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList, libraryManager.getLibraryManagedList(), 
-                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager);
+                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager, scrollPane);
     }
     
     /**

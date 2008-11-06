@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.image;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.Icon;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -29,7 +34,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 
-public class LibraryImagePanel  extends JPanel implements ListEventListener<List<LocalFileItem>>, Sharable, Disposable, LibrarySelectable {
+public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Sharable, Disposable, LibrarySelectable, Scrollable {
     
  
     private final EventList<LocalFileItem> currentEventList;
@@ -59,8 +64,10 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
 
     private LibrarySharePanel sharePanel;
     
+    private JScrollPane scrollPane;
     
-    public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager) {       
+    
+    public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager, JScrollPane scrollPane) {       
         super(new VerticalLayout());
         GuiUtils.assignResources(this); 
         this.fileList = fileList;
@@ -68,6 +75,7 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
         this.thumbnailManager = thumbnailManager;
         this.currentEventList = eventList;
         this.params = params;
+        this.scrollPane = scrollPane;
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
         groupingList.addListEventListener(this);
@@ -147,6 +155,65 @@ public class LibraryImagePanel  extends JPanel implements ListEventListener<List
     public void selectAndScroll(Object selectedObject) {
         //TODO selectAndScroll for library image table
         throw new RuntimeException("Implement me");
+    }
+    /**
+     * Overrides getPreferredSize. getPreferredSize is used by scrollable to 
+     * determine how big to make the scrollableViewPort. Uses the parent 
+     * component to set the appropriate size thats currently visible. This
+     * prevents the image list from growing too wide and never shrinking again.
+     */
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension dimension = super.getPreferredSize();
+        if (getParent() == null)
+            return dimension;
+        return new Dimension(scrollPane.getWidth(), dimension.height);
+    }
+
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return getPreferredSize();
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return getPosition(visibleRect, orientation, direction);
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        return false;
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return false;
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return getPosition(visibleRect, orientation, direction);
+    }
+    
+    /**
+     * Scrolls to the appropriate location based on the height of a thumbnail image.
+     */
+    private int getPosition(Rectangle visibleRect, int orientation, int direction) {
+        int currentPosition = 0;
+        if (orientation == SwingConstants.HORIZONTAL)
+            currentPosition = visibleRect.x;
+        else
+            currentPosition = visibleRect.y;
+    
+        //TODO: read this from ImageList again
+        int height = 134;//imageList.getList().getFixedCellHeight();
+        
+        if (direction < 0) {
+            int newPosition = currentPosition - (currentPosition / height) * height;
+            return (newPosition == 0) ? height : newPosition;
+        } else {
+            return ((currentPosition / height) + 1) * height - currentPosition;
+        }
     }
     
 }
