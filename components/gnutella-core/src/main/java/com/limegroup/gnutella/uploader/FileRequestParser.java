@@ -38,17 +38,21 @@ class FileRequestParser {
      */
     public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
             HttpRequest request, HttpContext context) throws IOException, HttpException {
+        
         // Only parse URI requests.
-        if(!uri.toLowerCase(Locale.US).startsWith("/uri-res/")) {
+        int index = uri.toLowerCase(Locale.US).indexOf("/uri-res/");
+        if(index == -1) {
             throw new IOException("invalid request");
         }
         
-        URN urn = URN.createSHA1UrnFromHttpRequest(uri + " HTTP/1.1");
+        String uriRes = uri.substring(0, index);
+        
+        URN urn = URN.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy. URI scheme names are not case-sensitive.
         RequestType requestType;
-        String requestUpper = uri.toUpperCase(Locale.US);
+        String requestUpper = uriRes.toUpperCase(Locale.US);
         if (requestUpper.indexOf(HTTPConstants.NAME_TO_THEX) > 0) {
             requestType = RequestType.THEX;
         } else if (requestUpper.indexOf(HTTPConstants.NAME_TO_RESOURCE) > 0) {
