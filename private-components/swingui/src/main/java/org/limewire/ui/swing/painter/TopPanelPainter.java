@@ -29,7 +29,6 @@ public class TopPanelPainter extends AbstractPainter<JXPanel> {
         g.fillRect(0, 0, width, height-1);
         
         g.setColor(borderColor);
-        g.drawLine(0, 0, width, 0);
         g.drawLine(0, height-1, width, height-1);
     }
 }

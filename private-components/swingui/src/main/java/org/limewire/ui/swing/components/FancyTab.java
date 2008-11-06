@@ -22,6 +22,7 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
@@ -110,7 +111,7 @@ public class FancyTab extends JXPanel {
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
         
         setLayout(new MigLayout("insets 0, filly, gapy 0, hidemode 1"));        
-        add(busyLabel, "gapbefore 4, alignx left, aligny bottom");
+        add(busyLabel, "gapbefore 4, alignx left, aligny bottom, hidemode 0");
         add(mainButton, "aligny bottom, width min(pref,60):pref:max, split 1");
         add(additionalText, "aligny bottom");
         add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
@@ -131,15 +132,26 @@ public class FancyTab extends JXPanel {
         return props.getInsets();
     }
     
+    // TODO: Remove this hack and make a consistant model mediating 
+    //        control of tab states and state existance 
+    private static void setBuisySize(JComponent c, Dimension d) {
+        c.setMaximumSize(d);
+        c.setMinimumSize(d);
+        c.setPreferredSize(d);
+        c.setSize(d);
+    }
+    
     JXBusyLabel createBusyLabel() {
         final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
+        setBuisySize(busy, new Dimension(0,0));
         busy.setVisible(false);
         
         if (tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
             Boolean.TRUE) {
             busy.setBusy(true);
+            setBuisySize(busy, new Dimension(16,16));    
             busy.setVisible(true);
-        }
+        } 
         
         tabActions.getMainAction().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -147,7 +159,8 @@ public class FancyTab extends JXPanel {
                 if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
                     boolean on = evt.getNewValue() == Boolean.TRUE;
                     busy.setBusy(on);
-                    busy.setVisible(on);
+                    setBuisySize(busy, new Dimension(16,16));
+                    busy.setVisible(on);                    
                 }
             }
         });

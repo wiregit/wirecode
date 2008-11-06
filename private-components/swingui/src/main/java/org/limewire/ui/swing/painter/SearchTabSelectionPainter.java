@@ -65,7 +65,15 @@ public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
         
         // Draw tab
         g.setPaint(gradient);
-        g.fill(this.tabAreaCache);    
+        g.fill(this.tabAreaCache);
+        
+        // Hack for Anthony to correct the antialiasing for the bottom border and tab mixing
+        g.setColor(new Color(0xca,0xca,0xca));
+        g.drawLine(0,height-2,0,height-2);
+        g.drawLine(width-1,height-2,width-1,height-2);
+        g.setColor(new Color(0xab,0xab,0xab));
+        g.drawLine(1,height-2,1,height-2);
+        g.drawLine(width-2,height-2,width-2,height-2);
     }
 
 }
