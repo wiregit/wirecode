@@ -20,8 +20,8 @@ public class FriendSharingDisplayImpl implements FriendSharingDisplay {
     }
     
     @Override
-    public void displaySharing() {
-        displayNavigableItem(NavCategory.SHARING, FriendSharePanel.NAME);
+    public void displaySharing() { throw new IllegalStateException("Implement me again");
+//        displayNavigableItem(NavCategory.SHARING, FriendSharePanel.NAME);
     }
 
     private void displayNavigableItem(NavCategory navCategory, String id) {

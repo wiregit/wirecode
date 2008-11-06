@@ -11,6 +11,10 @@ import org.limewire.ui.swing.listener.ActionHandListener;
 
 public class IconButton extends JXButton {
 
+    public IconButton() {
+        init();
+    }
+    
     public IconButton(Action a) {
         super(a);
         init();

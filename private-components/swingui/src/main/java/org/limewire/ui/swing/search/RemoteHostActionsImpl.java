@@ -56,12 +56,12 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     }
 
     @Override
-    public void showFilesSharedBy(RemoteHost person) {
-        LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
-        Friend friend = person.getFriendPresence().getFriend();
-        friendSharePanel.selectFriend(friend);
-        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
-        navItem.select();
+    public void showFilesSharedBy(RemoteHost person) { throw new IllegalStateException("Implement me again");
+//        LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
+//        Friend friend = person.getFriendPresence().getFriend();
+//        friendSharePanel.selectFriend(friend);
+//        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
+//        navItem.select();
     }
 
     @Override

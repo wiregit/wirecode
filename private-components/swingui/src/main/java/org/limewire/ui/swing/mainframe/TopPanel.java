@@ -13,6 +13,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -63,6 +64,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final FriendAutoCompleters friendLibraries,
                     HomePanel homePanel,
                     StorePanel storePanel,
+                    LeftPanel leftPanel,
                     SearchBar searchBar) {
         
         GuiUtils.assignResources(this);
@@ -76,16 +78,23 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setBackgroundPainter(new TopPanelPainter());
         
-        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);
-        NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
+        homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
         homeButton.setName("TopPanel.homeButton");
         homeButton.setText(I18n.tr("Home"));
         homeButton.setIconTextGap(1);
+        
+        NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
         JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
         storeButton.setName("TopPanel.storeButton");
         storeButton.setText(I18n.tr("Store"));
         storeButton.setIconTextGap(1);
+        
+        JButton libraryButton = new IconButton();
+        libraryButton.setName("TopPanel.libraryButton");
+        libraryButton.setText(I18n.tr("Library"));
+        libraryButton.setIconTextGap(1);
+        libraryButton.addActionListener(new LibraryAction(leftPanel));
         
         searchList = new FancyTabList();
         searchList.setName("TopPanel.SearchList");
@@ -104,6 +113,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        
         add(homeButton);
         add(storeButton);
+        add(libraryButton);
         add(searchBar, "gapleft 65, gapright 30");
         add(searchList, "gapleft 4, gaptop 6, grow");
     };
@@ -274,5 +284,18 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     public void goHome() {
         homeNav.select();
+    }
+    
+    private class LibraryAction implements ActionListener {
+        private JPanel panel;
+        
+        public LibraryAction(JPanel panel) {
+            this.panel = panel;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            panel.setVisible(!panel.isVisible());
+        }
     }
 }

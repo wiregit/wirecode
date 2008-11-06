@@ -53,75 +53,75 @@ public class FilesSharingSummaryPanel extends JPanel {
     @Resource
     private Color bottomButtonSelectionGradient;
 
-    private final ShareButton gnutellaButton;
-
-    private final ShareButton friendButton;
+//    private final ShareButton gnutellaButton;
+//
+//    private final ShareButton friendButton;
 
     @Inject
-    FilesSharingSummaryPanel(final ShareListManager shareListManager,
-            GnutellaSharePanel gnutellaSharePanel, FriendSharePanel friendSharePanel,
-            final Navigator navigator, ListenerSupport<FriendShareListEvent> shareSupport) {
+    FilesSharingSummaryPanel(){//final ShareListManager shareListManager,
+//            GnutellaSharePanel gnutellaSharePanel, FriendSharePanel friendSharePanel,
+//            final Navigator navigator, ListenerSupport<FriendShareListEvent> shareSupport) {
         GuiUtils.assignResources(this);
 
         setOpaque(false);
         title = new SectionHeading(I18n.tr("Files I'm Sharing"));
         title.setName("FilesSharingSummaryPanel.title");
 
-        NavItem gnutellaNav = navigator.createNavItem(NavCategory.SHARING, GnutellaSharePanel.NAME,
-                gnutellaSharePanel);
-        gnutellaButton = new ShareButton(NavigatorUtils.getNavAction(gnutellaNav));
-        gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
-        gnutellaButton.setText("0");
-        gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        gnutellaButton.setTransferHandler(new ShareButtonTransferHandler(navigator, gnutellaButton,
-                GnutellaSharePanel.NAME) {
-            private final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(
-                    shareListManager.getGnutellaShareList());
+//        NavItem gnutellaNav = navigator.createNavItem(NavCategory.SHARING, GnutellaSharePanel.NAME,
+//                gnutellaSharePanel);
+//        gnutellaButton = new ShareButton(NavigatorUtils.getNavAction(gnutellaNav));
+//        gnutellaButton.setName("FilesSharingSummaryPanel.gnutella");
+//        gnutellaButton.setText("0");
+//        gnutellaButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
+//        gnutellaButton.setTransferHandler(new ShareButtonTransferHandler(navigator, gnutellaButton,
+//                GnutellaSharePanel.NAME) {
+//            private final SharingTransferHandler sharingTransferHandler = new SharingTransferHandler(
+//                    shareListManager.getGnutellaShareList());
+//
+//            @Override
+//            public boolean canImport(TransferSupport support) {
+//                super.canImport(support);
+//                return sharingTransferHandler.canImport(support);
+//            }
+//
+//            @Override
+//            public boolean importData(TransferSupport support) {
+//                return sharingTransferHandler.importData(support);
+//            }
+//        });
 
-            @Override
-            public boolean canImport(TransferSupport support) {
-                super.canImport(support);
-                return sharingTransferHandler.canImport(support);
-            }
-
-            @Override
-            public boolean importData(TransferSupport support) {
-                return sharingTransferHandler.importData(support);
-            }
-        });
-
-        NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME,
-                friendSharePanel);
-        friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
-        friendButton.setName("FilesSharingSummaryPanel.friends");
-        friendButton.setText("0");
-        friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
-        friendButton.setTransferHandler(new ShareButtonTransferHandler(navigator, friendButton,
-                FriendSharePanel.NAME));
-
-        setLayout(new MigLayout("insets 0, gap 0", "", ""));
-
-        add(title, "span, wrap");
-        add(gnutellaButton, "alignx left");
-        add(friendButton, "alignx right");
-
-        shareListManager.getGnutellaShareList().getSwingModel().addListEventListener(
-                new ListEventListener<LocalFileItem>() {
-                    @Override
-                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                        gnutellaButton.setText(GuiUtils.toLocalizedInteger(listChanges
-                                .getSourceList().size()));
-                    }
-                });
-
-        shareListManager.getCombinedFriendShareLists().getSwingModel().addListEventListener(
-                new ListEventListener<LocalFileItem>() {
-                    @Override
-                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                        friendButton.setText(GuiUtils.toLocalizedInteger(listChanges
-                                .getSourceList().size()));
-                    }
-                });
+//        NavItem friendNav = navigator.createNavItem(NavCategory.SHARING, FriendSharePanel.NAME,
+//                friendSharePanel);
+//        friendButton = new ShareButton(NavigatorUtils.getNavAction(friendNav));
+//        friendButton.setName("FilesSharingSummaryPanel.friends");
+//        friendButton.setText("0");
+//        friendButton.setGradients(topButtonSelectionGradient, bottomButtonSelectionGradient);
+//        friendButton.setTransferHandler(new ShareButtonTransferHandler(navigator, friendButton,
+//                FriendSharePanel.NAME));
+//
+//        setLayout(new MigLayout("insets 0, gap 0", "", ""));
+//
+//        add(title, "span, wrap");
+//        add(gnutellaButton, "alignx left");
+//        add(friendButton, "alignx right");
+//
+//        shareListManager.getGnutellaShareList().getSwingModel().addListEventListener(
+//                new ListEventListener<LocalFileItem>() {
+//                    @Override
+//                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
+//                        gnutellaButton.setText(GuiUtils.toLocalizedInteger(listChanges
+//                                .getSourceList().size()));
+//                    }
+//                });
+//
+//        shareListManager.getCombinedFriendShareLists().getSwingModel().addListEventListener(
+//                new ListEventListener<LocalFileItem>() {
+//                    @Override
+//                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
+//                        friendButton.setText(GuiUtils.toLocalizedInteger(listChanges
+//                                .getSourceList().size()));
+//                    }
+//                });
     }
 
     /**
@@ -155,8 +155,8 @@ public class FilesSharingSummaryPanel extends JPanel {
                 timer = new ComponentHoverTimer(750, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, panelName);
-                        navItem.select();
+//                        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, panelName);
+//                        navItem.select();
                     }
                 }, shareButton);
 
