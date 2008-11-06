@@ -8,15 +8,30 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.painter.AbstractPainter;
+import org.limewire.ui.swing.components.FancyTab;
+import org.limewire.ui.swing.util.GuiUtils;
 
-public class SearchTabSelectionPainter implements Painter {
+public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
+    
+    @Resource private Color topBevelBackground;
+    @Resource private Color topBevelBorder;
+    @Resource private Color backgroundTopGradient;
+    @Resource private Color backgroundBottomGradient;
+    
+    private final GradientPaint gradient;
     
     private Area tabAreaCache   = null;
     private int  tabWidthCache  = 0;
     private int  tabHeightCache = 0;
     
     public SearchTabSelectionPainter() {
+        GuiUtils.assignResources(this);
+        
+        this.setAntialiasing(true);
+        
+        gradient = new GradientPaint(0, 0, this.backgroundTopGradient, 0, 1, this.backgroundBottomGradient);
     }
 
     
@@ -24,7 +39,7 @@ public class SearchTabSelectionPainter implements Painter {
         
         if (this.tabWidthCache == width && this.tabHeightCache == height)  return;        
         
-        Area compound = new Area(new RoundRectangle2D.Float(10, 0, width-1-20, height-1, 20, 20));
+        Area compound = new Area(new RoundRectangle2D.Float(10, 3, width-1-20, height-1, 20, 20));
         
         compound.add(new Area(new Rectangle2D.Float(0,height-10-1,width-1,height-1)));
         
@@ -37,12 +52,20 @@ public class SearchTabSelectionPainter implements Painter {
     }
     
     @Override
-    public void paint(Graphics2D g, Object object, int width, int height) {
-
+    protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
         cacheTabArea(width, height);
+
+        // Draw top bevel
+        g.setColor(this.topBevelBackground);
+        g.fillRoundRect(10, 0, width-2-20, 20, 20, 20);
         
-        g.setPaint(new GradientPaint(0, 0, new Color(0f, 0f, 0f, 0.32f), 0, 1, Color.decode("#787878")));
-        g.fill(this.tabAreaCache);
+        // Draw top border
+        g.setColor(this.topBevelBorder);
+        g.drawRoundRect(10, 0, width-2-20, 20, 20, 20);
+        
+        // Draw tab
+        g.setPaint(gradient);
+        g.fill(this.tabAreaCache);    
     }
 
 }
