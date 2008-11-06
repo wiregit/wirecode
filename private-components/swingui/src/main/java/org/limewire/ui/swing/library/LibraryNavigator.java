@@ -125,7 +125,7 @@ public class LibraryNavigator extends JXPanel {
         titleLabel.setName("LibraryNavigator.titleLabel");
 
         setLayout(new MigLayout("insets 0, gap 0"));
-        add(titleLabel, "growx, alignx left, aligny top,  wrap");
+        add(titleLabel, "growx, alignx left, aligny top, wrap");
        
         LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         addNavPanel(new NavPanel(Me.ME,
