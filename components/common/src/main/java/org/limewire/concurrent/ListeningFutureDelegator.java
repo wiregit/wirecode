@@ -20,26 +20,17 @@ public abstract class ListeningFutureDelegator<S, R> implements ListeningFuture<
     }
 
     public void addFutureListener(final EventListener<FutureEvent<R>> listener) {
-        delegate.addFutureListener(new EventListener<FutureEvent<S>>() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void handleEvent(FutureEvent<S> event) {
-                FutureEvent<R> newEvent;
-                switch(event.getType()) {
-                case SUCCESS:
-                    try {
-                        newEvent = FutureEvent.createSuccess(convertSource(event.getResult()));
-                    } catch(ExecutionException ee) {
-                        newEvent = FutureEvent.createException(ee);
-                    }
-                    break;
-                default:
-                    // It's ok to erase because the type is unused.
-                    newEvent = (FutureEvent<R>)event;
+        // If we're done, we can just dispatch immediately w/o having to 
+        // worry about creating a delegate listener.
+        if(isDone()) {
+            EventListenerList.dispatch(listener, FutureEvent.createEvent(this));
+        } else {        
+            delegate.addFutureListener(new EventListener<FutureEvent<S>>() {
+                public void handleEvent(FutureEvent<S> event) {
+                    EventListenerList.dispatch(listener, FutureEvent.createEvent(ListeningFutureDelegator.this));
                 }
-                EventListenerList.dispatch(listener, newEvent);
-            }
-        });
+            });
+        }
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -47,12 +38,26 @@ public abstract class ListeningFutureDelegator<S, R> implements ListeningFuture<
     }
 
     public R get() throws InterruptedException, ExecutionException {
-        return convertSource(delegate.get());
+        S s;
+        try {
+            s = delegate.get();
+        } catch(ExecutionException ee) {
+            return convertException(ee);            
+        }
+        
+        return convertSource(s);
     }
 
     public R get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
             TimeoutException {
-        return convertSource(delegate.get(timeout, unit));
+        S s;
+        try {
+            s = delegate.get(timeout, unit);
+        } catch(ExecutionException ee) {
+            return convertException(ee);            
+        }
+        
+        return convertSource(s);
     }
 
     public boolean isCancelled() {
@@ -65,5 +70,8 @@ public abstract class ListeningFutureDelegator<S, R> implements ListeningFuture<
     
     /** Converts from S to R. If it cannot be converted, throws an ExecutionException. */
     protected abstract R convertSource(S source) throws ExecutionException;
+    
+    /** Converts from an ExecutionException. If it cannot be converted, rethrows an ExecutionException. */
+    protected abstract R convertException(ExecutionException ee) throws ExecutionException;
 
 }

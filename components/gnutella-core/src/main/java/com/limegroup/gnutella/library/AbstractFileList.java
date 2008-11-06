@@ -470,6 +470,21 @@ abstract class AbstractFileList implements SharedFileList {
             protected FileDesc convertSource(FileDesc source) throws ExecutionException {
                 return throwExecutionExceptionIfNotContains(source);
             }
+            
+            @Override
+            protected FileDesc convertException(ExecutionException ee) throws ExecutionException {
+                // We can fail because we attempted to add a File that already existed --
+                // if that's why we failed, then we return the file anyway (because it is added.)
+                if(ee.getCause() instanceof FileListChangeFailedException) {
+                    FileListChangeFailedException fe = (FileListChangeFailedException)ee.getCause();
+                    if(fe.getEvent().getType() == FileListChangedEvent.Type.ADD_FAILED) {
+                        if(contains(fe.getEvent().getFile())) {
+                            return getFileDesc(fe.getEvent().getFile());
+                        }
+                    }
+                }
+                throw ee;
+            }
         };
     }    
     

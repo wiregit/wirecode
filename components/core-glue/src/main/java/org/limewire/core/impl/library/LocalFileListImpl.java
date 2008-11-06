@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.concurrent.ListeningFuture;
@@ -166,6 +167,12 @@ abstract class LocalFileListImpl implements LocalFileList {
             }
             return replaced;
         }
+        
+        @Override
+        protected List<ListeningFuture<LocalFileItem>> convertException(ExecutionException ee)
+                throws ExecutionException {
+            throw ee;
+        }
     }
     
     private class Wrapper extends ListeningFutureDelegator<FileDesc, LocalFileItem> {
@@ -176,6 +183,11 @@ abstract class LocalFileListImpl implements LocalFileList {
         @Override
         protected LocalFileItem convertSource(FileDesc source) {
             return lookup.get(source.getFile());
+        }
+        
+        @Override
+        protected LocalFileItem convertException(ExecutionException ee) throws ExecutionException {
+            throw ee;
         }
     }
     
