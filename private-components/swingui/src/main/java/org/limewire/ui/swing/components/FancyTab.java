@@ -116,12 +116,19 @@ public class FancyTab extends JXPanel {
         add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
         // TODO: this edges a bit over the right if additionalText is invisible
         add(underline, "skip 1, span 2, growx, aligny top, gapafter 0");
-
     }
-
+    
     @Override
     public String toString() {
         return "FancyTab for: " + getTitle() + ", " + super.toString();
+    }
+    
+    @Override 
+    public Insets getInsets() {
+        if (props == null || props.getInsets() == null)
+            return super.getInsets();
+        
+        return props.getInsets();
     }
     
     JXBusyLabel createBusyLabel() {

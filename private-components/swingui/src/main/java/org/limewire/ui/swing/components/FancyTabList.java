@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -221,7 +222,7 @@ public class FancyTabList extends JXPanel {
         props.setRemovable(removable);
         recreateTabs();
     }
-
+    
     /**
      * Sets a new list of tabs based on the given actions.
      */
@@ -329,6 +330,16 @@ public class FancyTabList extends JXPanel {
             }
         }
         props.setNormalColor(normalColor);
+    }
+    
+    
+    /** Sets the tab's insets */
+    public void setTabInsets(Insets insets) {
+        props.setInsets(insets);
+        
+        for (FancyTab tab : tabs) {
+            tab.validate();
+        }
     }
     
     /** Sets the color used to render the tab's text when it is selected. */

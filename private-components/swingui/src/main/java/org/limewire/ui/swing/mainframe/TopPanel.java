@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -98,7 +99,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         searchList.setSelectionPainter(new SearchTabSelectionPainter());
         searchList.setHighlightPainter(null);
-        
+        searchList.setTabInsets(new Insets(0,20,0,20));
+                
         setLayout(new MigLayout("gap 0, insets 0, fill", "", "[center]"));        
         add(homeButton);
         add(storeButton);

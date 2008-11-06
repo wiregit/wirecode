@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Insets;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
@@ -23,6 +24,7 @@ public class FancyTabProperties implements Cloneable {
     private Color underlineColor;
     private Color underlineHoverColor;
     private boolean underlineEnabled;
+    private Insets insets;
 
     FancyTabProperties() {
         highlightPainter = new RectanglePainter<JXButton>(2, 2, 2, 2, 5, 5, true, Color.YELLOW, 0f, Color.LIGHT_GRAY);
@@ -37,6 +39,7 @@ public class FancyTabProperties implements Cloneable {
         underlineColor = Color.BLUE;
         underlineHoverColor = Color.CYAN;
         underlineEnabled = true;
+        insets = null;
     }
     
     public FancyTabProperties clone() {
@@ -149,5 +152,13 @@ public class FancyTabProperties implements Cloneable {
 
     public void setUnderlineEnabled(boolean underlineEnabled) {
         this.underlineEnabled = underlineEnabled;
+    }
+    
+    public void setInsets(Insets insets) {
+        this.insets = insets;
+    }
+    
+    public Insets getInsets() {
+        return this.insets;
     }
 }

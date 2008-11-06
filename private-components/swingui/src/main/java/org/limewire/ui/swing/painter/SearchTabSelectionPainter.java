@@ -13,7 +13,6 @@ public class SearchTabSelectionPainter implements Painter {
     
     
     public SearchTabSelectionPainter() {
-        
     }
 
     @Override

@@ -9,11 +9,17 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 
 public class HeadingLabel extends JXLabel {
     
-    private static AbstractPainter<JXLabel> painter 
-        = new AbstractPainter<JXLabel>() {
+    private static AbstractPainter<JXLabel> painter = new TextShadowPainter();
+        
+        
+        private static class TextShadowPainter extends AbstractPainter<JXLabel> {
         
             private final Color shadowColour = new Color(0,0,0,150);
-        
+            
+            TextShadowPainter() {
+                this.setAntialiasing(true);
+            }
+            
             @Override
             protected void doPaint(Graphics2D g, JXLabel object, int width, int height) {
                 String label = object.getText();
