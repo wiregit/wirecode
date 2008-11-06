@@ -1235,6 +1235,16 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         return new ManageableFileFilter(extensions);
     }
     
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return folder.isDirectory() && isFolderManageable(folder, false);
+    }
+    
+    @Override
+    public boolean isDirectoryExcluded(File folder) {
+        return getLibraryData().isFolderExcluded(folder);
+    }
+    
     /** A filter used to see if a file is manageable. */
     private class ManageableFileFilter implements FileFilter {
         private final Set<String> extensions;

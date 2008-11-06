@@ -62,5 +62,18 @@ public interface ManagedFileList extends FileList {
      * subdirectories as managed files.
      */
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
+    ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File folder);
+    
+    /**
+     * Returns true if the directory is allowed to be added as a recursively
+     * managed folder.  This <b>allows</b> excluded directories.  It does
+     * not allow non-directories, banned directories, or other problematic
+     * directories.
+     */
+    boolean isDirectoryAllowed(File folder);
+    
+    /**
+     * Returns true if the directory is excluded from recursive management.
+     */
+    boolean isDirectoryExcluded(File folder);
 }

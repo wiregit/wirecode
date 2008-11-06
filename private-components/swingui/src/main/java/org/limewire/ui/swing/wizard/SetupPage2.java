@@ -106,7 +106,7 @@ public class SetupPage2 extends WizardPage {
     private void initManualPanel() {
         ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            items.add(new LibraryManagerItemImpl(file, true));
+            items.add(new LibraryManagerItemImpl(libraryData, file, true));
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));

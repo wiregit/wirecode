@@ -62,4 +62,14 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public boolean isDirectoryAllowed(File folder) {
+        return folder.isDirectory();
+    }
+    
+    @Override
+    public boolean isDirectoryExcluded(File folder) {
+        return false;
+    }
 }

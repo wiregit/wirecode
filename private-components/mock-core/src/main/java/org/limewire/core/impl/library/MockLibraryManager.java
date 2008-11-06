@@ -160,6 +160,22 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     private class LibraryDataAdapter implements LibraryData {
 
         @Override
+        public void setManagedFolders(Collection<File> recursiveFoldersToManage,
+                Collection<File> foldersToExclude) {
+        }
+
+        @Override
+        public boolean isDirectoryAllowed(File folder) {
+            return folder.isDirectory();
+        }
+        
+        @Override
+        public boolean isDirectoryExcluded(File folder) {
+            return false;
+        }
+        
+
+        @Override
         public List<File> getDirectoriesToManageRecursively() {
             return new ArrayList<File>();
         }

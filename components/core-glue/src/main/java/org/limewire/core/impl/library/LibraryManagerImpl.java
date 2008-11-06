@@ -52,6 +52,21 @@ class LibraryManagerImpl implements LibraryManager {
         public LibraryDataImpl(ManagedFileList fileList) {
             this.fileList = fileList;
         }
+        
+        @Override
+        public void setManagedFolders(Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude) {
+            fileList.setManagedFolders(recursiveFoldersToManage, foldersToExclude);
+        }
+
+        @Override
+        public boolean isDirectoryAllowed(File folder) {
+            return fileList.isDirectoryAllowed(folder);
+        }
+
+        @Override
+        public boolean isDirectoryExcluded(File folder) {
+            return fileList.isDirectoryExcluded(folder);
+        }
 
         @Override
         public List<File> getDirectoriesToManageRecursively() {

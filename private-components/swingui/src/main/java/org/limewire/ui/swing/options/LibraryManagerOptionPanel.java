@@ -28,7 +28,7 @@ import org.limewire.ui.swing.util.I18n;
 
 public class LibraryManagerOptionPanel extends OptionPanel {
 
-    private LibraryData libraryData;
+    private final LibraryData libraryData;
     
     private JButton addFolderButton;
     private JCheckBox musicCheckBox;
@@ -110,7 +110,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     public void initOptions() {
         ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            items.add(new LibraryManagerItemImpl(file, true));
+            items.add(new LibraryManagerItemImpl(libraryData, file, true));
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
