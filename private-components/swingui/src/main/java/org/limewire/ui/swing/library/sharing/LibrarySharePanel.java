@@ -45,7 +45,6 @@ import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.ui.swing.components.RoundedBorder;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -176,7 +175,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
       
         
         inputField = new JTextField(12);
-        inputField.setBorder(new RoundedBorder(5));
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
@@ -293,7 +291,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         friendTable.setRowHeight(addEditor.getPreferredSize().height);
         friendTable.setVisibleRowCount(FRIEND_ROW_COUNT);
         friendScroll = new JScrollPane(friendTable);      
-        friendScroll.setBorder(new RoundedBorder(5));
         
         shareScroll = new JScrollPane(shareTable);
         shareScroll.setBorder(new EmptyBorder(0, shareTableIndent, 0, 0));
