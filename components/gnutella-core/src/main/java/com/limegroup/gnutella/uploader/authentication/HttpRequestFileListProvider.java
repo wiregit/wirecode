@@ -17,5 +17,5 @@ public interface HttpRequestFileListProvider {
      * @throws HttpException if the file list for the request was not found or
      * the request is not authorized
      */
-    Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) throws HttpException;
+    Iterable<FileList> getFileLists(String userID, HttpContext httpContext) throws HttpException;
 }

@@ -2,7 +2,6 @@ package com.limegroup.gnutella.uploader.authentication;
 
 import java.util.Arrays;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
 import com.limegroup.gnutella.library.FileList;
@@ -28,7 +27,7 @@ public class GnutellaUploadFileListProvider implements HttpRequestFileListProvid
      * to enable sharing of incomplete files
      */
     @Override
-    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
+    public Iterable<FileList> getFileLists(String userID, HttpContext httpContext) {
         return Arrays.asList(fileManager.getGnutellaSharedFileList(), fileManager.getIncompleteFileList());
     }
 }

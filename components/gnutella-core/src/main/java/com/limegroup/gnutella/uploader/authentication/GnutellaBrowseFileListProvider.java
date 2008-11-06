@@ -2,7 +2,6 @@ package com.limegroup.gnutella.uploader.authentication;
 
 import java.util.Collections;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.protocol.HttpContext;
 
 import com.google.inject.Inject;
@@ -28,7 +27,7 @@ public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvid
      * @return {@link FileManager#getGnutellaSharedFileList()}.
      */
     @Override
-    public Iterable<FileList> getFileLists(HttpRequest request, HttpContext httpContext) {
+    public Iterable<FileList> getFileLists(String userID, HttpContext httpContext) {
         return Collections.singletonList(fileManager.getGnutellaSharedFileList());
     }
 
