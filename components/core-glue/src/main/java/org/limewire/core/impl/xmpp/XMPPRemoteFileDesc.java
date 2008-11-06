@@ -108,8 +108,9 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
     @Override
     public String getUrlPath() {
         URN sha1Urn = getSHA1Urn();
+        FriendPresence presence = addressResolver.getPresence(address);
         try {
-            return CoreGlueXMPPService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(address.getId(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
+            return CoreGlueXMPPService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(presence.getFriend().getNetwork().getMyID(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
