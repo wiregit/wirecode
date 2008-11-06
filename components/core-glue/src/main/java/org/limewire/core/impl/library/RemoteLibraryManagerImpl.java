@@ -28,19 +28,23 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.ReadOnlyList;
-import ca.odell.glazedlists.util.concurrent.Lock;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private final EventList<FriendLibrary> allFriendLibraries;
     private final EventList<FriendLibrary> readOnlyFriendLibraries;
     private volatile EventList<FriendLibrary> swingFriendLibraries;
+    private final ReadWriteLock lock;
 
     @Inject
     public RemoteLibraryManagerImpl() {
-        Connector<FriendLibrary> connector = GlazedLists.beanConnector(FriendLibrary.class);        
-        allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>()), connector);
+        Connector<FriendLibrary> connector = GlazedLists.beanConnector(FriendLibrary.class);
+        lock = LockFactory.DEFAULT.createReadWriteLock();
+        allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(lock)), connector);
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
     }
     
@@ -60,63 +64,42 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     
     @Override
     public PresenceLibrary addPresenceLibrary(FriendPresence presence) {
-        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
-        lock.lock();
+        lock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getOrCreateFriendLibrary(presence.getFriend());
-            Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
-            friendLibLock.lock();
-            try {
-                return friendLibrary.getOrCreatePresenceLibrary(presence);
-            } finally {
-                friendLibLock.unlock();
-            }  
+            return friendLibrary.getOrCreatePresenceLibrary(presence);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
     
     @Override
     public void removeFriendLibrary(Friend friend) {
-        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
-        lock.lock();
+        lock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getFriendLibrary(friend);
-            Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
-            friendLibLock.lock();
-            try {
-                while(friendLibrary.allPresenceLibraries.size() > 0) {
-                    friendLibrary.removePresenceLibrary(friendLibrary.allPresenceLibraries.get(0).getPresence());
-                }
-                removeFriendLibrary(friendLibrary);
-            } finally {
-                friendLibLock.unlock();    
-            }                 
+            while(friendLibrary.allPresenceLibraries.size() > 0) {
+                friendLibrary.removePresenceLibrary(friendLibrary.allPresenceLibraries.get(0).getPresence());
+            }
+            removeFriendLibrary(friendLibrary);                
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
     
     @Override
     public void removePresenceLibrary(FriendPresence presence) {
-        Lock lock = allFriendLibraries.getReadWriteLock().writeLock();
-        lock.lock();
+        lock.writeLock().lock();
         try {
             FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
             if (friendLibrary != null) {
-                Lock friendLibLock = friendLibrary.allPresenceLibraries.getReadWriteLock().writeLock();
-                friendLibLock.lock();
-                try {
-                    friendLibrary.removePresenceLibrary(presence); 
-                    if (friendLibrary.size() == 0) {
-                        removeFriendLibrary(friendLibrary);
-                    }
-                } finally {
-                    friendLibLock.unlock();    
+                friendLibrary.removePresenceLibrary(presence); 
+                if (friendLibrary.size() == 0) {
+                    removeFriendLibrary(friendLibrary);
                 }
             }
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }                       
     }
 
@@ -132,7 +115,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private FriendLibraryImpl getOrCreateFriendLibrary(Friend friend) {
         FriendLibraryImpl library = findFriendLibrary(friend);
         if(library == null) {
-            library = new FriendLibraryImpl(friend);
+            library = new FriendLibraryImpl(friend, lock);
             library.commit();
             allFriendLibraries.add(library);
         }
@@ -141,17 +124,16 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
     @Override
     public boolean hasFriendLibrary(Friend friend) {
-        return getFriendLibrary(friend) != null;
+        lock.readLock().lock();
+        try {
+            return getFriendLibrary(friend) != null;
+        } finally {
+            lock.readLock().unlock();
+        }        
     }
     
     private FriendLibraryImpl getFriendLibrary(Friend friend) {
-        Lock lock = allFriendLibraries.getReadWriteLock().readLock();
-        lock.lock();
-        try {
-            return findFriendLibrary(friend);
-        } finally {
-            lock.unlock();
-        }
+        return findFriendLibrary(friend);
     }
 
     private void removeFriendLibrary(FriendLibraryImpl friendLibrary) {
@@ -169,12 +151,15 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         private final UniqueList<RemoteFileItem> threadSafeUniqueList;
         private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
         
+        private final ReadWriteLock lock;
+        
         private final PropertyChangeSupport changeSupport;
         private volatile LibraryState state = LibraryState.LOADING;
 
-        public FriendLibraryImpl(Friend friend) {
+        public FriendLibraryImpl(Friend friend, ReadWriteLock lock) {
             this.friend = friend;
-            compositeList = new CompositeList<RemoteFileItem>();
+            this.lock = lock;
+            compositeList = new CompositeList<RemoteFileItem>(ListEventAssembler.createListEventPublisher(), lock);
             threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(compositeList),
                     new Comparator<RemoteFileItem>() {
                 @Override
@@ -186,7 +171,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             changeSupport = new PropertyChangeSupport(this);
             
             Connector<PresenceLibrary> connector = GlazedLists.beanConnector(PresenceLibrary.class);            
-            allPresenceLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>()), connector);
+            allPresenceLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>(lock)), connector);
             readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
             
             allPresenceLibraries.addListEventListener(new ListEventListener<PresenceLibrary>() {
@@ -210,8 +195,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
         
         private LibraryState calculateState() {
-            Lock lock = allPresenceLibraries.getReadWriteLock().readLock();
-            lock.lock();
+            lock.readLock().lock();
             try {
                 boolean oneCompleted = false;
                 for(PresenceLibrary library : allPresenceLibraries) {
@@ -230,7 +214,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     return LibraryState.FAILED_TO_LOAD;
                 }
             } finally {
-                lock.unlock();
+                lock.readLock().unlock();
             }
         }
 
@@ -268,12 +252,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         private void removeMemberList(PresenceLibrary presenceLibrary) {
-            compositeList.getReadWriteLock().writeLock().lock();
-            try {
-                compositeList.removeMemberList(presenceLibrary.getModel());
-            } finally {
-                compositeList.getReadWriteLock().writeLock().unlock();
-            }
+            compositeList.removeMemberList(presenceLibrary.getModel());
         }
 
         private EventList<RemoteFileItem> createMemberList() {
@@ -281,12 +260,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         private void addMemberList(PresenceLibrary presenceLibrary) {
-            compositeList.getReadWriteLock().writeLock().lock();
-            try {
-                compositeList.addMemberList(presenceLibrary.getModel());
-            } finally {
-                compositeList.getReadWriteLock().writeLock().unlock();
-            }
+            compositeList.addMemberList(presenceLibrary.getModel());
         }
 
         @Override

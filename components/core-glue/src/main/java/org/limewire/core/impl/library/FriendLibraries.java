@@ -22,11 +22,11 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 @Singleton
 public class FriendLibraries {
@@ -80,7 +80,7 @@ public class FriendLibraries {
                             }
                             @Override
                             protected void itemRemoved(PresenceLibrary item) {
-                                LOG.debugf("removing library for presence {0} from index", item.getPresence());
+                                LOG.debugf("removing library for presence {0} from index", item.getPresence().getPresenceId());
                                 libraries.remove(item.getPresence().getPresenceId());
                                 LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
                                 item.getModel().removeListEventListener(listener);
