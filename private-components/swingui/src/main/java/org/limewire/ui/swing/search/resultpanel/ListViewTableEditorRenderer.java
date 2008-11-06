@@ -191,8 +191,10 @@ implements TableCellEditor, TableCellRenderer {
             itemIconLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    actionButtonPanel.startDownload();
-                    table.editingStopped(new ChangeEvent(table));
+                    if(e.getButton() == MouseEvent.BUTTON1) {
+                        actionButtonPanel.startDownload();
+                        table.editingStopped(new ChangeEvent(table));
+                    }
                 }
             });
         }
