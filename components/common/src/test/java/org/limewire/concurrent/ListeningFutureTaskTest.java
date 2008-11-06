@@ -225,7 +225,8 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertNotNull(listener.event);
         assertNull(listener.event.getResult());
         assertEquals(FutureEvent.Type.CANCELLED, listener.event.getType());
-        assertNull(listener.event.getException());        
+        assertNull(listener.event.getException()); 
+        Thread.sleep(100);
         assertTrue(runner.interrupted);
         
         assertEquals(Thread.currentThread(), listener.thread);
@@ -245,6 +246,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertNull(listener.event.getResult());
         assertEquals(FutureEvent.Type.CANCELLED, listener.event.getType());
         assertNull(listener.event.getException());
+        Thread.sleep(100);
         assertFalse(runner.interrupted);
         
         assertEquals(Thread.currentThread(), listener.thread);
@@ -447,7 +449,8 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertNotNull(listener.event);
         assertNull(listener.event.getResult());
         assertEquals(FutureEvent.Type.CANCELLED, listener.event.getType());
-        assertNull(listener.event.getException());        
+        assertNull(listener.event.getException());       
+        Thread.sleep(100);
         assertTrue(runner.interrupted);
         
         assertEquals(dispatchThread(), listener.thread);
@@ -468,6 +471,7 @@ public class ListeningFutureTaskTest  extends BaseTestCase {
         assertNull(listener.event.getResult());
         assertEquals(FutureEvent.Type.CANCELLED, listener.event.getType());
         assertNull(listener.event.getException());
+        Thread.sleep(100);
         assertFalse(runner.interrupted);
         
         assertEquals(dispatchThread(), listener.thread);
