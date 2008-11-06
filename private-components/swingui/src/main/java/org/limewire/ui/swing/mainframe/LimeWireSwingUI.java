@@ -10,8 +10,8 @@ import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
-import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.menu.LimeMenuBar;
@@ -78,7 +78,7 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new PanelResizer(playerPanel));
         add(layeredPane, gbc);
                 
-        JPanel southPanel = new JPanel(new VerticalLayout());
+        JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);
         southPanel.add(downloadSummaryPanel);
         southPanel.add(statusPanel);
         

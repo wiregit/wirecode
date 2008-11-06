@@ -18,9 +18,16 @@ import java.util.Comparator;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
@@ -67,7 +74,7 @@ public class DownloadSummaryPanel extends JXPanel {
     private JTable table;
 
 	private SummaryPanelHeader header;
-	private JLabel moreLabel;
+	private JButton moreButton;
 	//private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
     private EventList<DownloadItem> unfinishedList;
@@ -81,37 +88,11 @@ public class DownloadSummaryPanel extends JXPanel {
     
   //  private CardLayout cardLayout;
 
-   // @Resource private Color allCompleteColour;
-    @Resource private Color fontColour;
-    @Resource private Font moreFont;
     @Resource private Font itemFont; 
     @Resource private Icon downloadIcon;
     
     private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
 
-    private void createMoreLabel() {
-        moreLabel = new JLabel(I18n.tr("see more downloads")) {
-            @Override
-            public void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                
-                Graphics2D g2 = (Graphics2D) g;
-                
-                int bottom = this.getHeight();
-                
-                String label = this.getText();
-                Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
-                
-                g.setColor(new Color(0x2b,0x5b,0xaa));
-                g.drawLine(LEFT_MARGIN, bottom-7, (int)labelRect.getWidth()+LEFT_MARGIN, bottom-7);
-            }
-      };
-      
-      moreLabel.setForeground(fontColour);
-      moreLabel.setFont(moreFont);
-      
-      moreLabel.setBorder(BorderFactory.createEmptyBorder(0,LEFT_MARGIN,6,0));
-    }
     
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
@@ -120,7 +101,7 @@ public class DownloadSummaryPanel extends JXPanel {
 	    
         this.allList = downloadListManager.getSwingThreadSafeDownloads();
 
-        setLayout(new BorderLayout());
+        setLayout(new MigLayout());
         setBackgroundPainter(new DownloadSummaryPainter());
                 
         //leaving this commented out until we are sure it is gone
@@ -134,12 +115,7 @@ public class DownloadSummaryPanel extends JXPanel {
 		
 		header = new SummaryPanelHeader();
 
-        
-
-        add(header, BorderLayout.WEST);
-
-        createMoreLabel();
-        add(moreLabel, BorderLayout.EAST);
+        moreButton = new JButton(I18n.tr("See All"));
 
         Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
@@ -158,8 +134,37 @@ public class DownloadSummaryPanel extends JXPanel {
 		table.setOpaque(false);
 		table.setRowHeight(28);
 		
+		
+		
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
+		
+		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+            @Override
+            public void columnAdded(TableColumnModelEvent e) {
+                int columnIndex = e.getToIndex();
+                table.getColumnModel().getColumn(columnIndex).setWidth(225);
+                table.getColumnModel().getColumn(columnIndex).setMaxWidth(225);
+                table.getColumnModel().getColumn(columnIndex).setMinWidth(225);
+            }
+
+            @Override
+            public void columnMarginChanged(ChangeEvent e) {
+            }
+
+            @Override
+            public void columnMoved(TableColumnModelEvent e) {
+            }
+
+            @Override
+            public void columnRemoved(TableColumnModelEvent e) {
+            }
+
+            @Override
+            public void columnSelectionChanged(ListSelectionEvent e) {
+            }
+        });
+		
 
 //        cardLayout = new CardLayout();
 //        cardPanel = new JPanel(cardLayout);
@@ -172,7 +177,16 @@ public class DownloadSummaryPanel extends JXPanel {
 //        cardPanel.add(table, TABLE);
 //
 //        cardLayout.show(cardPanel, TABLE);
-		add(table);
+
+		table.setTableHeader(null);
+        JScrollPane tableScroll = new JScrollPane(table);
+        tableScroll.setOpaque(false);
+        tableScroll.getViewport().setOpaque(false);
+        tableScroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+        add(header);
+        add(tableScroll, "growx, push");
+        add(moreButton);
 		
 		updateTitle();
 		adjustVisibility();  
@@ -187,6 +201,7 @@ public class DownloadSummaryPanel extends JXPanel {
                 item.select();
             }            
         }));
+        
 	}
 	
     
@@ -220,10 +235,10 @@ public class DownloadSummaryPanel extends JXPanel {
 
                 if (allList.size() > NUMBER_DISPLAYED) {
                     chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
-                    moreLabel.setVisible(true);
+                    moreButton.setVisible(true);
                 } else {
                     chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-                    moreLabel.setVisible(false);
+                    moreButton.setVisible(false);
                 }
                 
             } //else {//all downloads complete
@@ -249,6 +264,7 @@ public class DownloadSummaryPanel extends JXPanel {
         for(Component comp : header.getComponents()){
             comp.addMouseListener(listener);
         }
+        table.addMouseListener(listener);
     }
 
 	private void updateTitle(){
