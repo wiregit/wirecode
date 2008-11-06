@@ -13,9 +13,10 @@ import com.limegroup.gnutella.uploader.HttpException;
 public interface HttpRequestFileListProvider {
 
     /**
+     * @param userId can be null if there is no user id in the request uri
      * @return iterable of file lists
      * @throws HttpException if the file list for the request was not found or
      * the request is not authorized
      */
-    Iterable<FileList> getFileLists(String userID, HttpContext httpContext) throws HttpException;
+    Iterable<FileList> getFileLists(String userId, HttpContext httpContext) throws HttpException;
 }

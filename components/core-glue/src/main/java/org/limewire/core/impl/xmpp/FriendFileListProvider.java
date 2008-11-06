@@ -35,13 +35,16 @@ public class FriendFileListProvider implements HttpRequestFileListProvider {
     }
     
     @Override
-    public Iterable<FileList> getFileLists(String userID, HttpContext httpContext) throws HttpException {
+    public Iterable<FileList> getFileLists(String userId, HttpContext httpContext) throws HttpException {
+        if (userId == null) {
+            throw new HttpException("no user given", HttpStatus.SC_FORBIDDEN);
+        }
         ServerAuthState authState = (ServerAuthState)httpContext.getAttribute(ServerAuthState.AUTH_STATE);
         if(authState != null) {
             Credentials credentials = authState.getCredentials();
             if (credentials != null) {
                 // authorized by checking if friend is asking for their own list of files
-                if (!credentials.getUserPrincipal().getName().equals(userID)) {
+                if (!credentials.getUserPrincipal().getName().equals(userId)) {
                     throw new HttpException("not authorized", HttpStatus.SC_UNAUTHORIZED);
                 }
                 FileList buddyFileList = fileManager.getFriendFileList(credentials.getUserPrincipal().getName());
