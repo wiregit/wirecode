@@ -337,9 +337,7 @@ public class FancyTabList extends JXPanel {
     public void setTabInsets(Insets insets) {
         props.setInsets(insets);
         
-        for (FancyTab tab : tabs) {
-            tab.validate();
-        }
+        this.revalidate();
     }
     
     /** Sets the color used to render the tab's text when it is selected. */
