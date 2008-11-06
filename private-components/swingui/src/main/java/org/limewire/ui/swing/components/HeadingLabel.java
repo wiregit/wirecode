@@ -1,44 +1,38 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D;
+import java.awt.Insets;
 
-import javax.swing.JLabel;
+import org.jdesktop.swingx.JXLabel;
+import org.jdesktop.swingx.painter.AbstractPainter;
 
-public class HeadingLabel extends JLabel {
+public class HeadingLabel extends JXLabel {
     
-    //TODO: make resources
-    private int dropOpacity = 150;
+    private static AbstractPainter<JXLabel> painter 
+        = new AbstractPainter<JXLabel>() {
+        
+            private final Color shadowColour = new Color(0,0,0,150);
+        
+            @Override
+            protected void doPaint(Graphics2D g, JXLabel object, int width, int height) {
+                String label = object.getText();
+                
+                g.setFont(object.getFont());
+                
+                int h = g.getFontMetrics().getAscent();
+                Insets insets = object.getInsets();
+                
+                g.setColor(this.shadowColour);
+                g.drawString(label, insets.left+1, insets.top+h-2);
+                g.setColor(Color.WHITE);
+                g.drawString(label, insets.left, insets.top+h-3);
+            }
+    };
     
     public HeadingLabel(String text) {
         super(text);
+        
+        this.setForegroundPainter(painter);
     }
-    
-    @Override
-    protected void paintComponent(Graphics g) {
-        
-        Graphics2D g2 = (Graphics2D) g;
-        
-        // get original antialiasing value for reset
-        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        String label = this.getText();
-        Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
-        
-        g2.setFont(this.getFont());
-        
-        g2.setColor(new Color(0,0,0,dropOpacity));
-        g2.drawString(label, 1, (int) labelRect.getHeight()+1 -3);
-        g2.setColor(Color.WHITE);
-        g2.drawString(label, 0, (int) labelRect.getHeight() -3);
-        
-        // reset antialiasing propery
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
-    }
-
 }
