@@ -20,7 +20,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
@@ -308,11 +308,11 @@ public class SearchResultsPanel extends JXPanel {
         }
     }
     
-    private Painter<FancyTab> createTabSelectionPainter() {
-        return new Painter<FancyTab>() {
+    private AbstractPainter<FancyTab> createTabSelectionPainter() {
+        AbstractPainter<FancyTab> painter = new AbstractPainter<FancyTab>() {
 
             @Override
-            public void paint(Graphics2D g, FancyTab object, int width, int height) {
+            protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
                 g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionTopGradientColor, 
                         20.0f, 33.0f, tabSelectionBottomGradientColor));
                 
@@ -321,9 +321,10 @@ public class SearchResultsPanel extends JXPanel {
                 g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionBorderTopGradientColor, 
                         20.0f, 33.0f, tabSelectionBorderBottomGradientColor));
                 
-                g.drawRoundRect(4,5, width-1-6, height-9, 10,10);
-            }
-            
+                g.drawRoundRect(4,5, width-1-6, height-9, 10,10);            }
         };
+        
+        painter.setAntialiasing(true);
+        return painter;
     }
 }
