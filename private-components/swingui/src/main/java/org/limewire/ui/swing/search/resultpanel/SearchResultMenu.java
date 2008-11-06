@@ -61,7 +61,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         addSeparator();
 
-        add(new AbstractAction(tr("Properties")) {
+        add(new AbstractAction(tr("View File Info")) {
             public void actionPerformed(ActionEvent e) {
                 propertiesFactory.newProperties().showProperties(vsr);
             }

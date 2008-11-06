@@ -163,7 +163,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     };
 
-    private Action propertiesAction = new AbstractAction(I18n.tr("Properties")) {
+    private Action propertiesAction = new AbstractAction(I18n.tr("View File Info")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {

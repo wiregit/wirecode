@@ -67,7 +67,7 @@ public class SharingPopupHandler implements TablePopupHandler {
         locateFileItem.setActionCommand(SharingActionHandler.LOCATE);
         locateFileItem.addActionListener(menuListener);
         
-        propertiesItem = new JMenuItem(I18n.tr("Properties"));
+        propertiesItem = new JMenuItem(I18n.tr("View File Info"));
         propertiesItem.setActionCommand(SharingActionHandler.PROPERTIES);
         propertiesItem.addActionListener(menuListener);
         

@@ -16,7 +16,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
  * This class is both a table cell renderer and a table cell editor
- * for displaying the "Download", "More Info" and "Mark as Junk" buttons.
+ * for displaying the "Download", "View File Info" and "Mark as Junk" buttons.
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */

@@ -88,7 +88,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
         }
     };
     
-    private Action propertiesAction = new AbstractAction(I18n.tr("Properties")) {
+    private Action propertiesAction = new AbstractAction(I18n.tr("View File Info")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             //TODO - Is this correct? Only to show props for first one?

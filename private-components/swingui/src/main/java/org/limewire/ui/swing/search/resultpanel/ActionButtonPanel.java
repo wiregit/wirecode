@@ -33,13 +33,13 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 /**
  * This class is a panel containing three "action" buttons
- * for the actions "download", "more info" and "mark as junk".
+ * for the actions "download", "View File Info" and "mark as junk".
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class ActionButtonPanel extends JXPanel {
 
     private final String[] TOOLTIPS =
-        { tr("Download"), tr("More Info"), tr("Mark as Spam") };
+        { tr("Download"), tr("View File Info"), tr("Mark as Spam") };
     
     private static final int DOWNLOAD = 0;    
     private static final int MORE_INFO = 1;    
