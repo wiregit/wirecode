@@ -12,6 +12,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -90,10 +91,11 @@ class MyLibraryPanel extends JPanel implements Disposable, NavComponent {
             layer = new JXLayer<JComponent>(table, new AbstractLayerUI<JComponent>());
             scrollPane = new JScrollPane(layer);
             scrollPane.setColumnHeaderView(table.getTableHeader());
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            
             if (table.isColumnControlVisible()) {
                 scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
-                scrollPane
-                        .setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+                scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
 
             scrollComponent = table;
