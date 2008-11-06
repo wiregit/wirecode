@@ -8,7 +8,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.limewire.ui.swing.components.Line;
-import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.library.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.FilesSharingSummaryPanel;
@@ -21,7 +20,7 @@ import com.google.inject.Singleton;
 class LeftPanel extends JPanel {
     
     @Inject
-    public LeftPanel(final Navigator navigator, LibraryNavigator libraryNavigator, DownloadSummaryPanel downloadPanel, FilesSharingSummaryPanel filesSharingPanel) {
+    public LeftPanel(final Navigator navigator, LibraryNavigator libraryNavigator, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
 //        setMinimumSize(new Dimension(150, 0));
 //        setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
@@ -47,13 +46,7 @@ class LeftPanel extends JPanel {
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollableNav.setBorder(null);
-        add(scrollableNav, gbc);       
-                
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        gbc.weighty = 0;
-        gbc.gridy++;
-        add(downloadPanel, gbc);
+        add(scrollableNav, gbc);                       
                 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 0, 0, 0);

@@ -10,8 +10,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.player.PlayerPanel;
@@ -33,7 +35,7 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, FriendsPanel friendsPanel,
             TrayNotifier trayNotifier, AudioPlayer player,
-            LimeMenuBar limeMenuBar) {
+            LimeMenuBar limeMenuBar, DownloadSummaryPanel downloadSummaryPanel) {
     	GuiUtils.assignResources(this);
     	        
     	this.trayNotifier = trayNotifier;
@@ -76,13 +78,17 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new PanelResizer(playerPanel));
         add(layeredPane, gbc);
                 
-        // The statusbar
+        JPanel southPanel = new JPanel(new VerticalLayout());
+        southPanel.add(downloadSummaryPanel);
+        southPanel.add(statusPanel);
+        
+        // The download summary panel and statusbar
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = GridBagConstraints.REMAINDER;
-        add(statusPanel, gbc);
+        add(southPanel, gbc);
     }
 
     
