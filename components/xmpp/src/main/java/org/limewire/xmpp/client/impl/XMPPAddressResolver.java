@@ -6,13 +6,18 @@ import java.util.Map.Entry;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
+import org.limewire.xmpp.api.client.LimePresence;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.PresenceListener;
+import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -31,17 +36,21 @@ public class XMPPAddressResolver implements AddressResolver {
     
     private final XMPPService xmppService;
 
-    private EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
+    private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
+    
+    private final PresenceHandler presenceHandler = new PresenceHandler();
 
     @Inject
-    public XMPPAddressResolver(XMPPService xmppService) {
+    public XMPPAddressResolver(XMPPService xmppService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
         this.xmppService = xmppService;
+        this.connectivityEventBroadcaster = connectivityEventBroadcaster;
+        
     }
     
     @Inject
-    public void register(SocketsManager socketsManager,  EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
-        this.connectivityEventBroadcaster = connectivityEventBroadcaster;
+    public void register(SocketsManager socketsManager,  ListenerSupport<RosterEvent> rosterListenerSupport) {
         socketsManager.registerResolver(this);
+        rosterListenerSupport.addListener(new RosterHandler());
     }
     
     @Override
@@ -119,4 +128,30 @@ public class XMPPAddressResolver implements AddressResolver {
         }
     }
 
+    private class RosterHandler implements EventListener<RosterEvent> {
+
+        @Override
+        public void handleEvent(RosterEvent event) {
+            if (event.getType() == User.EventType.USER_ADDED) {
+                User user = event.getSource();
+                LOG.debugf("user added: {0}", user);
+                user.addPresenceListener(presenceHandler);
+            }
+        }
+        
+    }
+    
+    private class PresenceHandler implements PresenceListener {
+
+        @Override
+        public void presenceChanged(Presence presence) {
+            if (presence.getMode() == Presence.Mode.available) {
+                if (presence instanceof LimePresence) {
+                    LOG.debugf("lime presence became available: {0}", presence);
+                    connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
+                }
+            }
+        }
+        
+    }
 }

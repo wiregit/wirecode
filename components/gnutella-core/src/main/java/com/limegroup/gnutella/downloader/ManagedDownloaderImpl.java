@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -34,6 +35,7 @@ import org.limewire.io.InvalidDataException;
 import org.limewire.io.PermanentAddress;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
@@ -223,7 +225,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Set of {@link RemoteFileDesc remote file descs} that can't be resolved
      * or connected to yet.
      */
-    private final Set<RemoteFileDesc> unconnectableRFDs = new HashSet<RemoteFileDesc>();
+    private final Set<RemoteFileDesc> unconnectableRFDs = new ConcurrentSkipListSet<RemoteFileDesc>();
     
     private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 
@@ -447,6 +449,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Provider<PushList> pushListProvider;
 
     private final SocketsManager socketsManager;
+    
+    private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -498,6 +502,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
+        socketsManager.addListener(connectivityChangeEventHandler);
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -1379,6 +1384,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if ( ranker.addToPool(getContexts(copy)) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
+            LOG.debug("got new sources");
             receivedNewSources = true;
         }
         
@@ -1408,18 +1414,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasNewSources()
      */
     public boolean hasNewSources() {
-        return (!paused && receivedNewSources) || hasNewConnectableSources();
+        return (!paused && receivedNewSources);
     }
     
-    private boolean hasNewConnectableSources() {
-        boolean newConnectableSources = false;
+    private Collection<RemoteFileDesc> getNewConnectableSources() {
+        List<RemoteFileDesc> newlyConnectables = new ArrayList<RemoteFileDesc>();
         for (RemoteFileDesc rfd : unconnectableRFDs) {
             if (canResolve(rfd) || canConnect(rfd)) {
-                newConnectableSources = true;
-                addDownloadForced(rfd, true);
+                newlyConnectables.add(rfd);
             }
         }
-        return newConnectableSources;
+        return newlyConnectables;
     }
 
     /* (non-Javadoc)
@@ -1800,6 +1805,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (getSha1Urn() != null)
             altLocManager.removeListener(getSha1Urn(), this);
         requeryManager.cleanUp();
+        socketsManager.removeListener(connectivityChangeEventHandler);
     }
 
     /** 
@@ -3196,5 +3202,19 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return contexts;
     }
     
-    
+    private class ConnectivityChangeEventHandler implements EventListener<ConnectivityChangeEvent> {
+
+        @Override
+        public void handleEvent(ConnectivityChangeEvent event) {
+            LOG.debug("connectivity change");
+            Collection<RemoteFileDesc> newConnectableSources = getNewConnectableSources();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("new connectables: " + newConnectableSources);
+            }
+            if (!newConnectableSources.isEmpty()) {
+                addDownloadForced(newConnectableSources, false);
+            }
+        }
+        
+    }
 }
