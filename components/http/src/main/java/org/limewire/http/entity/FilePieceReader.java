@@ -325,7 +325,7 @@ public class FilePieceReader implements PieceReader {
                 processingOffset += length;
                 remaining -= length;
                 jobCount.incrementAndGet();
-                QUEUE.submit(job);
+                QUEUE.execute(job);
             }
         }
     }
