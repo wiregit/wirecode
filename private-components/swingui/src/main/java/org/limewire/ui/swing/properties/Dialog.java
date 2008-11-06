@@ -19,6 +19,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -65,17 +66,16 @@ public abstract class Dialog extends JDialog {
     protected final JTextField author = new JTextField();
     protected final JComboBox platform = new JComboBox();
     protected final JTextField company = new JTextField();
-    protected final DefaultTableModel readOnlyInfoModel = new DefaultTableModel();
-    protected final DefaultTableModel sharingWithModel = new DefaultTableModel();
+    protected final DefaultTableModel readOnlyInfoModel = new ReadOnlyTableModel();
     protected final JLabel localFileLocation = newLabel();
     protected final JXHyperlink locateOnDisk = new JXHyperlink();
     protected final JXHyperlink locateInLibrary = new JXHyperlink();
     protected final JTable readOnlyInfo = new JTable(readOnlyInfoModel);
-    protected final JTable sharingWith = new JTable(sharingWithModel);
     
     protected final JPanel overview;
     protected final JPanel details = new JPanel();
     protected final JPanel location = new JPanel();
+    protected final JPanel sharing = new JPanel();
     protected Component detailsContainer;
     
     public Dialog() {
@@ -86,11 +86,11 @@ public abstract class Dialog extends JDialog {
                 title, genre, rating, year, description, artist, album, track, author, platform,
                 company, localFileLocation);
         
-        setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][]push[]"));
+        setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
         JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
         buttons.add(new JButton(new CancelAction()));
-        add(buttons, "cell 1 3");
+        add(buttons, "cell 1 4");
         
         overview = new JPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
 
@@ -169,7 +169,7 @@ public abstract class Dialog extends JDialog {
         add(box("Overview", overview), "cell 0 0, spanx 2");
     }
 
-    private Component box(String string, JComponent component) {
+    protected Component box(String string, JComponent component) {
         JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]", "[][][]"));
         JLabel label = new JLabel(tr(string));
         label.setFont(getLargeFont());
@@ -344,5 +344,25 @@ public abstract class Dialog extends JDialog {
 
     protected String str(Object property) {
         return property == null ? null : property.toString();
+    }
+
+    protected void disableEdit(JTextComponent... comps) {
+        for (JTextComponent comp : comps) {
+            comp.setEditable(false);
+        }
+    }
+
+    protected void disableEdit(JComboBox... combos) {
+        for(JComboBox combo : combos) {
+            combo.setEditable(false);
+        }
+    }
+    
+    private static class ReadOnlyTableModel extends DefaultTableModel {
+
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
     }
 }

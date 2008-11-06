@@ -68,8 +68,7 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
 
         @Override
         protected void commit() {
-            // TODO Auto-generated method stub
-            
+            //no-op.  RemoteFileItems are immutable in their property view
         }
 
         @Override

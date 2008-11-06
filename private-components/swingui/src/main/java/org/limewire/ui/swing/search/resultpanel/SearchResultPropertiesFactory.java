@@ -6,9 +6,7 @@ import java.awt.Font;
 
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
-import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -57,18 +55,6 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
-        }
-        
-        private void disableEdit(JTextComponent... comps) {
-            for (JTextComponent comp : comps) {
-                comp.setEditable(false);
-            }
-        }
-        
-        private void disableEdit(JComboBox... combos) {
-            for(JComboBox combo : combos) {
-                combo.setEditable(false);
-            }
         }
         
         @Override
