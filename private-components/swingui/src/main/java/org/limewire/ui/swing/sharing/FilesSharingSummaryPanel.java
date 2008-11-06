@@ -18,28 +18,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.TransferHandler;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.core.api.library.FriendShareListEvent;
-import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.mainframe.SectionHeading;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.NavigatorUtils;
-import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 

@@ -9,8 +9,6 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.FriendsPane;
 import org.limewire.ui.swing.library.LibraryNavigator;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.sharing.FriendSharePanel;
 
