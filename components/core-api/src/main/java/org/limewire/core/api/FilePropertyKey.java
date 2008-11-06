@@ -27,7 +27,9 @@ public enum FilePropertyKey {
     YEAR;
     
     private final static Collection<FilePropertyKey> indexableKeys = new HashSet<FilePropertyKey>(); 
+    private final static Collection<FilePropertyKey> editableKeys = new HashSet<FilePropertyKey>(); 
 
+    
     static {
         indexableKeys.add(ALBUM);
         indexableKeys.add(TITLE);
@@ -38,9 +40,25 @@ public enum FilePropertyKey {
         indexableKeys.add(NAME);
         indexableKeys.add(PLATFORM);
     };
+
+    static {
+        editableKeys.add(ALBUM);
+        editableKeys.add(AUTHOR);
+        editableKeys.add(COMMENTS);
+        editableKeys.add(COMPANY);
+        editableKeys.add(GENRE);
+        editableKeys.add(PLATFORM);
+        editableKeys.add(TITLE);
+        editableKeys.add(TRACK_NUMBER);
+        editableKeys.add(YEAR);
+    };
     
     public static Collection<FilePropertyKey> getIndexableKeys() {
         return indexableKeys;
+    }
+    
+    public static Collection<FilePropertyKey> getEditableKeys() {
+        return editableKeys;
     }
 }
 

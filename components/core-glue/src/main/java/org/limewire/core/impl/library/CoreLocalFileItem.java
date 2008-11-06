@@ -124,6 +124,17 @@ class CoreLocalFileItem implements LocalFileItem {
         return getPropertiesMap().get(key);
     }
 
+    @Override
+    public String getPropertyString(FilePropertyKey key) {
+        Object value = getProperty(key);
+        if (value != null) {
+            String stringValue = value.toString();
+            return stringValue;
+        } else {
+            return null;
+        }
+    }
+
     public FileMetaData toMetadata() {
         FileDetails details = getFileDetails();
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
@@ -288,4 +299,7 @@ class CoreLocalFileItem implements LocalFileItem {
         getPropertiesMap().put(key, value);        
     }
     
+    public FileDesc getFileDesc() {
+        return fileDesc;
+    }
 }

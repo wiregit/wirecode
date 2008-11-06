@@ -14,6 +14,11 @@ public interface PropertiableFile {
      * Returns xml data about this fileItem
      */
     Object getProperty(FilePropertyKey key);
+
+    /**
+     * Returns a string representation of this items xml data.
+     */
+    String getPropertyString(FilePropertyKey filePropertyKey);
     
     URN getUrn();
 }

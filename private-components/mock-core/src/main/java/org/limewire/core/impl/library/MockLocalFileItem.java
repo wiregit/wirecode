@@ -73,7 +73,10 @@ public class MockLocalFileItem implements LocalFileItem {
 
     @Override
     public Object getProperty(FilePropertyKey key) {
-        // TODO Auto-generated method stub
+        return null;
+    }
+    @Override
+    public String getPropertyString(FilePropertyKey key) {
         return null;
     }
 

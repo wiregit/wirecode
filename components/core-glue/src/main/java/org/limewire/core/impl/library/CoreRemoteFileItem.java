@@ -66,6 +66,17 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     }
     
     @Override
+    public String getPropertyString(FilePropertyKey key) {
+        Object value = getProperty(key);
+        if (value != null) {
+            String stringValue = value.toString();
+            return stringValue;
+        } else {
+            return null;
+        }
+    }
+    
+    @Override
     public String toString() {
         return StringUtils.toString(this);
     }
