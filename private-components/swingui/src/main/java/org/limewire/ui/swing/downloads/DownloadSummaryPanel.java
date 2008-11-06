@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -18,12 +17,16 @@ import java.awt.geom.Rectangle2D;
 import java.util.Comparator;
 
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
@@ -33,10 +36,11 @@ import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 import org.limewire.ui.swing.downloads.table.HorizontalDownloadTableModel;
 import org.limewire.ui.swing.listener.ActionHandListener;
-import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.painter.DownloadSummaryPainter;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -51,7 +55,7 @@ import com.google.inject.Inject;
 
 
 
-public class DownloadSummaryPanel extends JPanel {
+public class DownloadSummaryPanel extends JXPanel {
 
     /**
      * Number of download items displayed in the table
@@ -62,26 +66,26 @@ public class DownloadSummaryPanel extends JPanel {
 
     private JTable table;
 
-	private SectionHeading titleLabel;
-	private JLabel countLabel;
+	private SummaryPanelHeader header;
 	private JLabel moreLabel;
-	private JLabel completeLabel;
+	//private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
     private EventList<DownloadItem> unfinishedList;
     private RangeList<DownloadItem> chokeList;
     
-    private JPanel completePanel;
-    private JPanel cardPanel;
+//    private JPanel completePanel;
+//    private JPanel cardPanel;
 
-    private static final String TABLE = "TABLE";
-    private static final String COMPLETE = "COMPLETE";
+//    private static final String TABLE = "TABLE";
+//    private static final String COMPLETE = "COMPLETE";
     
-    private CardLayout cardLayout;
+  //  private CardLayout cardLayout;
 
-    @Resource private Color allCompleteColour;
+   // @Resource private Color allCompleteColour;
     @Resource private Color fontColour;
     @Resource private Font moreFont;
-    @Resource private Font itemFont;
+    @Resource private Font itemFont; 
+    @Resource private Icon downloadIcon;
     
     private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
 
@@ -114,33 +118,28 @@ public class DownloadSummaryPanel extends JPanel {
 	    GuiUtils.assignResources(this);
 	    setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
-	    setOpaque(false);
-	    
         this.allList = downloadListManager.getSwingThreadSafeDownloads();
 
         setLayout(new BorderLayout());
+        setBackgroundPainter(new DownloadSummaryPainter());
                 
-        completePanel = new JPanel(new BorderLayout());
-        completePanel.setOpaque(false);
-        completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
-        completeLabel.setForeground(allCompleteColour);
-        completePanel.add(completeLabel);
+        //leaving this commented out until we are sure it is gone
+//        completePanel = new JPanel(new BorderLayout());
+//        completePanel.setOpaque(false);
+//        completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
+//        completeLabel.setForeground(allCompleteColour);
+//        completePanel.add(completeLabel);
         
         unfinishedList = GlazedListsFactory.filterList(allList, new DownloadStateExcluder(DownloadState.DONE));
 		
-		titleLabel = new SectionHeading(I18n.tr("Downloads"));
-		titleLabel.setName("DownloadSummaryPanel.titleLabel");
-		
-		countLabel = new JLabel("0 ");
-        countLabel.setFont(new Font("Arial", Font.PLAIN, 15));
-        countLabel.setForeground(fontColour);
+		header = new SummaryPanelHeader();
 
-        titleLabel.add(countLabel, BorderLayout.EAST);
+        
 
-        add(titleLabel, BorderLayout.NORTH);
+        add(header, BorderLayout.WEST);
 
         createMoreLabel();
-        add(moreLabel, BorderLayout.SOUTH);
+        add(moreLabel, BorderLayout.EAST);
 
         Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
@@ -162,17 +161,18 @@ public class DownloadSummaryPanel extends JPanel {
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
 
-        cardLayout = new CardLayout();
-        cardPanel = new JPanel(cardLayout);
-        cardPanel.setOpaque(false);
-        cardPanel.setBorder(BorderFactory.createEmptyBorder(7,0,4,0));        
+//        cardLayout = new CardLayout();
+//        cardPanel = new JPanel(cardLayout);
+//        cardPanel.setOpaque(false);
+//        cardPanel.setBorder(BorderFactory.createEmptyBorder(7,0,4,0));        
 
-        add(cardPanel, BorderLayout.CENTER);
-
-        cardPanel.add(completePanel, COMPLETE);
-        cardPanel.add(table, TABLE);
-
-        cardLayout.show(cardPanel, TABLE);
+//        add(cardPanel, BorderLayout.CENTER);
+//
+//        cardPanel.add(completePanel, COMPLETE);
+//        cardPanel.add(table, TABLE);
+//
+//        cardLayout.show(cardPanel, TABLE);
+		add(table);
 		
 		updateTitle();
 		adjustVisibility();  
@@ -216,7 +216,7 @@ public class DownloadSummaryPanel extends JPanel {
 
             if (unfinishedList.size() > 0) {//downloads in progress
                 
-                cardLayout.show(cardPanel, TABLE);
+//                cardLayout.show(cardPanel, TABLE);
 
                 if (allList.size() > NUMBER_DISPLAYED) {
                     chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
@@ -226,10 +226,10 @@ public class DownloadSummaryPanel extends JPanel {
                     moreLabel.setVisible(false);
                 }
                 
-            } else {//all downloads complete
-                cardLayout.show(cardPanel, COMPLETE);
-                moreLabel.setVisible(false);
-            }
+            } //else {//all downloads complete
+           //     cardLayout.show(cardPanel, COMPLETE);
+             //   moreLabel.setVisible(false);
+         //   }
             
         } else {
             //Nothing to show
@@ -246,18 +246,13 @@ public class DownloadSummaryPanel extends JPanel {
             comp.addMouseListener(listener);
         }
         
-        for(Component comp : cardPanel.getComponents()){
+        for(Component comp : header.getComponents()){
             comp.addMouseListener(listener);
         }
     }
 
 	private void updateTitle(){
-	    titleLabel.setText(I18n.tr("Downloads"));
-	    
-	    if (unfinishedList.size() > 0) {
-            countLabel.setText(unfinishedList.size() + " ");
-	    }
-	    
+	    header.setCount(allList.size());
 	}
 	
 	
@@ -331,6 +326,27 @@ public class DownloadSummaryPanel extends JPanel {
 	    
 	    }
 	    return 0;
+	}
+	
+	private class SummaryPanelHeader extends JPanel {
+	    private JLabel countLabel;
+	    public SummaryPanelHeader(){
+	        super(new MigLayout());
+	        setOpaque(false);
+	        
+	        JLabel dlLabel = new JLabel(I18n.tr("DL"), JLabel.RIGHT);
+	        FontUtils.bold(dlLabel);
+	        
+	        countLabel = new JLabel(Integer.toString(0, JLabel.LEFT));
+	        add(new JLabel(downloadIcon), "spanx 3, grow, wrap");
+	        add(dlLabel);
+	        add(new JLabel("|"));
+	        add(countLabel);
+	    }
+	    
+	    public void setCount(int count){
+	        countLabel.setText(Integer.toString(count));
+	    }
 	}
 
 }
