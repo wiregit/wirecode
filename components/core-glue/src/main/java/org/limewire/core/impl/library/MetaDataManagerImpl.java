@@ -68,17 +68,17 @@ public class MetaDataManagerImpl implements MetaDataManager {
         try {
             newDoc = limeXMLDocumentFactory.createLimeXMLDocument(input);
         } catch (SAXException e) {
-            e.printStackTrace();
+            coreLocalFileItem.reloadProperties();
             // TODO show error
             throw new UnsupportedOperationException(
                     "Internal Document Error. Data could not be saved.");
         } catch (SchemaNotFoundException e) {
-            e.printStackTrace();
+            coreLocalFileItem.reloadProperties();
             // TODO show error
             throw new UnsupportedOperationException(
                     "Internal Document Error. Data could not be saved.");
         } catch (IOException e) {
-            e.printStackTrace();
+            coreLocalFileItem.reloadProperties();
             // TODO show error
             throw new UnsupportedOperationException(
                     "Internal Document Error. Data could not be saved.");
@@ -101,13 +101,14 @@ public class MetaDataManagerImpl implements MetaDataManager {
         if (LimeXMLUtils.isSupportedFormat(fileDesc.getFileName())) {
             final MetaDataState committed = collection.mediaFileToDisk(fileDesc, result);
             if (committed != MetaDataState.NORMAL && committed != MetaDataState.UNCHANGED) {
-                // TODO revert to values in the old doc
+                coreLocalFileItem.reloadProperties();
                 // TODO show errors
                 throw new UnsupportedOperationException(
                         "Internal Document Error. Data could not be saved.");
             }
         } else if (!collection.writeMapToDisk()) {
-            // TODO show errors
+            coreLocalFileItem.reloadProperties();
+            // TODO show error
             throw new UnsupportedOperationException(
                     "Internal Document Error. Data could not be saved.");
         }

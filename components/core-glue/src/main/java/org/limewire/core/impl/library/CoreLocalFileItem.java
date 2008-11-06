@@ -32,10 +32,15 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 class CoreLocalFileItem implements LocalFileItem {
 
     private final Category category;
-    private volatile Map<FilePropertyKey,Object> propertiesMap;
+
+    private volatile Map<FilePropertyKey, Object> propertiesMap;
+
     private final FileDesc fileDesc;
+
     private final LimeXMLDocument doc;
+
     private final LocalFileDetailsFactory detailsFactory;
+
     private final CreationTimeCache creationTimeCache;
 
     @AssistedInject
@@ -47,17 +52,16 @@ class CoreLocalFileItem implements LocalFileItem {
         this.creationTimeCache = creationTimeCache;
         this.category = getCategory(fileDesc.getFile());
     }
-    
+
     /**
-     * Lazily builds the properties map for this local file item. 
-     * Uses double checked locking to prevent multiple threads from creating this map.
+     * Lazily builds the properties map for this local file item. Uses double
+     * checked locking to prevent multiple threads from creating this map.
      */
     private Map<FilePropertyKey, Object> getPropertiesMap() {
-        if( propertiesMap == null ) {
+        if (propertiesMap == null) {
             synchronized (this) {
-                if(propertiesMap == null) {    
-                    propertiesMap = Collections.synchronizedMap(new HashMap<FilePropertyKey, Object>());
-                    FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(),fileDesc.getFile().lastModified(), fileDesc.getFileSize(), propertiesMap, doc);
+                if (propertiesMap == null) {
+                    reloadProperties();
                 }
             }
         }
@@ -68,12 +72,12 @@ class CoreLocalFileItem implements LocalFileItem {
     public int getFriendShareCount() {
         return fileDesc.getShareListCount();
     }
-    
+
     @Override
     public boolean isSharedWithGnutella() {
         return fileDesc.isSharedWithGnutella();
     }
-    
+
     @Override
     public long getCreationTime() {
         return creationTimeCache.getCreationTimeAsLong(fileDesc.getSHA1Urn());
@@ -113,7 +117,7 @@ class CoreLocalFileItem implements LocalFileItem {
     public Category getCategory() {
         return category;
     }
-    
+
     private static Category getCategory(File file) {
         String ext = FileUtils.getFileExtension(file);
         return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));
@@ -197,25 +201,26 @@ class CoreLocalFileItem implements LocalFileItem {
 
         public Map<String, String> getMetaData() {
             // TODO
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null; // To change body of implemented methods use File |
+            // Settings | File Templates.
         }
 
-    public Set<String> getURNsAsString() {
-        StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
-        Set<String> set = new HashSet<String>();
-        while(st.hasMoreElements()) {
-            set.add(st.nextToken());
+        public Set<String> getURNsAsString() {
+            StringTokenizer st = new StringTokenizer(data.get(Element.urns), " ");
+            Set<String> set = new HashSet<String>();
+            while (st.hasMoreElements()) {
+                set.add(st.nextToken());
+            }
+            return set;
         }
-        return set;
-    }
 
-    public void setURNs(Set<URN> urns) {
-        String urnsString = "";
-        for(URN urn : urns) {
-            urnsString += urn  + " ";
+        public void setURNs(Set<URN> urns) {
+            String urnsString = "";
+            for (URN urn : urns) {
+                urnsString += urn + " ";
+            }
+            data.put(Element.urns, urnsString);
         }
-        data.put(Element.urns, urnsString);
-    }
 
         public Date getCreateTime() {
             return new Date(Long.valueOf(data.get(Element.createTime)));
@@ -228,7 +233,7 @@ class CoreLocalFileItem implements LocalFileItem {
         public String toXML() {
             // TODO StringBuilder instead of concats
             String fileMetadata = "<file>";
-            for(Element element : data.keySet()) {
+            for (Element element : data.keySet()) {
                 fileMetadata += "<" + element.toString() + ">";
                 fileMetadata += data.get(element);
                 fileMetadata += "</" + element.toString() + ">";
@@ -250,24 +255,23 @@ class CoreLocalFileItem implements LocalFileItem {
         return result;
     }
 
-      
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        
+
         if (obj == null) {
             return false;
         }
-        
-        if (getClass() != obj.getClass()){
+
+        if (getClass() != obj.getClass()) {
             return false;
         }
-        
+
         return getFile().equals(((CoreLocalFileItem) obj).getFile());
     }
-    
+
     @Override
     public String toString() {
         return "CoreLocalFileItem for: " + fileDesc;
@@ -277,7 +281,7 @@ class CoreLocalFileItem implements LocalFileItem {
     public String getFileName() {
         return getFileDetails().getFileName();
     }
-    
+
     @Override
     public boolean isShareable() {
         return !fileDesc.isStoreFile();
@@ -296,10 +300,24 @@ class CoreLocalFileItem implements LocalFileItem {
 
     @Override
     public void setProperty(FilePropertyKey key, Object value) {
-        getPropertiesMap().put(key, value);        
+        getPropertiesMap().put(key, value);
     }
-    
+
     public FileDesc getFileDesc() {
         return fileDesc;
+    }
+
+    /**
+     * Reloads the properties map to whatever values are stored in the
+     * LimeXmlDocs for this file.
+     */
+    public void reloadProperties() {
+        synchronized (this) {
+            Map<FilePropertyKey, Object> reloadedMap = Collections
+                    .synchronizedMap(new HashMap<FilePropertyKey, Object>());
+            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
+                    .lastModified(), fileDesc.getFileSize(), reloadedMap, doc);
+            propertiesMap = reloadedMap;
+        }
     }
 }
