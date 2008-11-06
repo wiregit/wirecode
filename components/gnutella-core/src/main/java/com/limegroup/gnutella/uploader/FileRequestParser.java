@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.util.StringUtils;
 
@@ -37,7 +40,7 @@ class FileRequestParser {
      * @throws HttpException 
      */
     public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
-            HttpRequest request, HttpContext context) throws IOException, HttpException {
+            HttpRequest request, HttpContext context) throws IOException, com.limegroup.gnutella.uploader.HttpException {
         
         // Only parse URI requests.
         int index = uri.toLowerCase(Locale.US).indexOf("/uri-res/");
@@ -62,7 +65,7 @@ class FileRequestParser {
         }
     
         FileDesc desc = null;
-        for (FileList fileList : fileListProvider.getFileLists(request, context)) {
+        for (FileList fileList : fileListProvider.getFileLists(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
             desc = fileList.getFileDesc(urn);
             if (desc != null) {
                 break;
@@ -73,6 +76,30 @@ class FileRequestParser {
         } else {
             return new FileRequest(desc, requestType);
         }
+    }
+
+    static String parseFriendId(String uriString) throws com.limegroup.gnutella.uploader.HttpException {
+        try {
+            URI uri = new URI(uriString);
+            String path = uri.getPath();
+            if (path == null) {
+                throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
+            }
+            if (path.endsWith("/")) {
+                int previousSlash = path.lastIndexOf('/', path.length() - 2);
+                if (previousSlash != -1) {
+                    return path.substring(previousSlash + 1, path.length() - 1);
+                }
+            } else {
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash != -1) {
+                    return path.substring(lastSlash + 1);
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
     }
 
     /** Record for storing information about a file request. */
