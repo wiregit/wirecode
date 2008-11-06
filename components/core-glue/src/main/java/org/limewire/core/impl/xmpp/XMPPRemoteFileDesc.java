@@ -92,7 +92,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
         if (authToken == null) {
             return null;
         }
-        return new UsernamePasswordCredentials(address.getId(), StringUtils.getUTF8String(authToken));
+        return new UsernamePasswordCredentials(presence.getFriend().getNetwork().getMyID(), StringUtils.getUTF8String(authToken));
     }
 
     @Override

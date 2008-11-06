@@ -13,6 +13,8 @@ import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.nio.protocol.NHttpResponseTrigger;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.UriPatternMatcher;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,6 +28,8 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class AuthenticationInterceptorImpl implements AuthenticationInterceptor {
+    
+    private static final Log LOG = LogFactory.getLog(AuthenticationInterceptorImpl.class);
     
     private final Authenticator authenticator;
     private final UriPatternMatcher protectedURIs;
@@ -49,6 +53,7 @@ public class AuthenticationInterceptorImpl implements AuthenticationInterceptor 
         authState.setScheme(authScheme);  // TODO other schemes, scheme registry, etc
         context.setAttribute(ServerAuthState.AUTH_STATE, authState);
         if(protectedURIs.lookup(request.getRequestLine().getUri()) != null) {
+            LOG.debugf("entering protected uri: {0}", request.getRequestLine().getUri());
             Credentials credentials = authScheme.authenticate(request);
             if(credentials != null) {
                 authState.setCredentials(credentials);
