@@ -133,7 +133,7 @@ public class HTTPDownloader implements BandwidthTracker {
     static volatile int MIN_PARTIAL_FILE_BYTES = 1*1024*1024; // 1MB
     
     private final RemoteFileDesc _rfd;
-    private RemoteFileDescContext rfdContext;
+    private final RemoteFileDescContext rfdContext;
 	private long _index;
 	private String _filename; 
 	private byte[] _guid;
@@ -318,6 +318,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.thexReaderFactory = thexReaderFactory;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.rfdContext = rfdContext;
         _rfd = rfdContext.getRemoteFileDesc();
         _socket=socket;
         _incompleteFile=incompleteFile;
