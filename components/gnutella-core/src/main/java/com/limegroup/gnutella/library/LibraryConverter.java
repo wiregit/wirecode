@@ -106,8 +106,10 @@ class LibraryConverter {
             }
         });
 
-        for (File file : fileList) {
-            data.setSharedWithGnutella(file, true);
+        if(fileList != null) {
+            for (File file : fileList) {
+                data.setSharedWithGnutella(file, true);
+            }
         }
 
         if(!LibraryUtils.isForcedShareDirectory(directory)) {
@@ -123,8 +125,10 @@ class LibraryConverter {
                 }
             });
             
-            for (File subdir : dirList) {
-                convertDirectory(subdir, extensions, data, convertedDirectories);
+            if(dirList != null) {
+                for (File subdir : dirList) {
+                    convertDirectory(subdir, extensions, data, convertedDirectories);
+                }
             }
         }
     }
