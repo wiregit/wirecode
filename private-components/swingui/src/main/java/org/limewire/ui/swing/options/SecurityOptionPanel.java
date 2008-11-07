@@ -9,7 +9,6 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.spam.SpamManager;
-import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
@@ -125,7 +124,7 @@ public class SecurityOptionPanel extends OptionPanel {
             
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     unsafeOptionPanel, I18n.tr("Configure"),
-                    I18n.tr("Unsafe types"), I18n.tr("Configure Documents and Programs")));
+                    I18n.tr("Configure"), I18n.tr("Configure Documents and Programs")));
             
             add(new JLabel(I18n.tr("For your safety, LimeWire disables you from:")),"wrap");
             add(new JLabel(I18n.tr("-Searching for and sharing Programs with anyone")), "gapleft 25, wrap");
@@ -155,7 +154,6 @@ public class SecurityOptionPanel extends OptionPanel {
 
         private FilterKeywordOptionPanel filterKeywordPanel;
         
-        private JCheckBox unlicensedCheckBox;
         private JCheckBox adultContentCheckBox;
         private JButton filterKeywordsButton;
         
@@ -165,8 +163,6 @@ public class SecurityOptionPanel extends OptionPanel {
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
-            unlicensedCheckBox = new JCheckBox();
-            unlicensedCheckBox.setContentAreaFilled(false);
             adultContentCheckBox = new JCheckBox();
             adultContentCheckBox.setContentAreaFilled(false);
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
@@ -174,9 +170,6 @@ public class SecurityOptionPanel extends OptionPanel {
                     I18n.tr("Filter Keywords"),I18n.tr("Restrict files with certain words from being displayed in search results")));
             
             add(new JLabel(I18n.tr("In search results...")), "wrap");
-            
-            add(unlicensedCheckBox, "split, gapleft 20");
-            add(new JLabel(I18n.tr("Don't show unlicensed or unathorized files")), "wrap");
             
             add(adultContentCheckBox, "split, gapleft 20");
             add(new JLabel(I18n.tr("Don't show adult content")), "wrap");
@@ -187,21 +180,18 @@ public class SecurityOptionPanel extends OptionPanel {
         @Override
         void applyOptions() {
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
-            ContentSettings.USER_WANTS_MANAGEMENTS.setValue(unlicensedCheckBox.isSelected());
             filterKeywordPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
             return  FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
-                    || ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != unlicensedCheckBox.isSelected() 
                     || filterKeywordPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
             adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
-            unlicensedCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue());
             filterKeywordPanel.initOptions();
         }
     }

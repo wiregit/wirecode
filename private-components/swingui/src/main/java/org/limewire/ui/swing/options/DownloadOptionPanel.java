@@ -89,39 +89,31 @@ public class DownloadOptionPanel extends OptionPanel {
     private class SharingDownloadsPanel extends OptionPanel {
 
         private JCheckBox shareCompletedDownloadsCheckBox;
-        private JCheckBox shareIncompleteDownloadsCheckBox;
         
         public SharingDownloadsPanel() {
             super(I18n.tr("Sharing downloads"));
             
             shareCompletedDownloadsCheckBox = new JCheckBox();
             shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
-            shareIncompleteDownloadsCheckBox = new JCheckBox();
-            shareIncompleteDownloadsCheckBox.setContentAreaFilled(false);
             
             add(shareCompletedDownloadsCheckBox);
             add(new JLabel(I18n.tr("Share files downloaded from the LimeWire Network with the LimeWire Network")), "wrap");
-            
-            add(shareIncompleteDownloadsCheckBox);
-            add(new JLabel(I18n.tr("Also share files being downloaded from the LimeWire Network with the LimeWire Network")), "wrap");
         }
         
         @Override
         void applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareCompletedDownloadsCheckBox.isSelected());
-            SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareIncompleteDownloadsCheckBox.isSelected());
+            SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareCompletedDownloadsCheckBox.isSelected());
         }
 
         @Override
         boolean hasChanged() {
-            return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() != shareCompletedDownloadsCheckBox.isSelected()
-                    || SharingSettings.ALLOW_PARTIAL_SHARING.getValue() != shareIncompleteDownloadsCheckBox.isSelected();
+            return SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() != shareCompletedDownloadsCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() {
             shareCompletedDownloadsCheckBox.setSelected(SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue());
-            shareIncompleteDownloadsCheckBox.setSelected(SharingSettings.ALLOW_PARTIAL_SHARING.getValue());
         }
     }
     

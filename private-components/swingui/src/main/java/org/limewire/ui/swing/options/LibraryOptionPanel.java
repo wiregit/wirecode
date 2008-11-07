@@ -3,8 +3,6 @@ package org.limewire.ui.swing.options;
 import java.awt.Dimension;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,7 +21,6 @@ import com.google.inject.Inject;
 public class LibraryOptionPanel extends OptionPanel {
 
     private LibraryManagementPanel libraryManagerPanel;
-    private SmartSharingPanel smartSharingPanel;
     
     private LibraryManager libraryManager;
     
@@ -34,7 +31,6 @@ public class LibraryOptionPanel extends OptionPanel {
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getLibraryManagerPanel(), "pushx, growx");
-        add(getSmartSharingPane(), "pushx, growx");
     }
     
     private OptionPanel getLibraryManagerPanel() {
@@ -43,29 +39,20 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         return libraryManagerPanel;
     }
-    
-    private OptionPanel getSmartSharingPane() {
-        if(smartSharingPanel == null) {
-            smartSharingPanel = new SmartSharingPanel();
-        }
-        return smartSharingPanel;
-    }   
 
     @Override
     void applyOptions() {
         getLibraryManagerPanel().applyOptions();
-        getSmartSharingPane().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return getLibraryManagerPanel().hasChanged() || getSmartSharingPane().hasChanged();
+        return getLibraryManagerPanel().hasChanged();
     }
 
     @Override
     public void initOptions() {
         getLibraryManagerPanel().initOptions();
-        getSmartSharingPane().initOptions();
     }
     
     /**
@@ -104,35 +91,6 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             libraryOptionPanel.initOptions();
-        }
-    }
-    
-    /**
-     * 
-     */
-    private class SmartSharingPanel extends OptionPanel {
-        private JCheckBox smartSharingCheckBox;
-        
-        public SmartSharingPanel() {
-            super(I18n.tr("Smart Sharing"));
-            
-            smartSharingCheckBox = new JCheckBox();
-            
-            add(smartSharingCheckBox);
-            add(new JLabel(I18n.tr("When I share all files of a type, Smart Share new files added of that type.")));
-        }
-
-        @Override
-        void applyOptions() {
-        }
-
-        @Override
-        boolean hasChanged() {
-            return false;
-        }
-
-        @Override
-        public void initOptions() {
         }
     }
 }
