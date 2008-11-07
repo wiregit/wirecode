@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -11,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.Comparator;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -109,7 +111,6 @@ public class DownloadSummaryPanel extends JXPanel {
 		
 		header = new SummaryPanelHeader();
 
-        moreButton = new JButton(I18n.tr("See All"));
 
         Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
@@ -126,9 +127,7 @@ public class DownloadSummaryPanel extends JXPanel {
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
-		table.setRowHeight(28);
-		
-		
+		table.setRowHeight(30);
 		
 		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
@@ -177,10 +176,16 @@ public class DownloadSummaryPanel extends JXPanel {
         tableScroll.setOpaque(false);
         tableScroll.getViewport().setOpaque(false);
         tableScroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+        //necessary for vertical centering our single row table
+        tableScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, table.getRowHeight()));
+        
 
-        add(header);
-        add(tableScroll, "growx, push");
-        add(moreButton);
+        moreButton = new JButton(I18n.tr("See All"));
+        moreButton.setPreferredSize(new Dimension(moreButton.getPreferredSize().width, table.getRowHeight()));
+
+        add(header, "aligny 50%");
+        add(tableScroll, "aligny 50%, growx, push");
+        add(moreButton, "aligny 50%");
 		
 		updateTitle();
 		adjustVisibility();  
@@ -271,15 +276,20 @@ public class DownloadSummaryPanel extends JXPanel {
 		
 	    private final JLabel nameLabel;
 		private final LimeProgressBar progressBar;
+		
+
+	    @Resource private Color progressBarBorderColor;
 
 		public DownloadStatusPanelRenderer() {
 			super(new GridBagLayout());
+			GuiUtils.assignResources(this);
 			
 			nameLabel = new JLabel();
 			progressBar = new LimeProgressBar(0,100);
 			progressBar.setPreferredSize(
 			        new Dimension((int)progressBar.getPreferredSize().getWidth(), 10));
-
+			progressBar.setBorder(BorderFactory.
+	                createLineBorder(progressBarBorderColor));
             nameLabel.setFont(itemFont);
                         
 			setOpaque(false);
@@ -287,9 +297,10 @@ public class DownloadSummaryPanel extends JXPanel {
 
 			gbc.gridx = 0;
 			gbc.gridy = 0;
-			gbc.weightx = 1;
+            gbc.weightx = 1;
+            gbc.weighty = 1;
 			gbc.fill = GridBagConstraints.BOTH;
-			gbc.anchor = GridBagConstraints.WEST;
+			gbc.anchor = GridBagConstraints.SOUTH;
 			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
 			nameLabel.setOpaque(false);
 			gbc.insets = new Insets(0, LEFT_MARGIN, 0, LEFT_MARGIN);
@@ -297,6 +308,7 @@ public class DownloadSummaryPanel extends JXPanel {
 
 			gbc.gridy = 1;
 			gbc.weightx = 1;
+            gbc.anchor = GridBagConstraints.NORTH;
 			add(progressBar, gbc);
 		}
 		
