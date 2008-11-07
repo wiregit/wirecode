@@ -182,6 +182,15 @@ implements TableCellEditor, TableCellRenderer {
 
         final SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, row, remoteHostActions, properties);
 
+        itemIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(e.getButton() == MouseEvent.BUTTON3) {
+                    searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
+                }
+            }
+        });
+        
         if (editorComponent == null) {
             editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
 
@@ -204,9 +213,7 @@ implements TableCellEditor, TableCellRenderer {
                     if(e.getButton() == MouseEvent.BUTTON1) {
                         actionButtonPanel.startDownload();
                         table.editingStopped(new ChangeEvent(table));
-                    } else if(e.getButton() == MouseEvent.BUTTON3) {
-                        searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
-                    }
+                    } 
                 }
             });
         }
