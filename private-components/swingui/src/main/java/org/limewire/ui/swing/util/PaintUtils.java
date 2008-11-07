@@ -26,29 +26,7 @@ public class PaintUtils {
         // Reset antialiasing propery
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
     }
-    
-    /**
-     * Draws a rounded border like box at a given location and size with 
-     *  one pixel inner shadowing/beveling
-     */
-    public static void drawRoundedBorder(Graphics g, int x, int y, int width, 
-            int height, int arcWidth, int arcHeight, Color border, 
-            Color bevel1, Color bevel2, Color bevel3) {
 
-        // Draw shading/bevel
-        g.setColor(bevel1);
-        g.drawRoundRect(x, y+1, width, height-2, arcWidth, arcHeight);
-        g.drawLine(x+arcWidth/2, y+height-1, x+width-arcWidth/2, y+height-1);
-        g.setColor(bevel2);
-        g.drawLine(x+arcWidth/2, y+1, x+width-arcWidth/2, y+1);
-        g.setColor(bevel3);
-        g.drawLine(x+width-1, y+arcHeight/2, x+width-1, y+height-arcHeight/2);
-        
-        g.setColor(border);
-        g.drawRoundRect(x, y, width, height, arcWidth, arcHeight);
-    }
-    
-    
     /**
      * Produces a new lightened colour value by a given intensity from a base colour 
      */

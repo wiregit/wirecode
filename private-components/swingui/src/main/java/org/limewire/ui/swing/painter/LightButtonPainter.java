@@ -1,11 +1,16 @@
 package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 
 import javax.swing.ButtonModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.CompoundPainter;
+import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PaintUtils;
 
@@ -16,7 +21,7 @@ import com.google.inject.Singleton;
  */
 
 @Singleton
-public class LightButtonPainter extends AbstractButtonPainter {
+public class LightButtonPainter implements Painter<JXButton> {
         
     @Resource
     private int arcWidth;
@@ -39,32 +44,62 @@ public class LightButtonPainter extends AbstractButtonPainter {
     @Resource
     private Color highlightGradientBottom;
     
+    private final Painter<JXButton> normalPainter;
+    private final Painter<JXButton> clickedPainter;
+    private final Painter<JXButton> hoveredPainter;
+    
+    
+    private Painter<JXButton> createPainter(Color gradientTop, Color gradientBottom, Color border, 
+            Color bevel1, Color bevel2, Color bevel3) {
+        
+        CompoundPainter<JXButton> compoundPainter = new CompoundPainter<JXButton>();
+        
+        RectanglePainter<JXButton> painter = new RectanglePainter<JXButton>();
+        
+        painter.setRounded(true);
+        painter.setFillPaint(new GradientPaint(0,0, gradientTop, 0, 1, gradientBottom, false));
+        painter.setRoundWidth(this.arcWidth);
+        painter.setRoundHeight(this.arcHeight);
+        painter.setFillVertical(true);
+        painter.setFillHorizontal(true);
+        painter.setPaintStretched(true);
+        painter.setAntialiasing(true);
+        
+        compoundPainter.setPainters(painter, new BorderPainter(this.arcWidth, this.arcHeight,
+                border, bevel1, bevel2, bevel3));
+        
+        return compoundPainter;
+    }
+    
     public LightButtonPainter() {
         GuiUtils.assignResources(this);
-
-        props.arcHeight = this.arcHeight;
-        props.arcWidth = this.arcWidth;
-
-        props.border = this.borderColour;
         
-        props.borderBevel1 = PaintUtils.lighten(this.borderColour, 60);
-        props.borderBevel2 = PaintUtils.lighten(this.borderColour, 80);
-        props.borderBevel3 = PaintUtils.lighten(this.borderColour, 100);
+        Color bevel1 = PaintUtils.lighten(this.borderColour, 60);
+        Color bevel2 = PaintUtils.lighten(this.borderColour, 80);
+        Color bevel3 = PaintUtils.lighten(this.borderColour, 100);
+        
+        this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
+                this.borderColour, bevel1, bevel2, bevel3);
+        
+        this.hoveredPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
+                this.borderColour, bevel1, bevel2, bevel3);
+        
+        this.clickedPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
+                this.borderColour, bevel1, bevel2, bevel3);
     }
     
     @Override
-    protected void setButtonColours(JXButton button) {    
-        
-        ButtonModel model = button.getModel();
+    public void paint(Graphics2D g, JXButton object, int width, int height) {
+        ButtonModel model = object.getModel();
 
-        //isSelected() for toggle buttons
         if(model.isPressed() || model.isSelected()) {
-            props.backgroundGradientTop = this.backgroundGradientTop;
-            props.backgroundGradientBottom = this.backgroundGradientBottom;
+            this.clickedPainter.paint(g, object, width, height);
+        } 
+        else if (model.isRollover()) {
+            this.hoveredPainter.paint(g, object, width, height);
         } 
         else {
-            props.backgroundGradientTop = this.highlightGradientTop;
-            props.backgroundGradientBottom = this.highlightGradientBottom;
-        }
+            this.normalPainter.paint(g, object, width, height);
+        }        
     }
 }
