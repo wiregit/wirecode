@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -274,16 +273,18 @@ public class LimeComboBox extends JXButton {
         
         g2.setFont(this.getFont());
         
-        FontMetrics fm = g2.getFontMetrics();
-        
         int ix1 = 0;
         int ix2 = 0;
+        int iy2 = 0;
         
         if (this.getBorder() != null) {
             Insets insets = this.getBorder().getBorderInsets(this);
             ix1 = insets.left;
             ix2 = insets.right;
+            iy2 = insets.bottom;
         }
+        
+        int y = this.getHeight() - this.getHeight()/2 + g.getFontMetrics().getAscent()/2 - iy2;
         
         Icon icon = this.getIcon();
                 
@@ -299,9 +300,9 @@ public class LimeComboBox extends JXButton {
             g2.setColor(this.getForeground());
         }
             
-        
         if (this.getText() != null) {
-            PaintUtils.drawSmoothString(g2, this.getText(), ix1, fm.getAscent()+2);
+            PaintUtils.drawSmoothString(g2, this.getText(), ix1,  
+                    y);
             
             if (icon != null) {
                 icon.paintIcon(this, g2, this.getWidth() - ix2 + 3, 
@@ -309,7 +310,8 @@ public class LimeComboBox extends JXButton {
             }
         } else {
             if (this.selectedAction != null) {
-                PaintUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, fm.getAscent()+3);
+                PaintUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, 
+                        y);
             }
             
             if (icon != null) {
@@ -393,13 +395,17 @@ public class LimeComboBox extends JXButton {
             iy1 = insets.top;
             iy2 = insets.bottom;
         }
+
+        this.setMinimumSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
+                (int)labelRect.getHeight()+iy1+iy2));
+        
+        int height = (int)this.getPreferredSize().getHeight();
+        if (height < this.getMinimumSize().getHeight()) height = (int)this.getMinimumSize().getHeight();
         
         this.setPreferredSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
-                (int)labelRect.getHeight()  + iy1 + iy2));
+                height));
         
         this.setSize(this.getPreferredSize());
-        
-        this.setMinimumSize(this.getPreferredSize());
                 
         this.revalidate();
         this.repaint();

@@ -1,15 +1,15 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JTextField;
+import javax.swing.text.BadLocationException;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
@@ -23,6 +23,9 @@ import org.limewire.ui.swing.util.PaintUtils;
 public class PromptTextField extends JTextField implements FocusListener {
     
     private String promptText;
+    
+    @Resource
+    private Color promptColour;
     
     @Resource
     private int arcWidth;
@@ -42,16 +45,14 @@ public class PromptTextField extends JTextField implements FocusListener {
     
     public PromptTextField() {
         GuiUtils.assignResources(this);
-        
+
         this.borderBevel1 = PaintUtils.lighten(this.borderColour, 120);
         this.borderBevel2 = PaintUtils.lighten(this.borderColour, 80); 
         this.borderBevel3 = PaintUtils.lighten(this.borderColour, 100);
         
         TextFieldClipboardControl.install(this);
-        addFocusListener(this);
+        this.addFocusListener(this);
         this.setOpaque(false);
-        
-        this.setPreferredSize(new Dimension(200, 22));
         
         this.setBorder(BorderFactory.createEmptyBorder(2,10,2,12));
         this.backgroundPainter = createBackgroundPainter();
@@ -128,15 +129,25 @@ public class PromptTextField extends JTextField implements FocusListener {
 
     }
     
-    private static Painter<PromptTextField> createPromptPainter() {
+    private Painter<PromptTextField> createPromptPainter() {
         AbstractPainter<PromptTextField> painter = new AbstractPainter<PromptTextField>() {
 
             @Override
             protected void doPaint(Graphics2D g, PromptTextField object, int width, int height) {
-                g.setColor(Color.LIGHT_GRAY);
-                FontMetrics fm = g.getFontMetrics();
-                int x = object.getInsets().left;
-                g.drawString(object.getPromptText(), x, fm.getAscent() + 3);
+                g.setColor(promptColour);
+                g.setFont(object.getFont());
+                
+                int dot  = object.getCaret().getDot();
+                Rectangle r = null;
+                
+                // Find the carat position
+                try {
+                    r = object.modelToView(dot);
+                } catch (BadLocationException e) { return; }
+                
+                int x = r.x;
+                int y = r.y + r.height - 3;
+                g.drawString(object.getPromptText(), x, y);
             }
         };
         

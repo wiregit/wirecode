@@ -83,7 +83,7 @@ public class LimeComboBoxFactory {
         LimeComboBox box = new LimeComboBox(items);
         
         box.setBackgroundPainter(this.lightButtonPainter);
-        box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         box.setIcon(this.miniRegIcon);
         box.setFont(this.fullTextFont);
         box.setForeground(this.miniRegTextColour);
