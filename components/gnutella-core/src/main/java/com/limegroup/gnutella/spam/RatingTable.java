@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
+// import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -274,6 +274,7 @@ public class RatingTable implements Service {
         } finally {
             IOUtils.close(oos);
         }
+        /*
         // DEBUG: dump the ratings to a human-readable file
         PrintWriter dump = null;
         try {
@@ -286,6 +287,7 @@ public class RatingTable implements Service {
         } finally {
             IOUtils.close(dump);
         }
+        */
 	}
     
 	private static File getSpamDat() {

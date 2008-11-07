@@ -25,6 +25,8 @@ public class URNFilter implements SpamFilter {
     // Called when the spam service starts and on SIMPP updates
     public void refreshURNs() {
         blacklist.clear();
+        if(!FilterSettings.USE_NETWORK_FILTER.getValue())
+            return;
         try {
             for(String s : FilterSettings.FILTERED_URNS_LOCAL.getValue())
                 blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
