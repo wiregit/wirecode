@@ -429,7 +429,7 @@ implements TableCellEditor, TableCellRenderer {
     private Icon getIcon(VisualSearchResult vsr) {
         if (vsr.isSpam()) {
             return spamIcon;
-        } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+        } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING || vsr.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING) {
             return downloadingIcon;
         } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
             return libraryIcon;

@@ -8,6 +8,7 @@ package org.limewire.ui.swing.search.model;
  */
 public enum BasicDownloadState {
     NOT_STARTED,
+    PRE_EXISTING_DOWNLOADING,
     DOWNLOADING,
     DOWNLOADED,
     LIBRARY

@@ -21,12 +21,15 @@ public class ListViewRowHeightRuleTest extends TestCase {
     }
 
     public void testHeadingOnly() {
+        assertStuff(BasicDownloadState.PRE_EXISTING_DOWNLOADING, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADING, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADED, "bar", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.LIBRARY, "bar", HeadingOnly, true, true);
     }
     
     public void testHeadingOnlyWhenSubheadingAndMetadataIsEmptyOrNull() {
+        assertStuff(BasicDownloadState.PRE_EXISTING_DOWNLOADING, "", HeadingOnly, true, true);
+        assertStuff(BasicDownloadState.PRE_EXISTING_DOWNLOADING, null, HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADING, "", HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADING, null, HeadingOnly, true, true);
         assertStuff(BasicDownloadState.DOWNLOADED, "", HeadingOnly, true, true);

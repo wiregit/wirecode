@@ -27,6 +27,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
             bldr.append(tr("{0} is Spam", headingText));
         } else {
             switch(downloadState) {
+            case PRE_EXISTING_DOWNLOADING:
             case DOWNLOADING:
                 bldr.append(tr("You are <a href=\"#downloading\">downloading</a> {0}", headingText));
                 break;

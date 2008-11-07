@@ -47,8 +47,8 @@ public class AlreadyDownloadedListEventListener implements ListEventListener<Vis
                     // nice to lookup download by urn potentially.
                     for (DownloadItem downloadItem : downloads) {
                         if (urn.equals(downloadItem.getUrn())) {
-                            downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(visualSearchResult));
-                            visualSearchResult.setDownloadState(BasicDownloadState.DOWNLOADING);
+                            downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(visualSearchResult, true));
+                            visualSearchResult.setDownloadState(BasicDownloadState.PRE_EXISTING_DOWNLOADING);
                             break;
                         }
                     }

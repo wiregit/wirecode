@@ -258,7 +258,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                     // went through.. checking for conflicts, etc.
                     DownloadItem di = resultDownloader.addDownload(
                         search, vsr.getCoreSearchResults());
-                    di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                    di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr, false));
                      
                     vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                 } catch (SaveLocationException sle) {

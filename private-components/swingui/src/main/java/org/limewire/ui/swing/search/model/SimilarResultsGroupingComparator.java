@@ -27,10 +27,17 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
         int compare = Boolean.valueOf(spam1).compareTo(Boolean.valueOf(spam2));
 
         if(compare == 0 && SearchSettings.MOVE_DOWNLOADED_FILES_TO_BOTTOM.getValue()) {
-            boolean library1 = parent1.getDownloadState() == BasicDownloadState.LIBRARY;
-            boolean library2 = parent2.getDownloadState() == BasicDownloadState.LIBRARY;
+            boolean library1 = o1.getDownloadState() == BasicDownloadState.LIBRARY;
+            boolean library2 = o2.getDownloadState() == BasicDownloadState.LIBRARY;
             compare = Boolean.valueOf(library1).compareTo(Boolean.valueOf(library2));
+            
+            if(compare == 0) {
+                boolean preDownload1 = o1.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING;
+                boolean preDownload2 = o2.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING;
+                compare = Boolean.valueOf(preDownload1).compareTo(Boolean.valueOf(preDownload2));
+            }
         }
+        
         
         if (compare == 0) {
             // if both match, try our comparison algorithm

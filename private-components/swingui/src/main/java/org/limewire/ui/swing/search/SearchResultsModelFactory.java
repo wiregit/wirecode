@@ -49,11 +49,7 @@ public class SearchResultsModelFactory {
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory
                 .newSimilarResultsDetector();
 
-        if(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
-            GroupingListEventListener groupingListEventListener = new GroupingListEventListener(
-                similarResultsDetector);
-            visualSearchResults.addListEventListener(groupingListEventListener);
-        }
+        
         SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
                 similarResultsDetector);
         visualSearchResults.addListEventListener(spamListEventListener);
@@ -61,6 +57,11 @@ public class SearchResultsModelFactory {
         AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
         visualSearchResults.addListEventListener(alreadyDownloadedListEventListener);
         
+        if(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
+            GroupingListEventListener groupingListEventListener = new GroupingListEventListener(
+                similarResultsDetector);
+            visualSearchResults.addListEventListener(groupingListEventListener);
+        }
 
         return searchResultsModel;
     }

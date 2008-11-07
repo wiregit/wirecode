@@ -30,6 +30,8 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
         String expected = 
             DOCUMENT_START + "You are <a href=\"#downloading\">downloading</a> <span class=\"title\">Night life</span>" + DOCUMENT_END;
         assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.DOWNLOADING, false, false));
+        assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.PRE_EXISTING_DOWNLOADING, false, false));
+
     }
     
     public void testFileInLibraryHeadingDocument() {
@@ -51,6 +53,7 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
         String expected = 
             DOCUMENT_START + "<span class=\"title\">Night life</span> is Spam" + DOCUMENT_END;
        assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.NOT_STARTED, false, true));
+       assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.PRE_EXISTING_DOWNLOADING, false, true));
        assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.DOWNLOADING, false, true));
        assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.DOWNLOADED, false, true));
        assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.LIBRARY, false, true));
