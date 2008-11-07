@@ -208,4 +208,14 @@ public class MockVisualSearchResult implements VisualSearchResult {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public boolean isPreExistingDownload() {
+        return false;
+    }
+
+    @Override
+    public void setPreExistingDownload(boolean preExistingDownload) {
+        
+    }
 }

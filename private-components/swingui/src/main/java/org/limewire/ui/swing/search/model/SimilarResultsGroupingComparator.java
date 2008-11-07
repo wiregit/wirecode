@@ -32,8 +32,8 @@ public abstract class SimilarResultsGroupingComparator implements Comparator<Vis
             compare = Boolean.valueOf(library1).compareTo(Boolean.valueOf(library2));
             
             if(compare == 0) {
-                boolean preDownload1 = o1.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING;
-                boolean preDownload2 = o2.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING;
+                boolean preDownload1 = o1.isPreExistingDownload();
+                boolean preDownload2 = o2.isPreExistingDownload();
                 compare = Boolean.valueOf(preDownload1).compareTo(Boolean.valueOf(preDownload2));
             }
         }

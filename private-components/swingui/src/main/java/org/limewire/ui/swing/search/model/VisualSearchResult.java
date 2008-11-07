@@ -62,4 +62,8 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile {
     String getSubHeading();
     
     double getRelevance();
+    
+    boolean isPreExistingDownload();
+    void setPreExistingDownload(boolean preExistingDownload);
+
 }

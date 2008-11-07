@@ -48,6 +48,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     
     private Boolean spamCache;
     
+    private boolean preExistingDownload = false;
+    
     private Double relevance = null;
 
     public SearchResultAdapter(List<SearchResult> sourceValue, PropertiableHeadings propertiableHeadings) {
@@ -287,5 +289,15 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
             this.relevance = sum;
         } 
         return relevance;
+    }
+
+    @Override
+    public boolean isPreExistingDownload() {
+        return preExistingDownload;
+    }
+
+    @Override
+    public void setPreExistingDownload(boolean preExistingDownload) {
+        this.preExistingDownload = preExistingDownload;
     }
 }

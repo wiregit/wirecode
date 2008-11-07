@@ -13,11 +13,8 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 public class DownloadItemPropertyListener implements PropertyChangeListener {
     private final VisualSearchResult vsr;
 
-    private final boolean preExistingDownload;
-
-    public DownloadItemPropertyListener(VisualSearchResult vsr, boolean preExistingDownload) {
+    public DownloadItemPropertyListener(VisualSearchResult vsr) {
         this.vsr = vsr;
-        this.preExistingDownload = preExistingDownload;
     }
 
     public void propertyChange(PropertyChangeEvent evt) {
@@ -31,11 +28,7 @@ public class DownloadItemPropertyListener implements PropertyChangeListener {
                 vsr.setDownloadState(BasicDownloadState.NOT_STARTED);
                 break;
             case DONE:
-                if (preExistingDownload) {
-                    vsr.setDownloadState(BasicDownloadState.LIBRARY);
-                } else {
-                    vsr.setDownloadState(BasicDownloadState.DOWNLOADED);
-                }
+                vsr.setDownloadState(BasicDownloadState.DOWNLOADED);
                 break;
             case ERROR:
             case CONNECTING:
@@ -45,11 +38,7 @@ public class DownloadItemPropertyListener implements PropertyChangeListener {
             case STALLED:
             case FINISHING:
             case DOWNLOADING:
-                if (preExistingDownload) {
-                    vsr.setDownloadState(BasicDownloadState.PRE_EXISTING_DOWNLOADING);
-                } else {
-                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                }
+                vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                 break;
             }
         }

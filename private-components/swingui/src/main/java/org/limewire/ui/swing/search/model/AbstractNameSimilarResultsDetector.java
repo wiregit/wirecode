@@ -18,7 +18,7 @@ public abstract class AbstractNameSimilarResultsDetector extends AbstractSimilar
 
     @Override
     public void detectSimilarResult(VisualSearchResult visualSearchResult) {
-        if (!visualSearchResult.isSpam() && !(visualSearchResult.getDownloadState() == BasicDownloadState.LIBRARY) && !(visualSearchResult.getDownloadState() == BasicDownloadState.PRE_EXISTING_DOWNLOADING)) {
+        if (!visualSearchResult.isSpam() && !(visualSearchResult.getDownloadState() == BasicDownloadState.LIBRARY) && !visualSearchResult.isPreExistingDownload()) {
             Set<String> names = getCleanIdentifyingStrings(visualSearchResult);
             VisualSearchResult parent = null;
             for (String name : names) {
