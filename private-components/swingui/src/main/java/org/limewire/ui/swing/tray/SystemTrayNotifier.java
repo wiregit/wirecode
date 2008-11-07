@@ -123,6 +123,7 @@ class SystemTrayNotifier implements TrayNotifier {
 	public boolean isExitEvent(EventObject event) {
 	    if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue())
 	        return true;
+	    
 	    if(event != null && event.getSource() instanceof MenuItem) {
 	        MenuItem item = (MenuItem)event.getSource();
 	        return item.getParent() == popupMenu;

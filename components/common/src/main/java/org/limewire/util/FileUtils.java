@@ -115,6 +115,15 @@ public class FileUtils {
         }
     }
     
+    /** Safely canonicalizes a file, with no IOExceptions. */
+    public static File canonicalize(File f) {
+        try {
+            return getCanonicalFile(f);
+        } catch(IOException iox) {
+            return f;
+        }
+    }
+    
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
         try {

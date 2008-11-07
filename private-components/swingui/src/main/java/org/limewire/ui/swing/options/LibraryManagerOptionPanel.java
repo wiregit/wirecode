@@ -3,7 +3,6 @@ package org.limewire.ui.swing.options;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.ArrayList;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -17,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.library.manager.LibraryManagerItem;
 import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
@@ -63,7 +61,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     }
     
     private void createComponents(Action okAction, Action cancelAction) {
-        treeTable = new LibraryManagerTreeTable();
+        treeTable = new LibraryManagerTreeTable(libraryData);
         addFolderButton = new JButton(new AddDirectoryAction(this));
         
         musicCheckBox = new JCheckBox();
@@ -96,24 +94,24 @@ public class LibraryManagerOptionPanel extends OptionPanel {
 
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
+        LibraryManagerModel model = treeTable.getLibraryModel();
+        model.persist(libraryData);
     }
 
     @Override
     boolean hasChanged() {
-        // TODO Auto-generated method stub
-        return false;
+        LibraryManagerModel model = treeTable.getLibraryModel();
+        return model.hasChanged(libraryData);
     }
 
     @Override
     public void initOptions() {
-        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
+        RootLibraryManagerItem root = new RootLibraryManagerItem();
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            items.add(new LibraryManagerItemImpl(libraryData, file, true));
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, true));
         }
 
-        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
+        treeTable.setTreeTableModel(new LibraryManagerModel(root));
     }
     
     private class AddDirectoryAction extends AbstractAction {
@@ -129,15 +127,16 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            File directory = FileChooser.getInputDirectory(parent, null);
-            
-            if(directory == null)
+            File folder = FileChooser.getInputDirectory(parent);            
+            if(folder == null) {
                 return;
-            
-//            try {
-//                String newDirectory = directory.getCanonicalPath();
-//                currentDirectoryTextField.setText(newDirectory);
-//            }catch(IOException ioe) {}
+            } else {
+                if(libraryData.isDirectoryAllowed(folder)) {
+                    treeTable.addDirectory(folder);
+                } else {
+                    // TODO: Display message?
+                }
+            }
         }
     }    
 }

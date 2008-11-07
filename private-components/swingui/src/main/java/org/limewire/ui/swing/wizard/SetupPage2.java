@@ -5,7 +5,6 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -21,7 +20,6 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.library.manager.LibraryManagerItem;
 import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
@@ -76,7 +74,7 @@ public class SetupPage2 extends WizardPage {
         
         addFolderButton = new JButton(new AddDirectoryAction(SetupPage2.this));
         
-        treeTable = new LibraryManagerTreeTable();
+        treeTable = new LibraryManagerTreeTable(libraryData);
         initManualPanel();
         treeTableScrollPane = new JScrollPane(treeTable);
         
@@ -104,19 +102,20 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void initManualPanel() {
-        ArrayList<LibraryManagerItem> items = new ArrayList<LibraryManagerItem>();
+        RootLibraryManagerItem root = new RootLibraryManagerItem();
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            items.add(new LibraryManagerItemImpl(libraryData, file, true));
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, true));
         }
 
-        treeTable.setTreeTableModel(new LibraryManagerModel(new RootLibraryManagerItem(items)));
+        treeTable.setTreeTableModel(new LibraryManagerModel(root));
     }
 
 
     @Override
     public void applySettings() {
         InstallSettings.SCAN_FILES.setValue(true);
-        //TODO: actually set the values
+        LibraryManagerModel model = treeTable.getLibraryModel();
+        model.persist(libraryData);
     }
     
     private void setTreeTableVisiable(boolean visible){
@@ -144,12 +143,16 @@ public class SetupPage2 extends WizardPage {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            File directory = FileChooser.getInputDirectory(parent, null);
-            
-            if(directory == null)
+            File folder = FileChooser.getInputDirectory(parent);            
+            if(folder == null) {
                 return;
-            
-//TODO: do something with the directory
+            } else {
+                if(libraryData.isDirectoryAllowed(folder)) {
+                    treeTable.addDirectory(folder);
+                } else {
+                    // TODO: Display message?
+                }
+            }
         }
     } 
  

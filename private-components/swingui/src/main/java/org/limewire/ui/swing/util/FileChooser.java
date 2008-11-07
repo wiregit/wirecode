@@ -36,6 +36,23 @@ public final class FileChooser {
         else 
             return dir;
     }
+   
+    public static File getInputDirectory(Component parent) {
+        return getInputDirectory(parent, 
+                I18nMarker.marktr("Select Folder"), 
+                I18nMarker.marktr("Select"),
+                null,
+                null);
+    }
+    
+    public static File getInputDirectory(Component parent, FileFilter filter) {
+        return getInputDirectory(parent, 
+                I18nMarker.marktr("Select Folder"), 
+                I18nMarker.marktr("Select"),
+                null,
+                filter);
+    }
+    
 
     /**
      * Same as <tt>getInputFile</tt> that takes no arguments, except this

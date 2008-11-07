@@ -19,6 +19,9 @@ public interface LibraryData {
      * Returns a list of all directories that will be managed recursively.
      */
     List<File> getDirectoriesToManageRecursively();
+    
+    /** Returns a list of all excluded directories. */
+    List<File> getDirectoriesToExcludeFromManaging();
 
     /**
      * Returns a collection of all extensions that define which

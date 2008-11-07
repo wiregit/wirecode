@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.library;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class ManagedFileListStub extends AbstractFileListStub implements ManagedFileList {
 
+    @Override
+    public List<File> getDirectoriesToExcludeFromManaging() {
+        return new ArrayList<File>();
+    }
 
     @Override
     public void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener) {

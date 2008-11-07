@@ -223,6 +223,16 @@ class LibraryFileData extends AbstractSettingsGroup {
         return canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.getValue()).equals(folder);
     }
     
+    /** Gets the list of directories to exclude from recursive management. */
+    List<File> getDirectoriesToExcludeFromManaging() {
+        lock.readLock().lock();
+        try {
+            return new ArrayList<File>(directoriesNotToManage);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }    
+    
     /** Sets the new directory to exclude from recursive management. */
     void setDirectoriesToExcludeFromManaging(Collection<File> folders) {
         lock.writeLock().lock();

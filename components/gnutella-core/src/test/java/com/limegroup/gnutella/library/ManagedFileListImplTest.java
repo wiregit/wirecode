@@ -521,5 +521,8 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertContainsFiles(fileList, f4, f7);     
     }
     
+    // TODO: Test that adding folders / setting manageable folders / changing extensions
+    //       does not forcibly exclude the file from adding again, nor does adding folders
+    //       listen to previously excluded files.
 
 }

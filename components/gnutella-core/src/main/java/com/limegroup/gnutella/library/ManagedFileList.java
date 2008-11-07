@@ -76,4 +76,7 @@ public interface ManagedFileList extends FileList {
      * Returns true if the directory is excluded from recursive management.
      */
     boolean isDirectoryExcluded(File folder);
+    
+    /** Returns all directories that are excluded from managing. */
+    List<File> getDirectoriesToExcludeFromManaging();
 }

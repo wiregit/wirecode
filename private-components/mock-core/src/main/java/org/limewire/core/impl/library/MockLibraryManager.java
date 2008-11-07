@@ -160,6 +160,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     private class LibraryDataAdapter implements LibraryData {
 
         @Override
+        public List<File> getDirectoriesToExcludeFromManaging() {
+            return new ArrayList<File>();
+        }
+        
+        @Override
         public void setManagedFolders(Collection<File> recursiveFoldersToManage,
                 Collection<File> foldersToExclude) {
         }

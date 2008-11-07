@@ -329,7 +329,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                         managedDirectories.removeAll(removedDirs);
                         for(FileDesc fd : files) {
                             if(fd != null && removedDirs.contains(fd.getFile().getParentFile()) && hasManageableExtension(fd.getFile())) {
-                                removed.add(removeInternal(fd.getFile()));
+                                removed.add(removeInternal(fd.getFile(), false));
                             }
                         }
                     }
@@ -347,7 +347,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
                 List<ListeningFuture<FileDesc>> added = new ArrayList<ListeningFuture<FileDesc>>();
                 for(File dir : addedDirs) {
-                    updateManagedDirectories(extensions, dir, startRevision, false, false, added);
+                    updateManagedDirectories(extensions, dir, startRevision, false, false, true, added);
                 }
                 return added;
             }
@@ -402,7 +402,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             @Override
             public List<ListeningFuture<FileDesc>> call() {
                 List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-                updateManagedDirectories(extensions, folder, revision.get(), true, true, futures);
+                updateManagedDirectories(extensions, folder, revision.get(), true, true, true, futures);
                 return futures;
             }
         });
@@ -555,12 +555,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                         String ext = FileUtils.getFileExtension(fd.getFile()).toLowerCase(Locale.US);
                         
                         if(managedDirectories.contains(parent) && removedExtensions.contains(ext)) {
-                            removed.add(removeInternal(fd.getFile()));
+                            removed.add(removeInternal(fd.getFile(), false));
                         }
                     }
                 }
             }
-
+            
             getLibraryData().setManagedExtensions(newManagedExtensions);
             extensions.clear();
             extensions.addAll(getLibraryData().getManagedExtensions());
@@ -589,7 +589,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                     }
                     
                     for(File directory : directoryCopy) {
-                        updateManagedDirectories(newExtensions, directory, rev, false, false, futures);
+                        updateManagedDirectories(newExtensions, directory, rev, false, false, false, futures);
                     }
                     return futures;
                 }
@@ -604,7 +604,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     @Override
     public List<File> getDirectoriesToManageRecursively() {
-        return fileData.getDirectoriesToManageRecursively();
+        return getLibraryData().getDirectoriesToManageRecursively();
+    }
+    
+    @Override
+    public List<File> getDirectoriesToExcludeFromManaging() {
+        return getLibraryData().getDirectoriesToExcludeFromManaging();
     }
     
     @Override
@@ -827,7 +832,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         LOG.debugf("Removing file: {0}", file);                
 
         file = canonicalize(file);
-        FileDesc fd = removeInternal(file);        
+        FileDesc fd = removeInternal(file, true);        
         if(fd != null) {
             dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fd));
         }
@@ -841,12 +846,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * 
      * The file should be canonicalized already.
      */
-    private FileDesc removeInternal(File file) {
+    private FileDesc removeInternal(File file, boolean allowExclude) {
         FileDesc fd;
         boolean exclude;
         rwLock.writeLock().lock();
         try {
-            exclude = managedDirectories.contains(file.getParentFile()) && hasManageableExtension(file);
+            exclude = allowExclude && managedDirectories.contains(file.getParentFile()) && hasManageableExtension(file);
             fd = fileToFileDescMap.get(file);
             if(fd != null) {
                 removeFileDesc(file, fd);
@@ -905,7 +910,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
         oldName = canonicalize(oldName);
-        FileDesc fd = removeInternal(oldName);        
+        FileDesc fd = removeInternal(oldName, false);        
         if (fd != null) {
             // TODO: It's dangerous to prepopulate, because we might actually
             //       be called with wrong data, giving us wrong URNs.
@@ -923,7 +928,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         LOG.debugf("File Changed: {0}", file);
 
         file = canonicalize(file);
-        FileDesc fd = removeInternal(file);
+        FileDesc fd = removeInternal(file, false);
         if (fd != null) {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
@@ -1008,8 +1013,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
         
         // TODO: We want to always share this stuff, not just approved extensions.
-        updateManagedDirectories(extensions, LibraryUtils.PROGRAM_SHARE, rev, false, true, futures);
-        updateManagedDirectories(extensions, LibraryUtils.PREFERENCE_SHARE, rev, false, true, futures);
+        updateManagedDirectories(extensions, LibraryUtils.PROGRAM_SHARE, rev, false, true, true, futures);
+        updateManagedDirectories(extensions, LibraryUtils.PREFERENCE_SHARE, rev, false, true, true, futures);
 
         List<File> directories = getLibraryData().getDirectoriesToManageRecursively();
         // Sorting is not terribly necessary, but we'll do it anyway...
@@ -1023,7 +1028,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             if(rev != revision.get()) {
                 break;
             }
-            updateManagedDirectories(extensions, directory, rev, true, true, futures);        
+            updateManagedDirectories(extensions, directory, rev, true, true, false, futures);        
         }
         
         Set<File> managedDirs = new HashSet<File>();
@@ -1056,7 +1061,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * expected revision, this returns immediately.
      */
     private void updateManagedDirectories(Collection<String> managedExts, File directory, int rev,
-            boolean recurse, boolean validateDir,
+            boolean recurse, boolean validateDir, boolean forceExclusions,
             List<ListeningFuture<FileDesc>> futures) {
         LOG.debugf("Adding [{0}] to managed directories", directory);
          
@@ -1091,7 +1096,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      
          // STEP 2:
          // Scan subdirectory for the amount of shared files.
-         File[] fileList = directory.listFiles(new ManageableFileFilter(managedExts));
+         File[] fileList = directory.listFiles(new ManageableFileFilter(managedExts, forceExclusions));
          if (fileList == null) {
              LOG.debugf("Exiting because no files in directory {0}", directory);
              return;
@@ -1118,7 +1123,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
              File[] dirList = directory.listFiles(new ManagedDirectoryFilter());
              if(dirList != null) {
                  for(int i = 0; i < dirList.length && rev == revision.get(); i++) {
-                     updateManagedDirectories(managedExts, dirList[i], rev, recurse, validateDir, futures);
+                     updateManagedDirectories(managedExts, dirList[i], rev, recurse, validateDir, forceExclusions, futures);
                  }
             }
          } else {
@@ -1232,7 +1237,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** Returns a filter used to get manageable files. */
     FileFilter newManageableFilter() {
-        return new ManageableFileFilter(extensions);
+        return new ManageableFileFilter(extensions, true);
     }
     
     @Override
@@ -1248,10 +1253,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     /** A filter used to see if a file is manageable. */
     private class ManageableFileFilter implements FileFilter {
         private final Set<String> extensions;
+        private final boolean allowExclusions;
         
         /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(Collection<String> extensions) {
+        public ManageableFileFilter(Collection<String> extensions, boolean allowExclusions) {
             this.extensions = new HashSet<String>(extensions);
+            this.allowExclusions = allowExclusions;
         }
         
         @Override
@@ -1259,7 +1266,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             return file.isFile()
                 && LibraryUtils.isFilePhysicallyManagable(file)
                 && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
-                && !getLibraryData().isFileExcluded(file);
+                && (allowExclusions || !getLibraryData().isFileExcluded(file));
         }
     }
     
