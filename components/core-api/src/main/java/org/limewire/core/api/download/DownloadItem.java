@@ -5,13 +5,13 @@ import java.io.File;
 import java.util.List;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
+import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.i18n.I18nMarker;
 
 /**
  * A single download
  */
-public interface DownloadItem {	
+public interface DownloadItem extends PropertiableFile {	
 
 	public static enum ErrorState {
 	    NONE(I18nMarker.marktr("No problems.")),
@@ -110,11 +110,4 @@ public interface DownloadItem {
      * This call may block while the file is created.
      */
     File getLaunchableFile();
-
-    /**
-     * Returns a urn for the file being downloaded.
-     * 
-     * May be null.
-     */
-    URN getUrn();
 }

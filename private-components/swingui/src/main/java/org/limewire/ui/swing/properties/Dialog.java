@@ -75,7 +75,6 @@ public abstract class Dialog extends JDialog {
     protected final JPanel overview;
     protected final JPanel details = new JPanel();
     protected final JPanel location = new JPanel();
-    protected final JPanel sharing = new JPanel();
     protected Component detailsContainer;
     
     public Dialog() {
@@ -170,12 +169,20 @@ public abstract class Dialog extends JDialog {
     }
 
     protected Component box(String string, JComponent component) {
-        JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]", "[][][]"));
+        return box(string, null, component);
+    }
+
+    protected Component box(String string, JComponent bannerComponent, JComponent bodyComponent) {
+        
+        JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]push[]", "[][][]"));
         JLabel label = new JLabel(tr(string));
         label.setFont(getLargeFont());
-        panel.add(label, "wrap");
-        panel.add(Line.createHorizontalLine(), "wrap");
-        panel.add(component);
+        panel.add(label, bannerComponent == null ? "wrap" : "");
+        if (bannerComponent != null) {
+            panel.add(bannerComponent, "wrap");
+        }
+        panel.add(Line.createHorizontalLine(), "span, wrap");
+        panel.add(bodyComponent, "span");
         return panel;
     }
 

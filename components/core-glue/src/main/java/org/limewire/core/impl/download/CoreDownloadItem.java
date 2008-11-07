@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
@@ -318,6 +319,21 @@ class CoreDownloadItem implements DownloadItem {
         }
         return null;
     }
-    
-   
+
+    @Override
+    public String getFileName() {
+        return downloader.getSaveFile().getName();
+    }
+
+    @Override
+    public Object getProperty(FilePropertyKey key) {
+        // TODO - Implement me
+        return "Property not implemented";
+    }
+
+    @Override
+    public String getPropertyString(FilePropertyKey filePropertyKey) {
+        // TODO - Implement me
+        return "PropertyString not implemented";
+    }
 }

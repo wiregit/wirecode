@@ -15,6 +15,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
@@ -96,12 +97,12 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final Map<FilePropertyKey, Object> changedProps = new HashMap<FilePropertyKey, Object>();
         private final List<SharingTarget> allFriends;
         private final ShareListManager shareListManager;
+        private final JPanel sharing = new JPanel();
         private LocalFileItem displayedItem;
 
         private @Resource Font smallFont;
         private @Resource Font mediumFont;
         private @Resource Font largeFont;
-//        private List<Friend> sharedWithList;
         private List<Friend> unsharedFriendList = new ArrayList<Friend>();
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager,
@@ -147,7 +148,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             metaDataManager.save(displayedItem);
             
             for(Friend friend : unsharedFriendList) {
-                //TODO: how do you unshare this file from this friend?
+                shareListManager.getOrCreateFriendShareList(friend).removeFile(displayedItem.getFile());
             }
         }
 
@@ -175,6 +176,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             
             icon.setIcon(getIcon(propertiable));
             populateCommonFields(propertiable);
+            populateCopyToClipboard(propertiable);
             localFileLocation.setText(propertiable.getFile().getAbsolutePath());
             
             List<Friend> sharedWithList = getSharedWithList(propertiable);

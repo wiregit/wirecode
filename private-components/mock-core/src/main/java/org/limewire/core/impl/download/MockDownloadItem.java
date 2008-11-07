@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
@@ -214,6 +215,21 @@ public class MockDownloadItem implements DownloadItem {
     public URN getUrn() {
         return null;
     }
+    
+    @Override
+    public String getFileName() {
+        return title;
+    }
 
-  
+    @Override
+    public Object getProperty(FilePropertyKey key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getPropertyString(FilePropertyKey filePropertyKey) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

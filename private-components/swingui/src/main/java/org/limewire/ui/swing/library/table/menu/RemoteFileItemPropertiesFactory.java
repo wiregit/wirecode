@@ -75,6 +75,7 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
         public void showProperties(RemoteFileItem propertiable) {
             icon.setIcon(categoryIconManager.getIcon(propertiable.getCategory()));
             populateCommonFields(propertiable);
+            populateCopyToClipboard(propertiable);
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
     }
