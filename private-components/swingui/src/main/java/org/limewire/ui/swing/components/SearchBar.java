@@ -84,7 +84,6 @@ public class SearchBar extends JXPanel {
         this.searchButton.setBorderPainted(false);
         this.searchButton.setBackgroundPainter(new GreenButtonPainter());
         this.searchButton.setOpaque(false);
-        this.searchButton.setMinimumSize(this.searchButton.getPreferredSize());
         this.searchButton.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         this.searchButton.setFocusPainted(false);
         
