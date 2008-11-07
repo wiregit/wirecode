@@ -111,7 +111,7 @@ class CoreDownloadItem implements DownloadItem {
     @Override
     public List<DownloadSource> getSources() {
         //TODO: getSources
-        return Collections.singletonList((DownloadSource)new CoreDownloadSource("name"));
+        return Collections.singletonList((DownloadSource)new CoreDownloadSource("name", "127.0.0.1"));
     }
 
     @Override

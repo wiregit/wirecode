@@ -25,7 +25,8 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 public class MockDownloadListManager implements DownloadListManager {
-	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
+	private static final String LOCALHOST = "127.0.0.1";
+    private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
 	private EventList<DownloadItem> downloadItems;
 	
 	public MockDownloadListManager(){
@@ -88,71 +89,71 @@ public class MockDownloadListManager implements DownloadListManager {
 	private void initializeMockData(){
 	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 4146,
 				DownloadState.DOWNLOADING, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("Frank"));
-		item.addDownloadSource(new MockDownloadSource("Bob"));
-		item.addDownloadSource(new MockDownloadSource("Joey"));
+		item.addDownloadSource(new MockDownloadSource("Frank", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("Joey", LOCALHOST));
 		addDownload(item);
 
 		item = new MockDownloadItem("FINISHING", 446,
 				DownloadState.FINISHING, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("Henry"));
+		item.addDownloadSource(new MockDownloadSource("Henry", LOCALHOST));
 		addDownload(item);
 		
 		item = new MockDownloadItem("done on Skateboard image", 446,
 				DownloadState.DONE, Category.IMAGE);
-		item.addDownloadSource(new MockDownloadSource("Jolene"));
-		item.addDownloadSource(new MockDownloadSource("Bob"));
+		item.addDownloadSource(new MockDownloadSource("Jolene", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
 		addDownload(item);
 
 		item = new MockDownloadItem("queued video", 55,
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("Barack"));
-		item.addDownloadSource(new MockDownloadSource("Bob"));
+		item.addDownloadSource(new MockDownloadSource("Barack", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
 		addDownload(item);
 		
 		item = new MockDownloadItem("other queued doc", 55,
                 DownloadState.REMOTE_QUEUED, Category.DOCUMENT);
-        item.addDownloadSource(new MockDownloadSource("Barack"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Barack", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         addDownload(item);
 		
 		item = new MockDownloadItem("Paused audio file", 55,
 				DownloadState.PAUSED, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("John"));
-		item.addDownloadSource(new MockDownloadSource("George"));
+		item.addDownloadSource(new MockDownloadSource("John", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("George", LOCALHOST));
 		addDownload(item);
         
         item = new MockDownloadItem("Stalled program", 55,
                 DownloadState.STALLED, Category.PROGRAM);
-        item.addDownloadSource(new MockDownloadSource("Al"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         addDownload(item);
         
         item = new MockDownloadItem("Corrupt other file", 55,
                 DownloadState.ERROR, Category.OTHER);
-        item.addDownloadSource(new MockDownloadSource("Al"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         item.setErrorState(ErrorState.CORRUPT_FILE);
         addDownload(item);
         
         item = new MockDownloadItem("disk problem video", 55,
                 DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         item.setErrorState(ErrorState.DISK_PROBLEM);
         addDownload(item);
         
         item = new MockDownloadItem("not sharable video", 55,
                 DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         item.setErrorState(ErrorState.FILE_NOT_SHARABLE);
         addDownload(item);
         
         item = new MockDownloadItem("UNABLE_TO_CONNECT vid", 55,
                 DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al"));
-        item.addDownloadSource(new MockDownloadSource("Bob"));
+        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
         item.setErrorState(ErrorState.UNABLE_TO_CONNECT);
         addDownload(item);
         
