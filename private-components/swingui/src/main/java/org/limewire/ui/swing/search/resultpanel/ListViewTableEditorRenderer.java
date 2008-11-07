@@ -41,6 +41,7 @@ import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.library.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -84,6 +85,9 @@ implements TableCellEditor, TableCellRenderer {
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
+    private final DownloadHandler downloadHandler;
+    private final RemoteHostActions remoteHostActions;
+    private final PropertiesFactory<VisualSearchResult> properties;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -116,8 +120,10 @@ implements TableCellEditor, TableCellRenderer {
         @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
         @Assisted Color rowSelectionColor,
+        @Assisted DownloadHandler downloadHandler,
         SearchHeadingDocumentBuilder headingBuilder,
-        ListViewRowHeightRule rowHeightRule) {
+        ListViewRowHeightRule rowHeightRule,
+        PropertiesFactory<VisualSearchResult> properties) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -126,7 +132,9 @@ implements TableCellEditor, TableCellRenderer {
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.rowSelectionColor = rowSelectionColor;
-        
+        this.downloadHandler = downloadHandler;
+        this.remoteHostActions = remoteHostActions;
+        this.properties = properties;
         GuiUtils.assignResources(this);
 
         similarButton.setFont(similarResultsButtonFont);
@@ -171,7 +179,9 @@ implements TableCellEditor, TableCellRenderer {
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
-        
+
+        final SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, row, remoteHostActions, properties);
+
         if (editorComponent == null) {
             editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
 
@@ -194,6 +204,8 @@ implements TableCellEditor, TableCellRenderer {
                     if(e.getButton() == MouseEvent.BUTTON1) {
                         actionButtonPanel.startDownload();
                         table.editingStopped(new ChangeEvent(table));
+                    } else if(e.getButton() == MouseEvent.BUTTON3) {
+                        searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                     }
                 }
             });
@@ -201,7 +213,7 @@ implements TableCellEditor, TableCellRenderer {
 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
-        populatePanel((VisualSearchResult) value, col);
+        populatePanel((VisualSearchResult) value, col, searchResultMenu);
         
         editorComponent.removeAll();
 
@@ -365,7 +377,7 @@ implements TableCellEditor, TableCellRenderer {
         }
     }
 
-    private void populatePanel(VisualSearchResult vsr, int column) {
+    private void populatePanel(VisualSearchResult vsr, int column, final SearchResultMenu searchResultMenu) {
         if (vsr == null) return;
         
         if (column == 0) {
@@ -395,8 +407,16 @@ implements TableCellEditor, TableCellRenderer {
             if (getSimilarResultsCount() > 0) {
                 similarButton.setText(getHideShowSimilarFilesButtonText());
             }
-            
-        } 
+        }
+        
+        this.heading.addMouseListener( new MouseAdapter() {
+            @Override
+                public void mousePressed(MouseEvent e) {
+                    if(e.getButton() == MouseEvent.BUTTON3) {
+                        searchResultMenu.show(heading, e.getX(), e.getY());
+                    }
+                }
+        });
     }
 
     private Icon getIcon(VisualSearchResult vsr) {

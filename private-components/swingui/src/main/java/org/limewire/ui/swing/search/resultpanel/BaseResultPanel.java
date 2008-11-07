@@ -99,7 +99,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsList.setEventList(eventList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setTableFormat(tableFormat);
-
+        
         // Note that the same ListViewTableCellEditor instance
         // cannot be used for both the editor and the renderer
         // because the renderer receives paint requests for some cells
@@ -110,7 +110,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -121,7 +121,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
@@ -186,7 +186,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
                     SearchResultMenu menu = new SearchResultMenu(
-                        BaseResultPanel.this, navigator, vsr, row, remoteHostActions, properties);
+                        BaseResultPanel.this, vsr, row, remoteHostActions, properties);
                     menu.show(component, e.getX(), e.getY());
                 }
             }

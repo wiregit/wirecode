@@ -10,7 +10,6 @@ import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -23,8 +22,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class SearchResultMenu extends JPopupMenu {
 
-    public SearchResultMenu(final BaseResultPanel brp,
-        final Navigator navigator,
+    public SearchResultMenu(final DownloadHandler downloadHandler,
         final VisualSearchResult vsr,
         final int row,
         final RemoteHostActions fromActions,
@@ -32,7 +30,7 @@ public class SearchResultMenu extends JPopupMenu {
 
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
-                brp.download(vsr, row);
+                downloadHandler.download(vsr, row);
             }
         });
 

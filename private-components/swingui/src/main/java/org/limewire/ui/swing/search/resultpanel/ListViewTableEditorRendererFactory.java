@@ -12,6 +12,7 @@ public interface ListViewTableEditorRendererFactory {
             String searchText, 
             RemoteHostActions fromActions, 
             Navigator navigator, 
-            Color rowSelectionColor);
+            Color rowSelectionColor,
+            DownloadHandler downloadHandler);
     
 }
