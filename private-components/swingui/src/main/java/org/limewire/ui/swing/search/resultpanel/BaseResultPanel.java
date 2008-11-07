@@ -26,11 +26,10 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
-import org.limewire.ui.swing.search.ModeListener;
+import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
-import org.limewire.ui.swing.search.ModeListener.Mode;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
@@ -84,9 +83,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties, rowHeightRule);
         configureTable(eventList, tableFormat, navigator);
  
-        add(resultsList, ModeListener.Mode.LIST.name());
-        add(resultsTable, ModeListener.Mode.TABLE.name());
-        setMode(ModeListener.Mode.LIST);
+        add(resultsList, SearchViewType.LIST.name());
+        add(resultsTable, SearchViewType.TABLE.name());
+        setViewType(SearchViewType.LIST);
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
@@ -278,7 +277,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
      * Changes whether the list view or table view is displayed.
      * @param mode LIST or TABLE
      */
-    public void setMode(Mode mode) {
+    public void setViewType(SearchViewType mode) {
         layout.show(this, mode.name());
         switch(mode) {
         case LIST: this.visibileComponent = resultsList; break;

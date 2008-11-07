@@ -478,4 +478,10 @@ public final class SearchSettings extends LimeProps {
      */
     public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
         FACTORY.createIntSetting("DEFAULT_SEARCH_CATEGORY_ID", -1);
+    
+    /**
+     * The default search view, list versus classic.
+     */
+    public static final IntSetting SEARCH_VIEW_TYPE_ID =
+        FACTORY.createIntSetting("SEARCH_VIEW_TYPE_ID", -1);
 }

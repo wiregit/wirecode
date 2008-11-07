@@ -12,7 +12,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,6 +31,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
@@ -76,7 +78,6 @@ public class SortAndFilterPanel extends JXPanel {
     private final String FILE_TYPE = tr("File type");
     private final String NAME = tr("Name");
     private final String RELEVANCE_ITEM = tr("Relevance");
-    private List<ModeListener> modeListeners = new ArrayList<ModeListener>();
 
     private final HashMap<String,Action> actions = new HashMap<String,Action>(); 
 
@@ -137,27 +138,21 @@ public class SortAndFilterPanel extends JXPanel {
         this.actions.put(NAME,createAction(NAME));
         this.actions.put(RELEVANCE_ITEM,createAction(RELEVANCE_ITEM));
     }
-    
+
     private Action createAction(String name) {
         return new AbstractAction(name) {
             @Override
             public void actionPerformed(ActionEvent arg0) {
 
-                
             }
         };
     }
-    
-    public void addModeListener(ModeListener listener) {
-        modeListeners.add(listener);
-    }
-    
+
     private void configureViewButtons() {
         final SortAndFilterPanel outerThis = this;
-        
+
         listViewToggleButton.setIcon(listViewIcon);
         listViewToggleButton.setPressedIcon(listViewIcon);
-        listViewToggleButton.setSelected(true);
         listViewToggleButton.setMargin(new Insets(0, 10, 0, 6));
         listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
@@ -169,13 +164,12 @@ public class SortAndFilterPanel extends JXPanel {
             @Override
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
-                    outerThis.notifyModeListeners(ModeListener.Mode.LIST);
-                    sortLabel.setVisible(true);
-                    sortCombo.setVisible(true);
+                    SearchSettings.SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.LIST.getId());
+                    selectListView(outerThis);
                 }
             }
         });
-        
+
         tableViewToggleButton.setIcon(tableViewIcon);
         tableViewToggleButton.setPressedIcon(tableViewIcon);
         tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
@@ -189,18 +183,56 @@ public class SortAndFilterPanel extends JXPanel {
             @Override
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
-                    outerThis.notifyModeListeners(ModeListener.Mode.TABLE);
-                    sortLabel.setVisible(false);
-                    sortCombo.setVisible(false);
+                    SearchSettings.SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.TABLE.getId());
+                    selectTableView(outerThis);
                 }
             }
         });
-        
+
+        SearchSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                int newViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+                SearchViewType newSearchViewType = SearchViewType.forId(newViewTypeId);
+                updateView(outerThis, newSearchViewType);
+            }
+        });
         ButtonGroup viewGroup = new ButtonGroup();
         viewGroup.add(listViewToggleButton);
         viewGroup.add(tableViewToggleButton);
+        
+        int viewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+        SearchViewType searchViewType = SearchViewType.forId(viewTypeId);
+        
+        updateView(outerThis, searchViewType);
+    }
+
+    private void updateView(final SortAndFilterPanel outerThis,
+            SearchViewType newSearchViewType) {
+        switch (newSearchViewType) {
+        case LIST:
+            selectListView(outerThis);
+            break;
+        case TABLE:
+            selectTableView(outerThis);
+            break;
+        }
     }
     
+    private void selectListView(final SortAndFilterPanel outerThis) {
+        tableViewToggleButton.setSelected(false);
+        listViewToggleButton.setSelected(true);
+        sortLabel.setVisible(true);
+        sortCombo.setVisible(true);
+    }
+
+    private void selectTableView(final SortAndFilterPanel outerThis) {
+        tableViewToggleButton.setSelected(true);
+        listViewToggleButton.setSelected(false);
+        sortLabel.setVisible(false);
+        sortCombo.setVisible(false);
+    }
+
     public EventList<VisualSearchResult> getFilteredAndSortedList(
         EventList<VisualSearchResult> simpleList, final RowSelectionPreserver preserver) {
 
@@ -446,16 +478,6 @@ public class SortAndFilterPanel extends JXPanel {
         add(tableViewToggleButton, gbc);
     }
 
-    private void notifyModeListeners(ModeListener.Mode mode) {
-        for (ModeListener listener : modeListeners) {
-            listener.setMode(mode);
-        }
-    }
-
-    public void removeModeListener(ModeListener listener) {
-        modeListeners.remove(listener);
-    }
-
     public void clearFilterBox() {
         filterBox.setText("");
     }
@@ -464,11 +486,11 @@ public class SortAndFilterPanel extends JXPanel {
      * Sets the state of the view toggle buttons.
      * @param mode the current mode ... LIST or TABLE
      */
-    public void setMode(ModeListener.Mode mode) {
-        if (mode == ModeListener.Mode.LIST) {
+    public void setMode(SearchViewType mode) {
+        if (mode == SearchViewType.LIST) {
             listViewToggleButton.setSelected(true);
             tableViewToggleButton.setSelected(false);
-        } else if (mode == ModeListener.Mode.TABLE) {
+        } else if (mode == SearchViewType.TABLE) {
             listViewToggleButton.setSelected(false);
             tableViewToggleButton.setSelected(true);
         }

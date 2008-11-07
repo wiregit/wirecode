@@ -14,6 +14,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanelFactory;
@@ -39,7 +40,7 @@ public class ResultsContainer extends JXPanel {
     private BaseResultPanel currentPanel;
     private Map<String, BaseResultPanel> panelMap =
         new HashMap<String, BaseResultPanel>();
-    private ModeListener.Mode mode = ModeListener.Mode.LIST;
+    private SearchViewType mode = SearchViewType.forId(SearchSettings.SEARCH_VIEW_TYPE_ID.getValue());
     
     private final CardLayout cardLayout = new CardLayout();
 
@@ -91,16 +92,16 @@ public class ResultsContainer extends JXPanel {
      * Changes whether the list view or table view is displayed.
      * @param mode LIST or TABLE
      */
-    public void setMode(ModeListener.Mode mode) {
+    public void setViewType(SearchViewType mode) {
         this.mode = mode;
-        currentPanel.setMode(mode);
+        currentPanel.setViewType(mode);
     }
     
     void showCategory(SearchCategory category) {
         String name = category.name();
         currentPanel = panelMap.get(name); 
         cardLayout.show(this, name);
-        currentPanel.setMode(mode);
+        currentPanel.setViewType(mode);
     }
     
     private FilterList<VisualSearchResult> filter(

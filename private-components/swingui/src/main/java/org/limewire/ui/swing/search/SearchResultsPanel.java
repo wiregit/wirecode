@@ -26,8 +26,11 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.core.settings.SearchSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -128,13 +131,19 @@ public class SearchResultsPanel extends JXPanel {
         // which it passes to the ResultsContainer constructor
         // for the parameters annotated with @Assisted.
         this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
-
-        sortAndFilterPanel.addModeListener(new ModeListener() {
-            @Override
-            public void setMode(Mode mode) {
-                resultsContainer.setMode(mode);
-                syncScrollPieces();
-            }
+        
+        SearchSettings.SEARCH_VIEW_TYPE_ID.addSettingListener( new SettingListener() {
+           int oldSearchViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               int newSearchViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+               if(newSearchViewTypeId != oldSearchViewTypeId) {
+                   SearchViewType newSearchViewType = SearchViewType.forId(newSearchViewTypeId);
+                   resultsContainer.setViewType(newSearchViewType);
+                   syncScrollPieces();
+                   oldSearchViewTypeId = newSearchViewTypeId;
+               }
+            } 
         });
 
         SearchTabItems.SearchTabListener listener =
