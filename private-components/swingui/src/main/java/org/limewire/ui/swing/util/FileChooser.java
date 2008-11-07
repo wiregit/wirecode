@@ -16,10 +16,14 @@ import javax.swing.filechooser.FileFilter;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
-
+/**
+ * This is a utility class that displays a file chooser dialog to the user. 
+ */
 public final class FileChooser {
     
     private FileChooser() {}
@@ -306,4 +310,74 @@ public final class FileChooser {
         }
         return chooser;
     }    
+
+    /**
+     * Opens a dialog asking the user to choose a file which is used for
+     * saving to.
+     * 
+     * @param parent the parent component the dialog is centered on
+     * @param titleKey the key for the locale-specific string to use for the
+     *        file dialog title
+     * @param suggestedFile the suggested file for saving
+     * @return the file or <code>null</code> when the user cancelled the
+     *         dialog
+     */
+    public static File getSaveAsFile(Component parent, String titleKey, File suggestedFile) {
+        return getSaveAsFile(parent, titleKey, suggestedFile, null);
+    }
+    
+    /**
+     * Opens a dialog asking the user to choose a file which is used for
+     * saving to.
+     * 
+     * @param parent the parent component the dialog is centered on
+     * @param titleKey the key for the locale-specific string to use for the
+     *        file dialog title
+     * @param suggestedFile the suggested file for saving
+     * @param the filter to use for what's shown.
+     * @return the file or <code>null</code> when the user cancelled the
+     *         dialog
+     */
+    public static File getSaveAsFile(Component parent, String titleKey,
+                                     File suggestedFile, final FileFilter filter) {
+        if (OSUtils.isAnyMac()) {
+            FileDialog dialog = new FileDialog(GuiUtils.getMainFrame(),
+                                               I18n.tr(titleKey),
+                                               FileDialog.SAVE);
+            dialog.setDirectory(suggestedFile.getParent());
+            dialog.setFile(suggestedFile.getName()); 
+            if (filter != null) {
+                FilenameFilter f = new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return filter.accept(new File(dir, name));
+                    }
+                };
+                dialog.setFilenameFilter(f);
+            }
+
+            dialog.setVisible(true);
+            String dir = dialog.getDirectory();
+            setLastInputDirectory(new File(dir));
+            String file = dialog.getFile();
+            if ((dir != null) && (file != null)) {
+                File f = new File(dir, file);
+                if ((filter != null) && !filter.accept(f)) {
+                    return null;
+                } else {
+                    return f;
+                }
+            } else {
+                return null;
+            }
+            
+        } else {
+            JFileChooser chooser = getDirectoryChooser(titleKey, null, null, 
+                    JFileChooser.FILES_ONLY, filter);
+            chooser.setSelectedFile(suggestedFile);
+            int ret = chooser.showSaveDialog(parent);
+            File file = chooser.getSelectedFile();
+            setLastInputDirectory(file);
+            return (ret != JFileChooser.APPROVE_OPTION) ? null : file;
+        }
+    }
 }
