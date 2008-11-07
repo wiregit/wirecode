@@ -169,4 +169,9 @@ class RemoteFileDescContext {
     public boolean isFromAlternateLocation() {
         return remoteFileDesc.isFromAlternateLocation();
     }
+    
+    @Override
+    public String toString() {
+        return remoteFileDesc.toString();
+    }
 }

@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -225,7 +226,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Set of {@link RemoteFileDesc remote file descs} that can't be resolved
      * or connected to yet.
      */
-    private final Set<RemoteFileDesc> unconnectableRFDs = new ConcurrentSkipListSet<RemoteFileDesc>();
+    private final Set<RemoteFileDesc> permanentRFDs = new ConcurrentSkipListSet<RemoteFileDesc>(new Comparator<RemoteFileDesc>() {
+        @Override
+        public int compare(RemoteFileDesc o1, RemoteFileDesc o2) {
+            return o1.hashCode() - o2.hashCode();
+        }
+    });
     
     private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 
@@ -506,10 +512,18 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
-        if(rfds == null)
+        if(rfds == null) {
+            LOG.debug("rfds are null");
             rfds = Collections.emptyList();
+        }
         
         cachedRFDs.addAll(rfds);
+        for (RemoteFileDesc rfd : rfds) {
+            if (rfd.getAddress() instanceof PermanentAddress) {
+                permanentRFDs.add(rfd);
+            }
+        }
+        
         if (rfds.size() > 0) 
             initPropertiesMap(rfds.iterator().next());
 
@@ -1363,6 +1377,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from 
         copy.removeAll(currentRFDs);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("remaining new rfds: " + copy);
+        }
         
         byte[] myGUID = applicationServices.getMyGUID();
         for (Iterator<RemoteFileDesc> iter = copy.iterator(); iter.hasNext();) {
@@ -1376,7 +1393,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             prepareRFD(rfd,cache);
             
             if (!canResolve(rfd) && !canConnect(rfd)) {
-                unconnectableRFDs.add(rfd);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("rfd not connectable yet: " + rfd);
+                }
+                permanentRFDs.add(rfd);
                 iter.remove();
             }
         }
@@ -1386,6 +1406,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //        LOG.trace("added rfds: " + c);
             LOG.debug("got new sources");
             receivedNewSources = true;
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(copy + " not added");
+            }
         }
         
         return true;
@@ -1419,9 +1443,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private Collection<RemoteFileDesc> getNewConnectableSources() {
         List<RemoteFileDesc> newlyConnectables = new ArrayList<RemoteFileDesc>();
-        for (RemoteFileDesc rfd : unconnectableRFDs) {
+        for (RemoteFileDesc rfd : permanentRFDs) {
             if (canResolve(rfd) || canConnect(rfd)) {
                 newlyConnectables.add(rfd);
+            } else {
+                LOG.debug(rfd + " not connectable");
             }
         }
         return newlyConnectables;
@@ -2440,8 +2466,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	}
     
     public synchronized void forgetRFD(RemoteFileDesc rfd) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("remove rfd: " + rfd);
+        }
         // don't remove permanent addresses
         if (rfd.getAddress() instanceof PermanentAddress) {
+            permanentRFDs.add(rfd);
             return;
         }
         if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
@@ -3210,9 +3240,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Collection<RemoteFileDesc> newConnectableSources = getNewConnectableSources();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("new connectables: " + newConnectableSources);
+                LOG.debug("all non-connectables" + permanentRFDs);
             }
             if (!newConnectableSources.isEmpty()) {
-                addDownloadForced(newConnectableSources, false);
+                receivedNewSources = true;
+                addDownloadForced(newConnectableSources, true);
             }
         }
         

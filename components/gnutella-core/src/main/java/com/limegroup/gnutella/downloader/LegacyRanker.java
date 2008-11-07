@@ -28,7 +28,7 @@ public class LegacyRanker extends AbstractSourceRanker {
 	@Override
     public synchronized boolean addToPool(RemoteFileDescContext host) {
         if (LOG.isDebugEnabled())
-            LOG.debug("adding host "+host+" to be ranked");
+            LOG.debug("adding host "+host+" to be ranked", new Exception());
 		return rfds.add(host);
 	}
 

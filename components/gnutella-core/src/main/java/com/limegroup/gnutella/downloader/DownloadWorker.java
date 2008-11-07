@@ -1736,11 +1736,15 @@ public class DownloadWorker {
         @Override
         public void handleIOException(IOException iox) {
             LOG.debug("could not connect", iox);
+            finishConnect();
+            finishWorker();
         }
 
         @Override
         public void shutdown() {
             LOG.debug("shut down");
+            finishConnect();
+            finishWorker();
         }
         
     }

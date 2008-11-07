@@ -146,9 +146,11 @@ public class XMPPAddressResolver implements AddressResolver {
         @Override
         public void presenceChanged(Presence presence) {
             if (presence.getMode() == Presence.Mode.available) {
+                LOG.debugf("lime presence became available: {0}", presence);
                 if (presence instanceof LimePresence) {
-                    LOG.debugf("lime presence became available: {0}", presence);
                     connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
+                } else {
+                    LOG.debug("no lime presence");
                 }
             }
         }
