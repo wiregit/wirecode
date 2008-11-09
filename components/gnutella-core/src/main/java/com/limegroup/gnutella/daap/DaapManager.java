@@ -1114,9 +1114,6 @@ public final class DaapManager {
         DAAP_EVENT_QUEUE.execute(new Runnable(){
             public void run(){
                 switch(evt.getType()) {
-                    case LOAD_STARTED:
-                        setEnabled(false);
-                        return;
                     case LOAD_COMPLETE:
                         setEnabled(true);
                         return;

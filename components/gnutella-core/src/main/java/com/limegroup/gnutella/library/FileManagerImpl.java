@@ -91,7 +91,7 @@ class FileManagerImpl implements FileManager, Service {
       //  cleanIndividualFiles();
         LibraryConverter converter = new LibraryConverter();
         if(converter.isOutOfDate()) {
-            managedFileList.dispatch(new ManagedListStatusEvent(managedFileList, ManagedListStatusEvent.Type.LOAD_STARTED));
+            managedFileList.fireLoading();
             converter.convert(managedFileList.getLibraryData());
         }
         managedFileList.loadManagedFiles();

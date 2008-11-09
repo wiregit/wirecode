@@ -9,24 +9,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.ListeningExecutorService;
+import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.SimpleFuture;
 import org.limewire.io.IOUtils;
-import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
@@ -46,7 +44,7 @@ import com.limegroup.gnutella.UrnSet;
  * @see URN
  */
 @Singleton
-public final class UrnCache implements EventListener<ManagedListStatusEvent> {
+public final class UrnCache {
     
     private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
@@ -65,13 +63,8 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
     /**
      * The ProcessingQueue that Files are hashed in.
      */
-    private final ExecutorService QUEUE =
+    private final ListeningExecutorService QUEUE =
         ExecutorsHelper.newFixedSizeThreadPool(Runtime.getRuntime().availableProcessors(), "Hasher");
-    
-    /**
-     * The set of files that are pending hashing to the callbacks that are listening to them.
-     */
-    private Map<File, List<UrnCallback>> pendingHashing = new HashMap<File, List<UrnCallback>>();
     
     /**
      * Whether or not data is dirty since the last time we saved.
@@ -84,7 +77,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
     /**
      * Create and initialize urn cache.
      */
-    public UrnCache() {
+    UrnCache() {
         deserializer = QUEUE.submit(new Callable<Map<UrnSetKey, Set<URN>>>() {
             @SuppressWarnings("unchecked")
             public Map<UrnSetKey, Set<URN>> call() {
@@ -103,7 +96,7 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
      * will be notified immediately.  Otherwise, it will be notified when hashing
      * completes, fails, or is interrupted.
      */
-    public Future<Set<URN>> calculateAndCacheUrns(File file, UrnCallback callback) {
+    public ListeningFuture<Set<URN>> calculateAndCacheUrns(File file) {
         Set<URN> urns;
         synchronized (this) {
             urns = getUrns(file);
@@ -114,39 +107,12 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
             if (urns.isEmpty()) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Adding: " + file + " to be hashed.");
-                List<UrnCallback> list = pendingHashing.get(file);
-                if(list == null) {
-                    list = new ArrayList<UrnCallback>(1);
-                    pendingHashing.put(file, list);
-                }
-                list.add(callback);
                 return QUEUE.submit(new Processor(file));
             }
         }
         
         assert !urns.isEmpty();
-        callback.urnsCalculated(file, urns);
         return new SimpleFuture<Set<URN>>(urns);
-    }
-    
-    /**
-     * Clears all callbacks that are owned by the given owner.
-     */
-    private synchronized void clearPendingHashes(Object owner) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Clearing all pending hashes owned by: " + owner);
-        
-        for(Iterator<List<UrnCallback>> i = pendingHashing.values().iterator(); i.hasNext(); ) {
-            List<UrnCallback> callbacks = i.next();
-            for(int j = callbacks.size() - 1; j >= 0; j--) {
-                UrnCallback c = callbacks.get(j);
-                if(c.isOwner(owner))
-                    callbacks.remove(j);
-            }            
-            // if there's no more callbacks for this file, remove it.
-            if(callbacks.isEmpty())
-                i.remove();
-        }
     }
     
     /**
@@ -342,37 +308,25 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
         
         public Set<URN> call() {
             Set<URN> urns;
-            List<UrnCallback> callbacks;
             
             synchronized(UrnCache.this) {
-                callbacks = pendingHashing.remove(file);
                 urns = getUrns(file); // already calculated?
             }
             
-            // If there was atleast one callback listening, try and send it out
-            // (which may involve calculating it).
-            if(callbacks != null && !callbacks.isEmpty()) {
-                // If not calculated, calculate OUTSIDE OF LOCK.
-                if(urns.isEmpty()) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Hashing file: " + file);
-                    try {
-                        urns = URN.createSHA1AndTTRootUrns(file);
-                        addUrns(file, urns);
-                    } catch(IOException ignored) {
-                        LOG.warn("Unable to calculate URNs", ignored);
-                    } catch(InterruptedException ignored) {
-                        LOG.warn("Unable to calculate URNs", ignored);
-                    }
-                }
-                
-                // Note that because we already removed this list from the Map,
-                // we don't need to synchronize while iterating over it, because
-                // nothing else can modify it now.
-                for(int i = 0; i < callbacks.size(); i++) {
-                    callbacks.get(i).urnsCalculated(file, urns);
+            // If not calculated, calculate OUTSIDE OF LOCK.
+            if(urns.isEmpty()) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Hashing file: " + file);
+                try {
+                    urns = URN.createSHA1AndTTRootUrns(file);
+                    addUrns(file, urns);
+                } catch(IOException ignored) {
+                    LOG.warn("Unable to calculate URNs", ignored);
+                } catch(InterruptedException ignored) {
+                    LOG.warn("Unable to calculate URNs", ignored);
                 }
             }
+            
             return urns;
         }
     }
@@ -481,15 +435,4 @@ public final class UrnCache implements EventListener<ManagedListStatusEvent> {
 			_hashCode = calculateHashCode();
 		}
 	}
-
-	/**
-	 * Handles events from the FileManager
-	 */
-    public void handleEvent(ManagedListStatusEvent evt) {
-        if(evt.getType() == ManagedListStatusEvent.Type.LOAD_STARTED) {
-            clearPendingHashes(evt.getList());
-        } else if(evt.getType() == ManagedListStatusEvent.Type.SAVE) {
-            persistCache();
-        } 
-    }
 }

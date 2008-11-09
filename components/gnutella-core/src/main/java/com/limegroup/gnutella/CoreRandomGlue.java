@@ -20,7 +20,6 @@ import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.LibraryUtils;
-import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -43,7 +42,6 @@ class CoreRandomGlue {
     private final SimppManager simppManager;
     private final HashTreeCache hashTreeCache;
     private final LicenseFactory licenseFactory;
-    private final UrnCache urnCache;
     private final AltLocManager altLocManager;
     
     @Inject
@@ -57,7 +55,6 @@ class CoreRandomGlue {
             SimppManager simppManager,
             LicenseFactory licenseFactory,
             HashTreeCache hashTreeCache,
-            UrnCache urnCache,
             SchemaReplyCollectionMapper schemaMapper,
             AltLocManager altLocManager) {
         this.fileManager = fileManager;
@@ -72,7 +69,6 @@ class CoreRandomGlue {
         this.simppManager = simppManager;
         this.hashTreeCache = hashTreeCache;
         this.licenseFactory = licenseFactory;
-        this.urnCache = urnCache;
         this.altLocManager = altLocManager;
     }
     
@@ -81,7 +77,6 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 //TODO: find a better way to do this
-                fileManager.getManagedFileList().addManagedListStatusListener(urnCache);
                 fileManager.getManagedFileList().addFileListListener(altLocManager);
                 
                 connectionManager.addEventListener(activityCallback);

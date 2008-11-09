@@ -1,5 +1,6 @@
 package org.limewire.core.impl.library;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -11,7 +12,6 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -21,7 +21,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.ManagedFileList;
-import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
@@ -104,17 +103,16 @@ class LibraryManagerImpl implements LibraryManager {
             super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
             this.managedList = managedList;
             this.managedList.addFileListListener(newEventListener());
-            this.managedList.addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
+            this.managedList.addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
-                public void handleEvent(ManagedListStatusEvent event) {
+                public void propertyChange(PropertyChangeEvent evt) {
                     LibraryState oldState = libraryState;
-                    switch(event.getType()) {
-                    case LOAD_STARTED:
-                        libraryState = LibraryState.LOADING;
-                        break;
-                    case LOAD_COMPLETE:
-                        libraryState = LibraryState.LOADED;
-                        break;
+                    if(evt.getPropertyName().equals("hasPending")) {
+                        if(Boolean.TRUE.equals(evt.getNewValue())) {
+                            libraryState = LibraryState.LOADING;
+                        } else {
+                            libraryState = LibraryState.LOADED;
+                        }
                     }
                     changeSupport.firePropertyChange("state", oldState, libraryState);
                 }

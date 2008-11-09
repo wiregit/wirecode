@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.UrnCache;
-import com.limegroup.gnutella.library.UrnCallback;
 
 public class UrnHelper {
 
@@ -101,27 +100,7 @@ public class UrnHelper {
     }
 
     public static Set<URN> calculateAndCacheURN(File f, UrnCache urnCache) throws Exception {
-        final Set<URN> myUrns = new HashSet<URN>(1);
-        UrnCallback blocker = new UrnCallback() {
-            public void urnsCalculated(File file, Set<? extends URN> urns) {
-                synchronized(myUrns) {
-                    myUrns.addAll(urns);
-                    myUrns.notify();
-                }
-            }
-            
-            public boolean isOwner(Object o) {
-                return false;
-            }
-        };
-        
-        synchronized(myUrns) {
-            urnCache.calculateAndCacheUrns(f, blocker);
-            if(myUrns.isEmpty()) // only wait if it didn't fill immediately.
-                myUrns.wait(3000);
-        }
-        
-        return myUrns;
+        return urnCache.calculateAndCacheUrns(f).get();
     }
 
 }

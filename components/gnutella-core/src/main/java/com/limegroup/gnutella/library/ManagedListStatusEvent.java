@@ -5,14 +5,7 @@ import org.limewire.util.StringUtils;
 
 public class ManagedListStatusEvent {
     
-    public static enum Type {
-    
-        /**
-         * Called once FileManager has begun a new load process of loading all files in all shared
-         * and store directories
-         */
-        LOAD_STARTED,
-        
+    public static enum Type {        
         /**
          * Called once FileManager is preparing to finish the loading process. 
          * 

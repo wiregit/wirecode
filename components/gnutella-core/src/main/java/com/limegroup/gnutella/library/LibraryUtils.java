@@ -140,7 +140,7 @@ public class LibraryUtils {
      * Determines if this File is a network shared directory.
      */
     public static boolean isForcedShareDirectory(File f) {
-        return f.equals(LibraryUtils.PROGRAM_SHARE) || f.equals(LibraryUtils.PREFERENCE_SHARE);
+        return f != null && (f.equals(LibraryUtils.PROGRAM_SHARE) || f.equals(LibraryUtils.PREFERENCE_SHARE));
     }
     
     public static boolean isApplicationSpecialShareDirectory(File directory) {

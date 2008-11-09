@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library;
 
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +21,9 @@ public interface ManagedFileList extends FileList {
     
     void addManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);
     void removeManagedListStatusListener(EventListener<ManagedListStatusEvent> listener);
+    
+    void addPropertyChangeListener(PropertyChangeListener listener);
+    void removePropertyChangeListener(PropertyChangeListener listener);
   
     /** Returns true if the initial load of the library has finished. */
     boolean isLoadFinished();

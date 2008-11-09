@@ -109,7 +109,9 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
     
     @Override
     protected boolean isPending(File file, FileDesc fd) {
-        return data.isSharedWithGnutella(file) || sessionFiles.containsKey(file);
+        return LibraryUtils.isForcedShareDirectory(file.getParentFile())
+            || data.isSharedWithGnutella(file) 
+            || sessionFiles.containsKey(file);
     }
     
     @Override

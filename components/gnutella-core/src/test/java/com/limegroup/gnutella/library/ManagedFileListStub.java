@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.library;
 
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,18 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     @Override
     public List<File> getDirectoriesToExcludeFromManaging() {
         return new ArrayList<File>();
+    }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override

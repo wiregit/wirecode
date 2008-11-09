@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.library;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -25,6 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.limewire.collection.CollectionUtils;
 import org.limewire.collection.IntSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureTask;
@@ -35,6 +39,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.SourcedEventMulticaster;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.FileUtils;
@@ -60,6 +65,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private final UrnCache urnCache;
     private final FileDescFactory fileDescFactory; 
     private final ListeningExecutorService fileLoader;
+    private final PropertyChangeSupport changeSupport;
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -80,6 +86,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * Keys must be canonical <tt>File</tt> instances.
      */
     private final Map<File, FileDesc> fileToFileDescMap;
+    
+    /**
+     * The map of pending URNs for each File.
+     */
+    private final Map<File, Future<Set<URN>>> fileToUrnFuture;
  
     /**
      * A map of appropriately case-normalized URN strings to the
@@ -90,13 +101,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * files[i].getUrns(), rnMap.get(k) contains i.
      */
     private final Map<URN, IntSet> urnMap;
-    
-    /** 
-     * The total number of files that are pending managed.
-     *  (ie: awaiting hashing or being added)
-     */
-    @InspectablePrimitive("number of pending files")
-    private int numPendingFiles;
     
     /**
      * The set of file extensions to manage, sorted by StringComparator. 
@@ -119,21 +123,17 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     @InspectablePrimitive("filemanager revision")
     private final AtomicInteger revision = new AtomicInteger();
     
-    /** The revision that finished loading all pending files. */
-    @InspectablePrimitive("revision that finished loading")
-    private volatile int pendingFinished = -1;
-    
-    /** The revision that finished updating shared directories. */
-    private volatile int updatingFinished = -1;
-    
-    /** The last revision that finished both pending & updating. */
-    private volatile int loadingFinished = -1;
-    
     /** All the library data for this library -- loaded on-demand. */
     private final LibraryFileData fileData = new LibraryFileData();  
     
     /** The validator to ask if URNs are OK. */
     private final UrnValidator urnValidator;
+    
+    /** The revision this finished loading. */
+    private volatile int loadingFinished = -1;
+    
+    /** The number of files that are pending calculation. */
+    private final AtomicInteger pendingFiles = new AtomicInteger(0);
 
     @Inject
     ManagedFileListImpl(SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster,
@@ -152,7 +152,19 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         this.managedDirectories = new HashSet<File>();
         this.urnMap = new HashMap<URN, IntSet>();
         this.fileToFileDescMap = new HashMap<File, FileDesc>();
+        this.fileToUrnFuture = new HashMap<File, Future<Set<URN>>>();
         this.urnValidator = urnValidator;
+        this.changeSupport = new SwingSafePropertyChangeSupport(this);
+    }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
     }
     
     /** Gets the library data, loading it if necessary. */
@@ -303,6 +315,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         final int startRevision = revision.get();
         
+        fireLoading();
         return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
             public List<ListeningFuture<FileDesc>> call() throws Exception {
@@ -349,6 +362,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 for(File dir : addedDirs) {
                     updateManagedDirectories(extensions, dir, startRevision, false, false, true, added);
                 }
+                addLoadingListener(added, startRevision);
                 return added;
             }
         });
@@ -398,11 +412,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
         
         getLibraryData().addDirectoryToManageRecursively(folder);
+        fireLoading();
         return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
             public List<ListeningFuture<FileDesc>> call() {
+                int rev = revision.get();
                 List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-                updateManagedDirectories(extensions, folder, revision.get(), true, true, true, futures);
+                updateManagedDirectories(extensions, folder, rev, true, true, true, futures);
+                addLoadingListener(futures, rev);
                 return futures;
             }
         });
@@ -576,6 +593,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         // Go through all managed directories & add any files for new extensions.
         ListeningFuture<List<ListeningFuture<FileDesc>>> future;
         if(!newExtensions.isEmpty()) {
+            fireLoading();
             future = submit(new Callable<List<ListeningFuture<FileDesc>>>() {
                 @Override
                 public List<ListeningFuture<FileDesc>> call() {
@@ -591,6 +609,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                     for(File directory : directoryCopy) {
                         updateManagedDirectories(newExtensions, directory, rev, false, false, false, futures);
                     }
+                    addLoadingListener(futures, rev);
                     return futures;
                 }
             });
@@ -631,16 +650,19 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * @param rev - current  version of LimeXMLDocs being used
      * @param oldFileDesc the old FileDesc this is replacing
      */
-    private ListeningFuture<FileDesc> add(File file, List<? extends LimeXMLDocument> metadata, int rev,
-            FileDesc oldFileDesc) {
-        LOG.debugf("Attempting to load file: {0}", file);
+    private ListeningFuture<FileDesc> add(File f, 
+            final List<? extends LimeXMLDocument> metadata,
+            final int rev,
+            final FileDesc oldFileDesc) {
+        LOG.debugf("Attempting to load file: {0}", f);
         
         // Make sure capitals are resolved properly, etc.
+        final File file;
         try {
-            file = FileUtils.getCanonicalFile(file);
+            file = FileUtils.getCanonicalFile(f);
         } catch (IOException e) {
-            LOG.debugf("Not adding {0} because canonicalize failed", file);
-            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            LOG.debugf("Not adding {0} because canonicalize failed", f);
+            FileListChangedEvent event = dispatchFailure(f, oldFileDesc);
             return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Can't canonicalize file"));
         }
         
@@ -674,11 +696,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         try {
             if (rev != revision.get()) {
                 failed = true;
-            } else {
-                numPendingFiles++;
-                // make sure _pendingFinished does not hold _revision
-                // while we're still adding files
-                pendingFinished = -1;
             }
         } finally {
             rwLock.writeLock().unlock();
@@ -689,29 +706,22 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Revisions changed while loading"));
         } else {
-            PendingFuture task = new PendingFuture();
-            urnCache.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, rev, oldFileDesc, task));
+            final PendingFuture task = new PendingFuture();
+            ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(file);
+            rwLock.writeLock().lock();
+            try {
+                fileToUrnFuture.put(file, urnFuture);
+            } finally {
+                rwLock.writeLock().unlock();
+            }
+            urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
+                @Override
+                public void handleEvent(FutureEvent<Set<URN>> event) {
+                    finishLoadingFileDesc(file, event.getResult(), metadata, rev, oldFileDesc, task);
+                }
+            });
             return task;
         }
-    }
-    
-    /**
-     * Constructs a new UrnCallback that will possibly load the file with the given URNs.
-     * @param task 
-     */
-    private UrnCallback getNewUrnCallback(final File file, final List<? extends LimeXMLDocument> metadata, final int rev, 
-                                final FileDesc oldFileDesc, final PendingFuture task) {
-        return new UrnCallback() {
-            @Override
-            public void urnsCalculated(File f, Set<? extends URN> urns) {
-                finishLoadingFileDesc(f, urns, metadata, rev, oldFileDesc, task);
-            }
-
-            @Override
-            public boolean isOwner(Object o) {
-                return o == ManagedFileListImpl.this;
-            }
-        };
     }
     
     /** Finishes the process of loading the FD, now that URNs are known. */
@@ -727,7 +737,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 revchange = true;
                 LOG.warn("Revisions changed, dropping share.");
             } else {
-                numPendingFiles--;
+                fileToUrnFuture.remove(file);
                 
                 // Only load the file if we were able to calculate URNs 
                 // assume the fd is being shared
@@ -777,42 +787,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             
             task.set(fd);
         }
-            
-        // In all cases except revision change, try to finish this revision.
-        if(!revchange) {
-            boolean finished = false;
-            rwLock.writeLock().lock();
-            try {
-                if(numPendingFiles == 0) {
-                    pendingFinished = rev;
-                    finished = true;
-                }
-            } finally {
-                rwLock.writeLock().unlock();
-            }
-            
-            if (finished) {
-                tryToFinish();
-            }
-        }
-    }
-    
-    /** Notification that something finished loading. */
-    private void tryToFinish() {
-        int rev;
-        rwLock.writeLock().lock();
-        try {
-            if(pendingFinished != updatingFinished || // Pending's revision must == update
-               pendingFinished != revision.get() ||       // The revision must be the current library's
-               loadingFinished >= revision.get())         // And we can't have already finished.
-                return;
-            loadingFinished = revision.get();
-            rev = loadingFinished;
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        
-        loadFinished(rev);
     }
   
     /**
@@ -949,7 +923,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         ListeningFuture<List<ListeningFuture<FileDesc>>> future = submit(new Callable<List<ListeningFuture<FileDesc>>>() {
             @Override
             public List<ListeningFuture<FileDesc>> call() {
-                dispatch(new ManagedListStatusEvent(ManagedFileListImpl.this, ManagedListStatusEvent.Type.LOAD_STARTED));
                 return loadSettingsInternal(currentRevision);
             }
         });
@@ -962,46 +935,72 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    private List<ListeningFuture<FileDesc>> loadSettingsInternal(int revision) {
-        LOG.debugf("Loading Library Revision: {0}", revision);
+    private List<ListeningFuture<FileDesc>> loadSettingsInternal(int rev) {
+        LOG.debugf("Loading Library Revision: {0}", rev);
         
+        List<Future<Set<URN>>> urnFutures;
         rwLock.writeLock().lock();
         try {
+            urnFutures = new ArrayList<Future<Set<URN>>>(fileToUrnFuture.values());
+            fileToUrnFuture.clear();
             files.clear();
             urnMap.clear();
             fileToFileDescMap.clear();
             managedDirectories.clear();
-            numPendingFiles = 0;
             extensions.clear();
             extensions.addAll(getLibraryData().getManagedExtensions());
         } finally {
             rwLock.writeLock().unlock();
         }
         
+        for(Future<Set<URN>> future : urnFutures) {
+            future.cancel(true);
+        }
+        
         dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.CLEAR));
         
-        List<ListeningFuture<FileDesc>> futures = loadManagedFiles(revision);
-
-        LOG.debugf("Finished queueing files for revision: {0}", revision);
-            
-        rwLock.writeLock().lock();
-        try {
-            updatingFinished = revision;
-            if(numPendingFiles == 0) // if we didn't even try adding any files, pending is finished also.
-                pendingFinished = revision;
-        } finally {
-            rwLock.writeLock().unlock();
-        }
-        tryToFinish();
+        fireLoading();
+        final List<ListeningFuture<FileDesc>> futures = loadManagedFiles(rev);
+        addLoadingListener(futures, rev);
+        LOG.debugf("Finished queueing files for revision: {0}", rev);
         return futures;
+    }
+    
+    void fireLoading() {
+        changeSupport.firePropertyChange("hasPending", false, true);
+    }
+    
+    private void addLoadingListener(final List<ListeningFuture<FileDesc>> futures, final int rev) {
+        if(futures.isEmpty() && pendingFiles.get() == 0) {
+            loadFinished(rev);
+        } else if(!futures.isEmpty()) {
+            pendingFiles.addAndGet(futures.size());
+            
+            EventListener<FutureEvent<FileDesc>> listener = new EventListener<FutureEvent<FileDesc>>() {
+                @Override
+                public void handleEvent(FutureEvent<FileDesc> event) {
+                    if(pendingFiles.addAndGet(-1) == 0 && revision.get() == rev) {
+                        loadFinished(rev); 
+                    }
+                }
+            };
+            
+            for(ListeningFuture<FileDesc> future : futures) {
+                future.addFutureListener(listener);
+            }
+        }
     }
     
     /** Kicks off necessary stuff for loading being done. */
     private void loadFinished(int rev) {
-        LOG.debugf("Finished loading revision: {0}", rev);
-        dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_FINISHING));
-        save();
-        dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_COMPLETE));
+        changeSupport.firePropertyChange("hasPending", true, false);
+        if(loadingFinished != rev) {
+            loadingFinished = rev;
+            LOG.debugf("Finished loading revision: {0}", rev);
+            dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_FINISHING));
+            save();
+            dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.LOAD_COMPLETE));
+        }
     }
     
     @Override
@@ -1133,7 +1132,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     /** Dispatches a SAVE event & tells library data to save. */
     void save() {
-        dispatch(new ManagedListStatusEvent(this, ManagedListStatusEvent.Type.SAVE));
+        urnCache.persistCache();
         getLibraryData().save();
     }
     

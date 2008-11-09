@@ -119,7 +119,7 @@ public class ExecutorsHelper {
      * Items added while no threads are available to process them will wait
      * until an executing item is finished and then be processed.
      */
-    public static ExecutorService newFixedSizeThreadPool(int size, String name) {
+    public static ListeningExecutorService newFixedSizeThreadPool(int size, String name) {
         ThreadPoolListeningExecutor tpe =  new ThreadPoolListeningExecutor(size, size,
                 5L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
