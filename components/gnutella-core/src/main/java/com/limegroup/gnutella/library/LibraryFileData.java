@@ -60,8 +60,10 @@ class LibraryFileData extends AbstractSettingsGroup {
     private final Set<File> directoriesNotToManage = new HashSet<File>();
     private final Set<File> excludedFiles = new HashSet<File>();
     private final Map<File, FileProperties> libraryShareData = new HashMap<File, FileProperties>();
+    private volatile boolean dirty = false;
     
     private final File saveFile = new File(CommonUtils.getUserSettingsDir(), "library5.dat"); 
+    private final File backupFile = new File(CommonUtils.getUserSettingsDir(), "library5.bak");
     
     private volatile boolean loaded = false;
 
@@ -80,8 +82,14 @@ class LibraryFileData extends AbstractSettingsGroup {
     
     @Override
     public boolean revertToDefault() {
+        clear();
+        return true;
+    }
+    
+    private void clear() {
         lock.writeLock().lock();
         try {
+            dirty = true;
             userExtensions.clear();
             userRemoved.clear();
             directoriesToManageRecursively.clear();
@@ -91,11 +99,13 @@ class LibraryFileData extends AbstractSettingsGroup {
         } finally {
             lock.writeLock().unlock();
         }
-        
-        return true;
     }
 
     public boolean save() {
+        if(!loaded || !dirty) {
+            return false;
+        }
+        
         Map<String, Object> save = new HashMap<String, Object>();
         lock.readLock().lock();
         try {
@@ -107,10 +117,14 @@ class LibraryFileData extends AbstractSettingsGroup {
             save.put("SHARE_DATA", libraryShareData);
             
             try {
-                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(saveFile)));
+                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
                 out.writeObject(save);
                 out.flush();
                 out.close();
+                // Rename backup to save, now that it saved.
+                saveFile.delete();
+                backupFile.renameTo(saveFile);                
+                dirty = false;
             } catch(IOException iox) {
                 LOG.debug("IOX saving library", iox);
             }
@@ -122,9 +136,18 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
     
     void load() {
+        boolean failed = false;
+        if(!loadFromFile(saveFile)) {
+            failed = !loadFromFile(backupFile);
+        }
+        dirty = failed;
+        loaded = true;
+    }
+    
+    private boolean loadFromFile(File file) {
         Map<String, Object> readMap = null;
         try {
-            ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(saveFile)));
+            ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
             Object read = in.readObject();
             readMap = GenericsUtils.scanForMap(read, String.class, Object.class, ScanMode.REMOVE);
             if (readMap != null) {
@@ -143,6 +166,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 
                 lock.writeLock().lock();
                 try {
+                    clear();
                     this.userExtensions.addAll(userExtensions);
                     this.userRemoved.addAll(userRemoved);
                     this.directoriesToManageRecursively.addAll(directoriesToManageRecursively);
@@ -152,12 +176,13 @@ class LibraryFileData extends AbstractSettingsGroup {
                 } finally {
                     lock.writeLock().unlock();
                 }
+                return true;
             }
         } catch(Throwable throwable) {
             LOG.error("Error loading library", throwable);
         }
         
-        this.loaded = true;
+        return false;
     }
 
     /** Returns true if the given file should be excluded from managing. */
@@ -177,10 +202,12 @@ class LibraryFileData extends AbstractSettingsGroup {
     void addManagedFile(File file, boolean explicit) {
         lock.writeLock().lock();
         try {
-            excludedFiles.remove(file);
+            boolean changed = excludedFiles.remove(file);
             if(explicit && !libraryShareData.containsKey(file)) {
                 libraryShareData.put(file, new FileProperties());
+                changed = true;
             } 
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -197,10 +224,11 @@ class LibraryFileData extends AbstractSettingsGroup {
     void removeManagedFile(File file, boolean explicit) {
         lock.writeLock().lock();
         try {
-            libraryShareData.remove(file);
+            boolean changed = libraryShareData.remove(file) != null;
             if(explicit) {
-                excludedFiles.add(file);
+                changed |= excludedFiles.add(file);
             }
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -237,9 +265,14 @@ class LibraryFileData extends AbstractSettingsGroup {
     void setDirectoriesToExcludeFromManaging(Collection<File> folders) {
         lock.writeLock().lock();
         try {
-            directoriesNotToManage.clear();
-            directoriesNotToManage.addAll(folders);
-            directoriesToManageRecursively.removeAll(folders);
+            boolean changed = false;
+            if(!directoriesNotToManage.equals(folders)) {
+                changed = true;
+                directoriesNotToManage.clear();
+                directoriesNotToManage.addAll(folders);
+            }
+            changed |= directoriesToManageRecursively.removeAll(folders);
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -259,8 +292,10 @@ class LibraryFileData extends AbstractSettingsGroup {
     void addDirectoryToManageRecursively(File folder) {
         lock.writeLock().lock();
         try {
-            directoriesToManageRecursively.add(folder);
-            directoriesNotToManage.remove(folder);
+            boolean changed = false;
+            changed |= directoriesToManageRecursively.add(folder);
+            changed |= directoriesNotToManage.remove(folder);
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
@@ -270,9 +305,14 @@ class LibraryFileData extends AbstractSettingsGroup {
     void setDirectoriesToManageRecursively(Collection<File> folders) {
         lock.writeLock().lock();
         try {
-            directoriesToManageRecursively.clear();
-            directoriesToManageRecursively.addAll(folders);
-            directoriesNotToManage.removeAll(folders);
+            boolean changed = false;
+            if(!directoriesToManageRecursively.equals(folders)) {
+                changed = true;
+                directoriesToManageRecursively.clear();
+                directoriesToManageRecursively.addAll(folders);
+            }
+            changed |= directoriesNotToManage.removeAll(folders);
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
@@ -291,8 +331,13 @@ class LibraryFileData extends AbstractSettingsGroup {
     public void setUserExtensions(Collection<String> addedExtensions) {
         lock.writeLock().lock();
         try {
-            userExtensions.clear();
-            userExtensions.addAll(addedExtensions);
+            boolean changed = false;
+            if(!userExtensions.equals(addedExtensions)) {
+                changed = true;
+                userExtensions.clear();
+                userExtensions.addAll(addedExtensions);
+            }
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
@@ -301,8 +346,13 @@ class LibraryFileData extends AbstractSettingsGroup {
     public void setUserRemovedExtensions(Collection<String> removedExtensions) {
         lock.writeLock().lock();
         try {
-            userRemoved.clear();
-            userRemoved.addAll(removedExtensions);
+            boolean changed = false;
+            if(userRemoved.equals(removedExtensions)) {
+                changed = true;
+                userRemoved.clear();
+                userRemoved.addAll(removedExtensions);
+            }
+            dirty |= changed;            
         } finally {
             lock.writeLock().unlock();
         }
@@ -325,13 +375,26 @@ class LibraryFileData extends AbstractSettingsGroup {
     void setManagedExtensions(Collection<String> newExtensions) {
         lock.writeLock().lock();
         try {
-            userRemoved.clear();
-            userRemoved.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            userRemoved.removeAll(newExtensions);
+            boolean changed = false;
+            Set<String> removed = new HashSet<String>();
+            removed.addAll(DEFAULT_MANAGED_EXTENSIONS);
+            removed.removeAll(newExtensions);
+            if(!userRemoved.equals(removed)) {
+                changed = true;
+                userRemoved.clear();
+                userRemoved.addAll(removed);
+            }
             
-            userExtensions.clear();
-            userExtensions.addAll(newExtensions);
-            userExtensions.removeAll(DEFAULT_MANAGED_EXTENSIONS);
+            Set<String> added = new HashSet<String>();
+            added.addAll(newExtensions);
+            added.removeAll(DEFAULT_MANAGED_EXTENSIONS);
+            if(!userExtensions.equals(added)) {
+                changed = true;
+                userExtensions.clear();
+                userExtensions.addAll(added);
+            }
+            
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -353,7 +416,9 @@ class LibraryFileData extends AbstractSettingsGroup {
                 props = new FileProperties();
                 libraryShareData.put(file, props);
             }
+            boolean changed = props.gnutella != shared;
             props.gnutella = shared;
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
@@ -392,14 +457,16 @@ class LibraryFileData extends AbstractSettingsGroup {
                 }
                 props.friends = new HashSet<String>();
             }
+            boolean changed;
             if(shared) {
-                props.friends.add(friendId);
+                changed = props.friends.add(friendId);
             } else {
-                props.friends.remove(friendId);
+                changed = props.friends.remove(friendId);
                 if(props.friends.isEmpty()) {
                     props.friends = null;
                 }
             }
+            dirty |= changed;
         } finally {
             lock.writeLock().unlock();
         }
