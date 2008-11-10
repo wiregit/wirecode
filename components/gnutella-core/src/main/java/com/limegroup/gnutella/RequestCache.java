@@ -3,12 +3,18 @@ package com.limegroup.gnutella;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
+
 import com.limegroup.gnutella.uploader.LimitReachedRequestHandler;
 
 /**
  * Keeps track of requests sent by a client.
  */
 public class RequestCache {
+    
+    private static final Log LOG = LogFactory.getLog(RequestCache.class);
+    
     // we don't allow more than 1 request per 5 seconds
     private static final double MAX_REQUESTS = 5 * 1000;
 
@@ -92,6 +98,7 @@ public class RequestCache {
      * uploaded.
      */
     void transferDone(URN sha1) {
+        LOG.debugf("transferDone for " + sha1);
         ACTIVE_TRANSFERS.remove(sha1);
     }
 }
