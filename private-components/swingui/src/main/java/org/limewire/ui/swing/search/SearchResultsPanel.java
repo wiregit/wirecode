@@ -132,6 +132,7 @@ public class SearchResultsPanel extends JXPanel {
         // for the parameters annotated with @Assisted.
         this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
         
+        //TODO this is not a singleton, need to remove the listener when we are done with this panel
         SearchSettings.SEARCH_VIEW_TYPE_ID.addSettingListener( new SettingListener() {
            int oldSearchViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
            @Override

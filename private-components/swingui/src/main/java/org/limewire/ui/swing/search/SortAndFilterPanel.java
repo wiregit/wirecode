@@ -189,6 +189,8 @@ public class SortAndFilterPanel extends JXPanel {
             }
         });
 
+        
+        //TODO this is not a singleton, need to remove the listener when we are done with this panel
         SearchSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
