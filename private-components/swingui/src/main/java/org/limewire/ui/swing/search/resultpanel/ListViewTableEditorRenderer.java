@@ -176,7 +176,6 @@ implements TableCellEditor, TableCellRenderer {
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
 
-        searchResultMenu.init(vsr, row);
         
         
         if (editorComponent == null) {
@@ -209,9 +208,21 @@ implements TableCellEditor, TableCellRenderer {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if(e.getButton() == MouseEvent.BUTTON3) {
+                        searchResultMenu.init(vsr, currentRow);
                         searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                     }
                 }
+            });
+            
+            
+            heading.addMouseListener( new MouseAdapter() {
+                @Override
+                    public void mousePressed(MouseEvent e) {
+                        if(e.getButton() == MouseEvent.BUTTON3) {
+                            searchResultMenu.init(vsr, currentRow);
+                            searchResultMenu.show(heading, e.getX(), e.getY());
+                        }
+                    }
             });
         }
 
@@ -333,15 +344,6 @@ implements TableCellEditor, TableCellRenderer {
                     }
                 }
             }
-        });
-        
-        heading.addMouseListener( new MouseAdapter() {
-            @Override
-                public void mousePressed(MouseEvent e) {
-                    if(e.getButton() == MouseEvent.BUTTON3) {
-                        searchResultMenu.show(heading, e.getX(), e.getY());
-                    }
-                }
         });
 
         return panel;
