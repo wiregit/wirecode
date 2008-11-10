@@ -137,8 +137,8 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         // get the resource file for com/limegroup/gnutella
         File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(susheel).get(1, TimeUnit.SECONDS));
         
 		connect();
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());

@@ -2,11 +2,15 @@ package com.limegroup.gnutella.library;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.StringArraySetting;
@@ -31,6 +35,7 @@ class LibraryConverter {
         OldLibraryData oldData = new OldLibraryData(); // load if necessary
         for(File folder : OldLibrarySettings.DIRECTORIES_TO_SHARE.getValue()) {
             if(!LibraryUtils.isSensitiveDirectory(folder) || oldData.SENSITIVE_DIRECTORIES_VALIDATED.contains(folder)) {
+                folder = FileUtils.canonicalize(folder);
                 newData.addDirectoryToManageRecursively(folder);
             }
         }
@@ -38,19 +43,22 @@ class LibraryConverter {
         newData.setDirectoriesToExcludeFromManaging(oldData.DIRECTORIES_NOT_TO_SHARE);
         
         for(File file : oldData.SPECIAL_FILES_TO_SHARE) {
+            file = FileUtils.canonicalize(file);            
             newData.addManagedFile(file, true);
             newData.setSharedWithGnutella(file, true);
         }
         
         for(File file : oldData.FILES_NOT_TO_SHARE) {
+            file = FileUtils.canonicalize(file);
             newData.removeManagedFile(file, true);
         }
         
-        newData.setUserExtensions(
-                Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue())));
-        
-        newData.setUserRemovedExtensions(
-                Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue())));
+        // Set the new managed extensions.
+        List<String> extensions = new ArrayList<String>();
+        extensions.addAll(Arrays.asList(OldLibrarySettings.getDefaultExtensions()));
+        extensions.removeAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_UNSHARED.getValue())));
+        extensions.addAll(Arrays.asList(StringArraySetting.decode(OldLibrarySettings.EXTENSIONS_LIST_CUSTOM.getValue())));        
+        newData.setManagedExtensions(extensions);
         
         // Here's the bulk of the conversion -- loop through, recursively, previously 
         // shared directories & mark all potential files as shareable.
@@ -58,16 +66,19 @@ class LibraryConverter {
         
         
         for(File file : oldData.SPECIAL_STORE_FILES) {
+            file = FileUtils.canonicalize(file);
             newData.addManagedFile(file, true);
         }
         
         for(MediaType type : MediaType.getDefaultMediaTypes()) {
-            newData.addDirectoryToManageRecursively(SharingSettings.getFileSettingForMediaType(type).getValue());
+            File file = SharingSettings.getFileSettingForMediaType(type).getValue();
+            file = FileUtils.canonicalize(file);
+            newData.addDirectoryToManageRecursively(file);
         }
         
-        newData.addDirectoryToManageRecursively(SharingSettings.getSaveLWSDirectory());
+        newData.addDirectoryToManageRecursively(FileUtils.canonicalize(SharingSettings.getSaveLWSDirectory()));
         
-        newData.addDirectoryToManageRecursively(SharingSettings.getSaveDirectory());
+        newData.addDirectoryToManageRecursively(FileUtils.canonicalize(SharingSettings.getSaveDirectory()));
         
         LibrarySettings.VERSION.setValue(LibrarySettings.LibraryVersion.FIVE_0_0.name());
         
@@ -80,7 +91,11 @@ class LibraryConverter {
     }
     
     private void convertSharedFiles(LibraryFileData data) {
-        Collection<String> extensions = data.getManagedExtensions(); 
+        Map<Category, Collection<String>> extByCategory = data.getExtensionsPerCategory();
+        Collection<String> extensions = new ArrayList<String>();
+        for(Collection<String> exts : extByCategory.values()) {
+            extensions.addAll(exts);
+        }
         Set<File> convertedDirectories = new HashSet<File>();
         for(File file : data.getDirectoriesToManageRecursively()) {
             convertDirectory(file, extensions, data, convertedDirectories);
@@ -108,6 +123,7 @@ class LibraryConverter {
 
         if(fileList != null) {
             for (File file : fileList) {
+                file = FileUtils.canonicalize(file);
                 data.setSharedWithGnutella(file, true);
             }
         }

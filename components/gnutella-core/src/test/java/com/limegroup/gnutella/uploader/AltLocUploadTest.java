@@ -172,7 +172,7 @@ public class AltLocUploadTest extends LimeTestCase {
         File testDir = TestUtils.getResourceFile(testDirName);
         assertTrue("test directory could not be found", testDir.isDirectory());
         File testFile = new File(testDir, fileName);
-        Future<FileDesc> f1 = fileManager.getGnutellaSharedFileList().add(testFile);
+        Future<FileDesc> f1 = fileManager.getGnutellaFileList().add(testFile);
         fd = f1.get(1, TimeUnit.SECONDS);
         assertNotNull(fd);
         

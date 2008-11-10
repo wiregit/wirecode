@@ -86,8 +86,8 @@ public class SearchOptionPanel extends OptionPanel {
             defaultSearchSpinner = new JComboBox(SearchCategory.values());
             defaultSearchSpinner.removeItem(SearchCategory.OTHER);
 
-            LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SearchSettingListener(
-                    LibrarySettings.PROGRAM_SHARING_ENABLED, SearchCategory.PROGRAM,
+            LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SearchSettingListener(
+                    LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
             searchTabNumberCheckBox = new JCheckBox();

@@ -4,12 +4,11 @@ import java.util.Map;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
-import org.limewire.util.MediaType;
 
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
@@ -26,8 +25,7 @@ public class FilePropertyKeyPopulator {
         set(properties, FilePropertyKey.FILE_SIZE, fileSize);
 
         String extension = FileUtils.getFileExtension(fileName);
-        Category category = MediaTypeConverter.toCategory(MediaType
-                .getMediaTypeForExtension(extension));
+        Category category = CategoryConverter.categoryForExtension(extension);
 
         if (doc != null) {
             for (FilePropertyKey filePropertyKey : FilePropertyKey.values()) {

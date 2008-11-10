@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
-import org.limewire.core.api.library.LibraryData;
 import org.limewire.ui.swing.util.I18n;
 
 public class LibraryManagerModel extends AbstractTreeTableModel {
@@ -27,7 +26,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
      * 
      * @param aNode
      *            the node to query
-     * @return an array of {@code TreeTableNode}s, where
+     * @return an array of {@code LibraryManagerItem}s, where
      *         {@code arr[0].equals(getRoot())} and
      *         {@code arr[arr.length - 1].equals(aNode)}, or an empty array if
      *         the node is not found.
@@ -135,36 +134,29 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         
         return -1;
     }
-
-    /** Persists the contents of this model to libraryData. */
-    public void persist(LibraryData libraryData) {
-        Collection<File> manageRecursively = new HashSet<File>();
-        Collection<File> exclude = new HashSet<File>();
-        calculateManagedDirectories(manageRecursively, exclude);
-        libraryData.setManagedFolders(manageRecursively, exclude);
-    }
-
-    /** Returns true if the contents of this model is different than that of the data. */
-    public boolean hasChanged(LibraryData libraryData) {
-        Collection<File> manageRecursively = new HashSet<File>();
-        Collection<File> exclude = new HashSet<File>();
-        calculateManagedDirectories(manageRecursively, exclude);
-        
-        Collection<File> existingManaged = libraryData.getDirectoriesToManageRecursively();
-        Collection<File> existingExclude = libraryData.getDirectoriesToExcludeFromManaging();
-        return !existingExclude.equals(exclude) || !existingManaged.equals(manageRecursively);
-    }
     
-    private void calculateManagedDirectories(Collection<File> manageRecursively, Collection<File> excludes) {
+    public Collection<File> getManagedDirectories() {
+        Collection<File> manageRecursively = new HashSet<File>();
         List<LibraryManagerItem> children = getRoot().getChildren();
         for(LibraryManagerItem child : children) {
             if(child.isScanned()) {
                 manageRecursively.add(child.getFile());
+            }
+        }
+        return manageRecursively;
+    }
+    
+    public Collection<File> getExcludedDirectories() {
+        Collection<File> excludes = new HashSet<File>();
+        List<LibraryManagerItem> children = getRoot().getChildren();
+        for(LibraryManagerItem child : children) {
+            if(child.isScanned()) {
                 addExclusions(child, excludes);
             }
         }
+        return excludes;
     }
-    
+        
     private void addExclusions(LibraryManagerItem item, Collection<File> excludes) {
         if(!item.isScanned()) {
             excludes.add(item.getFile());
@@ -173,5 +165,5 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
                 addExclusions(child, excludes);
             }
         }
-    }
+    }    
 }

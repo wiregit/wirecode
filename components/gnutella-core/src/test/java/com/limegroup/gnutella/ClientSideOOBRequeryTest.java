@@ -146,7 +146,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         networkManagerStub.setPort(SERVER_PORT);
         
         File file = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/metadata.mp3");
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(file).get(1, TimeUnit.SECONDS));
                 
         UDP_ACCESS = new DatagramSocket[10];
         for (int i = 0; i < UDP_ACCESS.length; i++)

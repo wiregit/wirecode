@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.limewire.collection.CollectionUtils;
+import org.limewire.core.api.Category;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
@@ -114,7 +116,7 @@ public class FileManagerTestUtils {
     }
     
     public static List<FileDesc> assertSetManagedDirectories(ManagedFileList fileList, Collection<File> dirs, Collection<File> excludeDirs) throws Exception {
-        return assertFutureListFinishes(fileList.setManagedFolders(dirs, excludeDirs), 5, TimeUnit.SECONDS);
+        return assertFutureListFinishes(fileList.setManagedOptions(dirs, excludeDirs, EnumSet.allOf(Category.class)), 5, TimeUnit.SECONDS);
     }
     
     public static void assertContainsFiles(Iterable<FileDesc> iterable, File... expectedFiles) {
@@ -127,8 +129,10 @@ public class FileManagerTestUtils {
             files.add(fd.getFile());
         }
         
+        int i = 0;
         for(File file : expectedFiles) {
-            assertTrue("did not contain: " + file, files.remove(file));
+            assertTrue("did not contain file[" + i + "]: " + file, files.remove(file));
+            i++;
         }
         assertEmpty(files);
     }

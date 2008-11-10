@@ -13,12 +13,11 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.impl.URNImpl;
-import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -95,8 +94,7 @@ class CoreDownloadItem implements DownloadItem {
 
     @Override
     public Category getCategory() {
-        String ext = FileUtils.getFileExtension(downloader.getFile());
-        return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));        
+        return CategoryConverter.categoryForFile(downloader.getFile());
     }
 
     @Override

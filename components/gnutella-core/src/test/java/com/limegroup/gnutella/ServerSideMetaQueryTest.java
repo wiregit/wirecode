@@ -63,12 +63,12 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fm = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fm, 500);
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(1, TimeUnit.SECONDS));
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta doc.txt")).get(1, TimeUnit.SECONDS));
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta image.png")).get(1, TimeUnit.SECONDS));
-        assertNotNull(fm.getGnutellaSharedFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta program txt.bin")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta doc.txt")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta image.png")).get(1, TimeUnit.SECONDS));
+        assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta program txt.bin")).get(1, TimeUnit.SECONDS));
     }
     
     @Singleton

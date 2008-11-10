@@ -39,7 +39,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 class FileManagerImpl implements FileManager, Service {
     
     private final ManagedFileListImpl managedFileList;
-    private final GnutellaSharedFileListImpl sharedFileList;
+    private final GnutellaFileListImpl sharedFileList;
     private final IncompleteFileListImpl incompleteFileList;
     private final Map<String, FriendFileListImpl> friendFileLists = new HashMap<String,FriendFileListImpl>();
     
@@ -60,7 +60,7 @@ class FileManagerImpl implements FileManager, Service {
     public FileManagerImpl(ManagedFileListImpl managedFileList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.backgroundExecutor = backgroundExecutor;
         this.managedFileList = managedFileList;
-        this.sharedFileList = new GnutellaSharedFileListImpl(managedFileList.getLibraryData(), managedFileList);
+        this.sharedFileList = new GnutellaFileListImpl(managedFileList.getLibraryData(), managedFileList);
         this.incompleteFileList = new IncompleteFileListImpl(managedFileList);
         
         synchronized(this) {
@@ -117,7 +117,7 @@ class FileManagerImpl implements FileManager, Service {
     }
 
     @Override
-    public GnutellaFileList getGnutellaSharedFileList() {
+    public GnutellaFileList getGnutellaFileList() {
         return sharedFileList;
     }    
     
@@ -180,7 +180,7 @@ class FileManagerImpl implements FileManager, Service {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
-                    FileList shareList = getGnutellaSharedFileList();
+                    FileList shareList = getGnutellaFileList();
                     shareList.getReadLock().lock();
                     try {
                         for (FileDesc fd : shareList){
@@ -235,7 +235,7 @@ class FileManagerImpl implements FileManager, Service {
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
 
             List<FileDesc> fds;
-            FileList shareList = getGnutellaSharedFileList();
+            FileList shareList = getGnutellaFileList();
             shareList.getReadLock().lock();
             try {
                 fds = CollectionUtils.listOf(shareList);

@@ -25,12 +25,12 @@ public class GnutellaBrowseFileListProvider implements HttpRequestFileListProvid
     }
     
     /**
-     * @return {@link FileManager#getGnutellaSharedFileList()}.
+     * @return {@link FileManager#getGnutellaFileList()}.
      */
     @Override
     public Iterable<SharedFileList> getFileLists(HttpRequest request, HttpContext httpContext) {
         // Broken into two lines so it returns the correct type.
-        SharedFileList fileList = fileManager.getGnutellaSharedFileList();
+        SharedFileList fileList = fileManager.getGnutellaFileList();
         return Collections.singletonList(fileList);
     }
 

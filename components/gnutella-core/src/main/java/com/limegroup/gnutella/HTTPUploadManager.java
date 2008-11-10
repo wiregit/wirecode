@@ -404,7 +404,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             return false;
         }
         
-        if (fileManager.get().getGnutellaSharedFileList().hasApplicationSharedFiles())
+        if (fileManager.get().getGnutellaFileList().hasApplicationSharedFiles())
             return slotManager.hasHTTPSlotForMeta(uploadsInProgress()
                     + getNumQueuedUploads());
         return isServiceable();

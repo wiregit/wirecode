@@ -102,7 +102,7 @@ public class SearchBar extends JXPanel {
 
         this.searchField.setFont(this.searchField.getFont().deriveFont(12));
         
-        LibrarySettings.PROGRAM_SHARING_ENABLED.addSettingListener(new SettingListener() {
+        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {
             
             @Override
             public void settingChanged(SettingEvent evt) {
@@ -113,7 +113,7 @@ public class SearchBar extends JXPanel {
     }
     
     private void assertProgramCategory() {
-        if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
+        if (!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             this.comboBox.removeAction(this.programAction);
         } else {
             this.comboBox.addAction(this.programAction);

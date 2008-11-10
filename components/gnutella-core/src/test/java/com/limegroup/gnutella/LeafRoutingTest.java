@@ -135,8 +135,8 @@ public class LeafRoutingTest extends LimeTestCase {
         // get the resource file for com/limegroup/gnutella
         File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(berkeley).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(susheel).get(1, TimeUnit.SECONDS));
         
         assertEquals("unexpected port", SERVER_PORT, NetworkSettings.PORT.getValue());
         connect();
@@ -379,7 +379,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(fileManager.getGnutellaSharedFileList().size() == 2);
+        assertTrue(fileManager.getGnutellaFileList().size() == 2);
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -415,7 +415,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaFileList().size());
 
         // get the URNS for the files
         File berkeley = 

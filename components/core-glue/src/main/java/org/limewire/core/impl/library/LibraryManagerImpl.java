@@ -6,7 +6,9 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -33,7 +35,6 @@ class LibraryManagerImpl implements LibraryManager {
         this.libraryList = new LibraryFileListImpl(managedList, coreLocalFileItemFactory);
         this.libraryData = new LibraryDataImpl(managedList);
     }
-
     
     @Override
     public LibraryFileList getLibraryManagedList() {
@@ -53,14 +54,25 @@ class LibraryManagerImpl implements LibraryManager {
         }
         
         @Override
-        public List<File> getDirectoriesToExcludeFromManaging() {
-            return fileList.getDirectoriesToExcludeFromManaging();
+        public boolean isProgramManagingAllowed() {
+            return fileList.isProgramManagingAllowed();
         }
         
         @Override
-        public void setManagedFolders(Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude) {
-            fileList.setManagedFolders(recursiveFoldersToManage, foldersToExclude);
+        public void setManagedOptions(Collection<File> recursiveFoldersToManage,
+                Collection<File> foldersToExclude, Collection<Category> managedCategories) {
+            fileList.setManagedOptions(recursiveFoldersToManage, foldersToExclude, managedCategories);
         }
+        
+        @Override
+        public Collection<Category> getManagedCategories() {
+            return fileList.getManagedCategories();
+        }
+        
+        @Override
+        public List<File> getDirectoriesToExcludeFromManaging() {
+            return fileList.getDirectoriesToExcludeFromManaging();
+        }        
 
         @Override
         public boolean isDirectoryAllowed(File folder) {
@@ -78,13 +90,13 @@ class LibraryManagerImpl implements LibraryManager {
         }
         
         @Override
-        public Collection<String> getDefaultManagedExtensions() {
+        public Collection<String> getDefaultExtensions() {
             return fileList.getDefaultManagedExtensions();
         }
         
         @Override
-        public Collection<String> getManagedExtensions() {
-            return fileList.getManagedExtensions();
+        public Map<Category, Collection<String>> getExtensionsPerCategory() {
+            return fileList.getExtensionsPerCategory();
         }
         
         @Override
@@ -148,9 +160,7 @@ class LibraryManagerImpl implements LibraryManager {
         @Override
         public void removePropertyChangeListener(PropertyChangeListener listener) {
             changeSupport.removePropertyChangeListener(listener);
-        }    
-        
-        
+        }
     }
     
 

@@ -3,18 +3,15 @@ package org.limewire.core.api.library;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import org.limewire.core.api.Category;
 
 /**
  * Allows manipulation of the library.
  */
 public interface LibraryData {
-    
-    /**
-     * Sets the new directories to recursively manage, and directories
-     * to be excluded from management.
-     */
-    void setManagedFolders(Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude);
-    
+        
     /**
      * Returns a list of all directories that will be managed recursively.
      */
@@ -24,19 +21,21 @@ public interface LibraryData {
     List<File> getDirectoriesToExcludeFromManaging();
 
     /**
-     * Returns a collection of all extensions that define which
-     * files will be managed when folders are managed.
+     * Returns a Map of Category->Collection<String> that defines
+     * what extensions are in what category.
      */
-    Collection<String> getManagedExtensions();
+    Map<Category, Collection<String>> getExtensionsPerCategory();
 
     /**
      * Returns a list of all extensions that this, by default, would
-     * manage.  This is not necessarily the current managed list.
+     * manage.  This is not necessarily the current list.
      */
-    Collection<String> getDefaultManagedExtensions();
+    Collection<String> getDefaultExtensions();
 
     /**
-     * Sets the current managed extensions to be the given set.
+     * Sets the current managed extensions to be the given set. If the
+     * extensions are not in a managed category, the extension will not be
+     * managed.
      */
     void setManagedExtensions(Collection<String> extensions);
 
@@ -45,4 +44,19 @@ public interface LibraryData {
 
     /** Returns true if the directory is allowed to be recursively managed. */
     boolean isDirectoryExcluded(File folder);
+
+    /** Returns all categories that should be managed. */
+    Collection<Category> getManagedCategories();
+
+    /** Returns true if the library is allowed to manage programs. */
+    boolean isProgramManagingAllowed();
+
+    /**
+     * Sets the new options for managing directories.
+     * This includes the new directories to manage, directories to exclude,
+     * and categories to manage.
+     */
+    void setManagedOptions(Collection<File> recursiveFoldersToManage, 
+            Collection<File> foldersToExclude,
+            Collection<Category> managedCategories);
 }

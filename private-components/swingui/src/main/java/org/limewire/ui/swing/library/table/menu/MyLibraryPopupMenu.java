@@ -121,7 +121,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     
     //TODO: refactor to common parent with MyLibraryMultipleSelectionPopupMenu
     private boolean isGnutellaSharable(Category category){
-        return category != Category.DOCUMENT || LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue();
+        return category != Category.DOCUMENT || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
 
     

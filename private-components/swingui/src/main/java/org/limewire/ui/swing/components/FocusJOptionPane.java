@@ -141,13 +141,16 @@ public class FocusJOptionPane {
         return dialog;
     }
     
-    public static Window getWindowForComponent(Component parentComponent) 
-    throws HeadlessException {
-        if (parentComponent == null)
+    public static Window getWindowForComponent(Component parentComponent) throws HeadlessException {
+        if (parentComponent == null) {
             return GuiUtils.getMainFrame();
-        if (parentComponent instanceof Frame || parentComponent instanceof Dialog)
-            return (Window)parentComponent;
-    return FocusJOptionPane.getWindowForComponent(parentComponent.getParent());
-}
+        }
+        
+        if (parentComponent instanceof Frame || parentComponent instanceof Dialog) {
+            return (Window) parentComponent;
+        }
+        
+        return FocusJOptionPane.getWindowForComponent(parentComponent.getParent());
+    }
 
 }

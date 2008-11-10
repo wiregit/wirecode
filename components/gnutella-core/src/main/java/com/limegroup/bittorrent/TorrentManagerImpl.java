@@ -327,7 +327,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
             	if (LibraryUtils.isFilePhysicallyManagable(f))
-            		fileManager.getGnutellaSharedFileList().addForSession(f);
+            		fileManager.getGnutellaFileList().addForSession(f);
             }
         };
         threadPool.execute(r);
@@ -346,7 +346,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
                 if(fileManager.getManagedFileList().remove(f)) {
-                    fileManager.getGnutellaSharedFileList().remove(f);      
+                    fileManager.getGnutellaFileList().remove(f);      
                     if(fdelete) {
                         FileUtils.delete(f, false);
                     } else {
@@ -372,7 +372,7 @@ public class TorrentManagerImpl implements TorrentManager {
     public void shareTorrentFile(BTMetaInfo m, byte[] body) {
         if (SharingSettings.SHARE_TORRENT_META_FILES.getValue() && !m.isPrivate()) {
             final File tFile = getSharedTorrentMetaDataFile(m);
-            fileManager.getGnutellaSharedFileList().remove(tFile);
+            fileManager.getGnutellaFileList().remove(tFile);
 
             File backup = null;
             if (tFile.exists()) {
@@ -391,7 +391,7 @@ public class TorrentManagerImpl implements TorrentManager {
                 if (backup != null) {
                     // restore backup
                     if (FileUtils.forceRename(backup, tFile)) {
-                        fileManager.getGnutellaSharedFileList().add(tFile);
+                        fileManager.getGnutellaFileList().add(tFile);
                     }
                 }
             } finally {

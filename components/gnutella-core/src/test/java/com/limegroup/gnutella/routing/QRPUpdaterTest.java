@@ -61,14 +61,14 @@ public class QRPUpdaterTest extends LimeTestCase {
         assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
         
         FileDesc fd = new FileDescStub("FoundFile.txt");
-        fileManagerStub.getGnutellaSharedFileList().add(fd);
+        fileManagerStub.getGnutellaFileList().add(fd);
         
         table = qrpUpdater.getQRT();
         assertTrue(table.contains(new QueryRequestImpl("limewire")));
         assertTrue(table.contains(new QueryRequestImpl("FoundFile.txt")));
         assertFalse(table.contains(new QueryRequestImpl("NotFound.txt")));
         
-        fileManagerStub.getGnutellaSharedFileList().remove(fd);
+        fileManagerStub.getGnutellaFileList().remove(fd);
         table = qrpUpdater.getQRT();
         assertTrue(table.contains(new QueryRequestImpl("limewire")));
         assertFalse(table.contains(new QueryRequestImpl("FoundFile.txt")));

@@ -13,14 +13,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.limewire.collection.CollectionUtils;
+import org.limewire.core.api.Category;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -30,6 +36,8 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
+
+import com.limegroup.gnutella.CategoryConverter;
 
 class LibraryFileData extends AbstractSettingsGroup {
     
@@ -167,7 +175,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 lock.writeLock().lock();
                 try {
                     clear();
-                    this.userExtensions.addAll(userExtensions);
+                    this.userExtensions.addAll(lowercase(userExtensions));
                     this.userRemoved.addAll(userRemoved);
                     this.directoriesToManageRecursively.addAll(directoriesToManageRecursively);
                     this.directoriesNotToManage.addAll(directoriesNotToManage);
@@ -248,7 +256,7 @@ class LibraryFileData extends AbstractSettingsGroup {
 
     /** Retuns true if the given folder is the incomplete folder. */
     boolean isIncompleteDirectory(File folder) {
-        return canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.getValue()).equals(folder);
+        return FileUtils.canonicalize(SharingSettings.INCOMPLETE_DIRECTORY.getValue()).equals(folder);
     }
     
     /** Gets the list of directories to exclude from recursive management. */
@@ -282,7 +290,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     boolean isFolderExcluded(File folder) {
         lock.readLock().lock();
         try {
-            return directoriesNotToManage.contains(folder);
+            return directoriesNotToManage.contains(FileUtils.canonicalize(folder));
         } finally {
             lock.readLock().unlock();
         }
@@ -327,39 +335,53 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.readLock().unlock();
         }
     }
-
-    public void setUserExtensions(Collection<String> addedExtensions) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(!userExtensions.equals(addedExtensions)) {
-                changed = true;
-                userExtensions.clear();
-                userExtensions.addAll(addedExtensions);
-            }
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
+    
+    /** Returns all categories that should be managed. */
+    public Collection<Category> getManagedCategories() {
+        Set<Category> categories = EnumSet.noneOf(Category.class);
+        if(LibrarySettings.MANAGE_AUDIO.getValue()) {
+            categories.add(Category.AUDIO);
         }
+        if(LibrarySettings.MANAGE_DOCUMENTS.getValue()) {
+            categories.add(Category.DOCUMENT);
+        }
+        if(LibrarySettings.MANAGE_IMAGES.getValue()) {
+            categories.add(Category.IMAGE);
+        }
+        if(LibrarySettings.MANAGE_OTHER.getValue()) {
+            categories.add(Category.OTHER);
+        }
+        if(LibrarySettings.MANAGE_PROGRAMS.getValue()) {
+            categories.add(Category.PROGRAM);
+        }
+        if(LibrarySettings.MANAGE_VIDEO.getValue()) {
+            categories.add(Category.VIDEO);
+        }
+        return categories;
     }
 
-    public void setUserRemovedExtensions(Collection<String> removedExtensions) {
-        lock.writeLock().lock();
-        try {
-            boolean changed = false;
-            if(userRemoved.equals(removedExtensions)) {
-                changed = true;
-                userRemoved.clear();
-                userRemoved.addAll(removedExtensions);
-            }
-            dirty |= changed;            
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }    
+    /** Sets the new group of categories to manage. */
+    public void setManagedCategories(Collection<Category> categoriesToManage) {
+        LibrarySettings.MANAGE_AUDIO.setValue(categoriesToManage.contains(Category.AUDIO));
+        LibrarySettings.MANAGE_VIDEO.setValue(categoriesToManage.contains(Category.VIDEO));
+        LibrarySettings.MANAGE_DOCUMENTS.setValue(categoriesToManage.contains(Category.DOCUMENT));
+        LibrarySettings.MANAGE_IMAGES.setValue(categoriesToManage.contains(Category.IMAGE));
+        LibrarySettings.MANAGE_PROGRAMS.setValue(categoriesToManage.contains(Category.PROGRAM));
+        LibrarySettings.MANAGE_OTHER.setValue(categoriesToManage.contains(Category.OTHER));
+    }
+
+    /** Returns all extensions that are managed within the managed categories. */
+    public Collection<String> getExtensionsInManagedCategories() {
+        Map<Category, Collection<String>> map = getExtensionsPerCategory();
+        map.keySet().retainAll(getManagedCategories());
+        return CollectionUtils.flatten(map.values());        
+    }
     
-    /** Returns all extensions that are manageable. */
-    Collection<String> getManagedExtensions() {
+    /**
+     * Returns a Map of Category->Collection<String> that defines
+     * what extensions are in what category.
+     */
+    Map<Category, Collection<String>> getExtensionsPerCategory() {
         lock.readLock().lock();
         Set<String> extensions = new HashSet<String>();        
         try {
@@ -369,12 +391,25 @@ class LibraryFileData extends AbstractSettingsGroup {
         } finally {
             lock.readLock().unlock();
         }
-        return extensions;
+        
+        Map<Category, Collection<String>> extByCategory = new EnumMap<Category, Collection<String>>(Category.class);
+        for(Category category : Category.values()) {
+            extByCategory.put(category, new ArrayList<String>());
+        }
+        
+        for(String ext : extensions) {
+            extByCategory.get(CategoryConverter.categoryForExtension(ext)).add(ext);
+        }
+        
+        return extByCategory;
     }
 
+    /** Sets all extensions that should be managed. */
     void setManagedExtensions(Collection<String> newExtensions) {
         lock.writeLock().lock();
         try {
+            newExtensions = lowercase(newExtensions);
+            
             boolean changed = false;
             Set<String> removed = new HashSet<String>();
             removed.addAll(DEFAULT_MANAGED_EXTENSIONS);
@@ -486,12 +521,17 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.readLock().unlock();
         }
     }
-    private File canonicalize(File file) {
-        try {
-            return FileUtils.getCanonicalFile(file);  
-        } catch(IOException iox) {
-            return file;
+
+    boolean isProgramManagingAllowed() {
+        return LibrarySettings.ALLOW_PROGRAMS.getValue();
+    }
+    
+    private Collection<String> lowercase(Collection<String> extensions) {
+        Set<String> exts = new HashSet<String>(extensions.size());
+        for(String string : extensions) {
+            exts.add(string.toLowerCase(Locale.US));
         }
+        return exts;
     }
     
     private static class FileProperties implements Serializable {

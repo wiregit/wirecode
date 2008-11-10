@@ -67,7 +67,7 @@ public class AltLocModel implements StorableModel {
         List<Storable> toRemove = new ArrayList<Storable>();
         List<Storable> toPublish = new ArrayList<Storable>();
         
-        SharedFileList sharedFiles = fileManager.get().getGnutellaSharedFileList();
+        SharedFileList sharedFiles = fileManager.get().getGnutellaFileList();
         synchronized (values) {
             sharedFiles.getReadLock().lock();
             try {

@@ -234,7 +234,7 @@ public class LimeSessionInfo implements SessionInfo {
 
     @Override
     public int getSharedFileListSize() {
-        return fileManager.getGnutellaSharedFileList().size();
+        return fileManager.getGnutellaFileList().size();
     }
 
     @Override

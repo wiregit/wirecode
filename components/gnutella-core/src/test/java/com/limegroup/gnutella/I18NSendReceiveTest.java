@@ -125,7 +125,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
             fo.write('a');
             fo.flush();
             fo.close();
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(f).get(1, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaFileList().add(f).get(1, TimeUnit.SECONDS));
         }
     }
 

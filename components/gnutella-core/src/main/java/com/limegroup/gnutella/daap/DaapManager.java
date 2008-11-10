@@ -144,7 +144,7 @@ public final class DaapManager {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileManager.get().getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                fileManager.get().getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
                     @Override
                     public void handleEvent(FileListChangedEvent event) {
                         handleFileListEvent(event);
@@ -504,7 +504,7 @@ public final class DaapManager {
         int size = masterPlaylist.getSongCount();        
         Transaction txn = library.beginTransaction();    
    
-        FileList sharedFileList = fileManager.get().getGnutellaSharedFileList();
+        FileList sharedFileList = fileManager.get().getGnutellaFileList();
         sharedFileList.getReadLock().lock();
         try {
             for(FileDesc fd : sharedFileList) {

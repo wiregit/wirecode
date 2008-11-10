@@ -119,8 +119,8 @@ public class ServerSideWhatIsNewTest
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         downloadServices = injector.getInstance(DownloadServices.class);
         
-        fileManager.getGnutellaSharedFileList().remove(berkeleyFD);
-        fileManager.getGnutellaSharedFileList().remove(susheelFD);
+        fileManager.getGnutellaFileList().remove(berkeleyFD);
+        fileManager.getGnutellaFileList().remove(susheelFD);
         
         berkeley = new File(_scratchDir, berkeleyFD.getFileName());
         CommonUtils.copyFile(berkeleyFD.getFile(), berkeley);
@@ -131,8 +131,8 @@ public class ServerSideWhatIsNewTest
         // Make sure mod times of each file are different.
         berkeley.setLastModified(susheel.lastModified()-1000);
         
-        berkeleyFD = fileManager.getGnutellaSharedFileList().add(berkeley).get(1, TimeUnit.SECONDS);
-        susheelFD = fileManager.getGnutellaSharedFileList().add(susheel).get(1, TimeUnit.SECONDS);
+        berkeleyFD = fileManager.getGnutellaFileList().add(berkeley).get(1, TimeUnit.SECONDS);
+        susheelFD = fileManager.getGnutellaFileList().add(susheel).get(1, TimeUnit.SECONDS);
         assertNotNull(berkeleyFD);
         assertNotNull(susheelFD);
         
@@ -168,11 +168,11 @@ public class ServerSideWhatIsNewTest
     // test that the CreationTimeCache is as expected
     public void testCreationTimeCacheInitialState() throws Exception {
         // we should be sharing two files - two text files.
-        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaFileList().size());
 
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getGnutellaSharedFileList().getFileDesc(berkeley).getSHA1Urn();
-        URN susheelURN = fm.getGnutellaSharedFileList().getFileDesc(susheel).getSHA1Urn();
+        URN berkeleyURN = fm.getGnutellaFileList().getFileDesc(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getGnutellaFileList().getFileDesc(susheel).getSHA1Urn();
 
         Map urnToLong =  creationTimeCache.getUrnToTime();
         assertEquals(2, urnToLong.size());
@@ -299,8 +299,8 @@ public class ServerSideWhatIsNewTest
     // fine
     public void testAddSharedFiles() throws Exception {
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getGnutellaSharedFileList().getFileDesc(berkeley).getSHA1Urn();
-        URN susheelURN = fm.getGnutellaSharedFileList().getFileDesc(susheel).getSHA1Urn();
+        URN berkeleyURN = fm.getGnutellaFileList().getFileDesc(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getGnutellaFileList().getFileDesc(susheel).getSHA1Urn();
 
         // we start with one or two timestamps
         Map longToUrns = creationTimeCache.getTimeToUrn();
@@ -309,8 +309,8 @@ public class ServerSideWhatIsNewTest
         
         setupAndAddTempFiles();
 
-        URN tempFile1URN = fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn();
-        URN tempFile2URN = fm.getGnutellaSharedFileList().getFileDesc(tempFile2).getSHA1Urn();
+        URN tempFile1URN = fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn();
+        URN tempFile2URN = fm.getGnutellaFileList().getFileDesc(tempFile2).getSHA1Urn();
 
         Map urnToLong = creationTimeCache.getUrnToTime();
         assertEquals(4, urnToLong.size());
@@ -370,7 +370,7 @@ public class ServerSideWhatIsNewTest
         
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn();
+        URN tempFile1URN = fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn();
         Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter fw = new FileWriter(tempFile1, true);
@@ -378,11 +378,11 @@ public class ServerSideWhatIsNewTest
         fw.close();
         tempFile1.setLastModified(tempFile1.lastModified()+3000);
         
-        final FileDesc beforeChanged = fm.getGnutellaSharedFileList().getFileDesc(tempFile1);
+        final FileDesc beforeChanged = fm.getGnutellaFileList().getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
         final CountDownLatch fileChangedLatch = new CountDownLatch(1);
-        fm.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fm.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             public void handleEvent(FileListChangedEvent evt) {
                 if (evt.getType() != FileListChangedEvent.Type.CHANGED)
                     return;
@@ -392,13 +392,13 @@ public class ServerSideWhatIsNewTest
         });
         fm.getManagedFileList().fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
         assertTrue(fileChangedLatch.await(5, TimeUnit.SECONDS));
-        FileDesc afterChanged = fm.getGnutellaSharedFileList().getFileDesc(tempFile1);
+        FileDesc afterChanged = fm.getGnutellaFileList().getFileDesc(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
         
-        assertNotNull(fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn());
-        assertNotEquals(tempFile1URN, fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn()),
+        assertNotNull(fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn()),
                      cTime);
 
         // now just send another What Is New query and make sure everything
@@ -443,7 +443,7 @@ public class ServerSideWhatIsNewTest
         
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn();
+        URN tempFile1URN = fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn();
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
         // cTime
@@ -453,11 +453,11 @@ public class ServerSideWhatIsNewTest
         fos.write(contents);
         fos.close();
         tempFile1.setLastModified(tempFile1.lastModified()+3000);
-        FileDesc beforeChanged = fm.getGnutellaSharedFileList().getFileDesc(tempFile1);
+        FileDesc beforeChanged = fm.getGnutellaFileList().getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
         final CountDownLatch latch = new CountDownLatch(1);
-        fm.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fm.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             public void handleEvent(FileListChangedEvent evt) {
                 if(FileListChangedEvent.Type.CHANGED == evt.getType())
                     latch.countDown();
@@ -465,13 +465,13 @@ public class ServerSideWhatIsNewTest
         });
         fm.getManagedFileList().fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
         assertTrue(latch.await(2, TimeUnit.SECONDS));
-        FileDesc afterChanged = fm.getGnutellaSharedFileList().getFileDesc(tempFile1);
+        FileDesc afterChanged = fm.getGnutellaFileList().getFileDesc(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
-        assertNotNull(fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn());
-        assertNotEquals(tempFile1URN, fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn());
-        assertEquals(fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn(), fm.getGnutellaSharedFileList().getFileDesc(tempFile2).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(fm.getGnutellaSharedFileList().getFileDesc(tempFile1).getSHA1Urn()),
+        assertNotNull(fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn());
+        assertEquals(fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn(), fm.getGnutellaFileList().getFileDesc(tempFile2).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getGnutellaFileList().getFileDesc(tempFile1).getSHA1Urn()),
                      cTime);
         
         // now just send another What Is New query and make sure everything
@@ -513,11 +513,11 @@ public class ServerSideWhatIsNewTest
         setupAndAddTempFiles();
         
         FileManager fm = fileManager;
-        assertEquals(4,fm.getGnutellaSharedFileList().size());
+        assertEquals(4,fm.getGnutellaFileList().size());
         
         
         // 4 shared files
-        assertEquals(4,fm.getGnutellaSharedFileList().size());
+        assertEquals(4,fm.getGnutellaFileList().size());
         
         // 4 different urns 
         {
@@ -534,7 +534,7 @@ public class ServerSideWhatIsNewTest
         }
         
         // tempFile1 and 2 have the same URN
-        fm.getGnutellaSharedFileList().remove(tempFile1);
+        fm.getGnutellaFileList().remove(tempFile1);
         {
             Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
@@ -544,7 +544,7 @@ public class ServerSideWhatIsNewTest
         
         // tempFile2 should result in a removal of an URN
         // as well as a timestamp
-        fm.getGnutellaSharedFileList().remove(tempFile2);
+        fm.getGnutellaFileList().remove(tempFile2);
 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
@@ -567,9 +567,9 @@ public class ServerSideWhatIsNewTest
 
         ((ManagedFileListImpl)fm.getManagedFileList()).loadManagedFiles();
         Thread.sleep(2000);
-        assertEquals("num shared files", 1, fileManager.getGnutellaSharedFileList().size());
+        assertEquals("num shared files", 1, fileManager.getGnutellaFileList().size());
 
-        URN susheelURN = fm.getGnutellaSharedFileList().getFileDesc(susheel).getSHA1Urn();
+        URN susheelURN = fm.getGnutellaFileList().getFileDesc(susheel).getSHA1Urn();
         {
             Map urnToLong = creationTimeCache.getUrnToTime(); 
             assertEquals(""+urnToLong, 1, urnToLong.size());
@@ -587,9 +587,9 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         Map longToUrns = ctCache.getTimeToUrn();
-        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileList());
         for (FileDesc fd : fds) {
-            fileManager.getGnutellaSharedFileList().remove(fd.getFile());
+            fileManager.getGnutellaFileList().remove(fd.getFile());
         }
         longToUrns = ctCache.getTimeToUrn();
         final int UPLOADER_PORT = 10000;
@@ -604,9 +604,9 @@ public class ServerSideWhatIsNewTest
                 .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
                         false, null, urns, false, false, "LIME", new HashSet<IpPort>(), -1, false);
         
-        int sharedBefore = fileManager.getGnutellaSharedFileList().size();
+        int sharedBefore = fileManager.getGnutellaFileList().size();
         final CountDownLatch shareLatch = new CountDownLatch(1);
-        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             public void handleEvent(FileListChangedEvent evt) {
                 if (evt.getType() == FileListChangedEvent.Type.ADDED)
                     shareLatch.countDown();
@@ -625,11 +625,11 @@ public class ServerSideWhatIsNewTest
         assertTrue("state: " + downloader.getState(), downloadedLatch.await(30,TimeUnit.SECONDS));
         
         assertTrue("didn't share!", shareLatch.await(5, TimeUnit.SECONDS));
-        assertEquals( sharedBefore + 1, fileManager.getGnutellaSharedFileList().size());
+        assertEquals( sharedBefore + 1, fileManager.getGnutellaFileList().size());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
-        URN newFileURN = fm.getGnutellaSharedFileList().getFileDesc(newFile).getSHA1Urn();
+        URN newFileURN = fm.getGnutellaFileList().getFileDesc(newFile).getSHA1Urn();
         assertEquals(TestFile.hash(), newFileURN);
         assertEquals(newFileURN.toString(), cTime, ctCache.getCreationTime(newFileURN));
 
@@ -647,9 +647,9 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         
-        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaSharedFileList());
+        List<FileDesc> fds = CollectionUtils.listOf(fileManager.getGnutellaFileList());
         for (FileDesc fd : fds) {
-            fileManager.getGnutellaSharedFileList().remove(fd.getFile());
+            fileManager.getGnutellaFileList().remove(fd.getFile());
         }
 
         final int UPLOADER_PORT = 20000;
@@ -684,7 +684,7 @@ public class ServerSideWhatIsNewTest
         });
         
         
-        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             public void handleEvent(FileListChangedEvent evt) {
                 if (evt.getType() == FileListChangedEvent.Type.ADDED) {
                     shareLatch.countDown();
@@ -712,7 +712,7 @@ public class ServerSideWhatIsNewTest
         
         assertTrue("download: " + downloader.getState(), downloadLatch.await(30, TimeUnit.SECONDS));
         assertTrue("never shared", shareLatch.await(5, TimeUnit.SECONDS));        
-        assertEquals(1, fileManager.getGnutellaSharedFileList().size());
+        assertEquals(1, fileManager.getGnutellaFileList().size());
 
         {
             Map urnToLong = ctCache.getUrnToTime(); 
@@ -725,7 +725,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "anita.txt");
         assertTrue(newFile.exists());
-        URN newFileURN = fm.getGnutellaSharedFileList().getFileDesc(newFile).getSHA1Urn();
+        URN newFileURN = fm.getGnutellaFileList().getFileDesc(newFile).getSHA1Urn();
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
     }
 
@@ -764,11 +764,11 @@ public class ServerSideWhatIsNewTest
         osxDst.deleteOnExit();
         
         try {
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(winDst).get(5, TimeUnit.SECONDS));
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(linDst).get(5, TimeUnit.SECONDS));
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(osxDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaFileList().add(winDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaFileList().add(linDst).get(5, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaFileList().add(osxDst).get(5, TimeUnit.SECONDS));
             
-            assertEquals(5, fileManager.getGnutellaSharedFileList().size());
+            assertEquals(5, fileManager.getGnutellaFileList().size());
     
             {
                 Map urnToLong = creationTimeCache.getUrnToTime();
@@ -782,24 +782,24 @@ public class ServerSideWhatIsNewTest
             // make sure the installer urns are not in the cache
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getGnutellaSharedFileList().getFileDesc(winInstaller));
+                assertNull(fm.getGnutellaFileList().getFileDesc(winInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getGnutellaSharedFileList().getFileDesc(linInstaller));
+                assertNull(fm.getGnutellaFileList().getFileDesc(linInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getGnutellaSharedFileList().getFileDesc(osxInstaller));
+                assertNull(fm.getGnutellaFileList().getFileDesc(osxInstaller));
             }
             // make sure berkeley and susheel are in the cache.
             {
                 assertTrue(berkeley.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getGnutellaSharedFileList().getFileDesc(berkeley).getSHA1Urn()));
+                assertNotNull(ctCache.getCreationTime(fm.getGnutellaFileList().getFileDesc(berkeley).getSHA1Urn()));
             }
             {
                 assertTrue(susheel.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getGnutellaSharedFileList().getFileDesc(susheel).getSHA1Urn()));
+                assertNotNull(ctCache.getCreationTime(fm.getGnutellaFileList().getFileDesc(susheel).getSHA1Urn()));
             }
         
         } finally {        
@@ -834,9 +834,9 @@ public class ServerSideWhatIsNewTest
         assertNotEquals("couldn't set up test",tempFile2.lastModified(), previousTime);
         
         // now move them to the share dir
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(tempFile1).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(tempFile2).get(1, TimeUnit.SECONDS));
-        assertEquals("Files were not loaded by filemanager", 4, fileManager.getGnutellaSharedFileList().size());
+        assertNotNull(fileManager.getGnutellaFileList().add(tempFile1).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(tempFile2).get(1, TimeUnit.SECONDS));
+        assertEquals("Files were not loaded by filemanager", 4, fileManager.getGnutellaFileList().size());
     }
 
 }

@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Collection;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -115,7 +116,9 @@ public class SetupPage2 extends WizardPage {
     public void applySettings() {
         InstallSettings.SCAN_FILES.setValue(true);
         LibraryManagerModel model = treeTable.getLibraryModel();
-        model.persist(libraryData);
+        Collection<File> manage = model.getManagedDirectories();
+        Collection<File> exclude = model.getExcludedDirectories();
+        libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());
     }
     
     private void setTreeTableVisiable(boolean visible){

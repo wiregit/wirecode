@@ -350,7 +350,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         	List<Response> filtered = new ArrayList<Response>(responses.length);
         	for(Response r : responses) {
         		if (r.isMetaFile() && 
-        				fileManager.getGnutellaSharedFileList().isFileApplicationShare(r.getName()))
+        				fileManager.getGnutellaFileList().isFileApplicationShare(r.getName()))
         			filtered.add(r);
         	}
         	

@@ -425,7 +425,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             for (int i = 0; i < files.length; i++) {
                 if (!files[i].isFile())
                     continue;
-                fileManager.getGnutellaSharedFileList().add(files[i]);
+                fileManager.getGnutellaFileList().add(files[i]);
             }
         }
     }

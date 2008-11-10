@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.limewire.util.FileUtils;
 
 
-class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFileList {
+class GnutellaFileListImpl extends AbstractFileList implements GnutellaFileList {
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
@@ -26,7 +26,7 @@ class GnutellaSharedFileListImpl extends AbstractFileList implements GnutellaFil
     /** A list of application shared files. */
     private final AtomicInteger applicationShared = new AtomicInteger();
     
-    public GnutellaSharedFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
+    public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
         super(managedList);
         this.data = data;
         this.numBytes = new AtomicLong();

@@ -676,7 +676,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getGnutellaSharedFileList().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = fileManager.get().getGnutellaFileList().getFilesInDirectory(LibraryUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
                     fileManager.get().getManagedFileList().remove(fd.getFile());

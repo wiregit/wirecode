@@ -4,8 +4,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.Category;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -41,7 +43,7 @@ public interface ManagedFileList extends FileList {
     Collection<String> getDefaultManagedExtensions();
     
     /** Gets the current set of managed extensions. */
-    Collection<String> getManagedExtensions();
+    Map<Category, Collection<String>> getExtensionsPerCategory();
     
     /**
      * Sets a new collection of managed extensions.
@@ -49,17 +51,6 @@ public interface ManagedFileList extends FileList {
      * as part of the extensions changing.
      */
     ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedExtensions(Collection<String> extensions);
-    
-    /**
-     * Sets the new collection of managed folders.  Folders listed in 
-     * 'recursiveFoldersToManage' will be recursively managed and
-     * folders in 'foldersToExclude' will not be managed.
-     * 
-     * This is different than {@link FileList#addFolder(File)} because it
-     * will replace existing managed folders.
-     */
-    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedFolders(Collection<File> recursiveFoldersToManage,
-                                                     Collection<File> foldersToExclude);
     
     /**
      * Adds manageable files in this directory and recursively all
@@ -83,4 +74,20 @@ public interface ManagedFileList extends FileList {
     
     /** Returns all directories that are excluded from managing. */
     List<File> getDirectoriesToExcludeFromManaging();
+    
+    /** Returns all categories that should be managed. */
+    Collection<Category> getManagedCategories();
+    
+    /** Returns true if this is allowed to many any programs. */
+    boolean isProgramManagingAllowed();
+    
+    /**
+     * Sets the new options for managing directories.
+     * This includes the new directories to manage, directories to exclude,
+     * and categories to manage.
+     */
+    ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedOptions(
+            Collection<File> recursiveFoldersToManage,
+            Collection<File> foldersToExclude,
+            Collection<Category> managedCategories);
 }

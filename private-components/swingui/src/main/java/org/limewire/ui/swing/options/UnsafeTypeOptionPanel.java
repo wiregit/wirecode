@@ -36,19 +36,19 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        LibrarySettings.PROGRAM_SHARING_ENABLED.setValue(programCheckBox.isSelected());
-        LibrarySettings.DOCUMENT_SHARING_ENABLED.setValue(documentCheckBox.isSelected());
+        LibrarySettings.ALLOW_PROGRAMS.setValue(programCheckBox.isSelected());
+        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(documentCheckBox.isSelected());
     }
 
     @Override
     boolean hasChanged() {
-        return LibrarySettings.PROGRAM_SHARING_ENABLED.getValue() != programCheckBox.isSelected() 
-                || LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue() != documentCheckBox.isSelected();
+        return LibrarySettings.ALLOW_PROGRAMS.getValue() != programCheckBox.isSelected() 
+                || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() != documentCheckBox.isSelected();
     }
 
     @Override
     public void initOptions() {
-        programCheckBox.setSelected(LibrarySettings.PROGRAM_SHARING_ENABLED.getValue());
-        documentCheckBox.setSelected(LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue());
+        programCheckBox.setSelected(LibrarySettings.ALLOW_PROGRAMS.getValue());
+        documentCheckBox.setSelected(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
     }
 }

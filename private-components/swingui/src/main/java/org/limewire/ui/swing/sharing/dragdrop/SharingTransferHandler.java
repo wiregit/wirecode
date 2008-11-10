@@ -70,8 +70,7 @@ public class SharingTransferHandler extends TransferHandler {
             LOG.debug("DND valid file not found.");
             lastDragOk = false;
         } catch (java.awt.dnd.InvalidDnDOperationException e) {
-            LOG.debugf("Transferable not available, check lastDrag: {0}", Boolean
-                    .valueOf(lastDragOk));
+            LOG.debugf("Transferable not available, check lastDrag: {0}", lastDragOk);
             return lastDragOk;
         } catch (UnsupportedFlavorException e) {
             LOG.debug(e.getMessage(), e);
@@ -196,18 +195,20 @@ public class SharingTransferHandler extends TransferHandler {
         if(file.isDirectory()) {
             return false;
         }
+        
         String fileExtension = FileUtils.getFileExtension(file.getName());
         if (!fileExtension.isEmpty()) {
-            if (!alwaysShareDocuments && !LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue()) {
+            if (!alwaysShareDocuments && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
                 if (type == null || type.getSchema().equals(MediaType.SCHEMA_DOCUMENTS)) {
                     return false;
                 }
             }
-            if (!LibrarySettings.PROGRAM_SHARING_ENABLED.getValue()) {
+            if (!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
                 MediaType type = MediaType.getMediaTypeForExtension(fileExtension);
-                if (type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS))
+                if (type == null || type.getSchema().equals(MediaType.SCHEMA_PROGRAMS)) {
                     return false;
+                }
             }
         }
         return true;

@@ -68,4 +68,16 @@ public class CollectionUtils {
         };
     }
 
+    /**
+     * Flattens the collections into a single collection.
+     * The returned value is a copy, not a view.
+     */
+    public static <T> Collection<T> flatten(Collection<? extends Collection<? extends T>> values) {
+        List<T> list = new ArrayList<T>();
+        for(Collection<? extends T> collection : values) {
+            list.addAll(collection);
+        }
+        return list;
+    }
+
 }

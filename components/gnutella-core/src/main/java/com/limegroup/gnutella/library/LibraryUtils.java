@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 
@@ -23,9 +25,6 @@ public class LibraryUtils {
 
     /** Subdirectory used to share special application files */
     public static final File APPLICATION_SPECIAL_SHARE;
-    
-    
-
 
     static {
         File forceShare = new File(".", ".NetworkShare").getAbsoluteFile();
@@ -52,16 +51,25 @@ public class LibraryUtils {
     
     /**
      * Returns true if this file is not too large, not too small,
-     * not null, is a directory, can be read, is not hidden.  
+     * not null, not a directory, not unreadable, not hidden,
+     * and not a program (if we're not allowing programs).
+     * 
      * Returns false otherwise.
      */
     public static boolean isFilePhysicallyManagable(File file) {
-        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) 
+        if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) { 
             return false;
+        }
                 
         long fileLength = file.length();
-        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE) 
+        if (fileLength <= 0 || fileLength > MAX_FILE_SIZE)  {
             return false;
+        }
+        
+        if(!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            MediaType ext = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
+            return ext != MediaType.getProgramMediaType();
+        }
         
         return true;
     }

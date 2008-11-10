@@ -85,7 +85,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         
         // get the resource file for com/limegroup/gnutella
         File file = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/ID3V24.mp3");
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(file).get(1, TimeUnit.SECONDS));
     }
     
     public void testXMLReturned1() throws Exception {

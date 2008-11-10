@@ -527,7 +527,7 @@ public class HeadPongTest extends LimeTestCase {
         networkManager.setIncomingTLSEnabled(false);
         networkManager.setAcceptedIncomingConnection(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -568,7 +568,7 @@ public class HeadPongTest extends LimeTestCase {
         networkManager.setIncomingTLSEnabled(true);
         networkManager.setOutgoingTLSEnabled(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -607,7 +607,7 @@ public class HeadPongTest extends LimeTestCase {
         networkManager.setIncomingTLSEnabled(true);
         networkManager.setAcceptedIncomingConnection(false);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -750,7 +750,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
         
         HeadPong pong = headPongFactory.create(req);
@@ -786,7 +786,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         uploadManager.setNumQueuedUploads(3);
         
         HeadPong pong = headPongFactory.create(req);
@@ -822,7 +822,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        fileManager.getGnutellaSharedFileList().add(fd);
+        fileManager.getGnutellaFileList().add(fd);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue()-5);
         
         HeadPong pong = headPongFactory.create(req);

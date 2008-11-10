@@ -146,7 +146,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 queryRouteTable.addIndivisible(entry);
             }
         }
-        FileList gnutella = fileManager.getGnutellaSharedFileList();
+        FileList gnutella = fileManager.getGnutellaFileList();
         gnutella.getReadLock().lock();
         try {
             for (FileDesc fd : gnutella) {
@@ -232,7 +232,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
-        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             @Override
             public void handleEvent(FileListChangedEvent event) {
                 switch(event.getType()) {

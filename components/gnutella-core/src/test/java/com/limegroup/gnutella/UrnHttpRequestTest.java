@@ -88,10 +88,10 @@ public final class UrnHttpRequestTest extends LimeTestCase {
             File file = new File(_scratchDir, "file" + i + ".tmp");
             FileUtils.writeObject(file, data);
             file.deleteOnExit();
-            assertNotNull(fileManager.getGnutellaSharedFileList().add(file).get(1, TimeUnit.SECONDS));
+            assertNotNull(fileManager.getGnutellaFileList().add(file).get(1, TimeUnit.SECONDS));
         }
         
-        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getGnutellaSharedFileList().size());
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getGnutellaFileList().size());
     }
 
     @Override
@@ -108,7 +108,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         UploadSettings.HARD_MAX_UPLOADS.setValue(0);
 
         try {
-            for (FileDesc fd: fileManager.getGnutellaSharedFileList()) {
+            for (FileDesc fd: fileManager.getGnutellaFileList()) {
                 String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
                 BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -130,7 +130,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * Test requests by URN.
      */
     public void testHttpUrnRequest() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = "/uri-res/N2R?" + fd.getSHA1Urn().httpStringValue();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -147,7 +147,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63______PHN7VSVTKZA3YYT HTTP/1.1
      */
     public void testMalformedHttpUrnRequest() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = "/get/0//uri-res/N2R?"
                     + fd.getSHA1Urn().httpStringValue();
 
@@ -165,7 +165,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * the X-Gnutella-Content-URN header is always returned.
      */
     public void testTraditionalGetForReturnedUrn() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -188,7 +188,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * expected.
      */
     public void testTraditionalGetWithContentUrn() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -206,7 +206,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * error code 404.
      */
     public void testTraditionalGetWithInvalidContentUrn() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -227,7 +227,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * matching X-Gnutella-Content-URN header values also fail with 404.
      */
     public void testInvalidTraditionalGetWithValidContentUrn() throws Exception {
-        for (FileDesc fd : fileManager.getGnutellaSharedFileList()) {
+        for (FileDesc fd : fileManager.getGnutellaFileList()) {
             String uri = LimeTestUtils.getRelativeRequest(fd.getSHA1Urn());
             uri = uri.substring(0, uri.length() - 2)+ "xx";
             

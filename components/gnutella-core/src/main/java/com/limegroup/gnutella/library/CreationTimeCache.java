@@ -122,7 +122,7 @@ public final class CreationTimeCache {
                 handleManagedListStatusEvent(event);
             }
         });
-        fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+        fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             @Override
             public void handleEvent(FileListChangedEvent event) {
                 handleFileListEvent(event);
@@ -218,7 +218,7 @@ public final class CreationTimeCache {
                 // check to see if file still exists
                 // NOTE: technically a URN can map to multiple FDs, but I only want
                 // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+                FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(currURN);
                 if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                     dirty = true;
                     iter.remove();
@@ -334,7 +334,7 @@ public final class CreationTimeCache {
                     }
                     
                     // we only want shared FDs
-                    FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(currURN);
+                    FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(currURN);
                     if (fd == null) {
                         if (toRemove == null) {
                             toRemove = new ArrayList<URN>();

@@ -197,7 +197,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
+        FileDesc desc = fileManager.get().getGnutellaFileList().getFileDesc(urn);
         if(desc == null) {
             desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
         }
@@ -288,7 +288,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getGnutellaSharedFileList().getFileDesc(urn);
+    	FileDesc desc = fileManager.get().getGnutellaFileList().getFileDesc(urn);
     	if(desc == null) {
     	    desc = fileManager.get().getIncompleteFileList().getFileDesc(urn);
     	}

@@ -13,14 +13,12 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.impl.URNImpl;
-import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
-import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.xmpp.api.client.FileMetaData;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.library.CreationTimeCache;
@@ -119,8 +117,7 @@ class CoreLocalFileItem implements LocalFileItem {
     }
 
     private static Category getCategory(File file) {
-        String ext = FileUtils.getFileExtension(file);
-        return MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(ext));
+        return CategoryConverter.categoryForFile(file);
     }
 
     @Override

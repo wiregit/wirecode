@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,15 +159,25 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     private class LibraryDataAdapter implements LibraryData {
+        
+        @Override
+        public boolean isProgramManagingAllowed() {
+            return false;
+        }
+        
+        @Override
+        public void setManagedOptions(Collection<File> recursiveFoldersToManage,
+                Collection<File> foldersToExclude, Collection<Category> managedCategories) {
+        }
+        
+        @Override
+        public Collection<Category> getManagedCategories() {
+            return EnumSet.allOf(Category.class);
+        }
 
         @Override
         public List<File> getDirectoriesToExcludeFromManaging() {
             return new ArrayList<File>();
-        }
-        
-        @Override
-        public void setManagedFolders(Collection<File> recursiveFoldersToManage,
-                Collection<File> foldersToExclude) {
         }
 
         @Override
@@ -186,13 +197,13 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         }
 
         @Override
-        public Collection<String> getDefaultManagedExtensions() {
+        public Collection<String> getDefaultExtensions() {
             return new ArrayList<String>();
         }
 
         @Override
-        public Collection<String> getManagedExtensions() {
-            return new ArrayList<String>();
+        public Map<Category, Collection<String>> getExtensionsPerCategory() {
+            return new HashMap<Category, Collection<String>>();
         }
 
         @Override

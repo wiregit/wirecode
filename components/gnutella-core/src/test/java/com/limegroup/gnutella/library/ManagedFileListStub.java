@@ -5,15 +5,23 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.Category;
 import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class ManagedFileListStub extends AbstractFileListStub implements ManagedFileList {
 
+    @Override
+    public Collection<Category> getManagedCategories() {
+        return EnumSet.allOf(Category.class);
+    }
+    
     @Override
     public List<File> getDirectoriesToExcludeFromManaging() {
         return new ArrayList<File>();
@@ -56,8 +64,8 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
 
     @Override
-    public Collection<String> getManagedExtensions() {
-        return Collections.emptySet();
+    public Map<Category, Collection<String>> getExtensionsPerCategory() {
+        return Collections.emptyMap();
     }
 
     @Override
@@ -75,13 +83,6 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     }
     
     @Override
-    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedFolders(
-            Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
     public boolean isDirectoryAllowed(File folder) {
         return folder.isDirectory();
     }
@@ -89,5 +90,17 @@ public class ManagedFileListStub extends AbstractFileListStub implements Managed
     @Override
     public boolean isDirectoryExcluded(File folder) {
         return false;
+    }
+
+    @Override
+    public boolean isProgramManagingAllowed() {
+        return false;
+    }
+
+    @Override
+    public ListeningFuture<List<ListeningFuture<FileDesc>>> setManagedOptions(
+            Collection<File> recursiveFoldersToManage, Collection<File> foldersToExclude,
+            Collection<Category> managedCategories) {
+        throw new UnsupportedOperationException();
     }
 }

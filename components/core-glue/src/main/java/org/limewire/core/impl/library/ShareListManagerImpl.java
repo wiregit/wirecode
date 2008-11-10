@@ -51,7 +51,7 @@ class ShareListManagerImpl implements ShareListManager {
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventListener = friendShareListEventListener;
         this.combinedFriendShareLists = new CombinedFriendShareList();
-        this.gnutellaFileList = new GnutellaFileList(fileManager.getGnutellaSharedFileList());
+        this.gnutellaFileList = new GnutellaFileList(fileManager.getGnutellaFileList());
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
 

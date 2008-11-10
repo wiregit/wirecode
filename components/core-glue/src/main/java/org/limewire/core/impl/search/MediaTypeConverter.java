@@ -33,20 +33,5 @@ public class MediaTypeConverter {
             throw new IllegalArgumentException(searchCategory.name());
         }
     }
-
-    public static Category toCategory(MediaType type) {
-        if (type == MediaType.getAudioMediaType()) {
-            return Category.AUDIO;
-        } else if (type == MediaType.getVideoMediaType()) {
-            return Category.VIDEO;
-        } else if (type == MediaType.getImageMediaType()) {
-            return Category.IMAGE;
-        } else if (type == MediaType.getDocumentMediaType()) {
-            return Category.DOCUMENT;
-        } else if (type == MediaType.getProgramMediaType()) {
-            return Category.PROGRAM;
-        }
-        return Category.OTHER;
-    }
     
 }

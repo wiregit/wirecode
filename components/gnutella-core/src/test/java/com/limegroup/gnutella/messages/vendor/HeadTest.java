@@ -186,14 +186,14 @@ public class HeadTest extends LimeTestCase {
 
         FileDescStub complete = new FileDescStub("complete", _haveFull, 2);        
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        fileManager.getGnutellaSharedFileList().add(complete);
-        fileManager.getGnutellaSharedFileList().add(new FileDescStub("test", _tlsURN, 100));
+        fileManager.getGnutellaFileList().add(complete);
+        fileManager.getGnutellaFileList().add(new FileDescStub("test", _tlsURN, 100));
         fileManager.getIncompleteFileList().add(_partial);
         fileManager.getIncompleteFileList().add(_partialLarge);
         
         assertEquals(_partial,fileManager.getIncompleteFileList().getFileDesc(_havePartial));
         assertEquals(_partialLarge,fileManager.getIncompleteFileList().getFileDesc(_largeURN));
-        assertEquals(complete,fileManager.getGnutellaSharedFileList().getFileDesc(_haveFull));
+        assertEquals(complete,fileManager.getGnutellaFileList().getFileDesc(_haveFull));
         
         
         blankRFD = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false,

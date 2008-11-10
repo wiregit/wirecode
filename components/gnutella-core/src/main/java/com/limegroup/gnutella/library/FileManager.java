@@ -20,12 +20,12 @@ public interface FileManager {
     ManagedFileList getManagedFileList();
 
     /**
-     * Returns the FileList containing Shared files.
+     * Returns the FileList containing files shared with Gnutella.
      */
-    GnutellaFileList getGnutellaSharedFileList();
+    GnutellaFileList getGnutellaFileList();
     
     /**
-     * Returns the FileList containing Shared Friend files of this name.
+     * Returns the FileList containing files shared with this friend.
      * If no list exists, returns null.
      */
     FriendFileList getFriendFileList(String name);

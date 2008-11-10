@@ -885,12 +885,12 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         File _completeFile = context.getFileSystem().getCompleteFile();
         if (_completeFile.isFile()) {
             if (force)
-                fileManager.getGnutellaSharedFileList().add(_completeFile);
+                fileManager.getGnutellaFileList().add(_completeFile);
             else
                 fileManager.getManagedFileList().add(_completeFile);
         } else if (_completeFile.isDirectory()) {
             if(force) {
-                fileManager.getGnutellaSharedFileList().addFolder(_completeFile);
+                fileManager.getGnutellaFileList().addFolder(_completeFile);
             } else {
                 fileManager.getManagedFileList().addFolder(_completeFile);
             }

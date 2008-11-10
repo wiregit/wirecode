@@ -29,9 +29,9 @@ import org.limewire.io.IpPort;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -56,7 +56,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.properties = new HashMap<FilePropertyKey, Object>();
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
-        category = MediaTypeConverter.toCategory(MediaType.getMediaTypeForExtension(extension));
+        category = CategoryConverter.categoryForExtension(extension);
 
         LimeXMLDocument doc = rfd.getXMLDocument();
         long fileSize = rfd.getSize();

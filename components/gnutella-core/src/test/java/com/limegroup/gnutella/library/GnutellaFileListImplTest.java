@@ -62,7 +62,7 @@ public class GnutellaFileListImplTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         managedList = (ManagedFileListImpl)injector.getInstance(FileManager.class).getManagedFileList();
-        fileList = injector.getInstance(FileManager.class).getGnutellaSharedFileList();
+        fileList = injector.getInstance(FileManager.class).getGnutellaFileList();
         urnValidator = injector.getInstance(UrnValidator.class);
         injector.getInstance(ServiceRegistry.class).initialize();
     }

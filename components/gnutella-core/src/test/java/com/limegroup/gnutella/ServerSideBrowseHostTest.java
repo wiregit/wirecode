@@ -100,7 +100,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getGnutellaSharedFileList().size());
+        assertEquals(2, fileManager.getGnutellaFileList().size());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -131,10 +131,10 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
             File f = new File(_scratchDir, "sharedFile"+i+".txt");
             f.deleteOnExit();
             FileUtils.writeObject(f, new Integer(i));
-            assertNotNull(fm.getGnutellaSharedFileList().add(f).get(1, TimeUnit.SECONDS));
+            assertNotNull(fm.getGnutellaFileList().add(f).get(1, TimeUnit.SECONDS));
         }
 
-        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getGnutellaSharedFileList().size());
+        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getGnutellaFileList().size());
         
         String result = null;
 

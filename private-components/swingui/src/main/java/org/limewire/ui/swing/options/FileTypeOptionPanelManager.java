@@ -17,6 +17,7 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
@@ -72,7 +73,7 @@ public final class FileTypeOptionPanelManager {
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.libraryData = libraryManager.getLibraryData();
-        this.originalExtensions = libraryData.getManagedExtensions();
+        this.originalExtensions = CollectionUtils.flatten(libraryData.getExtensionsPerCategory().values());
     }
     
     /**
@@ -108,10 +109,10 @@ public final class FileTypeOptionPanelManager {
     }
    
     void initCore() {        
-        Collection<String> selectedExts = libraryData.getManagedExtensions();
+        Collection<String> selectedExts = CollectionUtils.flatten(libraryData.getExtensionsPerCategory().values());
         Collection<String> allExts = new TreeSet<String>();
         
-        allExts.addAll(libraryData.getDefaultManagedExtensions());
+        allExts.addAll(libraryData.getDefaultExtensions());
         allExts.addAll(selectedExts);
                         
         Map<Category, List<String>> extensionsByType = createExtensionsMap(allExts);

@@ -119,7 +119,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                         handleManagedListStatusEvent(event);
                     }
                 });
-                fileManager.getGnutellaSharedFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
+                fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
                     @Override
                     public void handleEvent(FileListChangedEvent event) {
                         handleFileListEvent(event, true);
@@ -194,7 +194,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // Iterate through our hit indices to create a list of results.
         for (IntSet.IntSetIterator iter = matches.iterator(); iter.hasNext();) {
             int i = iter.next();
-            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDescForIndex(i);
+            FileDesc desc = fileManager.getGnutellaFileList().getFileDescForIndex(i);
             if(desc == null) {
                 desc = fileManager.getIncompleteFileList().getFileDescForIndex(i);
             }
@@ -233,7 +233,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     private IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
         IntSet ret = priors;
         for (URN urn : urnsIter) {
-            List<FileDesc> fds = fileManager.getGnutellaSharedFileList().getFileDescsMatching(urn);
+            List<FileDesc> fds = fileManager.getGnutellaFileList().getFileDescsMatching(urn);
             for(FileDesc fd : fds) {
                 if(ret == null) {
                     ret = new IntSet();
@@ -262,7 +262,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         // get the appropriate responses
         Set<Response> resps = new HashSet<Response>(urnList.size());
         for (URN urn : urnList) {
-            FileDesc desc = fileManager.getGnutellaSharedFileList().getFileDesc(urn);
+            FileDesc desc = fileManager.getGnutellaFileList().getFileDesc(urn);
 
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
@@ -580,7 +580,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             if (file == null) { // pure metadata (no file)
                 res = responseFactory.get().createPureMetadataResponse();
             } else { // meta-data about a specific file
-                FileDesc fd = fileManager.getGnutellaSharedFileList().getFileDesc(file);
+                FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(file);
                 if (fd == null) {
                     // fd == null is bad -- would mean MetaFileManager is out of
                     // sync.

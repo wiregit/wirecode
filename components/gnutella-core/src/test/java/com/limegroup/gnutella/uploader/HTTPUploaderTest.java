@@ -86,7 +86,7 @@ public class HTTPUploaderTest extends LimeTestCase {
         });        
 
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
-        GnutellaFileListStub sharedList = fm.getGnutellaSharedFileList();
+        GnutellaFileListStub sharedList = fm.getGnutellaFileList();
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFG");
         fd1 = new FileDescStub("abc1.txt", urn1, 0);
         sharedList.add(fd1);

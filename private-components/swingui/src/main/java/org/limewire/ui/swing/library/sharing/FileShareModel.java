@@ -43,7 +43,6 @@ public class FileShareModel implements LibraryShareModel {
         }
     }
 
-   
     /**
      * @param fileItem  The LocalFileItem whose sharing info will be displayed
      */
@@ -51,13 +50,11 @@ public class FileShareModel implements LibraryShareModel {
         LocalFileItem oldFileItem = this.fileItem;
         this.fileItem = fileItem;
         support.firePropertyChange("fileItem", oldFileItem, fileItem);
-    }
-    
-  
+    }  
     
     @Override
     public boolean isGnutellaNetworkSharable() {
-        return (fileItem.getCategory() != Category.DOCUMENT || LibrarySettings.DOCUMENT_SHARING_ENABLED.getValue());
+        return (fileItem.getCategory() != Category.DOCUMENT || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
     }
  
     @Override

@@ -35,30 +35,30 @@ import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
 import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
-import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.FileMetaData;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 
 
 @Singleton
@@ -176,10 +176,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
-        Category category = MediaTypeConverter.toCategory(
-                MediaType.getMediaTypeForExtension(
-                        FileUtils.getFileExtension(
-                                fileMeta.getName())));
+        Category category = CategoryConverter.categoryForFileName(fileMeta.getName());
         return createDownloader(new RemoteFileDesc[] { createRfdFromChatResult(presence, fileMeta) },
                 RemoteFileDesc.EMPTY_LIST, 
                 null, null, null, false, category);

@@ -24,11 +24,11 @@ public class GnutellaUploadFileListProvider implements HttpRequestFileListProvid
     }
 
     /**
-     * @return {@link FileManager#getGnutellaSharedFileList()} and {@link FileManager#getIncompleteFileList()}
+     * @return {@link FileManager#getGnutellaFileList()} and {@link FileManager#getIncompleteFileList()}
      * to enable sharing of incomplete files
      */
     @Override
     public Iterable<SharedFileList> getFileLists(HttpRequest request, HttpContext httpContext) {
-        return Arrays.asList(fileManager.getGnutellaSharedFileList(), fileManager.getIncompleteFileList());
+        return Arrays.asList(fileManager.getGnutellaFileList(), fileManager.getIncompleteFileList());
     }
 }

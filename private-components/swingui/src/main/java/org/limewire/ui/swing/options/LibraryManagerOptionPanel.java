@@ -3,6 +3,8 @@ package org.limewire.ui.swing.options;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Collection;
+import java.util.EnumSet;
 
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -10,9 +12,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
@@ -33,6 +37,8 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     private JCheckBox videoCheckBox;
     private JCheckBox imageCheckBox;
     private JCheckBox docCheckBox;
+    private JCheckBox programCheckBox;
+    private JCheckBox otherCheckBox;
     
     private LibraryManagerTreeTable treeTable;
     
@@ -64,10 +70,23 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         treeTable = new LibraryManagerTreeTable(libraryData);
         addFolderButton = new JButton(new AddDirectoryAction(this));
         
-        musicCheckBox = new JCheckBox();
-        videoCheckBox = new JCheckBox();
-        imageCheckBox = new JCheckBox();
-        docCheckBox = new JCheckBox();
+        musicCheckBox = new JCheckBox(I18n.tr(Category.AUDIO.toString()));
+        musicCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        
+        videoCheckBox = new JCheckBox(I18n.tr(Category.VIDEO.toString()));
+        videoCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        
+        imageCheckBox = new JCheckBox(I18n.tr(Category.IMAGE.toString()));
+        imageCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        
+        docCheckBox = new JCheckBox(I18n.tr(Category.DOCUMENT.toString()));
+        docCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        
+        programCheckBox = new JCheckBox(I18n.tr(Category.PROGRAM.toString()));
+        programCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        
+        otherCheckBox = new JCheckBox(I18n.tr(Category.OTHER.toString()));
+        otherCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
         
         okButton = new JButton(okAction);
         cancelButton = new JButton(cancelAction);
@@ -77,17 +96,12 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         JPanel p = new JPanel();
         p.setLayout(new MigLayout());
         
-        p.add(musicCheckBox, "gapleft 25");
-        p.add(new JLabel(I18n.tr("Music")), "gapright 18");
-        
-        p.add(videoCheckBox);
-        p.add(new JLabel(I18n.tr("Videos")), "gapright 18");
-        
-        p.add(imageCheckBox);
-        p.add(new JLabel(I18n.tr("Images")), "gapright 18");
-        
-        p.add(docCheckBox);
-        p.add(new JLabel(I18n.tr("Documents")), "gapright 18");
+        p.add(musicCheckBox, "gapleft 25, gapright 18");        
+        p.add(videoCheckBox, "gapright 18");        
+        p.add(imageCheckBox, "wrap");        
+        p.add(docCheckBox, "gapleft 25, gapright 18");
+        p.add(programCheckBox, "gapright 18");
+        p.add(otherCheckBox);
         
         return p;
     }
@@ -95,13 +109,43 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     @Override
     void applyOptions() {
         LibraryManagerModel model = treeTable.getLibraryModel();
-        model.persist(libraryData);
+        Collection<File> manage = model.getManagedDirectories();
+        Collection<File> exclude = model.getExcludedDirectories();
+        libraryData.setManagedOptions(manage, exclude, getManagedCategories());
+    }
+
+    private Collection<Category> getManagedCategories() {
+        Collection<Category> categories = EnumSet.noneOf(Category.class);
+        if(musicCheckBox.isEnabled()) {
+            categories.add(Category.AUDIO);
+        }
+        if(videoCheckBox.isEnabled()) {
+            categories.add(Category.VIDEO);
+        }
+        if(imageCheckBox.isEnabled()) {
+            categories.add(Category.IMAGE);
+        }
+        if(docCheckBox.isEnabled()) {
+            categories.add(Category.DOCUMENT);
+        }
+        if(programCheckBox.isEnabled()) {
+            categories.add(Category.PROGRAM);
+        }
+        if(otherCheckBox.isEnabled()) {
+            categories.add(Category.OTHER);
+        }
+        return categories;
     }
 
     @Override
     boolean hasChanged() {
         LibraryManagerModel model = treeTable.getLibraryModel();
-        return model.hasChanged(libraryData);
+        Collection<File> manage = model.getManagedDirectories();
+        Collection<File> exclude = model.getExcludedDirectories();
+        Collection<Category> categories = getManagedCategories();
+        return !manage.equals(libraryData.getDirectoriesToManageRecursively())
+            || !exclude.equals(libraryData.getDirectoriesToExcludeFromManaging())
+            || !categories.equals(libraryData.getManagedCategories());
     }
 
     @Override
@@ -112,6 +156,16 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
+        
+        Collection<Category> categories = libraryData.getManagedCategories();
+        musicCheckBox.setSelected(categories.contains(Category.AUDIO));
+        videoCheckBox.setSelected(categories.contains(Category.VIDEO));
+        docCheckBox.setSelected(categories.contains(Category.DOCUMENT));
+        imageCheckBox.setSelected(categories.contains(Category.IMAGE));
+        programCheckBox.setSelected(categories.contains(Category.PROGRAM));
+        otherCheckBox.setSelected(categories.contains(Category.OTHER));
+        
+        programCheckBox.setEnabled(libraryData.isProgramManagingAllowed());
     }
     
     private class AddDirectoryAction extends AbstractAction {

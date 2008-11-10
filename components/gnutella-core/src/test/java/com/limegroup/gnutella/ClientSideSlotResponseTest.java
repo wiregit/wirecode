@@ -87,14 +87,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         someFileMatches.add(USER_TORRENT);
         someFileMatches.add(APP_TXT);        
         
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(textFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(torrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(userTorrentFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(appTextFile).get(1, TimeUnit.SECONDS));
-        assertNotNull(fileManager.getGnutellaSharedFileList().add(appTorrentFile).get(1, TimeUnit.SECONDS));
-        fileManager.getGnutellaSharedFileList().remove(berkeleyFD);
-        fileManager.getGnutellaSharedFileList().remove(susheelFD);
-        assertEquals(5, fileManager.getGnutellaSharedFileList().size());
+        assertNotNull(fileManager.getGnutellaFileList().add(textFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(torrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(userTorrentFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(appTextFile).get(1, TimeUnit.SECONDS));
+        assertNotNull(fileManager.getGnutellaFileList().add(appTorrentFile).get(1, TimeUnit.SECONDS));
+        fileManager.getGnutellaFileList().remove(berkeleyFD);
+        fileManager.getGnutellaFileList().remove(susheelFD);
+        assertEquals(5, fileManager.getGnutellaFileList().size());
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         uploadManagerStub = (UploadManagerStub) injector.getInstance(UploadManager.class);
