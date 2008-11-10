@@ -63,7 +63,7 @@ public class SearchOptionPanel extends OptionPanel {
         private JButton clearNowButton;
 
         public SearchBarPanel() {
-            super(I18n.tr("Search Options"));
+            super(I18n.tr("Searching"));
 
             createComponents();
 
