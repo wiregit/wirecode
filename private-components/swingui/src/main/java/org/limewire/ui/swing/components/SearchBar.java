@@ -6,11 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.BorderFactory;
+import javax.swing.JButton;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
@@ -19,7 +18,6 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.painter.GreenButtonPainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -33,7 +31,7 @@ public class SearchBar extends JXPanel {
 
     private final LimeComboBox comboBox;
     private final PromptTextField searchField;
-    private final JXButton searchButton;
+    private final JButton searchButton;
     
     private final DropDownListAutoCompleteControl dropDownListAutoCompleteControl;
     private final FriendAutoCompleters friendLibraries;
@@ -79,12 +77,8 @@ public class SearchBar extends JXPanel {
         this.searchField = new PromptTextField(I18n.tr("Search"));
         this.searchField.setName("SearchBar.searchField");
         
-        this.searchButton = new JXButton();
+        this.searchButton = new IconButton();
         this.searchButton.setName("SearchBar.searchButton");
-        this.searchButton.setBorderPainted(false);
-        this.searchButton.setBackgroundPainter(new GreenButtonPainter());
-        this.searchButton.setOpaque(false);
-        this.searchButton.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         this.searchButton.setFocusPainted(false);
         
         this.assertProgramCategory();

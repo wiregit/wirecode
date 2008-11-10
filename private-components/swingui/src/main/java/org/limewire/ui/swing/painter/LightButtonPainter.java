@@ -53,7 +53,7 @@ public class LightButtonPainter implements Painter<JXButton> {
         painter.setFillPaint(new GradientPaint(0,0, gradientTop, 0, 1, gradientBottom, false));
         painter.setRoundWidth(this.arcWidth);
         painter.setRoundHeight(this.arcHeight);
-        painter.setInsets(new Insets(2,2,2,2));
+        painter.setInsets(new Insets(1,2,2,2));
         painter.setPaintStretched(true);
         painter.setBorderPaint(null);
         painter.setFillVertical(true);
@@ -82,7 +82,7 @@ public class LightButtonPainter implements Painter<JXButton> {
                 gradientRight, this.bevelBottom);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
-                this.borderColour,  PaintUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
+                this.borderColour,  PaintUtils.TRASPARENT, PaintUtils.TRASPARENT, PaintUtils.TRASPARENT, 
                 gradientRight, this.bevelBottom);
     }
     
