@@ -7,6 +7,9 @@ import java.awt.RenderingHints;
 
 public class PaintUtils {
    
+    
+    public static Color TRASPARENT = new Color(0,0,0,0);
+    
     /**
      * Draws a string to a graphics with antialiasing
      */

@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -18,27 +19,20 @@ import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.PaintUtils;
 
 public class PromptTextField extends JTextField implements FocusListener {
     
     private String promptText;
     
-    @Resource
-    private Color promptColour;
-    
-    @Resource
-    private int arcWidth;
-    
-    @Resource
-    private int arcHeight;
-        
-    @Resource 
-    private Color borderColour;
-    
-    private final Color borderBevel1;
-    private final Color borderBevel2;
-    private final Color borderBevel3;
+    @Resource private Color promptColour;
+    @Resource private int arcWidth;
+    @Resource private int arcHeight;
+    @Resource private Color borderColour;
+    @Resource private Color bevelLeft;
+    @Resource private Color bevelTop1;
+    @Resource private Color bevelTop2;
+    @Resource private Color bevelRight;
+    @Resource private Color bevelBottom;
     
     private Painter<JTextField> backgroundPainter;
     private Painter<PromptTextField> promptPainter;
@@ -46,10 +40,6 @@ public class PromptTextField extends JTextField implements FocusListener {
     public PromptTextField() {
         GuiUtils.assignResources(this);
 
-        this.borderBevel1 = PaintUtils.lighten(this.borderColour, 120);
-        this.borderBevel2 = PaintUtils.lighten(this.borderColour, 80); 
-        this.borderBevel3 = PaintUtils.lighten(this.borderColour, 100);
-        
         TextFieldClipboardControl.install(this);
         this.addFocusListener(this);
         this.setOpaque(false);
@@ -166,12 +156,15 @@ public class PromptTextField extends JTextField implements FocusListener {
         painter.setFillPaint(Color.WHITE);
         painter.setRoundWidth(this.arcWidth);
         painter.setRoundHeight(this.arcHeight);
+        painter.setInsets(new Insets(2,2,2,2));
+        painter.setBorderPaint(null);
         painter.setFillVertical(true);
         painter.setFillHorizontal(true);
         painter.setAntialiasing(true);
         
         compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
-                this.borderColour, this.borderBevel1, this.borderBevel2, this.borderBevel3));
+                this.borderColour,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
+                this.bevelRight,  this.bevelBottom));
         
         return compoundPainter;
     }
