@@ -34,9 +34,9 @@ public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
 
     /**
      * Number of seconds the remote host should wait before retrying in case we
-     * don't have any alt-locs left to send. (20 minutes)
+     * don't have any alt-locs left to send. 30 seconds.
      */
-    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (60 * 20);
+    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (30);
 
     /**
      * Number of seconds the remote host should wait before retrying in case we
