@@ -184,10 +184,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
-                    SearchResultMenu menu = new SearchResultMenu(
-                        BaseResultPanel.this, remoteHostActions, properties);
-                    menu.init(vsr, row);
-                    menu.show(component, e.getX(), e.getY());
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, row, remoteHostActions, properties);
+                    searchResultMenu.show(component, e.getX(), e.getY());
                 }
             }
         });

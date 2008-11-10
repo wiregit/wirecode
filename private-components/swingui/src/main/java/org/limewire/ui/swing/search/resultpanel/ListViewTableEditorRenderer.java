@@ -85,7 +85,9 @@ implements TableCellEditor, TableCellRenderer {
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
-    private final SearchResultMenu searchResultMenu;
+    private final DownloadHandler downloadHandler;
+    private final RemoteHostActions remoteHostActions;
+    private final PropertiesFactory<VisualSearchResult> properties;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -130,13 +132,15 @@ implements TableCellEditor, TableCellRenderer {
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.rowSelectionColor = rowSelectionColor;
-        this.searchResultMenu = new SearchResultMenu(downloadHandler, remoteHostActions, properties);
         GuiUtils.assignResources(this);
 
         similarButton.setFont(similarResultsButtonFont);
         
         fromWidget = fromWidgetFactory.create(remoteHostActions);
-        
+         this.downloadHandler = downloadHandler;
+        this.remoteHostActions = remoteHostActions;
+        this.properties = properties;
+       
         makePanel(navigator);
     }
 
@@ -208,7 +212,7 @@ implements TableCellEditor, TableCellRenderer {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if(e.getButton() == MouseEvent.BUTTON3) {
-                        searchResultMenu.init(vsr, currentRow);
+                        SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
                         searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                     }
                 }
@@ -219,7 +223,7 @@ implements TableCellEditor, TableCellRenderer {
                 @Override
                     public void mousePressed(MouseEvent e) {
                         if(e.getButton() == MouseEvent.BUTTON3) {
-                            searchResultMenu.init(vsr, currentRow);
+                            SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
                             searchResultMenu.show(heading, e.getX(), e.getY());
                         }
                     }

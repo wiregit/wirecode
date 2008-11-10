@@ -15,34 +15,19 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 /**
- * This class implements the menu that is displayed when the user right clicks a
- * search result.
+ * This class implements the menu that is displayed
+ * when the user right clicks a search result.
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class SearchResultMenu extends JPopupMenu {
-    final DownloadHandler downloadHandler;
-
-    final RemoteHostActions fromActions;
-
-    final PropertiesFactory<VisualSearchResult> propertiesFactory;
-
-    boolean initialized = false;
 
     public SearchResultMenu(final DownloadHandler downloadHandler,
-            final RemoteHostActions fromActions,
-            final PropertiesFactory<VisualSearchResult> propertiesFactory) {
-        this.downloadHandler = downloadHandler;
-        this.fromActions = fromActions;
-        this.propertiesFactory = propertiesFactory;
-    }
+        final VisualSearchResult vsr,
+        final int row,
+        final RemoteHostActions fromActions,
+        final PropertiesFactory<VisualSearchResult> propertiesFactory) {
 
-    /**
-     * Initializes the menu using the given visual search result and row. This
-     * allows the menu to be reused for several search results.
-     */
-    public void init(final VisualSearchResult vsr, final int row) {
-        removeAll();
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
                 downloadHandler.download(vsr, row);
