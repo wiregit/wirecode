@@ -85,9 +85,7 @@ implements TableCellEditor, TableCellRenderer {
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
-    private final DownloadHandler downloadHandler;
-    private final RemoteHostActions remoteHostActions;
-    private final PropertiesFactory<VisualSearchResult> properties;
+    private final SearchResultMenu searchResultMenu;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -132,9 +130,7 @@ implements TableCellEditor, TableCellRenderer {
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.rowSelectionColor = rowSelectionColor;
-        this.downloadHandler = downloadHandler;
-        this.remoteHostActions = remoteHostActions;
-        this.properties = properties;
+        this.searchResultMenu = new SearchResultMenu(downloadHandler, remoteHostActions, properties);
         GuiUtils.assignResources(this);
 
         similarButton.setFont(similarResultsButtonFont);
@@ -180,16 +176,8 @@ implements TableCellEditor, TableCellRenderer {
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
 
-        final SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, row, remoteHostActions, properties);
-
-        itemIconLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if(e.getButton() == MouseEvent.BUTTON3) {
-                    searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
-                }
-            }
-        });
+        searchResultMenu.init(vsr, row);
+        
         
         if (editorComponent == null) {
             editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
@@ -216,11 +204,20 @@ implements TableCellEditor, TableCellRenderer {
                     } 
                 }
             });
+            
+            itemIconLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if(e.getButton() == MouseEvent.BUTTON3) {
+                        searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
+                    }
+                }
+            });
         }
 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
-        populatePanel((VisualSearchResult) value, col, searchResultMenu);
+        populatePanel((VisualSearchResult) value, col);
         
         editorComponent.removeAll();
 
@@ -337,6 +334,15 @@ implements TableCellEditor, TableCellRenderer {
                 }
             }
         });
+        
+        heading.addMouseListener( new MouseAdapter() {
+            @Override
+                public void mousePressed(MouseEvent e) {
+                    if(e.getButton() == MouseEvent.BUTTON3) {
+                        searchResultMenu.show(heading, e.getX(), e.getY());
+                    }
+                }
+        });
 
         return panel;
     }
@@ -384,7 +390,7 @@ implements TableCellEditor, TableCellRenderer {
         }
     }
 
-    private void populatePanel(VisualSearchResult vsr, int column, final SearchResultMenu searchResultMenu) {
+    private void populatePanel(VisualSearchResult vsr, int column) {
         if (vsr == null) return;
         
         if (column == 0) {
@@ -415,15 +421,6 @@ implements TableCellEditor, TableCellRenderer {
                 similarButton.setText(getHideShowSimilarFilesButtonText());
             }
         }
-        
-        this.heading.addMouseListener( new MouseAdapter() {
-            @Override
-                public void mousePressed(MouseEvent e) {
-                    if(e.getButton() == MouseEvent.BUTTON3) {
-                        searchResultMenu.show(heading, e.getX(), e.getY());
-                    }
-                }
-        });
     }
 
     private Icon getIcon(VisualSearchResult vsr) {
