@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-03 11:31-0500\n"
+"POT-Creation-Date: 2008-11-10 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,23 +209,23 @@ msgstr ""
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:22
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
 msgid "Free to chat"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
 msgid "Available"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
 msgid "Away"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:26
 msgid "Away for a while"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:26
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:27
 msgid "Do not disturb"
 msgstr ""
 
@@ -264,11 +264,11 @@ msgstr ""
 msgid "Stale Connection Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:107
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:102
 msgid "Various Core Services"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:112
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:107
 msgid "Gnutella Connections"
 msgstr ""
 
