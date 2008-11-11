@@ -37,7 +37,7 @@ class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        //TODO no longer a singleton build on demand
+        //TODO no longer a singleton build on demand, or figure out how to update items
         JMenuItem fileItem = getFileMenuItem(downloadListManager);
         add(fileItem);
         JMenuItem linkItem = getUrlMenuItem(downloadListManager);
