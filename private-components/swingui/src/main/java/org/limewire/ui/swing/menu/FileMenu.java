@@ -1,26 +1,30 @@
 package org.limewire.ui.swing.menu;
 
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,105 +37,188 @@ class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator) {
         super(I18n.tr("File"));
         this.navigator = navigator;
+        //TODO no longer a singleton build on demand
         JMenuItem fileItem = getFileMenuItem(downloadListManager);
         add(fileItem);
+        JMenuItem linkItem = getUrlMenuItem(downloadListManager);
+        add(linkItem);
+        JMenuItem recentDownloads = getRecentDownloads();
+        add(recentDownloads);
+        addSeparator();
+        JMenuItem addFile = getAddFile();
+        add(addFile);
+        JMenuItem addFolder = getAddFolder();
+        add(addFolder);
+        addSeparator();
+        JMenuItem launchFile = getLaunchItem();
+        add(launchFile);
+        JMenuItem locateFile = getLocateFile();
+        add(locateFile);
+        addSeparator();
+        add(new JMenuItem(I18n.tr("Set as available")));
+        add(new JMenuItem(I18n.tr("Set as away")));
+        addSeparator();
+        add(new JMenuItem(I18n.tr("Switch user")));
+        add(new JMenuItem(I18n.tr("Sign into Friends/Sign out of Friends")));
+        addSeparator();
+        add(new JMenuItem(I18n.tr("Exit")));
+        
+    }
 
-        JMenuItem urlItem = getUrlMenuItem(downloadListManager);
-        add(urlItem);
+    private JMenuItem getLocateFile() {
+        return new JMenuItem(I18n.tr("Locate file"));
+    }
+
+    private JMenuItem getLaunchItem() {
+        return new JMenuItem(I18n.tr("Launch file"));
+    }
+
+    private JMenuItem getAddFolder() {
+        JMenuItem addFolder = new JMenuItem(I18n.tr("Add Folder"));
+        addFolder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<File> folders = FileChooser.getInput(FileMenu.this, I18n.tr("Add Folder(s)"),
+                        I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
+                        JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
+                        new FileFilter() {
+                            @Override
+                            public boolean accept(File f) {
+                                String extension = FileUtils.getFileExtension(f);
+                                return f.isDirectory();
+                            }
+
+                            @Override
+                            public String getDescription() {
+                                return I18n.tr("TODO get better description");
+                            }
+                        });
+
+            }
+        });
+        return addFolder;
+    }
+
+    private JMenuItem getAddFile() {
+        JMenuItem addFile = new JMenuItem(I18n.tr("Add File"));
+        addFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Add File(s)"), I18n
+                        .tr("Add Files"), FileChooser.getLastInputDirectory(),
+                        JFileChooser.FILES_ONLY, JFileChooser.APPROVE_OPTION, true,
+                        new FileFilter() {
+                            @Override
+                            public boolean accept(File f) {
+                                String extension = FileUtils.getFileExtension(f);
+                                // TODO filter extensions enabled in options
+                                return f.isDirectory() || f.isFile();
+                            }
+
+                            @Override
+                            public String getDescription() {
+                                return I18n.tr("TODO get a descripotion");
+                            }
+                        });
+
+            }
+        });
+        return addFile;
+    }
+
+    private JMenuItem getRecentDownloads() {
+        return new JMenuItem(I18n.tr("Recent Downloads"));
     }
 
     private JMenuItem getFileMenuItem(final DownloadListManager downloadListManager) {
-        // TODO this was just added for testing purposes, need to talk to mike
-        // to see the behavior we will use for real
         JMenuItem fileItem = new JMenuItem(I18n.tr("Open File"));
         fileItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final JFrame jFrame = new JFrame("open test");
-                jFrame.setBounds(new Rectangle(600, 300));
-                JPanel filePanel = new JPanel();
-                JLabel fileLabel = new JLabel(I18n.tr("File:"));
-                final JTextField fileField = new JTextField(50);
-                fileField.setText("/home/pvertenten/Desktop/Parted Magic 3.1 rc1 [LXDE].torrent");
-                JButton openButton = new JButton(I18n.tr("Open"));
-                openButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent event) {
-                        String fileString = fileField.getText();
-                        try {
-                            File file = new File(fileString);
-                            downloadListManager.addDownload(file);
-                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                    .select();
-                            jFrame.dispose();
-                        } catch (SaveLocationException e) {
-                            // TODO implement good user feedback
-                            throw new UnsupportedOperationException(
-                                    "Need to implement good user feedback for this.");
-                        }
+
+                List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Open File"), I18n
+                        .tr("Open"), FileChooser.getLastInputDirectory(), JFileChooser.FILES_ONLY,
+                        JFileChooser.APPROVE_OPTION, true, new FileFilter() {
+                            @Override
+                            public boolean accept(File f) {
+                                String extension = FileUtils.getFileExtension(f);
+                                return f.isDirectory() || "torrent".equalsIgnoreCase(extension)
+                                        || "magnet".equalsIgnoreCase(extension);
+                            }
+
+                            @Override
+                            public String getDescription() {
+                                return I18n.tr(".torrent|.magnet");
+                            }
+                        });
+
+                if (files == null) {
+                    return;
+                }
+
+                for (File file : files) {
+                    try {
+                        downloadListManager.addDownload(file);
+                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
+                    } catch (SaveLocationException e1) {
+                        // TODO better user feedback
+                        throw new UnsupportedOperationException(e1);
                     }
-                });
-                filePanel.add(fileLabel);
-                filePanel.add(fileField);
-                filePanel.add(openButton);
 
-                jFrame.setContentPane(filePanel);
-
-                jFrame.setVisible(true);
-
+                }
             }
         });
+
         return fileItem;
     }
 
     private JMenuItem getUrlMenuItem(final DownloadListManager downloadListManager) {
-        // TODO this was just added for testing purposes, need to talk to mike
-        // to see the behavior we will use for real
-        JMenuItem urlItem = new JMenuItem(I18n.tr("Open URL"));
-        urlItem.addActionListener(new ActionListener() {
+        JMenuItem linkItem = new JMenuItem(I18n.tr("Open Link"));
+        linkItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final JFrame jFrame = new JFrame("open test");
-                jFrame.setBounds(new Rectangle(600, 300));
-                JPanel urlPanel = new JPanel();
-                JLabel urlLabel = new JLabel(I18n.tr("URL:"));
-                final JTextField urlField = new JTextField(50);
-                urlField
-                        .setText("http://linuxtracker.org/download.php?id=b732059d98a6ba8cec113fc129a2e344495f9ca2&f=Parted%20Magic%203.1%20rc1%20%5BLXDE%5D.torrent");
-
-                JButton openButton = new JButton(I18n.tr("Open"));
-                openButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent event) {
-                        String uriString = urlField.getText();
-                        try {
-                            URI uri = new URI(uriString);
-                            downloadListManager.addDownload(uri);
-                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                    .select();
-                            jFrame.dispose();
-                        } catch (URISyntaxException e1) {
-                            // TODO implement good user feedback
-                            throw new UnsupportedOperationException(
-                                    "Need to implement good user feedback for this.");
-                        } catch (SaveLocationException e) {
-                            // TODO implement good user feedback
-                            throw new UnsupportedOperationException(
-                                    "Need to implement good user feedback for this.");
-                        }
-                    }
-                });
-                urlPanel.add(urlLabel);
-                urlPanel.add(urlField);
-                urlPanel.add(openButton);
-
-                jFrame.setContentPane(urlPanel);
-
-                jFrame.setVisible(true);
-
+                LocationDialogue locationDialogue = new LocationDialogue(downloadListManager);
+                locationDialogue.setVisible(true);
             }
         });
-        return urlItem;
+        return linkItem;
+    }
+
+    private class LocationDialogue extends JDialog {
+        public LocationDialogue(final DownloadListManager downloadListManager) {
+            super();
+            JPanel urlPanel = new JPanel();
+            JLabel urlLabel = new JLabel(I18n.tr("URL:"));
+            final JTextField urlField = new JTextField(50);
+            urlField.setText("http://");
+
+            JButton openButton = new JButton(I18n.tr("Open"));
+            openButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    String uriString = urlField.getText();
+                    try {
+                        URI uri = new URI(uriString);
+                        downloadListManager.addDownload(uri);
+                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
+                        dispose();
+                    } catch (URISyntaxException e1) {
+                        // TODO implement good user feedback
+                        throw new UnsupportedOperationException(
+                                "Need to implement good user feedback for this.");
+                    } catch (SaveLocationException e) {
+                        // TODO implement good user feedback
+                        throw new UnsupportedOperationException(
+                                "Need to implement good user feedback for this.");
+                    }
+                }
+            });
+            urlPanel.add(urlLabel);
+            urlPanel.add(urlField);
+            urlPanel.add(openButton);
+
+            setContentPane(urlPanel);
+        }
     }
 
 }
