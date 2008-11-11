@@ -37,7 +37,8 @@ class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        //TODO no longer a singleton build on demand, or figure out how to update items
+        // TODO no longer a singleton build on demand, or figure out how to
+        // update items
         JMenuItem fileItem = getFileMenuItem(downloadListManager);
         add(fileItem);
         JMenuItem linkItem = getUrlMenuItem(downloadListManager);
@@ -62,7 +63,7 @@ class FileMenu extends JMenu {
         add(new JMenuItem(I18n.tr("Sign into Friends/Sign out of Friends")));
         addSeparator();
         add(new JMenuItem(I18n.tr("Exit")));
-        
+
     }
 
     private JMenuItem getLocateFile() {
@@ -173,6 +174,8 @@ class FileMenu extends JMenu {
     }
 
     private JMenuItem getUrlMenuItem(final DownloadListManager downloadListManager) {
+        // TODO instead of adding downloadListManager a part of the location
+        // dialogue, add listening capabilities to the location dialogue
         JMenuItem linkItem = new JMenuItem(I18n.tr("Open Link"));
         linkItem.addActionListener(new ActionListener() {
             @Override
