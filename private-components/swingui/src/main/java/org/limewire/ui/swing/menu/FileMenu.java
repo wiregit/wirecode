@@ -19,6 +19,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
@@ -34,7 +35,8 @@ class FileMenu extends JMenu {
     private final Navigator navigator;
 
     @Inject
-    public FileMenu(DownloadListManager downloadListManager, Navigator navigator) {
+    public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
+            LibraryManager libraryManager) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         // TODO no longer a singleton build on demand, or figure out how to
@@ -46,9 +48,9 @@ class FileMenu extends JMenu {
         JMenu recentDownloads = getRecentDownloads();
         add(recentDownloads);
         addSeparator();
-        JMenuItem addFile = getAddFile();
+        JMenuItem addFile = getAddFile(libraryManager);
         add(addFile);
-        JMenuItem addFolder = getAddFolder();
+        JMenuItem addFolder = getAddFolder(libraryManager);
         add(addFolder);
         addSeparator();
         JMenuItem launchFile = getLaunchItem();
@@ -74,7 +76,7 @@ class FileMenu extends JMenu {
         return new JMenuItem(I18n.tr("Launch file"));
     }
 
-    private JMenuItem getAddFolder() {
+    private JMenuItem getAddFolder(final LibraryManager libraryManager) {
         JMenuItem addFolder = new JMenuItem(I18n.tr("Add Folder"));
         addFolder.addActionListener(new ActionListener() {
             @Override
@@ -95,12 +97,19 @@ class FileMenu extends JMenu {
                             }
                         });
 
+                if (folders != null) {
+                    for (File folder : folders) {
+                        // TODO run in background thread
+                        libraryManager.getLibraryManagedList().addFolder(folder);
+                    }
+                }
+
             }
         });
         return addFolder;
     }
 
-    private JMenuItem getAddFile() {
+    private JMenuItem getAddFile(final LibraryManager libraryManager) {
         JMenuItem addFile = new JMenuItem(I18n.tr("Add File"));
         addFile.addActionListener(new ActionListener() {
             @Override
@@ -121,7 +130,12 @@ class FileMenu extends JMenu {
                                 return I18n.tr("TODO get a descripotion");
                             }
                         });
-
+                if (files != null) {
+                    for (File file : files) {
+                        // TODO run in background thread
+                        libraryManager.getLibraryManagedList().addFile(file);
+                    }
+                }
             }
         });
         return addFile;
