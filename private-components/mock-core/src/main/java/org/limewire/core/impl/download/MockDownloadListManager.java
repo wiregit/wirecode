@@ -19,11 +19,14 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.xmpp.api.client.FileMetaData;
 
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
+@Singleton
 public class MockDownloadListManager implements DownloadListManager {
 	private static final String LOCALHOST = "127.0.0.1";
     private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
@@ -51,27 +54,14 @@ public class MockDownloadListManager implements DownloadListManager {
 	@Override
 	public DownloadItem addDownload(
             Search search, List<? extends SearchResult> coreSearchResults) {
-        String title = "title"; // TODO: RMV What should go here?
-        long totalSize = 123;
+        String title = coreSearchResults.get(0).getFileName(); 
+        long totalSize = coreSearchResults.get(0).getSize();
         DownloadState state = DownloadState.DOWNLOADING;
-        Category category = Category.AUDIO;
+        Category category = coreSearchResults.get(0).getCategory();
         final MockDownloadItem mdi =
             new MockDownloadItem(title, totalSize, state, category);
 
-        // Simulate a search.
-        Runnable runnable = new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    // do nothing
-                }
-                mdi.setState(DownloadState.DONE);
-            }
-        };
-
-        new Thread(runnable).start();
-
+        addDownload(mdi);
 	    return mdi;
 	}
 
@@ -87,76 +77,32 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 	
 	private void initializeMockData(){
-	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 4146,
+	    MockDownloadItem item = new MockDownloadItem("Monkey on ice skates", 4416,
 				DownloadState.DOWNLOADING, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("Frank", LOCALHOST));
-		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-		item.addDownloadSource(new MockDownloadSource("Joey", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("134.23.2.7", LOCALHOST));
 		addDownload(item);
 
-		item = new MockDownloadItem("FINISHING", 446,
-				DownloadState.FINISHING, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("Henry", LOCALHOST));
+		item = new MockDownloadItem("Psychology 101 Lecture 3", 446,
+				DownloadState.DOWNLOADING, Category.AUDIO);
+		item.addDownloadSource(new MockDownloadSource("245.2.7.78", LOCALHOST));
 		addDownload(item);
 		
-		item = new MockDownloadItem("done on Skateboard image", 446,
-				DownloadState.DONE, Category.IMAGE);
-		item.addDownloadSource(new MockDownloadSource("Jolene", LOCALHOST));
-		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
+		item = new MockDownloadItem("New England Foliage.bmp", 46,
+				DownloadState.DOWNLOADING, Category.IMAGE);
+		item.addDownloadSource(new MockDownloadSource("234.2.3.4", LOCALHOST));
 		addDownload(item);
 
-		item = new MockDownloadItem("queued video", 55,
+		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("Barack", LOCALHOST));
-		item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("34.2.7.7", LOCALHOST));
 		addDownload(item);
 		
-		item = new MockDownloadItem("other queued doc", 55,
-                DownloadState.REMOTE_QUEUED, Category.DOCUMENT);
-        item.addDownloadSource(new MockDownloadSource("Barack", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-        addDownload(item);
-		
-		item = new MockDownloadItem("Paused audio file", 55,
-				DownloadState.PAUSED, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("John", LOCALHOST));
-		item.addDownloadSource(new MockDownloadSource("George", LOCALHOST));
-		addDownload(item);
-        
-        item = new MockDownloadItem("Stalled program", 55,
-                DownloadState.STALLED, Category.PROGRAM);
-        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-        addDownload(item);
-        
-        item = new MockDownloadItem("Corrupt other file", 55,
-                DownloadState.ERROR, Category.OTHER);
-        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-        item.setErrorState(ErrorState.CORRUPT_FILE);
-        addDownload(item);
-        
-        item = new MockDownloadItem("disk problem video", 55,
+        item = new MockDownloadItem("Psychology 101 Lecture 1", 55,
                 DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("23.12.33.4", LOCALHOST));
         item.setErrorState(ErrorState.DISK_PROBLEM);
         addDownload(item);
-        
-        item = new MockDownloadItem("not sharable video", 55,
-                DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-        item.setErrorState(ErrorState.FILE_NOT_SHARABLE);
-        addDownload(item);
-        
-        item = new MockDownloadItem("UNABLE_TO_CONNECT vid", 55,
-                DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("Al", LOCALHOST));
-        item.addDownloadSource(new MockDownloadSource("Bob", LOCALHOST));
-        item.setErrorState(ErrorState.UNABLE_TO_CONNECT);
-        addDownload(item);
-        
+
 	}
 	
 	private class RemoveCancelledListener implements PropertyChangeListener {
