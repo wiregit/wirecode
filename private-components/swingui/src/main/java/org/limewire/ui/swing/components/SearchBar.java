@@ -74,7 +74,7 @@ public class SearchBar extends JXPanel {
         this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
         this.comboBox.setName("SearchBar.comboBox");
                 
-        this.searchField = new PromptTextField(I18n.tr("Search"));
+        this.searchField = new PromptTextField(I18n.tr("Search"), true);
         this.searchField.setName("SearchBar.searchField");
         
         this.searchButton = new IconButton();

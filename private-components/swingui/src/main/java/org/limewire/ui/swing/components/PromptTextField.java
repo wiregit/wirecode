@@ -37,7 +37,45 @@ public class PromptTextField extends JTextField implements FocusListener {
     private Painter<JTextField> backgroundPainter;
     private Painter<PromptTextField> promptPainter;
     
+    /**
+     * Controls the visibility of the faint white accent bubble
+     *  that is painted under components in some areas. 
+     */
+    private boolean borderBubbleVisible = false;
+    
+    
     public PromptTextField() {
+        this.init();
+    }
+    
+    public PromptTextField(boolean borderBubbleVisible) {
+        this.borderBubbleVisible = borderBubbleVisible;
+
+        this.init();
+    }
+    
+    public PromptTextField(String promptText) {
+        this.setPromptText(promptText);
+        
+        this.init();
+    }
+    
+    public PromptTextField(String promptText, boolean borderBubbleVisible) {
+        this.promptText = promptText;
+        this.borderBubbleVisible = true;
+    
+        init();
+    }
+    
+    
+    public PromptTextField(String promptText, int columns) {
+        this.promptText = promptText;
+        this.setColumns(columns);
+        
+        init();
+    }
+    
+    private void init() {
         GuiUtils.assignResources(this);
 
         TextFieldClipboardControl.install(this);
@@ -46,20 +84,9 @@ public class PromptTextField extends JTextField implements FocusListener {
         
         this.setBorder(BorderFactory.createEmptyBorder(2,10,2,12));
         this.backgroundPainter = createBackgroundPainter();
-        this.promptPainter = createPromptPainter();
+        this.promptPainter = createPromptPainter();        
     }
     
-    public PromptTextField(String promptText) {
-        this();
-        
-        this.setPromptText(promptText);
-    }
-    
-    public PromptTextField(String promptText, int columns) {
-        this(promptText);
-        
-        this.setColumns(columns);
-    }
     
     public void setPromptText(String text){
         this.promptText = text;
@@ -67,6 +94,18 @@ public class PromptTextField extends JTextField implements FocusListener {
     
     public String getPromptText() {
         return this.promptText;
+    }
+    
+    /**
+     * Controls visibility of the white accent bubble painted
+     *  under some components.
+     */
+    public void setBorderBubbleVisible(boolean visible) {
+        this.borderBubbleVisible = visible;
+        
+        System.out.println(visible);
+        
+        this.backgroundPainter = createBackgroundPainter();
     }
     
     /**
@@ -164,7 +203,7 @@ public class PromptTextField extends JTextField implements FocusListener {
         
         compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
                 this.borderColour,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
-                this.bevelRight,  this.bevelBottom));
+                this.bevelRight,  this.bevelBottom, this.borderBubbleVisible));
         
         return compoundPainter;
     }
