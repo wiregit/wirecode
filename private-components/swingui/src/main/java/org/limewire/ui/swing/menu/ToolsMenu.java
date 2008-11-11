@@ -3,6 +3,7 @@ package org.limewire.ui.swing.menu;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.options.OptionsDialog;
@@ -20,14 +21,14 @@ public class ToolsMenu extends JMenu {
     public ToolsMenu(final Provider<OptionsDialog> optionDialog) {
         super(I18n.tr("Tools"));
         
-        add(new JMenu(I18n.tr("Library Manager")));
-        add(new JMenu(I18n.tr("Downloads")));
-        add(new JMenu(I18n.tr("Uploads")));
+        add(new JMenuItem(I18n.tr("Library Manager")));
+        add(new JMenuItem(I18n.tr("Downloads")));
+        add(new JMenuItem(I18n.tr("Uploads")));
         addSeparator();
-        add(new JMenu(I18n.tr("Advanced Search")));
-        add(new JMenu(I18n.tr("What's New Search")));
+        add(new JMenuItem(I18n.tr("Advanced Search")));
+        add(new JMenuItem(I18n.tr("What's New Search")));
         addSeparator();
-        add(new JMenu(I18n.tr("Advanced Tools")));
+        add(new JMenuItem(I18n.tr("Advanced Tools")));
         addSeparator();
         add(new AbstractAction(I18n.tr("Options")) {
             @Override

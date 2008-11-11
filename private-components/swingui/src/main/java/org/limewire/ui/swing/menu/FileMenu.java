@@ -43,7 +43,7 @@ class FileMenu extends JMenu {
         add(fileItem);
         JMenuItem linkItem = getUrlMenuItem(downloadListManager);
         add(linkItem);
-        JMenuItem recentDownloads = getRecentDownloads();
+        JMenu recentDownloads = getRecentDownloads();
         add(recentDownloads);
         addSeparator();
         JMenuItem addFile = getAddFile();
@@ -127,8 +127,8 @@ class FileMenu extends JMenu {
         return addFile;
     }
 
-    private JMenuItem getRecentDownloads() {
-        return new JMenuItem(I18n.tr("Recent Downloads"));
+    private JMenu getRecentDownloads() {
+        return new JMenu(I18n.tr("Recent Downloads"));
     }
 
     private JMenuItem getFileMenuItem(final DownloadListManager downloadListManager) {

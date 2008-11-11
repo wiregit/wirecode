@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.tray.Notification;
@@ -25,7 +26,16 @@ class HelpMenu extends JMenu {
             final TrayNotifier trayNotifier) {
         super(I18n.tr("Help"));
         
+        add(new JMenuItem(I18n.tr("Using LimeWire")));
+        add(new JMenuItem(I18n.tr("LimeWire Store help")));
+        add(new JMenuItem(I18n.tr("FAQ")));
+        addSeparator();
+        add(new JMenuItem(I18n.tr("Check for updates")));
+        addSeparator();
+        add(new JMenuItem(I18n.tr("About LimeWire")));
+        
         if(application.isTestingVersion()) {
+            addSeparator();
             add(new AbstractAction("Error Test") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
