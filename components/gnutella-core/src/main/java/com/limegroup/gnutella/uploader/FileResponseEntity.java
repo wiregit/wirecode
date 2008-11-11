@@ -190,6 +190,7 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
         }
 
         public void readSuccessful() {
+            LOG.debug("read successful");
             ioControl.requestOutput();
         }
 
