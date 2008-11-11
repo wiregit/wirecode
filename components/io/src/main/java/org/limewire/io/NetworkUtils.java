@@ -11,6 +11,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -210,11 +211,29 @@ public final class NetworkUtils {
             return true;
         }
         
+        // Note: The ideal way of doing this would be to return:
+        //      NetworkInterface.getByInetAddress(addr) != null;
+        // However, that call crashes the JVM on a lot of machines.
+        // So, we have a crappy & long-winded workaround...
+        
         try {
-            return NetworkInterface.getByInetAddress(addr) != null;
-        } catch (SocketException err) {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while(interfaces.hasMoreElements()) {
+                NetworkInterface ni = interfaces.nextElement();
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while(addresses.hasMoreElements()) {
+                    InetAddress address = addresses.nextElement();
+                    if(Arrays.equals(addr.getAddress(), address.getAddress())) {
+                        return true;
+                    }
+                }
+            }
+        } catch(SocketException err) {
+            err.printStackTrace();
             return false;
         }
+        
+        return false;
     }
     
     /**
