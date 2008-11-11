@@ -3,7 +3,6 @@ package org.limewire.ui.swing.downloads.table;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
@@ -16,7 +15,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * Table showing DownloadItems. Provides popup menus and double click handling.
  * No renderers or editors are set by default.
  */
-public class DownloadTable extends MouseableTable {   
+public class DownloadTable extends AbstractDownloadTable {   
     
     //TODO: Make resource
     private int rowHeight = 60;    

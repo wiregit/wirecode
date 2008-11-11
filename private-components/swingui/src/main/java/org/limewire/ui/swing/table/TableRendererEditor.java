@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
-import javax.swing.JPanel;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-public abstract class TableRendererEditor extends JPanel implements TableCellRenderer, TableCellEditor {
+import org.jdesktop.swingx.JXPanel;
+
+public abstract class TableRendererEditor extends JXPanel implements TableCellRenderer, TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
 

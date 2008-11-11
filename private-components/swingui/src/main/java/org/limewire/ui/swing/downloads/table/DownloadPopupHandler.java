@@ -39,9 +39,9 @@ public class DownloadPopupHandler implements TablePopupHandler {
     private DownloadItem menuItem;
 
 
-    private DownloadTable table;
+    private AbstractDownloadTable table;
     
-    public DownloadPopupHandler(DownloadActionHandler actionHandler, DownloadTable table){
+    public DownloadPopupHandler(DownloadActionHandler actionHandler, AbstractDownloadTable table){
         this.actionHandler = actionHandler;
         this.table = table;
         
@@ -96,7 +96,7 @@ public class DownloadPopupHandler implements TablePopupHandler {
 
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
-        popupRow = table.rowAtPoint(new Point(x, y));
+        popupRow = getPopupRow(x, y);
         menuItem = table.getDownloadItem(popupRow);
        
         popupMenu.removeAll();
@@ -167,6 +167,9 @@ public class DownloadPopupHandler implements TablePopupHandler {
         popupMenu.show(component, x, y);
     }
     
+    protected int getPopupRow(int x, int y){
+        return table.rowAtPoint(new Point(x, y));
+    }
     private boolean isLaunchable(DownloadItem item){
         return item.getCategory() != Category.PROGRAM && item.isLaunchable();
     }

@@ -32,6 +32,10 @@ public class HorizontalDownloadTableModel implements TableModel {
         });
      
     }
+    
+    public DownloadItem getDownloadItem(int index){
+        return downloadItems.get(index);
+    }
 
 
     @Override

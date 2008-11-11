@@ -87,7 +87,9 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
         case COMMENTS_COL:
             return baseObject.getProperty(FilePropertyKey.COMMENTS);
         case HEIGHT_COL:
-            return baseObject.getProperty(FilePropertyKey.HEIGHT);
+            return baseObject.getProperty(FilePropertyKey.HEIGHT); 
+        case WIDTH_COL:
+            return baseObject.getProperty(FilePropertyKey.WIDTH); 
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:

@@ -7,10 +7,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.Comparator;
+import java.util.EventObject;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -19,12 +21,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
-import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -34,15 +37,22 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
-import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
+import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
+import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
+import org.limewire.ui.swing.downloads.table.DownloadPopupHandler;
 import org.limewire.ui.swing.downloads.table.HorizontalDownloadTableModel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.DownloadSummaryPainter;
+import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
+import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -65,33 +75,27 @@ public class DownloadSummaryPanel extends JXPanel {
      */
 	private static final int NUMBER_DISPLAYED = 5;
 
-	private static final int LEFT_MARGIN = 8;
+	private static final int LEFT_MARGIN = 25;
 
-    private JTable table;
+    private AbstractDownloadTable table;
 
 	private SummaryPanelHeader header;
 	private JButton moreButton;
-	//private JLabel completeLabel;
 	private EventList<DownloadItem> allList;
-    private EventList<DownloadItem> unfinishedList;
-    private RangeList<DownloadItem> chokeList;
+    private RangeList<DownloadItem> chokeList;    
     
-//    private JPanel completePanel;
-//    private JPanel cardPanel;
-
-//    private static final String TABLE = "TABLE";
-//    private static final String COMPLETE = "COMPLETE";
-    
-  //  private CardLayout cardLayout;
 
     @Resource private Font itemFont; 
+    @Resource private Color fontColor; 
     @Resource private Icon downloadIcon;
-    
-    private DownloadStatusPanelRenderer downloadStatusPanelRenderer;
+
+    private DownloadStatusPanelRendererEditor downloadStatusPanelRenderer;
+    private DownloadStatusPanelRendererEditor downloadStatusPanelEditor;
 
     
     @Inject
-	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, Navigator navigator) {
+	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, 
+	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory) {
 	    GuiUtils.assignResources(this);
 	    setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
@@ -100,17 +104,7 @@ public class DownloadSummaryPanel extends JXPanel {
         setLayout(new MigLayout());
         setBackgroundPainter(new DownloadSummaryPainter());
                 
-        //leaving this commented out until we are sure it is gone
-//        completePanel = new JPanel(new BorderLayout());
-//        completePanel.setOpaque(false);
-//        completeLabel = new JLabel("<html><u>" + I18n.tr("Downloads Complete") + "</u></html>", JLabel.CENTER);
-//        completeLabel.setForeground(allCompleteColour);
-//        completePanel.add(completeLabel);
-        
-        unfinishedList = GlazedListsFactory.filterList(allList, new DownloadStateExcluder(DownloadState.DONE));
-		
 		header = new SummaryPanelHeader();
-
 
         Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
@@ -123,14 +117,35 @@ public class DownloadSummaryPanel extends JXPanel {
 		
 		chokeList = GlazedListsFactory.rangeList(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-		table = new JTable(new HorizontalDownloadTableModel(sortedList));
+		final HorizontalDownloadTableModel tableModel = new HorizontalDownloadTableModel(sortedList);
+		table = new AbstractDownloadTable(){
+            @Override
+            public DownloadItem getDownloadItem(int row) {
+                //row is actually a column here
+                return tableModel.getDownloadItem(row);
+            }};
+            table.setModel(tableModel);
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
-		table.setRowHeight(30);
 		
-		downloadStatusPanelRenderer = new DownloadStatusPanelRenderer();
+		downloadStatusPanelRenderer = new DownloadStatusPanelRendererEditor();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
+        table.setRowHeight(45);
+        
+        downloadStatusPanelEditor = new DownloadStatusPanelRendererEditor();
+        table.setDefaultEditor(DownloadItem.class, downloadStatusPanelEditor);
+        
+        table.setColumnDoubleClickHandler(new DownloadClickHandler());
+        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(sortedList, propertiesFactory), table){
+            @Override
+            protected int getPopupRow(int x, int y){
+                //columns and rows are reversed in this table
+                return table.columnAtPoint(new Point(x, y));
+            }
+        };
+
+        table.setPopupHandler(popupHandler);
 		
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
             @Override
@@ -139,6 +154,7 @@ public class DownloadSummaryPanel extends JXPanel {
                 table.getColumnModel().getColumn(columnIndex).setWidth(225);
                 table.getColumnModel().getColumn(columnIndex).setMaxWidth(225);
                 table.getColumnModel().getColumn(columnIndex).setMinWidth(225);
+                table.getColumnModel().getColumn(columnIndex).setCellEditor(downloadStatusPanelEditor);
             }
 
             @Override
@@ -159,29 +175,29 @@ public class DownloadSummaryPanel extends JXPanel {
         });
 		
 
-//        cardLayout = new CardLayout();
-//        cardPanel = new JPanel(cardLayout);
-//        cardPanel.setOpaque(false);
-//        cardPanel.setBorder(BorderFactory.createEmptyBorder(7,0,4,0));        
-
-//        add(cardPanel, BorderLayout.CENTER);
-//
-//        cardPanel.add(completePanel, COMPLETE);
-//        cardPanel.add(table, TABLE);
-//
-//        cardLayout.show(cardPanel, TABLE);
-
 		table.setTableHeader(null);
         JScrollPane tableScroll = new JScrollPane(table);
         tableScroll.setOpaque(false);
         tableScroll.getViewport().setOpaque(false);
         tableScroll.setBorder(new EmptyBorder(0, 0, 0, 0));
-        //necessary for vertical centering our single row table
-        tableScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, table.getRowHeight()));
         
 
-        moreButton = new JButton(I18n.tr("See All"));
-        moreButton.setPreferredSize(new Dimension(moreButton.getPreferredSize().width, table.getRowHeight()));
+        moreButton = new HyperLinkButton(I18n.tr("See All"));
+        FontUtils.bold(moreButton);
+        
+        final NavItem item = navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
+        MouseListener navMouseListener = new ActionHandListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                item.select();
+            }            
+        });
+        moreButton.addMouseListener(navMouseListener);
+        header.addMouseListener(navMouseListener);
+        for(Component c : header.getComponents()){
+            c.addMouseListener(navMouseListener);
+        }
+        
 
         add(header, "aligny 50%");
         add(tableScroll, "aligny 50%, growx, push");
@@ -191,16 +207,6 @@ public class DownloadSummaryPanel extends JXPanel {
 		adjustVisibility();  
 		
 		addListeners();
-		
-        final NavItem item = navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
-        
-        addMouseListener(new ActionHandListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                item.select();
-            }            
-        }));
-        
 	}
 	
     
@@ -224,27 +230,8 @@ public class DownloadSummaryPanel extends JXPanel {
 	    
 	//hide panel if there are no downloads.  show it if there are
     private void adjustVisibility() {
-        if (allList.size() > 0) {
-            
-            setVisible(true);
-
-            if (unfinishedList.size() > 0) {//downloads in progress
-                
-//                cardLayout.show(cardPanel, TABLE);
-
-                if (allList.size() > NUMBER_DISPLAYED) {
-                    chokeList.setHeadRange(0, NUMBER_DISPLAYED - 1);
-                    moreButton.setVisible(true);
-                } else {
-                    chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-                    moreButton.setVisible(false);
-                }
-                
-            } //else {//all downloads complete
-           //     cardLayout.show(cardPanel, COMPLETE);
-             //   moreLabel.setVisible(false);
-         //   }
-            
+        if (allList.size() > 0) {            
+            setVisible(true);            
         } else {
             //Nothing to show
             setVisible(false);
@@ -271,45 +258,48 @@ public class DownloadSummaryPanel extends JXPanel {
 	}
 	
 	
-	private class DownloadStatusPanelRenderer extends JPanel implements
-			TableCellRenderer {
+	private class DownloadStatusPanelRendererEditor extends TableRendererEditor {
 		
 	    private final JLabel nameLabel;
 		private final LimeProgressBar progressBar;
+		private final Border mouseOverBorder;
 		
-
 	    @Resource private Color progressBarBorderColor;
+	    @Resource private Color mouseOverColor;
 
-		public DownloadStatusPanelRenderer() {
-			super(new GridBagLayout());
+		public DownloadStatusPanelRendererEditor() {
+            setLayout(new GridBagLayout());
 			GuiUtils.assignResources(this);
 			
+			mouseOverBorder = new LineBorder(mouseOverColor, 3);
+			
 			nameLabel = new JLabel();
-			progressBar = new LimeProgressBar(0,100);
-			progressBar.setPreferredSize(
-			        new Dimension((int)progressBar.getPreferredSize().getWidth(), 10));
-			progressBar.setBorder(BorderFactory.
-	                createLineBorder(progressBarBorderColor));
             nameLabel.setFont(itemFont);
+            nameLabel.setForeground(fontColor);
+            
+			progressBar = new LimeProgressBar(0,100);
+			Dimension size = new Dimension(173, 8);
+            progressBar.setPreferredSize(size);
+            progressBar.setMaximumSize(size);
+            progressBar.setMinimumSize(size);
+			progressBar.setBorder(BorderFactory.createLineBorder(progressBarBorderColor));
                         
 			setOpaque(false);
-			GridBagConstraints gbc = new GridBagConstraints();
+			
+	        GridBagConstraints gbc = new GridBagConstraints();
 
-			gbc.gridx = 0;
-			gbc.gridy = 0;
-            gbc.weightx = 1;
-            gbc.weighty = 1;
-			gbc.fill = GridBagConstraints.BOTH;
-			gbc.anchor = GridBagConstraints.SOUTH;
-			nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
-			nameLabel.setOpaque(false);
-			gbc.insets = new Insets(0, LEFT_MARGIN, 0, LEFT_MARGIN);
-			add(nameLabel, gbc);
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.SOUTHWEST;
+            nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
+            nameLabel.setOpaque(false);
+            gbc.insets = new Insets(0, LEFT_MARGIN, 6, 0);
+            add(nameLabel, gbc);
 
-			gbc.gridy = 1;
-			gbc.weightx = 1;
-            gbc.anchor = GridBagConstraints.NORTH;
-			add(progressBar, gbc);
+            gbc.gridy = 1;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            add(progressBar, gbc);			
 		}
 		
 
@@ -317,11 +307,31 @@ public class DownloadSummaryPanel extends JXPanel {
 		public Component getTableCellRendererComponent(JTable table,
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
-            DownloadItem item = (DownloadItem) value;
-            nameLabel.setText(item.getTitle());
-            progressBar.setValue(item.getPercentComplete());
+            updateCell((DownloadItem) value);
+            setBorder(null);
             return this;
         }
+
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            updateCell((DownloadItem) value);
+            setBorder(mouseOverBorder);
+            return this;
+        }
+
+
+        @Override
+        public boolean isCellEditable(EventObject anEvent) {
+            return true;
+        }
+        
+        private void updateCell(DownloadItem item){
+            nameLabel.setText(item.getTitle());
+            progressBar.setValue(item.getPercentComplete());
+        }
+     
 	}
 	
 	private int getSortPriority(DownloadState state){
@@ -371,4 +381,13 @@ public class DownloadSummaryPanel extends JXPanel {
 	    }
 	}
 
+	private class DownloadClickHandler implements TableColumnDoubleClickHandler {
+	    @Override
+	    public void handleDoubleClick(int col) {
+	        DownloadItem item = table.getDownloadItem(col);
+	        if (item.isLaunchable()) {
+	            DownloadItemUtils.launch(item);
+	        }
+	    }
+	}
 }

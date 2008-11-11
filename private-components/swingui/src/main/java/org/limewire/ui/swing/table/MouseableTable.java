@@ -28,7 +28,9 @@ public class MouseableTable extends StripedJXTable {
 
 	private TablePopupHandler popupHandler;
 
-	private TableDoubleClickHandler doubleClickHandler;
+	private TableDoubleClickHandler rowDoubleClickHandler;
+	
+	private TableColumnDoubleClickHandler columnDoubleClickHandler;
 	
 	private TableColors colors = newTableColors();
 	
@@ -55,11 +57,15 @@ public class MouseableTable extends StripedJXTable {
 		this.popupHandler = popupHandler;
 	}
 	
-	public void setDoubleClickHandler(
-        TableDoubleClickHandler tableDoubleClickHandler) {
-		this.doubleClickHandler = tableDoubleClickHandler;
+	public void setDoubleClickHandler(TableDoubleClickHandler tableDoubleClickHandler) {
+		this.rowDoubleClickHandler = tableDoubleClickHandler;
 	}
 	
+	public void setColumnDoubleClickHandler(TableColumnDoubleClickHandler columnDoubleClickHandler) {
+        this.columnDoubleClickHandler = columnDoubleClickHandler;
+    }
+	   
+	   
 	protected void initialize() {	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -81,7 +87,7 @@ public class MouseableTable extends StripedJXTable {
                 
                 // If the cell is editable and
                 // it's not already being edited ...
-                if (isCellEditable(row, col) && row != getEditingRow()) {
+                if (isCellEditable(row, col) && (row != getEditingRow() || col != getEditingColumn())) {
                     editCellAt(row, col);
                 }
             }
@@ -95,13 +101,18 @@ public class MouseableTable extends StripedJXTable {
 				int row = rowAtPoint(e.getPoint());
 
 				if (row >= 0 && col >= 0) {
-					if (doubleClickHandler != null) {
+					if (rowDoubleClickHandler != null || columnDoubleClickHandler != null) {
 						Component component = e.getComponent();
 						//launch file on double click unless the click is on a button
 						if (e.getClickCount() == 2
 								&& !(component.getComponentAt(e.getPoint()) instanceof JButton)) {
-							doubleClickHandler.handleDoubleClick(row);
-						}
+                            if (rowDoubleClickHandler != null) {
+                                rowDoubleClickHandler.handleDoubleClick(row);
+                            }
+                            if (columnDoubleClickHandler != null) {
+                                columnDoubleClickHandler.handleDoubleClick(col);
+                            }
+                        }
 					}
 					TableCellEditor editor = getCellEditor();
 					if (editor != null) {
@@ -273,11 +284,14 @@ public class MouseableTable extends StripedJXTable {
     @Override
     public void setDefaultEditor(Class clazz, TableCellEditor editor) {
         boolean usesEventTableModel = getModel() instanceof EventTableModel;
-        
-        TableFormat tableFormat =
-            ((EventTableModel) getModel()).getTableFormat();
-        boolean usesAdvancedTableFormat =
-            tableFormat instanceof AdvancedTableFormat;
+        boolean usesAdvancedTableFormat = false;
+        TableFormat tableFormat = null;
+
+        if (usesEventTableModel) {
+            tableFormat = ((EventTableModel) getModel()).getTableFormat();
+            usesAdvancedTableFormat =
+                tableFormat instanceof AdvancedTableFormat;
+        }
 
         if (usesEventTableModel && usesAdvancedTableFormat) {
             AdvancedTableFormat format = (AdvancedTableFormat) tableFormat;
