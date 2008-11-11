@@ -88,7 +88,7 @@ public class SortAndFilterPanel extends JXPanel {
     private final LimeComboBox sortCombo;
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
-    private final JTextField filterBox = new PromptTextField();
+    private final JTextField filterBox = new PromptTextField(tr("Filter"));
     private final JXButton listViewToggleButton = new JXButton();
     private final JXButton tableViewToggleButton = new JXButton();
     

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -81,6 +82,9 @@ public class PromptTextField extends JTextField implements FocusListener {
         TextFieldClipboardControl.install(this);
         this.addFocusListener(this);
         this.setOpaque(false);
+        
+        this.setMinimumSize(new Dimension(150,22));
+        this.setPreferredSize(this.getMinimumSize());
         
         this.setBorder(BorderFactory.createEmptyBorder(2,10,2,12));
         this.backgroundPainter = createBackgroundPainter();
