@@ -17,7 +17,7 @@ import junit.framework.Test;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
-import org.limewire.io.IpPort;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.FileUtils;
@@ -100,6 +100,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     
     private RemoteFileDescFactory remoteFileDescFactory;
 
+    private PushEndpointFactory pushEndpointFactory;
+
     public ClientSideOOBRequeryTest(String name) {
         super(name);
     }
@@ -146,6 +148,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         callback = (MyCallback) injector.getInstance(ActivityCallback.class);
         macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
+        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setCanReceiveSolicited(true);
@@ -334,7 +337,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
         assertTrue("file should be shared",
@@ -456,7 +459,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should not be empty since the query is still alive
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
@@ -585,7 +588,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());
@@ -1363,8 +1366,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     private RemoteFileDesc makeRFD(URN urn, int port) throws Exception {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", port, 1, "whatever", 10, GUID.makeGuid(), 1,
-                false, 3, false, null, urns, false, false, "LIME", IpPort.EMPTY_SET, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, false), 1, "whatever", 10, GUID.makeGuid(), 1,
+                false, 3, false, null, urns, false, "LIME", -1);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {

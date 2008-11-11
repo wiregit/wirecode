@@ -284,8 +284,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         final RemoteFileDesc rfd = callback.getRFD(); 
         assertNotNull(rfd);
-        assertNotNull(rfd.getPushAddr());
-        assertTrue(rfd.needsPush());
+        assertTrue(rfd.getAddress() instanceof PushEndpoint);
 
         // tell the leaf to download the file, should result in push proxy
         // request

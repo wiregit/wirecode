@@ -115,6 +115,9 @@ public class BrowseHostHandler {
         setState(CONNECTING);
         
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("browsing address: " + friendPresence.getPresenceAddress());
+            }
             Socket socket = socketsManager.connect(friendPresence.getPresenceAddress(), new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
             browseHost(socket, friendPresence);
             browseListener.browseFinished(true);

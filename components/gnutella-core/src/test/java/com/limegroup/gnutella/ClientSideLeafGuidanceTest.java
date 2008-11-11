@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.ConnectableImpl;
 
 import junit.framework.Test;
 
@@ -354,8 +355,8 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         
         // mark anita as spammy
         RemoteFileDesc anita =injector.getInstance(RemoteFileDescFactory.class)
-                .createRemoteFileDesc("127.0.0.1", 6355, 1, "anita kasevan", 1000, DataUtils.EMPTY_GUID, 3, false, 3, false,
-                        null, Collections.EMPTY_SET, false, false, "ALT", Collections.EMPTY_SET, 0l, false);
+                .createRemoteFileDesc(new ConnectableImpl("127.0.0.1", 6355, false), 1, "anita kasevan", 1000, DataUtils.EMPTY_GUID, 3, false, 3, false,
+                        null, URN.NO_URN_SET, false, "ALT", 0l);
         
         spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{anita});
         assertTrue(spamManager.isSpam(anita));

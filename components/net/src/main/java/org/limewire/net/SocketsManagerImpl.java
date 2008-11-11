@@ -169,20 +169,26 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
         if (address == null) { 
             throw new NullPointerException("address must not be null");
         }
-        resolve(address, new AddressResolutionObserver() {
-            @Override
-            public void resolved(Address address) {
-                connectUnresolved(address, observer);
-            }
-            @Override
-            public void handleIOException(IOException iox) {
-                observer.handleIOException(iox);
-            }
-            @Override
-            public void shutdown() {
-                observer.shutdown();
-            }
-        }); 
+        if (canResolve(address)) {
+            LOG.debugf("trying to resolve for connect: {0}", address);
+            resolve(address, new AddressResolutionObserver() {
+                @Override
+                public void resolved(Address address) {
+                    connectUnresolved(address, observer);
+                }
+                @Override
+                public void handleIOException(IOException iox) {
+                    observer.handleIOException(iox);
+                }
+                @Override
+                public void shutdown() {
+                    observer.shutdown();
+                }
+            }); 
+        } else {
+            LOG.debugf("trying to connect unresolved: {0}", address);
+            connectUnresolved(address, observer);
+        }
         return observer;
     }
     

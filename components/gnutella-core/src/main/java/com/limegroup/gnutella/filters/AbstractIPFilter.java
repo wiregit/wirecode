@@ -8,6 +8,8 @@ import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IP;
 import org.limewire.mojito.messages.DHTMessage;
 
@@ -141,4 +143,12 @@ abstract class AbstractIPFilter implements IPFilter {
     }
     
     protected abstract boolean allowImpl(IP ip);
+    
+    @Override
+    public boolean allow(Address address) {
+        if (address instanceof Connectable) {
+            return allow(((Connectable)address).getInetAddress().getAddress());
+        } 
+        return true;
+    }
 }

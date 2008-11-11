@@ -15,6 +15,7 @@ import junit.framework.Test;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.net.ConnectionDispatcher;
@@ -64,6 +65,8 @@ public class UDPPushTest extends LimeTestCase {
     private Injector injector;
     private TLSManager tlsManager;
 
+    private PushEndpointFactory pushEndpointFactory;
+
     public UDPPushTest(String name) {
         super(name);
     }
@@ -97,6 +100,7 @@ public class UDPPushTest extends LimeTestCase {
         
         messageFactory = injector.getInstance(MessageFactory.class);
         connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
         tlsManager = injector.getInstance(TLSManager.class);
 
@@ -104,18 +108,16 @@ public class UDPPushTest extends LimeTestCase {
         long now = System.currentTimeMillis();
         Set<IpPortImpl> proxies = new TreeSet<IpPortImpl>(IpPort.COMPARATOR);
         proxies.add(new IpPortImpl(InetAddress.getLocalHost().getHostAddress(), 10000));
+        PushEndpoint pushEndpoint = pushEndpointFactory.createPushEndpoint(guid, proxies, PushEndpoint.PPTLS_BINARY, 0, new ConnectableImpl("127.0.0.1", 20000, true));
 
-        rfd1 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME", proxies, now,
-                false);
+        rfd1 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 30l, "file1", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, URN.NO_URN_SET, false, "LIME", now);
 
-        rfd2 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 31l, "file2", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME", proxies, now,
-                false);
+        rfd2 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 31l, "file2", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, URN.NO_URN_SET, false, "LIME", now);
 
-        rfdAlt = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "ALT", proxies, now,
-                false);
+        rfdAlt = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(pushEndpoint, 30l, "file1", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, URN.NO_URN_SET, false, "ALT", now);
      
         injector.getInstance(LifecycleManager.class).start();
     }

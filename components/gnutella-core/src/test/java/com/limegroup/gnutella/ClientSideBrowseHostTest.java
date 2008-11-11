@@ -379,8 +379,6 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         public void handleQueryResult(RemoteFileDesc rfd,
                                       QueryReply queryReply,
                                       Set locs) {
-            // make sure the browse is not attempted as a TLS connection
-            rfd.setTLSCapable(false);
             remoteFileDesc = rfd;
             latch.countDown();
         }

@@ -215,15 +215,34 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
     
     @Override
-    public void connect(Address addr, ConnectObserver observer) {
-        FirewalledAddress address = (FirewalledAddress)addr;
+    public void connect(Address address, ConnectObserver observer) {
+        if (address instanceof FirewalledAddress) {
+            connect((FirewalledAddress)address, observer);
+        } else if (address instanceof PushEndpoint) {
+            connect((PushEndpoint)address, observer);
+        }
+    }
+    
+    private void connect(PushEndpoint pushEndpoint, ConnectObserver observer) {
+        RemoteFileDesc fakeRFD = 
+            remoteFileDescFactory.createRemoteFileDesc(pushEndpoint, SPECIAL_INDEX, "fake",
+                0, pushEndpoint.getClientGUID(), 0, false, 0, false, null, URN.NO_URN_SET, false, "",
+                -1, true);
+        connect(fakeRFD, observer);
+    }
+    
+    private void connect(FirewalledAddress address, ConnectObserver observer) {
         RemoteFileDesc fakeRFD = 
             remoteFileDescFactory.createRemoteFileDesc(address, SPECIAL_INDEX, "fake",
                 0, address.getClientGuid().bytes(), 0, false, 0, false, null, URN.NO_URN_SET, false, "",
                 -1, true);
-        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer, address);
+        connect(fakeRFD, observer);
+    }
+    
+    private void connect(RemoteFileDesc rfd, ConnectObserver observer) {
+        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(rfd, observer);
         pushHandlers.add(handlerAdapter);
-        sendPush(fakeRFD, new MultiShutdownableConnectObserverAdapter(observer));
+        sendPush(rfd, new MultiShutdownableConnectObserverAdapter(observer));
         scheduleExpirerFor(handlerAdapter, 60 * 1000);
     }
     
@@ -916,18 +935,36 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     @Override
     public boolean canConnect(Address address) {
-        if (address instanceof FirewalledAddress) {
-            if (hasValidLocalAddress()) {
-                if (networkManager.acceptedIncomingConnection()) {
-                    return true;
-                }
-                FirewalledAddress firewalledAddress = (FirewalledAddress)address;
-                if (networkManager.canDoFWT() && firewalledAddress.getFwtVersion() > 0) {
-                    return true;
-                }
+        int fwtVersion = getFWTVersion(address);
+        if (fwtVersion == -1) {
+            return false;
+        }
+        if (hasValidLocalAddress()) {
+            if (networkManager.acceptedIncomingConnection()) {
+                return true;
+            }
+            if (networkManager.canDoFWT() && fwtVersion > 0) {
+                return true;
             }
         }
         return false;
+    }
+    
+    /**
+     * Returns the fwt version supported by address
+     * 
+     * 0 - if firewalled address or push endpoint but not fwt capability
+     * > 0 - if firewalled address or push endpoint and fwt capability
+     * -1 if not a valid address;
+     */
+    private static int getFWTVersion(Address address) {
+        if (address instanceof FirewalledAddress) {
+            return ((FirewalledAddress)address).getFwtVersion();
+        } else if (address instanceof PushEndpoint) {
+            return ((PushEndpoint)address).getFWTVersion();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -935,21 +972,19 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private class PushedSocketHandlerAdapter implements PushedSocketHandler {
 
-        private final GUID clientGuid;
+        private final RemoteFileDesc rfd;
         private final ConnectObserver observer;
-        private final FirewalledAddress address;
 
-        public PushedSocketHandlerAdapter(GUID clientGuid, ConnectObserver observer, FirewalledAddress address) {
-            this.clientGuid = clientGuid;
+        public PushedSocketHandlerAdapter(RemoteFileDesc rfd, ConnectObserver observer) {
+            this.rfd = rfd;
             this.observer = observer;
-            this.address = address;
         }
-        
+
         @Override
         public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
-            if (Arrays.equals(clientGuid.bytes(), clientGUID)) {
+            if (Arrays.equals(rfd.getClientGUID(), clientGUID)) {
                 pushHandlers.remove(this);
-                Connectable publicAddress = address.getPublicAddress();
+                IpPort publicAddress = getPublicAddress(rfd);
                 // this ensures that no malicious push proxy pretends to be the connecting client 
                 if (NetworkUtils.isValidIpPort(publicAddress) && !publicAddress.getInetAddress().equals(socket.getInetAddress())) {
                     if (LOG.isDebugEnabled()) {
