@@ -98,8 +98,6 @@ public class SearchBar extends JXPanel {
         this.add(this.searchField, "gap 5");
         this.add(this.searchButton, "gap 5");
 
-        this.searchField.setFont(this.searchField.getFont().deriveFont(12));
-        
         LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {            
             @Override
             public void settingChanged(SettingEvent evt) {
