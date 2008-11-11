@@ -66,6 +66,8 @@ public class MulticastTest extends LimeTestCase {
             
     protected Injector injector;
 
+    private PushEndpointFactory pushEndpointFactory;
+
     public MulticastTest(String name) {
         super(name);
     }
@@ -124,6 +126,7 @@ public class MulticastTest extends LimeTestCase {
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         TLSManager = injector.getInstance(NetworkManager.class);
+        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         
         lifeCycleManager.start();
 		connectionServices.connect();
@@ -265,7 +268,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory, pushEndpointFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -331,7 +334,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory, pushEndpointFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -396,7 +399,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory, pushEndpointFactory);
         
         // clear the data to make it easier to look at again...
         M_HANDLER.multicasted.clear();
