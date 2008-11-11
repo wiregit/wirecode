@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.util.Locale;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.util.StringUtils;
@@ -32,15 +31,15 @@ class FileRequestParser {
 
     /**
      * Parses a URN request.
-     * 
      * @param uri the <tt>String</tt> instance containing the get request
+     * 
      * @return information about the requested file, <code>null</code> if the
      *         request type is invalid or the URN does not map to a valid file
      * @throws IOException thrown if the request is malformed
      * @throws HttpException 
      */
     public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
-            HttpRequest request, HttpContext context) throws IOException, com.limegroup.gnutella.uploader.HttpException {
+            HttpContext context) throws IOException, com.limegroup.gnutella.uploader.HttpException {
         
         // Only parse URI requests.
         int index = uri.toLowerCase(Locale.US).indexOf("/uri-res/");

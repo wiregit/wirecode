@@ -31,6 +31,7 @@ import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.uploader.authentication.GnutellaUploadFileListProvider;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class FileRequestHandlerTest extends LimeTestCase {
@@ -86,13 +87,16 @@ public class FileRequestHandlerTest extends LimeTestCase {
         fileManager.setFileDesc(descs);
         FileListStub sharedList = (FileListStub)fileManager.getGnutellaSharedFileList();
         sharedList.setDescs(descs);
-        fileRequestHandler = injector.getInstance(FileRequestHandler.class);
+        GnutellaUploadFileListProvider fileListProvider = injector.getInstance(GnutellaUploadFileListProvider.class);
+        fileRequestHandler = injector.getInstance(FileRequestHandlerFactoryImpl.class).createFileRequestHandler(fileListProvider, false);
     }
 
     public void testHandleAccept() throws Exception {
         HttpRequest request = new BasicHttpRequest("GET", "filename");
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
         HTTPUploader uploader = new HTTPUploader("filename", null);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
 
         NetworkManagerStub networkManager = (NetworkManagerStub) injector
@@ -109,6 +113,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testFeatureHeaderInterceptor() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
@@ -138,6 +144,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testFeatureHeaderInterceptorChat() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
@@ -159,6 +167,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testIsFWTBrowseHostEnabled() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
