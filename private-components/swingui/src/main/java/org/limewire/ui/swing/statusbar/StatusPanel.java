@@ -20,7 +20,9 @@ public class StatusPanel extends JXPanel {
     @Resource private int height;
 
     @Inject
-    public StatusPanel(AudioPlayer player, FriendStatusPanel friendStatusPanel, SharedFileCountPanel sharedFiles) {
+    public StatusPanel(AudioPlayer player, FriendStatusPanel friendStatusPanel, 
+            ConnectionStatusPanel connectionStatus) {
+        
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
@@ -34,9 +36,10 @@ public class StatusPanel extends JXPanel {
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
         miniPlayerPanel.setVisible(false);
         
-        add(sharedFiles, "gapafter push");
-        
+        add(connectionStatus, "gapafter push");
+                
         add(miniPlayerPanel, "gapbefore push");        
         add(friendStatusPanel.getComponent(), "gapbefore push");
+        
     }
 }
