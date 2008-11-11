@@ -30,14 +30,16 @@ public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
         GuiUtils.assignResources(this);
         
         this.setAntialiasing(true);
+        this.setCacheable(true);
         
         gradient = new GradientPaint(0, 0, this.backgroundTopGradient, 0, 1, this.backgroundBottomGradient);
     }
 
     
     private void cacheTabArea(int width, int height) {
-        
         if (this.tabWidthCache == width && this.tabHeightCache == height)  return;        
+        
+        // System.out.println("Hard Miss: " + this);
         
         Area compound = new Area(new RoundRectangle2D.Float(10, 3, width-1-20, height-1, 20, 20));
         
@@ -53,6 +55,8 @@ public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
     
     @Override
     protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
+        // System.out.println("Soft Miss: " + this);
+        
         cacheTabArea(width, height);
 
         // Draw top bevel

@@ -52,6 +52,8 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         this.bevelBottom = bevelBottom;
         
         this.hasBubble = hasBubble;
+        
+        this.setCacheable(true);
     }
     
     @Override

@@ -21,10 +21,13 @@ public class TopPanelPainter extends AbstractPainter<JXPanel> {
     
     public TopPanelPainter() {
         GuiUtils.assignResources(this);
+        
+        this.setCacheable(true);
     }
     
     @Override
     protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
+        
         g.setPaint(new GradientPaint(0, 0, topGradient, 0, height-1, bottomGradient));
         g.fillRect(0, 0, width, height-1);
         

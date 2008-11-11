@@ -10,6 +10,7 @@ import javax.swing.ButtonModel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
@@ -19,7 +20,7 @@ import org.limewire.ui.swing.util.PaintUtils;
 /**
  * Background painter for a gradient button. 
  */
-public class LightButtonPainter implements Painter<JXButton> {
+public class LightButtonPainter extends AbstractPainter<JXButton> {
         
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -59,10 +60,12 @@ public class LightButtonPainter implements Painter<JXButton> {
         painter.setFillVertical(true);
         painter.setFillHorizontal(true);
         painter.setAntialiasing(true);
+        painter.setCacheable(true);
         
         compoundPainter.setPainters(painter, new BorderPainter(this.arcWidth, this.arcHeight,
                 this.borderColour,  bevelLeft,  bevelTop1,  bevelTop2, 
                 bevelRight,  bevelBottom));
+        compoundPainter.setCacheable(true);
         
         return compoundPainter;
     }
@@ -86,10 +89,11 @@ public class LightButtonPainter implements Painter<JXButton> {
                 gradientRight, this.bevelBottom);
     }
     
+    
     @Override
-    public void paint(Graphics2D g, JXButton object, int width, int height) {
+    public void doPaint(Graphics2D g, JXButton object, int width, int height) {
         ButtonModel model = object.getModel();
-
+        
         if(model.isPressed() || model.isSelected()) {
             this.clickedPainter.paint(g, object, width, height);
         } 
