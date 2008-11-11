@@ -20,6 +20,15 @@ public class ToolsMenu extends JMenu {
     public ToolsMenu(final Provider<OptionsDialog> optionDialog) {
         super(I18n.tr("Tools"));
         
+        add(new JMenu(I18n.tr("Library Manager")));
+        add(new JMenu(I18n.tr("Downloads")));
+        add(new JMenu(I18n.tr("Uploads")));
+        addSeparator();
+        add(new JMenu(I18n.tr("Advanced Search")));
+        add(new JMenu(I18n.tr("What's New Search")));
+        addSeparator();
+        add(new JMenu(I18n.tr("Advanced Tools")));
+        addSeparator();
         add(new AbstractAction(I18n.tr("Options")) {
             @Override
             public void actionPerformed(ActionEvent e) {
