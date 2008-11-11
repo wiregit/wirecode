@@ -30,7 +30,6 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.observer.WriteObserver;
 import org.limewire.nio.timeout.ReadTimeout;
 import org.limewire.nio.timeout.SoTimeout;
-import org.limewire.util.VersionUtils;
 
 /**
  * Implements all common functionality that a non-blocking socket must contain. 
@@ -491,34 +490,9 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
         if(LOG.isDebugEnabled())
             LOG.debug("Shutting down socket & streams for: " + this);
  
-        // Workaround for bugid: 4744057, fixed in Java 1.5.0_10.
-        // Bug: If the channel is closed in a thread other than the selector thread,
-        //      there is a potential for deadlock.
-        // Note: We ONLY offload the actual shutting of the socket/channel,
-        //       as we don't want to expose the observer shutdowns to the
-        //       invokeAndWait, which could introduce a lot of potential deadlock.
-        if(VersionUtils.isJavaVersionOrAbove("1.5.0_10") || NIODispatcher.instance().isDispatchThread()) {
-            shutdownSocketAndChannels();
-        } else {
-            Future future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
-                public void run() {
-                    shutdownSocketAndChannels();
-                }
-            });
-            
-            // Make sure that an interruption doesn't stop this from waiting to complete.
-            while(true) {
-                try {
-                    future.get(); // Wait for the future to complete.
-                    break;
-                } catch (InterruptedException e) {
-                    continue;
-                } catch (ExecutionException e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-        }
-        
+        // NOTE: We assume >= Java 1.5.0_10.
+        //       Otherwise we'd need to workaround bugid: 4744057.
+        shutdownSocketAndChannels();
         shutdownObservers();
                 
         NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
