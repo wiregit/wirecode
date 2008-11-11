@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class AllFriendsList implements RegisteringEventListener<RosterEvent> {
     
-    List<SharingTarget> allFriends = Collections.synchronizedList(new ArrayList<SharingTarget>());
+    private final List<SharingTarget> allFriends = Collections.synchronizedList(new ArrayList<SharingTarget>());
     
     @Inject
     public AllFriendsList(){
@@ -42,13 +42,10 @@ public class AllFriendsList implements RegisteringEventListener<RosterEvent> {
     public void handleSignoff(SignoffEvent event) {
         allFriends.clear();
     }
-    
-
 
     @Override
     @Inject
     public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
         rosterEventListenerSupport.addListener(this);
     }
-
 }

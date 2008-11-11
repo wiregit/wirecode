@@ -1,9 +1,10 @@
-package org.limewire.ui.swing.mainframe;
+package org.limewire.ui.swing.statusbar;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -20,15 +21,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
 import org.limewire.ui.swing.friends.AwayOption;
@@ -40,9 +36,7 @@ import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
 import org.limewire.ui.swing.friends.SignoffAction;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
-import org.limewire.ui.swing.painter.StatusBarPainter;
-import org.limewire.ui.swing.player.MiniPlayerPanel;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -51,8 +45,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenMessageListener {
-    
+// Note: this should not be public, but needs to be for EventBus to work properly.
+public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageListener {
+
     private final IconLibrary icons;
     private final JXButton friendsButton;
     private final JMenu statusMenu;
@@ -63,25 +58,11 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
 
     private boolean loggedIn;
     
-    @Resource private int height;
-
-    @Inject
-    public StatusPanel(IconLibrary icons, AudioPlayer player) {
-        GuiUtils.assignResources(this);
+    private Component mainComponent;
+    
+    @Inject FriendStatusPanel(IconLibrary icons) {
         this.icons = icons;
         
-        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
-   
-        setMinimumSize(new Dimension(0, height + 2));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
-        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
-        
-        setBackgroundPainter(new StatusBarPainter());
- 
-        MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
-        miniPlayerPanel.setVisible(false);
-        add(miniPlayerPanel, "gapbefore push");
-
         JMenuBar menuBar = new JMenuBar();
         Color whiteBackground = Color.WHITE;
         menuBar.setBackground(whiteBackground);
@@ -94,8 +75,6 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
         menuPanel.setMaximumSize(new Dimension(150, 20));
         menuPanel.add(menuBar, BorderLayout.WEST);
         menuPanel.setBackground(whiteBackground);
-        
-        add(menuPanel, "gapbefore push");
         
         statusMenu = new JMenu();
         statusMenu.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -125,7 +104,13 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
         
         this.flasher = new UnseenMessageFlasher(friendsButton);
         
+        mainComponent = menuPanel;
+        
         EventAnnotationProcessor.subscribe(this);
+    }
+    
+    Component getComponent() {
+        return mainComponent;
     }
     
     @EventSubscriber
@@ -241,4 +226,5 @@ public class StatusPanel extends JXPanel implements FriendsCountUpdater, UnseenM
             hasFlashed = false;
         }
     }
+    
 }

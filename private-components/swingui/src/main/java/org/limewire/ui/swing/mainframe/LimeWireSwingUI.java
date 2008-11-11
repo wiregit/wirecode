@@ -18,6 +18,7 @@ import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 

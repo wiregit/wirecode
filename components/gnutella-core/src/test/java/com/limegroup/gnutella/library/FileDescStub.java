@@ -52,6 +52,7 @@ public class FileDescStub implements FileDesc {
     private final long modified;
     private final long size;
     
+    
     public FileDescStub(String name, URN urn, int index) {
         this.file = createStubFile(new File(name));
         this.urns = new UrnSet(urn);
@@ -293,5 +294,17 @@ public class FileDescStub implements FileDesc {
     public boolean removeListener(EventListener<FileDescChangeEvent> listener) {
         // TODO Auto-generated method stub
         return false;
+    }
+    
+    @Override
+    public Object getClientProperty(String property) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public void putClientProperty(String property, Object value) {
+        // TODO Auto-generated method stub
+        
     }
 }

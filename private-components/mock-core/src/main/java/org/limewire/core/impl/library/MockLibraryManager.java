@@ -126,16 +126,15 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         return allFileList;
     }
     
+    @Override
+    public FileList<LocalFileItem> getCombinedShareList() {
+        return new FileListAdapter();
+    }
     
     @Override
     public LocalFileList getGnutellaShareList() {
         return gnutellaList;
-    }
-        
-    @Override
-    public FileList<LocalFileItem> getCombinedFriendShareLists() {
-        return new FileListAdapter();
-    }
+    }        
 
     @Override
     public FriendFileList getOrCreateFriendShareList(Friend name) {

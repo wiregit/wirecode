@@ -7,15 +7,12 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.concurrent.ListeningFuture;
 import org.limewire.concurrent.ListeningFutureDelegator;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.impl.URNImpl;
@@ -29,13 +26,14 @@ import com.limegroup.gnutella.library.FileList;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 
 abstract class LocalFileListImpl implements LocalFileList {
+    
+    private static final String FILE_ITEM_PROPERTY = "limewire.fileitem";
+    
     protected final EventList<LocalFileItem> baseList;
     protected final TransformedList<LocalFileItem, LocalFileItem> threadSafeList;
     protected final TransformedList<LocalFileItem, LocalFileItem> readOnlyList;
-    protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;
-    
+    protected volatile TransformedList<LocalFileItem, LocalFileItem> swingEventList;    
 
-    private final Map<File, LocalFileItem> lookup;
     private final CoreLocalFileItemFactory fileItemFactory;
     
     LocalFileListImpl(EventList<LocalFileItem> eventList, CoreLocalFileItemFactory fileItemFactory) {
@@ -43,7 +41,6 @@ abstract class LocalFileListImpl implements LocalFileList {
         this.threadSafeList = GlazedListsFactory.threadSafeList(eventList);
         this.readOnlyList = GlazedListsFactory.readOnlyList(threadSafeList);
         this.fileItemFactory = fileItemFactory;
-        this.lookup = new ConcurrentHashMap<File, LocalFileItem>();
 
     }
     
@@ -111,9 +108,15 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     protected void addFileDesc(FileDesc fd) {
-        LocalFileItem newItem = fileItemFactory.createCoreLocalFileItem(fd);
-        lookup.put(fd.getFile(), newItem);
-        threadSafeList.add(newItem);
+        LocalFileItem item;
+        Object object = fd.getClientProperty(FILE_ITEM_PROPERTY);
+        if(object != null) {
+            item = (LocalFileItem)object;
+        } else {
+            item = fileItemFactory.createCoreLocalFileItem(fd);
+            fd.putClientProperty(FILE_ITEM_PROPERTY, item);
+        }
+        threadSafeList.add(item);
     }
     
     protected void changeFileDesc(FileDesc old, FileDesc now) {
@@ -122,12 +125,11 @@ abstract class LocalFileListImpl implements LocalFileList {
     }
     
     protected void removeFileDesc(FileDesc fd) {
-        FileItem old = lookup.remove(fd.getFile());
-        threadSafeList.remove(old);
+        LocalFileItem item = (LocalFileItem)fd.getClientProperty(FILE_ITEM_PROPERTY);
+        threadSafeList.remove(item);
     }
     
     protected void clearFileDescs() {
-        lookup.clear();
         threadSafeList.clear();
     }
    
@@ -182,7 +184,7 @@ abstract class LocalFileListImpl implements LocalFileList {
         
         @Override
         protected LocalFileItem convertSource(FileDesc source) {
-            return lookup.get(source.getFile());
+            return (LocalFileItem)source.getClientProperty(FILE_ITEM_PROPERTY);
         }
         
         @Override

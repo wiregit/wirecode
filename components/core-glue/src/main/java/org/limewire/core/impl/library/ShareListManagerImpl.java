@@ -16,7 +16,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
@@ -34,9 +33,9 @@ class ShareListManagerImpl implements ShareListManager {
     
     private final FileManager fileManager;
     
-    private final GnutellaFileList gnutellaFileList;
+    private final CombinedShareList combinedShareList;
     
-    private final CombinedFriendShareList combinedFriendShareLists;
+    private final GnutellaFileList gnutellaFileList;    
     
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
@@ -50,7 +49,7 @@ class ShareListManagerImpl implements ShareListManager {
         this.fileManager = fileManager;
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventListener = friendShareListEventListener;
-        this.combinedFriendShareLists = new CombinedFriendShareList();
+        this.combinedShareList = new CombinedShareList();
         this.gnutellaFileList = new GnutellaFileList(fileManager.getGnutellaFileList());
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
@@ -61,8 +60,8 @@ class ShareListManagerImpl implements ShareListManager {
     }
     
     @Override
-    public FileList<LocalFileItem> getCombinedFriendShareLists() {
-        return combinedFriendShareLists;
+    public FileList<LocalFileItem> getCombinedShareList() {
+        return combinedShareList;
     }
     
     @Override
@@ -91,9 +90,6 @@ class ShareListManagerImpl implements ShareListManager {
     @Override    
     public void removeFriendShareList(Friend friend) {
         fileManager.removeFriendFileList(friend.getId());
-        
-        // TODO: Should we clean up friendLocalFileLists?
-        //       (is there a reason the old code didn't do this?)        
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
             friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
@@ -102,13 +98,13 @@ class ShareListManagerImpl implements ShareListManager {
     }
     
     private class GnutellaFileList extends LocalFileListImpl {
-
         private final com.limegroup.gnutella.library.GnutellaFileList shareList;
         
         public GnutellaFileList(com.limegroup.gnutella.library.GnutellaFileList shareList) {
-            super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);            
+            super(combinedShareList.createMemberList(), coreLocalFileItemFactory);            
             this.shareList = shareList;
             this.shareList.addFileListListener(newEventListener());
+            combinedShareList.addMemberList(baseList);
         }
         
         @Override
@@ -116,17 +112,15 @@ class ShareListManagerImpl implements ShareListManager {
             return shareList;
         }
     }
-
     
     private class FriendFileListImpl extends LocalFileListImpl implements FriendFileList {
-
         private final FileManager fileManager;
         private final String name;
         private volatile boolean committed = false;
         private volatile EventListener<FileListChangedEvent> eventListener;
         
         FriendFileListImpl(FileManager fileManager, String name) {
-            super(combinedFriendShareLists.createMemberList(), coreLocalFileItemFactory);            
+            super(combinedShareList.createMemberList(), coreLocalFileItemFactory);            
             this.fileManager = fileManager;
             this.name = name;
         }
@@ -140,7 +134,7 @@ class ShareListManagerImpl implements ShareListManager {
         void dispose() {
             super.dispose();
             if(committed) {
-                combinedFriendShareLists.removeMemberList(baseList);
+                combinedShareList.removeMemberList(baseList);
                 getCoreFileList().removeFileListListener(eventListener);
             }
         }
@@ -150,19 +144,18 @@ class ShareListManagerImpl implements ShareListManager {
             committed = true;
             eventListener = newEventListener();
             fileManager.getOrCreateFriendFileList(name).addFileListListener(eventListener);
-            combinedFriendShareLists.addMemberList(baseList);
-            
-            com.limegroup.gnutella.library.FileList fileList =
-                fileManager.getFriendFileList(name);  
+            combinedShareList.addMemberList(baseList);
 
-              fileList.getReadLock().lock();
-              try {
-                  for(FileDesc fileDesc : fileList) {
-                      addFileDesc(fileDesc);
-                  }
-              } finally {
-                  fileList.getReadLock().unlock();
-              }
+            com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(name);
+
+            fileList.getReadLock().lock();
+            try {
+                for (FileDesc fileDesc : fileList) {
+                    addFileDesc(fileDesc);
+                }
+            } finally {
+                fileList.getReadLock().unlock();
+            }
         }
         
         public boolean isAddNewAudioAlways() {
@@ -190,14 +183,15 @@ class ShareListManagerImpl implements ShareListManager {
         }
     } 
     
-    private class CombinedFriendShareList implements FileList<LocalFileItem> {
+    private class CombinedShareList implements FileList<LocalFileItem> {
         private final CompositeList<LocalFileItem> compositeList;
         private final EventList<LocalFileItem> threadSafeUniqueList;
         private volatile TransformedList<LocalFileItem, LocalFileItem> swingList;
         
-        public CombinedFriendShareList() {
+        public CombinedShareList() {
             compositeList = new CompositeList<LocalFileItem>();
-            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(compositeList),
+            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(
+                    GlazedListsFactory.readOnlyList(compositeList)),
                     new Comparator<LocalFileItem>() {
                 @Override
                 public int compare(LocalFileItem o1, LocalFileItem o2) {
@@ -226,8 +220,8 @@ class ShareListManagerImpl implements ShareListManager {
             } finally {
                 compositeList.getReadWriteLock().writeLock().unlock();    
             }
-        }
-
+        }  
+        
         @Override
         public EventList<LocalFileItem> getModel() {
             return threadSafeUniqueList;
@@ -246,5 +240,6 @@ class ShareListManagerImpl implements ShareListManager {
         public int size() {
             return threadSafeUniqueList.size();
         }        
+
     }
 }

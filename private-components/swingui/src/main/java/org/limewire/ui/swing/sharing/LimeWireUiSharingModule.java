@@ -5,7 +5,7 @@ import org.limewire.ui.swing.sharing.fancy.LimeWireUiSharingFancyModule;
 
 import com.google.inject.AbstractModule;
 
-public class LimeWireUISharingModule extends AbstractModule {
+public class LimeWireUiSharingModule extends AbstractModule {
     
     @Override
     protected void configure() {

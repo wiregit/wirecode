@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -113,7 +114,9 @@ public class FileDescImpl implements FileDesc {
     
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> multicaster;
     private final RareFileDefinition rareFileDefinition;
-	
+    
+    private final ConcurrentHashMap<String, Object> clientProperties =
+        new ConcurrentHashMap<String, Object>();
 	    
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -514,6 +517,16 @@ public class FileDescImpl implements FileDesc {
     @Override
     public boolean removeListener(EventListener<FileDescChangeEvent> listener) {
         return multicaster.removeListener(this, listener);
+    }
+    
+    @Override
+    public Object getClientProperty(String property) {
+        return clientProperties.get(property);
+    }
+    
+    @Override
+    public void putClientProperty(String property, Object value) {
+        clientProperties.put(property, value);
     }
 
 }

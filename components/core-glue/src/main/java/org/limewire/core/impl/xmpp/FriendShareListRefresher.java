@@ -46,7 +46,7 @@ public class FriendShareListRefresher {
     @Singleton
     static class FriendShareListEventImpl implements RegisteringEventListener<FriendShareListEvent> {
 
-        private static final AtomicBoolean FILE_MANAGER_LOADED = new AtomicBoolean(false);
+        private final AtomicBoolean FILE_MANAGER_LOADED = new AtomicBoolean(false);
 
         @Inject
         public void register(ListenerSupport<FriendShareListEvent> friendShareListEventListenerSupport) {
@@ -64,6 +64,9 @@ public class FriendShareListRefresher {
             });
         }
 
+        // TODO: Sharelists are going to change a lot, in rapid succession --
+        //       We need to queue up the changes to avoid sending a zillion
+        //       library refresh packets.
         public void handleEvent(final FriendShareListEvent event) {
             if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
                 event.getFileList().getModel().addListEventListener(new ListEventListener<LocalFileItem>() {

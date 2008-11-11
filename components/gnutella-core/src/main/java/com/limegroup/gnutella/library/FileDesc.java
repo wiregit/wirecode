@@ -187,5 +187,11 @@ public interface FileDesc extends StringLookup, ListenerSupport<FileDescChangeEv
     public void setStoreFile(boolean b);
 
     public boolean isStoreFile();
+    
+    /** Sets a new property for this FileDesc. */
+    public void putClientProperty(String property, Object value);
+    
+    /** Retrieves a set property from this FileDesc. */
+    public Object getClientProperty(String property);
 
 }
