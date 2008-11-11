@@ -229,7 +229,6 @@ public final class NetworkUtils {
                 }
             }
         } catch(SocketException err) {
-            err.printStackTrace();
             return false;
         }
         
