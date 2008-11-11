@@ -452,6 +452,9 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
                 return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
             }
         case REMOTE_QUEUED:
+            if(item.getQueuePosition() == -1){
+                return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(item.getRemainingQueueTime()));
+            }
             return I18n.trn("Queued - {0} person ahead of you for this file",
                     "Queued - {0} people ahead of you for this file",
                     item.getQueuePosition(), item.getQueuePosition());

@@ -214,9 +214,9 @@ class CoreDownloadItem implements DownloadItem {
             return DownloadState.DONE;
 
         case REMOTE_QUEUED:
+        case BUSY://BUSY should look like locally queued but acts like remotely
             return DownloadState.REMOTE_QUEUED;
             
-
         case QUEUED:
             return DownloadState.LOCAL_QUEUED;
 
@@ -229,7 +229,6 @@ class CoreDownloadItem implements DownloadItem {
         case WAITING_FOR_GNET_RESULTS://should WAITING_FOR_GNET_RESULTS be in CONNECTING?
         case ITERATIVE_GUESSING:
         case QUERYING_DHT:
-        case BUSY:
             return DownloadState.STALLED;
 
         case ABORTED:
@@ -284,6 +283,9 @@ class CoreDownloadItem implements DownloadItem {
     public long getRemainingQueueTime() {
         if(queueTimeCalculator == null){
             return DownloadItem.UNKNOWN_TIME;
+        }
+        if(downloader.getState() == DownloadStatus.BUSY){
+            return downloader.getRemainingStateTime();
         }
         return queueTimeCalculator.getRemainingQueueTime(this);
     }
