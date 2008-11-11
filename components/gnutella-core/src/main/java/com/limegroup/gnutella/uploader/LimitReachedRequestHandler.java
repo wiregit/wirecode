@@ -11,6 +11,7 @@ import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.http.auth.ServerAuthState;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -28,15 +29,17 @@ public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
     public static final String RETRY_AFTER_VALIDATING = 20 + "";
 
     /**
-     * The time to wait for a normal retry after.
+     * The time to wait for a normal retry after in minutes.
      */
     public static final int RETRY_AFTER_TIME = 60 * 15;
 
     /**
      * Number of seconds the remote host should wait before retrying in case we
-     * don't have any alt-locs left to send. 30 seconds.
+     * don't have any alt-locs left to send. 20 minutes.
      */
-    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (30);
+    private static final String NO_ALT_LOCS_RETRY_AFTER = "" + (20 * 60);
+    
+    private static final String FRIEND_NO_ALT_LOCS_RETRY_AFTER = String.valueOf(30);
 
     /**
      * Number of seconds the remote host should wait before retrying in case we
@@ -95,17 +98,38 @@ public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
             } else if (sha1 != null) {
                 // write the Retry-After header, using different values
                 // depending on if we had any alts to send or not.
-                String retry = !altLocManager.hasAltlocs(sha1) ? NO_ALT_LOCS_RETRY_AFTER
+                String retry = !altLocManager.hasAltlocs(sha1) || isFriendRequest(context) ? getRetryAfterNoAltLocs(context)
                         : NORMAL_RETRY_AFTER;
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(retry));
                 httpHeaderUtils.addRangeHeader(response, uploader, fd);
             } else {
-                response.addHeader(HTTPHeaderName.RETRY_AFTER.create(NO_ALT_LOCS_RETRY_AFTER));
+                response.addHeader(HTTPHeaderName.RETRY_AFTER.create(getRetryAfterNoAltLocs(context)));
             }
         }
 
         uploader.setState(UploadStatus.LIMIT_REACHED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
         response.setEntity(new NStringEntity(errorMsg));
+    }
+    
+    private boolean isFriendRequest(HttpContext context) {
+        // it's enough to check if auth state is there, the guarding handler
+        // already verified the credentials
+        return context.getAttribute(ServerAuthState.AUTH_STATE) != null;
+    }
+    
+    /**
+     * Returns smaller Retry-After value for authenticated friend downloads 
+     */
+    // TODO breaks knowledge about friend downloads, this layer should not
+    // be aware of friends stuff
+    private String getRetryAfterNoAltLocs(HttpContext context) {
+        // it's enough to check if auth state is there, the guarding handler
+        // already verified the credentials
+       if (isFriendRequest(context)) {
+            return FRIEND_NO_ALT_LOCS_RETRY_AFTER;
+        } else {
+            return NO_ALT_LOCS_RETRY_AFTER;
+        }
     }
 }

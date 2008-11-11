@@ -6,8 +6,6 @@ import java.util.Set;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import com.limegroup.gnutella.uploader.LimitReachedRequestHandler;
-
 /**
  * Keeps track of requests sent by a client.
  */
@@ -17,12 +15,6 @@ public class RequestCache {
     
     // we don't allow more than 1 request per 5 seconds
     private static final double MAX_REQUESTS = 5 * 1000;
-
-    // time we expect the downloader to wait before sending
-    // another request after our initial LIMIT_REACHED reply
-    // must be greater than or equal to what we send in our RetryAfter
-    // header, otherwise we'll incorrectly mark guys as greedy.
-    static long WAIT_TIME = LimitReachedRequestHandler.RETRY_AFTER_TIME * 1000;
 
     // time to wait before checking for hammering: 30 seconds.
     // if the averge number of requests per time frame exceeds MAX_REQUESTS
