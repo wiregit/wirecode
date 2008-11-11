@@ -16,6 +16,7 @@ import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -267,9 +268,15 @@ public class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#isAltLocCapable()
      */
     public final boolean isAltLocCapable() {
-        return getSHA1Urn() != null && !_replyToMulticast;
-        // TODO fberger check if address can be connected to
-        // or somehow reinstitute validness of push proxies
+        if (address instanceof PushEndpoint) {
+            if (((PushEndpoint)address).getProxies().isEmpty()) {
+                return false;
+            }
+        }
+        if (getSHA1Urn() != null && !_replyToMulticast) {
+            return true;
+        }
+        return false;
     }
 
     /**

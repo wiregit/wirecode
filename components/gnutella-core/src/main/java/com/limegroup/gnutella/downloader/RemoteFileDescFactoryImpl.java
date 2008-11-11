@@ -36,7 +36,6 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
-import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -96,12 +95,11 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
 
     public RemoteFileDesc createRemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe) {
-        return createRemoteFileDesc(pe.getAddress(), // host - ignored
-                pe.getPort(), // port -ignored
+        return createRemoteFileDesc(pe, 
                 COPY_INDEX, // index (unknown)
                 rfd.getFileName(), // filename
                 rfd.getSize(), // filesize
-                DataUtils.EMPTY_GUID, // guid
+                pe.getClientGUID(),
                 rfd.getSpeed(), // speed
                 false, // chat capable
                 rfd.getQuality(), // quality
@@ -109,13 +107,8 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 rfd.getXMLDocument(), // xml doc
                 rfd.getUrns(), // urns
                 false, // reply to MCast
-                true, // is firewalled
                 AlternateLocation.ALT_VENDOR, // vendor
-                null, // push proxies
-                rfd.getCreationTime(), // creation time
-                0, // firewalled transfer
-                pe, // use existing PE
-                false); // not TLS capable (they connect to us anyway)
+                rfd.getCreationTime()); // creation time
     }
 
     public RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
