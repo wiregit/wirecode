@@ -1672,7 +1672,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void stop() {
 	    synchronized(this) {
 	        if (LOG.isDebugEnabled())
-	            LOG.debug("WORKER:"+this+" signaled to stop at "+(_initialReadingPoint+_amountRead));
+	            LOG.debug("WORKER:"+this+" signaled to stop at "+(_initialReadingPoint+_amountRead), new Exception());
 	        _isActive = false;
 	    }
         
