@@ -241,4 +241,8 @@ public class IPFilterTest extends LimeTestCase {
                 new byte[16], 0l, blackListedAddress, 6346);
         assertFalse(filter.allow(push2));
     }
+
+    public void testWhitelistGivesMaximumLogMinDistance() {
+        assertEquals(32, filter.logMinDistanceTo(new IP(whiteListedAddress)));
+    }
 }

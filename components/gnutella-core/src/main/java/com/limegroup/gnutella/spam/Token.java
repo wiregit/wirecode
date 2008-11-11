@@ -34,8 +34,8 @@ public abstract class Token implements Serializable {
     
     /**
      * Updates this token's spam rating by using an exponential moving average
-     * to combine the new rating is combined with the current rating. The
-     * subclass must supply the weight of the exponential moving average.
+     * to combine the new rating with the current rating. Subclasses must
+     * supply the weight of the exponential moving average (between 0 and 1).
      *  
      * @param update the new rating
      */

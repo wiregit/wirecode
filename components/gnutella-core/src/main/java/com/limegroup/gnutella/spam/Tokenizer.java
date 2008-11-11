@@ -48,10 +48,16 @@ public class Tokenizer {
 	 */
 	private int MAX_KEYWORD_LENGTH = 8;
 
+    private final Provider<IPFilter> ipFilter;
+    
 	@Inject
 	Tokenizer(Provider<IPFilter> ipFilter) {
-        AddressToken.setIpFilter(ipFilter);
+        this.ipFilter = ipFilter;
 	}
+    
+    void setIPFilter(AddressToken t) {
+        t.setIPFilter(ipFilter);
+    }
 	
 	/**
 	 * Extracts a set of tokens from a RemoteFileDesc
@@ -102,7 +108,7 @@ public class Tokenizer {
 			set.add(new UrnToken(urn.toString()));
 		set.add(new SizeToken(desc.getSize()));
         set.add(new ApproximateSizeToken(desc.getSize()));
-		set.add(new AddressToken(desc.getAddress()));
+		set.add(new AddressToken(desc.getAddress(), ipFilter));
 	}
 
 	/**

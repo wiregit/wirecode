@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.filters;
 
+import java.io.IOException;
 import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
@@ -20,7 +21,7 @@ import org.limewire.core.settings.FilterSettings;
 public class URNFilter implements SpamFilter {
     
     private static final Log LOG = LogFactory.getLog(URNFilter.class);
-    private static final HashSet<URN> blacklist = new HashSet<URN>();
+    private final HashSet<URN> blacklist = new HashSet<URN>();
 
     // Called when the spam service starts and on SIMPP updates
     public void refreshURNs() {
@@ -32,9 +33,9 @@ public class URNFilter implements SpamFilter {
                 blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
             for(String s : FilterSettings.FILTERED_URNS_REMOTE.getValue())
                 blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
-        } catch (Exception x) {
+        } catch (IOException iox) {
             if(LOG.isDebugEnabled())
-                LOG.debug("Error creating URN blacklist: " + x);
+                LOG.debug("Error creating URN blacklist: " + iox);
         }
     }
     
@@ -57,6 +58,7 @@ public class URNFilter implements SpamFilter {
                 return true;
             }
         } else if(m instanceof QueryRequest) {
+            // Note: we might not want to block query requests if this is a routing filter
             QueryRequest q = (QueryRequest)m;
             for(URN u : q.getQueryUrns()) {
                 if(blacklist.contains(u)) {

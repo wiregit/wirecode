@@ -40,13 +40,14 @@ public class SpamManager {
 	}
 
     /**
-     * Calculates and sets the spam rating for a RemoteFileDesc
+     * Calculates, sets and returns the spam rating for a RemoteFileDesc
      * 
      * @param rfd the RemoteFileDesc to rate
+     * @return the spam rating of the RemoteFileDesc, between 0 (not spam) and 1 (spam)
      */
-    public void calculateSpamRating(RemoteFileDesc rfd) {
+    public float calculateSpamRating(RemoteFileDesc rfd) {
         if(!SearchSettings.ENABLE_SPAM_FILTER.getValue())
-            return;
+            return 0;
         
         float rating = 0;
 		// TODO: these results should probably be ignored (possibly using the
@@ -62,6 +63,7 @@ public class SpamManager {
 		// Apply the 'Bayesian' filter
 		rating = 1 - (1 - rating) * (1 - ratingTable.getRating(rfd));
 		rfd.setSpamRating(rating);
+        return rating;
 	}
 
 	/**

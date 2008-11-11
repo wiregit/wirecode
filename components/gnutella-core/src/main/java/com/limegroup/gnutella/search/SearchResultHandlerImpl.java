@@ -216,8 +216,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         try {
             qr.validate();
         } catch(BadPacketException bpe) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("bad packet reading qr", bpe);
+            LOG.debug("bad packet reading qr", bpe);
             return;
         }
 
@@ -254,8 +253,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         try {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("error getting results", e);
+            LOG.debug("error getting results", e);
             return;
         }
 
@@ -267,7 +265,11 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
-            
+        
+        float spamThreshold = 1;
+        if(SearchSettings.ENABLE_SPAM_FILTER.getValue())
+            spamThreshold = SearchSettings.FILTER_SPAM_RESULTS.getValue();
+        
         for(Response response : results) {
             if(!qr.isBrowseHostReply() &&
                secureStatus != SecureMessage.SECURE) {
@@ -284,7 +286,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             // If there was an action, only allow it if it's a secure message.
             LimeXMLDocument doc = response.getDocument();
             if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-               doc != null && !doc.getAction().equals("") &&
+               doc != null && !"".equals(doc.getAction()) &&
                secureStatus != SecureMessage.SECURE) {
                 continue;
             }
@@ -298,10 +300,10 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             activityCallback.get().handleQueryResult(rfd, qr, alts);
             
             // Set the spam rating for the RemoteFileDesc
-            spamManager.get().calculateSpamRating(rfd);
+            float spamRating = spamManager.get().calculateSpamRating(rfd);
             
             // Count non-spam results for dynamic querying
-            if (skipSpam || !rfd.isSpam())
+            if(skipSpam || spamRating < spamThreshold)
                 numGoodSentToFrontEnd++;
         }
         

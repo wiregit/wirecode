@@ -60,7 +60,7 @@ public class RatingTable implements Service {
      * retrieve an equivalent token that has rating data.
      * 
      * The size of the map is limited. Entries are discarded in
-     * least-recently-used order when the map if full, on the assumption that
+     * least-recently-used order when the map is full, on the assumption that
      * the least-recently-used token is the least important to keep.
      * TODO: check that the order is preserved during serialization.
 	 */
@@ -238,13 +238,15 @@ public class RatingTable implements Service {
             // Most-recently-used token will be at the head, but we want to
             // add it to the map last so it's still most-recently-used
             Collections.reverse(list);
-            for(Token t : list)
+            for(Token t : list) {
+                if(t instanceof AddressToken)
+                    tokenizer.setIPFilter((AddressToken) t);
                 tokenMap.put(t, t);
+            }
             if(LOG.isDebugEnabled())
                 LOG.debug("Loaded " + tokenMap.size() + " entries");
 		} catch(Throwable t) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Error loading spam ratings: " + t);
+		    LOG.debug("Error loading spam ratings: ", t);
 		} finally {
             IOUtils.close(is);
 		}
@@ -253,12 +255,15 @@ public class RatingTable implements Service {
     /**
      * Saves ratings to disk (called whenever the user marks a search result)
      */
-    public synchronized void save() {
-        // Don't save ratings that have default scores
-        ArrayList<Token> list = new ArrayList<Token>(tokenMap.size());
-        for(Token t : tokenMap.keySet())
-            if(t.getRating() > 0f)
-                list.add(t);
+    public void save() {
+        ArrayList<Token> list;
+        synchronized(this) {
+            // Don't save ratings that have default scores
+            list = new ArrayList<Token>(tokenMap.size());
+            for(Token t : tokenMap.keySet())
+                if(t.getRating() > 0f)
+                    list.add(t);
+        }
         ObjectOutputStream oos = null;
         try {
             oos = new ObjectOutputStream(
@@ -267,10 +272,9 @@ public class RatingTable implements Service {
             oos.writeObject(list);
             oos.flush();
             if(LOG.isDebugEnabled())
-                LOG.debug("Saved " + tokenMap.size() + " entries");
+                LOG.debug("Saved " + list.size() + " entries");
         } catch (IOException iox) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Error saving spam ratings: ", iox);
+            LOG.debug("Error saving spam ratings: ", iox);
         } finally {
             IOUtils.close(oos);
         }

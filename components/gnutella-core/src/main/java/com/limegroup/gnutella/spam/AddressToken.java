@@ -20,17 +20,18 @@ public class AddressToken extends Token {
      */
     private static final float ADDRESS_WEIGHT = 0.2f;
     
-    private static transient Provider<IPFilter> ipFilter;
+    private transient Provider<IPFilter> ipFilter;
 
     private final String address;
     private boolean ratingInitialized;
     
-    static void setIpFilter(Provider<IPFilter> filter) {
-        ipFilter = filter;
+    void setIPFilter(Provider<IPFilter> ipFilter) {
+        this.ipFilter = ipFilter;
     }
     
-	public AddressToken(String address) {
+	public AddressToken(String address, Provider<IPFilter> ipFilter) {
 		this.address = address;
+        this.ipFilter = ipFilter;
         ratingInitialized = false;
 	}
 	
