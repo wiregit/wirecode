@@ -12,16 +12,19 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<ResponseQueryFilter> queryFilter;
     private final Provider<ResponseTypeFilter> typeFilter;
     private final Provider<SecureResultFilter> secureFilter;
+    private final Provider<ProgramsFilter> programsFilter;
     
     @Inject
     public ResponseFilterFactoryImpl(Provider<MandragoreWormFilter> wormFilter,
             Provider<ResponseQueryFilter> queryFilter,
             Provider<ResponseTypeFilter> typeFilter,
-            Provider<SecureResultFilter> secureFilter) {
+            Provider<SecureResultFilter> secureFilter,
+            Provider<ProgramsFilter> programsFilter) {
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
         this.typeFilter = typeFilter;
         this.secureFilter = secureFilter;
+        this.programsFilter = programsFilter;
     }
     
     @Override
@@ -32,6 +35,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(queryFilter.get());
         filters.add(typeFilter.get());
         filters.add(secureFilter.get());
+        filters.add(programsFilter.get());
         
         return new CompoundResponseFilter(filters);
     }

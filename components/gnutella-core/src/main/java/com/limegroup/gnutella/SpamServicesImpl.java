@@ -13,6 +13,8 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
+import com.limegroup.gnutella.search.SearchResultHandler;
 
 @Singleton
 public class SpamServicesImpl implements SpamServices {
@@ -21,18 +23,26 @@ public class SpamServicesImpl implements SpamServices {
     private final Provider<IPFilter> ipFilter;
     private final SpamFilterFactory spamFilterFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
+    private final SearchResultHandler searchResultHandler;
+    private final ResponseFilterFactory responseFilterFactory;
 
     @Inject
     public SpamServicesImpl(Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache) {
+            UDPReplyHandlerCache udpReplyHandlerCache,
+            SearchResultHandler searchResultHandler,
+            ResponseFilterFactory responseFilterFactory) {
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
         this.spamFilterFactory = spamFilterFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
+        this.searchResultHandler = searchResultHandler;
+        this.responseFilterFactory = responseFilterFactory;
     }
     
     public void adjustSpamFilters() {
+        searchResultHandler.setResponseFilter(responseFilterFactory.createResponseFilter());
+        
         udpReplyHandlerCache.setPersonalFilter(spamFilterFactory.createPersonalFilter());
         
         //Just replace the spam filters.  No need to do anything
