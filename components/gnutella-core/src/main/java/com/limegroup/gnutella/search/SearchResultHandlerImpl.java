@@ -13,7 +13,6 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
@@ -32,16 +31,16 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.filters.response.ResponseFilter;
+import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * Handles incoming search results from the network.  This class parses the 
@@ -85,43 +84,45 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, Map<URN,ClassCNetworks[]>>(10));
     
     private final NetworkManager networkManager;
-    private final SearchServices searchServices;
     private final Provider<ActivityCallback> activityCallback;
     private final Provider<ConnectionManager> connectionManager;
     private final ConnectionServices connectionServices;
     private final Provider<SpamManager> spamManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
+    
+    private volatile ResponseFilter responseFilter;
 
     @Inject
     public SearchResultHandlerImpl(NetworkManager networkManager,
-            SearchServices searchServices,
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,
             ConnectionServices connectionServices,
             Provider<SpamManager> spamManager,
             RemoteFileDescFactory remoteFileDescFactory,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            ResponseFilterFactory responseFilterFactory) {
         this.networkManager = networkManager;
-        this.searchServices = searchServices;
         this.activityCallback = activityCallback;
         this.connectionManager = connectionManager;
         this.connectionServices = connectionServices;
         this.spamManager = spamManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.responseFilter = responseFilterFactory.createResponseFilter();
     }
 
-    /*---------------------------------------------------    
-      PUBLIC INTERFACE METHODS
-     ----------------------------------------------------*/
+    @Override
+    public void setResponseFilter(ResponseFilter responseFilter) {
+        this.responseFilter = responseFilter;
+    }
 
     /**
-     * Adds the Query to the list of queries kept track of.  You should do this
-     * EVERY TIME you start a query so we can leaf guide it when possible.
-     * Also adds the query to the Spam Manager to adjust percentages.
-     *
-     * @param qr The query that has been started.  We really just acces the guid.
+     * Adds the Query to the list of queries kept track of. You should do this
+     * EVERY TIME you start a query so we can leaf guide it when possible. Also
+     * adds the query to the Spam Manager to adjust percentages.
+     * 
+     * @param qr The query that has been started. We really just acces the guid.
      */ 
     public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
@@ -271,25 +272,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         double numBadSentToFrontEnd = 0;
             
         for(Response response : results) {
-            if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                if (!searchServices.matchesType(qr.getGUID(), response)) {
-                    continue;
-                }
-
-                if (!searchServices.matchesQuery(qr.getGUID(), response)) {
-                    continue;
-                }
-            }
-
-            // Throw away results from Mandragore Worm
-            if (searchServices.isMandragoreWorm(qr.getGUID(), response)) {
-                continue;
-            }
-            
-            // If there was an action, only allow it if it's a secure message.
-            LimeXMLDocument doc = response.getDocument();
-            if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-               doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
+            if(!responseFilter.allow(qr, response)) {
                 continue;
             }
             

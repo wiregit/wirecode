@@ -55,16 +55,20 @@ public class SearchBar extends JXPanel {
         Action progAction = null;
         
         List<Action> typeActions = new LinkedList<Action>();
-        for ( SearchCategory cat : SearchCategory.values() ) {
-            if (cat == SearchCategory.OTHER)  continue;
-            
+        for (SearchCategory cat : SearchCategory.values()) {
+            if (cat == SearchCategory.OTHER) {
+                continue;
+            }
+
             Action action = new CatagoryAction(cat);
             if (cat == SearchCategory.PROGRAM) {
                 progAction = action;
                 continue;
             }
-            
-            if (cat == this.categoryToSearch) actionToSelect = action;
+
+            if (cat == this.categoryToSearch) {
+                actionToSelect = action;
+            }
 
             typeActions.add(action);
         }
@@ -96,13 +100,11 @@ public class SearchBar extends JXPanel {
 
         this.searchField.setFont(this.searchField.getFont().deriveFont(12));
         
-        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {
-            
+        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {            
             @Override
             public void settingChanged(SettingEvent evt) {
                 assertProgramCategory();
-            }
-            
+            }            
         });
     }
     
@@ -137,7 +139,7 @@ public class SearchBar extends JXPanel {
     private static String getName(SearchCategory category) {
         switch(category) {
         case ALL:      return I18n.tr("All");
-        case AUDIO:    return I18n.tr("Music"); 
+        case AUDIO:    return I18n.tr("Audio"); 
         case DOCUMENT: return I18n.tr("Documents"); 
         case IMAGE:    return I18n.tr("Images"); 
         case PROGRAM:  return I18n.tr("Programs"); 

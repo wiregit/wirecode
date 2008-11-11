@@ -124,8 +124,9 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 	
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
         // do not allow a faked multicast reply.
-        if(reply.isFakeMulticast())
+        if(reply.isFakeMulticast()) {
             return;
+        }
         
 		// Drop if it's a reply to mcast and conditions aren't met ...
         if( reply.isReplyToMulticastQuery() ) {
@@ -140,11 +141,14 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         // will create the cachedRFD with the correct XML.
         boolean validResponses = addXMLToResponses(reply, limeXMLDocumentHelper);
         // responses invalid?  exit.
-        if(!validResponses)
+        if(!validResponses) {
             return;
+        }
 
         // check for unwanted results after xml has been constructed
-        if(handler != null && handler.isPersonalSpam(reply)) return;
+        if (handler != null && handler.isPersonalSpam(reply)) {
+            return;
+        }
         
         if(reply.hasSecureData() && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
             secureMessageVerifier.verify(reply, this);

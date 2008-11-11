@@ -79,7 +79,6 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
         try {
             client.setSoTimeout(0);
         } catch(SocketException se) {
-            se.printStackTrace();
             LOG.warn("Unable to set soTimeout, closing client", se);
             IOUtils.close(client);
             return;
@@ -90,7 +89,6 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
        
         // no protocol available to handle this word 
         if (delegator == null) {
-            System.out.println("no pro: " + word);
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);

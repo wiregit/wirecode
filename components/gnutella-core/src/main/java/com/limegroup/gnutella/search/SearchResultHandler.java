@@ -3,6 +3,7 @@ package com.limegroup.gnutella.search;
 import java.util.List;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -66,5 +67,8 @@ public interface SearchResultHandler {
 	 *  otherwise <tt>false</tt> 
      */
     public void handleQueryReply(final QueryReply qr);
+    
+    /** Sets the new filter to use for response filters. */
+    void setResponseFilter(ResponseFilter responseFilter);
 
 }

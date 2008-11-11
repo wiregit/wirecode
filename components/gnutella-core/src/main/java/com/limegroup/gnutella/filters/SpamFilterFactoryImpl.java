@@ -9,7 +9,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SpamFilterFactoryImpl implements SpamFilterFactory {
+class SpamFilterFactoryImpl implements SpamFilterFactory {
     
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
     private final Provider<HostileFilter> hostileFilter;

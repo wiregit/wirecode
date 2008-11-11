@@ -110,11 +110,7 @@ import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTaskService;
-import com.limegroup.gnutella.filters.HostileFilter;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.filters.LocalIPFilter;
-import com.limegroup.gnutella.filters.SpamFilterFactory;
-import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
+import com.limegroup.gnutella.filters.LimeWireFiltersModule;
 import com.limegroup.gnutella.geocode.LimeWireGeocodeGlueModule;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
@@ -242,6 +238,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireLibraryModule());
         binder().install(new LimeWireUploaderModule());
         binder().install(new LimeWireContentAuthModule());
+        binder().install(new LimeWireFiltersModule());
         
         bind(LimeWireCore.class);
         
@@ -286,7 +283,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UploadServices.class).to(UploadServicesImpl.class);
         bind(ApplicationServices.class).to(ApplicationServicesImpl.class);
         bind(SpamServices.class).to(SpamServicesImpl.class);
-        bind(SpamFilterFactory.class).to(SpamFilterFactoryImpl.class);
         bind(DHTControllerFacade.class).to(DHTControllerFacadeImpl.class);
         bind(ChokerFactory.class).to(ChokerFactoryImpl.class);
         bind(BTConnectionFetcherFactory.class).to(BTConnectionFetcherFactoryImpl.class);
@@ -335,8 +331,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
         bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);
         bind(MessageRouter.class).to(StandardMessageRouter.class);
-        bind(IPFilter.class).to(LocalIPFilter.class);
-        bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
         bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
         bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
         bind(TorrentManager.class).to(TorrentManagerImpl.class);
