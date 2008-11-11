@@ -204,10 +204,12 @@ public class PromptTextField extends JTextField implements FocusListener {
         painter.setFillVertical(true);
         painter.setFillHorizontal(true);
         painter.setAntialiasing(true);
+        painter.setCacheable(true);
         
         compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
                 this.borderColour,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
                 this.bevelRight,  this.bevelBottom, this.borderBubbleVisible));
+        compoundPainter.setCacheable(true);
         
         return compoundPainter;
     }
