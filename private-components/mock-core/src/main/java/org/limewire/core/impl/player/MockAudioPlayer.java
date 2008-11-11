@@ -90,4 +90,10 @@ public class MockAudioPlayer implements AudioPlayer{
         return false;
     }
 
+    @Override
+    public AudioSource getCurrentSong() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

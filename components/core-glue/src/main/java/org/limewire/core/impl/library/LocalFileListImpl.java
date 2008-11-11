@@ -193,5 +193,12 @@ abstract class LocalFileListImpl implements LocalFileList {
         }
     }
     
-    
+    @Override
+    public LocalFileItem getFileItem(File file) {
+      FileDesc fileDesc = getCoreFileList().getFileDesc(file);
+      if(fileDesc != null) {
+          return (LocalFileItem)fileDesc.getClientProperty(FILE_ITEM_PROPERTY);
+      }
+      return null;
+    }
 }

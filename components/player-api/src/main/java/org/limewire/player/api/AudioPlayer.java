@@ -94,4 +94,9 @@ public interface AudioPlayer {
      * @return true if the file is currently paused
      */
     public boolean isPaused(File file);
+
+    /**
+     * @return The current song playing in the player. This may return null.
+     */
+    AudioSource getCurrentSong();
 }

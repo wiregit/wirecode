@@ -1,18 +1,140 @@
 package org.limewire.ui.swing.menu;
 
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Map;
+
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.player.api.AudioPlayer;
+import org.limewire.player.api.AudioPlayerEvent;
+import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.AudioSource;
+import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+
 public class PlayerMenu extends JMenu {
-    public PlayerMenu() {
+    @Inject
+    public PlayerMenu(final AudioPlayer audioPlayer, final Navigator navigator,
+            final LibraryManager libraryManager) {
         super(I18n.tr("Player"));
 
-        add(new JMenuItem(I18n.tr("Play/Pause")));
-        add(new JMenuItem(I18n.tr("Next")));
-        add(new JMenuItem(I18n.tr("Previous")));
+        add(getPlayPause(audioPlayer));
+
+        add(getNext(audioPlayer));
+        add(getPrevious(audioPlayer));
+
         addSeparator();
-        add(new JMenuItem(I18n.tr("Show current file")));
+        add(getShowCurrentFile(audioPlayer, navigator, libraryManager));
+    }
+
+    private JMenuItem getNext(final AudioPlayer audioPlayer) {
+        JMenuItem next = new JMenuItem(I18n.tr("Next"));
+        next.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me.");
+            }
+        });
+
+        addAudioListener(audioPlayer, next);
+        return next;
+    }
+
+    private JMenuItem getPrevious(final AudioPlayer audioPlayer) {
+        JMenuItem previous = new JMenuItem(I18n.tr("Previous"));
+        previous.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me.");
+            }
+        });
+
+        addAudioListener(audioPlayer, previous);
+        return previous;
+    }
+
+    private JMenuItem getPlayPause(final AudioPlayer audioPlayer) {
+        JMenuItem playPause = new JMenuItem(I18n.tr("Play/Pause"));
+        playPause.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (audioPlayer.getStatus() == PlayerState.PAUSED) {
+                    audioPlayer.playSong();
+                } else if (audioPlayer.getStatus() == PlayerState.PLAYING) {
+                    audioPlayer.pause();
+                }
+            }
+        });
+        addAudioListener(audioPlayer, playPause);
+        return playPause;
+    }
+
+    private JMenuItem getShowCurrentFile(final AudioPlayer audioPlayer, final Navigator navigator,
+            final LibraryManager libraryManager) {
+        final JMenuItem showCurrentFile = new JMenuItem(I18n.tr("Show current file"));
+        showCurrentFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AudioSource currentSong = audioPlayer.getCurrentSong();
+                if (currentSong != null) {
+                    File currentFile = currentSong.getFile();
+                    if (currentFile != null) {
+                        final LocalFileItem localFileItem = libraryManager.getLibraryManagedList()
+                                .getFileItem(currentFile);
+                        if (localFileItem != null) {
+                            Category category = localFileItem.getCategory();
+                            NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY,
+                                    LibraryNavigator.NAME_PREFIX + category);
+                            navItem.select(new NavSelectable<URN>() {
+                                @Override
+                                public URN getNavSelectionId() {
+                                    return localFileItem.getUrn();
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+        addAudioListener(audioPlayer, showCurrentFile);
+        return showCurrentFile;
+    }
+
+    /**
+     * Enable or disables MenuItem depending on players current state, and
+     * attaches a listener to see state changes of the player.
+     */
+    private void addAudioListener(final AudioPlayer audioPlayer, final Component component) {
+        audioPlayer.addAudioPlayerListener(new AudioPlayerListener() {
+            @Override
+            public void stateChange(AudioPlayerEvent event) {
+                component.setEnabled(event.getState() == PlayerState.PLAYING);
+            }
+
+            @Override
+            public void progressChange(int bytesread) {
+            }
+
+            @Override
+            public void songOpened(Map<String, Object> properties) {
+            }
+        });
+
+        component.setEnabled(audioPlayer.getStatus() == PlayerState.PLAYING);
     }
 }

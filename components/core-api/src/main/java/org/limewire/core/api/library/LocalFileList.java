@@ -34,5 +34,11 @@ public interface LocalFileList extends FileList<LocalFileItem> {
 
     /** Returns true if the list contains a file with this URN. */
     public boolean contains(URN urn);
+    
+    /**
+     * Returns the of FileItem for the given file, or null if it is not in this list.
+     * This may return null if the library has not finished loading.
+     */
+    LocalFileItem getFileItem(File file);
 
 }

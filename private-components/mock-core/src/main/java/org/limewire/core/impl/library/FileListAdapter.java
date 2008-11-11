@@ -95,4 +95,10 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public LocalFileItem getFileItem(File file) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
