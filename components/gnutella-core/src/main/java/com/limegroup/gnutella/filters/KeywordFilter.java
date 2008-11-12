@@ -40,11 +40,9 @@ public class KeywordFilter implements SpamFilter {
         disallow("ass");
         disallow("boob");
         disallow("blow");
-        disallow("blowjob");
         disallow("bondage");
         disallow("centerfold");
         disallow("cock");
-        disallow("cocks");
         disallow("cum");
         disallow("cumshot");
         disallow("cunt");
@@ -53,9 +51,6 @@ public class KeywordFilter implements SpamFilter {
         disallow("dildo");
         disallow("facial");
         disallow("fuck");
-        disallow("fucked");
-        disallow("fucking");
-        disallow("fucks");
         disallow("gangbang");
         disallow("hentai");
         disallow("horny");
@@ -73,7 +68,6 @@ public class KeywordFilter implements SpamFilter {
         disallow("pussy");
         disallow("rape");
         disallow("sex");
-        disallow("sexy");
         disallow("slut");
         disallow("squirt");
         disallow("stripper");
