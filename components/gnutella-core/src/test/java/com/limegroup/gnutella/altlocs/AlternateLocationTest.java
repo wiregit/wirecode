@@ -143,10 +143,10 @@ public final class AlternateLocationTest extends LimeTestCase {
         assertEquals(0, push.supportsFWTVersion());
         
         // test rfd with push proxies, external address that can do FWT
-        RemoteFileDesc FWTed = remoteFileDescFactory.createRemoteFileDesc("1.2.3.4", 5, 10, HTTPConstants.URI_RES_N2R+
-                                   UrnHelper.URNS[0].httpStringValue(), 10,
-                GUID.makeGuid(), 10, true, 2, true, null, UrnHelper.URN_SETS[0], false, true, "", proxies,
-                -1, 1, false);
+        pe = pushEndpointFactory.createPushEndpoint(GUID.makeGuid(), proxies, PushEndpoint.PLAIN, 1, new IpPortImpl("1.2.3.4", 5));
+        RemoteFileDesc FWTed = remoteFileDescFactory.createRemoteFileDesc(pe, 10, HTTPConstants.URI_RES_N2R+
+                UrnHelper.URNS[0].httpStringValue(), 10,
+                pe.getClientGUID(), 10, true, 2, true, null, UrnHelper.URN_SETS[0], false, "", -1);
         
         loc = alternateLocationFactory.create(FWTed);
         
