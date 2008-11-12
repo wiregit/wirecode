@@ -219,8 +219,6 @@ class FileMenu extends JMenu {
     }
 
     private Action getUrlMenuItem(final DownloadListManager downloadListManager) {
-        // TODO instead of adding downloadListManager as part of the location
-        // dialogue, add listening capabilities to the location dialogue
         return new AbstractAction(I18n.tr("Open Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
