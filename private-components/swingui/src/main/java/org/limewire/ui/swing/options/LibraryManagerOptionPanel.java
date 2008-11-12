@@ -107,7 +107,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
+    public void applyOptions() {
         LibraryManagerModel model = treeTable.getLibraryModel();
         Collection<File> manage = model.getManagedDirectories();
         Collection<File> exclude = model.getExcludedDirectories();
@@ -116,22 +116,22 @@ public class LibraryManagerOptionPanel extends OptionPanel {
 
     private Collection<Category> getManagedCategories() {
         Collection<Category> categories = EnumSet.noneOf(Category.class);
-        if(musicCheckBox.isEnabled()) {
+        if(musicCheckBox.isSelected()) {
             categories.add(Category.AUDIO);
         }
-        if(videoCheckBox.isEnabled()) {
+        if(videoCheckBox.isSelected()) {
             categories.add(Category.VIDEO);
         }
-        if(imageCheckBox.isEnabled()) {
+        if(imageCheckBox.isSelected()) {
             categories.add(Category.IMAGE);
         }
-        if(docCheckBox.isEnabled()) {
+        if(docCheckBox.isSelected()) {
             categories.add(Category.DOCUMENT);
         }
-        if(programCheckBox.isEnabled()) {
+        if(programCheckBox.isSelected()) {
             categories.add(Category.PROGRAM);
         }
-        if(otherCheckBox.isEnabled()) {
+        if(otherCheckBox.isSelected()) {
             categories.add(Category.OTHER);
         }
         return categories;
