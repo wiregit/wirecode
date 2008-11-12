@@ -96,7 +96,8 @@ public class AuthTokenIQListener implements PacketListener {
         user.addPresenceListener(new EventListener<PresenceEvent>() {
             public void handleEvent(PresenceEvent event) {
                 final Presence presence = event.getSource();
-                if(presence.getType().equals(Presence.Type.available)) {
+                if(event.getType().equals(Presence.EventType.PRESENCE_NEW) &&
+                        presence.getType().equals(Presence.Type.available)) {
                     presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
                         
                         @BlockingEvent

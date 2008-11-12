@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -63,6 +61,7 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
@@ -188,7 +187,8 @@ public class ConversationPane extends JPanel implements Displayable {
         if (type == Presence.Type.unavailable) {
             displayMessages(true);
             inputPanel.getInputComponent().setEnabled(false);
-        } else if (type == Presence.Type.available) {
+        } else if (event.isNewPresence() &&
+                type == Presence.Type.available) {
             displayMessages(false);
             inputPanel.getInputComponent().setEnabled(true);
         }

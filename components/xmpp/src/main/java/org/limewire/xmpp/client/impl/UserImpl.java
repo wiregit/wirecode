@@ -93,6 +93,7 @@ public class UserImpl implements User {
         for(Feature feature : features) {
             presence.removeFeature(feature.getID());
         }
+        presence.removeChatListener();
         presences.remove(presence.getJID());
         presenceListeners.broadcast(new PresenceEvent(presence, Presence.EventType.PRESENCE_UPDATE));
     }

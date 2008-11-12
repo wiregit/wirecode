@@ -83,4 +83,6 @@ public interface Presence extends FriendPresence {
      * @param listener the <code>IncomingChatListener</code> to be used
      */
     public void setIncomingChatListener(IncomingChatListener listener);
+
+    public void removeChatListener();
 }

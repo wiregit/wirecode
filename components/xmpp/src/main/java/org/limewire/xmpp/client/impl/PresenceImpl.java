@@ -36,6 +36,7 @@ class PresenceImpl implements Presence {
     private final User user;
     private Map<URI, Feature> features;
     private EventListenerList<FeatureEvent> featureListeners;
+    private volatile IncomingChatListenerAdapter listenerAdapter;
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
                  org.jivesoftware.smack.XMPPConnection connection, User user) {
@@ -51,6 +52,7 @@ class PresenceImpl implements Presence {
         this(presence, connection, currentPresence.getUser());
         this.features = currentPresence.features;
         this.featureListeners = currentPresence.featureListeners;
+        this.listenerAdapter = currentPresence.listenerAdapter;
     }
 
     public MessageWriter createChat(final MessageReader reader) {
@@ -86,45 +88,21 @@ class PresenceImpl implements Presence {
     }
 
     public void setIncomingChatListener(final IncomingChatListener listener) {
-        connection.getChatManager().addChatListener(new ChatManagerListener() {
-            public void chatCreated(final Chat chat, boolean createdLocally) {
-                if(!createdLocally) {
-                    if(chat.getParticipant().equals(getJID())) {
-                        if(LOG.isInfoEnabled()) {
-                            LOG.info("new incoming chat with " + getJID());
-                        }
-                        final MessageWriter writer = new MessageWriter() {
-                            public void writeMessage(String message) throws XMPPException {
-                                try {
-                                    chat.sendMessage(message);
-                                } catch (org.jivesoftware.smack.XMPPException e) {
-                                    throw new XMPPException(e);
-                                }
-                            }
-
-                            public void setChatState(ChatState chatState) throws XMPPException {
-                                try {
-                                    ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
-                                } catch (org.jivesoftware.smack.XMPPException e) {
-                                    throw new XMPPException(e);
-                                }
-                            }
-                        };
-                        final MessageReader reader = listener.incomingChat(writer);
-                        // TODO race condition
-                        chat.addMessageListener(new ChatStateListener() {
-                            public void processMessage(Chat chat, Message message) {
-                                reader.readMessage(message.getBody());
-                            }
-
-                            public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
-                                reader.newChatState(ChatState.valueOf(state.toString()));
-                            }
-                        });
-                    }
-                }
+        synchronized (this) {
+            if(listenerAdapter != null) {
+                connection.getChatManager().removeChatListener(listenerAdapter);
             }
-        });
+            listenerAdapter = new IncomingChatListenerAdapter(listener);
+            connection.getChatManager().addChatListener(listenerAdapter);
+        }
+    }
+
+    public void removeChatListener() {
+        synchronized (this) {
+            if(listenerAdapter != null) {
+                connection.getChatManager().removeChatListener(listenerAdapter);
+            }
+        }
     }
 
     public String getJID() {
@@ -200,5 +178,52 @@ class PresenceImpl implements Presence {
         if(feature != null) {
             featureListeners.broadcast(new FeatureEvent(feature, Feature.EventType.FEATURE_REMOVED));
         }
+    }
+
+    private class IncomingChatListenerAdapter implements ChatManagerListener {
+        private final IncomingChatListener listener;
+
+        public IncomingChatListenerAdapter(IncomingChatListener listener) {
+            this.listener = listener;
+        }
+
+        public void chatCreated(final Chat chat, boolean createdLocally) {
+            if(!createdLocally) {
+                if(chat.getParticipant().equals(getJID())) {
+                    if(LOG.isInfoEnabled()) {
+                        LOG.info("new incoming chat with " + getJID());
+                    }
+                    final MessageWriter writer = new MessageWriter() {
+                        public void writeMessage(String message) throws XMPPException {
+                            try {
+                                chat.sendMessage(message);
+                            } catch (org.jivesoftware.smack.XMPPException e) {
+                                throw new XMPPException(e);
+                            }
+                        }
+
+                        public void setChatState(ChatState chatState) throws XMPPException {
+                            try {
+                                ChatStateManager.getInstance(connection).setCurrentState(org.jivesoftware.smackx.ChatState.valueOf(chatState.toString()), chat);
+                            } catch (org.jivesoftware.smack.XMPPException e) {
+                                throw new XMPPException(e);
+                            }
+                        }
+                    };
+                    final MessageReader reader = listener.incomingChat(writer);
+                    // TODO race condition
+                    chat.addMessageListener(new ChatStateListener() {
+                        public void processMessage(Chat chat, Message message) {
+                            reader.readMessage(message.getBody());
+                        }
+
+                        public void stateChanged(Chat chat, org.jivesoftware.smackx.ChatState state) {
+                            reader.newChatState(ChatState.valueOf(state.toString()));
+                        }
+                    });
+                }
+            }
+        }
+
     }
 }

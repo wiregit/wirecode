@@ -46,7 +46,8 @@ class XmppPresenceLibraryAdder implements RegisteringEventListener<RosterEvent> 
             
             public void handleEvent(final PresenceEvent presenceEvent) {
                 final Presence presence = presenceEvent.getSource();
-                if(presence.getType().equals(Presence.Type.available)) {
+                if(presenceEvent.getType().equals(Presence.EventType.PRESENCE_NEW) &&
+                        presence.getType().equals(Presence.Type.available)) {
                     presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
                         
                         @BlockingEvent
