@@ -339,7 +339,7 @@ public class LimeComboBox extends JXButton {
             
             @Override
             public void mouseEntered(MouseEvent e) {
-                getTopLevelAncestor().setCursor(mouseOverCursor);
+                setCursor(mouseOverCursor);
                 
                 if (menu == null)  return;
                 
@@ -348,7 +348,7 @@ public class LimeComboBox extends JXButton {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                getTopLevelAncestor().setCursor(getCursor());
+                setCursor(Cursor.getDefaultCursor());
                 
                 this.hide = false;      
             }
