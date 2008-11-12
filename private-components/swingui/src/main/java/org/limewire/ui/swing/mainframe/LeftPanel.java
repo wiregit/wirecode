@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class LeftPanel extends JPanel {
+public class LeftPanel extends JPanel {
     public static final String NAME = "Library Panel";
     
     @Inject
@@ -43,5 +43,9 @@ class LeftPanel extends JPanel {
         Line line = Line.createVerticalLine();
         line.setName("LeftPanel.rightBorder");
         add(line, "grow");
+    }
+    
+    public void toggleVisibility() {
+        setVisible(!isVisible());
     }
 }

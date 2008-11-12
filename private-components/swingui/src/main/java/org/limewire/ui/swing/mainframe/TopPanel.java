@@ -13,7 +13,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
@@ -287,15 +286,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
     }
     
     private class LibraryAction implements ActionListener {
-        private JPanel panel;
+        private LeftPanel panel;
         
-        public LibraryAction(JPanel panel) {
+        public LibraryAction(LeftPanel panel) {
             this.panel = panel;
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            panel.setVisible(!panel.isVisible());
+            panel.toggleVisibility();
         }
     }
 }
