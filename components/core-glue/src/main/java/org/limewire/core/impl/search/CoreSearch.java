@@ -40,7 +40,7 @@ public class CoreSearch implements Search {
     private final QueryReplyListenerList listenerList;
     private final PromotionSearcher promotionSearcher;
     private final FriendSearcher friendSearcher;
-    private CachedGeoLocation geoLocation;
+    private final CachedGeoLocation geoLocation;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final CopyOnWriteArrayList<SearchListener> searchListeners = new CopyOnWriteArrayList<SearchListener>();
     private final QrListener qrListener = new QrListener();
@@ -97,6 +97,24 @@ public class CoreSearch implements Search {
         searchGuid = searchServices.newQueryGUID();
         listenerList.addQueryReplyListener(searchGuid, qrListener);
         
+        switch(searchDetails.getSearchType()) {
+        case KEYWORD:
+            doKeywordSearch(initial);
+            break;
+        case WHATS_NEW:
+            doWhatsNewSearch(initial);
+            break;
+        }
+    }
+    
+    private void doWhatsNewSearch(boolean initial) {
+        searchServices.queryWhatIsNew(searchGuid,
+                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
+        
+        // TODO: Search friends too.
+    }
+    
+    private void doKeywordSearch(boolean initial) {
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
                 MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
         
@@ -105,11 +123,9 @@ public class CoreSearch implements Search {
             public void run() { 
                 friendSearcher.doSearch(searchDetails, friendSearchListener);
             }
-        });
+        });        
         
-        
-        if (initial) {
-            
+        if (initial) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
                 public void process(PromotionMessageContainer result) {
@@ -130,8 +146,7 @@ public class CoreSearch implements Search {
                     promotionSearcher.search(searchDetails.getSearchQuery(), callback, geoLocation
                             .getGeocodeInformation());
                 }
-            });
-            
+            });            
         }
     }
     

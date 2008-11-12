@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.connection.ConnectionStrength;
+import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.search.Search;
@@ -64,6 +64,11 @@ class SearchHandlerImpl implements SearchHandler {
             public String getSearchQuery() {
                 return info.getQuery();
             }
+            
+            @Override
+            public SearchType getSearchType() {
+                return info.getSearchType();
+            }
         });
         
         String panelTitle = info.getTitle();
@@ -115,8 +120,7 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
-        addConnectionWarnings(search, searchPanel, item);
-        
+        addConnectionWarnings(search, searchPanel, item);        
         startSearch(search, searchPanel, item);
     }
 

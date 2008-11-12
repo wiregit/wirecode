@@ -19,6 +19,7 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -123,10 +124,13 @@ public class SearchBar extends JXPanel {
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (searchField.getText().isEmpty())  return;
-                
+                if (searchField.getText().isEmpty()) {
+                    return;
+                }
+
                 String searchText = searchField.getText();
-                searchHandler.doSearch(new DefaultSearchInfo(searchText, categoryToSearch));
+                searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(searchText,
+                        categoryToSearch));
             }
         };
         
@@ -134,27 +138,12 @@ public class SearchBar extends JXPanel {
         this.searchButton.addActionListener(listener);
     }
     
-    private static String getName(SearchCategory category) {
-        switch(category) {
-        case ALL:      return I18n.tr("All");
-        case AUDIO:    return I18n.tr("Audio"); 
-        case DOCUMENT: return I18n.tr("Documents"); 
-        case IMAGE:    return I18n.tr("Images"); 
-        case PROGRAM:  return I18n.tr("Programs"); 
-        case VIDEO:    return I18n.tr("Videos"); 
-        case OTHER: 
-        default:
-            return I18n.tr("Other");
-             
-        }
-    }
-    
     private class CatagoryAction extends AbstractAction {
 
         private final SearchCategory category;
         
         CatagoryAction(SearchCategory category) {
-            super(getName(category));
+            super(SearchCategoryUtils.getName(category));
             
             this.category = category;
         }
