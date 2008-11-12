@@ -30,6 +30,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.LibraryUtils;
 
 @Singleton
 class FileMenu extends JMenu {
@@ -112,27 +113,27 @@ class FileMenu extends JMenu {
     }
 
     private Action getAddFolder(final LibraryManager libraryManager) {
-        return new AbstractAction(I18n.tr("Add Folder")) {
+        return new AbstractAction(I18n.tr("Add Folder To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<File> folders = FileChooser.getInput(FileMenu.this, I18n.tr("Add Folder(s)"),
-                        I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
-                        JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
-                        new FileFilter() {
-                            @Override
-                            public boolean accept(File f) {
-                                return f.isDirectory();
-                            }
+                    I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
+                    JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
+                    new FileFilter() {
+                        @Override
+                        public boolean accept(File f) {
+                            return f.isDirectory();
+                        }
 
-                            @Override
-                            public String getDescription() {
-                                return I18n.tr("TODO get better description");
-                            }
-                        });
-
+                        @Override
+                        public String getDescription() {
+                            return I18n.tr("All Folders");
+                        }
+                    }
+                );
+                
                 if (folders != null) {
                     for (File folder : folders) {
-                        // TODO run in background thread
                         libraryManager.getLibraryManagedList().addFolder(folder);
                     }
                 }
@@ -142,7 +143,7 @@ class FileMenu extends JMenu {
     }
 
     private Action getAddFile(final LibraryManager libraryManager) {
-        return new AbstractAction(I18n.tr("Add File")) {
+        return new AbstractAction(I18n.tr("Add File To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Add File(s)"), I18n
@@ -151,19 +152,17 @@ class FileMenu extends JMenu {
                         new FileFilter() {
                             @Override
                             public boolean accept(File f) {
-                                String extension = FileUtils.getFileExtension(f);
-                                // TODO filter extensions enabled in options
-                                return f.isDirectory() || f.isFile();
+                                return f.isDirectory() || LibraryUtils.isFilePhysicallyManagable(f);
                             }
 
                             @Override
                             public String getDescription() {
-                                return I18n.tr("TODO get a descripotion");
+                                return I18n.tr("Valid Files");
                             }
                         });
+                
                 if (files != null) {
                     for (File file : files) {
-                        // TODO run in background thread
                         libraryManager.getLibraryManagedList().addFile(file);
                     }
                 }
@@ -192,7 +191,7 @@ class FileMenu extends JMenu {
 
                             @Override
                             public String getDescription() {
-                                return I18n.tr("TODO better copy. .torrent|.magnet");
+                                return I18n.tr(".torrent or .magnet files");
                             }
                         });
 
@@ -200,8 +199,7 @@ class FileMenu extends JMenu {
                     for (File file : files) {
                         try {
                             downloadListManager.addDownload(file);
-                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                    .select();
+                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
                         } catch (SaveLocationException e1) {
                             // TODO better user feedback
                             throw new UnsupportedOperationException(e1);
