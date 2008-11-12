@@ -10,7 +10,7 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 
-class RemoteFileDescContext {
+public class RemoteFileDescContext {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDescContext.class);
 
@@ -37,7 +37,7 @@ class RemoteFileDescContext {
      * The last known queue status of the remote host
      * negative values mean free slots
      */
-    private int queueStatus;
+    private int queueStatus = Integer.MAX_VALUE;
 
     /**
      * The earliest time to retry this host in milliseconds since 01-01-1970
