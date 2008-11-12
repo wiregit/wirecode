@@ -22,13 +22,13 @@ class ConnectionStatusPanel extends JXPanel {
     
     private final JLabel connectionStrengthPanel;
     
-//    @Resource private Icon noInternet;
-//    @Resource private Icon disconnected;
+    @Resource private Icon noInternet;
+    @Resource private Icon disconnected;
     @Resource private Icon connecting;
-//    @Resource private Icon weak;
-//    @Resource private Icon medium;
+    @Resource private Icon weak;
+    @Resource private Icon medium;
     @Resource private Icon full;
-//    @Resource private Icon turbo;
+    @Resource private Icon turbo;
     
     @Inject
     ConnectionStatusPanel(SharedFileCountPanel countPanel, GnutellaConnectionManager connectionManager) {
@@ -56,17 +56,18 @@ class ConnectionStatusPanel extends JXPanel {
     }
     
     private void setConnectionStrength(ConnectionStrength strength) {
-        System.out.println("New Connection Strength: " + strength);
+
         boolean sharingVisible = false;
         Icon strengthIcon = null;
+        
         switch(strength) {
         case NO_INTERNET:
             sharingVisible = false;
-            strengthIcon = connecting; // CHANGEME.
+            strengthIcon = noInternet;
             break;
         case DISCONNECTED:
             sharingVisible = false;
-            strengthIcon = connecting; // CHANGEME.
+            strengthIcon = disconnected;
             break;
         case CONNECTING:
             sharingVisible = true;
@@ -74,11 +75,11 @@ class ConnectionStatusPanel extends JXPanel {
             break;
         case WEAK:
             sharingVisible = true;
-            strengthIcon = connecting; // CHANGEME.
+            strengthIcon = weak;
             break;
         case MEDIUM:
             sharingVisible = true;
-            strengthIcon = connecting; // CHANGEME.
+            strengthIcon = medium; 
             break;            
         case FULL:
             sharingVisible = true;
@@ -86,7 +87,7 @@ class ConnectionStatusPanel extends JXPanel {
             break;
         case TURBO:
             sharingVisible = true;
-            strengthIcon = full; // CHANGEME.
+            strengthIcon = turbo; 
             break;
         }
         
