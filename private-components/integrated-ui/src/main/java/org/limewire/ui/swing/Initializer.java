@@ -256,13 +256,7 @@ public final class Initializer {
         ErrorService.setErrorCallback(new ErrorHandler());
 
         // set error handler for uncaught exceptions originating from non-LW
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            public void uncaughtException(Thread thread, Throwable throwable) {
-                if(LimeWireUtils.isTestingVersion()) {
-                    ErrorService.error(throwable, "Uncaught thread error: " +thread.getName());
-                }
-            }
-        });
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandlerImpl());
         stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages
