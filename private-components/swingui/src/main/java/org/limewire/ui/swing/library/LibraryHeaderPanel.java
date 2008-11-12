@@ -140,4 +140,41 @@ public class LibraryHeaderPanel extends JXPanel {
         throw new IllegalArgumentException("Unknown category: " + category);
     }
     
+    private String getSharingTitle() {
+        String libraryString = I18n.tr("Sharing with {0}", friend.getRenderName());
+        
+        switch (category) {
+        case AUDIO:
+            return I18n.tr("{0} - Audio", libraryString);
+        case DOCUMENT:
+            return I18n.tr("{0} - Documents", libraryString);
+        case IMAGE:
+            return I18n.tr("{0} - Images", libraryString);
+        case OTHER:
+            return I18n.tr("{0} - Other", libraryString);
+        case PROGRAM:
+            return I18n.tr("{0} - Programs", libraryString);
+        case VIDEO:
+            return I18n.tr("{0} - Video", libraryString);
+        }
+        throw new IllegalArgumentException("Unknown category: " + category);
+    }
+    
+    public void setFriend(Friend friend) {
+        this.friend = friend;
+        
+        titleLabel.setText(getSharingTitle());
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+        titleLabel.setText(getTitle());
+    }
+    
+    public void setCategory(Category category, Friend friend) {
+        this.friend = friend;
+        this.category = category;
+        
+        titleLabel.setText(getSharingTitle());
+    }
 }

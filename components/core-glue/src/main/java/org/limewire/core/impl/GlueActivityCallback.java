@@ -116,6 +116,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+//        System.out.println("Lifecycle event: " + evt);
         // TODO Auto-generated method stub
     }
 

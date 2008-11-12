@@ -18,6 +18,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -30,6 +31,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
+import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
@@ -168,6 +170,68 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
 
         return libTable;
 
+    }    
+
+    @Override
+    public <T extends FileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, Friend friend, LocalFileList friendFileList) {
+        final LibraryTable<T> libTable;
+        
+        switch (category) {
+        case AUDIO:
+            libTable = new AudioLibraryTable<T>(eventList, player);
+            libTable.getColumnModel().getColumn(AudioTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().getColumn(AudioTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().moveColumn(AudioTableFormat.ACTION_COL, 0);
+            break;
+        case VIDEO:
+            libTable = new VideoLibraryTable<T>(eventList);
+            libTable.getColumnModel().getColumn(VideoTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().getColumn(VideoTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().moveColumn(VideoTableFormat.ACTION_COL, 0);
+            break;
+        case DOCUMENT:
+            libTable = new LibraryTable<T>(eventList, new DocumentTableFormat<T>());
+            libTable.getColumnModel().getColumn(DocumentTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(DocumentTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().getColumn(DocumentTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().moveColumn(DocumentTableFormat.ACTION_COL, 0);
+            break;
+        case IMAGE:
+            libTable = new LibraryTable<T>(eventList, new ImageTableFormat<T>());
+            break;
+        case OTHER:
+            libTable = new LibraryTable<T>(eventList, new OtherTableFormat<T>());
+            libTable.getColumnModel().getColumn(OtherTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(OtherTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(OtherTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().getColumn(OtherTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().moveColumn(OtherTableFormat.ACTION_COL, 0);
+            break;
+        case PROGRAM:
+            libTable = new LibraryTable<T>(eventList, new ProgramTableFormat<T>());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().getColumn(ProgramTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList));
+            libTable.getColumnModel().moveColumn(ProgramTableFormat.ACTION_COL, 0);
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown category: " + category);
+        }
+        
+        if(friend != null){
+            libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
+            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, 
+                    magnetLinkFactory, remoteItemPropFactory));
+        } else {//Local            
+            libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
+            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
+                    magnetLinkFactory, friendList, localItemPropFactory));
+        }
+        
+            libTable.setDropMode(DropMode.ON);
+        
+        return libTable;
     }
 
     @SuppressWarnings( { "unchecked", "cast" })
@@ -335,5 +399,4 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             }
         });
     }
-
 }

@@ -20,6 +20,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
                 FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
         bind(MyLibraryFactory.class).toProvider(
                 FactoryProvider.newFactory(MyLibraryFactory.class, MyLibraryPanel.class));
+        bind(SharingLibraryFactory.class).toProvider(
+                FactoryProvider.newFactory(SharingLibraryFactory.class, SharingLibraryPanel.class));
         bind(LibraryTableFactory.class).to(LibraryTableFactoryImpl.class);
         bind(new TypeLiteral<PropertiesFactory<LocalFileItem>>(){}).to(LocalFileItemPropertiesFactory.class);
         bind(new TypeLiteral<PropertiesFactory<RemoteFileItem>>(){}).to(RemoteFileItemPropertiesFactory.class);

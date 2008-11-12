@@ -31,7 +31,7 @@ public class LibraryImageCellRenderer extends ImageCellRenderer {
     public Component getListCellRendererComponent(JList list, Object value, int index,
             boolean isSelected, boolean cellHasFocus) {
         if (configurable != null){
-            configurable.configure((LocalFileItem)value);
+            configurable.configure((LocalFileItem)value, isSelected);
         }
         return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
     }

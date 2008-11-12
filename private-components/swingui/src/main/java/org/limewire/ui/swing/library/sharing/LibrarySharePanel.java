@@ -47,6 +47,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -64,7 +65,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 
-public class LibrarySharePanel extends JXPanel implements PropertyChangeListener{
+public class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable {
 
 
 

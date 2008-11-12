@@ -215,7 +215,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
                 int index = imageList.locationToIndex(point);
                 if (index > -1) {
                     hoverComponent.setVisible(true);
-                    hoverComponent.configure((LocalFileItem) imageList.getModel().getElementAt(index));
+                    hoverComponent.configure((LocalFileItem) imageList.getModel().getElementAt(index), true);
                     Rectangle bounds = imageList.getCellBounds(index, index);
                     ImageCellRenderer renderer = imageList.getImageCellRenderer();
                     hoverComponent.setLocation(bounds.x + renderer.getSubComponentLocation().x,
