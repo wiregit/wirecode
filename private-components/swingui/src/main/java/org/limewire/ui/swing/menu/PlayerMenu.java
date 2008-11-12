@@ -1,13 +1,12 @@
 package org.limewire.ui.swing.menu;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
@@ -42,35 +41,32 @@ public class PlayerMenu extends JMenu {
         add(getShowCurrentFile(audioPlayer, navigator, libraryManager));
     }
 
-    private JMenuItem getNext(final AudioPlayer audioPlayer) {
-        JMenuItem next = new JMenuItem(I18n.tr("Next"));
-        next.addActionListener(new ActionListener() {
+    private Action getNext(final AudioPlayer audioPlayer) {
+        Action action = new AbstractAction(I18n.tr("Next")) {;
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");
             }
-        });
+        };
 
-        addAudioListener(audioPlayer, next);
-        return next;
+        addAudioListener(audioPlayer, action);
+        return action;
     }
 
-    private JMenuItem getPrevious(final AudioPlayer audioPlayer) {
-        JMenuItem previous = new JMenuItem(I18n.tr("Previous"));
-        previous.addActionListener(new ActionListener() {
+    private Action getPrevious(final AudioPlayer audioPlayer) {
+        Action action = new AbstractAction(I18n.tr("Previous")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");
             }
-        });
+        };
 
-        addAudioListener(audioPlayer, previous);
-        return previous;
+        addAudioListener(audioPlayer, action);
+        return action;
     }
 
-    private JMenuItem getPlayPause(final AudioPlayer audioPlayer) {
-        JMenuItem playPause = new JMenuItem(I18n.tr("Play/Pause"));
-        playPause.addActionListener(new ActionListener() {
+    private Action getPlayPause(final AudioPlayer audioPlayer) {
+        Action action = new AbstractAction(I18n.tr("Play/Pause")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (audioPlayer.getStatus() == PlayerState.PAUSED) {
@@ -79,15 +75,14 @@ public class PlayerMenu extends JMenu {
                     audioPlayer.pause();
                 }
             }
-        });
-        addAudioListener(audioPlayer, playPause);
-        return playPause;
+        };
+        addAudioListener(audioPlayer, action);
+        return action;
     }
 
-    private JMenuItem getShowCurrentFile(final AudioPlayer audioPlayer, final Navigator navigator,
+    private Action getShowCurrentFile(final AudioPlayer audioPlayer, final Navigator navigator,
             final LibraryManager libraryManager) {
-        final JMenuItem showCurrentFile = new JMenuItem(I18n.tr("Show current file"));
-        showCurrentFile.addActionListener(new ActionListener() {
+        Action action = new AbstractAction(I18n.tr("Show current file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AudioSource currentSong = audioPlayer.getCurrentSong();
@@ -110,20 +105,20 @@ public class PlayerMenu extends JMenu {
                     }
                 }
             }
-        });
-        addAudioListener(audioPlayer, showCurrentFile);
-        return showCurrentFile;
+        };
+        addAudioListener(audioPlayer, action);
+        return action;
     }
 
     /**
      * Enable or disables MenuItem depending on players current state, and
      * attaches a listener to see state changes of the player.
      */
-    private void addAudioListener(final AudioPlayer audioPlayer, final Component component) {
+    private void addAudioListener(final AudioPlayer audioPlayer, final Action action) {
         audioPlayer.addAudioPlayerListener(new AudioPlayerListener() {
             @Override
             public void stateChange(AudioPlayerEvent event) {
-                component.setEnabled(event.getState() == PlayerState.PLAYING);
+                action.setEnabled(event.getState() == PlayerState.PLAYING);
             }
 
             @Override
@@ -135,6 +130,6 @@ public class PlayerMenu extends JMenu {
             }
         });
 
-        component.setEnabled(audioPlayer.getStatus() == PlayerState.PLAYING);
+        action.setEnabled(audioPlayer.getStatus() == PlayerState.PLAYING);
     }
 }
