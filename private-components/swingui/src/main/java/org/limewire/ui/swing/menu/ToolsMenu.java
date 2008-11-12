@@ -62,7 +62,7 @@ public class ToolsMenu extends JMenu {
                 libraryManagerOptionPanel.setPreferredSize(new Dimension(500, 500));
                 libraryManagerOptionPanel.initOptions();
                 libraryManagerDialogue = FocusJOptionPane.createDialog("test",
-                        libraryManagerOptionPanel, libraryManagerOptionPanel);
+                        ToolsMenu.this, libraryManagerOptionPanel);
                 libraryManagerDialogue.setVisible(true);
             }
         });
