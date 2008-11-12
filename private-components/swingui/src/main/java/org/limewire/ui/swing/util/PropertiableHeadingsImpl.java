@@ -103,7 +103,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
             break;
         case IMAGE: {
             Object time = propertiable.getProperty(FilePropertyKey.DATE_CREATED);
-            if (time != null) {
+            if (time != null  && time instanceof Long) {
                 subheading = DATE_FORMAT.format(new java.util.Date((Long) time));
             }
         }
