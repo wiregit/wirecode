@@ -106,11 +106,11 @@ public class MainDownloadPanel extends JPanel {
 		add(cardPanel, BorderLayout.CENTER);
 		
         
-        final AllDownloadPanel noCategoryPanel = allDownloadPanelFactory.create(downloadMediator.getFilteredList());
+        final AllDownloadPanel noCategoryPanel = allDownloadPanelFactory.create(downloadMediator.getDownloadList());
 		noCategoryPanel.setName(NO_CATEGORY);
 		cardPanel.add(noCategoryPanel, noCategoryPanel.getName());
 		
-		final CategoryDownloadPanel categoryPanel = categoryDownloadPanelFactory.create(downloadMediator.getFilteredList());
+		final CategoryDownloadPanel categoryPanel = categoryDownloadPanelFactory.create(downloadMediator.getDownloadList());
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 		
@@ -119,11 +119,11 @@ public class MainDownloadPanel extends JPanel {
 		
 		cardLayout.show(cardPanel, NO_CATEGORY);
 		
-		EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
 		        new PausableMatcher());
-		EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> resumableList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                 new ResumableMatcher());
-		EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getFilteredList(), 
+		EventList<DownloadItem> doneList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
                         new DownloadStateMatcher(DownloadState.DONE));
 		
 		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
@@ -160,7 +160,6 @@ public class MainDownloadPanel extends JPanel {
 		private final JButton resumeAllButton;
 	    private final JXButton clearFinishedButton;
 		private final JCheckBox categoriseCheckBox;
-		private final JTextField searchBar;
 		private final JLabel titleLabel;
 		
 		public DownloadSettingsPanel() {
@@ -192,10 +191,6 @@ public class MainDownloadPanel extends JPanel {
 			categoriseCheckBox.setOpaque(false);
 			categoriseCheckBox.setForeground(Color.WHITE);
 			FontUtils.changeStyle(categoriseCheckBox, Font.PLAIN);
-			
-			searchBar = downloadMediator.getFilterTextField();
-			
-            searchBar.setPreferredSize(new Dimension(150,19));
 			
 	        categorizeAction.setEnabled(true);
 			
@@ -234,12 +229,6 @@ public class MainDownloadPanel extends JPanel {
 			gbc.gridy = 0;
             gbc.insets = insets;
 			restPanel.add(clearFinishedButton, gbc);
-			
-			gbc.gridx++;
-			gbc.gridy = 0;
-			gbc.insets = insets;
-			gbc.anchor = GridBagConstraints.LINE_END;
-			restPanel.add(searchBar, gbc);
 			
 			add(titlePanel, BorderLayout.WEST);
             add(restPanel, BorderLayout.EAST);
