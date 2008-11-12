@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
+import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.ManagedFileList;
 
 @Singleton
@@ -51,6 +52,11 @@ class LibraryManagerImpl implements LibraryManager {
         
         public LibraryDataImpl(ManagedFileList fileList) {
             this.fileList = fileList;
+        }
+        
+        @Override
+        public boolean isFileManageable(File f) {
+            return LibraryUtils.isFilePhysicallyManagable(f);
         }
         
         @Override

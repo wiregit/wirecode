@@ -59,4 +59,7 @@ public interface LibraryData {
     void setManagedOptions(Collection<File> recursiveFoldersToManage, 
             Collection<File> foldersToExclude,
             Collection<Category> managedCategories);
+
+    /** Returns true if this file is potentially manageable. */
+    boolean isFileManageable(File f);
 }

@@ -30,7 +30,6 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.library.LibraryUtils;
 
 @Singleton
 class FileMenu extends JMenu {
@@ -152,7 +151,7 @@ class FileMenu extends JMenu {
                         new FileFilter() {
                             @Override
                             public boolean accept(File f) {
-                                return f.isDirectory() || LibraryUtils.isFilePhysicallyManagable(f);
+                                return f.isDirectory() || libraryManager.getLibraryData().isFileManageable(f);
                             }
 
                             @Override

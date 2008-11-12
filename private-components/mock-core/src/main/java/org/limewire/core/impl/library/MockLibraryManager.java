@@ -160,6 +160,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     private class LibraryDataAdapter implements LibraryData {
         
         @Override
+        public boolean isFileManageable(File f) {
+            return true;
+        }
+        
+        @Override
         public boolean isProgramManagingAllowed() {
             return false;
         }
