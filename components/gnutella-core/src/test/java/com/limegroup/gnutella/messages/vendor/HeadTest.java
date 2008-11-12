@@ -46,6 +46,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.downloader.PingRanker;
+import com.limegroup.gnutella.downloader.RemoteFileDescContext;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.library.FileDescStub;
@@ -85,7 +87,7 @@ public class HeadTest extends LimeTestCase {
 	
     private PushEndpoint pushCollectionPE, tlsCollectionPE;
     
-    private RemoteFileDesc blankRFD;
+    private RemoteFileDescContext blankRFD;
 	
     private HeadPongFactory headPongFactory;
 	
@@ -209,18 +211,11 @@ public class HeadTest extends LimeTestCase {
         assertEquals(complete,fileManager.getFileDesc(_haveFull));
         
         
-        blankRFD = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false,
-                -1, false, null, null, false, false, null, null, -1, false);
-        assertFalse(blankRFD.isBrowseHostEnabled());
-        assertFalse(blankRFD.isChatEnabled());
+        blankRFD = new RemoteFileDescContext(remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.1.1.1", 1, false), 1, "file", 1, new byte[16], 1, false,
+                -1, false, null, URN.NO_URN_SET, false, null, -1));
         assertFalse(blankRFD.isBusy());
-        assertFalse(blankRFD.isDownloading());
-        assertFalse(blankRFD.isFirewalled());
         assertFalse(blankRFD.isPartialSource());
         assertFalse(blankRFD.isReplyToMulticast());
-        assertFalse(blankRFD.isTLSCapable());
-        assertNull(blankRFD.getPushAddr());
-        assertEquals(0, blankRFD.getPushProxies().size());
         assertEquals(Integer.MAX_VALUE, blankRFD.getQueueStatus());
         
         createCollections();
@@ -396,11 +391,11 @@ public class HeadTest extends LimeTestCase {
 		assertNull(pong.getRanges());
 		assertNotNull(pongi.getRanges());
         
-        pongi.updateRFD(blankRFD);
+        PingRanker.updateContext(blankRFD, pongi);
         assertTrue(blankRFD.isPartialSource());
         assertEquals(pongi.getRanges(), blankRFD.getAvailableRanges());
         
-        pong.updateRFD(blankRFD);
+        PingRanker.updateContext(blankRFD, pong);
         assertFalse(blankRFD.isPartialSource());        
 		
 		assertTrue(Arrays.equals(_ranges.toBytes().ints,pongi.getRanges().toBytes().ints));
@@ -473,7 +468,7 @@ public class HeadTest extends LimeTestCase {
         pong = reparse(pong);
 		int allFree =  pong.getQueueStatus();
 		assertEquals(-UploadSettings.HARD_MAX_UPLOADS.getValue(), allFree);
-        pong.updateRFD(blankRFD);
+        PingRanker.updateContext(blankRFD, pong);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
         assertFalse(blankRFD.isBusy());
     }
@@ -491,7 +486,7 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);
 		assertEquals(-UploadSettings.HARD_MAX_UPLOADS.getValue()+10,pong.getQueueStatus());
-        pong.updateRFD(blankRFD);
+        PingRanker.updateContext(blankRFD, pong);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
         assertFalse(blankRFD.isBusy());
     }
@@ -509,7 +504,7 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);
 		assertEquals(5,pong.getQueueStatus());
-        pong.updateRFD(blankRFD);
+		PingRanker.updateContext(blankRFD, pong);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
         assertFalse(blankRFD.isBusy());
     }
@@ -528,7 +523,7 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);    
 		assertEquals(0,pong.getQueueStatus());
-        pong.updateRFD(blankRFD);
+		PingRanker.updateContext(blankRFD, pong);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
         assertFalse(blankRFD.isBusy());
     }
@@ -550,7 +545,7 @@ public class HeadTest extends LimeTestCase {
 		uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
 		pong = reparse(headPongFactory.create(ping));
 		assertGreaterThanOrEquals(0x7F,pong.getQueueStatus());
-        pong.updateRFD(blankRFD);
+	    PingRanker.updateContext(blankRFD, pong);
         assertEquals(pong.getQueueStatus(), blankRFD.getQueueStatus());
         assertTrue(blankRFD.isBusy());
 	}
@@ -647,13 +642,13 @@ public class HeadTest extends LimeTestCase {
 		assertNotEmpty(pong1.getPushLocs());
 		
 		RemoteFileDesc dummy = 
-		    remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
-                true, null, UrnHelper.URN_SETS[1], false, false, "", null, -1, false);
+		    remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", 6346, false), 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
+                true, null, UrnHelper.URN_SETS[1], false, "", -1);
 		
 		Set received = pong1.getAllLocsRFD(dummy, remoteFileDescFactory);
 		assertEquals(1,received.size());
 		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
-		PushEndpoint point = rfd.getPushAddr();
+		PushEndpoint point = (PushEndpoint) rfd.getAddress();
 		assertEquals(pushCollectionPE,point);
 		assertEquals(pushCollectionPE.getProxies() + " expected to have the same size as " + point.getProxies(), pushCollectionPE.getProxies().size(),point.getProxies().size());
         Set parsedProxies = new IpPortSet(point.getProxies());
@@ -704,20 +699,21 @@ public class HeadTest extends LimeTestCase {
         assertEquals("2.3.4.5", nonTLS.getAddress());
         
         RemoteFileDesc dummy = 
-            remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
-                true, null, UrnHelper.URN_SETS[1], false, false, "", null, -1, false);
+            remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", 6346, false), 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
+                true, null, UrnHelper.URN_SETS[1], false, "", -1);
         
-        Set rfds = pong.getAllLocsRFD(dummy, remoteFileDescFactory);
+        Set<RemoteFileDesc> rfds = pong.getAllLocsRFD(dummy, remoteFileDescFactory);
         assertEquals(1, rfds.size());
-        RemoteFileDesc rfd = (RemoteFileDesc)rfds.toArray()[0]; 
-        assertEquals(tlsCollectionPE.getClientGUID(), rfd.getPushAddr().getClientGUID());
-        assertEquals(3, rfd.getPushProxies().size());
-        Set parsedProxies = new IpPortSet(rfd.getPushProxies());
+        RemoteFileDesc rfd = rfds.iterator().next();
+        assertEquals(tlsCollectionPE.getClientGUID(), rfd.getClientGUID());
+        PushEndpoint pe = (PushEndpoint) rfd.getAddress();
+        assertEquals(3, pe.getProxies().size());
+        Set parsedProxies = new IpPortSet(pe.getProxies());
         parsedProxies.retainAll(expectedProxies);
         assertEquals(3, parsedProxies.size());
         tls = 0;
         nonTLS = null;        
-        for(IpPort ipp : rfd.getPushProxies()) {
+        for(IpPort ipp : pe.getProxies()) {
             if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
                 tls++;
             else
@@ -748,18 +744,20 @@ public class HeadTest extends LimeTestCase {
         }
         
         RemoteFileDesc dummy = 
-            remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
-                true, null, UrnHelper.URN_SETS[1], false, false, "", null, -1, false);
+            remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("www.limewire.org", 6346, false), 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
+                true, null, UrnHelper.URN_SETS[1], false, "", -1);
         
         Set rfds = pong.getAllLocsRFD(dummy, remoteFileDescFactory);
         assertEquals(1, rfds.size());
         RemoteFileDesc rfd = (RemoteFileDesc)rfds.toArray()[0]; 
-        assertEquals(tlsCollectionPE.getClientGUID(), rfd.getPushAddr().getClientGUID());
-        assertEquals(3, rfd.getPushProxies().size());
-        Set parsedProxies = new IpPortSet(rfd.getPushProxies());
+        assertEquals(tlsCollectionPE.getClientGUID(), rfd.getClientGUID());
+        PushEndpoint pe = (PushEndpoint) rfd.getAddress();
+        assertEquals(tlsCollectionPE.getClientGUID(), pe.getClientGUID());
+        assertEquals(3, pe.getProxies().size());
+        Set parsedProxies = new IpPortSet(pe.getProxies());
         parsedProxies.retainAll(expectedProxies);
         assertEquals(3, parsedProxies.size());
-        for(IpPort ipp : rfd.getPushProxies()) {
+        for(IpPort ipp : pe.getProxies()) {
             if(ipp instanceof Connectable && ((Connectable)ipp).isTLSCapable())
                 fail("tls capable!: " + ipp);
         }        
@@ -780,8 +778,8 @@ public class HeadTest extends LimeTestCase {
 		assertNotEmpty(pong.getAltLocs());
 		assertNotEmpty(pong.getPushLocs());
 		
-		RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("1.2.3.4", 1, 1, "filename", 1, null, 1, false, 1,
-                false, null, null, false, false, "", null, 1, false);
+		RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("1.2.3.4", 1, false), 1, "filename", 1, null, 1, false, 1,
+                false, null, URN.NO_URN_SET, false, "", 1);
 		
 		Set rfds = pong.getAllLocsRFD(rfd, remoteFileDescFactory);
 		

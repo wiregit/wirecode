@@ -62,8 +62,8 @@ public class SameNATAddressResolverTest extends BaseTestCase {
         BlockingAddressResolutionObserver observer = new BlockingAddressResolutionObserver();
         FirewalledAddress behindSameNatAddress = createAddress("129.0.0.1", "192.168.0.2");
         resolver.resolve(behindSameNatAddress, observer);
-        Address[] resolvedAddresses = observer.getAddresses();
-        Connectable connectable = (Connectable) resolvedAddresses[0];
+        Address resolvedAddress = observer.getAddress();
+        Connectable connectable = (Connectable) resolvedAddress;
         assertEquals("192.168.0.2", connectable.getAddress());
     }
     

@@ -390,7 +390,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
 
     
-    private void updateContext(RemoteFileDescContext rfdContext, HeadPong headPong) {
+    public static void updateContext(RemoteFileDescContext rfdContext, HeadPong headPong) {
         // if the rfd claims its busy, ping it again in a minute
         // (we're obviously using HeadPings, so its cheap to ping it sooner 
         // rather than later)

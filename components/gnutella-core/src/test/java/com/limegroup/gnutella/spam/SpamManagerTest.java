@@ -6,7 +6,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.io.IpPortSet;
+import org.limewire.io.ConnectableImpl;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -286,12 +286,11 @@ public class SpamManagerTest extends LimeTestCase {
     }
 
     private RemoteFileDesc createRFD(String addr, int port,
-            String name, LimeXMLDocument doc, URN urn, int size) {
+            String name, LimeXMLDocument doc, URN urn, int size) throws Exception {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        return remoteFileDescFactory.createRemoteFileDesc(addr, port, 1, name, size,
-                DataUtils.EMPTY_GUID, 3, false, 3, false, doc, urns, false, false, "ALT",
-                new IpPortSet(), 0l, false);
+        return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(addr, port, false), 1, name, size,
+                DataUtils.EMPTY_GUID, 3, false, 3, false, doc, urns, false, "ALT", 0l);
     }
     
 }
