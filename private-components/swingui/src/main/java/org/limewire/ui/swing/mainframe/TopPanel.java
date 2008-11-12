@@ -62,7 +62,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     Navigator navigator,
                     final FriendAutoCompleters friendLibraries,
                     HomePanel homePanel,
-                    StorePanel storePanel,
+                    final StorePanel storePanel,
                     LeftPanel leftPanel,
                     SearchBar searchBar,
                     FancyTabListFactory fancyTabListFactory) {
@@ -89,6 +89,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
         storeButton.setName("TopPanel.storeButton");
         storeButton.setText(I18n.tr("Store"));
         storeButton.setIconTextGap(1);
+        storeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                storePanel.reloadIfNecessary();
+            }
+        });
         
         JButton libraryButton = new IconButton();
         libraryButton.setName("TopPanel.libraryButton");
