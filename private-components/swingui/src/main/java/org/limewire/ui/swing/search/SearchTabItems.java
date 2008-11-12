@@ -19,10 +19,14 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.TabActionMap;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -44,7 +48,10 @@ class SearchTabItems {
     
     @Resource private Font tabFont;
 
-    SearchTabItems(SearchCategory category, EventList<VisualSearchResult> resultsList) {
+    @AssistedInject
+    SearchTabItems(@Assisted SearchCategory category, @Assisted EventList<VisualSearchResult> resultsList, 
+            FancyTabListFactory fancyTabListFactory) {
+        
         this.listeners = new CopyOnWriteArrayList<SearchTabListener>();
         
         this.searchActionMaps = new ArrayList<TabActionMap>();
@@ -90,7 +97,7 @@ class SearchTabItems {
             }
         }
 
-        searchTab = new FancyTabList(searchActionMaps);
+        searchTab = fancyTabListFactory.create(searchActionMaps);
         searchTab.setTabTextColor(Color.WHITE);
         
         // Make all the tabs except "All" invisible

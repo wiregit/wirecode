@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.util.List;
 
@@ -101,10 +102,7 @@ public class LimeComboBoxFactory {
         return createMiniComboBox(null,null);
     }
     
-    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
-    
-        LimeComboBox box = new LimeComboBox(items);
-        
+    public void decorateMiniComboBox(LimeComboBox box, String promptText) {
         box.setBackgroundPainter(popupButtonPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         box.setFont(this.miniTextFont);
@@ -112,6 +110,14 @@ public class LimeComboBoxFactory {
                 this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
         box.setText(promptText);
+        box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+    
+    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
+    
+        LimeComboBox box = new LimeComboBox(items);
+        
+        this.decorateMiniComboBox(box, promptText);
         
         return box;
         

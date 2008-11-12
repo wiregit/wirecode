@@ -33,7 +33,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     private final LibraryData libraryData;
     
     private JButton addFolderButton;
-    private JCheckBox musicCheckBox;
+    private JCheckBox audioCheckBox;
     private JCheckBox videoCheckBox;
     private JCheckBox imageCheckBox;
     private JCheckBox docCheckBox;
@@ -70,8 +70,8 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         treeTable = new LibraryManagerTreeTable(libraryData);
         addFolderButton = new JButton(new AddDirectoryAction(this));
         
-        musicCheckBox = new JCheckBox(I18n.tr(Category.AUDIO.toString()));
-        musicCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
+        audioCheckBox = new JCheckBox(I18n.tr(Category.AUDIO.toString()));
+        audioCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
         
         videoCheckBox = new JCheckBox(I18n.tr(Category.VIDEO.toString()));
         videoCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -96,7 +96,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         JPanel p = new JPanel();
         p.setLayout(new MigLayout());
         
-        p.add(musicCheckBox, "gapleft 25, gapright 18");        
+        p.add(audioCheckBox, "gapleft 25, gapright 18");        
         p.add(videoCheckBox, "gapright 18");        
         p.add(imageCheckBox, "wrap");        
         p.add(docCheckBox, "gapleft 25, gapright 18");
@@ -116,7 +116,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
 
     private Collection<Category> getManagedCategories() {
         Collection<Category> categories = EnumSet.noneOf(Category.class);
-        if(musicCheckBox.isSelected()) {
+        if(audioCheckBox.isSelected()) {
             categories.add(Category.AUDIO);
         }
         if(videoCheckBox.isSelected()) {
@@ -158,7 +158,7 @@ public class LibraryManagerOptionPanel extends OptionPanel {
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
         
         Collection<Category> categories = libraryData.getManagedCategories();
-        musicCheckBox.setSelected(categories.contains(Category.AUDIO));
+        audioCheckBox.setSelected(categories.contains(Category.AUDIO));
         videoCheckBox.setSelected(categories.contains(Category.VIDEO));
         docCheckBox.setSelected(categories.contains(Category.DOCUMENT));
         imageCheckBox.setSelected(categories.contains(Category.IMAGE));

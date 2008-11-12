@@ -1,16 +1,13 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.List;
 
 import javax.swing.AbstractButton;
 import javax.swing.GroupLayout;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
@@ -20,40 +17,23 @@ import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
 
 import org.jdesktop.swingx.JXBusyLabel;
-import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.painter.MoreButtonPainter;
-import org.limewire.ui.swing.util.I18n;
 
-public class FancyTabMoreButton extends JXButton {
-    
-//    @Resource private int width;
-//    @Resource private int height;
+public class FancyTabMoreButton extends LimeComboBox {
     
     private final FancyTabProperties props;
-    private JPopupMenu menu = new JPopupMenu(I18n.tr("more"));
+    private JPopupMenu menu = new JPopupMenu();
     
     public FancyTabMoreButton(List<FancyTab> tabs,
-            Icon triangle,
             FancyTabProperties props) {
 
-        super(I18n.tr("more"), triangle);
-
-        this.props = props;
+        super(null);
         
-//        setMinimumSize(new Dimension(70, 21));
-//        setMaximumSize(new Dimension(68, 21));
-//        setPreferredSize(new Dimension(68, 21));
-        setContentAreaFilled(false);
-        setFocusPainted(false);
-        setBorderPainted(false);
-        setHorizontalTextPosition(SwingConstants.LEFT);        
-        setVerticalTextPosition(SwingConstants.CENTER);
-        setHorizontalAlignment(SwingConstants.RIGHT);
-        setBackgroundPainter(new MoreButtonPainter());
+        this.props = props;
+        this.overrideMenu(menu);
+
         MoreListener listener = new MoreListener(tabs);
-        this.addMouseListener(listener);
-        this.addActionListener(listener);
+        this.addUpdateHandler(listener);
     }
     
     private JComponent createMenuItemFor(
@@ -148,7 +128,7 @@ public class FancyTabMoreButton extends JXButton {
         }
     }
     
-    private class MoreListener implements MouseListener, ActionListener {
+    private class MoreListener implements UpdateHandler {
         private final List<FancyTab> tabs;
         
         public MoreListener(List<FancyTab> tabs) {
@@ -156,30 +136,12 @@ public class FancyTabMoreButton extends JXButton {
         }
         
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void fireUpdate() {
             menu.removeAll();
-
+            
             for (FancyTab tab : tabs) {
-                menu.add(createMenuItemFor(menu, tab));
+                    menu.add(createMenuItemFor(menu, tab));
             }
-
-            JComponent source = (JComponent) e.getSource();
-            menu.show(source, 3, source.getBounds().height);
         }
-        
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
-        
-        @Override
-        public void mouseExited(MouseEvent e) {
-            getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());
-        }
-        
-        @Override public void mouseClicked(MouseEvent e) {}
-        @Override public void mousePressed(MouseEvent e) {}
-        @Override public void mouseReleased(MouseEvent e) {}
     }
-
 }

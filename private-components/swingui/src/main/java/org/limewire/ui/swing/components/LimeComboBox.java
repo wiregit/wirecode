@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -29,7 +30,7 @@ import javax.swing.event.ChangeListener;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FontUtils;
-import org.limewire.ui.swing.util.PaintUtils;
+import org.limewire.ui.swing.util.PainterUtils;
 
 public class LimeComboBox extends JXButton {
     
@@ -46,6 +47,7 @@ public class LimeComboBox extends JXButton {
     private boolean isMenuUpdated = false;
     
     private JPopupMenu menu = null;
+    private Cursor mouseOverCursor = Cursor.getDefaultCursor();
     
     private UpdateHandler updateHandler = null;
     
@@ -143,6 +145,10 @@ public class LimeComboBox extends JXButton {
             this.updateSize();
     }
 
+    public void setMouseOverCursor(Cursor cursor) {
+        this.mouseOverCursor = cursor;
+    }
+    
     public void addUpdateHandler(UpdateHandler updateHandler) {
         this.updateHandler = updateHandler;        
     }
@@ -267,9 +273,11 @@ public class LimeComboBox extends JXButton {
 
         Graphics2D g2 = (Graphics2D) g;        
 
-        Object origHints = g2.getRenderingHints();
-        this.getBackgroundPainter().paint(g2, this, this.getWidth(), this.getHeight());  
-        g2.setRenderingHints((Map<?, ?>) origHints);
+        if (this.getBackgroundPainter() != null) {
+            Object origHints = g2.getRenderingHints();
+            this.getBackgroundPainter().paint(g2, this, this.getWidth(), this.getHeight());  
+            g2.setRenderingHints((Map<?, ?>) origHints);
+        }
         
         g2.setFont(this.getFont());
         
@@ -301,7 +309,7 @@ public class LimeComboBox extends JXButton {
         }
             
         if (this.getText() != null) {
-            PaintUtils.drawSmoothString(g2, this.getText(), ix1,  
+            PainterUtils.drawSmoothString(g2, this.getText(), ix1,  
                     y);
             
             if (icon != null) {
@@ -310,7 +318,7 @@ public class LimeComboBox extends JXButton {
             }
         } else {
             if (this.selectedAction != null) {
-                PaintUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, 
+                PainterUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, 
                         y);
             }
             
@@ -331,6 +339,8 @@ public class LimeComboBox extends JXButton {
             
             @Override
             public void mouseEntered(MouseEvent e) {
+                getTopLevelAncestor().setCursor(mouseOverCursor);
+                
                 if (menu == null)  return;
                 
                 if (menu.isVisible()) this.hide = true;                
@@ -338,7 +348,9 @@ public class LimeComboBox extends JXButton {
 
             @Override
             public void mouseExited(MouseEvent e) {
-                this.hide = false;                
+                getTopLevelAncestor().setCursor(getCursor());
+                
+                this.hide = false;      
             }
             
             @Override

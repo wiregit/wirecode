@@ -15,7 +15,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.PaintUtils;
+import org.limewire.ui.swing.util.PainterUtils;
 
 /**
  * Background painter for a gradient button. 
@@ -77,16 +77,18 @@ public class LightButtonPainter extends AbstractPainter<JXButton> {
                 0, 1, this.bevelRightGradientBottom, false);
         
         this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
-                this.borderColour,  PaintUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
+                this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
                 gradientRight, this.bevelBottom);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
-                this.borderColour,  PaintUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
+                this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
                 gradientRight, this.bevelBottom);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
-                this.borderColour,  PaintUtils.TRASPARENT, PaintUtils.TRASPARENT, PaintUtils.TRASPARENT, 
+                this.borderColour,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
                 gradientRight, this.bevelBottom);
+        
+        this.setCacheable(false);
     }
     
     

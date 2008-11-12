@@ -25,6 +25,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
@@ -64,7 +65,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     HomePanel homePanel,
                     StorePanel storePanel,
                     LeftPanel leftPanel,
-                    SearchBar searchBar) {
+                    SearchBar searchBar,
+                    FancyTabListFactory fancyTabListFactory) {
         
         GuiUtils.assignResources(this);
         
@@ -95,7 +97,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         libraryButton.setIconTextGap(1);
         libraryButton.addActionListener(new LibraryAction(leftPanel));
         
-        searchList = new FancyTabList();
+        searchList = fancyTabListFactory.create();
         searchList.setName("TopPanel.SearchList");
         searchList.setMaxVisibleTabs(3);
         searchList.setMaxTotalTabs(10);

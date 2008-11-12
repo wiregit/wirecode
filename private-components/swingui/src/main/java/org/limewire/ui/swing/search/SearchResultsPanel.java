@@ -102,6 +102,7 @@ public class SearchResultsPanel extends JXPanel {
             @Assisted final EventList<VisualSearchResult> eventList,
             @Assisted Search search,
             ResultsContainerFactory containerFactory,
+            SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             final SortAndFilterPanel sortAndFilterPanel,
             RowSelectionPreserver preserver) {        
@@ -158,7 +159,7 @@ public class SearchResultsPanel extends JXPanel {
             }
         };
         
-        searchTabItems = new SearchTabItems(searchInfo.getSearchCategory(), eventList);
+        searchTabItems = searchTabItemsFactory.create(searchInfo.getSearchCategory(), eventList);
         searchTabItems.addSearchTabListener(listener);
 
         for (Map.Entry<SearchCategory, Action> entry : searchTabItems.getResultCountActions()) {

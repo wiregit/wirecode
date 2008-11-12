@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
-public class PaintUtils {
+public class PainterUtils {
    
     
     public static Color TRASPARENT = new Color(0,0,0,0);
