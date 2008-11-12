@@ -28,6 +28,7 @@ import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.IOUtils;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.AbstractSettingsGroup;
@@ -114,6 +115,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             return false;
         }
         
+        ObjectOutputStream out = null;
         Map<String, Object> save = new HashMap<String, Object>();
         lock.readLock().lock();
         try {
@@ -125,10 +127,11 @@ class LibraryFileData extends AbstractSettingsGroup {
             save.put("SHARE_DATA", libraryShareData);
             
             try {
-                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
+                out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(backupFile)));
                 out.writeObject(save);
                 out.flush();
                 out.close();
+                out = null;
                 // Rename backup to save, now that it saved.
                 saveFile.delete();
                 backupFile.renameTo(saveFile);                
@@ -138,6 +141,7 @@ class LibraryFileData extends AbstractSettingsGroup {
             }
         } finally {
             lock.readLock().unlock();
+            IOUtils.close(out);
         }
         
         return true;
