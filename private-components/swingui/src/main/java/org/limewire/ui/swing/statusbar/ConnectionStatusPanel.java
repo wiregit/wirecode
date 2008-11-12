@@ -18,37 +18,33 @@ import com.google.inject.Inject;
 
 class ConnectionStatusPanel extends JXPanel {
 
-    private final SharedFileCountPanel countPanel;
-    private final GnutellaConnectionManager connectionManager;
+    private final SharedFileCountPanel sharedFileCountPanel;
     
-    private final JLabel qualityIcon;
+    private final JLabel connectionStrengthPanel;
     
 //    @Resource private Icon noInternet;
 //    @Resource private Icon disconnected;
-//    @Resource private Icon poor;
-//    @Resource private Icon satifactory;
-//    @Resource private Icon good;
-//    @Resource private Icon veryGood;
-    @Resource private Icon excellent;
+    @Resource private Icon connecting;
+//    @Resource private Icon weak;
+//    @Resource private Icon medium;
+    @Resource private Icon full;
 //    @Resource private Icon turbo;
     
     @Inject
     ConnectionStatusPanel(SharedFileCountPanel countPanel, GnutellaConnectionManager connectionManager) {
         GuiUtils.assignResources(this);
         
-        this.countPanel = countPanel;
-        this.connectionManager = connectionManager;
+        this.sharedFileCountPanel = countPanel;
         
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        this.countPanel.setVisible(false);
+        this.sharedFileCountPanel.setVisible(false);        
+        this.connectionStrengthPanel = new JLabel();
         
-        this.qualityIcon = new JLabel(excellent);
+        this.add(this.connectionStrengthPanel);
+        this.add(this.sharedFileCountPanel);
         
-        this.add(this.qualityIcon);
-        this.add(this.countPanel);
-        
-        this.connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
+        connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals("strength")) {
@@ -61,18 +57,40 @@ class ConnectionStatusPanel extends JXPanel {
     
     private void setConnectionStrength(ConnectionStrength strength) {
         System.out.println("New Connection Strength: " + strength);
+        boolean sharingVisible = false;
+        Icon strengthIcon = null;
         switch(strength) {
         case NO_INTERNET:
+            sharingVisible = false;
+            strengthIcon = connecting; // CHANGEME.
+            break;
         case DISCONNECTED:
-            ConnectionStatusPanel.this.countPanel.setVisible(false);
+            sharingVisible = false;
+            strengthIcon = connecting; // CHANGEME.
             break;
         case CONNECTING:
+            sharingVisible = true;
+            strengthIcon = connecting;
+            break;
         case WEAK:
+            sharingVisible = true;
+            strengthIcon = connecting; // CHANGEME.
+            break;
         case MEDIUM:
+            sharingVisible = true;
+            strengthIcon = connecting; // CHANGEME.
+            break;            
         case FULL:
+            sharingVisible = true;
+            strengthIcon = full;
+            break;
         case TURBO:
-            ConnectionStatusPanel.this.countPanel.setVisible(true);
+            sharingVisible = true;
+            strengthIcon = full; // CHANGEME.
             break;
         }
+        
+        sharedFileCountPanel.setVisible(sharingVisible);
+        connectionStrengthPanel.setIcon(strengthIcon);
     }
 }
