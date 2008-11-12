@@ -396,7 +396,7 @@ public class LibraryNavigator extends JXPanel {
             if(friend == Me.ME){
                 setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));
             } else {
-                setTransferHandler(new FriendLibraryNavTransferHandler(friend, libraryManager, shareListManager));
+                setTransferHandler(new FriendLibraryNavTransferHandler(friend, shareListManager));
             }
         }
         

@@ -20,7 +20,6 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 
 public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
@@ -94,25 +93,17 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
     private LocalFileItem[] createFileItemArray(){
         return fileItems.toArray(new LocalFileItem[fileItems.size()]);
-    }
-    
+    }    
 
     private Action removeAction = new AbstractAction(I18n.tr("Remove from library")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
-
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (LocalFileItem fileItem : fileItemArray) {
-                        if (!fileItem.isIncomplete()) {
-                            libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-                        }
-                    }
-
+            for (LocalFileItem fileItem : fileItemArray) {
+                if (!fileItem.isIncomplete()) {
+                    libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
                 }
-            });
+            }
         }
     };
 
@@ -123,8 +114,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
 
-            BackgroundExecutorService.schedule(new Runnable() {
-                
+            BackgroundExecutorService.schedule(new Runnable() {                
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {
@@ -145,23 +135,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
-            
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (LocalFileItem fileItem : fileItemArray) {
-                        if (!fileItem.isIncomplete()) {
-                            shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
-                        }
-                    }
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            repaintComponent.repaint();
-                        }
-                    });
+            for (LocalFileItem fileItem : fileItemArray) {
+                if (!fileItem.isIncomplete()) {
+                    shareListManager.getGnutellaShareList().removeFile(fileItem.getFile());
                 }
-            });
+            }
+            repaintComponent.repaint();
         }
     };
 
@@ -169,23 +148,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
-            
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (LocalFileItem fileItem : fileItemArray) {
-                        if (!fileItem.isIncomplete()) {
-                            shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
-                        }
-                    }
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            repaintComponent.repaint();
-                        }
-                    });
+            for (LocalFileItem fileItem : fileItemArray) {
+                if (!fileItem.isIncomplete()) {
+                    shareListManager.getGnutellaShareList().addFile(fileItem.getFile());
                 }
-            });        
+            }
+            repaintComponent.repaint();      
         }
     };
     
@@ -198,23 +166,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
-            
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (LocalFileItem fileItem : fileItemArray) {
-                        if (!fileItem.isIncomplete()) {
-                            shareListManager.getFriendShareList(friend).removeFile(fileItem.getFile());
-                        }
-                    }
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            repaintComponent.repaint();
-                        }
-                    });
+            for (LocalFileItem fileItem : fileItemArray) {
+                if (!fileItem.isIncomplete()) {
+                    shareListManager.getFriendShareList(friend).removeFile(fileItem.getFile());
                 }
-            });
+            }
+            repaintComponent.repaint();
         }
     };
 
@@ -226,24 +183,13 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-            final LocalFileItem[] fileItemArray = createFileItemArray();
-            
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (LocalFileItem fileItem : fileItemArray) {
-                        if (!fileItem.isIncomplete()) {
-                            shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
-                        }
-                    }
-                    SwingUtils.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            repaintComponent.repaint();
-                        }
-                    });
+            final LocalFileItem[] fileItemArray = createFileItemArray();            
+            for (LocalFileItem fileItem : fileItemArray) {
+                if (!fileItem.isIncomplete()) {
+                    shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
                 }
-            });        
+            }
+            repaintComponent.repaint();      
         }
     };
 

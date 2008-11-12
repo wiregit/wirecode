@@ -36,7 +36,6 @@ import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.IconLabelRenderer;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -50,26 +49,39 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LibraryTableFactoryImpl implements LibraryTableFactory, RegisteringEventListener<RosterEvent>{
+public class LibraryTableFactoryImpl implements LibraryTableFactory,
+        RegisteringEventListener<RosterEvent> {
 
     private IconManager iconManager;
+
     private LibraryManager libraryManager;
+
     private ShareListManager shareListManager;
+
     private AudioPlayer player;
-    
-    //only accessed on EDT
+
+    // only accessed on EDT
     private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
+
     private DownloadListManager downloadListManager;
+
     private MagnetLinkFactory magnetLinkFactory;
+
     private CategoryIconManager categoryIconManager;
+
     private ThumbnailManager thumbnailManager;
+
     private PropertiesFactory<LocalFileItem> localItemPropFactory;
+
     private PropertiesFactory<RemoteFileItem> remoteItemPropFactory;
 
     @Inject
-    public LibraryTableFactoryImpl(ThumbnailManager thumbnailManager, CategoryIconManager categoryIconManager, IconManager iconManager, LibraryManager libraryManager, 
-            ShareListManager shareListManager, AudioPlayer player, DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory,
-            PropertiesFactory<LocalFileItem> localItemPropFactory, PropertiesFactory<RemoteFileItem> remoteItemPropFactory){
+    public LibraryTableFactoryImpl(ThumbnailManager thumbnailManager,
+            CategoryIconManager categoryIconManager, IconManager iconManager,
+            LibraryManager libraryManager, ShareListManager shareListManager, AudioPlayer player,
+            DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory,
+            PropertiesFactory<LocalFileItem> localItemPropFactory,
+            PropertiesFactory<RemoteFileItem> remoteItemPropFactory) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
@@ -82,24 +94,27 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         this.remoteItemPropFactory = remoteItemPropFactory;
         EventAnnotationProcessor.subscribe(this);
     }
-    
+
     @Override
-    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane) {
-        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager, shareListManager,  magnetLinkFactory, friendList, localItemPropFactory);
-        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList, libraryManager.getLibraryManagedList(), 
+    public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
+            JScrollPane scrollPane) {
+        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
+                shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
+        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
+                libraryManager.getLibraryManagedList(),
                 categoryIconManager.getIcon(Category.IMAGE), thumbnailManager, scrollPane);
     }
-    
+
     /**
      * 
      * @param friend null for MyLibrary
      * @return
      */
-    public <T extends FileItem>LibraryTable<T> createTable(Category category,
+    public <T extends FileItem> LibraryTable<T> createTable(Category category,
             EventList<T> eventList, Friend friend) {
-        
+
         final LibraryTable<T> libTable;
-        
+
         switch (category) {
         case AUDIO:
             if (friend != null) {
@@ -113,69 +128,76 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             break;
         case DOCUMENT:
             libTable = new LibraryTable<T>(eventList, new DocumentTableFormat<T>());
-            libTable.getColumnModel().getColumn(DocumentTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
-            libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(DocumentTableFormat.NAME_COL).setCellRenderer(
+                    new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_COL).setCellRenderer(
+                    new FileSizeRenderer());
             break;
         case IMAGE:
             libTable = new LibraryTable<T>(eventList, new ImageTableFormat<T>());
             break;
         case OTHER:
             libTable = new LibraryTable<T>(eventList, new OtherTableFormat<T>());
-            libTable.getColumnModel().getColumn(OtherTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
-            libTable.getColumnModel().getColumn(OtherTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(OtherTableFormat.NAME_COL).setCellRenderer(
+                    new IconLabelRenderer(iconManager));
+            libTable.getColumnModel().getColumn(OtherTableFormat.SIZE_COL).setCellRenderer(
+                    new FileSizeRenderer());
             break;
         case PROGRAM:
             libTable = new LibraryTable<T>(eventList, new ProgramTableFormat<T>());
-            libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(
+                    new FileSizeRenderer());
             break;
         default:
             throw new IllegalArgumentException("Unknown category: " + category);
         }
-        
-        if(friend != null){
+
+        if (friend != null) {
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
-            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, 
-                    magnetLinkFactory, remoteItemPropFactory));
-        } else {//Local            
+            libTable.setPopupHandler(new FriendLibraryPopupHandler(
+                    castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
+                    remoteItemPropFactory));
+        } else {// Local
             libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
-                    magnetLinkFactory, friendList, localItemPropFactory));
+            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
+                    category, libraryManager, shareListManager, magnetLinkFactory, friendList,
+                    localItemPropFactory));
         }
-        
-            libTable.setDropMode(DropMode.ON);
-        
+
+        libTable.setDropMode(DropMode.ON);
+
         return libTable;
-        
+
     }
-    
-    @SuppressWarnings({ "unchecked", "cast" })
-    private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table){
-        return (LibraryTable<RemoteFileItem>)table;
+
+    @SuppressWarnings( { "unchecked", "cast" })
+    private LibraryTable<RemoteFileItem> castToRemoteLibraryTable(LibraryTable table) {
+        return (LibraryTable<RemoteFileItem>) table;
     }
-    
-    @SuppressWarnings({ "unchecked", "cast" })
-    private LibraryTable<LocalFileItem> castToLocalLibraryTable(LibraryTable table){
-        return (LibraryTable<LocalFileItem>)table;
+
+    @SuppressWarnings( { "unchecked", "cast" })
+    private LibraryTable<LocalFileItem> castToLocalLibraryTable(LibraryTable table) {
+        return (LibraryTable<LocalFileItem>) table;
     }
-    
+
     private class MyLibraryTransferHandler extends TransferHandler {
-        
+
         private LibraryTable table;
 
-        public MyLibraryTransferHandler(LibraryTable table){
+        public MyLibraryTransferHandler(LibraryTable table) {
             this.table = table;
         }
-        
+
         @Override
         public boolean canImport(TransferHandler.TransferSupport info) {
-            return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);      
-       }
+            return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+        }
 
         @Override
         public int getSourceActions(JComponent comp) {
             return COPY;
         }
-        
+
         @SuppressWarnings("unchecked")
         public boolean importData(TransferHandler.TransferSupport info) {
             if (!info.isDrop()) {
@@ -186,48 +208,49 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             Transferable t = info.getTransferable();
             final List<File> fileList;
             try {
-                fileList = (List<File>)t.getTransferData(DataFlavor.javaFileListFlavor);
-            } 
-            catch (Exception e) { return false; }
-            
-            BackgroundExecutorService.schedule(new Runnable() {
-                @Override
-                public void run() {
-                    for (File file : fileList) {
-                        libraryManager.getLibraryManagedList().addFile(file);
-                    }
+                fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+            } catch (Exception e) {
+                return false;
+            }
+
+            for (File file : fileList) {
+                if(file.isDirectory()) {
+                    libraryManager.getLibraryManagedList().addFolder(file);
+                } else {
+                    libraryManager.getLibraryManagedList().addFile(file);
                 }
-            });
+            }
             return true;
         }
 
-        
         @Override
         public Transferable createTransferable(JComponent comp) {
             int indices[] = table.getSelectedRows();
             File[] files = new File[indices.length];
-            for(int i = 0; i < indices.length; i++) {
-                files[i] = ((LocalFileItem)((LibraryTableModel)table.getModel()).getFileItem(indices[i])).getFile();
+            for (int i = 0; i < indices.length; i++) {
+                files[i] = ((LocalFileItem) ((LibraryTableModel) table.getModel())
+                        .getFileItem(indices[i])).getFile();
             }
             return new LocalFileTransferable(files);
         }
     }
 
-    
     private class FriendLibraryTransferHandler extends TransferHandler {
-        
+
         private LibraryTable table;
+
         private Friend friend;
 
-        public FriendLibraryTransferHandler(LibraryTable table, Friend friend){
+        public FriendLibraryTransferHandler(LibraryTable table, Friend friend) {
             this.table = table;
             this.friend = friend;
         }
-        
+
         @Override
         public int getSourceActions(JComponent comp) {
             return COPY;
         }
+
         @Override
         public boolean canImport(TransferHandler.TransferSupport info) {
             return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
@@ -248,15 +271,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             } catch (Exception e) {
                 return false;
             }
-            BackgroundExecutorService.schedule(new Runnable() {
-                public void run() {
-                    for (File file : fileList) {
-                        libraryManager.getLibraryManagedList().addFile(file);
-                        shareListManager.getFriendShareList(friend).addFile(file);
-                    }
+            for (File file : fileList) {
+                if (file.isDirectory()) {
+                    shareListManager.getFriendShareList(friend).addFolder(file);
+                } else {
+                    shareListManager.getFriendShareList(friend).addFile(file);
                 }
-            });
-
+            }
             return true;
         }
 
@@ -264,8 +285,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
         public Transferable createTransferable(JComponent comp) {
             int indices[] = table.getSelectedRows();
             List<RemoteFileItem> files = new ArrayList<RemoteFileItem>();
-            for(int i = 0; i < indices.length; i++) {
-                files.add((RemoteFileItem)((LibraryTableModel)table.getModel()).getFileItem(indices[i]));
+            for (int i = 0; i < indices.length; i++) {
+                files.add((RemoteFileItem) ((LibraryTableModel) table.getModel())
+                        .getFileItem(indices[i]));
             }
             return new RemoteFileTransferable(files);
         }
@@ -279,9 +301,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
 
     @Override
     public void handleEvent(RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {              
+        if (event.getType().equals(User.EventType.USER_ADDED)) {
             addFriend(event.getSource());
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if (event.getType().equals(User.EventType.USER_REMOVED)) {
             removeFriend(event.getSource());
         }
     }
@@ -295,7 +317,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             }
         });
     }
-    
+
     private void removeFriend(final Friend friend) {
         SwingUtils.invokeLater(new Runnable() {
             @Override
@@ -313,7 +335,5 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory, Registering
             }
         });
     }
-
-
 
 }
