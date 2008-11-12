@@ -6,8 +6,8 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
@@ -26,10 +26,10 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
-import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
@@ -58,7 +58,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final ResultDownloader resultDownloader;
     //cache for RowDisplayResult which could be expensive to generate with large search result sets
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
-        new WeakHashMap<VisualSearchResult, RowDisplayResult>();
+        new HashMap<VisualSearchResult, RowDisplayResult>();
     
     private Scrollable visibileComponent;
     
@@ -162,6 +162,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                             }
                         }
                         resultsList.setIgnoreRepaints(false);
+                        resultsList.updateViewSizeSequence();
                         resultsList.resizeAndRepaint();
                     }
                 };
@@ -330,6 +331,14 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         private void setIgnoreRepaints(boolean ignore) {
             this.ignoreRepaints = ignore;
+        }
+        
+        @Override
+        protected void updateViewSizeSequence() {
+            if (ignoreRepaints) {
+                return;
+            }
+            super.updateViewSizeSequence();
         }
 
         @Override
