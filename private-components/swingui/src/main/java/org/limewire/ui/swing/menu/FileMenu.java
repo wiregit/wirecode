@@ -294,8 +294,6 @@ class FileMenu extends JMenu {
                     
                 }
             });
-            // TODO validate input while typing, disable the open button until
-            // there is a valid url.
 
             openButton = new JButton(I18n.tr("Open"));
             openButton.addActionListener(new ActionListener() {
