@@ -1,8 +1,12 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.Network;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.Presence;
 
 public class SharingTarget {
     
@@ -46,7 +50,7 @@ public class SharingTarget {
     private static class Gnutella implements Friend {
         @Override
         public boolean isAnonymous() {
-            return false;
+            return true;
         }
         
         @Override
@@ -71,6 +75,10 @@ public class SharingTarget {
         @Override
         public Network getNetwork() {
             return null;
+        }
+
+        public Map<String, Presence> getPresences() {
+            return new HashMap<String, Presence>();
         }
     }
 

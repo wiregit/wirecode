@@ -18,4 +18,6 @@ public interface FriendItem {
     public void addPropertyChangeListener(PropertyChangeListener l);
     
     public void removePropertyChangeListener(PropertyChangeListener l);
+
+    void dispose();
 }

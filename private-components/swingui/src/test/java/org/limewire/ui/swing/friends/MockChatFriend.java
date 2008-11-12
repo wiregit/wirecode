@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.Network;
@@ -48,6 +50,10 @@ class MockChatFriend implements ChatFriend {
 
             public Network getNetwork() {
                 return null;
+            }
+
+            public Map<String, Presence> getPresences() {
+                return new HashMap<String, Presence>();
             }
         };
     }

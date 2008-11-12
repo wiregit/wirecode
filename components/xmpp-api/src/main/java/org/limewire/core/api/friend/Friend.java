@@ -1,5 +1,9 @@
 package org.limewire.core.api.friend;
 
+import java.util.Map;
+
+import org.limewire.xmpp.api.client.Presence;
+
 /** 
  * A Friend.
  */
@@ -40,4 +44,10 @@ public interface Friend {
     boolean isAnonymous();
     
     Network getNetwork();
+
+    /**
+     * @return an unmodifiable map of all <code>Presence</code>s for this <code>User</code>. 
+     * Keys are fully qualified jids of the form <code>"user@domain.com/resourceXYZ"</code>
+     */
+    Map<String, Presence> getPresences();
 }

@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateListener;
@@ -92,7 +93,7 @@ class PresenceImpl implements Presence {
             if(listenerAdapter != null) {
                 connection.getChatManager().removeChatListener(listenerAdapter);
             }
-            listenerAdapter = new IncomingChatListenerAdapter(listener);
+            listenerAdapter = new IncomingChatListenerAdapter(listener, getJID(), connection);
             connection.getChatManager().addChatListener(listenerAdapter);
         }
     }
@@ -180,18 +181,22 @@ class PresenceImpl implements Presence {
         }
     }
 
-    private class IncomingChatListenerAdapter implements ChatManagerListener {
+    private static class IncomingChatListenerAdapter implements ChatManagerListener {
+        private final org.jivesoftware.smack.XMPPConnection connection;
         private final IncomingChatListener listener;
+        private final String jid;
 
-        public IncomingChatListenerAdapter(IncomingChatListener listener) {
+        public IncomingChatListenerAdapter(IncomingChatListener listener, String jid, XMPPConnection connection) {
             this.listener = listener;
+            this.jid = jid;
+            this.connection = connection;
         }
 
         public void chatCreated(final Chat chat, boolean createdLocally) {
             if(!createdLocally) {
-                if(chat.getParticipant().equals(getJID())) {
+                if(chat.getParticipant().equals(jid)) {
                     if(LOG.isInfoEnabled()) {
-                        LOG.info("new incoming chat with " + getJID());
+                        LOG.info("new incoming chat with " + jid);
                     }
                     final MessageWriter writer = new MessageWriter() {
                         public void writeMessage(String message) throws XMPPException {

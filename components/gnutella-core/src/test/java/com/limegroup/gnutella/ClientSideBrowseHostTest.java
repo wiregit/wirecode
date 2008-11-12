@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +35,7 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.Base32;
+import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -415,6 +418,10 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         public Network getNetwork() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Map<String, Presence> getPresences() {
+            return new HashMap<String, Presence>();
         }
     }
     

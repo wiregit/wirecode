@@ -33,6 +33,10 @@ public class FriendItemImpl implements FriendItem, ListEventListener<LocalFileIt
         support.removePropertyChangeListener(l);
     }
     
+    public void dispose() {
+        eventList.removeListEventListener(this);
+    }
+    
     @Override
     public Friend getFriend() {
         return friend;

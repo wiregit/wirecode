@@ -30,6 +30,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.api.client.Presence;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.GUID;
@@ -249,6 +250,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                             public Network getNetwork() {
                                 return null; 
                             }
+
+                            public Map<String, Presence> getPresences() {
+                                return new HashMap<String, Presence>();
+                            }
                         };
                     }
 
@@ -376,6 +381,10 @@ public class RemoteFileDescAdapter implements SearchResult {
                         @Override
                         public Network getNetwork() {
                             return null;
+                        }
+
+                        public Map<String, Presence> getPresences() {
+                            return new HashMap<String, Presence>();
                         }
                     };
                 }

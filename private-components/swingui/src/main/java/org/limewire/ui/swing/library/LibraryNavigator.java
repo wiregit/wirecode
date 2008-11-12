@@ -66,6 +66,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -626,6 +627,11 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
 
         public Network getNetwork() {
             return null;
+        }
+
+        @Override
+        public Map<String, Presence> getPresences() {
+            return new HashMap<String, Presence>();
         }
     }
 }

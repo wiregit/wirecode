@@ -23,6 +23,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.Inject;
 
@@ -111,7 +112,7 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
     private static class Gnutella implements Friend {
         @Override
         public boolean isAnonymous() {
-            return false;
+            return true;
         }
         
         @Override
@@ -136,6 +137,11 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         @Override
         public Network getNetwork() {
             return null;
+        }
+
+        @Override
+        public Map<String, Presence> getPresences() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
+import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
@@ -107,7 +108,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     private void browse(final PresenceLibrary presenceLibrary, final FriendPresence friendPresence) {
         presenceLibrary.setState(LibraryState.LOADING);
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
-        browseFactory.createBrowse(friendPresence).start(new BrowseListener() {
+        final Browse browse = browseFactory.createBrowse(friendPresence);
+        browse.start(new BrowseListener() {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
@@ -126,6 +128,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 } else {
                     presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
                 }
+                browse.stop();
             }
         });
     }

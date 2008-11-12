@@ -42,17 +42,17 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.ObservableElementList.Connector;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 public class FriendSharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
@@ -304,12 +304,16 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             shareListManager.removeFriendShareList(event.getSource());
             friendMap.remove(event.getSource().getId());
+            // TODO remove from friendList ??
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
+        for(FriendItem friendItem : friendsList) {
+            friendItem.dispose();
+        }
         friendsList.clear();
         friendMap.clear();
     }

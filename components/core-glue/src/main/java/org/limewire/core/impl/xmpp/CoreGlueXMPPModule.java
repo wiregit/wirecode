@@ -17,7 +17,6 @@ public class CoreGlueXMPPModule extends AbstractModule {
         bind(new TypeLiteral<Map<String, XMPPServerSettings.XMPPServerConfiguration>>(){}).toProvider(XMPPServerSettings.XMPPServerConfigs.class);
         bind(new TypeLiteral<Map<String, XMPPUserSettings.XMPPUserConfiguration>>(){}).toProvider(XMPPUserSettings.XMPPUserConfigs.class);
         bind(FriendShareListRefresher.FriendShareListEventImpl.class);
-        bind(FriendShareListRefresher.RosterEventListenerImpl.class);
         bind(CoreGlueXMPPService.class);
     }
     
