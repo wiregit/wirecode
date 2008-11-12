@@ -1,8 +1,11 @@
 package org.limewire.ui.swing.menu;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,6 +35,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
+import org.limewire.util.URIUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
@@ -259,8 +263,40 @@ class FileMenu extends JMenu {
             JLabel urlLabel = new JLabel(I18n.tr("URL:"));
             urlField = new JTextField(50);
             urlField.setText("http://");
-            //TODO validate input while typing, disable the open button until there is a valid url.
-            
+
+            final JLabel errorLabel = new JLabel(I18n.tr("Invalid URL"));
+            errorLabel.setForeground(Color.RED);
+
+            urlField.addKeyListener(new KeyListener() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    URI uri = getURI();
+                    //TODO add stricter validation
+                    
+                    if (uri == null || uri.getPath() == null || uri.getPath().trim().length() == 0) {
+                        errorLabel.setVisible(true);
+                        openButton.setEnabled(false);
+                    } else {
+                        errorLabel.setVisible(false);
+                        openButton.setEnabled(true);
+                    }
+                }
+
+                @Override
+                public void keyPressed(KeyEvent e) {
+                    if(openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        openButton.doClick();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    
+                }
+            });
+            // TODO validate input while typing, disable the open button until
+            // there is a valid url.
+
             openButton = new JButton(I18n.tr("Open"));
             openButton.addActionListener(new ActionListener() {
                 @Override
@@ -268,6 +304,9 @@ class FileMenu extends JMenu {
                     LocationDialogue.this.dispose();
                 }
             });
+            openButton.setEnabled(false);
+            
+           
 
             JButton cancelButton = new JButton(I18n.tr("Cancel"));
             cancelButton.addActionListener(new ActionListener() {
@@ -282,6 +321,7 @@ class FileMenu extends JMenu {
             urlPanel.add(urlField, "wrap");
             urlPanel.add(openButton, "align right");
             urlPanel.add(cancelButton);
+            urlPanel.add(errorLabel);
 
             setContentPane(urlPanel);
             pack();
@@ -297,9 +337,10 @@ class FileMenu extends JMenu {
 
         public synchronized URI getURI() {
             try {
-                return new URI(urlField.getText());
+                return URIUtils.toURI(urlField.getText());
             } catch (URISyntaxException e) {
-                // should not happen, will validate while typing, like the eclipse control
+                // should not happen, will validate while typing, like the
+                // eclipse control
                 return null;
             }
         }
