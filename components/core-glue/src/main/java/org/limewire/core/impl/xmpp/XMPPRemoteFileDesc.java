@@ -16,6 +16,8 @@ import org.limewire.util.StringUtils;
 import org.limewire.xmpp.client.impl.XMPPAddress;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 
+import com.google.inject.internal.base.Objects;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -56,6 +58,8 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
 
     private final XMPPAddressResolver addressResolver;
     
+    private int hashCode = -1;
+    
     public XMPPRemoteFileDesc(XMPPAddress address, long index, String filename,
             long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
@@ -64,7 +68,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
         this.index = index;
         this.filename = filename;
         this.size = size;
-        this.clientGUID = clientGUID;
+        this.clientGUID = Objects.nonNull(clientGUID, "clientGUID");
         this.speed = speed;
         this.quality = quality;
         this.xmlDoc = xmlDoc;
@@ -74,6 +78,43 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
         this.vendor = vendor;
         this.createTime = createTime;
         this.addressFactory = addressFactory;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof XMPPRemoteFileDesc)) {
+            return false;
+        }
+        XMPPRemoteFileDesc other = (XMPPRemoteFileDesc)obj;
+        if (!Arrays.equals(clientGUID, other.clientGUID)) {
+            return false;
+        }
+        if (!address.equals(other.address)) {
+            return false;
+        }
+        if (size != other.size) {
+            return false;
+        }
+        if (!urns.equals(other.urns)) {
+            return false;
+        }
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        int h = hashCode;
+        if (h == -1) {
+            h = address.hashCode();
+            h = 31 * h + (int)size;
+            h = 31 * h + new GUID(clientGUID).hashCode();
+            h = 31 * h + urns.hashCode();
+            hashCode = h;
+        }
+        return h;
     }
     
     @Override
