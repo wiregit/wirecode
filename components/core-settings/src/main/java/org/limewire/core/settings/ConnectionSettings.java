@@ -45,7 +45,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * on startup.
 	 */
 	public static final BooleanSetting CONNECT_ON_STARTUP =
-		FACTORY.createBooleanSetting("CONNECT_ON_STARTUP", true);
+		FACTORY.createBooleanSetting("CONNECT_ON_STARTUP_2", true);
 
 	/**
 	 * Settings for the number of connections to maintain.
