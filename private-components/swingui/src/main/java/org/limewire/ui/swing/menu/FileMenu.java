@@ -22,11 +22,13 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,7 +42,7 @@ class FileMenu extends JMenu {
             LibraryManager libraryManager) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        // TODO no longer a singleton build on demand, or figure out how to
+        // TODO no longer a singleton, build on demand, or figure out how to
         // update items
         add(getFileMenuItem(downloadListManager));
         add(getUrlMenuItem(downloadListManager));
@@ -56,13 +58,13 @@ class FileMenu extends JMenu {
         add(new AbstractAction(I18n.tr("Set as available")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me");
+                new SelfAvailabilityUpdateEvent(Mode.available).publish();
             }
         });
         add(new AbstractAction(I18n.tr("Set as away")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me");
+                new SelfAvailabilityUpdateEvent(Mode.away).publish();
             }
         });
         addSeparator();
@@ -210,7 +212,7 @@ class FileMenu extends JMenu {
     }
 
     private Action getUrlMenuItem(final DownloadListManager downloadListManager) {
-        // TODO instead of adding downloadListManager a part of the location
+        // TODO instead of adding downloadListManager as part of the location
         // dialogue, add listening capabilities to the location dialogue
         return new AbstractAction(I18n.tr("Open Link")) {
             @Override
