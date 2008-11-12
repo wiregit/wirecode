@@ -14,6 +14,11 @@ public interface SpamServices {
      * Reloads the IP Filter data & adjusts spam filters when ready.
      */
     public void reloadIPFilter();
+    
+    /**
+     * Reloads the URN filter data.
+     */
+    public void reloadURNFilter();
 
     public void blockHost(String host);
     

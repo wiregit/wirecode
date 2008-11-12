@@ -1993,6 +1993,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         // drop the reply if we've already sent more than the specified number
         // of results for this GUID
+        // FIXME: could this cause spam to kill queries?
         if(resultsRouted > 100) {
             droppedReplyCounter.tooManyResults((short)resultsRouted);
             return true;
@@ -2001,13 +2002,14 @@ public abstract class MessageRouterImpl implements MessageRouter {
         int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
         if(ttl > 2 && bytesRouted < 50    * 1024) return false;
-        // send replies with ttl 1 if we've routed under 1000K 
+        // send replies with ttl 1 if we've routed under 200K 
         if(ttl == 1 && bytesRouted < 200 * 1024) return false;
-        // send replies with ttl 2 if we've routed under 333K 
+        // send replies with ttl 2 if we've routed under 100K 
         if(ttl == 2 && bytesRouted < 100  * 1024) return false;
 
         droppedReplyCounter.ttlByteDrop(ttl, bytesRouted);
         // if none of the above conditions holds true, drop the reply
+        // FIXME: could this cause spam to kill queries?
         return true;
     }
 

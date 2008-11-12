@@ -51,6 +51,25 @@ public class FilterSettings extends LimeProps {
     	FACTORY.createBooleanSetting("FILTER_WMV_ASF",true);
     
     /**
+     * Sets whether or not known spam and malware URNs are banned.
+     */
+    public static final BooleanSetting FILTER_URNS =
+        FACTORY.createBooleanSetting("FILTER_URNS", true);
+    
+    /**
+     * An array of URNs that should not be displayed (local setting).
+     */
+    public static final StringArraySetting FILTERED_URNS_LOCAL = 
+        FACTORY.createStringArraySetting("FILTERED_URNS_LOCAL", new String[0]);
+    
+    /**
+     * An array of URNs that should not be displayed (remote setting).
+     */
+    public static final StringArraySetting FILTERED_URNS_REMOTE =
+        FACTORY.createRemoteStringArraySetting("FILTERED_URNS_REMOTE",
+                new String[0], "FilterSettings.filteredUrnsRemote");
+    
+    /**
 	 * Sets whether or not duplicate search results are
 	 * banned.
 	 */
@@ -94,7 +113,7 @@ public class FilterSettings extends LimeProps {
      * TODO: naming convention for SIMPP keys?
      */
     public static final BooleanSetting FILTER_HASH_QUERIES =
-        FACTORY.createRemoteBooleanSetting("FILTER_HASH_QUERIES",false,"filter_hash");
+        FACTORY.createRemoteBooleanSetting("FILTER_HASH_QUERIES", false,"filter_hash");
     
     public static final IntSetting MIN_MATCHING_WORDS =
     	FACTORY.createRemoteIntSetting("MIN_MATCHING_WORDS",0,

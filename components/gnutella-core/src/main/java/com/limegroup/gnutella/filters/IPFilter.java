@@ -24,7 +24,7 @@ public interface IPFilter extends SpamFilter {
      * This is equivalent to floor(log2(distance)) + 1.
      *  
      * @param ip an IPv4 address, represented as an IP object with a /32 netmask.
-     * @return an int on the interval [0,31].
+     * @return an int on the interval [0,31], or 32 if the address is whitelisted.
      */
     public int logMinDistanceTo(IP ip);
     

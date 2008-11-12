@@ -335,27 +335,9 @@ public final class SearchSettings extends LimeProps {
     
     /**
 	 * Set how sensitive the spamfilter should be
-	 */    
-    // FIXME check min/max values
+	 */
     public static final FloatSetting FILTER_SPAM_RESULTS =
-        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.85f);
-    
-    /**
-     * The minimum spam rating at which we stop counting results for 
-     * dynamic querying.  Meant to prevent very strict user settings
-     * from making dynamic querying too agressive. 
-     */
-    public static final FloatSetting QUERY_SPAM_CUTOFF =
-        FACTORY.createRemoteFloatSetting("QUERY_SPAM_CUTOFF",0.4f,
-                "SpamManager.displayTreshold",0.1f,1.0f);
-
-    /**
-     * The percentage of normal results that spam results bring to
-     * the dynamic querying mechanism
-     */
-    public static final FloatSetting SPAM_RESULT_RATIO =
-	FACTORY.createRemoteFloatSetting("SPAM_RESULT_RATIO", 0.3f,
-		"SpamManager.resultRatio",0.2f,1.0f);
+        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.85f, 0.5f, 1.0f);
     
 	/**
      * Do not issue query keys more than this often

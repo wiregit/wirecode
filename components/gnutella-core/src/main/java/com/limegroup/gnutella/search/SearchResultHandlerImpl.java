@@ -198,9 +198,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             return -1;
     }
     
-    /**
-     * Determines whether or not the specified 
-    
     /*---------------------------------------------------    
       END OF PUBLIC INTERFACE METHODS
      ----------------------------------------------------*/
@@ -257,7 +254,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         try {
             results = qr.getResultsAsList();
         } catch (BadPacketException e) {
-            LOG.debug("Error gettig results", e);
+            LOG.debug("Error getting results", e);
             return;
         }
 
@@ -269,8 +266,11 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         
         boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
         int numGoodSentToFrontEnd = 0;
-        double numBadSentToFrontEnd = 0;
             
+        float spamThreshold = 1;
+        if(SearchSettings.ENABLE_SPAM_FILTER.getValue())
+            spamThreshold = SearchSettings.FILTER_SPAM_RESULTS.getValue();
+        
         for(Response response : results) {
             if(!responseFilter.allow(qr, response)) {
                 continue;
@@ -283,14 +283,15 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             Set<? extends IpPort> alts = response.getLocations();
             activityCallback.get().handleQueryResult(rfd, qr, alts);
             
-            if (skipSpam || !spamManager.get().isSpam(rfd))
+            // Set the spam rating for the RemoteFileDesc
+            float spamRating = spamManager.get().calculateSpamRating(rfd);
+            
+            // Count non-spam results for dynamic querying
+            if(skipSpam || spamRating < spamThreshold)
                 numGoodSentToFrontEnd++;
-            else 
-                numBadSentToFrontEnd++;
-        } //end of response loop
+        }
         
-        numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * SearchSettings.SPAM_RESULT_RATIO.getValue());
-        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd);
     }
 
     private void countClassC(QueryReply qr, Response r) {
@@ -318,8 +319,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
 
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
-        // technically Ultrapeers don't use this info, but we are keeping it
-        // around for further use
         if (numGoodSentToFrontEnd > 0) {
             // get the correct GuidCount
             GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));

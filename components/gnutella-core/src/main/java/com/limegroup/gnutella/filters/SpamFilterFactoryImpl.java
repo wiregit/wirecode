@@ -14,14 +14,16 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
     private final Provider<MutableGUIDFilter> mutableGUIDFilter;
     private final Provider<HostileFilter> hostileFilter;
     private final Provider<LocalIPFilter> ipFilter;
+    private final Provider<URNFilter> urnFilter;
 
     @Inject
     public SpamFilterFactoryImpl(Provider<MutableGUIDFilter> mutableGUIDFilter, 
             Provider<HostileFilter> hostileFilter,
-            Provider<LocalIPFilter> ipFilter) {
+            Provider<LocalIPFilter> ipFilter, Provider<URNFilter> urnFilter) {
         this.mutableGUIDFilter = mutableGUIDFilter;
         this.hostileFilter = hostileFilter;
         this.ipFilter = ipFilter;
+        this.urnFilter = urnFilter;
     }
     
     /* (non-Javadoc)
@@ -65,6 +67,10 @@ class SpamFilterFactoryImpl implements SpamFilterFactory {
         
         //4. Mutable GUID-based filters.
         buf.add(mutableGUIDFilter.get());
+        
+        //5. URN filters
+        if(FilterSettings.FILTER_URNS.getValue())
+            buf.add(urnFilter.get());
 
         return compose(buf);
     }

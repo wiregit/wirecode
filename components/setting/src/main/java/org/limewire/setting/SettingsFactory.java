@@ -627,6 +627,14 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         return result;
     }
 
+    public synchronized FloatSetting createFloatSetting(String key, 
+                    float defaultValue, float min, float max) {
+        FloatSetting result = 
+            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, min, max);
+        handleSettingInternal(result, null);
+        return result;
+    }
+    
     public synchronized FloatSetting createRemoteFloatSetting(String key, 
                    float defaultValue, String remoteKey, float min, float max) {
         FloatSetting result = new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, min, max);

@@ -746,8 +746,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 
     @Override
     public boolean isSpam() {
-        return getSpamRating() >= Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
-                SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+        return getSpamRating() >= SearchSettings.FILTER_SPAM_RESULTS.getValue();
     }
     
     @Override
