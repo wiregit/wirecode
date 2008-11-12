@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.lifecycle.Service;
@@ -17,6 +18,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 @Singleton
@@ -30,6 +33,8 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
     
     private volatile long lastIdleTime;
     private volatile ConnectionStrength currentStrength = ConnectionStrength.DISCONNECTED;
+    
+    private volatile ConnectionLifecycleEventType lastStrengthRelatedEvent;
 
     @Inject
     public GnutellaConnectionManagerImpl(com.limegroup.gnutella.ConnectionManager connectionManager) {
@@ -39,13 +44,28 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
     @Inject void register(ServiceRegistry registry, final @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         registry.register(new Service() {
             private volatile ScheduledFuture<?> meter;
+            private volatile ConnectionLifecycleListener listener;
             
             @Override
             public String getServiceName() {
                 return "Connection Strength Meter";
             }
+            
             @Override
             public void initialize() {
+                listener = new ConnectionLifecycleListener() {
+                    @Override
+                    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+                        switch(evt.getType()) {
+                        case NO_INTERNET:
+                        case CONNECTION_INITIALIZED:
+                        case CONNECTED:
+                            lastStrengthRelatedEvent = evt.getType();
+                            break;
+                        }
+                    }
+                };
+                connectionManager.addEventListener(listener);
             }
             
             @Override
@@ -57,11 +77,16 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
                     }
                 }, 0, 1, TimeUnit.SECONDS);
             }
+            
             @Override
             public void stop() {
                 if(meter != null) {
                     meter.cancel(false);
                     meter = null;
+                }
+                if(listener != null) {
+                    connectionManager.removeEventListener(listener);
+                    listener = null;
                 }
             }
         });
@@ -129,16 +154,23 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
         }
         
         switch(strength) {
-        case CONNECTING:            
+        case DISCONNECTED:
+        case CONNECTING:
+            if(lastStrengthRelatedEvent == ConnectionLifecycleEventType.NO_INTERNET) {
+                strength = ConnectionStrength.NO_INTERNET;
+            }    
+        }
+        
+        switch(strength) {
+        case CONNECTING:
         case WEAK:
-        case MEDIUM:
             // if one of these four, see if we recently woke up from
             // idle, and if so, report as 'waking up' instead.
             long now = System.currentTimeMillis();
             if(now < lastIdleTime + 15 * 1000)
-                strength = ConnectionStrength.FULL;
+                strength = ConnectionStrength.MEDIUM;
         }
-        
+                
         return strength;
     }
 

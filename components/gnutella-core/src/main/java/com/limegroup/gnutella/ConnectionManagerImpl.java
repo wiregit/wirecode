@@ -2455,8 +2455,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         // Kill all of the ConnectionFetchers.
         disconnect(false);
         
-        // Try to reconnect in 10 seconds, and then every minute after
-        // that.
+        // Try to reconnect periodically.
         backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 // If the last time the user disconnected is more recent
@@ -2474,7 +2473,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                     connect();
                 }
             }
-        }, 10*1000, 2*60*1000, TimeUnit.MILLISECONDS);
+        }, 10*1000, 30*1000, TimeUnit.MILLISECONDS);
         _automaticConnectTime = System.currentTimeMillis();
         _automaticallyConnecting = true;
         
