@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -23,24 +24,26 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ComboBoxEditor;
 import javax.swing.Icon;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.plaf.basic.ComboPopup;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.ShapePainter;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
@@ -48,8 +51,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.Disposable;
-import org.limewire.ui.swing.table.MouseableTable;
-import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -59,15 +60,16 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.swing.EventComboBoxModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 import com.google.inject.Inject;
 
 public class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable {
-
-
 
     private static final int FRIEND_ROW_COUNT = 4;
     private static final int SHARED_ROW_COUNT = 20;
@@ -76,9 +78,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     
     private LibraryShareModel shareModel;
     
-    
-    // private  final SharingTarget GNUTELLA_SHARE = new SharingTarget(new Gnutella());
-
     private JTextField inputField;
 
     /**
@@ -99,10 +98,11 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private List<SharingTarget> allFriends;
 
     private JScrollPane shareScroll;
-    private JScrollPane friendScroll;
+   // private JScrollPane friendScroll;
 
     private JXTable shareTable;
-    private MouseableTable friendTable;
+   // private MouseableTable friendTable;
+    private JComboBox friendCombo;
 
     private JLabel friendLabel;
     private JLabel shareLabel;
@@ -115,29 +115,24 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private int ledgeHeight;
     private int ledgeY;
     
+    private ComboPopup comboPopup;
+    
     @Resource
     private Icon removeIcon;
     @Resource
     private Icon removeIconRollover;
     @Resource
-    private Icon removeIconPressed;
-    @Resource
-    private Icon addIcon;
-    @Resource
-    private Icon addIconRollover;
-    @Resource
-    private Icon addIconPressed;
-    
+    private Icon removeIconPressed;   
     @Resource
     private int shareTableIndent = 15;
     
     private Action up = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = friendTable.getSelectedRow();
+            int selRow = friendCombo.getSelectedIndex();
             if (selRow > 0) {
                 selRow--;
-                friendTable.setRowSelectionInterval(selRow, selRow);
+                friendCombo.setSelectedIndex(selRow);
             }
         }
     };
@@ -145,10 +140,10 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private Action down = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = friendTable.getSelectedRow();
-            if (selRow < friendTable.getRowCount() - 1) {
+            int selRow = friendCombo.getSelectedIndex();
+            if (selRow < noShareFilterList.size() - 1) {
                 selRow++;
-                friendTable.setRowSelectionInterval(selRow, selRow);
+                friendCombo.setSelectedIndex(selRow);
             }
         }
     };
@@ -176,6 +171,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
       
         
         inputField = new JTextField(12);
+        inputField.setBorder(null);
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
@@ -213,22 +209,44 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             }
         };
         
-        //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
+        noShareFriendList = GlazedLists.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+      //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
-        noShareFriendList = GlazedLists.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
         noShareFilterList = GlazedListsFactory.filterList(noShareFriendList, textMatcher);
+
+        friendCombo = new JComboBox(new EventComboBoxModel<SharingTarget>(noShareFilterList));
+        ShareComboBoxUI comboUI = new ShareComboBoxUI();
         
-        inputField.addActionListener(new ActionListener() {
+        friendCombo.setUI(comboUI);
+        friendCombo.setEditor(new ShareComboBoxEditor());
+        friendCombo.setEditable(true);
+        
+        comboPopup = comboUI.getPopup();
+        
+        friendCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if("".equals(inputField.getText()) || inputField.getText() == null || friendTable.getRowCount() == 0){
-                    setVisible(false);
-                } else if (friendTable.getSelectedRow() >= 0) {
-                    shareFriend(noShareFilterList.get(friendTable.getSelectedRow()));
+                if ((e.getModifiers() & InputEvent.BUTTON1_MASK) != 0) {
+                    shareSelectedFriend();
                 }
             }
         });
+
+              
+        inputField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(noShareFilterList.size() == 0 || 
+                        !friendCombo.isPopupVisible() && ("".equals(inputField.getText()) || inputField.getText() == null)){
+                    setVisible(false);
+                } else if (friendCombo.getSelectedIndex() >= 0) {
+                    shareSelectedFriend();
+                    friendCombo.hidePopup();
+                }
+            }
+        });
+        
         
         inputField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -246,58 +264,30 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
                update();
             }
             
-            private void update(){
+            private void update() {
                 textMatcher.setFilterText(inputField.getText().split(" "));
-                if (friendTable.getRowCount() > 0){
-                    friendTable.setRowSelectionInterval(0, 0);
+                if (noShareFilterList.size() > 0) {
+                    friendCombo.setSelectedIndex(0);
+                    if (isVisible()) {
+                        friendCombo.showPopup();
+                    }
                 }
             }
-        });
-        
-        friendTable = new ToolTipTable(new EventTableModel<SharingTarget>(noShareFilterList, new LibraryShareTableFormat(0)));
-        //do nothing ColorHighlighter eliminates default striping
-        friendTable.setHighlighters(new ColorHighlighter(HighlightPredicate.ALWAYS, getBackground(),
-                Color.BLACK, friendTable.getSelectionBackground(), friendTable.getSelectionForeground()));
-        friendTable.setTableHeader(null);
-        friendTable.setOpaque(false);
-        friendTable.setShowGrid(false, false);
-        friendTable.setColumnSelectionAllowed(false);
-        friendTable.setRowSelectionAllowed(true);
-        friendTable.setToolTipText("filler to enable tooltips");
-
-        final ShareRendererEditor addEditor = new ShareRendererEditor(addIcon, addIconRollover, addIconPressed);
-        addEditor.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-               int row = friendTable.getSelectedRow();
-               shareFriend(addEditor.getFriend());
-               addEditor.cancelCellEditing();
-               inputField.requestFocusInWindow();
-               resetRowSelection(friendTable, row);
-            }            
-        });
-        
-        friendTable.setDoubleClickHandler(new TableDoubleClickHandler() {
-            @Override
-            public void handleDoubleClick(int row) {
-                addSelectedFriend();
-            }
+            
         });
 
-        friendTable.getColumnModel().getColumn(0).setCellEditor(addEditor);
-        friendTable.getColumnModel().getColumn(0).setPreferredWidth(addEditor.getPreferredSize().width); 
-        friendTable.getColumnModel().getColumn(0).setMaxWidth(addEditor.getPreferredSize().width);       
-        friendTable.getColumnModel().getColumn(0).setCellRenderer(new ShareRendererEditor(addIcon, addIconRollover, addIconPressed));
-
-        friendTable.setRowHeight(addEditor.getPreferredSize().height);
-        friendTable.setVisibleRowCount(FRIEND_ROW_COUNT);
-        friendScroll = new JScrollPane(friendTable);      
         
         shareScroll = new JScrollPane(shareTable);
         shareScroll.setBorder(new EmptyBorder(0, shareTableIndent, 0, 0));
         shareScroll.setOpaque(false);
 
-        friendLabel = new JLabel(I18n.tr("To share, type name below"));
+        friendLabel = new JLabel(I18n.tr("Start typing a friend's name"));
+        shareFriendList.addListEventListener(new ListEventListener<SharingTarget>() {
+            @Override
+            public void listChanged(ListEvent<SharingTarget> listChanges) {
+                adjustFriendLabelVisibility();
+            }
+        });
         
         Dimension labelSize = friendLabel.getPreferredSize().width > shareLabel.getPreferredSize().width ? 
                 friendLabel.getPreferredSize() : shareLabel.getPreferredSize();
@@ -305,28 +295,27 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         shareLabel.setPreferredSize(labelSize);
         
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridy = 0;
+        
         gbc.weightx = 1.0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(0, HGAP, 0, HGAP);
-        mainPanel.add(friendLabel, gbc);
         
-        gbc.gridy++;
-        gbc.weighty = 0;
-        mainPanel.add(inputField, gbc);
-        gbc.gridy++;
-        gbc.weighty = 1.0;
-        mainPanel.add(friendScroll, gbc);
-        gbc.gridy++;
-        gbc.weighty = 0;
-        mainPanel.add(new JSeparator(), gbc);   
-        gbc.gridy++;
+        gbc.gridy = 0;
         gbc.weighty = 0;
         mainPanel.add(shareLabel, gbc);
+        
         gbc.gridy++;
         gbc.weighty = 1.0;
         mainPanel.add(shareScroll, gbc);
+       
+        gbc.gridy++;
+        mainPanel.add(friendLabel, gbc);
+
+        
+        gbc.gridy++;
+        gbc.weighty = 1.0;
+        mainPanel.add(friendCombo, gbc);
                 
         add(mainPanel);
 
@@ -335,17 +324,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         setKeyStrokes(this);
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField);
-        
-        
-         Action enterAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addSelectedFriend();
-            }
-        };
-        
-        friendTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0),enterAction.toString() );
-        friendTable.getActionMap().put(enterAction.toString(), enterAction);        
+                     
         
         Action closeAction = new AbstractAction() {
             @Override
@@ -354,16 +333,12 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             }
         };
 
-        
 
         this.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
         this.getActionMap().put(closeAction.toString(), closeAction);  
 
         mainPanel.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
         mainPanel.getActionMap().put(closeAction.toString(), closeAction);  
-        
-        friendTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        friendTable.getActionMap().put(closeAction.toString(), closeAction);  
         
         shareTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
         shareTable.getActionMap().put(closeAction.toString(), closeAction); 
@@ -379,6 +354,19 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         });
     }
     
+
+    private void adjustFriendLabelVisibility() {
+        friendLabel.setVisible(shareFriendList.size() == 0);
+    }
+    
+    private void shareSelectedFriend() {
+        int index = friendCombo.getSelectedIndex();
+        if (index > -1) {
+            shareFriend(noShareFilterList.get(index));
+            resetRowSelection(index);
+        }
+    }
+
     public void setShareModel(LibraryShareModel shareModel){
         this.shareModel = shareModel;
         shareModel.addPropertyChangeListener(this);
@@ -388,14 +376,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         return shareModel;
     }
 
-    private void addSelectedFriend() {
-        if (friendTable.getSelectedRow() >= 0) {
-            int row = friendTable.getSelectedRow();
-            shareFriend(noShareFilterList.get(row));
-            resetRowSelection(friendTable, row);
-        }
-    
-    }
     
     private void setKeyStrokes(JComponent component) {
         component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "up");
@@ -407,6 +387,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
 
     public void show(Rectangle ledgeBounds, Rectangle visibleRect){
         inputField.setText(null);
+        adjustFriendLabelVisibility();
         
         ledgeWidth = ledgeBounds.width;
         ledgeHeight = ledgeBounds.height;
@@ -466,17 +447,17 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     }
 
 
-    private void resetRowSelection(JTable table, int oldSelRow) {
-        if(table.getRowCount() == 0){
+    private void resetRowSelection(int oldSelRow) {
+        if(noShareFilterList.size() == 0){
             return;
         }
         
         if(oldSelRow == -1){
-            table.setRowSelectionInterval(0, 0);
-        } else if(table.getRowCount() > oldSelRow){
-            table.setRowSelectionInterval(oldSelRow, oldSelRow);
-        } else if ((oldSelRow - 1) >= 0 && (oldSelRow - 1) < table.getRowCount()) {
-            table.setRowSelectionInterval(oldSelRow - 1, oldSelRow - 1);
+            friendCombo.setSelectedIndex(0);
+        } else if(noShareFilterList.size() > oldSelRow){
+            friendCombo.setSelectedIndex(oldSelRow);
+        } else if ((oldSelRow - 1) >= 0 && (oldSelRow - 1) < noShareFilterList.size()) {
+            friendCombo.setSelectedIndex(oldSelRow - 1);
         }
     }
     
@@ -503,9 +484,9 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     //TODO: clean this up
     public void adjustSize(){
         int visibleRows = (noShareFriendList.size() < FRIEND_ROW_COUNT) ? noShareFriendList.size() : FRIEND_ROW_COUNT;
-        friendTable.setVisibleRowCount(visibleRows);
-        friendScroll.setVisible(noShareFriendList.size() > 0);
-        friendLabel.setVisible(noShareFriendList.size() > 0);
+//        friendTable.setVisibleRowCount(visibleRows);
+        // friendScroll.setVisible(noShareFriendList.size() > 0);
+        adjustFriendLabelVisibility();
         inputField.setVisible(noShareFriendList.size() > 1);
         
         visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
@@ -547,7 +528,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     
     public boolean contains(Component c) {
         for (; c != null; c = c.getParent()) {
-            if (c == this) {
+            if (c == this || c == comboPopup) {
                 return true;
             }
         }
@@ -560,7 +541,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         }       
         
         ((EventTableModel)shareTable.getModel()).dispose();
-        ((EventTableModel)friendTable.getModel()).dispose();
+     //   ((EventTableModel)friendTable.getModel()).dispose();
     }
     
     
@@ -653,4 +634,45 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         // the share model file or cateogry has changed - reload friends.
         reloadSharedBuddies();
     }
+    
+    private class ShareComboBoxEditor implements ComboBoxEditor{
+        @Override
+        public Component getEditorComponent() {
+            return inputField;
+        }
+
+        @Override
+        public void addActionListener(ActionListener l) {
+            //Do nothing
+        }       
+
+        @Override
+        public Object getItem() {
+            //Do nothing
+            return null;
+        }
+
+        @Override
+        public void removeActionListener(ActionListener l) {
+            //Do nothing
+        }
+
+        @Override
+        public void selectAll() {
+            //Do nothing
+        }
+
+        @Override
+        public void setItem(Object anObject) {
+            //Do nothing
+        }
+        
+    }
+    
+    private static class ShareComboBoxUI extends BasicComboBoxUI {
+        public ComboPopup getPopup(){
+            return popup;
+        }
+    }
+
 }

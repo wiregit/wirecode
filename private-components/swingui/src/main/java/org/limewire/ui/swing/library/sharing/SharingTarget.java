@@ -46,6 +46,11 @@ public class SharingTarget {
     public boolean isGnutellaNetwork(){
         return this == GNUTELLA_SHARE;
     }
+    
+    @Override
+    public String toString(){
+        return getFriend().getRenderName();
+    }
 
     private static class Gnutella implements Friend {
         @Override
