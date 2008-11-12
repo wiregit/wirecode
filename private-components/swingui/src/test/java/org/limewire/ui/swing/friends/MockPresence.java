@@ -29,6 +29,12 @@ public class MockPresence implements Presence {
     public User getUser() {
         return user;
     }
+    
+    @Override
+    public void removeChatListener() {
+        // TODO Auto-generated method stub
+        
+    }
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
