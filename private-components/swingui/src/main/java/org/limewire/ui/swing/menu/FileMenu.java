@@ -7,12 +7,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
@@ -41,44 +42,77 @@ class FileMenu extends JMenu {
         this.navigator = navigator;
         // TODO no longer a singleton build on demand, or figure out how to
         // update items
-        JMenuItem fileItem = getFileMenuItem(downloadListManager);
-        add(fileItem);
-        JMenuItem linkItem = getUrlMenuItem(downloadListManager);
-        add(linkItem);
+        add(getFileMenuItem(downloadListManager));
+        add(getUrlMenuItem(downloadListManager));
         JMenu recentDownloads = getRecentDownloads();
         add(recentDownloads);
         addSeparator();
-        JMenuItem addFile = getAddFile(libraryManager);
-        add(addFile);
-        JMenuItem addFolder = getAddFolder(libraryManager);
-        add(addFolder);
+        add(getAddFile(libraryManager));
+        add(getAddFolder(libraryManager));
         addSeparator();
-        JMenuItem launchFile = getLaunchItem();
-        add(launchFile);
-        JMenuItem locateFile = getLocateFile();
-        add(locateFile);
+        add(getLaunchItem());
+        add(getLocateFile());
         addSeparator();
-        add(new JMenuItem(I18n.tr("Set as available")));
-        add(new JMenuItem(I18n.tr("Set as away")));
+        add(new AbstractAction(I18n.tr("Set as available")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        });
+        add(new AbstractAction(I18n.tr("Set as away")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        });
         addSeparator();
-        add(new JMenuItem(I18n.tr("Switch user")));
-        add(new JMenuItem(I18n.tr("Sign into Friends/Sign out of Friends")));
+        add(new AbstractAction(I18n.tr("Switch user")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        });
+        add(new AbstractAction(I18n.tr("Sign into Friends/Sign out of Friends")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        });
         addSeparator();
-        add(new JMenuItem(I18n.tr("Exit")));
+        add(new AbstractAction(I18n.tr("Exit")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        });
 
     }
 
-    private JMenuItem getLocateFile() {
-        return new JMenuItem(I18n.tr("Locate file"));
+    private Action getLocateFile() {
+
+        return new AbstractAction(I18n.tr("Locate file")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // File file = null;
+                // NativeLaunchUtils.launchExplorer(file);
+                throw new UnsupportedOperationException("TODO implement me");
+            }
+        };
     }
 
-    private JMenuItem getLaunchItem() {
-        return new JMenuItem(I18n.tr("Launch file"));
+    private Action getLaunchItem() {
+        return new AbstractAction(I18n.tr("Launch file")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // File file = null;
+                // NativeLaunchUtils.launchFile(file);
+                throw new UnsupportedOperationException("TODO Implement Me.");
+            }
+        };
     }
 
-    private JMenuItem getAddFolder(final LibraryManager libraryManager) {
-        JMenuItem addFolder = new JMenuItem(I18n.tr("Add Folder"));
-        addFolder.addActionListener(new ActionListener() {
+    private Action getAddFolder(final LibraryManager libraryManager) {
+        return new AbstractAction(I18n.tr("Add Folder")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<File> folders = FileChooser.getInput(FileMenu.this, I18n.tr("Add Folder(s)"),
@@ -87,7 +121,6 @@ class FileMenu extends JMenu {
                         new FileFilter() {
                             @Override
                             public boolean accept(File f) {
-                                String extension = FileUtils.getFileExtension(f);
                                 return f.isDirectory();
                             }
 
@@ -105,13 +138,11 @@ class FileMenu extends JMenu {
                 }
 
             }
-        });
-        return addFolder;
+        };
     }
 
-    private JMenuItem getAddFile(final LibraryManager libraryManager) {
-        JMenuItem addFile = new JMenuItem(I18n.tr("Add File"));
-        addFile.addActionListener(new ActionListener() {
+    private Action getAddFile(final LibraryManager libraryManager) {
+        return new AbstractAction(I18n.tr("Add File")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Add File(s)"), I18n
@@ -137,17 +168,15 @@ class FileMenu extends JMenu {
                     }
                 }
             }
-        });
-        return addFile;
+        };
     }
 
     private JMenu getRecentDownloads() {
         return new JMenu(I18n.tr("Recent Downloads"));
     }
 
-    private JMenuItem getFileMenuItem(final DownloadListManager downloadListManager) {
-        JMenuItem fileItem = new JMenuItem(I18n.tr("Open File"));
-        fileItem.addActionListener(new ActionListener() {
+    private Action getFileMenuItem(final DownloadListManager downloadListManager) {
+        return new AbstractAction(I18n.tr("Open File")) {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -163,42 +192,38 @@ class FileMenu extends JMenu {
 
                             @Override
                             public String getDescription() {
-                                return I18n.tr(".torrent|.magnet");
+                                return I18n.tr("TODO better copy. .torrent|.magnet");
                             }
                         });
 
-                if (files == null) {
-                    return;
-                }
-
-                for (File file : files) {
-                    try {
-                        downloadListManager.addDownload(file);
-                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
-                    } catch (SaveLocationException e1) {
-                        // TODO better user feedback
-                        throw new UnsupportedOperationException(e1);
+                if (files != null) {
+                    for (File file : files) {
+                        try {
+                            downloadListManager.addDownload(file);
+                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                                    .select();
+                        } catch (SaveLocationException e1) {
+                            // TODO better user feedback
+                            throw new UnsupportedOperationException(e1);
+                        }
                     }
-
                 }
             }
-        });
-
-        return fileItem;
+        };
     }
 
-    private JMenuItem getUrlMenuItem(final DownloadListManager downloadListManager) {
+    private Action getUrlMenuItem(final DownloadListManager downloadListManager) {
         // TODO instead of adding downloadListManager a part of the location
         // dialogue, add listening capabilities to the location dialogue
-        JMenuItem linkItem = new JMenuItem(I18n.tr("Open Link"));
-        linkItem.addActionListener(new ActionListener() {
+        return new AbstractAction(I18n.tr("Open Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LocationDialogue locationDialogue = new LocationDialogue(downloadListManager);
                 locationDialogue.setVisible(true);
+                URI uri = locationDialogue.getUri();
+
             }
-        });
-        return linkItem;
+        };
     }
 
     private class LocationDialogue extends JDialog {
@@ -235,6 +260,11 @@ class FileMenu extends JMenu {
             urlPanel.add(openButton);
 
             setContentPane(urlPanel);
+        }
+
+        public URI getUri() {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 
