@@ -39,6 +39,7 @@ class HelpMenu extends JMenu {
         add(new AbstractAction(I18n.tr("LimeWire Store help")) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                storePanel.load("about:blank");
                 storePanel.load("http://www.store.limewire.com/store/app/pages/help/Help/");
                 NavItem storeNav = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
                 storeNav.select();
