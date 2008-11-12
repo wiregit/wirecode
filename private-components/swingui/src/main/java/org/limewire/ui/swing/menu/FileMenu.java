@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.menu;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,6 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
@@ -84,7 +88,7 @@ class FileMenu extends JMenu {
         add(new AbstractAction(I18n.tr("Exit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me");
+                Application.getInstance().exit(e);
             }
         });
 
@@ -95,6 +99,7 @@ class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Locate file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // TODO
                 // File file = null;
                 // NativeLaunchUtils.launchExplorer(file);
                 throw new UnsupportedOperationException("TODO implement me");
@@ -106,6 +111,7 @@ class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Launch file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // TODO
                 // File file = null;
                 // NativeLaunchUtils.launchFile(file);
                 throw new UnsupportedOperationException("TODO Implement Me.");
@@ -118,21 +124,20 @@ class FileMenu extends JMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<File> folders = FileChooser.getInput(FileMenu.this, I18n.tr("Add Folder(s)"),
-                    I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
-                    JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
-                    new FileFilter() {
-                        @Override
-                        public boolean accept(File f) {
-                            return f.isDirectory();
-                        }
+                        I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
+                        JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
+                        new FileFilter() {
+                            @Override
+                            public boolean accept(File f) {
+                                return f.isDirectory();
+                            }
 
-                        @Override
-                        public String getDescription() {
-                            return I18n.tr("All Folders");
-                        }
-                    }
-                );
-                
+                            @Override
+                            public String getDescription() {
+                                return I18n.tr("All Folders");
+                            }
+                        });
+
                 if (folders != null) {
                     for (File folder : folders) {
                         libraryManager.getLibraryManagedList().addFolder(folder);
@@ -153,7 +158,8 @@ class FileMenu extends JMenu {
                         new FileFilter() {
                             @Override
                             public boolean accept(File f) {
-                                return f.isDirectory() || libraryManager.getLibraryData().isFileManageable(f);
+                                return f.isDirectory()
+                                        || libraryManager.getLibraryData().isFileManageable(f);
                             }
 
                             @Override
@@ -161,7 +167,7 @@ class FileMenu extends JMenu {
                                 return I18n.tr("Valid Files");
                             }
                         });
-                
+
                 if (files != null) {
                     for (File file : files) {
                         libraryManager.getLibraryManagedList().addFile(file);
@@ -200,7 +206,8 @@ class FileMenu extends JMenu {
                     for (File file : files) {
                         try {
                             downloadListManager.addDownload(file);
-                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
+                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                                    .select();
                         } catch (SaveLocationException e1) {
                             // TODO better user feedback
                             throw new UnsupportedOperationException(e1);
@@ -217,53 +224,86 @@ class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Open Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LocationDialogue locationDialogue = new LocationDialogue(downloadListManager);
+                final LocationDialogue locationDialogue = new LocationDialogue();
+                locationDialogue.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        URI uri = locationDialogue.getURI();
+                        if (uri != null) {
+                            try {
+                                downloadListManager.addDownload(uri);
+                                navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                                        .select();
+                            } catch (SaveLocationException e1) {
+                                // TODO implement good user feedback
+                                throw new UnsupportedOperationException(
+                                        "Need to implement good user feedback for this.");
+                            }
+                        }
+                    }
+                });
+
                 locationDialogue.setVisible(true);
-                URI uri = locationDialogue.getUri();
 
             }
         };
     }
 
     private class LocationDialogue extends JDialog {
-        public LocationDialogue(final DownloadListManager downloadListManager) {
+        private JButton openButton = null;
+
+        private JTextField urlField = null;
+
+        public LocationDialogue() {
             super();
+            setModalityType(ModalityType.APPLICATION_MODAL);
             JPanel urlPanel = new JPanel();
             JLabel urlLabel = new JLabel(I18n.tr("URL:"));
-            final JTextField urlField = new JTextField(50);
+            urlField = new JTextField(50);
             urlField.setText("http://");
-
-            JButton openButton = new JButton(I18n.tr("Open"));
+            //TODO validate input while typing, disable the open button until there is a valid url.
+            
+            openButton = new JButton(I18n.tr("Open"));
             openButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent event) {
-                    String uriString = urlField.getText();
-                    try {
-                        URI uri = new URI(uriString);
-                        downloadListManager.addDownload(uri);
-                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select();
-                        dispose();
-                    } catch (URISyntaxException e1) {
-                        // TODO implement good user feedback
-                        throw new UnsupportedOperationException(
-                                "Need to implement good user feedback for this.");
-                    } catch (SaveLocationException e) {
-                        // TODO implement good user feedback
-                        throw new UnsupportedOperationException(
-                                "Need to implement good user feedback for this.");
-                    }
+                    LocationDialogue.this.dispose();
                 }
             });
+
+            JButton cancelButton = new JButton(I18n.tr("Cancel"));
+            cancelButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    LocationDialogue.this.dispose();
+                }
+            });
+            urlPanel.setLayout(new MigLayout("", "[]5[]", "[]5[]"));
+            urlPanel.setPreferredSize(new Dimension(500, 60));
             urlPanel.add(urlLabel);
-            urlPanel.add(urlField);
-            urlPanel.add(openButton);
+            urlPanel.add(urlField, "wrap");
+            urlPanel.add(openButton, "align right");
+            urlPanel.add(cancelButton);
 
             setContentPane(urlPanel);
+            pack();
         }
 
-        public URI getUri() {
-            // TODO Auto-generated method stub
-            return null;
+        void addActionListener(ActionListener actionListener) {
+            openButton.addActionListener(actionListener);
+        }
+
+        void removeActionListener(ActionListener actionListener) {
+            openButton.removeActionListener(actionListener);
+        }
+
+        public synchronized URI getURI() {
+            try {
+                return new URI(urlField.getText());
+            } catch (URISyntaxException e) {
+                // should not happen, will validate while typing, like the eclipse control
+                return null;
+            }
         }
     }
 
