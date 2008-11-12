@@ -28,20 +28,19 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 @Singleton
-public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service {
+class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service {
 
     private static final Log LOG = LogFactory.getLog(BrowseHostHandlerManagerImpl.class);
 
     /** Map from serventID to BrowseHostHandler instance. */
     private final Map<GUID, BrowseHostHandler.PushRequestDetails> _pushedHosts = new HashMap<GUID, BrowseHostHandler.PushRequestDetails>();
 
-    private final Provider<ActivityCallback> activityCallback;
     private final SocketsManager socketsManager;
     private final Provider<ReplyHandler> forMeReplyHandler;
     private final ScheduledExecutorService backgroundExecutor;
 
     private final MessageFactory messageFactory;
-    private Provider<SocketWrappingHttpClient> clientProvider;
+    private final Provider<SocketWrappingHttpClient> clientProvider;
 
     private final NetworkManager networkManager;
 
@@ -50,14 +49,12 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
                                         ScheduledExecutorService backgroundExecutor,
-                                        Provider<ActivityCallback> activityCallback,
                                         SocketsManager socketsManager,
                                         @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                                         MessageFactory messageFactory,
                                         Provider<SocketWrappingHttpClient> clientProvider,
                                         NetworkManager networkManager,
                                         PushEndpointFactory pushEndpointFactory) {
-        this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
@@ -98,7 +95,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
      *      com.limegroup.gnutella.GUID, com.limegroup.gnutella.GUID)
      */
     public BrowseHostHandler createBrowseHostHandler(GUID guid, GUID serventID) {
-        return new BrowseHostHandler(guid, activityCallback.get(), socketsManager,
+        return new BrowseHostHandler(guid, socketsManager,
                 forMeReplyHandler, messageFactory, clientProvider, 
                 networkManager, pushEndpointFactory);
     }
@@ -171,7 +168,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
 
     @Override
     public BrowseHostHandler createBrowseHostHandler(GUID browseGuid) {
-        return new BrowseHostHandler(browseGuid, activityCallback.get(), socketsManager,
+        return new BrowseHostHandler(browseGuid, socketsManager,
                 forMeReplyHandler, messageFactory, clientProvider,
                 networkManager, pushEndpointFactory);
     }

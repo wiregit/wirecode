@@ -71,11 +71,6 @@ public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleL
 
 	/** display an error message */
 	public void chatErrorMessage(InstantMessenger chatter, String str);
-
-    /** display an error message since the browse host failed. 
-     *  @param guid The GUID of the browse host.
-     */    
-    public void browseHostFailed(GUID guid);
     
     /**
      * Notifies that the user is attempting to share a sensitive

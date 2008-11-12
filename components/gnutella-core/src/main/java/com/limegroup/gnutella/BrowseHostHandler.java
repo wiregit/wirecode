@@ -79,7 +79,6 @@ public class BrowseHostHandler {
     /** The time this state started. */
     private volatile long _stateStarted = 0;
 
-    private final ActivityCallback activityCallback;
     private final SocketsManager socketsManager;
     private final Provider<ReplyHandler> forMeReplyHandler;
 
@@ -97,14 +96,13 @@ public class BrowseHostHandler {
      * @param clientProvider used to make an HTTP client request over an *incoming* Socket
      */
     BrowseHostHandler(GUID sessionGuid, 
-                      ActivityCallback activityCallback, SocketsManager socketsManager,
+                      SocketsManager socketsManager,
                       @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                       MessageFactory messageFactory,
                       Provider<SocketWrappingHttpClient> clientProvider, 
                       NetworkManager networkManager,
                       PushEndpointFactory pushEndpointFactory) {
         _guid = sessionGuid;
-        this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
@@ -186,7 +184,6 @@ public class BrowseHostHandler {
      */   
     void failed() {
         setState(FINISHED);
-        activityCallback.browseHostFailed(_guid);
     }
 
     void browseHost(Socket socket, FriendPresence friendPresence) throws IOException, URISyntaxException, HttpException, InterruptedException {

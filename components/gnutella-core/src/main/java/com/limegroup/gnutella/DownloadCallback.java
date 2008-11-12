@@ -30,7 +30,5 @@ public interface DownloadCallback {
      * otherwise there will be threads piling up waiting for a notification
      */
     public void promptAboutCorruptDownload(Downloader dloader);
-
-    public String getHostValue(String key);
     
 }

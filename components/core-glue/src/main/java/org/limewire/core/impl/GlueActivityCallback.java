@@ -80,44 +80,33 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         downloadListeners.remove(listener);
     }
 
+    @Override
     public void acceptChat(InstantMessenger ctr) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void acceptedIncomingChanged(boolean status) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void addUpload(Uploader u) {
         // TODO Auto-generated method stub
 
     }
-
-    public void browseHostFailed(GUID guid) {
-        // TODO Auto-generated method stub
-
-    }
-
+    
+    @Override
     public void chatErrorMessage(InstantMessenger chatter, String str) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void chatUnavailable(InstantMessenger chatter) {
         // TODO Auto-generated method stub
-
-    }
-
-    public void fileManagerLoaded() {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void fileManagerLoading() {
-        // TODO Auto-generated method stub
-
     }
 
     public void handleAddressStateChanged() {
@@ -125,20 +114,24 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     }
 
+    @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         // TODO Auto-generated method stub
     }
 
+    @Override
     public boolean handleDAAPConnectionError(Throwable t) {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public boolean handleMagnets(MagnetOptions[] magnets) {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply,
             Set<? extends IpPort> locs) {
         List<QueryReplyListener> listeners = queryReplyListeners.get(queryReply.getGUID());
@@ -149,16 +142,19 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         }
     }
 
+    @Override
     public void handleQueryString(String query) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void handleSharedFileUpdate(File file) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void handleTorrent(File torrentFile) {
         try {
             downloadManager.downloadTorrent(torrentFile, true);
@@ -167,84 +163,86 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         }
     }
 
+    @Override
     public void installationCorrupted() {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public boolean isQueryAlive(GUID guid) {
-        // TODO Auto-generated method stub
-        return false;
+        return queryReplyListeners.containsKey(guid.bytes());
     }
 
+    @Override
     public void receiveMessage(InstantMessenger chr, String messsage) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void removeUpload(Uploader u) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void restoreApplication() {
         // TODO Auto-generated method stub
 
     }
 
-    public void setAnnotateEnabled(boolean enabled) {
-        // TODO Auto-generated method stub
-
-    }
-
+    @Override
     public String translate(String s) {
-        // TODO Auto-generated method stub
-        return null;
+        return s; // TODO: Plug this to the UI somehow.
     }
 
+    @Override
     public void updateAvailable(UpdateInformation info) {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public void uploadsComplete() {
         // TODO Auto-generated method stub
 
     }
 
+    @Override
     public boolean warnAboutSharingSensitiveDirectory(File dir) {
         // TODO Auto-generated method stub
         return false;
     }
 
+    @Override
     public void addDownload(Downloader d) {
         for (DownloadListener listener : downloadListeners) {
             listener.downloadAdded(d);
         }
     }
-
+    
+    @Override
     public void downloadsComplete() {
         // TODO Auto-generated method stub
 
     }
-
-    public String getHostValue(String key) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
+    @Override
     public void promptAboutCorruptDownload(Downloader dloader) {
         //just kill the download if it is corrupt
         dloader.discardCorruptDownload(true);
 
     }
-
+    
+    @Override
     public void removeDownload(Downloader d) {
         for (DownloadListener listener : downloadListeners) {
             listener.downloadRemoved(d);
         }
     }
-
+    
+    @Override
     public void showDownloads() {
         // TODO Auto-generated method stub
     }

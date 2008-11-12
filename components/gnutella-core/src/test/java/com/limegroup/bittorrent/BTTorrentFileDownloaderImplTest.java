@@ -456,11 +456,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void browseHostFailed(GUID guid) {
-                
-            }
-
-            @Override
             public void chatErrorMessage(InstantMessenger chatter, String str) {
                 
             }
@@ -559,10 +554,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             public void downloadsComplete() {
             }
 
-            @Override
-            public String getHostValue(String key) {
-                return null;
-            }
 
             @Override
             public void promptAboutCorruptDownload(Downloader dloader) {
