@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
-import javax.swing.AbstractAction;
 
 import org.limewire.ui.swing.util.I18n;
 
