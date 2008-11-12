@@ -199,8 +199,6 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         rosterEventListenerSupport.addListener(this);
     }
 
-
-
     protected void updateNavPanelForFriend(Friend friend, LibraryState state, EventList<RemoteFileItem> eventList) {
         for(LibraryPanel panel : navPanels) {
             if(panel.getFriend().getId().equals(friend.getId())) {
@@ -215,6 +213,15 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         for(LibraryPanel panel : navPanels) {
             if(panel.getFriend().getId().equals(friend.getId())) {
                 panel.updateLibraryState(state);
+            }
+        }
+    }
+    
+    private void ensureFriendVisible(Friend friend) {
+        for(LibraryPanel panel : navPanels) {
+            if(panel.getFriend().getId().equals(friend.getId())) {
+                scrollRectToVisible(panel.getBounds());
+                break;
             }
         }
     }
@@ -347,6 +354,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
             @Override
             public void itemSelected(boolean selected) {
                 if(selected) {
+                    ensureFriendVisible(friend);
 //                    collapseOthersAndExpandThis(friend);
                 }
             }
@@ -378,6 +386,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
             @Override
             public void itemSelected(boolean selected) {
                 if(selected) {
+                    ensureFriendVisible(friend);
 //                    collapseOthersAndExpandThis(friend);
                 }
             }
