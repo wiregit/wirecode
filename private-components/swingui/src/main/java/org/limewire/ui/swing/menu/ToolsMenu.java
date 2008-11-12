@@ -35,6 +35,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class ToolsMenu extends JMenu {
     private LibraryManagerOptionPanel libraryManagerOptionPanel = null;
+
     private JDialog libraryManagerDialogue = null;
 
     @Inject
@@ -61,8 +62,8 @@ public class ToolsMenu extends JMenu {
 
                 libraryManagerOptionPanel.setPreferredSize(new Dimension(500, 500));
                 libraryManagerOptionPanel.initOptions();
-                libraryManagerDialogue = FocusJOptionPane.createDialog("test",
-                        ToolsMenu.this, libraryManagerOptionPanel);
+                libraryManagerDialogue = FocusJOptionPane.createDialog("test", ToolsMenu.this,
+                        libraryManagerOptionPanel);
                 libraryManagerDialogue.setVisible(true);
             }
         });
@@ -75,6 +76,7 @@ public class ToolsMenu extends JMenu {
             }
         });
         add(new AbstractAction(I18n.tr("Uploads")) {
+            // TODO wire in Uploads panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");
@@ -82,6 +84,7 @@ public class ToolsMenu extends JMenu {
         });
         addSeparator();
         add(new AbstractAction(I18n.tr("Advanced Search")) {
+            // TODO wire in advanced search panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");
@@ -90,6 +93,7 @@ public class ToolsMenu extends JMenu {
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
         add(new AbstractAction(I18n.tr("Advanced Tools")) {
+            // TODO wire in advanced tools panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");

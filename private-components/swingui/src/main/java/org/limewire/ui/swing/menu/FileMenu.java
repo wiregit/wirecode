@@ -62,14 +62,14 @@ class FileMenu extends JMenu {
         add(getLocateFile());
         addSeparator();
         add(new AbstractAction(I18n.tr("Set as available")) {
-            // TODO disable dpedning on if logged in or not, make set as
-            // avaialble and set as away the same option
+            // TODO disable depending on if logged in or not, make checkable
             @Override
             public void actionPerformed(ActionEvent e) {
                 new SelfAvailabilityUpdateEvent(Mode.available).publish();
             }
         });
         add(new AbstractAction(I18n.tr("Set as away")) {
+            // TODO disable depending on if logged in or not, make checkable
             @Override
             public void actionPerformed(ActionEvent e) {
                 new SelfAvailabilityUpdateEvent(Mode.away).publish();
@@ -102,7 +102,8 @@ class FileMenu extends JMenu {
     }
 
     private Action getLocateFile() {
-
+        // TODO should be disabled if no file is selected only works if current
+        // view has selectable files?
         return new AbstractAction(I18n.tr("Locate file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -116,6 +117,8 @@ class FileMenu extends JMenu {
     }
 
     private Action getLaunchItem() {
+        // TODO should be disabled if no file is selected only works if current
+        // view has selectable files?
         return new AbstractAction(I18n.tr("Launch file")) {
             @Override
             public void actionPerformed(ActionEvent e) {

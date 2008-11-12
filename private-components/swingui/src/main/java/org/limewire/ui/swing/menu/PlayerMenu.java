@@ -42,6 +42,7 @@ public class PlayerMenu extends JMenu {
     }
 
     private Action getNext(final AudioPlayer audioPlayer) {
+        //TODO need to have a notion of a playlist for this to work.
         Action action = new AbstractAction(I18n.tr("Next")) {;
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -55,6 +56,7 @@ public class PlayerMenu extends JMenu {
 
     private Action getPrevious(final AudioPlayer audioPlayer) {
         Action action = new AbstractAction(I18n.tr("Previous")) {
+          //TODO need to have a notion of a playlist for this to work.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me.");
@@ -66,6 +68,7 @@ public class PlayerMenu extends JMenu {
     }
 
     private Action getPlayPause(final AudioPlayer audioPlayer) {
+        //TODO update text to play/pause depending on the current state of the player
         Action action = new AbstractAction(I18n.tr("Play/Pause")) {
             @Override
             public void actionPerformed(ActionEvent e) {
