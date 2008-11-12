@@ -50,8 +50,6 @@ class FileMenu extends JMenu {
             LibraryManager libraryManager) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        // TODO no longer a singleton, build on demand, or figure out how to
-        // update items
         add(getFileMenuItem(downloadListManager));
         add(getUrlMenuItem(downloadListManager));
         JMenu recentDownloads = getRecentDownloads();
@@ -64,6 +62,8 @@ class FileMenu extends JMenu {
         add(getLocateFile());
         addSeparator();
         add(new AbstractAction(I18n.tr("Set as available")) {
+            // TODO disable dpedning on if logged in or not, make set as
+            // avaialble and set as away the same option
             @Override
             public void actionPerformed(ActionEvent e) {
                 new SelfAvailabilityUpdateEvent(Mode.available).publish();
@@ -77,12 +77,14 @@ class FileMenu extends JMenu {
         });
         addSeparator();
         add(new AbstractAction(I18n.tr("Switch user")) {
+            // TODO disable depending on whether signed in or not.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me");
             }
         });
         add(new AbstractAction(I18n.tr("Sign into Friends/Sign out of Friends")) {
+            // TODO show approriate text depending on whether signed in or not.
             @Override
             public void actionPerformed(ActionEvent e) {
                 throw new UnsupportedOperationException("TODO implement me");
@@ -92,6 +94,7 @@ class FileMenu extends JMenu {
         add(new AbstractAction(I18n.tr("Exit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // TODO this acts funny, might be causing a race condition
                 Application.getInstance().exit(e);
             }
         });
@@ -103,7 +106,8 @@ class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Locate file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                // TODO need to be able to get the currently select file from
+                // any view
                 // File file = null;
                 // NativeLaunchUtils.launchExplorer(file);
                 throw new UnsupportedOperationException("TODO implement me");
@@ -115,7 +119,8 @@ class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Launch file")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                // TODO need to be able to get the currently select file from
+                // any view
                 // File file = null;
                 // NativeLaunchUtils.launchFile(file);
                 throw new UnsupportedOperationException("TODO Implement Me.");
@@ -182,6 +187,7 @@ class FileMenu extends JMenu {
     }
 
     private JMenu getRecentDownloads() {
+        // TODO need to save recent downloads to a list or a bounded queue
         return new JMenu(I18n.tr("Recent Downloads"));
     }
 
@@ -271,8 +277,8 @@ class FileMenu extends JMenu {
                 @Override
                 public void keyTyped(KeyEvent e) {
                     URI uri = getURI();
-                    //TODO add stricter validation
-                    
+                    // TODO add stricter validation
+
                     if (uri == null || uri.getPath() == null || uri.getPath().trim().length() == 0) {
                         errorLabel.setVisible(true);
                         openButton.setEnabled(false);
@@ -284,14 +290,14 @@ class FileMenu extends JMenu {
 
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    if(openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
                         openButton.doClick();
                     }
                 }
 
                 @Override
                 public void keyReleased(KeyEvent e) {
-                    
+
                 }
             });
 
@@ -303,8 +309,6 @@ class FileMenu extends JMenu {
                 }
             });
             openButton.setEnabled(false);
-            
-           
 
             JButton cancelButton = new JButton(I18n.tr("Cancel"));
             cancelButton.addActionListener(new ActionListener() {
@@ -333,12 +337,15 @@ class FileMenu extends JMenu {
             openButton.removeActionListener(actionListener);
         }
 
+        /**
+         * Returns a uri typed into this dialogue. Will return null if the last
+         * uri typed into the dialogue was invalid.
+         */
         public synchronized URI getURI() {
             try {
                 return URIUtils.toURI(urlField.getText());
             } catch (URISyntaxException e) {
-                // should not happen, will validate while typing, like the
-                // eclipse control
+                // eating exception and returning null for bad uris
                 return null;
             }
         }
