@@ -1,11 +1,13 @@
 package org.limewire.ui.swing.search;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
-import org.limewire.core.api.connection.ConnectionLifeCycleListener;
-import org.limewire.core.api.connection.ConnectionManager;
+import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.lifecycle.LifeCycleEvent;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.search.Search;
@@ -16,6 +18,9 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.search.model.SearchResultsModel;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -28,7 +33,7 @@ class SearchHandlerImpl implements SearchHandler {
     private final SearchNavigator searchNavigator;
     private final SearchResultsModelFactory searchResultsModelFactory;
     private final LifeCycleManager lifeCycleManager;
-    private final ConnectionManager connectionManager;
+    private final GnutellaConnectionManager connectionManager;
     
     @Inject
     SearchHandlerImpl(SearchFactory searchFactory,
@@ -36,7 +41,7 @@ class SearchHandlerImpl implements SearchHandler {
             SearchNavigator searchNavigator,
             SearchResultsModelFactory searchResultsModelFactory,
             LifeCycleManager lifeCycleManager, 
-            ConnectionManager connectionManager) {
+            GnutellaConnectionManager connectionManager) {
         this.searchNavigator = searchNavigator;
         this.searchFactory = searchFactory;
         this.panelFactory = panelFactory;
@@ -110,90 +115,117 @@ class SearchHandlerImpl implements SearchHandler {
             }
         });
         
-        addConnectionWarnings(search, searchPanel);
+        addConnectionWarnings(search, searchPanel, item);
         
-        startSearch(search, searchPanel);
+        startSearch(search, searchPanel, item);
     }
 
-    private void startSearch(final Search search, final SearchResultsPanel searchPanel) {
+    private void startSearch(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
         //prevent search from starting until lifecycle manager completes loading
         if(lifeCycleManager.isStarted()) {
             search.start();
         } else {
              searchPanel.setLifeCycleComplete(false);
-             lifeCycleManager.addListener(new EventListener<LifeCycleEvent>() {
-                 final EventListener<LifeCycleEvent> eventListener = this;
+             final EventListener<LifeCycleEvent> listener = new EventListener<LifeCycleEvent>() {
+                 @SwingEDTEvent
                  public void handleEvent(LifeCycleEvent event) {
                      if(event == LifeCycleEvent.STARTED) {
-                         SwingUtils.invokeLater(new Runnable() {
-                             public void run() {
-                                 searchPanel.setLifeCycleComplete(true);
-                                 search.start();
-                           
-                             }
-                         });
-                         lifeCycleManager.removeListener(eventListener);
+                         searchPanel.setLifeCycleComplete(true);
+                         search.start();
+                         lifeCycleManager.removeListener(this);
                      }
                  }
-             });   
+             };
+             lifeCycleManager.addListener(listener);
+             navItem.addNavItemListener(new NavItemListener() {                 
+                 public void itemRemoved() {
+                     lifeCycleManager.removeListener(listener);
+                 }
+                 
+                 public void itemSelected(boolean selected) {}
+             });
+        }
+    }
+    
+    private boolean setConnectionStrength(ConnectionStrength type, SearchResultsPanel searchPanel) {
+        switch(type) {
+        case TURBO:
+        case FULL:
+            searchPanel.setFullyConnected(true);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void removeListeners(Search search, AtomicReference<SearchListener> searchListenerRef, AtomicReference<PropertyChangeListener> connectionListenerRef) {
+        SearchListener searchListener = searchListenerRef.get();
+        if(searchListener != null) {
+            search.removeSearchListener(searchListener);
+            searchListenerRef.set(null);
+        }
+        
+        PropertyChangeListener connectionListener = connectionListenerRef.get();
+        if(connectionListener != null) {
+            connectionManager.removePropertyChangeListener(connectionListener);
+            connectionListenerRef.set(null);
         }
     }
 
-    private void addConnectionWarnings(final Search search, final SearchResultsPanel searchPanel) {
-        //display search warning message until fully connected to limewire.
-        if(!connectionManager.isConnected() || !connectionManager.isFullyConnected()) {
-            searchPanel.setFullyConnected(false);
-            connectionManager.addEventListener( new ConnectionLifeCycleListener() {
-               private final ConnectionLifeCycleListener connectionLifecycleListener = this;
-               @Override
-                public void handleEvent(ConnectionLifeCycleEventType eventType) {
-                   if(eventType == ConnectionLifeCycleEventType.CONNECTED) {
-                       if(connectionManager.isFullyConnected()) {
-                           SwingUtils.invokeLater(new Runnable() {
-                               public void run() {
-                                   searchPanel.setFullyConnected(true);
-                               }
-                           });
-                           connectionManager.removeEventListener(connectionLifecycleListener);
-                       }
-                   }
-                } 
-            });
-            
-            //override warning message if a certain number of search results comes in, for now 10, 
-            //we assume that while not fully connected, we have a good enough search going
-            search.addSearchListener(new SearchListener() {
-                private final AtomicInteger numberOfResults = new AtomicInteger(0);
-                
-                @Override
-                public void handleSearchResult(SearchResult searchResult) {
-                    if(numberOfResults.addAndGet(1) > 10) {
-                        SwingUtils.invokeLater(new Runnable() {
-                            public void run() {
-                                //while not fully connected, assume the connections we have are enough 
-                                //based on the number of results coming in.
-                                searchPanel.setFullyConnected(true);
-                            }});
-                        search.removeSearchListener(this);
+    private void addConnectionWarnings(final Search search, final SearchResultsPanel searchPanel, NavItem navItem) {
+        final AtomicReference<SearchListener> searchListenerRef = new AtomicReference<SearchListener>();
+        final AtomicReference<PropertyChangeListener> connectionListenerRef = new AtomicReference<PropertyChangeListener>();
+        
+        connectionListenerRef.set(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals("strength")) {
+                    if(setConnectionStrength((ConnectionStrength)evt.getNewValue(), searchPanel)) {
+                        removeListeners(search, searchListenerRef, connectionListenerRef);
                     }
                 }
+            }
+        });  
 
-                @Override
-                public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {
-                    
+        //override warning message if a certain number of search results comes in, for now 10, 
+        //we assume that while not fully connected, we have a good enough search going
+        searchListenerRef.set(new SearchListener() {
+            private final AtomicInteger numberOfResults = new AtomicInteger(0);
+            
+            @Override
+            public void handleSearchResult(SearchResult searchResult) {
+                if(numberOfResults.addAndGet(1) > 10) {
+                    SwingUtils.invokeLater(new Runnable() {
+                        public void run() {
+                            // while not fully connected, assume the
+                            // connections we have are enough
+                            // based on the number of results coming in.
+                            searchPanel.setFullyConnected(true);
+                        }
+                    });
+                    removeListeners(search, searchListenerRef, connectionListenerRef);
                 }
+            }
 
+            @Override public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) {}
+            @Override public void searchStarted() {}
+            @Override public void searchStopped() {}                
+        });
+        
+        searchPanel.setFullyConnected(false);
+        connectionManager.addPropertyChangeListener(connectionListenerRef.get());        
+        if(setConnectionStrength(connectionManager.getConnectionStrength(), searchPanel)) {
+            removeListeners(search, searchListenerRef, connectionListenerRef);
+        } else {
+            search.addSearchListener(searchListenerRef.get());
+            navItem.addNavItemListener(new NavItemListener() {
                 @Override
-                public void searchStarted() {
-                    
+                public void itemRemoved() {
+                    removeListeners(search, searchListenerRef, connectionListenerRef);
                 }
-
-                @Override
-                public void searchStopped() {
-                    
-                }
-                
+                @Override public void itemSelected(boolean selected) {}
             });
         }
+        
     }
 }

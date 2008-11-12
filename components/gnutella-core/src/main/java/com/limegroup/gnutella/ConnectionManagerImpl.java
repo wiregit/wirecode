@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.api.connection.ConnectionLifeCycleEventType;
+import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.UltrapeerSettings;
@@ -615,6 +615,13 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             return false;
         l.add(host);
         return true;
+    }
+    
+    @Override
+    public int getNumFetchingConnections() {
+        synchronized(this) {
+            return _initializingFetchedConnections.size();
+        }
     }
     
     /**
@@ -1537,7 +1544,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         
         if(!willTryToReconnect) {
             dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                    ConnectionLifeCycleEventType.DISCONNECTED, null));
+                    ConnectionLifecycleEventType.DISCONNECTED, null));
         }
     }
     
@@ -1689,7 +1696,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
 
         // 4) Notify the listener
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this, 
-                ConnectionLifeCycleEventType.CONNECTION_CLOSED,
+                ConnectionLifecycleEventType.CONNECTION_CLOSED,
                 c));
 
         // 5) Clean up Unicaster
@@ -1819,7 +1826,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             }
             _fetchers.addAll(fetchers);
             dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                    ConnectionLifeCycleEventType.CONNECTING, null));
+                    ConnectionLifecycleEventType.CONNECTING, null));
         } 
 
         // Stop ConnectionFetchers as necessary, but it's possible there
@@ -1911,7 +1918,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             // with a Connection.
         }
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                ConnectionLifeCycleEventType.CONNECTION_INITIALIZING,
+                ConnectionLifecycleEventType.CONNECTION_INITIALIZING,
                 mc));
      
         try {
@@ -2081,7 +2088,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                 adjustConnectionFetchers();
             }
             dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                    ConnectionLifeCycleEventType.CONNECTION_INITIALIZING,
+                    ConnectionLifecycleEventType.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2130,7 +2137,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                 adjustConnectionFetchers();
             }
             dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                    ConnectionLifeCycleEventType.CONNECTION_INITIALIZING,
+                    ConnectionLifecycleEventType.CONNECTION_INITIALIZING,
                     c));
         }
 
@@ -2158,13 +2165,13 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
                 dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                        ConnectionLifeCycleEventType.CONNECTION_INITIALIZED,
+                        ConnectionLifecycleEventType.CONNECTION_INITIALIZED,
                         mc));
                 setPreferredConnections();
                 if (_initializedConnections.size() >= getPreferredConnectionCount()) {
                     _lastFullConnectTime = System.currentTimeMillis();
                     dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                            ConnectionLifeCycleEventType.CONNECTED,
+                            ConnectionLifecycleEventType.CONNECTED,
                             mc));
                 }
                     
@@ -2437,7 +2444,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         // Notify the user that they have no internet connection and that
         // we will automatically retry
         dispatchEvent(new ConnectionLifecycleEvent(ConnectionManagerImpl.this,
-                ConnectionLifeCycleEventType.NO_INTERNET));
+                ConnectionLifecycleEventType.NO_INTERNET));
 
         if(_automaticallyConnecting) {
             // We've already notified the user about their connection and we're

@@ -1,10 +1,10 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
-import org.limewire.core.api.connection.ConnectionManager;
+import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.impl.browse.CoreGlueBrowseModule;
-import org.limewire.core.impl.connection.ConnectionManagerImpl;
+import org.limewire.core.impl.connection.GnutellaConnectionManagerImpl;
 import org.limewire.core.impl.daap.CoreGlueDaapModule;
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
 import org.limewire.core.impl.download.DownloadListenerList;
@@ -30,7 +30,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(DownloadListenerList.class).to(GlueActivityCallback.class);
         bind(Application.class).to(ApplicationImpl.class);
         bind(LifeCycleManager.class).to(LifeCycleManagerImpl.class);
-        bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
+        bind(GnutellaConnectionManager.class).to(GnutellaConnectionManagerImpl.class);
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueDaapModule());

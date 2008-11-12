@@ -20,6 +20,12 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 
 public class ConnectionManagerAdapter implements ConnectionManager {
 
+    @Override
+    public int getNumFetchingConnections() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+    
     public void acceptConnection(Socket socket) {
 
     }

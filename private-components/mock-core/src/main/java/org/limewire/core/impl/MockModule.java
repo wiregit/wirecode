@@ -1,7 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
-import org.limewire.core.api.connection.ConnectionManager;
+import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.impl.browse.MockBrowseModule;
 import org.limewire.core.impl.connection.MockConnectionManagerImpl;
@@ -22,7 +22,7 @@ public class MockModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(Application.class).to(MockApplication.class);
-        bind(ConnectionManager.class).to(MockConnectionManagerImpl.class);
+        bind(GnutellaConnectionManager.class).to(MockConnectionManagerImpl.class);
         install(new MockLifeCycleModule());
         install(new MockDaapModule());
         install(new MockSpamModule());

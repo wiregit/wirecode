@@ -126,9 +126,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        System.out.println("Lifecycle event: " + evt);
         // TODO Auto-generated method stub
-
     }
 
     public boolean handleDAAPConnectionError(Throwable t) {
@@ -249,7 +247,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     public void showDownloads() {
         // TODO Auto-generated method stub
-System.out.println("showdownloads");
     }
 
 }

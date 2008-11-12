@@ -525,5 +525,8 @@ public interface ConnectionManager extends ConnectionAcceptor,
      * notification that a connect back request has been sent on the given network 
      */
     public void connectBackSent(Network network);
+
+    /** Returns the number of connections that are currently being fetched. */
+    public int getNumFetchingConnections();
     
 }
