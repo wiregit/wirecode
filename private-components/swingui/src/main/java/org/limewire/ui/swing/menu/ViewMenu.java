@@ -38,12 +38,8 @@ public class ViewMenu extends JMenu {
             }
         });
         addSeparator();
-        add(new AbstractAction(I18n.tr("Recent Searches")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me!");
-            }
-        });
+        add(new JMenu(I18n.tr("Recent Searches")));
+        
         addSeparator();
         add(new AbstractAction(I18n.tr("List view")) {
             @Override
