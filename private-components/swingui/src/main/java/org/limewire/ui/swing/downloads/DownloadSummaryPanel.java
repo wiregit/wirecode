@@ -65,9 +65,10 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 
-
+@Singleton
 public class DownloadSummaryPanel extends JXPanel {
 
     /**
@@ -204,8 +205,6 @@ public class DownloadSummaryPanel extends JXPanel {
         add(moreButton, "aligny 50%");
 		
 		updateTitle();
-		adjustVisibility();  
-		
 		addListeners();
 	}
 	
@@ -220,7 +219,8 @@ public class DownloadSummaryPanel extends JXPanel {
                     @Override
                     public void run() {
                         updateTitle();
-                        adjustVisibility();
+                        //TODO put adjsut view back in? What is going to be the logic for showing the download list? since it is user driven as well as automatic.
+                        //waiting to hear back from mike s
                     }
                 });
             }
@@ -228,17 +228,6 @@ public class DownloadSummaryPanel extends JXPanel {
         });
 	}
 	    
-	//hide panel if there are no downloads.  show it if there are
-    private void adjustVisibility() {
-        if (allList.size() > 0) {            
-            setVisible(true);            
-        } else {
-            //Nothing to show
-            setVisible(false);
-        }
-        revalidate();
-    }
-
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
     @Override
     public void addMouseListener(MouseListener listener){
@@ -389,5 +378,9 @@ public class DownloadSummaryPanel extends JXPanel {
 	            DownloadItemUtils.launch(item);
 	        }
 	    }
+	}
+	
+	public void toggleVisibility() {
+	    setVisible(!isVisible());
 	}
 }
