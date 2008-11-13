@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.util;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 
-import org.jdesktop.jdic.desktop.Desktop;
 import org.limewire.core.settings.URLHandlerSettings;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
@@ -88,7 +89,7 @@ public final class NativeLaunchUtils {
 	 */
 	public static void openURL(String url) {
 	    try {
-            Desktop.browse(new URL(url));
+	        Desktop.getDesktop().browse(new URI(url));
         } catch (Throwable t) {
     	    try {
                 if (OSUtils.isWindows()) {
