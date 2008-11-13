@@ -18,6 +18,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
@@ -28,18 +29,19 @@ import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.impl.download.DownloadListener;
+import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
 import org.limewire.util.URIUtils;
-import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.Downloader;
 
 @Singleton
 class FileMenu extends JMenu {
@@ -47,42 +49,17 @@ class FileMenu extends JMenu {
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager, DownloadListenerList downloadListenerList) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(getFileMenuItem(downloadListManager));
         add(getUrlMenuItem(downloadListManager));
-        JMenu recentDownloads = getRecentDownloads();
+        JMenu recentDownloads = getRecentDownloads(downloadListenerList);
         add(recentDownloads);
         addSeparator();
         add(getAddFile(libraryManager));
         add(getAddFolder(libraryManager));
         addSeparator();
-        add(getLaunchItem());
-        add(getLocateFile());
-        addSeparator();
-        add(new AbstractAction(I18n.tr("Set as available")) {
-            // TODO disable depending on if logged in or not, make checkable
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new SelfAvailabilityUpdateEvent(Mode.available).publish();
-            }
-        });
-        add(new AbstractAction(I18n.tr("Set as away")) {
-            // TODO disable depending on if logged in or not, make checkable
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new SelfAvailabilityUpdateEvent(Mode.away).publish();
-            }
-        });
-        addSeparator();
-        add(new AbstractAction(I18n.tr("Switch user")) {
-            // TODO disable depending on whether signed in or not.
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me");
-            }
-        });
         add(new AbstractAction(I18n.tr("Sign into Friends/Sign out of Friends")) {
             // TODO show approriate text depending on whether signed in or not.
             @Override
@@ -99,36 +76,6 @@ class FileMenu extends JMenu {
             }
         });
 
-    }
-
-    private Action getLocateFile() {
-        // TODO should be disabled if no file is selected only works if current
-        // view has selectable files?
-        return new AbstractAction(I18n.tr("Locate file")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO need to be able to get the currently select file from
-                // any view
-                // File file = null;
-                // NativeLaunchUtils.launchExplorer(file);
-                throw new UnsupportedOperationException("TODO implement me");
-            }
-        };
-    }
-
-    private Action getLaunchItem() {
-        // TODO should be disabled if no file is selected only works if current
-        // view has selectable files?
-        return new AbstractAction(I18n.tr("Launch file")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO need to be able to get the currently select file from
-                // any view
-                // File file = null;
-                // NativeLaunchUtils.launchFile(file);
-                throw new UnsupportedOperationException("TODO Implement Me.");
-            }
-        };
     }
 
     private Action getAddFolder(final LibraryManager libraryManager) {
@@ -189,9 +136,28 @@ class FileMenu extends JMenu {
         };
     }
 
-    private JMenu getRecentDownloads() {
-        // TODO need to save recent downloads to a list or a bounded queue
-        return new JMenu(I18n.tr("Recent Downloads"));
+    private JMenu getRecentDownloads(DownloadListenerList downloadListenerList) {
+        final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
+        downloadListenerList.addDownloadListener(new DownloadListener() {
+            @Override
+            public void downloadAdded(final Downloader downloader) {
+                JMenuItem menuItem = new JMenuItem(downloader.getFile().getName());
+                menuItem.addActionListener(new ActionListener() {
+                   @Override
+                    public void actionPerformed(ActionEvent e) {
+                       System.out.println(downloader.getFile().getName());
+                    } 
+                });
+                recentDownloads.add(menuItem);
+
+            }
+
+            @Override
+            public void downloadRemoved(Downloader downloader) {
+
+            }
+        });
+        return recentDownloads;
     }
 
     private Action getFileMenuItem(final DownloadListManager downloadListManager) {
