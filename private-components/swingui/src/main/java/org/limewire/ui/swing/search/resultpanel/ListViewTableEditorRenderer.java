@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
+import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
@@ -74,10 +75,12 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
     @Resource private Color similarResultsBackgroundColor;
+    @Resource private Color surplusRowLimitColor;
     @Resource private Color rowSelectionColor;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
     @Resource private Font similarResultsButtonFont;
+    @Resource private Font surplusRowLimitFont;
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
@@ -88,6 +91,7 @@ implements TableCellEditor, TableCellRenderer {
     private final DownloadHandler downloadHandler;
     private final RemoteHostActions remoteHostActions;
     private final PropertiesFactory<VisualSearchResult> properties;
+    private final ListViewDisplayedRowsLimit displayLimit;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -95,7 +99,6 @@ implements TableCellEditor, TableCellRenderer {
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new JLabel();
     private JLabel metadataLabel = new JLabel();
-    private JXPanel rightPanel = new JXPanel();
     private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
@@ -103,13 +106,17 @@ implements TableCellEditor, TableCellRenderer {
     private JComponent similarResultIndentation;
     private JPanel indentablePanel;
     private JPanel leftPanel;
-    private JPanel centerPanel;
+    private JPanel fromPanel;
+    private JPanel lastRowPanel;
+    private final JPanel emptyPanel = new JPanel();
     private JXPanel searchResultTextPanel;
 
     private int currentColumn;
     private int currentRow;
     private int mousePressedRow = -1;
     private int mousePressedColumn = -1;
+
+    private JLabel lastRowMessage;
 
     @AssistedInject
     ListViewTableEditorRenderer(
@@ -123,7 +130,8 @@ implements TableCellEditor, TableCellRenderer {
         @Assisted DownloadHandler downloadHandler,
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule,
-        PropertiesFactory<VisualSearchResult> properties) {
+        PropertiesFactory<VisualSearchResult> properties,
+        @Assisted ListViewDisplayedRowsLimit displayLimit) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -132,6 +140,7 @@ implements TableCellEditor, TableCellRenderer {
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
         this.rowSelectionColor = rowSelectionColor;
+        this.displayLimit = displayLimit;
         GuiUtils.assignResources(this);
 
         similarButton.setFont(similarResultsButtonFont);
@@ -187,6 +196,11 @@ implements TableCellEditor, TableCellRenderer {
 
                 @Override
                 public void setBackground(final Color bg) {
+                    //Don't highlight the limit row
+                    if (currentRow == displayLimit.getLastDisplayedRow()) {
+                        super.setBackground(Color.WHITE);
+                        return;
+                    }
                     boolean editingColumn = mousePressedColumn == currentColumn;
                     boolean editingRow = mousePressedRow == currentRow;
                     boolean paintForCellSelection = editingColumn && editingRow;
@@ -232,12 +246,17 @@ implements TableCellEditor, TableCellRenderer {
 
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
-        populatePanel((VisualSearchResult) value, col);
-        
         editorComponent.removeAll();
+        JPanel panel = null;
+        if (row == displayLimit.getLastDisplayedRow()) {
+            lastRowMessage.setText(tr("Not showing {0} results", 
+                    (displayLimit.getTotalResultsReturned() - displayLimit.getLastDisplayedRow())));
+            panel = col == 0 ? lastRowPanel : emptyPanel;
+        } else {
+            populatePanel((VisualSearchResult) value, col);
+            panel = col == 0 ? leftPanel : fromPanel;
+        }
 
-        JPanel panel = col == 0 ? leftPanel : col == 1 ? centerPanel : rightPanel;
-        
         editorComponent.add(panel, "height 100%");
 
         return editorComponent;
@@ -356,9 +375,15 @@ implements TableCellEditor, TableCellRenderer {
     private void makePanel(Navigator navigator) {
         leftPanel = makeIndentablePanel(makeLeftPanel(navigator));
 
-        centerPanel = makeCenterPanel();
+        fromPanel = makeCenterPanel();
 
-        rightPanel.setOpaque(false);
+        lastRowPanel = new JPanel(new MigLayout("insets 10 30 0 0", "[]", "[]"));
+        lastRowPanel.setOpaque(false);
+        lastRowMessage = new JLabel();
+        lastRowMessage.setFont(surplusRowLimitFont);
+        lastRowMessage.setForeground(surplusRowLimitColor);
+        lastRowPanel.add(lastRowMessage);
+        emptyPanel.setOpaque(false);
     }
 
     private JPanel makeIndentablePanel(Component component) {

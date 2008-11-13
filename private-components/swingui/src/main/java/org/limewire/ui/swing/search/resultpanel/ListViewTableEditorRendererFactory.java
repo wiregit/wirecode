@@ -13,6 +13,6 @@ public interface ListViewTableEditorRendererFactory {
             RemoteHostActions fromActions, 
             Navigator navigator, 
             Color rowSelectionColor,
-            DownloadHandler downloadHandler);
+            DownloadHandler downloadHandler, ListViewDisplayedRowsLimit limit);
     
 }

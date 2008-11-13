@@ -45,7 +45,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
-    private static final int MAX_SIZE = 500;
+    private static final int MAX_DISPLAYED_RESULT_SIZE = 500;
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
     private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
     
@@ -90,7 +90,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         setViewType(SearchViewType.LIST);
     }
     
-    private void configureList(EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
+    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
             final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         resultsList = new ListViewTable();
@@ -98,12 +98,30 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         preserver.addRowPreservationListener(resultsList);
         
         final RangeList<VisualSearchResult> maxSizedList = new RangeList<VisualSearchResult>(eventList);
-        maxSizedList.setHeadRange(0, MAX_SIZE);
+        maxSizedList.setHeadRange(0, MAX_DISPLAYED_RESULT_SIZE + 1);
         
         resultsList.setEventList(maxSizedList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setTableFormat(tableFormat);
         
+        // Represents display limits for displaying search results in list view.
+        // The limits are introduced to avoid a performance penalty caused by
+        // very large (> 1k) search results. Variable row-height in the list
+        // view is calculated by looping through all results in the table
+        // and if the table holds many results, the performance penalty of 
+        // resizing all rows is noticeable past a certain number of rows.
+        ListViewDisplayedRowsLimit displayLimit = new ListViewDisplayedRowsLimit() {
+            @Override
+            public int getLastDisplayedRow() {
+                return MAX_DISPLAYED_RESULT_SIZE;
+            }
+
+            @Override
+            public int getTotalResultsReturned() {
+                return eventList.size();
+            }
+        };
+
         // Note that the same ListViewTableCellEditor instance
         // cannot be used for both the editor and the renderer
         // because the renderer receives paint requests for some cells
@@ -111,10 +129,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // and they can't share state (the list of sources).
         // The two ListViewTableCellEditor instances
         // can share the same ActionColumnTableCellEditor though.
-
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this, 
+                    displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
@@ -125,7 +143,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this);
+                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this,
+                    displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
@@ -301,7 +320,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
                 int row = resultsList.rowAtPoint(e.getPoint());
-                if (row == -1) return;
+                if (row == -1 || row == MAX_DISPLAYED_RESULT_SIZE) return;
                 TableModel tm = resultsList.getModel();
                 VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);
