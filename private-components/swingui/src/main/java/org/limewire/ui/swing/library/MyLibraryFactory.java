@@ -9,5 +9,4 @@ import ca.odell.glazedlists.EventList;
 public interface MyLibraryFactory {
     
     JComponent createMyLibrary(EventList<LocalFileItem> eventList);
-
 }

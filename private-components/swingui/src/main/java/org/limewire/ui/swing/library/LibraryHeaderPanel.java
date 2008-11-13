@@ -67,8 +67,13 @@ public class LibraryHeaderPanel extends JXPanel {
         this.category = category;
         this.friend = friend;
          
+        String title;
+        if(friend == null) 
+            title = getTitle();
+        else
+            title = getSharingTitle();
         
-        titleLabel = new HeadingLabel(getTitle());
+        titleLabel = new HeadingLabel(title);
         titleLabel.setForeground(fontColor);
         titleLabel.setFont(headerFont);
 
@@ -161,20 +166,23 @@ public class LibraryHeaderPanel extends JXPanel {
     }
     
     public void setFriend(Friend friend) {
-        this.friend = friend;
-        
-        titleLabel.setText(getSharingTitle());
+//        this.friend = friend;
+//        
+//        titleLabel.setText(getSharingTitle());
     }
 
     public void setCategory(Category category) {
         this.category = category;
-        titleLabel.setText(getTitle());
+        if(friend == null)
+            titleLabel.setText(getTitle());
+        else
+            titleLabel.setText(getSharingTitle());
     }
     
     public void setCategory(Category category, Friend friend) {
-        this.friend = friend;
-        this.category = category;
-        
-        titleLabel.setText(getSharingTitle());
+//        this.friend = friend;
+//        this.category = category;
+//        
+//        titleLabel.setText(getSharingTitle());
     }
 }

@@ -10,5 +10,5 @@ import ca.odell.glazedlists.EventList;
 
 public interface SharingLibraryFactory {
 
-    JComponent createSharingLibrary(BaseLibraryPanel basePanel, Friend friend, EventList<LocalFileItem> eventList, LocalFileList localFileList);
+    JComponent createSharingLibrary(BaseLibraryMediator basePanel, Friend friend, EventList<LocalFileItem> eventList, LocalFileList localFileList);
 }

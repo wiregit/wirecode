@@ -173,7 +173,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
     }    
 
     @Override
-    public <T extends FileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, Friend friend, LocalFileList friendFileList) {
+    public <T extends FileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList) {
         final LibraryTable<T> libTable;
         
         switch (category) {
@@ -219,17 +219,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             throw new IllegalArgumentException("Unknown category: " + category);
         }
         
-        if(friend != null){
-            libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
-            libTable.setPopupHandler(new FriendLibraryPopupHandler(castToRemoteLibraryTable(libTable), downloadListManager, 
-                    magnetLinkFactory, remoteItemPropFactory));
-        } else {//Local            
-            libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
-            libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
+        libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
+        libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
                     magnetLinkFactory, friendList, localItemPropFactory));
-        }
         
-            libTable.setDropMode(DropMode.ON);
+        libTable.setDropMode(DropMode.ON);
         
         return libTable;
     }

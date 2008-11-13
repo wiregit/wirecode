@@ -17,5 +17,5 @@ public interface LibraryTableFactory {
     
     LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane);
     
-    <T extends FileItem>LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, Friend friend, LocalFileList friendFileList);
+    <T extends FileItem>LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList);
 }

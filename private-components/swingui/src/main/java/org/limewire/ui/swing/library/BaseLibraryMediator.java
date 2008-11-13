@@ -1,20 +1,26 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.CardLayout;
+import java.awt.Component;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-public class BaseLibraryPanel extends JPanel {
+import org.limewire.ui.swing.nav.NavComponent;
+import org.limewire.ui.swing.nav.NavSelectable;
+
+public class BaseLibraryMediator extends JPanel implements Disposable, NavComponent {
 
     private static final String mainCard = "MAIN_CARD";
     private static final String auxCard = "AUX_CARD";
+    
+    private LibrarySelectable librarySelectable;
     
     private CardLayout cardLayout;
     
     private JComponent auxComponent = null;
     
-    public BaseLibraryPanel() {
+    public BaseLibraryMediator() {
         cardLayout = new CardLayout();
         
         setLayout(cardLayout);
@@ -44,5 +50,17 @@ public class BaseLibraryPanel extends JPanel {
     
     public void showAuxCard() {
         cardLayout.show(this, auxCard);
+    }
+
+    @Override
+    public void dispose() {
+        for(Component component : getComponents()) {
+            ((Disposable)component).dispose();
+        }
+    }
+
+    @Override
+    public void select(NavSelectable selectable) {
+        librarySelectable.selectAndScroll(selectable.getNavSelectionId());
     }
 }

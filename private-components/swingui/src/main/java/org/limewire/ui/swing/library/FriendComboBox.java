@@ -5,7 +5,6 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 
@@ -26,15 +25,18 @@ import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class FriendComboBox extends JComboBox implements RegisteringEventListener<RosterEvent> {
     
     private final Map<String, User> friendMap = new ConcurrentHashMap<String, User>();
-    
+    private final Map<String, FriendItem> friendItemMap = new ConcurrentHashMap<String, FriendItem>();
+     
     private static final String ALL = I18n.tr("All Files");
     private static final String GNUTELLA = I18n.tr("LimeWire Network");
     
-    private BaseLibraryPanel basePanel;
+    private BaseLibraryMediator basePanel;
     
     @Inject
     public FriendComboBox(final Navigator navigator, final SharingLibraryFactory sharingFactory, final LibraryManager libraryManager, final ShareListManager shareListManager) {
@@ -43,11 +45,11 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                String friend = (String) getModel().getSelectedItem();
-                if(friend.equals(ALL))
+                FriendItem friend = (FriendItem) getModel().getSelectedItem();
+                if(friend.getId().equals(ALL))
                     return;
                 
-                if(friend.equals(GNUTELLA)) {
+                if(friend.getId().equals(GNUTELLA)) {
                     JComponent component = sharingFactory.createSharingLibrary(basePanel, new Gnutella(), 
                             libraryManager.getLibraryManagedList().getSwingModel(),
                             shareListManager.getGnutellaShareList());
@@ -55,9 +57,9 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
                     basePanel.setAuxCard(component);
                     basePanel.showAuxCard();
                 } else { 
-                    JComponent component = sharingFactory.createSharingLibrary(basePanel, friendMap.get(friend), 
+                    JComponent component = sharingFactory.createSharingLibrary(basePanel, friendMap.get(friend.getId()), 
                             libraryManager.getLibraryManagedList().getSwingModel(),
-                            shareListManager.getFriendShareList(friendMap.get(friend)));
+                            shareListManager.getFriendShareList(friendMap.get(friend.getId())));
     
                     basePanel.setAuxCard(component);
                     basePanel.showAuxCard();
@@ -68,13 +70,13 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         loadDefaults();
     }
     
-    public void setBasePanel(BaseLibraryPanel basePanel) {
+    public void setBasePanel(BaseLibraryMediator basePanel) {
         this.basePanel = basePanel;
     }
     
     private void loadDefaults() {
-        ((DefaultComboBoxModel)getModel()).addElement(ALL);
-        ((DefaultComboBoxModel)getModel()).addElement(GNUTELLA);
+        addItem(new FriendItem(ALL, ALL));
+        addItem(new FriendItem(GNUTELLA, GNUTELLA));
     }
     
     @Override
@@ -83,11 +85,14 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         if(event.getType().equals(User.EventType.USER_ADDED)) {
             if(friendMap.containsKey(event.getSource().getId()))
                 return;
-            ((DefaultComboBoxModel)getModel()).addElement(event.getSource().getId());
+            FriendItem item = new FriendItem(event.getSource().getId(), event.getSource().getRenderName());
+            addItem(item);
             friendMap.put(event.getSource().getId(), event.getSource());
+            friendItemMap.put(event.getSource().getId(), item);
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
-            ((DefaultComboBoxModel)getModel()).removeElement(event.getSource().getId());
+            FriendItem item = friendItemMap.remove(event.getSource().getId());
             friendMap.remove(event.getSource().getId());
+            removeItem(item);
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
         }
     }   
@@ -95,8 +100,9 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
         for(User user : friendMap.values()) {
-            ((DefaultComboBoxModel)getModel()).removeElement(user.getId());
+            FriendItem item = friendItemMap.remove(user.getId());
             friendMap.remove(user.getId());
+            removeItem(item);
         }
     }
 
@@ -142,6 +148,24 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         @Override
         public Map<String, Presence> getPresences() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+    }
+    
+    private class FriendItem {
+        private final String id;
+        private final String displayName;
+        
+        public FriendItem(String id, String displayName) {
+            this.id = id;
+            this.displayName = displayName;
+        }
+        
+        public String getId() {
+            return id;
+        }
+        
+        public String toString() {
+            return displayName;
         }
     }
 }

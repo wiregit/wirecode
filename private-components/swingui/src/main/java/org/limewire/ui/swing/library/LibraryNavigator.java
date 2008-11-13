@@ -83,9 +83,9 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     public static final String NAME_PREFIX = NAME + DIVIDER;
 
     private final SectionHeading titleLabel;
-    private final List<LibraryPanel> navPanels = new ArrayList<LibraryPanel>();
+    private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
     
-    private final Map<String, LibraryPanel> friends = new HashMap<String, LibraryPanel>();
+    private final Map<String, NavPanel> friends = new HashMap<String, NavPanel>();
        
     @Resource private Icon removeLibraryIcon;
     @Resource private Icon removeLibraryHoverIcon;
@@ -101,17 +101,20 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
-    private final FriendLibraryFactory friendLibraryFactory;
+    private final FriendLibraryMediatorFactory friendLibraryBaseFactory;
+//    private final FriendLibraryFactory friendLibraryFactory;
+    private final MyLibraryMediator myLibraryBasePanel;
     
     private final Navigator navigator;
 
     @Inject
     LibraryNavigator(final Navigator navigator, LibraryManager libraryManager,
             RemoteLibraryManager remoteLibraryManager,
-            MyLibraryFactory myLibraryFactory, 
-            final FriendLibraryFactory friendLibraryFactory, 
+//            final FriendLibraryFactory friendLibraryFactory, 
+            FriendLibraryMediatorFactory friendFactory,
             DownloadListManager downloadListManager,
-            ShareListManager shareListManager) {
+            ShareListManager shareListManager,
+            MyLibraryMediator myLibraryBasePanel) {
         
         GuiUtils.assignResources(this);
         EventAnnotationProcessor.subscribe(this);
@@ -121,7 +124,9 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.navigator = navigator;
-        this.friendLibraryFactory = friendLibraryFactory;
+//        this.friendLibraryFactory = friendLibraryFactory;
+        this.friendLibraryBaseFactory = friendFactory;
+        this.myLibraryBasePanel = myLibraryBasePanel;
         
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
@@ -131,24 +136,17 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         setLayout(new MigLayout("insets 0, gap 0"));
         add(titleLabel, "growx, alignx left, aligny top, wrap");
         
-        LibraryFileList libraryList = libraryManager.getLibraryManagedList();
-        addNavPanel(new LibraryPanel(createLibraryAction(navigator, myLibraryFactory, libraryList.getSwingModel()), Me.ME));
-        libraryList.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals("state")) {
-                    updateNavPanelForMe(Me.ME, (LibraryState)evt.getNewValue());
-                }
-            }
-        });
+
+        createMyLibrary();
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override
             protected void itemAdded(FriendLibrary item) {
                 Friend friend = item.getFriend();
                 if(friend.isAnonymous()) {
-                    FriendLibraryPanel component = (FriendLibraryPanel) friendLibraryFactory.createFriendLibrary(friend);
-                    addNavPanel(new LibraryPanel(createFriendAction(navigator, friend, component, item.getSwingModel()),
+//                    FriendLibraryPanel component = (FriendLibraryPanel) friendLibraryFactory.createFriendLibrary(friend);
+                    FriendLibraryMediator component = friendLibraryBaseFactory.createFriendLibraryBasePanel(friend);
+                    addNavPanel(new NavPanel(createFriendAction(navigator, friend, component, item.getSwingModel()),
                                         friend, component, item.getState()));
                 }
             }
@@ -170,6 +168,19 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         }.install(remoteLibraryManager.getSwingFriendLibraryList());
     }
     
+    private void createMyLibrary() {
+        LibraryFileList libraryList = libraryManager.getLibraryManagedList();
+        addNavPanel(new NavPanel(createLibraryAction(navigator, libraryList.getSwingModel()), Me.ME));
+        libraryList.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals("state")) {
+                    updateNavPanelForMe(Me.ME, (LibraryState)evt.getNewValue());
+                }
+            }
+        });
+    }
+    
     @Override
     @SwingEDTEvent
     public void handleEvent(final RosterEvent event) {
@@ -177,8 +188,9 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
             if(friends.containsKey(event.getSource().getId()))
                 return;
             Friend friend = event.getSource();
-            FriendLibraryPanel component = (FriendLibraryPanel) friendLibraryFactory.createFriendLibrary(friend);
-            addNavPanel(new LibraryPanel(createFriendAction(navigator, friend, component, null), friend, component));
+//            FriendLibraryPanel component = (FriendLibraryPanel) friendLibraryFactory.createFriendLibrary(friend);
+            FriendLibraryMediator component = friendLibraryBaseFactory.createFriendLibraryBasePanel(friend);
+            addNavPanel(new NavPanel(createFriendAction(navigator, friend, component, null), friend, component));
         } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
             Friend friend = event.getSource();
             removeNavPanelForFriend(friend);
@@ -188,8 +200,8 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        List<LibraryPanel> oldPanels = new ArrayList<LibraryPanel>(navPanels);
-        for(LibraryPanel panel : oldPanels) {
+        List<NavPanel> oldPanels = new ArrayList<NavPanel>(navPanels);
+        for(NavPanel panel : oldPanels) {
             if(!panel.getFriend().equals(Me.ME))
                 removeNavPanelForFriend(panel.getFriend());
         }
@@ -201,7 +213,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
 
     protected void updateNavPanelForFriend(Friend friend, LibraryState state, EventList<RemoteFileItem> eventList) {
-        for(LibraryPanel panel : navPanels) {
+        for(NavPanel panel : navPanels) {
             if(panel.getFriend().getId().equals(friend.getId())) {
                 panel.updateLibraryState(state);
                 panel.updateLibrary(eventList, state);
@@ -211,7 +223,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
     
     protected void updateNavPanelForMe(Friend friend, LibraryState state) {
-        for(LibraryPanel panel : navPanels) {
+        for(NavPanel panel : navPanels) {
             if(panel.getFriend().getId().equals(friend.getId())) {
                 panel.updateLibraryState(state);
             }
@@ -219,7 +231,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
     
     private void ensureFriendVisible(Friend friend) {
-        for(LibraryPanel panel : navPanels) {
+        for(NavPanel panel : navPanels) {
             if(panel.getFriend().getId().equals(friend.getId())) {
                 scrollRectToVisible(panel.getBounds());
                 break;
@@ -227,11 +239,11 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         }
     }
 
-    private void addNavPanel(LibraryPanel panel) {
+    private void addNavPanel(NavPanel panel) {
         // Find the index where to insert.
-        int idx = Collections.binarySearch(navPanels, panel, new Comparator<LibraryPanel>() {
+        int idx = Collections.binarySearch(navPanels, panel, new Comparator<NavPanel>() {
             @Override
-            public int compare(LibraryPanel o1, LibraryPanel o2) {
+            public int compare(NavPanel o1, NavPanel o2) {
                 Friend f1 = o1.getFriend();
                 Friend f2 = o2.getFriend();
                 if(o1 == o2) {
@@ -263,9 +275,9 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
        
     private void moveDown() {
-        ListIterator<LibraryPanel> iter = navPanels.listIterator();
+        ListIterator<NavPanel> iter = navPanels.listIterator();
         while(iter.hasNext()) {
-            LibraryPanel panel = iter.next();
+            NavPanel panel = iter.next();
             if(panel.hasSelection()) {
                 if(iter.hasNext()) {
                     panel = iter.next();
@@ -278,9 +290,9 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
      
     private void moveUp() {
-        ListIterator<LibraryPanel> iter = navPanels.listIterator();
+        ListIterator<NavPanel> iter = navPanels.listIterator();
         while(iter.hasNext()) {
-            LibraryPanel panel = iter.next();
+            NavPanel panel = iter.next();
             if(panel.hasSelection()) {
                 iter.previous();
                 if(iter.hasPrevious()) {
@@ -295,8 +307,8 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     
     //removes the browse but keeps the buddy reference
     private void removeFriendBrowse(Friend friend) {
-        for(Iterator<LibraryPanel> i = navPanels.iterator(); i.hasNext(); ) {
-            LibraryPanel panel = i.next();
+        for(Iterator<NavPanel> i = navPanels.iterator(); i.hasNext(); ) {
+            NavPanel panel = i.next();
             if(panel.getFriend() != Me.ME && panel.getFriend().getId().equals(friend.getId())) {
                 panel.removeBrowse();
                 break;
@@ -305,8 +317,8 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
     
     private void removeNavPanelForFriend(Friend friend) {
-        for(Iterator<LibraryPanel> i = navPanels.iterator(); i.hasNext(); ) {
-            LibraryPanel panel = i.next();
+        for(Iterator<NavPanel> i = navPanels.iterator(); i.hasNext(); ) {
+            NavPanel panel = i.next();
             if(panel.getFriend() != Me.ME && panel.getFriend().getId().equals(friend.getId())) {
                 i.remove();
                 remove(panel);
@@ -319,7 +331,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     }
     
     public void collapseOthersAndExpandThis(Friend friend) {
-        for(LibraryPanel panel : navPanels) {
+        for(NavPanel panel : navPanels) {
             panel.select();
 //            if(friend == null || !panel.getFriend().getId().equals(friend.getId())) {
 //                panel.collapse();
@@ -329,8 +341,11 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         }
     }
     
-    private Action createLibraryAction(Navigator navigator, MyLibraryFactory factory, EventList<LocalFileItem> eventList) {
-        JComponent component = factory.createMyLibrary(eventList);
+    private Action createLibraryAction(Navigator navigator, EventList<LocalFileItem> eventList) {
+//        JComponent component = factory.createMyLibrary(eventList);
+//        JComponent component = new MyLibraryBasePanel(factory, eventList);
+        myLibraryBasePanel.setMainCardEventList(eventList);
+        JComponent component = myLibraryBasePanel;
         NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, NAME_PREFIX, component);
         Action action = NavigatorUtils.getNavAction(navItem);
         return decorateAction(action, navItem, (Disposable)component, eventList, Me.ME);
@@ -396,23 +411,23 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         return action;
     }
     
-    private class LibraryPanel extends JXPanel {
+    private class NavPanel extends JXPanel {
         private Friend friend;
         private final CategoryLabel categoryLabel;
         private MouseListener removeListener;
         private JXBusyLabel statusIcon;
         private Action action;
-        private FriendLibraryPanel libraryPanel;
+        private FriendLibraryMediator libraryPanel;
         
-        public LibraryPanel(Action action, Friend friend) {
+        public NavPanel(Action action, Friend friend) {
             this(action, friend, null);
         }
         
-        public LibraryPanel(Action action, Friend friend, FriendLibraryPanel component) {
+        public NavPanel(Action action, Friend friend, FriendLibraryMediator component) {
             this(action, friend, component, null);
         }
         
-        public LibraryPanel(Action action, Friend friend, FriendLibraryPanel component, LibraryState libraryState) {
+        public NavPanel(Action action, Friend friend, FriendLibraryMediator component, LibraryState libraryState) {
             super(new MigLayout("insets 0, gap 0, fill"));
             setOpaque(false);
             this.action = action;
