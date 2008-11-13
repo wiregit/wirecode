@@ -38,12 +38,14 @@ import org.limewire.ui.swing.table.StringTableCellRenderer;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
+    private static final int MAX_SIZE = 500;
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
     private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
     
@@ -88,14 +90,17 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         setViewType(SearchViewType.LIST);
     }
     
-    private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
+    private void configureList(EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
             final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         resultsList = new ListViewTable();
         resultsList.setShowGrid(true, false);
         preserver.addRowPreservationListener(resultsList);
         
-        resultsList.setEventList(eventList);
+        final RangeList<VisualSearchResult> maxSizedList = new RangeList<VisualSearchResult>(eventList);
+        maxSizedList.setHeadRange(0, MAX_SIZE);
+        
+        resultsList.setEventList(maxSizedList);
         ListViewTableFormat tableFormat = new ListViewTableFormat();
         resultsList.setTableFormat(tableFormat);
         
@@ -133,7 +138,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         resultsList.setRowHeightEnabled(true);
         //add listener to table model to set row heights based on contents of the search results
-        eventList.addListEventListener(new ListEventListener<VisualSearchResult>() {
+        maxSizedList.addListEventListener(new ListEventListener<VisualSearchResult>() {
             @Override
             public void listChanged(ListEvent<VisualSearchResult> listChanges) {
                 
@@ -146,7 +151,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 Runnable runner = new Runnable() {
                     @Override
                     public void run() {
+                        
                         resultsList.setIgnoreRepaints(true);
+                        boolean setRowSize = false;
                         for(int row = 0; row < model.getRowCount(); row++) {
                             VisualSearchResult vsr = (VisualSearchResult) model.getElementAt(row);
                             RowDisplayResult result = vsrToRowDisplayResultMap.get(vsr);
@@ -159,11 +166,14 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                                 LOG.debugf("Row: {0} vsr: {1} config: {2}", row, vsr.getHeading(), 
                                         result.getConfig());
                                 resultsList.setRowHeight(row, newRowHeight);
+                                setRowSize = true;
                             }
                         }
                         resultsList.setIgnoreRepaints(false);
-                        resultsList.updateViewSizeSequence();
-                        resultsList.resizeAndRepaint();
+                        if (setRowSize) {
+                            resultsList.updateViewSizeSequence();
+                            resultsList.resizeAndRepaint();
+                        }
                     }
                 };
                 
@@ -181,7 +191,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 if (e.getButton() == 3) {
                     // Get the VisualSearchResult that was selected.
                     int row = resultsList.rowAtPoint(e.getPoint());
-                    VisualSearchResult vsr = eventList.get(row);
+                    VisualSearchResult vsr = maxSizedList.get(row);
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
