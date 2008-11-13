@@ -36,6 +36,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -75,7 +76,7 @@ public class FileMenu extends JMenu {
         signInOutAction = new AbstractAction(signIntoFriends) {
             public void actionPerformed(ActionEvent e) {
                 if(signInOutAction.getValue(Action.NAME) == signIntoFriends) {
-                    //TODO open and foccus the chat window.
+                    new DisplayFriendsToggleEvent(true).publish();
                 } else {
                     new SignoffEvent().publish();
                 }
