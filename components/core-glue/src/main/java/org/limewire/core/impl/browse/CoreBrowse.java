@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -19,7 +20,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
 
-public class CoreBrowse implements Browse {    
+class CoreBrowse implements Browse {    
     
     private final SearchServices searchServices;
     private final FriendPresence friendPresence;
@@ -46,13 +47,32 @@ public class CoreBrowse implements Browse {
         listener = new BrowseResultAdapter(browseListener);
         listenerList.addQueryReplyListener(browseGuid, listener);
         
-        searchServices.doAsynchronousBrowseHost(friendPresence, new GUID(browseGuid), browseListener);
+        searchServices.doAsynchronousBrowseHost(friendPresence, new GUID(browseGuid), new ListenerProxy(browseListener));
     }
 
     @Override
     public void stop() {
         listenerList.removeQueryReplyListener(browseGuid, listener);
         searchServices.stopQuery(new GUID(browseGuid));
+    }
+    
+    private class ListenerProxy implements BrowseListener {
+        private final BrowseListener delegate;
+        
+        public ListenerProxy(BrowseListener delegate) {
+            this.delegate = delegate;
+        }
+        
+        @Override
+        public void browseFinished(boolean success) {
+            stop();
+            delegate.browseFinished(success);
+        }
+        
+        @Override
+        public void handleBrowseResult(SearchResult searchResult) {
+            delegate.handleBrowseResult(searchResult);
+        }
     }
 
     private static class BrowseResultAdapter implements QueryReplyListener {
@@ -68,9 +88,5 @@ public class CoreBrowse implements Browse {
             browseListener.handleBrowseResult(new RemoteFileDescAdapter(rfd,
                     queryReply, locs));
         }
-    }
-
-    public GUID getQueryGuid() {
-        return new GUID(browseGuid);
     }
 }

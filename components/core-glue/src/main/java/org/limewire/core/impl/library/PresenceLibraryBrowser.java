@@ -128,7 +128,6 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 } else {
                     presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
                 }
-                browse.stop();
             }
         });
     }
