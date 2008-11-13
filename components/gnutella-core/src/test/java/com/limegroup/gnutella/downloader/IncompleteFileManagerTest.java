@@ -12,6 +12,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -52,8 +53,8 @@ public class IncompleteFileManagerTest extends LimeTestCase {
            Set<URN> urns=new HashSet<URN>(1);
            if (urn!=null) 
                urns.add(URN.createSHA1Urn(urn));
-           return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("18.239.0.144", 6346, 13l, name, size, new byte[16],
-                56, false, 4, true, null, urns, false, false, "", null, -1, false);
+           return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("18.239.0.144", 6346, false), 13l, name, size, new byte[16],
+                56, false, 4, true, null, urns, false, "", -1);
        } catch (IOException e) {
            fail("Invalid URN", e);
            return null;

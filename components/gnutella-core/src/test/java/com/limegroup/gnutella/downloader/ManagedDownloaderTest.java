@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
@@ -554,12 +555,12 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	}
 	
     
-    private RemoteFileDesc newRFD(String name) {
+    private RemoteFileDesc newRFD(String name) throws Exception {
         return newRFD(name, null);
     }
 
-    private RemoteFileDesc newRFD(String name, String hash) {
-        Set<URN> urns=null;
+    private RemoteFileDesc newRFD(String name, String hash) throws Exception {
+        Set<URN> urns = Collections.emptySet();
         if (hash!=null) {
             urns=new HashSet<URN>(1);
             try {
@@ -568,8 +569,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 fail("Couldn't create URN", e);
             }
         }        
-        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", PORT, 13l, name, 1024, new byte[16],
-                56, false, 4, true, null, urns, false, false, "", null, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", PORT, false), 13l, name, 1024, new byte[16],
+                56, false, 4, true, null, urns, false, "", -1);
     }
     
     

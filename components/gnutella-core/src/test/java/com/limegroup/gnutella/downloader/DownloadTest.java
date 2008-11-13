@@ -2,8 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 
 
-import java.io.IOException;
-
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
@@ -501,7 +499,7 @@ public class DownloadTest extends DownloadTestCase {
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
     }
 
-    public void testPartialDownloads() throws IOException {
+    public void testPartialDownloads() throws Exception {
         LOG.info("-Testing partial downloads...");
         testUploaders[0].setPartial(true);
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
