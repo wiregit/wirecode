@@ -73,7 +73,6 @@ class FileMenu extends JMenu {
         add(new AbstractAction(I18n.tr("Exit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO this acts funny, might be causing a race condition
                 Application.getInstance().exit(e);
             }
         });
