@@ -1,65 +1,57 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import javax.swing.BorderFactory;
 import javax.swing.JProgressBar;
 
-import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.jdesktop.swingx.painter.Painter;
+import org.limewire.ui.swing.painter.ProgressBarBackgroundPainter;
+import org.limewire.ui.swing.painter.ProgressBarForegroundPainter;
 
 /**
  * Grayed out when setEnabled(false)
  */
 public class LimeProgressBar extends JProgressBar {
     
-    @Resource private Color barBackgroundGradientTop;
-    @Resource private Color barBackgroundGradientBottom;
-    @Resource private Color barForegroundGradientTop;
-    @Resource private Color barForegroundGradientBottom;
+
+    private static Painter<JProgressBar> BACKGROUND_PAINTER = new ProgressBarBackgroundPainter();
+    private static Painter<JProgressBar> FOREGROUND_PAINTER = new ProgressBarForegroundPainter();
     
-	private static final Composite DISABLED_COMPOSITE = AlphaComposite
-			.getInstance(AlphaComposite.SRC_ATOP).derive(.3f);
-	
+    private Painter<JProgressBar> foregroundPainter = FOREGROUND_PAINTER;
+    private Painter<JProgressBar> backgroundPainter = BACKGROUND_PAINTER;
+    
 	private boolean isHidden = false;
 	
 	public LimeProgressBar(int min, int max){
 	    super(min, max);
 	    
-	    GuiUtils.assignResources(this);
+	    init();
 	}
 	
 	public LimeProgressBar(){
-	    GuiUtils.assignResources(this);        
+	    
+	    init();
+    }
+
+	private void init() {
+	    this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+	}
+	 
+	public void setForegroundPainter(Painter<JProgressBar> painter) {
+	    this.foregroundPainter = painter;
+	}
+	
+	public void setBackgroundPainter(Painter<JProgressBar> painter) {
+        this.backgroundPainter = painter;
     }
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		if (!isHidden) {
-			if (!isEnabled()) {
-				Graphics2D g2 = (Graphics2D) g;
-				Composite oldComposite = g2.getComposite();
-				g2.setComposite(DISABLED_COMPOSITE);
-				super.paintComponent(g);
-				g2.setComposite(oldComposite);
-			} else {
-			    Graphics2D g2 = (Graphics2D) g;
-			    int height = this.getHeight();
-			    int width = this.getWidth();
-			   
-			    int progress = (int) (width * this.getPercentComplete());
-			    
-			    g2.setPaint(new GradientPaint(0,1, barBackgroundGradientTop, 0, height-2, barBackgroundGradientBottom));
-			    g2.fillRect(progress, 0, width-progress, height);
-			    
-			    g2.setPaint(new GradientPaint(0,1, barForegroundGradientTop, 0, height-2, barForegroundGradientBottom));
-			    g2.fillRect(0, 0, progress, height);
-			    
-			}
+	    if (!isHidden) {
+	        this.backgroundPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
+	        this.foregroundPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
 		}
 	}
 	
