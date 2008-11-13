@@ -3,14 +3,12 @@ package org.limewire.xmpp.client.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import net.jcip.annotations.GuardedBy;
-
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
@@ -23,14 +21,15 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.ChatState;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+//import net.jcip.annotations.GuardedBy;                          // TODO: DCHEN: Put dependencies in pom.xml and build.xml, then uncomment these!
 
 
 public class UserImpl implements User {
@@ -48,10 +47,10 @@ public class UserImpl implements User {
     // represent the Presence State
     private final Object presenceLock;
     
-    @GuardedBy("presenceLock")
-    private final ConcurrentHashMap<String, Presence> presences;
+//    @GuardedBy("presenceLock")
+    private final HashMap<String, Presence> presences;
 
-    @GuardedBy("presenceLock")
+//    @GuardedBy("presenceLock")
     private String activePresenceJid;
     // -----------------------------------------------------------------
 
@@ -59,8 +58,8 @@ public class UserImpl implements User {
     // -----------------------------------------------------------------
     private final Object chatListenerLock;
 
-    @GuardedBy("chatListenerLock")
-    private volatile IncomingChatListenerAdapter listenerAdapter;
+//    @GuardedBy("chatListenerLock")
+    private  IncomingChatListenerAdapter listenerAdapter;
     // -----------------------------------------------------------------
 
 
@@ -69,7 +68,7 @@ public class UserImpl implements User {
         this.id = id;
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
-        this.presences = new ConcurrentHashMap<String, Presence>();
+        this.presences = new HashMap<String, Presence>();
         this.presenceListeners = new EventListenerList<PresenceEvent>();
         this.activePresenceJid = null;
         this.connection = connection;
