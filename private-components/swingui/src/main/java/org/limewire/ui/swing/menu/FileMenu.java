@@ -1,11 +1,13 @@
 package org.limewire.ui.swing.menu;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,14 +28,15 @@ import javax.swing.filechooser.FileFilter;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Application;
+import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.impl.download.DownloadListener;
-import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
@@ -41,7 +44,6 @@ import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.Downloader;
 
 @Singleton
 class FileMenu extends JMenu {
@@ -49,12 +51,12 @@ class FileMenu extends JMenu {
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
-            LibraryManager libraryManager, DownloadListenerList downloadListenerList) {
+            LibraryManager libraryManager) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(getFileMenuItem(downloadListManager));
         add(getUrlMenuItem(downloadListManager));
-        JMenu recentDownloads = getRecentDownloads(downloadListenerList);
+        JMenu recentDownloads = getRecentDownloads(downloadListManager);
         add(recentDownloads);
         addSeparator();
         add(getAddFile(libraryManager));
@@ -136,27 +138,42 @@ class FileMenu extends JMenu {
         };
     }
 
-    private JMenu getRecentDownloads(DownloadListenerList downloadListenerList) {
+    private JMenu getRecentDownloads(DownloadListManager downloadListManager) {
         final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
-        downloadListenerList.addDownloadListener(new DownloadListener() {
+        new AbstractListEventListener<DownloadItem>() {
             @Override
-            public void downloadAdded(final Downloader downloader) {
-                JMenuItem menuItem = new JMenuItem(downloader.getFile().getName());
-                menuItem.addActionListener(new ActionListener() {
-                   @Override
+            protected void itemAdded(final DownloadItem item) {
+                recentDownloads.add(new AbstractAction(item.getFileName() + " - " + item.getPercentComplete() + "%") {
+                    {
+                        putValue("DOWNLOAD", item);
+                        item.addPropertyChangeListener(new PropertyChangeListener() {
+                            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                                putValue(Action.NAME, item.getFileName() + " - " + item.getPercentComplete() + "%");
+                            }
+                        });
+                    }
+                    
                     public void actionPerformed(ActionEvent e) {
-                       System.out.println(downloader.getFile().getName());
-                    } 
+                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                            .select(SimpleNavSelectable.create(item));
+                    }                    
                 });
-                recentDownloads.add(menuItem);
-
             }
-
             @Override
-            public void downloadRemoved(Downloader downloader) {
-
+            protected void itemRemoved(DownloadItem item) {
+                for(Component component : recentDownloads.getMenuComponents()) {
+                    if(component instanceof JMenuItem) {
+                        if(item.equals(((JMenuItem)component).getAction().getValue("DOWNLOAD"))) {
+                            recentDownloads.remove(component);
+                            break;
+                        }
+                    }
+                }
             }
-        });
+            @Override
+            protected void itemUpdated(DownloadItem item) {
+            }
+        }.install(downloadListManager.getSwingThreadSafeDownloads());
         return recentDownloads;
     }
 
@@ -184,9 +201,9 @@ class FileMenu extends JMenu {
                 if (files != null) {
                     for (File file : files) {
                         try {
-                            downloadListManager.addDownload(file);
+                            DownloadItem item = downloadListManager.addDownload(file);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                    .select();
+                                    .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException e1) {
                             // TODO better user feedback
                             throw new UnsupportedOperationException(e1);
@@ -208,9 +225,9 @@ class FileMenu extends JMenu {
                         URI uri = locationDialogue.getURI();
                         if (uri != null) {
                             try {
-                                downloadListManager.addDownload(uri);
+                                DownloadItem item = downloadListManager.addDownload(uri);
                                 navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                        .select();
+                                        .select(SimpleNavSelectable.create(item));
                             } catch (SaveLocationException e1) {
                                 // TODO implement good user feedback
                                 throw new UnsupportedOperationException(

@@ -3,19 +3,13 @@ package org.limewire.ui.swing.downloads;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JTextField;
-
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
-import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 
 class DownloadMediator {
