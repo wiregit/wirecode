@@ -135,7 +135,10 @@ class ShareListManagerImpl implements ShareListManager {
             super.dispose();
             if(committed) {
                 combinedShareList.removeMemberList(baseList);
-                getCoreFileList().removeFileListListener(eventListener);
+                com.limegroup.gnutella.library.FriendFileList fileList =
+                    getCoreFileList();
+                if(fileList != null)
+                    fileList.removeFileListListener(eventListener);
             }
         }
         
