@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +42,8 @@ public class LibraryHeaderPanel extends JXPanel {
     private Font headerFont;
     @Resource
     private Font buttonFont;
+    @Resource
+    private int height;
 
     private JLabel titleLabel;
 
@@ -60,7 +63,7 @@ public class LibraryHeaderPanel extends JXPanel {
      * @param friend the friend whose library is being viewed.  Null for MyLibrary.
      */
     public LibraryHeaderPanel(Category category, Friend friend) {
-        super(new MigLayout());
+        super(new MigLayout("insets 0, gap 0, aligny 50%", "[][]push[]", ""));
         
         GuiUtils.assignResources(this);
         
@@ -80,9 +83,13 @@ public class LibraryHeaderPanel extends JXPanel {
         filterField = new PromptTextField();
         filterField.setPromptText(I18n.tr("Filter"));
         
-        add(titleLabel);
-        add(filterField, "pushx, right");        
+        add(titleLabel, "gapx 10, gapafter 10");
+        add(filterField, "cell 2 0, right, gapafter 10");        
         setBackgroundPainter(new SubpanelPainter());
+        
+        setMinimumSize(new Dimension(0, height + 2));
+        setMaximumSize(new Dimension(getMaximumSize().width, height + 2));
+        setPreferredSize(new Dimension(getMaximumSize().width, height + 2));
     }
 
     public JTextComponent getFilterTextField(){
@@ -105,7 +112,7 @@ public class LibraryHeaderPanel extends JXPanel {
             }
         });
         
-        shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon);
+        shareAllButton = new JXButton(I18n.tr("Share Collection"), shareIcon);
         shareAllButton.setForeground(fontColor);
         shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareAllButton.setBackgroundPainter(new ButtonPainter());
@@ -122,7 +129,7 @@ public class LibraryHeaderPanel extends JXPanel {
                 shareAllPopup.show(shareAllButton, 0, 0);
             }
         });
-        add(shareAllButton);
+        add(shareAllButton, "cell 1 0");
     }
     
     private String getTitle() {
@@ -165,11 +172,6 @@ public class LibraryHeaderPanel extends JXPanel {
         throw new IllegalArgumentException("Unknown category: " + category);
     }
     
-    public void setFriend(Friend friend) {
-//        this.friend = friend;
-//        
-//        titleLabel.setText(getSharingTitle());
-    }
 
     public void setCategory(Category category) {
         this.category = category;
@@ -177,12 +179,18 @@ public class LibraryHeaderPanel extends JXPanel {
             titleLabel.setText(getTitle());
         else
             titleLabel.setText(getSharingTitle());
+        
+        displayCategory();
     }
     
-    public void setCategory(Category category, Friend friend) {
-//        this.friend = friend;
-//        this.category = category;
-//        
-//        titleLabel.setText(getSharingTitle());
+    public void displayCategory() {
+        if(shareAllButton == null)
+            return;
+        
+        if(category == Category.AUDIO || category == Category.IMAGE || category == Category.VIDEO)
+            shareAllButton.setVisible(true);
+        else
+            shareAllButton.setVisible(false);
     }
+    
 }

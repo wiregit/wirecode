@@ -106,7 +106,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         disposableList.add(disposable);
     }
     
-    protected void createButton(Icon icon, Category category, JComponent component) {
+    protected JButton createButton(Icon icon, Category category, JComponent component) {
         cardPanel.add(component, category.toString());
         
         ButtonItem item = new ButtonItemImpl(category);
@@ -124,6 +124,8 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), Prev.KEY);
         
         selectionPanel.add(button, "growx");
+        
+        return button;
     }
     
 

@@ -4,10 +4,13 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,6 +24,9 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
+import org.limewire.ui.swing.library.sharing.AllFriendsList;
+import org.limewire.ui.swing.library.sharing.CategoryShareModel;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -35,16 +41,23 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 public class SharingLibraryPanel extends LibraryPanel {
-
+    private AllFriendsList allFriendsList;
+    private ShareListManager shareListManager;
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final BaseLibraryMediator basePanel;
+    
+    private List<Disposable> buttonFilterList = new ArrayList<Disposable>();
+    
+    private LibrarySharePanel shareAllPanel = null;
     
     @AssistedInject
     public SharingLibraryPanel( @Assisted BaseLibraryMediator basePanel,
@@ -54,9 +67,12 @@ public class SharingLibraryPanel extends LibraryPanel {
                                 IconManager iconManager,
                                 CategoryIconManager categoryIconManager,
                                 LibraryTableFactory tableFactory,
+                                AllFriendsList allFriendsList,
                                 ShareListManager shareListManager) {
         super(friend);
         
+        this.shareListManager = shareListManager;
+        this.allFriendsList = allFriendsList;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.basePanel = basePanel;
@@ -65,11 +81,15 @@ public class SharingLibraryPanel extends LibraryPanel {
         loadSelectionPanel();
         createMyCategories(eventList, friend, friendFileList);
     }
-    
+        
     @Override
     public void loadHeader() {
         headerPanel.setBackgroundPainter(null);
         headerPanel.setBackground(Color.pink.darker());
+        
+        shareAllPanel = new LibrarySharePanel(allFriendsList.getAllFriends());
+        shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
+        headerPanel.enableShareAll(shareAllPanel);
     }
 
     @Override
@@ -88,8 +108,11 @@ public class SharingLibraryPanel extends LibraryPanel {
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList, Friend friend, LocalFileList friendFileList) {
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
         for(Category category : Category.getCategoriesInOrder()) {
-            createButton(categoryIconManager.getIcon(category), category,
-                    createMyCategoryAction(category, eventList, friend, friendFileList));
+            JButton button = createButton(categoryIconManager.getIcon(category), category,
+                        createMyCategoryAction(category, eventList, friend, friendFileList));
+            
+            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(friendFileList.getSwingModel(), new CategoryFilter(category));
+            buttonFilterList.add(new ButtonSizeListener(category.toString(), button.getAction(), filtered));
         }
         return categories;
     }
@@ -148,6 +171,15 @@ public class SharingLibraryPanel extends LibraryPanel {
         return (LibraryTableModel<LocalFileItem>)table.getModel();
     }   
     
+    @Override
+    public void dispose() {
+        super.dispose();
+        
+        shareAllPanel.dispose();
+        for(Disposable disposable : buttonFilterList)
+            disposable.dispose();
+    }
+    
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
         private LibraryTableModel<LocalFileItem> model;
 
@@ -176,6 +208,37 @@ public class SharingLibraryPanel extends LibraryPanel {
             case DOCUMENT:
                 NativeLaunchUtils.launchFile(file);
             }
+        }
+    }
+    
+    private class ButtonSizeListener implements Disposable, ListEventListener<LocalFileItem> {
+        private final String text;
+        private final Action action;
+        private final FilterList<LocalFileItem> list;
+        
+        public ButtonSizeListener(String text, Action action, FilterList<LocalFileItem> list) {
+            this.text = text;
+            this.action = action;
+            this.list = list;
+            
+            setText();
+                        
+            list.addListEventListener(this);
+        }
+
+        private void setText() {
+            action.putValue(Action.NAME, text + " (" + list.size() + ")");
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            list.dispose();
+        }
+
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            setText();
         }
     }
 }
