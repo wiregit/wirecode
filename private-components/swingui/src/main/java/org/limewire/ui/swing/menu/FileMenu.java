@@ -27,6 +27,7 @@ import javax.swing.filechooser.FileFilter;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.download.DownloadItem;
@@ -34,6 +35,10 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.event.AbstractEDTEvent;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
@@ -46,8 +51,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class FileMenu extends JMenu {
+public class FileMenu extends JMenu {
     private final Navigator navigator;
+
+    private final String signIntoFriends = I18n.tr("Sign into Friends");
+
+    private final String signOutOfFriends = I18n.tr("Sign out of Friends");
+
+    private final Action signInOutAction;
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
@@ -62,13 +73,16 @@ class FileMenu extends JMenu {
         add(getAddFile(libraryManager));
         add(getAddFolder(libraryManager));
         addSeparator();
-        add(new AbstractAction(I18n.tr("Sign into Friends/Sign out of Friends")) {
-            // TODO show approriate text depending on whether signed in or not.
-            @Override
+        signInOutAction = new AbstractAction(signIntoFriends) {
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me");
+                if(signInOutAction.getValue(Action.NAME) == signIntoFriends) {
+                    //TODO open and foccus the chat window.
+                } else {
+                    new SignoffEvent().publish();
+                }
             }
-        });
+        };
+        add(signInOutAction);
         addSeparator();
         add(new AbstractAction(I18n.tr("Exit")) {
             @Override
@@ -76,7 +90,7 @@ class FileMenu extends JMenu {
                 Application.getInstance().exit(e);
             }
         });
-
+        EventAnnotationProcessor.subscribe(this);
     }
 
     private Action getAddFolder(final LibraryManager libraryManager) {
@@ -142,33 +156,37 @@ class FileMenu extends JMenu {
         new AbstractListEventListener<DownloadItem>() {
             @Override
             protected void itemAdded(final DownloadItem item) {
-                recentDownloads.add(new AbstractAction(item.getFileName() + " - " + item.getPercentComplete() + "%") {
+                recentDownloads.add(new AbstractAction(item.getFileName() + " - "
+                        + item.getPercentComplete() + "%") {
                     {
                         putValue("DOWNLOAD", item);
                         item.addPropertyChangeListener(new PropertyChangeListener() {
                             public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                                putValue(Action.NAME, item.getFileName() + " - " + item.getPercentComplete() + "%");
+                                putValue(Action.NAME, item.getFileName() + " - "
+                                        + item.getPercentComplete() + "%");
                             }
                         });
                     }
-                    
+
                     public void actionPerformed(ActionEvent e) {
-                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                            .select(SimpleNavSelectable.create(item));
-                    }                    
+                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
+                                SimpleNavSelectable.create(item));
+                    }
                 });
             }
+
             @Override
             protected void itemRemoved(DownloadItem item) {
-                for(Component component : recentDownloads.getMenuComponents()) {
-                    if(component instanceof JMenuItem) {
-                        if(item.equals(((JMenuItem)component).getAction().getValue("DOWNLOAD"))) {
+                for (Component component : recentDownloads.getMenuComponents()) {
+                    if (component instanceof JMenuItem) {
+                        if (item.equals(((JMenuItem) component).getAction().getValue("DOWNLOAD"))) {
                             recentDownloads.remove(component);
                             break;
                         }
                     }
                 }
             }
+
             @Override
             protected void itemUpdated(DownloadItem item) {
             }
@@ -336,4 +354,13 @@ class FileMenu extends JMenu {
         }
     }
 
+    @EventSubscriber
+    public void handleSignon(XMPPConnectionEstablishedEvent event) {
+        signInOutAction.putValue(Action.NAME, signOutOfFriends);
+    }
+
+    @EventSubscriber
+    public void handleSignoff(SignoffEvent event) {
+        signInOutAction.putValue(Action.NAME, signIntoFriends);
+    }
 }
