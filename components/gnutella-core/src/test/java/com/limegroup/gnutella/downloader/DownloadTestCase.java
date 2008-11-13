@@ -15,6 +15,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
@@ -37,6 +38,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
@@ -44,6 +46,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.library.FileManager;
@@ -368,6 +371,25 @@ public abstract class DownloadTestCase extends LimeTestCase {
         IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
         VerifyingFile vf = ifm.getEntry(incFile);
         assertNull("verifying file should be null", vf);
+    }
+    
+    protected RemoteFileDesc newRFDPush(int port, int suffix) throws Exception {
+        return newRFDPush(port, suffix, 1);
+    }
+    
+    protected RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception {
+        PushAltLoc al = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
+                + ";127.0.0." + proxySuffix + ":" + port, TestFile.hash());
+        al.updateProxies(true);
+
+        Set<URN> urns = new HashSet<URN>();
+        urns.add(TestFile.hash());
+        
+        PushEndpoint pe = al.getPushAddress();
+        PushEndpoint copyWithPublicAddress = pushEndpointFactory.createPushEndpoint(pe.getClientGUID(), pe.getProxies(), pe.getFeatures(), pe.getFWTVersion(), new IpPortImpl("127.0.0." + rfdSuffix, 6346));
+        
+        return remoteFileDescFactory.createRemoteFileDesc(copyWithPublicAddress, 0, savedFile.getName(),
+                TestFile.length(), pe.getClientGUID(), 100, false, 1, false, null, urns, false, "ALT", 0);
     }
 
     protected RemoteFileDesc newRFD(int port, boolean useTLS) throws Exception {
