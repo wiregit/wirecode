@@ -4,11 +4,11 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Random;
 
-import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JMenu;
 
 import org.limewire.core.api.Application;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;

@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Map;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenu;
 
@@ -17,6 +16,7 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -32,16 +32,16 @@ public class PlayerMenu extends JMenu {
             final LibraryManager libraryManager) {
         super(I18n.tr("Player"));
 
-        add(getPlayPause(audioPlayer));
+        add(getPlayPauseAction(audioPlayer));
 
-        add(getNext(audioPlayer));
-        add(getPrevious(audioPlayer));
+        add(getNextAction(audioPlayer));
+        add(getPreviousAction(audioPlayer));
 
         addSeparator();
-        add(getShowCurrentFile(audioPlayer, navigator, libraryManager));
+        add(getShowCurrentFileAction(audioPlayer, navigator, libraryManager));
     }
 
-    private Action getNext(final AudioPlayer audioPlayer) {
+    private Action getNextAction(final AudioPlayer audioPlayer) {
         //TODO need to have a notion of a playlist for this to work.
         Action action = new AbstractAction(I18n.tr("Next")) {;
             @Override
@@ -54,7 +54,7 @@ public class PlayerMenu extends JMenu {
         return action;
     }
 
-    private Action getPrevious(final AudioPlayer audioPlayer) {
+    private Action getPreviousAction(final AudioPlayer audioPlayer) {
         Action action = new AbstractAction(I18n.tr("Previous")) {
           //TODO need to have a notion of a playlist for this to work.
             @Override
@@ -67,7 +67,7 @@ public class PlayerMenu extends JMenu {
         return action;
     }
 
-    private Action getPlayPause(final AudioPlayer audioPlayer) {
+    private Action getPlayPauseAction(final AudioPlayer audioPlayer) {
         final String play = I18n.tr("Play");
         final String pause = I18n.tr("Pause");
         final Action action = new AbstractAction() {
@@ -113,7 +113,7 @@ public class PlayerMenu extends JMenu {
         return action;
     }
 
-    private Action getShowCurrentFile(final AudioPlayer audioPlayer, final Navigator navigator,
+    private Action getShowCurrentFileAction(final AudioPlayer audioPlayer, final Navigator navigator,
             final LibraryManager libraryManager) {
         Action action = new AbstractAction(I18n.tr("Show current file")) {
             @Override
