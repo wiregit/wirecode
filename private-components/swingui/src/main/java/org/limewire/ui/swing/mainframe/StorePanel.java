@@ -38,8 +38,10 @@ public class StorePanel extends JPanel {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                loadedOnce = true;
-                load("http://store.limewire.com/");
+                if(!loadedOnce) {
+                    loadedOnce = true;
+                    load("http://store.limewire.com/");
+                }
                 removeComponentListener(this);
             }
         });
@@ -52,6 +54,7 @@ public class StorePanel extends JPanel {
     }
 
     public void load(String url) {
+        loadedOnce = true;
         url = application.getUniqueUrl(url) + "&isClient=true";
         browser.load(url);
     }
