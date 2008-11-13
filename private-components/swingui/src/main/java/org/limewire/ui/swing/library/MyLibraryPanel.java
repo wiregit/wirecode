@@ -3,13 +3,8 @@
  */
 package org.limewire.ui.swing.library;
 
-import java.awt.AWTEvent;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,8 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
-import org.jdesktop.jxlayer.JXLayer;
-import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
@@ -117,11 +110,8 @@ class MyLibraryPanel extends LibraryPanel {
         final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriendsList.getAllFriends());
         addDisposable(sharePanel);
         
-        final JXLayer<JComponent> layer;
-        
         sharePanel.setShareModel(new FileShareModel(shareListManager));
         
-        final JComponent scrollComponent;
         final JScrollPane scrollPane;
         
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
@@ -131,17 +121,9 @@ class MyLibraryPanel extends LibraryPanel {
             table.enableSharing(sharePanel);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             
-            layer = new JXLayer<JComponent>(table, new AbstractLayerUI<JComponent>());
-            scrollPane = new JScrollPane(layer);
-            scrollPane.setColumnHeaderView(table.getTableHeader());
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            
-            if (table.isColumnControlVisible()) {
-                scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
-                scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-            }
+            scrollPane = new JScrollPane(table);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());    
 
-            scrollComponent = table;
             addDisposable(table);
 //            librarySelectable = table;
 
@@ -153,70 +135,11 @@ class MyLibraryPanel extends LibraryPanel {
             
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            layer = new JXLayer<JComponent>(scrollPane, new AbstractLayerUI<JComponent>());
             
-            scrollComponent = imagePanel;
             addDisposable(imagePanel);
 //            librarySelectable = imagePanel;
         }
-        
-        // for absolute positioning of LibrarySharePanel
-        layer.getGlassPane().setLayout(null);
-        sharePanel.setBounds(0, 0, sharePanel.getPreferredSize().width, sharePanel
-                .getPreferredSize().height);
-        layer.getGlassPane().add(sharePanel);
-        sharePanel.setVisible(false);
-        
-        layer.addComponentListener(new ComponentListener(){
-            @Override
-            public void componentHidden(ComponentEvent e) {
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-            }
-
-            @Override
-            public void componentResized(ComponentEvent e) {
-                  if (scrollComponent.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
-                  //force layer to take up entire scrollpane so stripes are shown
-                      layer.setPreferredSize(scrollPane.getViewport().getSize());
-                  } else {
-                  //layer can handle its own sizing
-                      layer.setPreferredSize(null);
-                  }
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-                if (scrollComponent.getPreferredSize().height < scrollPane.getViewport().getSize().height) {
-                //force layer to take up entire scrollpane so stripes are shown
-                    layer.setPreferredSize(scrollPane.getViewport().getSize());
-                } else {
-                //layer can handle its own sizing
-                    layer.setPreferredSize(null);
-                }
-            }
-            
-        });
-
-        // make sharePanel disappear when the user clicks elsewhere
-        AWTEventListener eventListener = new AWTEventListener() {
-            @Override
-            public void eventDispatched(AWTEvent event) {
-                if (sharePanel.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)) {
-                    MouseEvent e = (MouseEvent) event;
-                    if (sharePanel != e.getComponent()
-                            && !sharePanel.contains(e.getComponent()) ){
-//                            && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
-                        sharePanel.setVisible(false);
-                    }
-                }
-            }
-        };
-        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener,
-                AWTEvent.MOUSE_EVENT_MASK);
-        
+                      
         return scrollPane;
     }
     

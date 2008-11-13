@@ -96,6 +96,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         for(LibraryImageSubPanel subPanel : panelMap.values()){
             subPanel.dispose();
         }
+        panelMap.clear();
         groupingList.removeListEventListener(this);
         groupingList.dispose();
     }

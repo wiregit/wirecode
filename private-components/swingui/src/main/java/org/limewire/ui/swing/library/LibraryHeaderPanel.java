@@ -1,17 +1,13 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.text.JTextComponent;
 
@@ -55,7 +51,6 @@ public class LibraryHeaderPanel extends JXPanel {
 
     private Friend friend;
     
-    private JPopupMenu shareAllPopup;
 
     /**
      * 
@@ -96,23 +91,9 @@ public class LibraryHeaderPanel extends JXPanel {
         return filterField;
     }
     
-    public void enableShareAll(final LibrarySharePanel sharePanel){
-        
-        shareAllPopup = new JPopupMenu();
-        shareAllPopup.setLayout(new BorderLayout());
-        shareAllPopup.add(sharePanel);
-        
-        sharePanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if (shareAllPopup.isVisible()) {
-                    //TODO: better way of doing this.  Popup flashes.
-                    shareAllPopup.pack();
-                }
-            }
-        });
-        
-        shareAllButton = new JXButton(I18n.tr("Share Collection"), shareIcon);
+    public void enableShareAll(final LibrarySharePanel sharePanel){        
+        shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon);
+
         shareAllButton.setForeground(fontColor);
         shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareAllButton.setBackgroundPainter(new ButtonPainter());
@@ -123,14 +104,14 @@ public class LibraryHeaderPanel extends JXPanel {
         shareAllButton.setContentAreaFilled(false);
         shareAllButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {               
                 ((CategoryShareModel)sharePanel.getShareModel()).setCategory(category);
-                sharePanel.adjustSize();
-                shareAllPopup.show(shareAllButton, 0, 0);
+                sharePanel.show(shareAllButton);
             }
         });
         add(shareAllButton, "cell 1 0");
     }
+
     
     private String getTitle() {
         String libraryString = (friend == null) ? I18n.tr("My Library") : I18n.tr("{0}'s Library", friend.getRenderName());
@@ -192,5 +173,5 @@ public class LibraryHeaderPanel extends JXPanel {
         else
             shareAllButton.setVisible(false);
     }
-    
+
 }

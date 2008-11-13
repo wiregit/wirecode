@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -7,15 +9,18 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -28,6 +33,7 @@ import javax.swing.ComboBoxEditor;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -71,7 +77,6 @@ import com.google.inject.Inject;
 
 public class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable {
 
-    private static final int FRIEND_ROW_COUNT = 4;
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
@@ -98,10 +103,8 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private List<SharingTarget> allFriends;
 
     private JScrollPane shareScroll;
-   // private JScrollPane friendScroll;
 
     private JXTable shareTable;
-   // private MouseableTable friendTable;
     private JComboBox friendCombo;
 
     private JLabel friendLabel;
@@ -111,9 +114,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     
     private ShapePainter shapePainter;    
     
-    private int ledgeWidth;
-    private int ledgeHeight;
-    private int ledgeY;
+    private JDialog dialog;
     
     private ComboPopup comboPopup;
     
@@ -147,16 +148,20 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             }
         }
     };
+    private AWTEventListener eventListener;
     
     
     @Inject
     public LibrarySharePanel(List<SharingTarget> allFriends) {
+        //TODO clean up constructor
         GuiUtils.assignResources(this);
         
         this.allFriends = allFriends;
         
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setOpaque(false);
+        
+        createDialog();
         
         shapePainter = new ShapePainter();
         shapePainter.setFillPaint(getBackground());        
@@ -348,12 +353,48 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
      
         addComponentListener(new ComponentAdapter() {
             @Override
+            public void componentResized(ComponentEvent e) {
+                if (dialog.isVisible()) {
+                    dialog.pack();
+                }
+            }
+
+            @Override
             public void componentShown(ComponentEvent e) {
                 inputField.requestFocusInWindow();
             }
         });
+        
+        // make sharePanel disappear when the user clicks elsewhere
+        eventListener = new AWTEventListener() {
+            @Override
+            public void eventDispatched(AWTEvent event) {
+                if (dialog.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)) {
+                    MouseEvent e = (MouseEvent) event;
+                    if (LibrarySharePanel.this != e.getComponent()
+                            && !contains(e.getComponent()) ){
+//                            && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
+                        dialog.setVisible(false);
+                        removeCloseListener();
+                    }
+                }
+            }
+        }; 
+
     }
     
+    private void createDialog(){
+        dialog = new JDialog();
+        dialog.setUndecorated(true);
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                addCloseListener();
+            }
+        });
+        dialog.setLayout(new BorderLayout());
+        dialog.add(this);
+    }
 
     private void adjustFriendLabelVisibility() {
         friendLabel.setVisible(shareFriendList.size() == 0);
@@ -383,66 +424,20 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
         component.getActionMap().put("down", down);       
     }
-    
 
-    public void show(Rectangle ledgeBounds, Rectangle visibleRect){
-        inputField.setText(null);
-        adjustFriendLabelVisibility();
-        
-        ledgeWidth = ledgeBounds.width;
-        ledgeHeight = ledgeBounds.height;
-        
+    
+    public void show(Component c) {
+        inputField.setText(null);    
         adjustSize();
-        
-        //favor ledge on top
-        boolean ledgeFitsOnBottom = ledgeBounds.y + ledgeBounds.height - getHeight() >= visibleRect.getY();
-        boolean ledgeFitsOnTop = ledgeBounds.y + getHeight() <= visibleRect.getHeight();
+        dialog.setLocationRelativeTo(c);
+        dialog.setVisible(true);
+        //TODO toFront() doesn't seem to work consistently
+        dialog.toFront();
+    }
+    
  
-        int y = 0; //y position for widget bounds
-        if (ledgeFitsOnTop) {
-            y = ledgeBounds.y;
-            ledgeY = 1;
-        } else if (ledgeFitsOnBottom) {
-            y = ledgeBounds.y + ledgeBounds.height - getHeight();
-            ledgeY = getHeight() - ledgeBounds.height - 1;
-        } else {
-            y = (int) visibleRect.getY();
-            ledgeY = ledgeBounds.y - y;
-            if (ledgeY <= 0) {
-                ledgeY = 1;
-            }
-        }
-        
-        adjustPainter();
-        
-        int xPos = ledgeFitsOnRight(ledgeBounds) ? getRightLedgeXPosition(ledgeBounds) : ledgeBounds.x;
-        
-        setBounds(xPos, y, getWidth(), getHeight());
-        getParent().validate();
-        setVisible(true);    
-    }
-    
-    private boolean ledgeFitsOnRight(Rectangle ledgeBounds){
-        return getRightLedgeXPosition(ledgeBounds) >= 0;
-    }
-    
-    private int getRightLedgeXPosition(Rectangle ledgeBounds){
-        return ledgeBounds.x - mainPanel.getWidth() - HGAP * 2;
-    }
-
-    
-    public void show(Component c, Rectangle visibleRect) {
-        show(c.getBounds(), visibleRect);
-    }
-    
-
-    //TODO: clean this up and move it to a separate component
     private void adjustPainter(){
         Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
-        Area area2 = new Area(new RoundRectangle2D.Float(mainPanel.getWidth() + HGAP * 2, ledgeY, ledgeWidth-1, ledgeHeight, BORDER_INSETS, BORDER_INSETS));
-        area.exclusiveOr(area2);
-        Area area3 = new Area(new Rectangle2D.Float(mainPanel.getWidth() + HGAP, ledgeY, BORDER_INSETS * 2, ledgeHeight));
-        area.add(area3);
         shapePainter.setShape(area);
     }
 
@@ -481,15 +476,11 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         adjustSize();
     }
     
-    //TODO: clean this up
     public void adjustSize(){
-        int visibleRows = (noShareFriendList.size() < FRIEND_ROW_COUNT) ? noShareFriendList.size() : FRIEND_ROW_COUNT;
-//        friendTable.setVisibleRowCount(visibleRows);
-        // friendScroll.setVisible(noShareFriendList.size() > 0);
         adjustFriendLabelVisibility();
         inputField.setVisible(noShareFriendList.size() > 1);
         
-        visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
+        int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
         shareScroll.setVisible(visibleRows > 0);
         shareLabel.setVisible(visibleRows > 0);
@@ -503,11 +494,9 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             prefWidth = Math.max(prefWidth, c.getPreferredSize().width);
         }
         
-        mainPanel.setSize(prefWidth, height);
-        setSize(mainPanel.getSize().width + ledgeWidth + 2 * HGAP, mainPanel.getSize().height + BORDER_INSETS);
-        revalidate();       
-        adjustPainter(); 
-        repaint();
+         mainPanel.setSize(300, height);
+         setSize(mainPanel.getSize().width + 2 * HGAP, mainPanel.getSize().height + BORDER_INSETS);
+        adjustPainter();
     }
     
      
@@ -519,12 +508,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         allFriends.clear();
     }
     
-      
-    //true if it is inside our funky shape
-    @Override
-    public boolean contains(int x, int y){
-        return shapePainter.getShape().contains(x, y);
-    }
     
     public boolean contains(Component c) {
         for (; c != null; c = c.getParent()) {
@@ -541,7 +524,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         }       
         
         ((EventTableModel)shareTable.getModel()).dispose();
-     //   ((EventTableModel)friendTable.getModel()).dispose();
     }
     
     
@@ -570,6 +552,14 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         return shareModel.isShared(friend);
     }   
     
+    private void addCloseListener() {
+        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
+    }
+
+    private void removeCloseListener() {
+        Toolkit.getDefaultToolkit().removeAWTEventListener(eventListener);
+    }
+            
     private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {
         private int editColumn;
         
@@ -635,6 +625,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         reloadSharedBuddies();
     }
     
+    
     private class ShareComboBoxEditor implements ComboBoxEditor{
         @Override
         public Component getEditorComponent() {
@@ -675,4 +666,5 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         }
     }
 
+    
 }

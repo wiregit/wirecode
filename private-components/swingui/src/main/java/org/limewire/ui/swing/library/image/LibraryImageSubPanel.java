@@ -249,7 +249,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
             Point convertedLocation = SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), LibraryImageSubPanel.this.getParent());
             bounds.x = convertedLocation.x;
             bounds.y = convertedLocation.y;
-            librarySharePanel.show(bounds, ((JComponent)LibraryImageSubPanel.this.getParent()).getVisibleRect());
+            librarySharePanel.show(shareEditor.getShareButton());
             shareEditor.cancelCellEditing();
         }
         
