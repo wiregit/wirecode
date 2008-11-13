@@ -6,10 +6,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jivesoftware.smack.RosterEntry;
+import net.jcip.annotations.GuardedBy;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
@@ -22,15 +23,14 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import net.jcip.annotations.GuardedBy;
 
 
 public class UserImpl implements User {

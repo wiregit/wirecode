@@ -1,17 +1,14 @@
 package org.limewire.ui.swing.friends;
 
-import java.util.Collection;
 import java.net.URI;
+import java.util.Collection;
 
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.listener.ListenerSupport;
 
 public class MockPresence implements Presence {
     private String status;

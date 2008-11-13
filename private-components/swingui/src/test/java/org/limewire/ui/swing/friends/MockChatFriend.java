@@ -1,9 +1,8 @@
 package org.limewire.ui.swing.friends;
 
 import java.beans.PropertyChangeListener;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.Network;

@@ -1,7 +1,5 @@
 package org.limewire.xmpp.api.client;
 
-import java.util.Map;
-
 import org.limewire.core.api.friend.Friend;
 import org.limewire.listener.EventListener;
 
