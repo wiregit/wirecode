@@ -27,6 +27,10 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     public boolean isDebugEnabled() {
         return serverConfiguration.isDebugEnabled();
     }
+    
+    public boolean requiresDomain() {
+        return serverConfiguration.requiresDomain();
+    }
 
     public String getUsername() {
         return userConfiguration.getUsername();
@@ -54,6 +58,10 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
 
     public String getServiceName() {
         return serverConfiguration.getServiceName();
+    }
+    
+    public String getFriendlyName() {
+        return serverConfiguration.getFriendlyName();
     }
 
     public boolean isAutoLogin() {

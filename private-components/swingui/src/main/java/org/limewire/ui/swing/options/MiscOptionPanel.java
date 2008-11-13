@@ -2,8 +2,11 @@ package org.limewire.ui.swing.options;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -13,6 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.friends.XMPPEventHandler;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 import com.google.inject.Inject;
@@ -109,35 +113,54 @@ public class MiscOptionPanel extends OptionPanel {
     
     private class FriendsChatPanel extends OptionPanel {
 
-        private static final String GMAIL_SERVICE_NAME = "gmail.com";
-        
         private JCheckBox signIntoOnStartupCheckBox;
-//        private JCheckBox rememberPasswordCheckBox;
+        private JComboBox serviceComboBox;
         private JTextField usernameTextField;
         private JPasswordField passwordField;
         
         public FriendsChatPanel() {
             super(I18n.tr("Friends and Chat"));
             
-            signIntoOnStartupCheckBox = new JCheckBox();
+            signIntoOnStartupCheckBox = new JCheckBox();            
             signIntoOnStartupCheckBox.setContentAreaFilled(false);
             signIntoOnStartupCheckBox.addItemListener(new ItemListener(){
                 @Override
                 public void itemStateChanged(ItemEvent e) {
+                    serviceComboBox.setEnabled(signIntoOnStartupCheckBox.isSelected());
                     usernameTextField.setEnabled(signIntoOnStartupCheckBox.isSelected());
                     passwordField.setEnabled(signIntoOnStartupCheckBox.isSelected());
                 }
             });
-//            rememberPasswordCheckBox = new JCheckBox();
-//            rememberPasswordCheckBox.setContentAreaFilled(false);
+            
+            serviceComboBox = new JComboBox();
+            ArrayList<String> services = new ArrayList<String>(); 
+            for(XMPPConnection connection : xmppEventHandler.getAllConnections()) {
+                XMPPConnectionConfiguration config = connection.getConfiguration();
+                services.add(config.getFriendlyName());
+            }
+            Collections.sort(services);
+            for(String friendlyName : services)
+                serviceComboBox.addItem(friendlyName); // FIXME: icons?
+            serviceComboBox.setSelectedItem("Gmail");
+            serviceComboBox.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    String friendlyName = (String)serviceComboBox.getSelectedItem();
+                    XMPPConnectionConfiguration config =
+                        xmppEventHandler.getConfigByFriendlyName(friendlyName);
+                    usernameTextField.setText(config.getMyID());
+                    passwordField.setText(config.getPassword());
+                }
+            });
+            
             usernameTextField = new JTextField(30);
-            passwordField = new JPasswordField(30);
+            passwordField = new JPasswordField(30);            
             
             add(signIntoOnStartupCheckBox, "split");
-            add(new JLabel(I18n.tr("Sign into Friends when LimeWire starts")), "wrap");
-
-//            add(rememberPasswordCheckBox, "split");
-//            add(new JLabel("Remember username and password"), "wrap");
+            add(new JLabel(I18n.tr("Sign in when LimeWire starts")), "wrap");
+            
+            add(new JLabel(I18n.tr("Sign in using")), "gapleft 25, split");
+            add(serviceComboBox, "wrap");
             
             add(new JLabel(I18n.tr("Username")), "gapleft 25, split");
             add(usernameTextField, "wrap");
@@ -148,36 +171,37 @@ public class MiscOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-            XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
-            config.setAutoLogin(signIntoOnStartupCheckBox.isSelected());
+            String friendlyName = (String)serviceComboBox.getSelectedItem();
+            XMPPConnectionConfiguration config =
+                xmppEventHandler.getConfigByFriendlyName(friendlyName);
             config.setUsername(usernameTextField.getText());
-            config.setPassword(passwordField.getPassword().toString());
-            
+            config.setPassword(new String(passwordField.getPassword()));
+            config.setAutoLogin(signIntoOnStartupCheckBox.isSelected());
             //TODO: some checking here for invalid states, null string, etc..
             //      also check if autologin checked but username/password null
         }
 
         @Override
         boolean hasChanged() {
-            XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
+            String friendlyName = (String)serviceComboBox.getSelectedItem();
+            XMPPConnectionConfiguration config =
+                xmppEventHandler.getConfigByFriendlyName(friendlyName);
             return config.isAutoLogin() != signIntoOnStartupCheckBox.isSelected()
                     || !usernameTextField.getText().equals(config.getUsername())
-                    || !passwordField.getPassword().equals(config.getPassword());
+                    || !new String(passwordField.getPassword()).equals(config.getPassword());
         }
 
         @Override
         public void initOptions() { 
-            XMPPConnectionConfiguration config = xmppEventHandler.getConfig(GMAIL_SERVICE_NAME);
-            //FIXME: Temporary guard 
-            if (config == null || !config.isAutoLogin()) {
-                signIntoOnStartupCheckBox.setSelected(false);
-            } else
-                signIntoOnStartupCheckBox.setSelected(true);
-            
-            if(config != null) {
-                usernameTextField.setText(config.getUsername());
-                passwordField.setText(config.getPassword());
-            }
+            String friendlyName = (String)serviceComboBox.getSelectedItem();
+            XMPPConnectionConfiguration config =
+                xmppEventHandler.getConfigByFriendlyName(friendlyName);
+            signIntoOnStartupCheckBox.setSelected(config.isAutoLogin());
+            serviceComboBox.setEnabled(config.isAutoLogin());
+            usernameTextField.setEnabled(config.isAutoLogin());
+            passwordField.setEnabled(config.isAutoLogin());
+            usernameTextField.setText(config.getUsername());
+            passwordField.setText(config.getPassword());
         }
     }
 }

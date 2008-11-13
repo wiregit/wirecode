@@ -81,16 +81,26 @@ public class XMPPEventHandler {
         }
     }
     
-    public XMPPConnectionConfiguration getConfig(String serviceName) {
-        XMPPConnectionConfiguration config = null;
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
+    public List<XMPPConnection> getAllConnections() {
+        return xmppService.getConnections();
+    }
+    
+    public XMPPConnectionConfiguration getConfigByServiceName(String serviceName) {
+        for(XMPPConnection connection : xmppService.getConnections()) {
             XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getServiceName().equals(serviceName)) {
-                config = configuration;
-            }
+            if(configuration.getServiceName().equals(serviceName))
+                return configuration;
         }
-        return config;
+        return null;
+    }
+    
+    public XMPPConnectionConfiguration getConfigByFriendlyName(String friendlyName) {
+        for(XMPPConnection connection : xmppService.getConnections()) {
+            XMPPConnectionConfiguration configuration = connection.getConfiguration();
+            if(configuration.getFriendlyName().equals(friendlyName))
+                return configuration;
+        }
+        return null;
     }
     
     @EventSubscriber
@@ -102,12 +112,10 @@ public class XMPPEventHandler {
         }
     }
     
-    private XMPPConnection getLoggedInConnection() {
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            if (connection.isLoggedIn()) {
+    public XMPPConnection getLoggedInConnection() {
+        for(XMPPConnection connection : xmppService.getConnections()) {
+            if (connection.isLoggedIn())
                 return connection;
-            }
         }
         return null;
     }

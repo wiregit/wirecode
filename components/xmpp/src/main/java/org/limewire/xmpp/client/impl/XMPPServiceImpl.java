@@ -97,6 +97,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         for(XMPPConnection connection : connections) {
             if(connection.getConfiguration().isAutoLogin()) {
                 login(connection);
+                return; // Don't log into more than one service
             }
         }        
     }

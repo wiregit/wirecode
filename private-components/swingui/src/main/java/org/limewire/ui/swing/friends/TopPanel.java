@@ -40,6 +40,7 @@ import org.limewire.ui.swing.components.ComponentHider.AdditionalBehavior;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.XMPPConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,14 +53,17 @@ public class TopPanel extends JPanel {
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
     private final FriendRemover friendRemover;
+    private final XMPPEventHandler xmppEventHandler;
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
     
     @Inject
-    public TopPanel(final IconLibrary icons, FriendRemover friendRemover) {
+    public TopPanel(final IconLibrary icons, FriendRemover friendRemover,
+                    XMPPEventHandler xmppEventHandler) {
         this.icons = icons;
         this.friendRemover = friendRemover;
+        this.xmppEventHandler = xmppEventHandler;
         
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
@@ -246,37 +250,47 @@ public class TopPanel extends JPanel {
             final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(TopPanel.this), tr("Add Friend"));
             dialog.setModalityType(ModalityType.MODELESS);
             dialog.setLayout(new MigLayout("", "[right]2[]2[]", "[]2[]2[]"));
-            dialog.add(new JLabel(tr("Friend ID:")));
+            dialog.add(new JLabel(tr("Friend's username:")));
             final JLabel errorLabel = new JLabel(" ");
-            final JTextField idTextField = new JTextField(18);
-            dialog.add(idTextField);
-            dialog.add(new JLabel("@gmail.com"), "wrap");
-            dialog.add(new JLabel(tr("Name:")));
-            final JTextField nameField = new JTextField(25);
-            dialog.add(nameField, "span, wrap");
+            final JTextField usernameField = new JTextField(18);
+            dialog.add(usernameField, "wrap");
+            dialog.add(new JLabel(tr("Name to display:")));
+            final JTextField nicknameField = new JTextField(18);
+            dialog.add(nicknameField, "span, wrap");
             
             JButton ok = new JButton(tr("Add friend"));
             ok.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
-                    // strip out the host info after @
-                    String idOfFriend = idTextField.getText().trim();
-                    if (idOfFriend.contains("@")) {
-                        int indexOfLastAtSign = idOfFriend.lastIndexOf('@');
-                        idOfFriend = idOfFriend.substring(0, indexOfLastAtSign);
-                    }
-
-                    // validate that Friend ID field has text
-                    if (idOfFriend.equals("")) {
-                        errorLabel.setText(tr("Friend ID is required"));
+                    // Validate that the username field has text
+                    String user = usernameField.getText().trim();
+                    if (user.equals("")) {
+                        errorLabel.setText(tr("Friend's username is required"));
                         errorLabel.setForeground(Color.RED);
                         dialog.setVisible(true);
                         return;
                     }
-                    idOfFriend += "@gmail.com";
+                    // If the user didn't enter a domain, use the service name
+                    if(user.indexOf('@') == -1) {
+                        XMPPConnection connection =
+                            xmppEventHandler.getLoggedInConnection();
+                        if(connection == null) {
+                            // Logged out while the dialog was open
+                            dialog.setVisible(false);
+                            dialog.dispose();
+                            return;
+                        }
+                        String serviceName =
+                            connection.getConfiguration().getServiceName();
+                        user += "@" + serviceName;
+                    }
+                    // If the user didn't enter a nickname, use the username
+                    String nick = nicknameField.getText().trim();
+                    if(nick.equals(""))
+                        nick = usernameField.getText();
                     dialog.setVisible(false);
-                    new AddFriendEvent(idOfFriend, nameField.getText()).publish();
+                    dialog.dispose();
+                    new AddFriendEvent(user, nick).publish();
                 }
             });
             
@@ -285,6 +299,7 @@ public class TopPanel extends JPanel {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     dialog.setVisible(false);
+                    dialog.dispose();
                 }
             });
             
