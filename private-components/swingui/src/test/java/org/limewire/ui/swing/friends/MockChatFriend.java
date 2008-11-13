@@ -3,6 +3,7 @@ package org.limewire.ui.swing.friends;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.Network;
@@ -39,6 +40,7 @@ class MockChatFriend implements ChatFriend {
                 return name;
             }
 
+            @Override
             public void setName(String name) {
                 MockChatFriend.this.name = name;
             }
@@ -48,12 +50,14 @@ class MockChatFriend implements ChatFriend {
                 return false;
             }
 
+            @Override
             public Network getNetwork() {
                 return null;
             }
 
+            @Override
             public Map<String, Presence> getPresences() {
-                return new HashMap<String, Presence>();
+                return Collections.emptyMap();
             }
         };
     }
@@ -147,8 +151,14 @@ class MockChatFriend implements ChatFriend {
         this.receivingUnviewedMessages = hasMessages;
     }
 
-    public Presence getPresence() {
+    @Override
+    public Presence getBestPresence() {
         return null;
+    }
+
+    @Override
+    public void update() {
+        // do nothing
     }
 
     @Override
@@ -159,15 +169,5 @@ class MockChatFriend implements ChatFriend {
     @Override
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    @Override
-    public void releasePresence(Presence presence) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void updatePresence(Presence presence) {
-        // TODO Auto-generated method stub
     }
 }

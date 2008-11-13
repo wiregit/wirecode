@@ -29,18 +29,6 @@ public class MockPresence implements Presence {
     public User getUser() {
         return user;
     }
-    
-    @Override
-    public void removeChatListener() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public MessageWriter createChat(MessageReader reader) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     @Override
     public String getJID() {
@@ -51,7 +39,7 @@ public class MockPresence implements Presence {
     public Mode getMode() {
         return mode;
     }
-    
+
     public void setMode(Mode mode) {
         this.mode = mode;
     }
@@ -65,7 +53,7 @@ public class MockPresence implements Presence {
     public void setStatus(String status) {
         this.status = status;
     }
-    
+
 
     @Override
     public String getStatus() {
@@ -78,39 +66,41 @@ public class MockPresence implements Presence {
     }
 
     @Override
-    public void setIncomingChatListener(IncomingChatListener listener) {
-        // TODO Auto-generated method stub
-
-    }
-
     public Friend getFriend() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public String getPresenceId() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public Collection<Feature> getFeatures() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public Feature getFeature(URI id) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public boolean hasFeatures(URI... id) {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void addFeature(Feature feature) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void removeFeature(URI id) {
         //To change body of implemented methods use File | Settings | File Templates.
     }

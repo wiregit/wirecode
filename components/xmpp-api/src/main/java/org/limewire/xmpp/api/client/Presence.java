@@ -69,20 +69,4 @@ public interface Presence extends FriendPresence {
      * @return the presence mode
      */
     public Mode getMode();
-
-    /**
-     * Used by the xmpp service user to initiate a new chat
-     * @param reader the <code>MessageReader</code> to be used to process incoming
-     * messages
-     * @return the <code>MessageWriter</code> used to send outgoing messages
-     */
-    public MessageWriter createChat(MessageReader reader);
-
-    /**
-     * Used by the xmpp service user to register a listener for new incoming chats
-     * @param listener the <code>IncomingChatListener</code> to be used
-     */
-    public void setIncomingChatListener(IncomingChatListener listener);
-
-    public void removeChatListener();
 }

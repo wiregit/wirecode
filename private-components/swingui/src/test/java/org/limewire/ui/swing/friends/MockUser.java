@@ -6,6 +6,9 @@ import java.util.Map;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageWriter;
+import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.core.api.friend.Network;
 import org.limewire.listener.EventListener;
 
@@ -49,10 +52,42 @@ public class MockUser implements User {
         return new HashMap<String, Presence>();
     }
 
+    @Override
+    public MessageWriter createChat(MessageReader reader) {
+        return null;
+    }
+
+    @Override
+    public void setIncomingChatListener(IncomingChatListener listener) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void removeChatListener() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public Presence getActivePresence() {
+        return null;
+    }
+
+    @Override
+    public boolean hasActivePresence() {
+        return true;
+    }
+
+    @Override
+    public boolean isSignedIn() {
+        return true;
+    }
+
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public Network getNetwork() {
         return new Network() {
             public String getMyID() {

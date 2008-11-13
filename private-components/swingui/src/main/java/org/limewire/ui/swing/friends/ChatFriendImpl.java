@@ -13,30 +13,42 @@ import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
  *
  */
 public class ChatFriendImpl extends AbstractBean implements ChatFriend {
+    private static final Log LOG = LogFactory.getLog(ChatFriendImpl.class);
+
     private boolean chatting;
     private boolean activeConversation;
-    private final Object presenceLock;
-    private Presence presence;
     private final User user;
     private String status;
     private Mode mode;
     private long chatStartTime;
     private boolean hasUnviewedMessages;
-    
-    ChatFriendImpl(Presence presence) {
-        this.presence = presence;
-        this.presenceLock = new Object();
+
+    ChatFriendImpl(final Presence presence, final String localId) {
         this.user = presence.getUser();
         this.status = presence.getStatus();
         this.mode = presence.getMode();
+        this.user.setIncomingChatListener(new IncomingChatListener() {
+            public MessageReader incomingChat(MessageWriter writer) {
+                LOG.debugf("{0} is typing a message", presence.getJID());
+                MessageWriter writerWrapper = new MessageWriterImpl(localId, ChatFriendImpl.this, writer);
+                ConversationSelectedEvent event = new ConversationSelectedEvent(ChatFriendImpl.this, writerWrapper, false);
+                event.publish();
+                //Hang out until a responder has processed this event
+                event.await();
+                return new MessageReaderImpl(ChatFriendImpl.this);
+            }
+        });
     }
-    
+
     @Override
     public Friend getFriend() {
         return user;
@@ -61,17 +73,9 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public String getName() {
-        return safe(user.getName(), user.getId());
+        return user.getRenderName();
     }
-    
-    /**
-     * Returns <code>str2</code> if <code>str</code> is either
-     * null or empty, otherwise returns <code>str</code>. 
-     */
-    private String safe(String str, String str2) {
-        return (str == null || "".equals(str)) ? str2 : str;
-    }
-    
+
     @Override
     public String getStatus() {
         return status;
@@ -97,9 +101,7 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public MessageWriter createChat(MessageReader reader) {
-        synchronized (presenceLock) {
-            return presence.createChat(reader);
-        }
+        return user.createChat(reader);
     }
 
     @Override
@@ -107,6 +109,15 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
         if (isChatting() == false) {
             chatStartTime = System.currentTimeMillis();
             setChatting(true);
+        }
+    }
+
+    @Override
+    public void update() {
+        Presence presence = getBestPresence();
+        if (presence != null) {
+            setStatus(presence.getStatus());
+            setMode(presence.getMode());
         }
     }
 
@@ -135,15 +146,17 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean isSignedInToLimewire() {
-        synchronized (presenceLock) {
-            LimewireFeature feature = (LimewireFeature)presence.getFeature(LimewireFeature.ID);
-            return feature != null;
+        Presence availPresence = getBestPresence();
+        if (availPresence == null) {
+            return false;
         }
+        LimewireFeature feature = (LimewireFeature)availPresence.getFeature(LimewireFeature.ID);
+        return feature != null;
     }
 
     @Override
     public boolean isSignedIn() {
-        return (presence != null);
+        return user.isSignedIn();
     }
 
     @Override
@@ -158,33 +171,12 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
         firePropertyChange("receivingUnviewedMessages", oldHasUnviewedMessages, hasMessages);
     }
 
-    public Presence getPresence() {
-        synchronized (presenceLock) {
-            return presence;
-        }
-    }
-    
     @Override
-    public void releasePresence(Presence presence) {
-        synchronized (presenceLock) {
-            if (this.presence.getJID().equals(presence.getJID())) {
-                this.presence = getHighestPriorityPresence();
-
-                if (this.presence != null) {
-                    setMode(presence.getMode());
-                    setStatus(presence.getStatus());
-                }
-            }
+    public Presence getBestPresence() {
+        if (user.hasActivePresence()) {
+            return user.getActivePresence();
         }
-    }
-
-    @Override
-    public void updatePresence(Presence presence) {
-        synchronized (presenceLock) {
-            this.presence = presence;
-            setMode(presence.getMode());
-            setStatus(presence.getStatus());
-        }
+        return getHighestPriorityPresence();
     }
 
     private Presence getHighestPriorityPresence() {

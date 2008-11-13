@@ -71,8 +71,6 @@ import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
@@ -380,35 +378,19 @@ public class FriendsPane extends JPanel implements FriendRemover {
             case available:
                 // TODO not threadsafe!
                 if(chatFriend == null) {
-                    chatFriend = new ChatFriendImpl(presence);
+                    chatFriend = new ChatFriendImpl(presence, myID);
                     chatFriends.add(chatFriend);
                     idToFriendMap.put(friend.getId(), chatFriend);
-                } else {
-                    chatFriend.updatePresence(presence);
                 }
-                final ChatFriend initChatFriend = chatFriend;
-
-                if (event.isNewPresence()) {
-                    presence.setIncomingChatListener(new IncomingChatListener() {
-                        public MessageReader incomingChat(MessageWriter writer) {
-                            LOG.debugf("{0} is typing a message", presence.getJID());
-                            MessageWriter writerWrapper = new MessageWriterImpl(myID, initChatFriend, writer);
-                            ConversationSelectedEvent event = new ConversationSelectedEvent(initChatFriend, writerWrapper, false);
-                            event.publish();
-                            //Hang out until a responder has processed this event
-                            event.await();
-                            return new MessageReaderImpl(initChatFriend);
-                        }
-                    });
-                }
+                chatFriend.update();
                 break;
             case unavailable:
                 if (chatFriend != null) {
-                    chatFriend.releasePresence(presence);
-                    if (!chatFriend.isChatting()) {
+                    if (shouldRemoveFromFriendsList(chatFriend)) {
                         chatFriends.remove(idToFriendMap.remove(friend.getId()));
                     }
-                } 
+                    chatFriend.update();
+                }
                 break;
         }
         friendsCountUpdater.setFriendsCount(chatFriends.size());
@@ -432,6 +414,19 @@ public class FriendsPane extends JPanel implements FriendRemover {
         if (message.getType() == Type.Sent) {
             idleTimer.restart();
         }
+    }
+
+    /**
+     * Remove from the friends list only when:
+     *
+     * 1. The user (buddy) associated with the chatfriend is no longer signed in, AND
+     * 2. The chat has been closed (by clicking on the "x" on the friend in the friend's list)
+     *
+     * @param chatFriend the ChatFriend to decide whether to remove (no null check)
+     * @return true if chatFriend should be removed.
+     */
+    private boolean shouldRemoveFromFriendsList(ChatFriend chatFriend) {
+        return (!chatFriend.isChatting()) && (!chatFriend.isSignedIn());
     }
     
     public String getMessagingTopicPatternName() {
@@ -499,7 +494,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
             chatFriend.stopChat();
             if (!chatFriend.isSignedIn()) {
-                chatFriends.remove(idToFriendMap.remove(chatFriend.getFriend().getId()));
+                chatFriends.remove(idToFriendMap.remove(chatFriend.getID()));
             }
             new CloseChatEvent(chatFriend).publish();
             
@@ -521,9 +516,13 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
     private void closeAllChats() {
         for (ChatFriend chatFriend : chatFriends) {
-            closeChat(chatFriend);
+            String userId = chatFriend.getID();
+            if (idToFriendMap.get(userId) != null) {
+                idToFriendMap.remove(userId);
+            }
+            chatFriend.stopChat();
+            new CloseChatEvent(chatFriend).publish();
         }
-        idToFriendMap.clear();
         chatFriends.clear();
         friendsTable.removeAll();
     }

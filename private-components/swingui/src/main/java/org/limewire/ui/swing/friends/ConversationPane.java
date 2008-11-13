@@ -183,8 +183,9 @@ public class ConversationPane extends JPanel implements Displayable {
 
     @RuntimeTopicEventSubscriber(methodName="getPresenceUpdateTopicName")
     public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
-        org.limewire.xmpp.api.client.Presence.Type type = event.getPresence().getType();
-        if (type == Presence.Type.unavailable) {
+        Presence updatedPresence = event.getPresence();
+        org.limewire.xmpp.api.client.Presence.Type type = updatedPresence.getType();
+        if ((type == Presence.Type.unavailable) && (!updatedPresence.getUser().isSignedIn())) {
             displayMessages(true);
             inputPanel.getInputComponent().setEnabled(false);
         } else if (event.isNewPresence() &&
@@ -314,7 +315,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   dl = downloader.addDownload(chatFriend.getPresence(),
+                   dl = downloader.addDownload(chatFriend.getBestPresence(),
                            msgWithfileOffer.getFileOffer());
                 } catch(SaveLocationException sle) {
                     throw new RuntimeException("FIX ME", sle); // BROKEN
@@ -377,7 +378,7 @@ public class ConversationPane extends JPanel implements Displayable {
             @Override
             public void handleEvent(FutureEvent<LocalFileItem> event) {
                if(event.getResult() != null) {
-                   FriendPresence presence = chatFriend.getPresence();
+                   FriendPresence presence = chatFriend.getBestPresence();
                    if(presence.getFeature(FileOfferFeature.ID) != null) {
                        // update the chat state in case the remote user has not started conversation with us
                        try {

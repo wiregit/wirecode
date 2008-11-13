@@ -53,9 +53,18 @@ public interface ChatFriend {
     
     void removePropertyChangeListener(PropertyChangeListener listener);
 
-    Presence getPresence();
-    
-    void releasePresence(Presence presence);
+    /**
+     * Returns the highest priority presence, null if user not signed in.
+     * Priority of presences is determined as follows:
+     *
+     * 1. Active presence
+     * 2. Highest priority XMPP presence
+     */
+    Presence getBestPresence();
 
-    void updatePresence(Presence presence);
+    /**
+     * updates the state of this chatFriend based on its underlying attributes, for instance 
+     * the mode and status of the current active presence
+     */
+    void update();
 }

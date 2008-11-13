@@ -213,7 +213,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 Roster roster = connection.getRoster();
                 for(String id : addedIds) {             
                     RosterEntry rosterEntry = roster.getEntry(id);
-                    UserImpl user = new UserImpl(id, rosterEntry, configuration);
+                    UserImpl user = new UserImpl(id, rosterEntry, configuration, connection);
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " added");
                     }
@@ -232,7 +232,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     UserImpl user = users.get(id);
                     if(user == null) {
                         // should never happen ?
-                        user = new UserImpl(id, rosterEntry, configuration);
+                        user = new UserImpl(id, rosterEntry, configuration, connection);
                         users.put(id, user);
                     } else {
                         user.setRosterEntry(rosterEntry);
@@ -278,7 +278,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                             } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
                                 PresenceImpl p = (PresenceImpl)user.getPresence(presence.getFrom());
                                 if(p != null) {                                    
-                                    user.removePresense(new PresenceImpl(presence, connection, p));                                    
+                                    user.removePresense(new PresenceImpl(presence, p));
                                 }
                             }
                         }
@@ -312,7 +312,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
 
         private void addNewPresence(final UserImpl user, final org.jivesoftware.smack.packet.Presence presence) {
-            final PresenceImpl presenceImpl = new PresenceImpl(presence, connection, user);
+            final PresenceImpl presenceImpl = new PresenceImpl(presence, user);
             user.addPresense(presenceImpl);
             
             Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
@@ -358,7 +358,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
 
         private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
             PresenceImpl currentPresence = (PresenceImpl)user.getPresences().get(presence.getFrom());
-            user.updatePresence(new PresenceImpl(presence, connection, currentPresence));
+            user.updatePresence(new PresenceImpl(presence, currentPresence));
         }
 
         public FileOfferer getFileOfferer(final String jid) {

@@ -222,7 +222,7 @@ public class XMPPServiceTest extends BaseTestCase {
         
         MessageReaderMock reader = new MessageReaderMock();
         Presence limeBuddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
-        MessageWriter writer = limeBuddy2.createChat(reader);
+        MessageWriter writer = limeBuddy2.getUser().createChat(reader);
         writer.writeMessage("hello world");
        
         Thread.sleep(2 * 1000);
