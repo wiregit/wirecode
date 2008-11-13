@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class MainPanel extends JPanel {
+public class MainPanel extends JPanel {
     
     private static final Log LOG = LogFactory.getLog(MainPanel.class);
     

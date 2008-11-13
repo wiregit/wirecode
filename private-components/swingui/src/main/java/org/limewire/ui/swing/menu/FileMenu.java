@@ -39,6 +39,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
@@ -56,15 +57,15 @@ public class FileMenu extends JMenu {
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager, final MainPanel mainPanel) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        add(buildOpenFileAction(downloadListManager));
-        add(buildOpenLinkAction(downloadListManager));
+        add(buildOpenFileAction(downloadListManager, mainPanel));
+        add(buildOpenLinkAction(downloadListManager, mainPanel));
         add(getRecentDownloadsMenu(downloadListManager));
         addSeparator();
-        add(getAddFileAction(libraryManager));
-        add(getAddFolderAction(libraryManager));
+        add(getAddFileAction(libraryManager, mainPanel));
+        add(getAddFolderAction(libraryManager, mainPanel));
         addSeparator();
         add(new SignInOutAction());
         addSeparator();
@@ -76,11 +77,11 @@ public class FileMenu extends JMenu {
         });
     }
 
-    private Action getAddFolderAction(final LibraryManager libraryManager) {
+    private Action getAddFolderAction(final LibraryManager libraryManager, final MainPanel mainPanel) {
         return new AbstractAction(I18n.tr("Add Folder To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<File> folders = FileChooser.getInput(FileMenu.this, I18n.tr("Add Folder(s)"),
+                List<File> folders = FileChooser.getInput(mainPanel, I18n.tr("Add Folder(s)"),
                         I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
                         JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
                         new FileFilter() {
@@ -105,11 +106,11 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private Action getAddFileAction(final LibraryManager libraryManager) {
+    private Action getAddFileAction(final LibraryManager libraryManager, final MainPanel mainPanel) {
         return new AbstractAction(I18n.tr("Add File To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Add File(s)"), I18n
+                List<File> files = FileChooser.getInput(mainPanel, I18n.tr("Add File(s)"), I18n
                         .tr("Add Files"), FileChooser.getLastInputDirectory(),
                         JFileChooser.FILES_ONLY, JFileChooser.APPROVE_OPTION, true,
                         new FileFilter() {
@@ -177,12 +178,12 @@ public class FileMenu extends JMenu {
         return recentDownloads;
     }
 
-    private Action buildOpenFileAction(final DownloadListManager downloadListManager) {
+    private Action buildOpenFileAction(final DownloadListManager downloadListManager, final MainPanel mainPanel) {
         return new AbstractAction(I18n.tr("&Open File")) {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                List<File> files = FileChooser.getInput(FileMenu.this, I18n.tr("Open File"), I18n
+                List<File> files = FileChooser.getInput(mainPanel, I18n.tr("Open File"), I18n
                         .tr("Open"), FileChooser.getLastInputDirectory(), JFileChooser.FILES_ONLY,
                         JFileChooser.APPROVE_OPTION, true, new FileFilter() {
                             @Override
@@ -214,11 +215,12 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private Action buildOpenLinkAction(final DownloadListManager downloadListManager) {
+    private Action buildOpenLinkAction(final DownloadListManager downloadListManager, final MainPanel mainPanel) {
         return new AbstractAction(I18n.tr("Open &Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 final LocationDialogue locationDialogue = new LocationDialogue();
+                locationDialogue.setLocationRelativeTo(mainPanel);
                 locationDialogue.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
