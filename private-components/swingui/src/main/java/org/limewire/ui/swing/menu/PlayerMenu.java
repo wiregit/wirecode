@@ -68,18 +68,48 @@ public class PlayerMenu extends JMenu {
     }
 
     private Action getPlayPause(final AudioPlayer audioPlayer) {
-        //TODO update text to play/pause depending on the current state of the player
-        Action action = new AbstractAction(I18n.tr("Play/Pause")) {
+        final String play = I18n.tr("Play");
+        final String pause = I18n.tr("Pause");
+        final Action action = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (audioPlayer.getStatus() == PlayerState.PAUSED) {
                     audioPlayer.playSong();
-                } else if (audioPlayer.getStatus() == PlayerState.PLAYING) {
+                } else {
+                    //TODO handle more player states
                     audioPlayer.pause();
                 }
             }
         };
-        addAudioListener(audioPlayer, action);
+
+        audioPlayer.addAudioPlayerListener(new AudioPlayerListener() {
+            @Override
+            public void stateChange(AudioPlayerEvent event) {
+                if (event.getState() == PlayerState.PAUSED) {
+                    action.putValue(Action.NAME, play);
+                } else {
+                    //TODO handle more player states
+                    action.putValue(Action.NAME, pause);
+                }
+            }
+            @Override
+            public void songOpened(Map<String, Object> properties) {
+    
+            }
+            @Override
+            public void progressChange(int bytesread) {
+                
+            } 
+        });
+        
+        if (audioPlayer.getStatus() == PlayerState.PAUSED) {
+            action.putValue(Action.NAME, play);
+        } else {
+            //TODO handle more player states
+            action.putValue(Action.NAME, pause);
+        }
+        
+        //TODO disable depending on whether a playlist is loaded or not.. right now there is no notion of a play list
         return action;
     }
 
@@ -118,10 +148,10 @@ public class PlayerMenu extends JMenu {
      * attaches a listener to see state changes of the player.
      */
     private void addAudioListener(final AudioPlayer audioPlayer, final Action action) {
+        //TODO remove and use playlist manager, next and previous should be available if there is a playlist.
         audioPlayer.addAudioPlayerListener(new AudioPlayerListener() {
             @Override
             public void stateChange(AudioPlayerEvent event) {
-                action.setEnabled(event.getState() == PlayerState.PLAYING);
             }
 
             @Override
@@ -132,7 +162,5 @@ public class PlayerMenu extends JMenu {
             public void songOpened(Map<String, Object> properties) {
             }
         });
-
-        action.setEnabled(audioPlayer.getStatus() == PlayerState.PLAYING);
     }
 }

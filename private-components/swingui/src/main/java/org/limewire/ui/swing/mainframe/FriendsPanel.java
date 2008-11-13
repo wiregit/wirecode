@@ -39,6 +39,9 @@ import org.limewire.ui.swing.sound.WavSoundPlayer;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.VisibilityListener;
+import org.limewire.ui.swing.util.VisibilityListenerList;
+import org.limewire.ui.swing.util.VisibleComponent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -48,7 +51,7 @@ import com.google.inject.Singleton;
  * TODO: Add Javadocs
  */
 @Singleton
-public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifecycleListener {
+public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifecycleListener, VisibleComponent {
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final Log LOG = LogFactory.getLog(FriendsPanel.class);
     private static final String MESSAGE_SOUND_PATH = "/org/limewire/ui/swing/mainframe/resources/sounds/friends/message.wav";
@@ -59,6 +62,8 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     private final WindowStateListener windowStateListener;
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
+    
+    private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     
     @Inject
     public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel, UnseenMessageListener unseenMessageListener, 
@@ -101,11 +106,14 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
 
     @EventSubscriber
     public void handleAppear(DisplayFriendsToggleEvent event) {
-        boolean shouldDisplay = !isVisible();
+       
         if(event.getVisible() != null) {
-            shouldDisplay = event.getVisible().booleanValue();
+           boolean shouldDisplay = event.getVisible().booleanValue();
+           displayFriendsPanel(shouldDisplay);
+        } else {
+            toggleVisibility();
         }
-        displayFriendsPanel(shouldDisplay);
+        
     }
 
     private void displayFriendsPanel(boolean shouldDisplay) {
@@ -120,6 +128,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
             ((Displayable)mainPanel.getComponent(0)).handleDisplay();
             new PanelDisplayedEvent(this).publish();
         }
+        visibilityListenerList.visibilityChanged(shouldDisplay);
     }
     
     /**
@@ -238,5 +247,21 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
             }
             return true;
         }
+    }
+
+    @Override
+    public void addVisibilityListener(VisibilityListener listener) {
+        visibilityListenerList.addVisibilityListener(listener);
+    }
+
+    @Override
+    public void removeVisibilityListener(VisibilityListener listener) {
+        visibilityListenerList.removeVisibilityListener(listener);
+    }
+
+    @Override
+    public void toggleVisibility() {
+        boolean shouldDisplay = !isVisible();
+        displayFriendsPanel(shouldDisplay);
     }
 }

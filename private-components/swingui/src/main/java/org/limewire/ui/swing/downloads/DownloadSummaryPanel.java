@@ -57,6 +57,9 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.ui.swing.util.VisibilityListener;
+import org.limewire.ui.swing.util.VisibilityListenerList;
+import org.limewire.ui.swing.util.VisibleComponent;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -69,7 +72,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class DownloadSummaryPanel extends JXPanel {
+public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 
     /**
      * Number of download items displayed in the table
@@ -78,6 +81,7 @@ public class DownloadSummaryPanel extends JXPanel {
 
 	private static final int LEFT_MARGIN = 25;
 
+	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private AbstractDownloadTable table;
 
 	private SummaryPanelHeader header;
@@ -381,6 +385,18 @@ public class DownloadSummaryPanel extends JXPanel {
 	}
 	
 	public void toggleVisibility() {
-	    setVisible(!isVisible());
+	    boolean visible = !isVisible(); 
+	    setVisible(visible);
+	    visibilityListenerList.visibilityChanged(visible);
 	}
+
+    @Override
+    public void addVisibilityListener(VisibilityListener listener) {
+        visibilityListenerList.addVisibilityListener(listener);        
+    }
+
+    @Override
+    public void removeVisibilityListener(VisibilityListener listener) {
+        visibilityListenerList.removeVisibilityListener(listener);
+    }
 }
