@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -34,6 +33,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
@@ -54,46 +54,29 @@ import com.google.inject.Singleton;
 public class FileMenu extends JMenu {
     private final Navigator navigator;
 
-    private final String signIntoFriends = I18n.tr("Sign into Friends");
-
-    private final String signOutOfFriends = I18n.tr("Sign out of Friends");
-
-    private final Action signInOutAction;
-
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        add(getFileMenuItem(downloadListManager));
-        add(getUrlMenuItem(downloadListManager));
-        JMenu recentDownloads = getRecentDownloads(downloadListManager);
-        add(recentDownloads);
+        add(buildOpenFileAction(downloadListManager));
+        add(buildOpenLinkAction(downloadListManager));
+        add(getRecentDownloadsMenu(downloadListManager));
         addSeparator();
-        add(getAddFile(libraryManager));
-        add(getAddFolder(libraryManager));
+        add(getAddFileAction(libraryManager));
+        add(getAddFolderAction(libraryManager));
         addSeparator();
-        signInOutAction = new AbstractAction(signIntoFriends) {
-            public void actionPerformed(ActionEvent e) {
-                if(signInOutAction.getValue(Action.NAME) == signIntoFriends) {
-                    new DisplayFriendsToggleEvent(true).publish();
-                } else {
-                    new SignoffEvent().publish();
-                }
-            }
-        };
-        add(signInOutAction);
+        add(new SignInOutAction());
         addSeparator();
-        add(new AbstractAction(I18n.tr("Exit")) {
+        add(new AbstractAction(I18n.tr("E&xit")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Application.getInstance().exit(e);
             }
         });
-        EventAnnotationProcessor.subscribe(this);
     }
 
-    private Action getAddFolder(final LibraryManager libraryManager) {
+    private Action getAddFolderAction(final LibraryManager libraryManager) {
         return new AbstractAction(I18n.tr("Add Folder To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -122,7 +105,7 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private Action getAddFile(final LibraryManager libraryManager) {
+    private Action getAddFileAction(final LibraryManager libraryManager) {
         return new AbstractAction(I18n.tr("Add File To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -151,7 +134,7 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private JMenu getRecentDownloads(DownloadListManager downloadListManager) {
+    private JMenu getRecentDownloadsMenu(DownloadListManager downloadListManager) {
         final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
         new AbstractListEventListener<DownloadItem>() {
             @Override
@@ -194,8 +177,8 @@ public class FileMenu extends JMenu {
         return recentDownloads;
     }
 
-    private Action getFileMenuItem(final DownloadListManager downloadListManager) {
-        return new AbstractAction(I18n.tr("Open File")) {
+    private Action buildOpenFileAction(final DownloadListManager downloadListManager) {
+        return new AbstractAction(I18n.tr("&Open File")) {
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -231,8 +214,8 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private Action getUrlMenuItem(final DownloadListManager downloadListManager) {
-        return new AbstractAction(I18n.tr("Open Link")) {
+    private Action buildOpenLinkAction(final DownloadListManager downloadListManager) {
+        return new AbstractAction(I18n.tr("Open &Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 final LocationDialogue locationDialogue = new LocationDialogue();
@@ -269,11 +252,11 @@ public class FileMenu extends JMenu {
             super();
             setModalityType(ModalityType.APPLICATION_MODAL);
             JPanel urlPanel = new JPanel();
-            JLabel urlLabel = new JLabel(I18n.tr("URL:"));
+            JLabel urlLabel = new JLabel(I18n.tr("Link:"));
             urlField = new JTextField(50);
             urlField.setText("http://");
 
-            final JLabel errorLabel = new JLabel(I18n.tr("Invalid URL"));
+            final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link"));
             errorLabel.setForeground(Color.RED);
 
             urlField.addKeyListener(new KeyListener() {
@@ -354,13 +337,34 @@ public class FileMenu extends JMenu {
         }
     }
 
-    @EventSubscriber
-    public void handleSignon(XMPPConnectionEstablishedEvent event) {
-        signInOutAction.putValue(Action.NAME, signOutOfFriends);
-    }
+    public static class SignInOutAction extends AbstractAction {
+        private static final String SIGN_INTO_FRIENDS_TEXT = I18n.tr("&Sign into Friends");
+        private static final String SIGN_OUT_OF_FRIENDS_TEXT = I18n.tr("&Sign out of Friends");
+        boolean signedIn = false;
+        public SignInOutAction() {
+            super(SIGN_INTO_FRIENDS_TEXT);
+            EventAnnotationProcessor.subscribe(this);
+        }
 
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
-        signInOutAction.putValue(Action.NAME, signIntoFriends);
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (!signedIn) {
+                new DisplayFriendsToggleEvent(true).publish();
+            } else {
+                new SignoffEvent().publish();
+            }
+        }
+
+        @EventSubscriber
+        public void handleSignon(XMPPConnectionEstablishedEvent event) {
+            putValue(Action.NAME, SIGN_OUT_OF_FRIENDS_TEXT);
+            signedIn = true;
+        }
+
+        @EventSubscriber
+        public void handleSignoff(SignoffEvent event) {
+            putValue(Action.NAME, SIGN_INTO_FRIENDS_TEXT);
+            signedIn = false;
+        }
     }
 }
