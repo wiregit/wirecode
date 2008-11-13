@@ -30,7 +30,7 @@ class HelpMenu extends JMenu {
             final TrayNotifier trayNotifier, final Navigator navigator, final StorePanel storePanel) {
         super(I18n.tr("Help"));
 
-        add(new AbstractAction(I18n.tr("Using LimeWire")) {
+        add(new AbstractAction(I18n.tr("Using LimeWire...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL("http://www.limewire.com/support/");
@@ -39,14 +39,13 @@ class HelpMenu extends JMenu {
         add(new AbstractAction(I18n.tr("LimeWire Store help")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                storePanel.load("about:blank");
                 storePanel.load("http://www.store.limewire.com/store/app/pages/help/Help/");
                 NavItem storeNav = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
                 storeNav.select();
             }
         });
 
-        add(new AbstractAction(I18n.tr("FAQ")) {
+        add(new AbstractAction(I18n.tr("FAQ...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils
