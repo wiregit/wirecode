@@ -2,10 +2,10 @@ package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JMenu;
 
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.mainframe.FriendsPanel;
 import org.limewire.ui.swing.mainframe.LeftPanel;
