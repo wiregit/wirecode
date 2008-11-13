@@ -40,6 +40,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.core.api.support.LocalClientInfo;
+import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.BugSettings;
 import org.limewire.inspection.Inspectable;

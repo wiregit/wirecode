@@ -1,4 +1,4 @@
-package org.limewire.ui.support;
+package org.limewire.core.api.support;
 
 public interface SessionInfo {
 

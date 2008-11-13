@@ -21,6 +21,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.limewire.core.api.support.LocalClientInfo;
+import org.limewire.core.api.support.LocalClientInfoFactory;
+import org.limewire.core.api.support.SessionInfo;
+import org.limewire.core.impl.support.LocalClientInfoImpl;
 import org.limewire.ui.swing.components.MultiLineLabel;
 
 import com.google.inject.Inject;
@@ -53,7 +57,7 @@ public final class FatalBugManager {
         if(localClientInfoFactory != null) {
             info = localClientInfoFactory.createLocalClientInfo(bug, Thread.currentThread().getName(), null, true);
         } else {
-            info = new LocalClientInfo(bug, Thread.currentThread().getName(), null, true, new FatalSessionInfo());
+            info = new LocalClientInfoImpl(bug, Thread.currentThread().getName(), null, true, new FatalSessionInfo());
         }
         
         reviewBug(info);

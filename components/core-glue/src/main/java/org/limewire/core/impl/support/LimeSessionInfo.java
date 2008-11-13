@@ -1,5 +1,6 @@
-package org.limewire.ui.support;
+package org.limewire.core.impl.support;
 
+import org.limewire.core.api.support.SessionInfo;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;

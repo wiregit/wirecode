@@ -14,6 +14,7 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -39,8 +40,11 @@ public class ToolsMenu extends JMenu {
     private JDialog libraryManagerDialogue = null;
 
     @Inject
-    public ToolsMenu(final Provider<OptionsDialog> optionDialog, final Navigator navigator,
+    public ToolsMenu(final Provider<OptionsDialog> optionDialog, 
+            final Provider<AdvancedToolsPanel> advancedProvider,
+            final Navigator navigator,
             SearchHandler searchHandler, final LibraryManager libraryManager) {
+
         super(I18n.tr("Tools"));
 
         add(new AbstractAction(I18n.tr("Library Manager")) {
@@ -96,7 +100,8 @@ public class ToolsMenu extends JMenu {
             // TODO wire in advanced tools panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me.");
+                AdvancedToolsPanel advancedTools = advancedProvider.get();
+                advancedTools.display(AdvancedToolsPanel.CONSOLE);
             }
         });
         addSeparator();

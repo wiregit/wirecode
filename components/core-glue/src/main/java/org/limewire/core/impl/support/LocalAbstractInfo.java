@@ -1,4 +1,4 @@
-package org.limewire.ui.support;
+package org.limewire.core.impl.support;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

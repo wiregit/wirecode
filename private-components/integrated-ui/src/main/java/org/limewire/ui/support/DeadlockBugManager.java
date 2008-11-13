@@ -1,5 +1,7 @@
 package org.limewire.ui.support;
 
+import org.limewire.core.api.support.LocalClientInfo;
+import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.core.settings.BugSettings;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;

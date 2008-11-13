@@ -2,6 +2,7 @@ package org.limewire.ui.support;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,8 +12,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
+import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 
@@ -82,7 +85,7 @@ final class ServletAccessor {
         HttpResponse response = null;
         LimeHttpClient client = ALLOW_NIO ? limeHttpClient.get() : new SimpleLimeHttpClient();
         try {
-            NameValuePair [] params = localInfo.getPostRequestParams();
+            NameValuePair[] params = getNameValuePairs(localInfo.getPostRequestParams());
             HttpPost post = new HttpPost(SERVLET_URL);
             post.addHeader("Cache-Control", "no-cache");
             post.addHeader("User-Agent", LimeWireUtils.getHttpServer());
@@ -125,5 +128,22 @@ final class ServletAccessor {
         LOG.error("Error connecting to bug servlet", e);
         remoteInfo.connectFailed();
     }
+    
+    /**
+     * Converts the specified array of map entries into an array of 
+     * NameValuePair objects.
+     */
+    private NameValuePair[] getNameValuePairs(Map.Entry[] entries) {
+        // Create result.
+        NameValuePair[] pairs = new NameValuePair[entries.length];
+        
+        // Convert each Map.Entry into a NameValuePair.
+        for (int i = 0; i < entries.length; i++) {
+            Map.Entry entry = entries[i];
+            pairs[i] = new BasicNameValuePair(String.valueOf(entry.getKey()),
+                    String.valueOf(entry.getValue()));
+        }
+        
+        return pairs;
+    }
 }
-

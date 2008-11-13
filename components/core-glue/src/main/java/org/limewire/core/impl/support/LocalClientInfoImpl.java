@@ -1,22 +1,22 @@
-package org.limewire.ui.support;
+package org.limewire.core.impl.support;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
+import org.limewire.core.api.support.LocalClientInfo;
+import org.limewire.core.api.support.SessionInfo;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.setting.Setting;
 import org.limewire.setting.SettingsFactory;
-import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.VersionUtils;
@@ -33,17 +33,18 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * access to that data in url-encoded form.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public final class LocalClientInfo extends LocalAbstractInfo {
+public final class LocalClientInfoImpl extends LocalAbstractInfo 
+    implements LocalClientInfo {
 	
 	/**
 	 * Creates information about this bug from the bug, thread, and detail.
 	 */
     @AssistedInject
-	public LocalClientInfo(@Assisted Throwable bug, 
-	                       @Assisted String threadName, 
-	                       @Assisted String detail, 
-	                       @Assisted boolean fatal, 
-	                       SessionInfo sessionInfo) {
+	public LocalClientInfoImpl(@Assisted Throwable bug, 
+	                           @Assisted String threadName, 
+	                           @Assisted String detail, 
+	                           @Assisted boolean fatal, 
+	                           SessionInfo sessionInfo) {
 	    //Store the basic information ...	    
 	    _limewireVersion = LimeWireUtils.getLimeWireVersion();
 	    _javaVersion = VersionUtils.getJavaVersion();
@@ -100,8 +101,9 @@ public final class LocalClientInfo extends LocalAbstractInfo {
 		pw.flush();
 		_props = sw.toString();
 		
-		//Store extra debugging information.
-		if(AppFrame.isStarted() && sessionInfo.isLifecycleLoaded()) {
+		// Store extra debugging information.  We removed an old call to
+		// AppFrame.isStarted() because it is no longer useful.
+		if (sessionInfo.isLifecycleLoaded()) {
             _upTime = CommonUtils.seconds2time(sessionInfo.getCurrentUptime()/1000);
             _connected = "" + sessionInfo.isConnected();
             _upToUp = ""+sessionInfo.getNumUltrapeerToUltrapeerConnections();
@@ -179,13 +181,12 @@ public final class LocalClientInfo extends LocalAbstractInfo {
         else return value;
     }	
 
-	/** 
-	 * Returns a an array of the name/value pairs of this info.
-     *
-     * @return an array of the name/value pairs of this info.
-	 */
-	public final NameValuePair[] getPostRequestParams() {
-	    List<NameValuePair> params = new LinkedList<NameValuePair>();
+    /** 
+     * Returns an array of map entries in this info.
+     */
+    public final Map.Entry[] getPostRequestParams() {
+	    List<Map.Entry> params = new LinkedList<Map.Entry>();
+	    
         append(params, LIMEWIRE_VERSION, _limewireVersion);
         append(params, JAVA_VERSION, _javaVersion);
         append(params, OS, _os);
@@ -253,7 +254,7 @@ public final class LocalClientInfo extends LocalAbstractInfo {
         }
         // APPEND OTHER PARAMETERS HERE.
         
-        return params.toArray(new NameValuePair[params.size()]);
+        return params.toArray(new Map.Entry[params.size()]);
 	}
     
     /**
@@ -261,16 +262,20 @@ public final class LocalClientInfo extends LocalAbstractInfo {
      */
     public String getShortParamList() {
         StringBuilder sb = new StringBuilder(2000);
-        for (NameValuePair nvp : getPostRequestParams())
-            sb.append(nvp.getName()).append("=").append(nvp.getValue()).append("\n");
+        //for (NameValuePair nvp : getPostRequestParams())
+        for (Map.Entry entry : getPostRequestParams()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue()).append("\n");
+        }
         return sb.toString();
     }
-	
-	/**
-	 * Appends a NameValuePair of k/v to l if v is non-null.
-	 */
-	private final void append(List<? super NameValuePair> l, final String k, final String v){
-	    if( v != null )
-	        l.add(new BasicNameValuePair(k, v));
-	}
+    
+    /**
+     * Appends a map entry to the specified list using the specified key and
+     * value.  If the value is null, then the entry is not added.
+     */
+    private final void append(List<Map.Entry> list, String key, String value) {
+        if (value != null) {
+            list.add(new AbstractMap.SimpleEntry<String, String>(key, value));
+        }
+    }
 }
