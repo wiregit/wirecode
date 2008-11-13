@@ -19,6 +19,7 @@ public class ViewMenu extends JMenu {
     @Inject
     public ViewMenu(final LeftPanel leftPanel, final DownloadSummaryPanel downloadSummaryPanel, final FriendsPanel friendsPanel) {
         super(I18n.tr("View"));
+        //TODO INSTEAD OF USING visibility listeners use the event bus? 
         add(buildAction(leftPanel, I18n.tr("Hide Libraries bar"), I18n.tr("Show Libraries bar")));
         add(buildAction(downloadSummaryPanel, I18n.tr("Hide Download Tray"), I18n.tr("Show Download Tray")));
         add(buildAction(friendsPanel, I18n.tr("Hide Chat window"), I18n.tr("Show Chat window")));
