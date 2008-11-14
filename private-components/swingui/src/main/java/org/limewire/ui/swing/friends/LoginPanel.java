@@ -156,7 +156,7 @@ public class LoginPanel extends JPanel
         String friendlyName = (String)serviceComboBox.getSelectedItem();
         XMPPConnectionConfiguration config =
             xmppEventHandler.getConfigByFriendlyName(friendlyName);
-        if(config.isAutoLogin()) {
+        if ((config != null) && config.isAutoLogin()) {
             userNameField.setText(config.getUsername());
             passwordField.setText(config.getPassword());
             rememberMeCheckbox.setSelected(true);
