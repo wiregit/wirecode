@@ -4,49 +4,51 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JProgressBar;
 
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.ui.swing.painter.ProgressBarBackgroundPainter;
-import org.limewire.ui.swing.painter.ProgressBarForegroundPainter;
 
-/**
- * Grayed out when setEnabled(false)
- */
 public class LimeProgressBar extends JProgressBar {
-    
 
-    private static Painter<JProgressBar> BACKGROUND_PAINTER = new ProgressBarBackgroundPainter();
-    private static Painter<JProgressBar> FOREGROUND_PAINTER = new ProgressBarForegroundPainter();
+    private static final boolean CACHING_SUPPORTED = true;
     
-    private Painter<JProgressBar> foregroundPainter = FOREGROUND_PAINTER;
-    private Painter<JProgressBar> backgroundPainter = BACKGROUND_PAINTER;
+    private AbstractPainter<JProgressBar> foregroundPainter;
+    private Painter<JComponent> backgroundPainter;
     
 	private boolean isHidden = false;
 	
-	public LimeProgressBar(int min, int max){
-	    super(min, max);
+	public LimeProgressBar(AbstractPainter<JProgressBar> foregroundPainter, 
+	        Painter<JComponent> backgroundPainter) {
 	    
-	    init();
-	}
-	
-	public LimeProgressBar(){
+	    this.foregroundPainter = foregroundPainter;
+	    this.backgroundPainter = backgroundPainter;
 	    
-	    init();
+        this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
     }
-
-	private void init() {
-	    this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-	}
 	 
-	public void setForegroundPainter(Painter<JProgressBar> painter) {
+	public void setForegroundPainter(AbstractPainter<JProgressBar> painter) {
 	    this.foregroundPainter = painter;
+	    painter.setCacheable(true);
 	}
 	
-	public void setBackgroundPainter(Painter<JProgressBar> painter) {
+	public void setBackgroundPainter(Painter<JComponent> painter) {
         this.backgroundPainter = painter;
     }
 
+	public boolean hasCacheSupport() {
+	    return CACHING_SUPPORTED;
+	}
+	
+	@Override 
+	public void setValue(int v) {
+	    if (this.getValue() != v) {
+            this.foregroundPainter.clearCache();
+        }
+	    super.setValue(v);
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 	    if (!isHidden) {
@@ -60,7 +62,6 @@ public class LimeProgressBar extends JProgressBar {
 	 * 
 	 * @param isHidden true to hide progress bar
 	 */
-	
 	public void setHidden(boolean isHidden){
 		this.isHidden = isHidden;
 	}

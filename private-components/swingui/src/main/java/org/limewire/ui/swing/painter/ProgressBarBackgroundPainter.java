@@ -1,47 +1,41 @@
 package org.limewire.ui.swing.painter;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 
-import javax.swing.JProgressBar;
+import javax.swing.JComponent;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.jdesktop.swingx.util.PaintUtils;
 
-public class ProgressBarBackgroundPainter extends AbstractPainter<JProgressBar> {
+public class ProgressBarBackgroundPainter extends AbstractPainter<JComponent> {
 
-    
-    @Resource private Color border;
-    @Resource private Color borderDisabled;
-    
-    @Resource private Color barBackgroundGradientTop;
-    @Resource private Color barBackgroundGradientBottom;
-    
-    private GradientPaint gradientBackground;
+    private final Paint border;
+    private final Paint borderDisabled;
+    private Paint background;
     
     private int heightCache = 0;
     
-    public ProgressBarBackgroundPainter() {
-        GuiUtils.assignResources(this);
+    public ProgressBarBackgroundPainter(Paint background, Paint border, Paint borderDisabled) {
+        this.background = background;
+        this.border = border;
+        this.borderDisabled = borderDisabled;
         
         this.setAntialiasing(false);
+        this.setCacheable(true);
     }
     
     @Override
-    protected void doPaint(Graphics2D g, JProgressBar object, int width, int height) {
+    protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
         if (height != this.heightCache) {
             this.heightCache = height;
-            
-            this.gradientBackground = new GradientPaint(0, 0, barBackgroundGradientTop, 0, height-1, barBackgroundGradientBottom);
+            this.background = PaintUtils.resizeGradient(background, 0, height-1);
         }
         
-        g.setPaint(this.gradientBackground);
+        g.setPaint(this.background);
         g.fillRect(0, 0, width-1, height-1);        
         
-        g.setColor(object.isEnabled() ? border : borderDisabled);
+        g.setPaint(object.isEnabled() ? this.border : this.borderDisabled);
         g.drawRect(0, 0, width-1, height-1);
     }
-
 }

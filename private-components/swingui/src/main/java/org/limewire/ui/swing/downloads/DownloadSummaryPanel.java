@@ -39,6 +39,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
+import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
@@ -81,6 +82,8 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 
 	private static final int LEFT_MARGIN = 25;
 
+	private final LimeProgressBarFactory progressBarFactory;
+	
 	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private AbstractDownloadTable table;
 
@@ -100,9 +103,14 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
     
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, 
-	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory) {
-	    GuiUtils.assignResources(this);
-	    setTransferHandler(new DownloadableTransferHandler(downloadListManager));
+	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
+	        LimeProgressBarFactory progressBarFactory) {
+	    
+        GuiUtils.assignResources(this);
+	    
+        this.progressBarFactory = progressBarFactory;
+        
+        setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
         this.allList = downloadListManager.getSwingThreadSafeDownloads();
 
@@ -270,7 +278,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             nameLabel.setFont(itemFont);
             nameLabel.setForeground(fontColor);
             
-			progressBar = new LimeProgressBar(0,100);
+			progressBar = progressBarFactory.create(0, 100);
 			Dimension size = new Dimension(173, 8);
             progressBar.setPreferredSize(size);
             progressBar.setMaximumSize(size);

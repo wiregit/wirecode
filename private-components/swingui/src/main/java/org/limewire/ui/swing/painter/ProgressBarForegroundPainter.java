@@ -1,31 +1,26 @@
 package org.limewire.ui.swing.painter;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 
 import javax.swing.JProgressBar;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.jdesktop.swingx.util.PaintUtils;
 
 public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> {
-
-    @Resource private Color barForegroundGradientTop;
-    @Resource private Color barForegroundGradientBottom;
-    @Resource private Color barDisabledForegroundGradientTop;
-    @Resource private Color barDisabledForegroundGradientBottom;
     
-    private GradientPaint gradientForeground;
-    private GradientPaint gradientDisabledForeground;
+    private Paint foreground;
+    private Paint disabledForeground;
 
     private int heightCache = 0;
     
-    public ProgressBarForegroundPainter() {
-        GuiUtils.assignResources(this);
+    public ProgressBarForegroundPainter(Paint foreground, Paint disabledForeground) {
+        this.foreground = foreground;
+        this.disabledForeground = disabledForeground;
         
         this.setAntialiasing(false);
+        this.setCacheable(false);
     }
     
     @Override
@@ -33,22 +28,20 @@ public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> 
         if (height != this.heightCache) {
             this.heightCache = height;
             
-            this.gradientForeground = new GradientPaint(0,1, barForegroundGradientTop, 0, height-2, barForegroundGradientBottom);
-            this.gradientDisabledForeground = new GradientPaint(0,1, barDisabledForegroundGradientTop,
-                    0, height-2, barDisabledForegroundGradientBottom);
+            this.foreground = PaintUtils.resizeGradient(this.foreground, 0, height-2);
+            this.disabledForeground = PaintUtils.resizeGradient(this.disabledForeground, 0, height-2);
         }
         
         int progress = (int) (width * object.getPercentComplete());
                 
         if (object.isEnabled()) {
-            g.setPaint(this.gradientForeground);
+            g.setPaint(this.foreground);
         } 
         else {
-            g.setPaint(this.gradientDisabledForeground);
+            g.setPaint(this.disabledForeground);
         }
         
         g.fillRect(1, 1, progress-2, height-2);
         
     }
-
 }

@@ -26,6 +26,7 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.LimeProgressBar;
+import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -36,6 +37,7 @@ import com.google.inject.assistedinject.AssistedInject;
 public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
 
     private final CategoryIconManager categoryIconManager;
+    private final LimeProgressBarFactory progressBarFactory;
     
     private CardLayout statusViewLayout;
     private final static String FULL_LAYOUT = "Full download display";
@@ -75,10 +77,11 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     private List<JComponent> textComponents = new ArrayList<JComponent>();
     
     @AssistedInject
-    public DownloadTableCellImpl(CategoryIconManager categoryIconManager) {
+    public DownloadTableCellImpl(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory) {
         GuiUtils.assignResources(this);
 
         this.categoryIconManager = categoryIconManager;
+        this.progressBarFactory = progressBarFactory;
         
         initComponents();
     }
@@ -152,7 +155,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         
         textComponents.add(fullStatusLabel);
 
-        fullProgressBar = new LimeProgressBar();
+        fullProgressBar = progressBarFactory.create();
         Dimension size = new Dimension(progressBarWidth, 16);
         fullProgressBar.setMaximumSize(size);
         fullProgressBar.setMinimumSize(size);
@@ -328,10 +331,9 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
             
         }
         
-        
         editor.minStatusLabel.setText(getMessage(item));
         
-        updateButtonsMin(item);      
+        updateButtonsMin(editor, item);      
     }
     
     
@@ -354,12 +356,11 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         editor.fullTimeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
         editor.fullTimeLabel.setVisible(true);
          
-        
-        updateButtonsFull(item);      
+        updateButtonsFull(editor, item);      
     }
     
 
-    private void updateButtonsMin(DownloadItem item) {
+    private void updateButtonsMin(DownloadTableCellImpl editor, DownloadItem item) {
         DownloadState state = item.getState();
         minButtonPanel.updateButtons(state);
         
@@ -383,18 +384,15 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         }
     }
     
-    private void updateButtonsFull(DownloadItem item) {
+    private void updateButtonsFull(DownloadTableCellImpl editor, DownloadItem item) {
         DownloadState state = item.getState();
         fullButtonPanel.updateButtons(state);
 
         if (state == DownloadState.DOWNLOADING) {
             fullProgressBar.setEnabled(true);
-            fullProgressBar.setHidden(false);
-        } else if (state == DownloadState.PAUSED) {
+        } 
+        else { 
             fullProgressBar.setEnabled(false);
-            fullProgressBar.setHidden(false);
-        } else {
-            fullProgressBar.setHidden(true);
         }
     }
 
