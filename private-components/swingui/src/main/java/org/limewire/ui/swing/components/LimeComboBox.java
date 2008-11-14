@@ -442,13 +442,6 @@ public class LimeComboBox extends JXButton {
         
         this.menu.removeAll();
         
-        int ix1 = 0;
-        
-        if (this.getBorder() != null) {
-            Insets insets = this.getBorder().getBorderInsets(this);
-            ix1 = insets.left - 4;
-        }
-        
         for ( Action action : this.actions ) {
         
             Action compoundAction = action;
@@ -462,7 +455,7 @@ public class LimeComboBox extends JXButton {
             menuItem.setForeground(Color.BLACK);
             menuItem.setFont(this.getFont());
             
-            menuItem.setBorder(BorderFactory.createEmptyBorder(0,ix1,0,0));
+            menuItem.setBorder(BorderFactory.createEmptyBorder(0,1,0,0));
             
             this.menu.add(menuItem);
         }
