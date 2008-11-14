@@ -598,11 +598,12 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private String getHostAddress() {
-        return _socket.getInetAddress().getHostAddress() + ":" + _socket.getPort();
+        Socket socket = _socket;
+        return socket != null ? socket.getInetAddress().getHostAddress() + ":" + socket.getPort() : "unknown host";
     }
 
     /** Adds some locations to the set of locations we'll write, and stores them in the already-written set. */
-    private <T extends AlternateLocation> void writeAlternateLocations(List<Header> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {        
+    private <T extends AlternateLocation> void writeAlternateLocations(List<Header> headers, HTTPHeaderName header, Set<T> locs, Set<T> stored, boolean includeTLS) {
         //We don't want to hold locks while doing network operations, so we use
         //this variable to clone the location before writing to the network
         List<HTTPHeaderValue> valuesToWrite = null;
@@ -644,6 +645,10 @@ public class HTTPDownloader implements BandwidthTracker {
                         return DirectAltLoc.TLS_IDX + hex;
                     }
                 });
+            }
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("writing alts: " + header.create(new HTTPHeaderValueCollection(valuesToWrite)));
             }
             
             headers.add(header.create(new HTTPHeaderValueCollection(valuesToWrite)));
