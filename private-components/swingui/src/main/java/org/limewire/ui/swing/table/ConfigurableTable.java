@@ -16,7 +16,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -47,9 +46,6 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
 
     public ConfigurableTable(boolean showHeaders) {
         this.showHeaders = showHeaders;
-
-        // Configure so resizing a column resizes the table, not other columns.
-        setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         if (showHeaders) {
             // Set up table headers to have a context menu
