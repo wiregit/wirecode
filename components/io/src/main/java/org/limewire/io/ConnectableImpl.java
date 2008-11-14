@@ -38,6 +38,10 @@ public class ConnectableImpl implements Connectable {
         this(new IpPortImpl(host, port), tlsCapable);
     }
     
+    public ConnectableImpl(String hostPort, boolean tlsCapable) throws UnknownHostException {
+        this(new IpPortImpl(hostPort), tlsCapable);
+    }
+    
     /** Copy-constructor for Connectables. */
     public ConnectableImpl(Connectable connectable) {
         this(new IpPortImpl(connectable.getInetSocketAddress(), connectable.getAddress()),
