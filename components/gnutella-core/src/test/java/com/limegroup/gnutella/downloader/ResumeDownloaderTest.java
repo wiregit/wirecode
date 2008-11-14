@@ -9,6 +9,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -23,7 +24,6 @@ import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
-import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /** Unit tests small parts of ResumeDownloader. */
@@ -83,16 +83,16 @@ public class ResumeDownloaderTest extends LimeTestCase {
         return downloader;
     }
 
-    private RemoteFileDesc newRFD(String name, int size, URN hash) {
+    private RemoteFileDesc newRFD(String name, int size, URN hash) throws Exception {
         Set<URN> urns = new HashSet<URN>(1);
         if (hash != null)
             urns.add(hash);
-        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("1.2.3.4", 6346, 13l, name, size, new byte[16],
-                56, false, 4, true, null, urns, false, false, "", null, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("1.2.3.4", 6346, false), 13l, name, size, new byte[16],
+                56, false, 4, true, null, urns, false, "", -1);
     }
 
     public void testLoads32Bit() throws Exception {
-        OldDownloadConverter oldDownloadConverter = new OldDownloadConverterImpl();
+        OldDownloadConverter oldDownloadConverter = injector.getInstance(OldDownloadConverter.class);
         File downloadDat = TestUtils.getResourceInPackage("resume_4.1.1-32bit-size.dat", ResumeDownloaderTest.class);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(downloadDat);
         assertEquals(1, mementos.size());
