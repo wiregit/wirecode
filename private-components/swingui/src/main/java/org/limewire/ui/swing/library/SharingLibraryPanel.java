@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -17,6 +18,9 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
@@ -33,6 +37,7 @@ import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -154,6 +159,8 @@ public class SharingLibraryPanel extends LibraryPanel {
                 scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
                 scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
+            TableColors tableColors = new TableColors();
+            table.addHighlighter(new ColorHighlighter(new UnsharedHighlightPredicate(getTableModel(table), friendFileList), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
         } else {//Category.IMAGE
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -240,5 +247,20 @@ public class SharingLibraryPanel extends LibraryPanel {
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             setText();
         }
+    }
+    
+    private static class UnsharedHighlightPredicate implements HighlightPredicate {
+        LibraryTableModel<LocalFileItem> libraryTableModel;
+        private LocalFileList friendFileList;
+        public UnsharedHighlightPredicate (LibraryTableModel<LocalFileItem> libraryTableModel, LocalFileList friendFileList) {
+            this.libraryTableModel = libraryTableModel;
+            this.friendFileList = friendFileList;
+        }
+        @Override
+        public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
+            LocalFileItem fileItem = libraryTableModel.getFileItem(adapter.row);
+            //TODO cache values?
+            return !(friendFileList.contains(fileItem.getUrn()));
+        }       
     }
 }
