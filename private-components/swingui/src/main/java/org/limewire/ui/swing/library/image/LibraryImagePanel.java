@@ -66,7 +66,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     
     private JScrollPane scrollPane;
     
-    
     public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager, JScrollPane scrollPane) {       
         super(new VerticalLayout());
         GuiUtils.assignResources(this); 
@@ -82,7 +81,8 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
 
         listMap = new ConcurrentHashMap<String, EventList<LocalFileItem>>();
         panelMap = new ConcurrentHashMap<String, LibraryImageSubPanel>();
-        
+    
+        initList();
     }
     
     public void enableSharing(LibrarySharePanel sharePanel){
@@ -117,9 +117,16 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
                     }
                 });
             } 
-        }
+        }       
+    }
     
-        
+    private void initList() {
+        for( List<LocalFileItem> fileItemList : groupingList) {
+            final String parent = getParent(fileItemList.get(0));
+            final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
+            listMap.put(parent, newList);
+            createSubPanel(parent, newList);
+        }
     }
     
     
