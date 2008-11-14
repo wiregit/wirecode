@@ -504,8 +504,10 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         }
         
         public void removeBrowse() {
-            if(libraryPanel != null)
+            if(libraryPanel != null) {
+                unbusy();
                 libraryPanel.showMainCard();
+            }
         }
 
         public void dispose() {
