@@ -34,7 +34,7 @@ public class ImageTableFormat<T extends FileItem> implements LibraryTableFormat<
         else if (column == MODIFIED_COL)
             return "Modified";
         else if (column == ACTION_COL)
-            return "Share";
+            return "Sharing";
 
         throw new IllegalArgumentException("Unknown column:" + column);
     }

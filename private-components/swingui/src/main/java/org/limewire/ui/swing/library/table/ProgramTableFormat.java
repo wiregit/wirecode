@@ -30,7 +30,7 @@ public class ProgramTableFormat<T extends FileItem> implements LibraryTableForma
         case COMPANY_COL:
             return I18n.tr("Company");
         case ACTION_COL:
-            return I18n.tr("Share");
+            return I18n.tr("Sharing");
         }
 
         throw new IllegalArgumentException("Unknown column:" + column);

@@ -54,7 +54,7 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
         case MODIFIED_COL:
             return I18n.tr("Modified");
         case ACTION_COL:
-            return I18n.tr("Share");
+            return I18n.tr("Sharing");
         }
 
         throw new IllegalArgumentException("Unknown column:" + column);

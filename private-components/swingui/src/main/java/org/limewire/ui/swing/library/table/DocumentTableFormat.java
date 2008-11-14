@@ -34,7 +34,7 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
          case NAME_COL:
              return I18n.tr("Name");
          case ACTION_COL:
-             return I18n.tr("Share");
+             return I18n.tr("Sharing");
          case SIZE_COL:
              return I18n.tr("Size");
          case TYPE_COL:
