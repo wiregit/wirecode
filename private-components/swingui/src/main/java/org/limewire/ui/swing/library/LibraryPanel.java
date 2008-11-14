@@ -59,6 +59,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     protected final Friend friend;
     protected LibraryHeaderPanel headerPanel;    
     
+    private final boolean isLibraryPanel;
     private final Next next = new Next();
     private final Prev prev = new Prev();
     
@@ -68,6 +69,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         cardPanel.setLayout(cardLayout);
         
         this.friend = friend;
+        this.isLibraryPanel = isLibraryPanel;
         
         createHeader(friend, isLibraryPanel);
         createSelectionPanel();
@@ -123,9 +125,14 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         
         Action action = new SelectionAction(icon, category, item);
         SelectionButton button = new SelectionButton(action);
-        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredList);
-        filteredList.addListEventListener(listener);
-        addDisposable(listener);
+        
+        // Remove the comments if you only want to show sizes for
+        // the sharing panel.
+//        if(!isLibraryPanel) {
+            ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredList);
+            filteredList.addListEventListener(listener);
+            addDisposable(listener);
+//        }
 
         
         button.getActionMap().put(Next.KEY, next);
