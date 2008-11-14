@@ -9,6 +9,7 @@ import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.FileSizeRenderer;
+import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 
 import ca.odell.glazedlists.EventList;
@@ -41,5 +42,6 @@ public class VideoResultsPanel extends BaseResultPanel {
         super.setupCellRenderers(tableFormat);
         setCellRenderer(VideoTableFormat.SIZE_INDEX, new FileSizeRenderer());
         setCellRenderer(VideoTableFormat.LENGTH_INDEX, new TimeRenderer());
+        setCellRenderer(VideoTableFormat.QUALITY_INDEX, new QualityRenderer());
     }
 }

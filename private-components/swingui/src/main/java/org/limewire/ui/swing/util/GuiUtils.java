@@ -342,4 +342,13 @@ public class GuiUtils {
                WindowsUtils.isLoginStatusAvailable();
     }
     
+    public static String toQualityString(long qualityScore) {
+        if (qualityScore <= 1) {
+            return I18n.tr("Poor Quality");
+        } else if (qualityScore == 2) {
+            return I18n.tr("Good Quality");
+        } else {
+           return I18n.tr("Excellent Quality");
+        }
+    }
 }
