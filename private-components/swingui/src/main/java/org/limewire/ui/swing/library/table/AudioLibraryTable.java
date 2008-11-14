@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library.table;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.table.FileSizeRenderer;
+import org.limewire.ui.swing.table.TimeRenderer;
 
 import ca.odell.glazedlists.EventList;
 

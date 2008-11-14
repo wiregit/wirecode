@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -228,30 +229,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
         
-        CalendarTableCellRenderer calendarRenderer =
-            new CalendarTableCellRenderer();
-        ComponentTableCellRenderer componentRenderer =
-            new ComponentTableCellRenderer();
-        StringTableCellRenderer stringRenderer =
-            new StringTableCellRenderer();
-
-        TableColumnModel tcm = resultsTable.getColumnModel();
         int columnCount = tableFormat.getColumnCount();
-        for (int i = 0; i < columnCount; i++) {
-            TableColumn tc = tcm.getColumn(i);
-            Class clazz = tableFormat.getColumnClass(i);
-            if (clazz == String.class
-                || clazz == Integer.class
-                || clazz == Long.class) {
-                tc.setCellRenderer(stringRenderer);
-            } else if (clazz == Calendar.class) {
-                tc.setCellRenderer(calendarRenderer);
-            } else if (clazz == Component.class) {
-                tc.setCellRenderer(componentRenderer);
-            } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                tc.setCellRenderer(new ActionColumnTableCellEditor(this));
-            }
-        }
+            
+        setupCellRenderers(tableFormat);
 
         resultsTable.setDefaultEditor(
             VisualSearchResult.class, new ActionColumnTableCellEditor(this));
@@ -275,6 +255,38 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         }
 
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
+    }
+
+    protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
+        CalendarTableCellRenderer calendarRenderer =
+            new CalendarTableCellRenderer();
+        ComponentTableCellRenderer componentRenderer =
+            new ComponentTableCellRenderer();
+        StringTableCellRenderer stringRenderer =
+            new StringTableCellRenderer();
+
+        
+        int columnCount = tableFormat.getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
+            Class clazz = tableFormat.getColumnClass(i);
+            if (clazz == String.class
+                || clazz == Integer.class
+                || clazz == Long.class) {
+                setCellRenderer(i, stringRenderer);
+            } else if (clazz == Calendar.class) {
+                setCellRenderer(i, calendarRenderer);
+            } else if (clazz == Component.class) {
+                setCellRenderer(i, componentRenderer);
+            } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
+                setCellRenderer(i, new ActionColumnTableCellEditor(this));
+            }
+        }
+    }
+
+    protected void setCellRenderer(int column, TableCellRenderer cellRenderer) {
+        TableColumnModel tcm = resultsTable.getColumnModel();
+        TableColumn tc = tcm.getColumn(column);
+        tc.setCellRenderer(cellRenderer);
     }
 
     public void download(final VisualSearchResult vsr, final int row) {

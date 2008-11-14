@@ -14,12 +14,15 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    private static final int ACTION_INDEX = 4;
-    private static final int COMPANY_INDEX = 3;
-    private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 6;
-    private static final int PLATFORM_INDEX = 2;
-    private static final int SIZE_INDEX = 1;
+    public static final int NAME_INDEX = 0;
+    public static final int SIZE_INDEX = 1;
+    public static final int PLATFORM_INDEX = 2;
+    public static final int COMPANY_INDEX = 3;
+    public static final int ACTION_INDEX = 4;
+    public static final int FILE_EXTENSION_INDEX = 5;
+    public static final int NUM_SOURCES_INDEX = 6;
+    public static final int AUTHOR_INDEX = 7;
+
     
     public ProgramTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
@@ -48,9 +51,9 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case PLATFORM_INDEX: return getProperty(FilePropertyKey.PLATFORM);
             case COMPANY_INDEX: return getProperty(FilePropertyKey.COMPANY);
             case ACTION_INDEX: return vsr;
-            case 5: return fileExtension;
+            case FILE_EXTENSION_INDEX: return fileExtension;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 7: return getProperty(FilePropertyKey.AUTHOR);
+            case AUTHOR_INDEX: return getProperty(FilePropertyKey.AUTHOR);
             default: return null;
         }
     }

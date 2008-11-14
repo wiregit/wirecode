@@ -8,6 +8,7 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.FileSizeRenderer;
 
 import ca.odell.glazedlists.EventList;
 
@@ -33,5 +34,11 @@ public class ProgramResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, tableFormat, resultDownloader,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
         
+    }
+    
+    @Override
+    protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
+        super.setupCellRenderers(tableFormat);
+        setCellRenderer(ProgramTableFormat.SIZE_INDEX, new FileSizeRenderer());
     }
 }

@@ -12,21 +12,25 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    private static final int ACTION_INDEX = 5;
-    private static final int ALBUM_INDEX = 2;
-    private static final int ARTIST_INDEX = 1;
-    private static final int BITRATE_INDEX = 6;
-    private static final int LENGTH_INDEX = 3;
-    private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 9;
-    private static final int QUALITY_INDEX = 4;
-    private static final int TRACK_INDEX = 8;
+    public static final int NAME_INDEX = 0;
+    public static final int ARTIST_INDEX = 1;
+    public static final int ALBUM_INDEX = 2;
+    public static final int LENGTH_INDEX = 3;
+    public static final int QUALITY_INDEX = 4;
+    public static final int ACTION_INDEX = 5;
+    public static final int BITRATE_INDEX = 6;
+    public static final int GENRE_INDEX = 7;
+    public static final int TRACK_INDEX = 8;
+    public static final int NUM_SOURCES_INDEX = 9;
+    public static final int FILE_EXTENSION_INDEX = 10;
+    public static final int SIZE_INDEX = 11;
 
+    
     public MusicTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Artist"), tr("Album"), tr("Length"), tr("Quality"),
                 "", tr("Bitrate"), tr("Genre"), tr("Track"),
-                tr("People with file"), tr("Extension"));
+                tr("People with file"), tr("Extension"), tr("Size"));
     }
 
     @Override
@@ -36,8 +40,6 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             index == NUM_SOURCES_INDEX ? Integer.class :
             index == TRACK_INDEX ? Integer.class :
             super.getColumnClass(index);
-        //System.out.println("MusicTableFormat: index = " + index);
-        //System.out.println("MusicTableFormat: clazz = " + clazz.getName());
         return clazz;
     }
 
@@ -52,10 +54,11 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case ACTION_INDEX: return vsr;
             case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
-            case 7: return getProperty(FilePropertyKey.GENRE);
+            case GENRE_INDEX: return getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
-            case 10: return vsr.getFileExtension();
+            case FILE_EXTENSION_INDEX: return vsr.getFileExtension();
+            case SIZE_INDEX: return vsr.getSize();
             default: return null;
         }
     }

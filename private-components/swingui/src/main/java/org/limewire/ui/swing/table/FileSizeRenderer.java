@@ -1,9 +1,10 @@
-package org.limewire.ui.swing.library.table;
+package org.limewire.ui.swing.table;
 
 import java.awt.Component;
 
 import javax.swing.JTable;
 
+import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class FileSizeRenderer extends DefaultLibraryRenderer {

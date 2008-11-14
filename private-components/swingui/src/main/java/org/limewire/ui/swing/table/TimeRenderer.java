@@ -1,10 +1,11 @@
-package org.limewire.ui.swing.library.table;
+package org.limewire.ui.swing.table;
 
 import java.awt.Component;
 
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
+import org.limewire.ui.swing.library.table.DefaultLibraryRenderer;
 import org.limewire.util.CommonUtils;
 
 public class TimeRenderer extends DefaultLibraryRenderer {

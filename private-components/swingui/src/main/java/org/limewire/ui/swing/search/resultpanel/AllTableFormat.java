@@ -13,13 +13,13 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    private static final int ACTION_INDEX = 3;
-    private static final int NAME_INDEX = 0;
-    private static final int NUM_SOURCES_INDEX = 5;
-    private static final int EXTENSION_INDEX = 4;
-    private static final int SIZE_INDEX = 2;
-    private static final int TYPE_INDEX = 1;
-
+    public static final int NAME_INDEX = 0;
+    public static final int TYPE_INDEX = 1;
+    public static final int SIZE_INDEX = 2;
+    public static final int ACTION_INDEX = 3;
+    public static final int EXTENSION_INDEX = 4;
+    public static final int NUM_SOURCES_INDEX = 5;
+    
     public AllTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX, tr("Name"), tr("Type"), tr("Size"), "",
                  tr("Extension"), tr("People with file"));

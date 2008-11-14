@@ -8,6 +8,8 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.table.FileSizeRenderer;
+import org.limewire.ui.swing.table.TimeRenderer;
 
 import ca.odell.glazedlists.EventList;
 
@@ -32,5 +34,12 @@ public class VideoResultsPanel extends BaseResultPanel {
         super(listViewEditorRendererFactory, eventList, new VideoTableFormat(), resultDownloader,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
         
+    }
+    
+    @Override
+    protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
+        super.setupCellRenderers(tableFormat);
+        setCellRenderer(VideoTableFormat.SIZE_INDEX, new FileSizeRenderer());
+        setCellRenderer(VideoTableFormat.LENGTH_INDEX, new TimeRenderer());
     }
 }

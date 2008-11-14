@@ -37,6 +37,7 @@ import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
