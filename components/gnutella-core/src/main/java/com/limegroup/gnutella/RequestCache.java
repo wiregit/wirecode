@@ -90,7 +90,6 @@ public class RequestCache {
      * uploaded.
      */
     void transferDone(URN sha1) {
-        LOG.debugf("transferDone for " + sha1);
         ACTIVE_TRANSFERS.remove(sha1);
     }
 }
