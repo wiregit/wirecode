@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,8 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.Area;
-import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Comparator;
@@ -36,10 +35,10 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -50,10 +49,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.painter.ShapePainter;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.Disposable;
@@ -80,6 +77,8 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
+    //TODO: move this to properties
+    private static final int WIDTH = 300;
     
     private LibraryShareModel shareModel;
     
@@ -109,10 +108,11 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
 
     private JLabel friendLabel;
     private JLabel shareLabel;
+    private JLabel bottomLabel;
     
     private JXPanel mainPanel;
     
-    private ShapePainter shapePainter;    
+   // private ShapePainter shapePainter;    
     
     private JDialog dialog;
     
@@ -130,10 +130,14 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private Action up = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = friendCombo.getSelectedIndex();
-            if (selRow > 0) {
-                selRow--;
-                friendCombo.setSelectedIndex(selRow);
+            if(!friendCombo.isPopupVisible()){
+                friendCombo.showPopup();
+            } else {
+                int selRow = friendCombo.getSelectedIndex();
+                if (selRow > 0) {
+                    selRow--;
+                    friendCombo.setSelectedIndex(selRow);
+                }
             }
         }
     };
@@ -141,10 +145,14 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private Action down = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            int selRow = friendCombo.getSelectedIndex();
-            if (selRow < noShareFilterList.size() - 1) {
-                selRow++;
-                friendCombo.setSelectedIndex(selRow);
+            if(!friendCombo.isPopupVisible()){
+                friendCombo.showPopup();
+            } else {
+                int selRow = friendCombo.getSelectedIndex();
+                if (selRow < noShareFilterList.size() - 1) {
+                    selRow++;
+                    friendCombo.setSelectedIndex(selRow);
+                }
             }
         }
     };
@@ -161,15 +169,14 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         setOpaque(false);
         
-        createDialog();
-        
-        shapePainter = new ShapePainter();
-        shapePainter.setFillPaint(getBackground());        
-        shapePainter.setBorderPaint(Color.BLACK);
-        shapePainter.setBorderWidth(2);
-        shapePainter.setHorizontalAlignment(HorizontalAlignment.LEFT);
-        shapePainter.setVerticalAlignment(VerticalAlignment.TOP);
-        setBackgroundPainter(shapePainter);
+//        shapePainter = new ShapePainter();
+//        shapePainter.setFillPaint(getBackground());        
+//        shapePainter.setBorderPaint(Color.BLACK);
+//        shapePainter.setBorderWidth(2);
+//        shapePainter.setHorizontalAlignment(HorizontalAlignment.LEFT);
+//        shapePainter.setVerticalAlignment(VerticalAlignment.TOP);
+//        setBackgroundPainter(shapePainter);
+        setBorder(new LineBorder(Color.BLACK));
         
         mainPanel = new JXPanel(new GridBagLayout());
         mainPanel.setOpaque(false);
@@ -244,7 +251,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             public void actionPerformed(ActionEvent e) {
                 if(noShareFilterList.size() == 0 || 
                         !friendCombo.isPopupVisible() && ("".equals(inputField.getText()) || inputField.getText() == null)){
-                    setVisible(false);
+                    dialog.setVisible(false);
                 } else if (friendCombo.getSelectedIndex() >= 0) {
                     shareSelectedFriend();
                     friendCombo.hidePopup();
@@ -299,6 +306,8 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         friendLabel.setPreferredSize(labelSize);
         shareLabel.setPreferredSize(labelSize);
         
+        bottomLabel = new MultiLineLabel("", WIDTH);
+        
         GridBagConstraints gbc = new GridBagConstraints();
         
         gbc.weightx = 1.0;
@@ -316,11 +325,15 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
        
         gbc.gridy++;
         mainPanel.add(friendLabel, gbc);
-
         
         gbc.gridy++;
         gbc.weighty = 1.0;
         mainPanel.add(friendCombo, gbc);
+
+        gbc.gridy++;
+        mainPanel.add(bottomLabel, gbc);
+        
+        
                 
         add(mainPanel);
 
@@ -329,27 +342,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         setKeyStrokes(this);
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField);
-                     
-        
-        Action closeAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setVisible(false);
-            }
-        };
-
-
-        this.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        this.getActionMap().put(closeAction.toString(), closeAction);  
-
-        mainPanel.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        mainPanel.getActionMap().put(closeAction.toString(), closeAction);  
-        
-        shareTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        shareTable.getActionMap().put(closeAction.toString(), closeAction); 
-        
-        inputField.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),closeAction.toString() );
-        inputField.getActionMap().put(closeAction.toString(), closeAction);   
+  
      
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -369,22 +362,36 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         eventListener = new AWTEventListener() {
             @Override
             public void eventDispatched(AWTEvent event) {
-                if (dialog.isVisible() && (event.getID() == MouseEvent.MOUSE_PRESSED)) {
-                    MouseEvent e = (MouseEvent) event;
-                    if (LibrarySharePanel.this != e.getComponent()
-                            && !contains(e.getComponent()) ){
-//                            && !scrollPane.getVerticalScrollBar().contains(e.getPoint())) {
-                        dialog.setVisible(false);
-                        removeCloseListener();
+                if (dialog.isVisible()) {
+                    
+                    if ((event.getID() == MouseEvent.MOUSE_PRESSED)) {
+                        MouseEvent e = (MouseEvent) event;
+                        
+                        if (LibrarySharePanel.this != e.getComponent()
+                                && !contains(e.getComponent())) {
+                            dialog.setVisible(false);
+                        }
+                        
+                    } else if (event.getID() == KeyEvent.KEY_TYPED) {
+                        KeyEvent e = (KeyEvent) event;
+                        
+                        if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                            dialog.setVisible(false);
+                        }
                     }
+                    
                 }
             }
         }; 
 
     }
     
-    private void createDialog(){
-        dialog = new JDialog();
+    public void setBottomLabel(String text){
+        bottomLabel.setText(text);
+    }
+    
+    private void createDialog(JComponent component){
+        dialog = new JDialog((Window)component.getTopLevelAncestor());
         dialog.setUndecorated(true);
         dialog.addWindowListener(new WindowAdapter() {
             @Override
@@ -392,6 +399,14 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
                 addCloseListener();
             }
         });
+        
+        dialog.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                removeCloseListener();
+            }
+        });
+        
         dialog.setLayout(new BorderLayout());
         dialog.add(this);
     }
@@ -426,20 +441,25 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     }
 
     
-    public void show(Component c) {
-        inputField.setText(null);    
+    public void show(JComponent c) {
+        if(dialog == null){
+            createDialog(c);
+        }
+        inputField.setText(null);
+        if (noShareFilterList.size() > 0) {
+            friendCombo.setSelectedIndex(0);
+        }
         adjustSize();
         dialog.setLocationRelativeTo(c);
         dialog.setVisible(true);
-        //TODO toFront() doesn't seem to work consistently
         dialog.toFront();
     }
     
  
-    private void adjustPainter(){
-        Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
-        shapePainter.setShape(area);
-    }
+//    private void adjustPainter(){
+//        Area area = new Area(new RoundRectangle2D.Float(1, 1, mainPanel.getWidth() + HGAP * 2-1, getHeight()-2, BORDER_INSETS, BORDER_INSETS));
+//        shapePainter.setShape(area);
+//    }
 
 
     private void resetRowSelection(int oldSelRow) {
@@ -494,9 +514,9 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             prefWidth = Math.max(prefWidth, c.getPreferredSize().width);
         }
         
-         mainPanel.setSize(300, height);
+         mainPanel.setSize(WIDTH, height);
          setSize(mainPanel.getSize().width + 2 * HGAP, mainPanel.getSize().height + BORDER_INSETS);
-        adjustPainter();
+       // adjustPainter();
     }
     
      
@@ -554,6 +574,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     
     private void addCloseListener() {
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
+        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.KEY_EVENT_MASK);
     }
 
     private void removeCloseListener() {
@@ -621,7 +642,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // the share model file or cateogry has changed - reload friends.
+        // the share model file or category has changed - reload friends.
         reloadSharedBuddies();
     }
     

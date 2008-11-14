@@ -106,6 +106,8 @@ public class LibraryHeaderPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {               
                 ((CategoryShareModel)sharePanel.getShareModel()).setCategory(category);
+                sharePanel.setBottomLabel(
+                        I18n.tr("Sharing your {0} collection automatically shares new {0} files added to your Library", getCategoryString()));
                 sharePanel.show(shareAllButton);
             }
         });
@@ -131,6 +133,24 @@ public class LibraryHeaderPanel extends JXPanel {
             return I18n.tr("{0} - Video", libraryString);
         }
         throw new IllegalArgumentException("Unknown category: " + category);
+    }
+    
+    private String getCategoryString(){
+        switch (category) {
+        case AUDIO:
+            return I18n.tr("audio");
+        case DOCUMENT:
+            return I18n.tr("document");
+        case IMAGE:
+            return I18n.tr("image");
+        case OTHER:
+            return I18n.tr("other");
+        case PROGRAM:
+            return I18n.tr("program");
+        case VIDEO:
+            return I18n.tr("video");
+        }
+        throw new IllegalStateException("Unknown category: " + category);
     }
     
     private String getSharingTitle() {
