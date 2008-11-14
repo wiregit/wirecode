@@ -76,7 +76,6 @@ public class RequeryBehaviorTest extends LimeTestCase {
             }
         };
         Injector injector = LimeTestUtils.createInjector(m);
-        injector.getInstance(ConnectableConnector.class);  // so it can register; needed for non eager mode (i.e. Stage.DEVELOPMENT)
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.start();

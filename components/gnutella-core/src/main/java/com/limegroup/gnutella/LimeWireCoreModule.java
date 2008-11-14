@@ -381,9 +381,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeCoreGlue.class);
         bind(QRPUpdater.class);
         bind(DaapManager.class);
-        bind(FirewalledAddressSerializer.class);
-        bind(SameNATAddressResolver.class);
-        bind(ConnectableConnector.class);
+        bind(FirewalledAddressSerializer.class).asEagerSingleton();
+        bind(SameNATAddressResolver.class).asEagerSingleton();
+        bind(ConnectableConnector.class).asEagerSingleton();
     }
     
     
