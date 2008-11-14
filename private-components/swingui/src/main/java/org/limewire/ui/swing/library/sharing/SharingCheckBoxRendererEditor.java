@@ -25,7 +25,7 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     
     private LocalFileItem currentItem = null;
     
-    public SharingCheckBoxRendererEditor(final LocalFileList localFileList) {
+    public SharingCheckBoxRendererEditor(final LocalFileList localFileList, final JTable table) {
         this.localFileList = localFileList;
         
         addActionListener(new ActionListener(){
@@ -38,6 +38,7 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
                     } else { // remove it from the fileList
                         localFileList.removeFile(currentItem.getFile());
                     }
+                    table.repaint();
                 }
             }
         });

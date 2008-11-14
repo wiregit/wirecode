@@ -45,8 +45,6 @@ import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class displays search results in a panel.
- * 
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class SearchResultsPanel extends JXPanel {
     private final Log LOG = LogFactory.getLog(getClass());
