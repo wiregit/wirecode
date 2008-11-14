@@ -29,6 +29,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.net.address.ConnectableConnector;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -75,6 +76,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
             }
         };
         Injector injector = LimeTestUtils.createInjector(m);
+        injector.getInstance(ConnectableConnector.class);  // so it can register; needed for non eager mode (i.e. Stage.DEVELOPMENT)
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.start();
