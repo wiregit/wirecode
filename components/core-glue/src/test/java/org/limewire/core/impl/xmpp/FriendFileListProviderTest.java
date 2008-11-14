@@ -80,6 +80,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
         
         try {
             friendFileListProvider.getFileLists("me@you.com", httpContext);
+            fail("expected exception");
         } catch (HttpException he) {
             assertEquals(HttpStatus.SC_NOT_FOUND, he.getErrorCode());
         }
