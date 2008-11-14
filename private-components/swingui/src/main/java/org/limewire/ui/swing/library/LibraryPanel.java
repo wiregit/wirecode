@@ -126,13 +126,13 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         Action action = new SelectionAction(icon, category, item);
         SelectionButton button = new SelectionButton(action);
         
-        // Remove the comments if you only want to show sizes for
-        // the sharing panel.
-//        if(!isLibraryPanel) {
+        // If you only want to show the #s for the sharing panel -- make this false.
+        boolean showForAll_NotJustSharing = true;
+        if(showForAll_NotJustSharing || !isLibraryPanel) {
             ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredList);
             filteredList.addListEventListener(listener);
             addDisposable(listener);
-//        }
+        }
 
         
         button.getActionMap().put(Next.KEY, next);

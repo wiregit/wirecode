@@ -79,7 +79,7 @@ public class FriendLibraryPanel extends LibraryPanel {
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
         for(Category category : Category.getCategoriesInOrder()) {
             FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
-            JComponent component = createMyCategoryAction(category, eventList, friend);
+            JComponent component = createMyCategoryAction(category, filtered, friend);
             if(component != null) {
                 createButton(categoryIconManager.getIcon(category), category, component, filtered);                
             }
