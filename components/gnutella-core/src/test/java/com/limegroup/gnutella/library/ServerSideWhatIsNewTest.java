@@ -19,6 +19,7 @@ import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
@@ -670,8 +671,8 @@ public class ServerSideWhatIsNewTest
         Set urns = new HashSet();
         urns.add(TestFile.hash());
         RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class)
-                .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
-                        false, null, urns, false, false, "LIME", new HashSet(), -1, false);
+                .createRemoteFileDesc(new ConnectableImpl("127.0.0.1", UPLOADER_PORT, false), 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
+                        false, null, urns, false, "LIME", -1);
         
         int sharedBefore = fileManager.getGnutellaSharedFileList().size();
         final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
@@ -725,9 +726,8 @@ public class ServerSideWhatIsNewTest
             uploader[i].setCreationTime(cTime[i]);
             Set urns = new HashSet();
             urns.add(TestFile.hash());
-            rfds[i] = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, "anita.txt",
-                    TestFile.length(), guid, 1, false, 3, false, null, urns, false, false, "LIME",
-                    new HashSet(), -1, false);
+            rfds[i] = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", UPLOADER_PORT+i, false), 1, "anita.txt",
+                    TestFile.length(), guid, 1, false, 3, false, null, urns, false, "LIME", -1);
         }
 
         // first we get a notification for sharing the incomplete file desc
