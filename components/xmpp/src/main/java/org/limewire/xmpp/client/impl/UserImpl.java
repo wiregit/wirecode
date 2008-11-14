@@ -29,7 +29,7 @@ import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.IncomingChatListener;
-//import net.jcip.annotations.GuardedBy;                          // TODO: DCHEN: Put dependencies in pom.xml and build.xml, then uncomment these!
+import net.jcip.annotations.GuardedBy;
 
 
 public class UserImpl implements User {
@@ -47,10 +47,10 @@ public class UserImpl implements User {
     // represent the Presence State
     private final Object presenceLock;
     
-//    @GuardedBy("presenceLock")
+    @GuardedBy("presenceLock")
     private final HashMap<String, Presence> presences;
 
-//    @GuardedBy("presenceLock")
+    @GuardedBy("presenceLock")
     private String activePresenceJid;
     // -----------------------------------------------------------------
 
@@ -58,7 +58,7 @@ public class UserImpl implements User {
     // -----------------------------------------------------------------
     private final Object chatListenerLock;
 
-//    @GuardedBy("chatListenerLock")
+    @GuardedBy("chatListenerLock")
     private  IncomingChatListenerAdapter listenerAdapter;
     // -----------------------------------------------------------------
 
