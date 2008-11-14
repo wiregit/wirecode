@@ -69,8 +69,8 @@ public class XMPPServiceTest extends BaseTestCase {
         Thread.sleep(10 * 1000); // allow login, roster, presence, library messages to be
                                 // sent, received   
                                 // TODO wait()/notify()
-        assertEquals("another limebuddy2 presence has been detecteded, test cannnot run", 1, rosterListener.roster.get("limebuddy2@gmail.com").size());
-        assertEquals("another limebuddy1 presence has been detecteded, test cannnot run", 1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertEquals("another automatedtestfriend2 presence has been detecteded, test cannnot run", 1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
+        assertEquals("another automatedtestfriend1 presence has been detecteded, test cannnot run", 1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
     }
     
     protected Injector createInjector(Module... modules) {
@@ -94,12 +94,12 @@ public class XMPPServiceTest extends BaseTestCase {
         rosterListener = new RosterListenerMock();
         rosterListener2 = new RosterListenerMock();
         final XMPPConnectionConfiguration configuration =
-            new XMPPConnectionConfigurationMock("limebuddy1@gmail.com",
-                    "limebuddy123", "talk.google.com", 5222, "gmail.com",
+            new XMPPConnectionConfigurationMock("automatedtestfriend1@gmail.com",
+                    "automatedtestfriend123", "talk.google.com", 5222, "gmail.com",
                     "Gmail", "http://gmail.com/", rosterListener);
         final XMPPConnectionConfiguration configuration2 =
-            new XMPPConnectionConfigurationMock("limebuddy2@gmail.com",
-                    "limebuddy234", "talk.google.com", 5222, "gmail.com",
+            new XMPPConnectionConfigurationMock("automatedtestfriend2@gmail.com",
+                    "automatedtestfriend234", "talk.google.com", 5222, "gmail.com",
                     "Gmail", "http://gmail.com/", rosterListener2);
         Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
@@ -117,38 +117,38 @@ public class XMPPServiceTest extends BaseTestCase {
 
     public void testRosterIsPopulated() throws InterruptedException, UnknownHostException {
         assertEquals(1, rosterListener.roster.size());
-        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertEquals("automatedtestfriend2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
         
         assertEquals(1, rosterListener2.roster.size());
-        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertEquals("automatedtestfriend1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
     }
     
     public void testSetName() throws InterruptedException {
-        assertEquals("buddy2", rosterListener.users.get("limebuddy2@gmail.com").getName());
-        rosterListener.users.get("limebuddy2@gmail.com").setName("foo");
+        assertEquals("buddy2", rosterListener.users.get("automatedtestfriend2@gmail.com").getName());
+        rosterListener.users.get("automatedtestfriend2@gmail.com").setName("foo");
         Thread.sleep(3 * 1000);
-        assertEquals("foo", rosterListener.users.get("limebuddy2@gmail.com").getName());
-        rosterListener.users.get("limebuddy2@gmail.com").setName("buddy2");
+        assertEquals("foo", rosterListener.users.get("automatedtestfriend2@gmail.com").getName());
+        rosterListener.users.get("automatedtestfriend2@gmail.com").setName("buddy2");
     }
     
     public void testDetectLimePresences() throws InterruptedException, UnknownHostException {
         assertEquals(1, rosterListener.roster.size());
-        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertEquals("automatedtestfriend2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
         
         assertEquals(1, rosterListener2.roster.size());
-        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertEquals("automatedtestfriend1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
         
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000 * 2);
         
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
-        Presence buddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
+        Presence buddy2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -162,8 +162,8 @@ public class XMPPServiceTest extends BaseTestCase {
         AuthTokenFeature authTokenFeature = (AuthTokenFeature)buddy2.getFeature(AuthTokenFeature.ID);
         assertNotNull(authTokenFeature);
         
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
-        Presence buddy1 = rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
+        Presence buddy1 = rosterListener2.roster.get("automatedtestfriend1@gmail.com").get(0);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
@@ -188,32 +188,32 @@ public class XMPPServiceTest extends BaseTestCase {
     
     public void testStatusChanges() throws InterruptedException, UnknownHostException {
         assertEquals(1, rosterListener.roster.size());
-        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertEquals("automatedtestfriend2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
         
         assertEquals(1, rosterListener2.roster.size());
-        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertEquals("automatedtestfriend1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
         
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000); 
         
-        Presence buddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        Presence buddy2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
 
         XMPPService xmppService = injector.getInstance(XMPPService.class);
         for(XMPPConnection connection : xmppService.getConnections()) {
-            if(connection.getConfiguration().getUsername().equals("limebuddy2@gmail.com")) {
+            if(connection.getConfiguration().getUsername().equals("automatedtestfriend2@gmail.com")) {
                 connection.setMode(Presence.Mode.away);
             }
         }
         
         Thread.sleep(1000); 
         
-        buddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        buddy2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.away, buddy2.getMode());
     }
@@ -225,8 +225,8 @@ public class XMPPServiceTest extends BaseTestCase {
         Thread.sleep(1000);
         
         MessageReaderMock reader = new MessageReaderMock();
-        Presence limeBuddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
-        MessageWriter writer = limeBuddy2.getUser().createChat(reader);
+        Presence automatedtestfriend2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
+        MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
         writer.writeMessage("hello world");
        
         Thread.sleep(2 * 1000);
@@ -254,14 +254,14 @@ public class XMPPServiceTest extends BaseTestCase {
         
         Thread.sleep(1000);
         
-        Presence limebuddy2 = roster1.get("limebuddy2@gmail.com").get(0);
+        Presence automatedtestfriend2 = roster1.get("automatedtestfriend2@gmail.com").get(0);
         FileMetaDataImpl metaData = new FileMetaDataImpl();
         metaData.setId(new Random().nextInt() + "");
         metaData.setName("a_cool_file.txt");
         metaData.setSize(1000);
         metaData.setCreateTime(new Date());
         metaData.setDescription("cool file");
-        FileOfferFeature feature = (FileOfferFeature)limebuddy2.getFeature(FileOfferFeature.ID);
+        FileOfferFeature feature = (FileOfferFeature)automatedtestfriend2.getFeature(FileOfferFeature.ID);
         assertNotNull(feature);
         FileOfferer fileOfferer = feature.getFeature();
         fileOfferer.offerFile(metaData);
@@ -275,20 +275,20 @@ public class XMPPServiceTest extends BaseTestCase {
     
     public void testDetectAddressChanges() throws InterruptedException, UnknownHostException {
         assertEquals(1, rosterListener.roster.size());
-        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+        assertEquals("automatedtestfriend2@gmail.com", rosterListener.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
         
         assertEquals(1, rosterListener2.roster.size());
-        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+        assertEquals("automatedtestfriend1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
         
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
         
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
-        Presence buddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
+        Presence buddy2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -299,8 +299,8 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
         
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
-        Presence buddy1 = rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
+        Presence buddy1 = rosterListener2.roster.get("automatedtestfriend1@gmail.com").get(0);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
@@ -316,8 +316,8 @@ public class XMPPServiceTest extends BaseTestCase {
         
         Thread.sleep(1000);
         
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
-        buddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
+        assertEquals(1, rosterListener.roster.get("automatedtestfriend2@gmail.com").size());
+        buddy2 = rosterListener.roster.get("automatedtestfriend2@gmail.com").get(0);
         limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -328,8 +328,8 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
 
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
-        buddy1 = rosterListener2.roster.get("limebuddy1@gmail.com").get(0);
+        assertEquals(1, rosterListener2.roster.get("automatedtestfriend1@gmail.com").size());
+        buddy1 = rosterListener2.roster.get("automatedtestfriend1@gmail.com").get(0);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
