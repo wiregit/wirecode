@@ -2280,9 +2280,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Set<AlternateLocation> ret;
             
             if (validAlts != null) {
-                ret = new HashSet<AlternateLocation>();
-                for(AlternateLocation next : validAlts)
-                    ret.add(next);
+                ret = new HashSet<AlternateLocation>(validAlts);
             } else
                 ret = Collections.emptySet();
             

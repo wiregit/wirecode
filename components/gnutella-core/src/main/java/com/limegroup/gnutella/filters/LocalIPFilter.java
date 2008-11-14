@@ -14,7 +14,6 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.Address;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IP;
 import org.limewire.util.CommonUtils;
@@ -175,11 +174,6 @@ public final class LocalIPFilter extends AbstractIPFilter {
         };
     }
 
-    @Override
-    public boolean allow(Address address) {
-        // TODO fberger
-        return false;
-    }
 }
 
 

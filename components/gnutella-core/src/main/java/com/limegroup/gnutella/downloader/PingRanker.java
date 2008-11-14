@@ -19,6 +19,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
@@ -202,8 +203,9 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             if (address instanceof PushEndpoint) {
                 for(IpPort ipp : ((PushEndpoint)address).getProxies())
                     pingedHosts.remove(ipp);
-            } else
-                pingedHosts.remove(ret);
+            } else {
+                pingedHosts.remove(ret.getAddress());
+            }
         }
         
         pingNewHosts();
@@ -360,7 +362,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             // if the pong is firewalled, remove the other proxies from the 
             // pinged set
-            if (pong.isFirewalled()) {
+            if (pong.isFirewalled() && rfd.getAddress() instanceof PushEndpoint) {
                 for(IpPort ipp : ((PushEndpoint)rfd.getAddress()).getProxies())
                     pingedHosts.remove(ipp);
             }

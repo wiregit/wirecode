@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import java.net.SocketAddress;
 
 import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IP;
 
 /**
@@ -59,6 +60,16 @@ public interface IPFilter extends SpamFilter {
      */
     public boolean allow(String addr);
     
+    /**
+     * Checks if the address is of type {@link Connectable} and checks
+     * if the ip address is banned.
+     * 
+     * Can be extended to handle other address types if they have the notion
+     * of a public/unique ip address.
+     * 
+     * @return if this host is allowed or the type of address can't be filtered,
+     *  false if it is banned or we are unable to create correct IP address out of it.
+     */
     public boolean allow(Address address);
     
     /** 

@@ -55,6 +55,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -371,10 +372,12 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         return IpPort.EMPTY_SET;
     }
     
+    
     private IpPort getPublicAddress(RemoteFileDesc rfd) {
         Address address = rfd.getAddress();
         if (address instanceof PushEndpoint) {
-            return (IpPort)address;
+            IpPort externalAddress = ((PushEndpoint)address).getValidExternalAddress();
+            return externalAddress != null ? externalAddress : ConnectableImpl.INVALID_CONNECTABLE;
         } else if (address instanceof FirewalledAddress) {
             return ((FirewalledAddress)address).getPublicAddress();
         }
@@ -415,14 +418,23 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         //don't bother sending direct push if the node reported invalid
         //address and port.
         if (NetworkUtils.isValidIpPort(publicAddress)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("sending push to host itself via udp: " + publicAddress);
+            }
             udpService.send(pr, publicAddress);
         }
         
         //make sure we send it to the proxies, if any
         for(IpPort ppi : getPushProxies(file)) {
             if (ipFilter.get().allow(ppi.getAddress())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("sending udp push to: " + ppi);
+                }
                 udpService.send(pr, ppi.getInetSocketAddress());
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("removing disallowed pushproxy: " + ppi);
+                }
                 removePushProxy(file.getClientGUID(), ppi);
             }
         }
@@ -661,6 +673,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("receiving socket: " + socket + ", line: " + line);
+        }
 
         boolean accepted = false;
         for(PushedSocketHandler handler : pushHandlers) {
@@ -863,6 +879,11 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             this.file=file;
             this.index=index;
             this.clientGUID=clientGUID;
+        }
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this);
         }
     }
     
