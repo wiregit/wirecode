@@ -239,7 +239,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         friendCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if ((e.getModifiers() & InputEvent.BUTTON1_MASK) != 0) {
+                if (friendCombo.isPopupVisible() && (e.getModifiers() & InputEvent.BUTTON1_MASK) != 0) {
                     shareSelectedFriend();
                 }
             }
