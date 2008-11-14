@@ -177,7 +177,7 @@ implements TableCellEditor, TableCellRenderer {
 
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
-
+        
         vsr = (VisualSearchResult) value;
         this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
@@ -185,12 +185,16 @@ implements TableCellEditor, TableCellRenderer {
         currentColumn = col;
         currentRow = row;
         
+        if (value == null) {
+            editorComponent.removeAll();
+            editorComponent.add(emptyPanel, "height 100%");
+            return editorComponent;
+        }
+        
         actionButtonPanel =
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
 
-        
-        
         if (editorComponent == null) {
             editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
 
