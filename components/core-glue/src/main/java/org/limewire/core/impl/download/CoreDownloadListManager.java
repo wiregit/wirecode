@@ -129,9 +129,24 @@ public class CoreDownloadListManager implements DownloadListManager {
 
 	@Override
 	public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults) throws SaveLocationException {
-        File saveDir = null; // TODO
-        String fileName = null; // TODO
-        boolean overwrite = false; // TODO
+	   return addDownload(search, searchResults, null, false);
+	}
+	
+
+    @Override
+    public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
+            File saveFile, boolean overwrite) throws SaveLocationException {
+        File saveDir = null;
+        String fileName = null;
+        
+        if(saveFile != null) {
+            if(saveFile.isDirectory()) {
+                saveDir = saveFile;
+            } else {
+                saveDir = saveFile.getParentFile();
+                fileName = saveFile.getName();
+            }
+        }
         
         RemoteFileDesc[] files;
         List<RemoteFileDesc> alts = new ArrayList<RemoteFileDesc>();
@@ -144,7 +159,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         
         Category category = searchResults.iterator().next().getCategory();
         return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category);
-	}
+    }
 	
 	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
             GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category)
@@ -352,5 +367,4 @@ public class CoreDownloadListManager implements DownloadListManager {
         Downloader downloader = downloadManager.downloadTorrent(file, true);
         return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
     }
-
 }

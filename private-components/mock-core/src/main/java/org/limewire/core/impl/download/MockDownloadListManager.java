@@ -129,4 +129,10 @@ public class MockDownloadListManager implements DownloadListManager {
     public DownloadItem addDownload(File file) {
         return null;
     }
+
+    @Override
+    public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults,
+            File saveFile, boolean overwrite) throws SaveLocationException {
+       return addDownload(search, coreSearchResults);
+    }
 }

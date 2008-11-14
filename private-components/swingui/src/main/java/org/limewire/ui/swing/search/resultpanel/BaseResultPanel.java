@@ -3,8 +3,11 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +27,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
@@ -289,19 +293,50 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     public void download(final VisualSearchResult vsr, final int row) {
-        try {
-            // TODO: Need to go through some of the rigor that
-            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-            // went through.. checking for conflicts, etc.
-            DownloadItem di = resultDownloader.addDownload(
-                search, vsr.getCoreSearchResults());
-            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-             
-            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-        } catch (SaveLocationException sle) {
-            //TODO
-            throw new RuntimeException("FIX ME", sle);
+            try {
+                // TODO: Need to go through some of the rigor that
+                // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
+                // went through.. checking for conflicts, etc.
+                DownloadItem di = resultDownloader.addDownload(
+                    search, vsr.getCoreSearchResults());
+                di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                 
+                vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+            } catch (final SaveLocationException sle) {
+                if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                    //TODO get download item and add property change listener
+                } else {
+                    handleSaveLocationException(vsr, sle);
+                }
+            }
+    }
+    
+    private void handleSaveLocationException(final VisualSearchResult vsr,
+            final SaveLocationException sle) {
+        
+        if(sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
+            //TODO better user feedback
+            throw new UnsupportedOperationException("Error starting download.", sle);
         }
+        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode());
+        saveAsDialogue.addActionListener(new ActionListener() {
+           @Override
+            public void actionPerformed(ActionEvent e) {
+               File saveFile = saveAsDialogue.getSaveFile();
+               boolean overwrite = saveAsDialogue.isOverwrite();
+              try {
+                DownloadItem di = resultDownloader.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
+                di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+              } catch (SaveLocationException e1) {
+                  saveAsDialogue.dispose();
+                  handleSaveLocationException(vsr, e1);
+              }
+            } 
+        });
+        saveAsDialogue.setLocationRelativeTo(BaseResultPanel.this);
+        saveAsDialogue.setVisible(true);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
