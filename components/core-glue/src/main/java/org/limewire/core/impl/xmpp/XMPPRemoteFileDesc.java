@@ -20,6 +20,7 @@ import com.google.inject.internal.base.Objects;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -216,12 +217,11 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
 
     @Override
     public URN getSHA1Urn() {
-        for (URN urn : urns) {
-            if (urn.isSHA1()) {
-                return urn;
-            }
+        URN sha1Urn = UrnSet.getSha1(urns);
+        if (sha1Urn == null) {
+            throw new IllegalArgumentException(urns + " should have sha1");
         }
-        throw new IllegalArgumentException(urns + " should have sha1");
+        return sha1Urn;
     }
 
     @Override
