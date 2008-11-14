@@ -44,7 +44,11 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     private final Comparator<LocalFileItem> groupingComparator = new Comparator<LocalFileItem>() {
         @Override
         public int compare(LocalFileItem o1, LocalFileItem o2) {
-            return o1.getFile().getParent().compareTo(o2.getFile().getParent());
+            if (o1.getFile() != null) {
+                return (o2.getFile() != null) ? o1.getFile().getParent().compareTo(o2.getFile().getParent()) : 1;
+            } else  {
+                return (o2.getFile() != null) ? -1 : 0;
+            }
         }
     };
     
@@ -141,7 +145,8 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     }
     
     private String getParent(LocalFileItem localFileItem){
-        return localFileItem.isIncomplete()? incomplete : localFileItem.getFile().getParent();
+        return localFileItem.isIncomplete() ? incomplete : 
+            ((localFileItem.getFile() == null) ? incomplete : localFileItem.getFile().getParent());
     }
     
     private class DirectoryMatcher implements Matcher<LocalFileItem>{
