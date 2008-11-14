@@ -110,7 +110,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
                 connection = new org.jivesoftware.smack.XMPPConnection(getConnectionConfig(configuration));
                 connection.addRosterListener(new RosterListenerImpl(connection));
-                LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
+                if (LOG.isInfoEnabled())
+                    LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
                 connection.connect();
                 LOG.info("connected.");
                 if (LOG.isInfoEnabled())
@@ -127,7 +128,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     public void logout() {
         synchronized (this) {
             if(isLoggedIn()) {
-                LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
+                if (LOG.isInfoEnabled())
+                    LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
                 connection.disconnect();
                 rosterListeners.removeListener(addressIQListener.getRosterListener());
                 rosterListeners.removeListener(authTokenIQListener.getRosterListener());
@@ -302,7 +304,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     }
                     user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
                     if(user != null) {
-                        LOG.debugf("found user {0} for presence {1}",
+                        if (LOG.isDebugEnabled())
+                            LOG.debugf("found user {0} for presence {1}",
                                 StringUtils.parseBareAddress(presence.getFrom()), presence.getFrom());    
                     }
                 }
