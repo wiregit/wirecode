@@ -1,14 +1,10 @@
 package org.limewire.ui.swing.friends;
 
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -37,6 +33,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -62,6 +59,7 @@ public class LoginPanel extends JPanel
     
     private static final String AUTHENTICATION_ERROR = tr("Please try again."); // See spec
     private static final String NETWORK_ERROR = tr("Network error. Please try again later.");
+    private static final String BLANK_CREDENTIALS = tr("Please enter your username and password.");
     
     private JComboBox serviceComboBox;
     private JTextField userNameField;
@@ -71,7 +69,6 @@ public class LoginPanel extends JPanel
     private JButton registerButton;
     private JPanel normalTopPanel;
     private JPanel detailsPanel;
-    private Desktop desktop;
     private final XMPPEventHandler xmppEventHandler;
     private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 
@@ -210,6 +207,7 @@ public class LoginPanel extends JPanel
         removeAll();
         add(messagePanel, "wrap");
         add(detailsPanel);
+        validate();
     }
 
     private JPanel loginErrorPanel(String message) {
@@ -252,20 +250,13 @@ public class LoginPanel extends JPanel
         sign.add(rememberMeCheckbox, "wrap");
         sign.add(signInButton);
         p.add(sign, "split");
-        try {
-            desktop = Desktop.getDesktop();
-            if(desktop.isSupported(Desktop.Action.BROWSE)) {
-                JPanel reg = new JPanel();
-                reg.setBorder(new LineBorder(Color.BLACK));
-                reg.setLayout(new MigLayout());
-                reg.add(new JLabel(tr("Don't have an account?")), "wrap");
-                reg.add(registerButton);
-                p.add(reg);
-                registerButton.addActionListener(this);
-            }
-        } catch(UnsupportedOperationException oux) {
-            // No desktop integration, no register button
-        }
+        JPanel reg = new JPanel();
+        reg.setBorder(new LineBorder(Color.BLACK));
+        reg.setLayout(new MigLayout());
+        reg.add(new JLabel(tr("Don't have an account?")), "wrap");
+        reg.add(registerButton);
+        p.add(reg);
+        registerButton.addActionListener(this);
         return p;
     }
     
@@ -275,15 +266,7 @@ public class LoginPanel extends JPanel
         String friendlyName = (String)serviceComboBox.getSelectedItem();
         XMPPConnectionConfiguration config =
             xmppEventHandler.getConfigByFriendlyName(friendlyName);
-        try {
-            desktop.browse(new URI(config.getRegistrationURL()));
-        } catch(IOException iox) {
-            // Warn the user?
-        } catch(SecurityException sx) {
-            // Warn the user?
-        } catch(URISyntaxException usx) {
-            // Warn the user?
-        }
+        NativeLaunchUtils.openURL(config.getRegistrationURL());
     }
 
     class SignInAction extends AbstractAction {
@@ -292,21 +275,24 @@ public class LoginPanel extends JPanel
         }
 
         public void actionPerformed(ActionEvent e) {
+            String user = userNameField.getText().trim();
+            final String password = new String(passwordField.getPassword());
+            if(user.equals("") || password.equals("")) {
+                setTopPanelMessage(loginErrorPanel(BLANK_CREDENTIALS));
+                return;
+            }
             setSignInComponentsEnabled(false);
-            String userNameFieldValue = userNameField.getText().trim();
             String friendlyName = (String)serviceComboBox.getSelectedItem();
             XMPPConnectionConfiguration config =
                 xmppEventHandler.getConfigByFriendlyName(friendlyName);
             // Some servers expect the domain to be included, others don't
-            int at = userNameFieldValue.indexOf('@');
+            int at = user.indexOf('@');
             if(config.requiresDomain() && at == -1)
-                userNameFieldValue += "@" + config.getServiceName(); // Guess
+                user += "@" + config.getServiceName(); // Guess
             else if(!config.requiresDomain() && at > -1)
-                userNameFieldValue = userNameFieldValue.substring(0, at);
-            final String userName = userNameFieldValue;
-            final String password = new String(passwordField.getPassword());
+                user = user.substring(0, at); // Strip the domain
+            final String userName = user;
             final String serviceName = config.getServiceName();
-            // TODO: handle empty username/password
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
