@@ -44,7 +44,7 @@ public class LimeWireNetModule extends AbstractModule {
         bind(WhoIsRequestFactory.class).to(WhoIsRequestFactoryImpl.class);
         bind(FirewallService.class).to(FirewallServiceImpl.class);
         bind(AddressFactory.class).to(AddressFactoryImpl.class);
-        bind(ConnectableSerializer.class);
+        bind(ConnectableSerializer.class).asEagerSingleton();
         bind(new TypeLiteral<ListenerSupport<ConnectivityChangeEvent>>(){}).to(SocketsManager.class);
         bind(new TypeLiteral<EventBroadcaster<ConnectivityChangeEvent>>(){}).to(SocketsManagerImpl.class);
         
