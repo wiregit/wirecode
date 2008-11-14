@@ -12,6 +12,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.DHTSettings;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -357,8 +358,8 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     private RemoteFileDesc fakeRFD() throws Exception {
-        return remoteFileDescFactory.createRemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l, "badger", 1024, new byte[16],
-                56, false, 4, true, null, new UrnSet(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")), false, false, "", null, -1, false);
+        return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), false), 13l, "badger", 1024, new byte[16],
+                56, false, 4, true, null, new UrnSet(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")), false, "", -1);
     }
     
     
