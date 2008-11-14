@@ -350,12 +350,18 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
             editor.fullProgressBar.setMaximum((int) item.getTotalSize());
             editor.fullProgressBar.setValue((int) item.getCurrentSize());
         }
+        editor.fullProgressBar.setEnabled(item.getState() != DownloadState.PAUSED);
         
         editor.fullStatusLabel.setText(getMessage(item));
         
-        editor.fullTimeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
-        editor.fullTimeLabel.setVisible(true);
-         
+        if (item.getRemainingDownloadTime() > Long.MAX_VALUE-1000) {
+            editor.fullTimeLabel.setVisible(false);
+        }
+        else {
+            editor.fullTimeLabel.setText(CommonUtils.seconds2time(item.getRemainingDownloadTime()));
+            editor.fullTimeLabel.setVisible(item.getState() == DownloadState.DOWNLOADING);
+        }
+                 
         updateButtonsFull(editor, item);      
     }
     
@@ -386,30 +392,23 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     
     private void updateButtonsFull(DownloadTableCellImpl editor, DownloadItem item) {
         DownloadState state = item.getState();
-        fullButtonPanel.updateButtons(state);
-
-        if (state == DownloadState.DOWNLOADING) {
-            fullProgressBar.setEnabled(true);
-        } 
-        else { 
-            fullProgressBar.setEnabled(false);
-        }
+        
+        editor.fullButtonPanel.updateButtons(state);
     }
 
-    
     private void updateComponent(DownloadTableCellImpl editor, DownloadItem item){
-        if (item.getState() == DownloadState.DOWNLOADING) {
-            editor.statusViewLayout.show(this, FULL_LAYOUT);
-            updateFull(editor, item);
-        } 
-        else {
-            editor.statusViewLayout.show(this, MIN_LAYOUT);
-            updateMin(editor, item);
+        switch(item.getState()) {
+            case DOWNLOADING:
+            case PAUSED:
+                editor.statusViewLayout.show(this, FULL_LAYOUT);
+                updateFull(editor, item);
+                break;
+            default:
+                editor.statusViewLayout.show(this, MIN_LAYOUT);
+                updateMin(editor, item);
         }
     }
     
-    
-
     private String getMessage(DownloadItem item) {
         switch (item.getState()) {
         case CANCELLED:

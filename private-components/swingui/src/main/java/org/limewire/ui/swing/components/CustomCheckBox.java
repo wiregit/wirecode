@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.Action;
@@ -12,6 +11,7 @@ import javax.swing.JCheckBox;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PainterUtils;
 
 public class CustomCheckBox extends JCheckBox {
     
@@ -36,22 +36,19 @@ public class CustomCheckBox extends JCheckBox {
     @Override
     protected void paintComponent(Graphics g) {
         
+        // TODO: Remove this class or use painters.
+        
         Graphics2D g2 = (Graphics2D) g;
         
-        // get original antialiasing value for reset
-        Object origAntiAliasHint = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
         String label = this.getText();
         Rectangle2D labelRect = this.getFont().getStringBounds(label, g2.getFontRenderContext());
         
         g2.setFont(this.getFont());
         
         g2.setColor(this.dropColour);
-        g2.drawString(label, 16, (int) labelRect.getHeight()+2);
+        PainterUtils.drawSmoothString(g2, label, 16, (int) labelRect.getHeight()+4);
         g2.setColor(Color.WHITE);
-        g2.drawString(label, 15, (int) labelRect.getHeight()+1);
+        PainterUtils.drawSmoothString(g2, label, 17, (int) labelRect.getHeight()+3);
         
         int top = this.getHeight() / 2 - 6;
         
@@ -65,9 +62,7 @@ public class CustomCheckBox extends JCheckBox {
             g2.drawLine(3,top + 3, 9, top + 9);
             g2.drawLine(9,top + 3, 3, top + 9);
         }
-       
-        // reset antialiasing propery
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint);
+      
     }
 
 }

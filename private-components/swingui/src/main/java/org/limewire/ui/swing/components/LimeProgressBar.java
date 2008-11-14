@@ -50,6 +50,14 @@ public class LimeProgressBar extends JProgressBar {
 	}
 	
 	@Override
+	public void setEnabled(boolean b) {
+	    if (this.isEnabled() != b) {
+            this.foregroundPainter.clearCache();
+        }
+	    super.setEnabled(b);
+	}
+	
+	@Override
 	protected void paintComponent(Graphics g) {
 	    if (!isHidden) {
 	        this.backgroundPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
