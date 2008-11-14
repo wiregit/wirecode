@@ -19,7 +19,7 @@ public class StorePanel  extends JPanel{
     public StorePanel(){
         setLayout(new GridBagLayout());
         browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
-//        browser.load("http://store.limewire.com");
+        browser.load("http://store.limewire.com");
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
