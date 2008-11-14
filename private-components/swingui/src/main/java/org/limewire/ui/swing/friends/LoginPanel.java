@@ -1,10 +1,14 @@
 package org.limewire.ui.swing.friends;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -19,6 +23,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -47,7 +52,8 @@ import com.google.inject.Singleton;
  * TODO: Swap labels on network button press?
  */
 @Singleton
-public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener {
+public class LoginPanel extends JPanel
+        implements Displayable, XMPPErrorListener, ActionListener {
 //    @Resource private Icon gmail;
 //    @Resource private Icon facebook;
 
@@ -62,8 +68,10 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
     private JPasswordField passwordField;
     private JCheckBox rememberMeCheckbox;
     private JButton signInButton;
+    private JButton registerButton;
     private JPanel normalTopPanel;
     private JPanel detailsPanel;
+    private Desktop desktop;
     private final XMPPEventHandler xmppEventHandler;
     private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 
@@ -125,8 +133,9 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
 
         rememberMeCheckbox = new JCheckBox(tr("Remember me"));
         signInButton = new JButton(signinAction);
+        registerButton = new JButton(tr("Sign up"));
 
-        setLayout(new MigLayout("gapy 10"));
+        setLayout(new MigLayout());
         normalTopPanel = normalTopPanel();
         detailsPanel = getDetailsPanel();
         add(normalTopPanel, "wrap");
@@ -173,7 +182,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
 
     private JPanel normalTopPanel() {
         JPanel p = new JPanel();
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout());
         p.add(new JLabel(tr("Have a Jabber account?")), "wrap");
         p.add(new JLabel(tr("- Access your friends' libraries")), "wrap");
         p.add(new JLabel(tr("- See what new files they have")), "wrap");
@@ -205,7 +214,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
 
     private JPanel loginErrorPanel(String message) {
         JPanel p = new JPanel();
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout());
         JLabel label = new JLabel(tr("Could not sign you in."));
         //A pretty crimson
         label.setForeground(new Color(112, 13, 37));
@@ -218,7 +227,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
     private void setSignInComponentsEnabled(boolean isEnabled) {
         signInButton.setEnabled(isEnabled);
         signInButton.setText(isEnabled ? SIGNIN_ENABLED_TEXT : SIGNIN_DISABLED_TEXT);
-
+        registerButton.setEnabled(isEnabled);
         userNameField.setEnabled(isEnabled);
         passwordField.setEnabled(isEnabled);
         rememberMeCheckbox.setEnabled(isEnabled);
@@ -231,16 +240,50 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
 
     private JPanel getDetailsPanel() {
         JPanel p = new JPanel();
-        p.setLayout(new MigLayout("gapy 10"));
+        p.setLayout(new MigLayout());
         p.add(new JLabel(tr("Sign in using")), "split");
         p.add(serviceComboBox, "wrap");
         p.add(new JLabel(tr("Username")), "split");
         p.add(userNameField, "wrap");
         p.add(new JLabel(tr("Password")), "split");
         p.add(passwordField, "wrap");
-        p.add(rememberMeCheckbox, "wrap");
-        p.add(signInButton, "wrap");
+        JPanel sign = new JPanel();
+        sign.setLayout(new MigLayout());
+        sign.add(rememberMeCheckbox, "wrap");
+        sign.add(signInButton);
+        p.add(sign, "split");
+        try {
+            desktop = Desktop.getDesktop();
+            if(desktop.isSupported(Desktop.Action.BROWSE)) {
+                JPanel reg = new JPanel();
+                reg.setBorder(new LineBorder(Color.BLACK));
+                reg.setLayout(new MigLayout());
+                reg.add(new JLabel(tr("Don't have an account?")), "wrap");
+                reg.add(registerButton);
+                p.add(reg);
+                registerButton.addActionListener(this);
+            }
+        } catch(UnsupportedOperationException oux) {
+            // No desktop integration, no register button
+        }
         return p;
+    }
+    
+    // ActionListener for registerButton
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String friendlyName = (String)serviceComboBox.getSelectedItem();
+        XMPPConnectionConfiguration config =
+            xmppEventHandler.getConfigByFriendlyName(friendlyName);
+        try {
+            desktop.browse(new URI(config.getRegistrationURL()));
+        } catch(IOException iox) {
+            // Warn the user?
+        } catch(SecurityException sx) {
+            // Warn the user?
+        } catch(URISyntaxException usx) {
+            // Warn the user?
+        }
     }
 
     class SignInAction extends AbstractAction {
@@ -280,7 +323,7 @@ public class LoginPanel extends JPanel implements Displayable, XMPPErrorListener
                             }
                         });
 
-                    } catch (XMPPException e1) {
+                    } catch(XMPPException e1) {
                         LOG.error("Unable to login", e1);
                         loginFailed(e1);
                     }

@@ -93,10 +93,14 @@ public class XMPPServiceTest extends BaseTestCase {
     protected List<Module> getServiceModules() {
         rosterListener = new RosterListenerMock();
         rosterListener2 = new RosterListenerMock();
-        final XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationMock("limebuddy1@gmail.com",
-                "limebuddy123", "talk.google.com", 5222, "gmail.com", "Gmail", rosterListener);
-        final XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationMock("limebuddy2@gmail.com",
-                "limebuddy234", "talk.google.com", 5222, "gmail.com", "Gmail", rosterListener2);
+        final XMPPConnectionConfiguration configuration =
+            new XMPPConnectionConfigurationMock("limebuddy1@gmail.com",
+                    "limebuddy123", "talk.google.com", 5222, "gmail.com",
+                    "Gmail", "http://gmail.com/", rosterListener);
+        final XMPPConnectionConfiguration configuration2 =
+            new XMPPConnectionConfigurationMock("limebuddy2@gmail.com",
+                    "limebuddy234", "talk.google.com", 5222, "gmail.com",
+                    "Gmail", "http://gmail.com/", rosterListener2);
         Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
         fileOfferHandler = new FileOfferHandlerMock();

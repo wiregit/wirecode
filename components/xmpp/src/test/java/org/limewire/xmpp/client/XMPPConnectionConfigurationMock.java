@@ -14,22 +14,25 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     private final int port;
     private final String serviceName;
     private final String friendlyName;
+    private final String registrationURL;
     private final EventListener<RosterEvent> rosterListener;
 
     public XMPPConnectionConfigurationMock(String userName, String pw,
             String host, int port, String serviceName, String friendlyName,
-            EventListener<RosterEvent> rosterListener) {
+            String registrationURL, EventListener<RosterEvent> rosterListener) {
         this.userName = userName;
         this.pw = pw;
         this.host = host;
         this.port = port;
         this.serviceName = serviceName;
         this.friendlyName = friendlyName;
+        this.registrationURL = registrationURL;
         this.rosterListener = rosterListener;
     }
     
     public XMPPConnectionConfigurationMock() {
-        this("foo", "bar", "gmail.com", 5555, "gmail.com", "Gmail", new RosterListenerMock());
+        this("foo", "bar", "gmail.com", 5555, "gmail.com", "Gmail",
+                "http://gmail.com/", new RosterListenerMock());
     }
     
     public boolean isDebugEnabled() {
@@ -70,6 +73,10 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     
     public String getFriendlyName() {
         return friendlyName;
+    }
+    
+    public String getRegistrationURL() {
+        return registrationURL;
     }
 
     public boolean isAutoLogin() {

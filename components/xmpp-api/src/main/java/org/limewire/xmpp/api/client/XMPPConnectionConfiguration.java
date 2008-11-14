@@ -17,6 +17,7 @@ public interface XMPPConnectionConfiguration extends Network {
     public int getPort();
     public String getServiceName();
     public String getFriendlyName();
+    public String getRegistrationURL();
     public boolean isAutoLogin();
     public void setAutoLogin(boolean autoLogin);
     public EventListener<RosterEvent> getRosterListener();

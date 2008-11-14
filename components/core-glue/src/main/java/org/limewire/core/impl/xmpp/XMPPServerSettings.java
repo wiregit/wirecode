@@ -14,29 +14,22 @@ import com.google.inject.Singleton;
 public class XMPPServerSettings extends LimeProps {
     private static final StringSetSetting XMPP_SERVERS =
         FACTORY.createStringSetSetting("XMPP_SERVERS",
-        //"false,false,im.apinc.org,5222,im.apinc.org,APINC;" +
-        //"false,false,jabber.ccc.de,5222,jabber.ccc.de,Chaos Computer Club;" +
-        //"false,false,darkdna.net,5222,darkdna.net,DarkDNA;" +
-        //"false,false,im.flosoft.biz,5222,im.flosoft.biz,Flosoft.biz;" +
-        "false,true,talk.google.com,5222,gmail.com,Gmail;" +
-        //"false,false,jabber.hot-chilli.net,5222,jabber.hot-chilli.net,Hot-Chilli;" +
-        //"false,false,jabber.org,5222,jabber.org,Jabber.org;" +
-        //"false,false,jabber.se,5222,jabber.se,Jabber.se;" +
-        //"false,false,jabberes.org,5222,jabberes.org,JabberES;" +
-        //"false,false,jabbim.com,5222,jabbim.com,Jabbim;" +
-        //"false,false,jabster.pl,5222,jabster.pl,Jabster.pl;" +
-        "false,false,livejournal.com,5222,livejournal.com,LiveJournal;" +
-        //"false,false,macjabber.de,5222,macjabber.de,MacJabber.de;" +
-        //"false,false,programmer-art.org,5222,programmer-art.org,Programmer-Art;" +
+        "false,true,talk.google.com,5222,gmail.com,Gmail,http://mail.google.com/mail/signup;" +
+        "false,false,jabber.hot-chilli.net,5222,jabber.hot-chilli.net,Hot-Chilli,http://jabber.hot-chilli.net/jwchat/;" +
+        "false,false,jabberes.org,5222,jabberes.org,JabberES,http://www.jabberes.org/jrt/;" +
+        "false,false,jabber.fr,5222,jabber.fr,JabberFR,http://im.apinc.org/inscription/?server=jabber.fr;" +
+        "false,false,livejournal.com,5222,livejournal.com,LiveJournal,http://www.livejournal.com/create.bml;" +
+        "false,false,macjabber.de,5222,macjabber.de,MacJabber.de,https://macjabber.de:444/;" +
         "");
     
     private XMPPServerSettings() {}
     
     public static XMPPServerConfiguration add(boolean requiresDomain,
-                                    String host,  Integer port,
-                                    String serviceName, String friendlyName) {
+            String host, Integer port, String serviceName, String friendlyName,
+            String registrationURL) {
         XMPPServerConfiguration newConfig =
-            new XMPPServerConfiguration(requiresDomain, host, port, serviceName, friendlyName);  
+            new XMPPServerConfiguration(requiresDomain, host, port,
+                    serviceName, friendlyName, registrationURL);  
         XMPP_SERVERS.add(newConfig.toString());
         return newConfig;
     }
@@ -62,6 +55,7 @@ public class XMPPServerSettings extends LimeProps {
         private final int port;
         private final String serviceName;
         private final String friendlyName;
+        private final String registrationURL;
         
         public XMPPServerConfiguration(String connectionString) {
             StringTokenizer st = new StringTokenizer(connectionString, ",");
@@ -71,16 +65,18 @@ public class XMPPServerSettings extends LimeProps {
             port = Integer.valueOf(st.nextToken());
             serviceName = st.nextToken();
             friendlyName = st.nextToken();
+            registrationURL = st.nextToken();
         }
 
         public XMPPServerConfiguration(boolean requiresDomain, String host,
-                                        int port, String serviceName,
-                                        String friendlyName) {
+                int port, String serviceName, String friendlyName,
+                String registrationURL) {
             this.requiresDomain = requiresDomain;
             this.host = host;
             this.port = port;
             this.serviceName = serviceName;
             this.friendlyName = friendlyName;
+            this.registrationURL = registrationURL;
             isDebugEnabled = false;
         }
 
@@ -105,6 +101,10 @@ public class XMPPServerSettings extends LimeProps {
         
         public String getFriendlyName() {
             return friendlyName;
+        }
+        
+        public String getRegistrationURL() {
+            return registrationURL;
         }
         
         @Override

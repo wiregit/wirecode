@@ -63,6 +63,10 @@ public class XMPPConfigurationImpl implements XMPPConnectionConfiguration {
     public String getFriendlyName() {
         return serverConfiguration.getFriendlyName();
     }
+    
+    public String getRegistrationURL() {
+        return serverConfiguration.getRegistrationURL();
+    }
 
     public boolean isAutoLogin() {
         return userConfiguration.isAutoLogin();
