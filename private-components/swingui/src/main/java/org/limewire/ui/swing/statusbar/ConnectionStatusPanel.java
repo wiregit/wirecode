@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.statusbar;
 
+import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -9,8 +10,8 @@ import javax.swing.JLabel;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.connection.ConnectionStrength;
+import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -34,16 +35,23 @@ class ConnectionStatusPanel extends JXPanel {
     ConnectionStatusPanel(SharedFileCountPanel countPanel, GnutellaConnectionManager connectionManager) {
         GuiUtils.assignResources(this);
         
+        this.setLayout(new BorderLayout());
+        
         this.sharedFileCountPanel = countPanel;
         
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
+        
         this.sharedFileCountPanel.setVisible(false);        
+        this.sharedFileCountPanel.setFont(this.getFont());
+        this.sharedFileCountPanel.setForeground(this.getForeground());
+        
         this.connectionStrengthPanel = new JLabel();
-        
-        this.add(this.connectionStrengthPanel);
-        this.add(this.sharedFileCountPanel);
-        
+        this.connectionStrengthPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,3));
+                
+        this.add(this.connectionStrengthPanel,BorderLayout.WEST);
+        this.add(this.sharedFileCountPanel, BorderLayout.CENTER);
+                
         connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
