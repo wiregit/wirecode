@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.security.SecureMessage.Status;
 
 /**
- * An abstract base class to verify a {@link Status}. The
+ * An abstract base class to verify a {@link SecureMessage}. The
  * callback, a {@link SecureMessageCallback} receives notification if the 
  * message is verified.
  */
