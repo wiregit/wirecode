@@ -19,7 +19,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XMLStringUtils;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.FileUtils;
 
 /**
@@ -51,10 +51,13 @@ public class Tokenizer {
 	private int MAX_KEYWORD_LENGTH = 8;
 
     private final Provider<IPFilter> ipFilter;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
 	@Inject
-	Tokenizer(Provider<IPFilter> ipFilter) {
+	Tokenizer(Provider<IPFilter> ipFilter,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.ipFilter = ipFilter;
+        this.networkInstanceUtils = networkInstanceUtils;
 	}
     
     void setIPFilter(AddressToken t) {
@@ -112,7 +115,7 @@ public class Tokenizer {
         set.add(new ApproximateSizeToken(desc.getSize()));
         // Ignore private addresses such as 192.168.x.x
         InetAddress address = desc.getInetAddress();
-        if(!NetworkUtils.isPrivateAddress(address))
+        if(!networkInstanceUtils.isPrivateAddress(address))
             set.add(new AddressToken(address.getHostAddress(), ipFilter));
 	}
 

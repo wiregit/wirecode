@@ -303,12 +303,14 @@ public final class NetworkUtils {
      * address is private taking an InetAddress object as argument
      * like the isLocalAddress(InetAddress) method. 
      *
-     * This method is IPv6 compliant
+     * This method is IPv6 compliant.
+     * 
+     * Don't make this method public please.
      *
      * @return <tt>true</tt> if the specified address is private,
      *  otherwise <tt>false</tt>
      */
-    public static boolean isPrivateAddress(InetAddress address) {
+    static boolean isPrivateAddress(InetAddress address) {
         if (address.isAnyLocalAddress() 
                 || address.isLoopbackAddress() 
                 || address.isLinkLocalAddress() 
