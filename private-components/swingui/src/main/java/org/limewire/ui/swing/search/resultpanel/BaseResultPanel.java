@@ -36,7 +36,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -290,24 +289,19 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     public void download(final VisualSearchResult vsr, final int row) {
-        BackgroundExecutorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // TODO: Need to go through some of the rigor that
-                    // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-                    // went through.. checking for conflicts, etc.
-                    DownloadItem di = resultDownloader.addDownload(
-                        search, vsr.getCoreSearchResults());
-                    di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                     
-                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                } catch (SaveLocationException sle) {
-                    //TODO
-                    throw new RuntimeException("FIX ME", sle);
-                }                
-            }
-        });
+        try {
+            // TODO: Need to go through some of the rigor that
+            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
+            // went through.. checking for conflicts, etc.
+            DownloadItem di = resultDownloader.addDownload(
+                search, vsr.getCoreSearchResults());
+            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+             
+            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+        } catch (SaveLocationException sle) {
+            //TODO
+            throw new RuntimeException("FIX ME", sle);
+        }
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {

@@ -42,7 +42,7 @@ public class DownloadableTransferHandler extends TransferHandler{
                 return false;
             }
         
-        BackgroundExecutorService.schedule(new Runnable() {
+        BackgroundExecutorService.execute(new Runnable() {
             public void run() {
                 for (RemoteFileItem file : remoteFileList) {
                     try {

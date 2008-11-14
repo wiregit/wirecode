@@ -52,7 +52,7 @@ public class AddNewVideoAction implements ActionListener {
         final FileList<LocalFileItem> libraryList = libraryManager.getLibraryManagedList();
         if(checkBox.isSelected()) {
             fileList.setAddNewVideoAlways(true);
-            BackgroundExecutorService.schedule(new Runnable(){
+            BackgroundExecutorService.execute(new Runnable(){
                 public void run() {
                     FilterList<LocalFileItem> filter = GlazedListsFactory.filterList(libraryList.getModel(), new CategoryFilter(Category.VIDEO));
                         try {

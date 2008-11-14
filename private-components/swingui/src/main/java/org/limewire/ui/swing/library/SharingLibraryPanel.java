@@ -5,13 +5,10 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -46,8 +43,6 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.assistedinject.Assisted;
@@ -59,8 +54,6 @@ public class SharingLibraryPanel extends LibraryPanel {
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final BaseLibraryMediator basePanel;
-    
-    private List<Disposable> buttonFilterList = new ArrayList<Disposable>();
     
     private LibrarySharePanel shareAllPanel = null;
     
@@ -113,18 +106,15 @@ public class SharingLibraryPanel extends LibraryPanel {
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList, Friend friend, LocalFileList friendFileList) {
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
         for(Category category : Category.getCategoriesInOrder()) {
-            JButton button = createButton(categoryIconManager.getIcon(category), category,
-                        createMyCategoryAction(category, eventList, friend, friendFileList));
-            
-            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(friendFileList.getSwingModel(), new CategoryFilter(category));
-            buttonFilterList.add(new ButtonSizeListener(category.toString(), button.getAction(), filtered));
+            FilterList<LocalFileItem> filteredAll = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+            FilterList<LocalFileItem> filteredShared = GlazedListsFactory.filterList(friendFileList.getSwingModel(), new CategoryFilter(category));
+            createButton(categoryIconManager.getIcon(category), category,
+                        createMyCategoryAction(category, filteredAll, friend, friendFileList), filteredShared);
         }
         return categories;
     }
     
-    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> eventList, Friend friend, final LocalFileList friendFileList) {
-        FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
-
+    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered, Friend friend, final LocalFileList friendFileList) {
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
 
@@ -159,7 +149,7 @@ public class SharingLibraryPanel extends LibraryPanel {
                 scrollPane.setCorner(JScrollPane.UPPER_TRAILING_CORNER, table.getColumnControl());
                 scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
-            TableColors tableColors = new TableColors();
+			TableColors tableColors = new TableColors();
             table.addHighlighter(new ColorHighlighter(new UnsharedHighlightPredicate(getTableModel(table), friendFileList), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
         } else {//Category.IMAGE
             scrollPane = new JScrollPane();
@@ -183,8 +173,6 @@ public class SharingLibraryPanel extends LibraryPanel {
         super.dispose();
         
         shareAllPanel.dispose();
-        for(Disposable disposable : buttonFilterList)
-            disposable.dispose();
     }
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
@@ -218,37 +206,6 @@ public class SharingLibraryPanel extends LibraryPanel {
         }
     }
     
-    private class ButtonSizeListener implements Disposable, ListEventListener<LocalFileItem> {
-        private final String text;
-        private final Action action;
-        private final FilterList<LocalFileItem> list;
-        
-        public ButtonSizeListener(String text, Action action, FilterList<LocalFileItem> list) {
-            this.text = text;
-            this.action = action;
-            this.list = list;
-            
-            setText();
-                        
-            list.addListEventListener(this);
-        }
-
-        private void setText() {
-            action.putValue(Action.NAME, text + " (" + list.size() + ")");
-        }
-        
-        @Override
-        public void dispose() {
-            list.removeListEventListener(this);
-            list.dispose();
-        }
-
-        @Override
-        public void listChanged(ListEvent<LocalFileItem> listChanges) {
-            setText();
-        }
-    }
-    
     private static class UnsharedHighlightPredicate implements HighlightPredicate {
         LibraryTableModel<LocalFileItem> libraryTableModel;
         private LocalFileList friendFileList;
@@ -262,5 +219,5 @@ public class SharingLibraryPanel extends LibraryPanel {
             //TODO cache values?
             return !(friendFileList.contains(fileItem.getUrn()));
         }       
-    }
+    }    
 }

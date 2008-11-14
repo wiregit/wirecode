@@ -114,7 +114,7 @@ public class SharingTransferHandler extends TransferHandler {
         // TODO: give feedback for failed adds.\
         // TODO this code is duplicated from ShareDropTarget -- need to refactor
         // both classes
-        BackgroundExecutorService.schedule(new Runnable() {
+        BackgroundExecutorService.execute(new Runnable() {
             public void run() {
                 for (File file : acceptedFiles) {
                     currentModel.addFile(file);

@@ -17,7 +17,7 @@ public class SharingActionHandler {
     
     public void performAction(final String actionCommand, final LocalFileList fileList, final LocalFileItem item, 
             final PropertiesFactory<LocalFileItem> localFileItemPropsFactory) {
-        BackgroundExecutorService.schedule(new Runnable(){
+        BackgroundExecutorService.execute(new Runnable(){
             public void run() {
                 if(actionCommand == UNSHARE) {
                     fileList.removeFile(item.getFile());

@@ -114,7 +114,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
 
-            BackgroundExecutorService.schedule(new Runnable() {                
+            BackgroundExecutorService.execute(new Runnable() {                
                 @Override
                 public void run() {
                     for (LocalFileItem fileItem : fileItemArray) {

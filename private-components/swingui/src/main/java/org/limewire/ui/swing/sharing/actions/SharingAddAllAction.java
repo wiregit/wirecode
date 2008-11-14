@@ -65,7 +65,7 @@ public class SharingAddAllAction extends AbstractAction {
     }
     
     private void loadFiles(final FriendFileList currentUserList, final List<Category> categories) {
-        BackgroundExecutorService.schedule(new Runnable(){
+        BackgroundExecutorService.execute(new Runnable(){
             public void run() {
                 for(Category category : categories) {
                     loadFilteredList(category, currentUserList);

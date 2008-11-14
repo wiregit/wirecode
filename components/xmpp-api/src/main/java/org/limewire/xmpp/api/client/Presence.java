@@ -8,7 +8,16 @@ import org.limewire.i18n.I18nMarker;
  */
 public interface Presence extends FriendPresence {
 
-    enum EventType {PRESENCE_NEW, PRESENCE_UPDATE}
+    enum EventType {
+        /** Indicates that this is the first time we're seeing this presence. */
+        PRESENCE_NEW,
+
+        /**
+         * Indicates that this is an update to the presence. For the exact kind
+         * of update, see the {@link Type}.
+         */
+        PRESENCE_UPDATE
+    }
 
     enum Type {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error

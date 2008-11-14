@@ -97,14 +97,14 @@ class MyLibraryPanel extends LibraryPanel {
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
         for(Category category : Category.getCategoriesInOrder()) {
-            createButton(categoryIconManager.getIcon(category), 
-                    category, createMyCategoryAction(category, eventList));
+            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+            createButton(categoryIconManager.getIcon(category), category, 
+                    createMyCategoryAction(category, filtered), filtered);
         }
         return categories;
     }
 
-    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> eventList) {
-        FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {
         
         //TODO: can this be a singleton??? 
         final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriendsList.getAllFriends());

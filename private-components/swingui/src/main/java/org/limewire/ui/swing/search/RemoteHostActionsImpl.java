@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import javax.swing.SwingUtilities;
+
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
@@ -68,7 +70,13 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(final RemoteHost person) {
         LOG.debugf("viewLibraryOf: {0}", person.getRenderName());
         remoteLibraryManager.addPresenceLibrary(person.getFriendPresence());
-        libraryNavigator.selectFriendLibrary(person.getFriendPresence().getFriend());
+        // Run this later, to allow the library a bit of time to render the friend.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+				libraryNavigator.selectFriendLibrary(person.getFriendPresence().getFriend());
+            }
+        });
     }
 
     @Override

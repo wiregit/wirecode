@@ -19,7 +19,7 @@ public class BackgroundExecutorService {
     /**
      * Runs the specified runnable in a different thread when it can.
      */
-    public static void schedule(Runnable r) {
+    public static void execute(Runnable r) {
         QUEUE.execute(r);
     }
     

@@ -78,22 +78,16 @@ public class FriendLibraryPanel extends LibraryPanel {
     private Map<Category, JComponent> createMyCategories(EventList<RemoteFileItem> eventList, Friend friend) {       
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
         for(Category category : Category.getCategoriesInOrder()) {
+            FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             JComponent component = createMyCategoryAction(category, eventList, friend);
             if(component != null) {
-                createButton(categoryIconManager.getIcon(category), category, component);                
+                createButton(categoryIconManager.getIcon(category), category, component, filtered);                
             }
         }
         return categories;
     }
     
-    private JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> eventList, Friend friend) {
-        FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
-        
-        //don't bother creating anything if there's nothing to display
-        if(filtered.size() == 0) {
-            filtered.dispose();
-            return null;
-        }
+    private JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered, Friend friend) {
         EventList<RemoteFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
 

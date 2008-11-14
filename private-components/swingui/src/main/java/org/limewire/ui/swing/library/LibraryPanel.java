@@ -28,8 +28,14 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
+
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * This is the framework for a Library Panel. It contains a Header
@@ -40,21 +46,21 @@ import org.limewire.ui.swing.util.GuiUtils;
  */
 public abstract class LibraryPanel extends JPanel implements Disposable {
     
-    private Map<String, ButtonItem> categoryTables = new HashMap<String, ButtonItem>();
-    private List<String> categoryOrder = new ArrayList<String>();
-    private List<Disposable> disposableList = new ArrayList<Disposable>();
+    private final Map<Category, ButtonItem> categoryTables = new HashMap<Category, ButtonItem>();
+    private final List<Category> categoryOrder = new ArrayList<Category>();
+    private final List<Disposable> disposableList = new ArrayList<Disposable>();
     
-    protected LibraryHeaderPanel headerPanel;
-    protected JPanel cardPanel = new JPanel();
-    private CardLayout cardLayout = new CardLayout();
-    protected JPanel selectionPanel = new JPanel();
-    
-    protected Friend friend;
+    private final JPanel cardPanel = new JPanel();
+    private final CardLayout cardLayout = new CardLayout();
     
     private ButtonItem currentItem = null;
+
+    protected final JPanel selectionPanel = new JPanel();
+    protected final Friend friend;
+    protected LibraryHeaderPanel headerPanel;    
     
-    private Next next = new Next();
-    private Prev prev = new Prev();
+    private final Next next = new Next();
+    private final Prev prev = new Prev();
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel) {        
         setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[120!][]", "[][]"));
@@ -85,21 +91,19 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     
     public abstract void loadSelectionPanel();
     
-    public void select(String id) {
-        
+    public void select(Category id) {        
         if(currentItem != null)
             currentItem.fireSelected(false);
         
         currentItem = categoryTables.get(id);
         currentItem.fireSelected(true);
         
-        cardLayout.show(cardPanel, id);
+        cardLayout.show(cardPanel, id.name());
         headerPanel.setCategory(currentItem.getCategory());
     }
     
     public void selectFirst() {
-        if(categoryOrder.size() > 0)
-            select(categoryOrder.get(0));
+        select(categoryOrder.get(0));
     }
     
     public JTextComponent getFilterTextField() {
@@ -110,14 +114,19 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         disposableList.add(disposable);
     }
     
-    protected JButton createButton(Icon icon, Category category, JComponent component) {
-        cardPanel.add(component, category.toString());
+    protected <T extends FileItem> JButton createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredList) {
+        cardPanel.add(component, category.name());
         
         ButtonItem item = new ButtonItemImpl(category);
-        categoryTables.put(category.toString(), item);
-        categoryOrder.add(category.toString());
+        categoryTables.put(category, item);
+        categoryOrder.add(category);
         
-        SelectionButton button = new SelectionButton(new SelectionAction(icon, category, item));
+        Action action = new SelectionAction(icon, category, item);
+        SelectionButton button = new SelectionButton(action);
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredList);
+        filteredList.addListEventListener(listener);
+        addDisposable(listener);
+
         
         button.getActionMap().put(Next.KEY, next);
         button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), Next.KEY);
@@ -141,7 +150,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     
     private void selectNext() {
         for(int i = 0; i < categoryOrder.size(); i++) {
-            if(categoryOrder.get(i).equals(currentItem.getId())) {
+            if(categoryOrder.get(i).equals(currentItem.getCategory())) {
                 if(i == categoryOrder.size() -1) {
                     select(categoryOrder.get(0));
                 } else
@@ -153,7 +162,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     
     private void selectPrev() {
         for(int i = 0; i < categoryOrder.size(); i++) {
-            if(categoryOrder.get(i).equals(currentItem.getId())) {
+            if(categoryOrder.get(i).equals(currentItem.getCategory())) {
                 if(i == 0) {
                     select(categoryOrder.get(categoryOrder.size()-1));
                 } else
@@ -181,12 +190,12 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         }
     }
     
-    protected class SelectionAction extends AbstractAction {
+    private class SelectionAction extends AbstractAction {
         
         public SelectionAction(Icon icon, Category category, ButtonItem buttonItem) {
-            super(category.toString(), icon);
+            super(I18n.tr(category.toString()), icon);
             
-            putValue(Action.ACTION_COMMAND_KEY, category.toString());
+            putValue("limewire.category", category);
             
             buttonItem.addButtonItemListener(new ButtonItemListener(){
                 @Override
@@ -198,7 +207,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            select( (String) getValue(Action.ACTION_COMMAND_KEY));
+            select((Category)getValue("limewire.category"));
         }
     }
     
@@ -211,15 +220,13 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         public void select();
         
         public Category getCategory();
-        
-        public String getId();
     }
     
     private interface ButtonItemListener {
         public void itemSelect(boolean selected);
     }
     
-    protected class ButtonItemImpl implements ButtonItem {
+    private class ButtonItemImpl implements ButtonItem {
         
         private final List<ButtonItemListener> listeners = new CopyOnWriteArrayList<ButtonItemListener>();
         
@@ -231,12 +238,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
 
         @Override
         public void select() {
-            LibraryPanel.this.select(getId());
-        }
-
-        @Override
-        public String getId() {
-            return category.toString();
+            LibraryPanel.this.select(getCategory());
         }
 
         @Override
@@ -256,7 +258,35 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         }
     }
     
-    class SelectionButton extends JButton {
+    private class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
+        private final String text;
+        private final Action action;
+        private final FilterList<T> list;
+        
+        private ButtonSizeListener(String text, Action action, FilterList<T> list) {
+            this.text = text;
+            this.action = action;
+            this.list = list;            
+            setText();
+        }
+
+        private void setText() {
+            action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + ")");
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            list.dispose();
+        }
+
+        @Override
+        public void listChanged(ListEvent<T> listChanges) {
+            setText();
+        }
+    }
+    
+    private class SelectionButton extends JButton {
         @Resource Color selectedBackground;
         @Resource Font selectedTextFont;
         @Resource Color selectedTextColor;

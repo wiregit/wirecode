@@ -52,7 +52,7 @@ public class AddNewAudioAction implements ActionListener {
         final FileList<LocalFileItem> libraryList = libraryManager.getLibraryManagedList();
         if(checkBox.isSelected()) {
             fileList.setAddNewAudioAlways(true);
-            BackgroundExecutorService.schedule(new Runnable(){
+            BackgroundExecutorService.execute(new Runnable(){
                 public void run() {
                     FilterList<LocalFileItem> filter = GlazedListsFactory.filterList(libraryList.getModel(), new CategoryFilter(Category.AUDIO));
                         try {

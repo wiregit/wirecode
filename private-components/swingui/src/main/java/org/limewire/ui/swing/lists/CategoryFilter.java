@@ -18,9 +18,14 @@ public class CategoryFilter implements Matcher<FileItem>{
 
     @Override
     public boolean matches(FileItem item) {
-        if(item == null) return false;
-        if(category == null) return true;
+        if (item == null) {
+            return false;
+        }
         
+        if (category == null) {
+            return true;
+        }
+
         return item.getCategory().equals(category);
     }
 }

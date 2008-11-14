@@ -33,6 +33,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
     public void setAuxCard(JComponent panel) {
         if(auxComponent != null) {
             ((Disposable)auxComponent).dispose();
+            remove(auxComponent);
             auxComponent = null;
         }
         auxComponent = panel;
@@ -43,6 +44,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
     public void showMainCard() {
         if(auxComponent != null) {
             ((Disposable)auxComponent).dispose();
+            remove(auxComponent);
             auxComponent = null;
         }
         cardLayout.show(this, mainCard);
@@ -54,6 +56,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
 
     @Override
     public void dispose() {
+        removeAll();
         for(Component component : getComponents()) {
             ((Disposable)component).dispose();
         }

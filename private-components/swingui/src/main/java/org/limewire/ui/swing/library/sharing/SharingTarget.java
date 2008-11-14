@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.library.sharing;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
@@ -83,7 +83,7 @@ public class SharingTarget {
         }
 
         public Map<String, Presence> getPresences() {
-            return new HashMap<String, Presence>();
+            return Collections.emptyMap();
         }
     }
 

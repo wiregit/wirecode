@@ -65,7 +65,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
         public void actionPerformed(ActionEvent e) {
             final RemoteFileItem[] fileItemArray = createFileItemArray();
             
-            BackgroundExecutorService.schedule(new Runnable() {
+            BackgroundExecutorService.execute(new Runnable() {
                 @Override
                 public void run() {
                     for (RemoteFileItem fileItem : fileItemArray) {

@@ -36,7 +36,7 @@ public class SharingRemoveAllAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final LocalFileItem[] items = eventList.toArray(new LocalFileItem[eventList.size()]);
-        BackgroundExecutorService.schedule(new Runnable(){
+        BackgroundExecutorService.execute(new Runnable(){
             public void run() {
                 for(LocalFileItem item : items) {
                     fileList.removeFile(item.getFile());
