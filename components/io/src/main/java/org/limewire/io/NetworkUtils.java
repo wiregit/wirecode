@@ -308,7 +308,7 @@ public final class NetworkUtils {
      * @return <tt>true</tt> if the specified address is private,
      *  otherwise <tt>false</tt>
      */
-    static boolean isPrivateAddress(InetAddress address) {
+    public static boolean isPrivateAddress(InetAddress address) {
         if (address.isAnyLocalAddress() 
                 || address.isLoopbackAddress() 
                 || address.isLinkLocalAddress() 

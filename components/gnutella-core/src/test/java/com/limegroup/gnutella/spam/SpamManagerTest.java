@@ -333,6 +333,25 @@ public class SpamManagerTest extends LimeTestCase {
         assertFalse(unrelated.isSpam());
         assertEquals(0f, unrelated.getSpamRating());
     }
+    
+    /**
+     * Tests that private (LAN) addresses are ignored
+     */
+    public void testPrivateAddressIgnored() throws Exception {
+        String privateAddress = "192.168.0.1";
+        
+        // A result arrives and the user marks it as spam
+        RemoteFileDesc marked = createRFD(privateAddress, port1, badger, null, urn1, size1);
+        manager.handleUserMarkedSpam(new RemoteFileDesc[]{marked});
+        assertTrue(marked.isSpam());
+        assertGreaterThan(0f, marked.getSpamRating());
+        
+        // A result with nothing in common but the private address should
+        // receive a zero rating
+        RemoteFileDesc unrelated = createRFD(privateAddress, port2, mushroom, null, urn2, size2);
+        assertFalse(unrelated.isSpam());
+        assertEquals(0f, unrelated.getSpamRating());
+    }
 
     private RemoteFileDesc createRFD(String addr, int port,
             String name, LimeXMLDocument doc, URN urn, int size) {
@@ -345,6 +364,5 @@ public class SpamManagerTest extends LimeTestCase {
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);
         return rfd;
-    }
-    
+    }    
 }

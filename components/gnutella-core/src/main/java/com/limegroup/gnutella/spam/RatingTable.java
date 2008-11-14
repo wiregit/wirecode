@@ -10,9 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-// import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -62,7 +60,6 @@ public class RatingTable implements Service {
      * The size of the map is limited. Entries are discarded in
      * least-recently-used order when the map is full, on the assumption that
      * the least-recently-used token is the least important to keep.
-     * TODO: check that the order is preserved during serialization.
 	 */
 	private final Map<Token, Token> tokenMap
         = new LinkedHashMap<Token, Token>(INITIAL_SIZE, 0.75f, true) {
@@ -227,6 +224,7 @@ public class RatingTable implements Service {
 	 * Loads ratings from disk
 	 */
 	private void load() {
+        tokenMap.clear();
 		ObjectInputStream is = null;
 		try {
 			is = new ObjectInputStream(
@@ -235,9 +233,6 @@ public class RatingTable implements Service {
             List<Token> list
                 = GenericsUtils.scanForList(is.readObject(),
                     Token.class, GenericsUtils.ScanMode.REMOVE);
-            // Most-recently-used token will be at the head, but we want to
-            // add it to the map last so it's still most-recently-used
-            Collections.reverse(list);
             for(Token t : list) {
                 if(t instanceof AddressToken)
                     tokenizer.setIPFilter((AddressToken) t);
@@ -255,44 +250,49 @@ public class RatingTable implements Service {
     /**
      * Saves ratings to disk (called whenever the user marks a search result)
      */
-    public void save() {
-        ArrayList<Token> list;
-        synchronized(this) {
-            // Don't save ratings that have default scores
-            list = new ArrayList<Token>(tokenMap.size());
-            for(Token t : tokenMap.keySet())
-                if(t.getRating() > 0f)
-                    list.add(t);
-        }
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(
-                    new BufferedOutputStream(
-                            new FileOutputStream(getSpamDat())));
-            oos.writeObject(list);
-            oos.flush();
-            if(LOG.isDebugEnabled())
-                LOG.debug("Saved " + list.size() + " entries");
-        } catch (IOException iox) {
-            LOG.debug("Error saving spam ratings: ", iox);
-        } finally {
-            IOUtils.close(oos);
-        }
-        /*
-        // DEBUG: dump the ratings to a human-readable file
-        PrintWriter dump = null;
-        try {
-            dump = new PrintWriter(
-                    new File(CommonUtils.getUserSettingsDir(), "spam.dump"));
-            for(Token t : list) dump.println(t + " " + t.getRating());
-        } catch (Exception x) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Error dumping spam ratings: ", x);
-        } finally {
-            IOUtils.close(dump);
-        }
-        */
+	public void save() {
+	    ArrayList<Token> list;
+	    synchronized(this) {
+	        list = new ArrayList<Token>(tokenMap.size());
+	        // The iterator returns the least-recently-used entry first
+	        for(Map.Entry<Token,Token> e : tokenMap.entrySet()) {
+	            Token t = e.getKey();
+	            // Don't save ratings that have default scores
+	            if(t.getRating() > 0f)
+	                list.add(t);
+	        }
+	    }
+	    ObjectOutputStream oos = null;
+	    try {
+	        oos = new ObjectOutputStream(
+	                new BufferedOutputStream(
+	                        new FileOutputStream(getSpamDat())));
+	        oos.writeObject(list);
+	        oos.flush();
+	        if(LOG.isDebugEnabled())
+	            LOG.debug("Saved " + list.size() + " entries");
+	    } catch (IOException iox) {
+	        LOG.debug("Error saving spam ratings: ", iox);
+	    } finally {
+	        IOUtils.close(oos);
+	    }
 	}
+    
+    /**
+     * @return the number of tokens in the rating table (for testing)
+     */
+    protected int size() {
+        return tokenMap.size();
+    }
+    
+    /**
+     * @return the least-recently-used token in the table (for testing)
+     */
+    protected Token getLeastRecentlyUsed() {
+        for(Map.Entry<Token,Token> e : tokenMap.entrySet())
+            return e.getKey();
+        return null; // Empty
+    }
     
 	private static File getSpamDat() {
 	    return new File(CommonUtils.getUserSettingsDir(), "spam.dat");

@@ -17,13 +17,21 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 import org.limewire.core.settings.FilterSettings;
 
+/**
+ * A filter that blocks queries and query responses with URNs that match
+ * either of two blacklists, one local and one remote (SIMPP). This is
+ * designed for filtering out spam and malware.
+ */
 @Singleton
 public class URNFilter implements SpamFilter {
     
     private static final Log LOG = LogFactory.getLog(URNFilter.class);
     private final HashSet<URN> blacklist = new HashSet<URN>();
 
-    // Called when the spam service starts and on SIMPP updates
+    /**
+     * Reloads the local and remote blacklists. Called when the spam service
+     * starts and on SIMPP updates.
+     */ 
     public void refreshURNs() {
         blacklist.clear();
         if(!FilterSettings.USE_NETWORK_FILTER.getValue())
@@ -34,11 +42,14 @@ public class URNFilter implements SpamFilter {
             for(String s : FilterSettings.FILTERED_URNS_REMOTE.getValue())
                 blacklist.add(URN.createSHA1Urn("urn:sha1:" + s));
         } catch (IOException iox) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Error creating URN blacklist: " + iox);
+            LOG.debug("Error creating URN blacklist: ", iox);
         }
     }
     
+    /**
+     * Returns false if the message is a query request or query response with
+     * a URN matching either of the blacklists; otherwise returns true.
+     */
     @Override
     public boolean allow(Message m) {
         if(m instanceof QueryReply) {

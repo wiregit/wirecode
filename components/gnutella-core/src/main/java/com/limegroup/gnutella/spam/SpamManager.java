@@ -28,6 +28,11 @@ public class SpamManager {
 	SpamManager(RatingTable ratingTable) {
 	    this.ratingTable = ratingTable;
 	}
+    
+    // For testing
+    protected RatingTable getRatingTable() {
+        return ratingTable;
+    }
 	
 	/**
 	 * Clears bad ratings for the keywords in a query started by the user

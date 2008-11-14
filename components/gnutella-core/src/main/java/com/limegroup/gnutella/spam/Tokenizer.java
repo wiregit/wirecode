@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.spam;
 
+import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XMLStringUtils;
+import org.limewire.io.NetworkUtils;
 import org.limewire.util.FileUtils;
 
 /**
@@ -108,7 +110,10 @@ public class Tokenizer {
 			set.add(new UrnToken(urn.toString()));
 		set.add(new SizeToken(desc.getSize()));
         set.add(new ApproximateSizeToken(desc.getSize()));
-		set.add(new AddressToken(desc.getAddress(), ipFilter));
+        // Ignore private addresses such as 192.168.x.x
+        InetAddress address = desc.getInetAddress();
+        if(!NetworkUtils.isPrivateAddress(address))
+            set.add(new AddressToken(address.getHostAddress(), ipFilter));
 	}
 
 	/**
