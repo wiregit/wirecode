@@ -49,17 +49,21 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private CardLayout cardLayout = new CardLayout();
     protected JPanel selectionPanel = new JPanel();
     
+    protected Friend friend;
+    
     private ButtonItem currentItem = null;
     
     private Next next = new Next();
     private Prev prev = new Prev();
     
-    public LibraryPanel(Friend friend) {        
+    public LibraryPanel(Friend friend, boolean isLibraryPanel) {        
         setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[120!][]", "[][]"));
         
         cardPanel.setLayout(cardLayout);
         
-        createHeader(friend);
+        this.friend = friend;
+        
+        createHeader(friend, isLibraryPanel);
         createSelectionPanel();
         
         add(headerPanel, "span, growx, wrap");
@@ -67,10 +71,10 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    public void createHeader(Friend friend) {
+    public void createHeader(Friend friend, boolean isLibraryPanel) {
         Category category = Category.AUDIO;
 
-        headerPanel = new LibraryHeaderPanel(category, friend);
+        headerPanel = new LibraryHeaderPanel(category, friend, isLibraryPanel);
     }
     
     public abstract void loadHeader();

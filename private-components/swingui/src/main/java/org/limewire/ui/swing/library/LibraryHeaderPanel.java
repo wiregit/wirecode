@@ -51,22 +51,25 @@ public class LibraryHeaderPanel extends JXPanel {
 
     private Friend friend;
     
+    private boolean isLibraryHeader;
+    
 
     /**
      * 
      * @param category
      * @param friend the friend whose library is being viewed.  Null for MyLibrary.
      */
-    public LibraryHeaderPanel(Category category, Friend friend) {
+    public LibraryHeaderPanel(Category category, Friend friend, boolean isLibraryHeader) {
         super(new MigLayout("insets 0, gap 0, aligny 50%", "[][]push[]", ""));
         
         GuiUtils.assignResources(this);
         
         this.category = category;
         this.friend = friend;
+        this.isLibraryHeader = isLibraryHeader;
          
         String title;
-        if(friend == null) 
+        if(isLibraryHeader) 
             title = getTitle();
         else
             title = getSharingTitle();
@@ -92,7 +95,7 @@ public class LibraryHeaderPanel extends JXPanel {
     }
     
     public void enableShareAll(final LibrarySharePanel sharePanel){        
-        shareAllButton = new JXButton(I18n.tr("Share All"), shareIcon);
+        shareAllButton = new JXButton(I18n.tr("Share Collection"), shareIcon);
 
         shareAllButton.setForeground(fontColor);
         shareAllButton.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -176,7 +179,7 @@ public class LibraryHeaderPanel extends JXPanel {
 
     public void setCategory(Category category) {
         this.category = category;
-        if(friend == null)
+        if(isLibraryHeader)
             titleLabel.setText(getTitle());
         else
             titleLabel.setText(getSharingTitle());

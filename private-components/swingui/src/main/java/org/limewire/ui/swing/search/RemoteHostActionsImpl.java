@@ -68,7 +68,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void viewLibraryOf(final RemoteHost person) {
         LOG.debugf("viewLibraryOf: {0}", person.getRenderName());
         remoteLibraryManager.addPresenceLibrary(person.getFriendPresence());
-        libraryNavigator.collapseOthersAndExpandThis(person.getFriendPresence().getFriend());
+        libraryNavigator.selectFriendLibrary(person.getFriendPresence().getFriend());
     }
 
     @Override

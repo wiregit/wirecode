@@ -59,7 +59,7 @@ class MyLibraryPanel extends LibraryPanel {
                           ShareListManager shareListManager,
                           AllFriendsList allFriendsList,
                           final FriendComboBox comboBox){
-        super(null);
+        super(null, true);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;

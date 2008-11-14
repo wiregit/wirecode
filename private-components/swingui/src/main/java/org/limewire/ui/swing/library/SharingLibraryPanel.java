@@ -69,7 +69,7 @@ public class SharingLibraryPanel extends LibraryPanel {
                                 LibraryTableFactory tableFactory,
                                 AllFriendsList allFriendsList,
                                 ShareListManager shareListManager) {
-        super(friend);
+        super(friend, false);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;

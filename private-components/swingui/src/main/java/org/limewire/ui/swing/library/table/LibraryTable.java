@@ -158,6 +158,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         private DownloadListManager downloadListManager;
         private LibraryTable table;
         private ArrayList<RemoteFileItem> downloadingList;
+        
         public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table, ArrayList<RemoteFileItem> downloadingList){
             super(text);
             this.downloadingList = downloadingList;

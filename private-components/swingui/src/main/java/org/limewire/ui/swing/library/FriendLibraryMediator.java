@@ -16,11 +16,11 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
     private Friend friend;
     
     @AssistedInject
-    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory) {
+    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, LibraryNavigator libraryNavigator) {
         this.factory = factory;
         this.friend = friend;
         
-        setMainCard(new FriendEmptyLibrary(friend));
+        setMainCard(new FriendEmptyLibrary(friend, libraryNavigator));
     }
     
     public void createLibraryPanel(EventList<RemoteFileItem> eventList) {

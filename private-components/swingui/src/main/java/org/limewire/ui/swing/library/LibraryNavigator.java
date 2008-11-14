@@ -104,6 +104,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
     private final FriendLibraryMediatorFactory friendLibraryBaseFactory;
 //    private final FriendLibraryFactory friendLibraryFactory;
     private final MyLibraryMediator myLibraryBasePanel;
+    private final SharingLibraryFactory sharingFactory;
     
     private final Navigator navigator;
 
@@ -114,7 +115,8 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
             FriendLibraryMediatorFactory friendFactory,
             DownloadListManager downloadListManager,
             ShareListManager shareListManager,
-            MyLibraryMediator myLibraryBasePanel) {
+            MyLibraryMediator myLibraryBasePanel,
+            SharingLibraryFactory sharingFactory) {
         
         GuiUtils.assignResources(this);
         EventAnnotationProcessor.subscribe(this);
@@ -127,6 +129,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
 //        this.friendLibraryFactory = friendLibraryFactory;
         this.friendLibraryBaseFactory = friendFactory;
         this.myLibraryBasePanel = myLibraryBasePanel;
+        this.sharingFactory = sharingFactory;
         
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
@@ -330,15 +333,31 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         repaint(); // Must forcibly paint, otherwise might not redraw w/o panel.
     }
     
-    public void collapseOthersAndExpandThis(Friend friend) {
+    public void selectFriendLibrary(Friend friend) {
         for(NavPanel panel : navPanels) {
-            panel.select();
+            if(friend.getId().equals(panel.getFriend().getId()))
+                panel.select();
 //            if(friend == null || !panel.getFriend().getId().equals(friend.getId())) {
 //                panel.collapse();
 //            } else {
 //                panel.expand();
 //            }
         }
+    }
+    
+    public void selectMyLibrary() {
+        selectFriendLibrary(Me.ME);
+    }
+    
+    public void selectFriendShareList(Friend friend) {
+        JComponent component = sharingFactory.createSharingLibrary(myLibraryBasePanel, friend, 
+            libraryManager.getLibraryManagedList().getSwingModel(),
+            shareListManager.getFriendShareList(friend));
+
+        myLibraryBasePanel.setAuxCard(component);
+        myLibraryBasePanel.showAuxCard();
+
+        selectMyLibrary();
     }
     
     private Action createLibraryAction(Navigator navigator, EventList<LocalFileItem> eventList) {
@@ -613,7 +632,7 @@ public class LibraryNavigator extends JXPanel implements RegisteringEventListene
         }
     }
     
-    private static class Me implements Friend {
+    public static class Me implements Friend {
         private static final Me ME = new Me();
         
         @Override
