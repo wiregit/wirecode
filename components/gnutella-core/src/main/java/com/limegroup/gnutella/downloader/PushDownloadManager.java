@@ -534,6 +534,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
         //TODO: send push msg directly to a proxy if you're connected to it.
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("using guid: " + new GUID(data.getFile().getClientGUID()));
+        }
         // set up the request string --
         // if a fw-fw transfer is required, add the extra "file" parameter.
         final String request = "/gnutella/push-proxy?ServerID=" + 
