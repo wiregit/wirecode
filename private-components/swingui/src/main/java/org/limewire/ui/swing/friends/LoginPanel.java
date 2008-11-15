@@ -138,8 +138,7 @@ public class LoginPanel extends JPanel
         add(normalTopPanel, "wrap");
         add(detailsPanel);
         
-        setSignInComponentsEnabled(true);
-        populateInputs();
+        setSignInComponentsEnabled(!populateInputs());
     }
 
     @Override
@@ -152,29 +151,37 @@ public class LoginPanel extends JPanel
         xmppService.setXmppErrorListener(this);
     }
 
-    private void populateInputs() {
+    /**
+     * @return true if the selected configuration is set to auto-login
+     */
+    private boolean populateInputs() {
         String friendlyName = (String)serviceComboBox.getSelectedItem();
         XMPPConnectionConfiguration config =
             xmppEventHandler.getConfigByFriendlyName(friendlyName);
-        if ((config != null) && config.isAutoLogin()) {
-            userNameField.setText(config.getUsername());
-            passwordField.setText(config.getPassword());
-            rememberMeCheckbox.setSelected(true);
-            setSignInComponentsEnabled(false);
-        }
+        userNameField.setText(config.getUsername());
+        passwordField.setText(config.getPassword());
+        rememberMeCheckbox.setSelected(config.isAutoLogin());
+        return config.isAutoLogin();
     }
 
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        if (!rememberMeCheckbox.isSelected()) {
+        String friendlyName = (String)serviceComboBox.getSelectedItem();
+        XMPPConnectionConfiguration config =
+            xmppEventHandler.getConfigByFriendlyName(friendlyName);
+        if(!config.isAutoLogin()) {
+            config.setUsername("");
+            config.setPassword("");
             userNameField.setText("");
             passwordField.setText("");
+            rememberMeCheckbox.setSelected(false);
         }
     }
 
     @Override
     public void handleDisplay() {
         userNameField.requestFocusInWindow();
+        populateInputs(); // Config may have been changed in options dialog
     }
 
     private JPanel normalTopPanel() {
