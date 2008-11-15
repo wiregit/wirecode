@@ -303,8 +303,16 @@ implements TableCellEditor, TableCellRenderer {
                 vsr.setChildrenVisible(toggleVisibility);
             }
         });
+        
+        optionsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                properties.newProperties().showProperties(vsr);
+            }
+        });
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "[][][]", "0[]0")) {
+//        JXPanel panel = new JXPanel(new MigLayout("debug, insets 0 0 0 0", "[][][]", "0[center]0")) {
+        JXPanel panel = new JXPanel(new BorderLayout()) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -315,9 +323,15 @@ implements TableCellEditor, TableCellRenderer {
         };
 
         panel.setOpaque(false);
-        panel.add(fromWidget, "push");
-        panel.add(similarButton);
-        panel.add(optionsButton);
+//        panel.add(fromWidget, "push");
+//        panel.add(similarButton, "ay top");
+//        panel.add(optionsButton, "ay top, gaptop 1, gapbottom 10");
+        panel.add(fromWidget, BorderLayout.WEST);
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setOpaque(false);
+        buttonsPanel.add(similarButton);
+        buttonsPanel.add(optionsButton);
+        panel.add(buttonsPanel, BorderLayout.EAST);
 
         return panel;
     }
