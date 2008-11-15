@@ -84,11 +84,13 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                             protected void itemAdded(PresenceLibrary presenceLibrary) {
                                 FriendPresence friendPresence = presenceLibrary.getPresence();
                                 Address address = friendPresence.getPresenceAddress();
-                                if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                                    browse(presenceLibrary, friendPresence);
-                                } else {
-                                    presenceLibrary.setState(LibraryState.LOADING);
-                                    librariesToBrowse.add(presenceLibrary);
+                                synchronized (librariesToBrowse) {
+                                    if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
+                                        browse(presenceLibrary, friendPresence);
+                                    } else {
+                                        presenceLibrary.setState(LibraryState.LOADING);
+                                        librariesToBrowse.add(presenceLibrary);
+                                    }
                                 }
                             }
 
