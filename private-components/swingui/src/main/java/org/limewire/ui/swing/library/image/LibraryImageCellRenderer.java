@@ -13,8 +13,6 @@ import org.limewire.ui.swing.library.table.Configurable;
 public class LibraryImageCellRenderer extends ImageCellRenderer {
     private Configurable configurable;
     
- 
-    
     public LibraryImageCellRenderer(int width, int height, ThumbnailManager thumbnailManager) {
         super(width, height, thumbnailManager);
     }

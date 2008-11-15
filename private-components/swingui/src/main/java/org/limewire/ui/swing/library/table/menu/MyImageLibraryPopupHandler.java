@@ -37,15 +37,15 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
 
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
-        popupRow = imagePanel.getList().locationToIndex(new Point(x, y));
-        LocalFileItem selectedItem = (LocalFileItem)imagePanel.getList().getModel().getElementAt(popupRow);
+        popupRow = imagePanel.getImageList().locationToIndex(new Point(x, y));
+        LocalFileItem selectedItem = (LocalFileItem)imagePanel.getImageList().getModel().getElementAt(popupRow);
         if (!selectedItem.isIncomplete()) {
             List<LocalFileItem> items = imagePanel.getSelectedItems();
             if (items.contains(selectedItem) && items.size() > 1) {
                 multiSelectPopupMenu.setFileItems(items);
                 multiSelectPopupMenu.show(component, x, y);
             } else {
-                imagePanel.getList().setSelectionInterval(popupRow, popupRow);
+                imagePanel.getImageList().setSelectionInterval(popupRow, popupRow);
                 popupMenu.setFileItem(selectedItem);
                 popupMenu.show(component, x, y);
             }

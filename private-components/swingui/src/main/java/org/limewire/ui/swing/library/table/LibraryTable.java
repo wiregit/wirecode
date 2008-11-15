@@ -68,7 +68,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         setDefaultRenderer(Object.class, defaultRenderer);
     }
     
-    public void enableSharing(LibrarySharePanel librarySharePanel) {
+    public void enableMyLibrarySharing(LibrarySharePanel librarySharePanel) {
         this.librarySharePanel = librarySharePanel;
         shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);

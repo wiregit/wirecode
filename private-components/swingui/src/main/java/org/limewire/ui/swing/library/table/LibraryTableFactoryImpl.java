@@ -29,8 +29,9 @@ import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
+import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
@@ -72,20 +73,19 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
 
     private CategoryIconManager categoryIconManager;
 
-    private ThumbnailManager thumbnailManager;
-
     private PropertiesFactory<LocalFileItem> localItemPropFactory;
 
     private PropertiesFactory<RemoteFileItem> remoteItemPropFactory;
+    
+    private LibraryImageSubPanelFactory subPanelFactory;
 
     @Inject
-    public LibraryTableFactoryImpl(ThumbnailManager thumbnailManager,
-            CategoryIconManager categoryIconManager, IconManager iconManager,
+    public LibraryTableFactoryImpl(CategoryIconManager categoryIconManager, IconManager iconManager,
             LibraryManager libraryManager, ShareListManager shareListManager, AudioPlayer player,
             DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory,
             PropertiesFactory<LocalFileItem> localItemPropFactory,
-            PropertiesFactory<RemoteFileItem> remoteItemPropFactory) {
-        this.thumbnailManager = thumbnailManager;
+            PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
+            LibraryImageSubPanelFactory factory) {
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
@@ -95,17 +95,31 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
         this.magnetLinkFactory = magnetLinkFactory;
         this.localItemPropFactory = localItemPropFactory;
         this.remoteItemPropFactory = remoteItemPropFactory;
+        this.subPanelFactory = factory;
         EventAnnotationProcessor.subscribe(this);
     }
 
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane) {
+            JScrollPane scrollPane, LibrarySharePanel sharePanel) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
                 shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
         return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(),
-                categoryIconManager.getIcon(Category.IMAGE), thumbnailManager, scrollPane);
+                categoryIconManager.getIcon(Category.IMAGE), scrollPane, subPanelFactory,
+                sharePanel, null);
+    }
+    
+    @Override
+    public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
+            JScrollPane scrollPane, LocalFileList currentFriendList) {
+        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
+                shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
+        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
+                libraryManager.getLibraryManagedList(),
+                categoryIconManager.getIcon(Category.IMAGE), scrollPane,
+                subPanelFactory,
+                null, currentFriendList);
     }
 
     /**

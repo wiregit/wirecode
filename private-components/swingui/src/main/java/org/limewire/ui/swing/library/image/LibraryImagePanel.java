@@ -17,10 +17,8 @@ import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.LibrarySelectable;
-import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -34,9 +32,11 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 
-public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Sharable, Disposable, LibrarySelectable, Scrollable {
+public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Disposable, LibrarySelectable, Scrollable {
     
- 
+    private LibraryImageSubPanelFactory factory;
+    private LibrarySharePanel sharePanel;
+    
     private final EventList<LocalFileItem> currentEventList;
 
     private final GroupingList<LocalFileItem> groupingList;
@@ -57,28 +57,34 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     private final Map<String, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
+    private final LocalFileList currentFriendFileList;
 
     private final Icon panelIcon;
-
-    private final ThumbnailManager thumbnailManager;
     
     private final String incomplete = I18n.tr("Incomplete Files");
 
     private ImageLibraryPopupParams params;
-
-    private LibrarySharePanel sharePanel;
     
     private JScrollPane scrollPane;
     
-    public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, ThumbnailManager thumbnailManager, JScrollPane scrollPane) {       
+    public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, 
+            LocalFileList fileList, Icon panelIcon, JScrollPane scrollPane,
+            LibraryImageSubPanelFactory factory,
+            LibrarySharePanel sharePanel,
+            LocalFileList selectedFriendList) {       
         super(new VerticalLayout());
+        
         GuiUtils.assignResources(this); 
+        
         this.fileList = fileList;
         this.panelIcon = panelIcon;
-        this.thumbnailManager = thumbnailManager;
         this.currentEventList = eventList;
         this.params = params;
         this.scrollPane = scrollPane;
+        this.factory = factory;
+        this.sharePanel = sharePanel;
+        this.currentFriendFileList = selectedFriendList;
+        
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
         
         groupingList.addListEventListener(this);
@@ -87,13 +93,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         panelMap = new ConcurrentHashMap<String, LibraryImageSubPanel>();
     
         initList();
-    }
-    
-    public void enableSharing(LibrarySharePanel sharePanel){
-        this.sharePanel = sharePanel;
-        for(LibraryImageSubPanel subPanel : panelMap.values()){
-            subPanel.enableSharing(sharePanel);
-        }
     }
     
     public void dispose() {
@@ -135,10 +134,11 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     
     
     private void createSubPanel(String parent, EventList<LocalFileItem> list){
-        LibraryImageSubPanel subPanel = new LibraryImageSubPanel(parent, list, 
-                fileList, panelIcon, thumbnailManager, params);
-        if(sharePanel != null){
-            subPanel.enableSharing(sharePanel);
+        LibraryImageSubPanel subPanel;
+        if(sharePanel != null )
+            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, panelIcon, params, sharePanel);
+        else {
+            subPanel = factory.createSharingLibraryImageSubPanel(parent, list, fileList, panelIcon, params, currentFriendFileList);
         }
         panelMap.put(parent, subPanel);
         add(subPanel);

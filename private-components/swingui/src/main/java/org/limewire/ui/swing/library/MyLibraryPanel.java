@@ -118,7 +118,7 @@ class MyLibraryPanel extends LibraryPanel {
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
             LibraryTable table = tableFactory.createTable(category, filterList, null);
-            table.enableSharing(sharePanel);
+            table.enableMyLibrarySharing(sharePanel);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             
             scrollPane = new JScrollPane(table);
@@ -130,8 +130,7 @@ class MyLibraryPanel extends LibraryPanel {
         } else {//Category.IMAGE 
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane);
-            imagePanel.enableSharing(sharePanel);
+            LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane, sharePanel);
             
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());

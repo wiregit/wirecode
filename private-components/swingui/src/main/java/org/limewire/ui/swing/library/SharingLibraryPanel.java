@@ -154,7 +154,7 @@ public class SharingLibraryPanel extends LibraryPanel {
         } else {//Category.IMAGE
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            LibraryImagePanel imagePanel = tableFactory.createImagePanel(sortedList, scrollPane);
+            LibraryImagePanel imagePanel = tableFactory.createSharingImagePanel(sortedList, scrollPane, friendFileList);
             addDisposable(imagePanel);
             
             scrollPane.setViewportView(imagePanel);

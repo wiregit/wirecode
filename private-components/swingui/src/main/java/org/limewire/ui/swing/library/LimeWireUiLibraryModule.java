@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
+import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactoryImpl;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactoryImpl;
 import org.limewire.ui.swing.library.table.menu.LocalFileItemPropertiesFactory;
@@ -25,6 +27,7 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         bind(SharingLibraryFactory.class).toProvider(
                 FactoryProvider.newFactory(SharingLibraryFactory.class, SharingLibraryPanel.class));
         bind(LibraryTableFactory.class).to(LibraryTableFactoryImpl.class);
+        bind(LibraryImageSubPanelFactory.class).to(LibraryImageSubPanelFactoryImpl.class);
         bind(new TypeLiteral<PropertiesFactory<LocalFileItem>>(){}).to(LocalFileItemPropertiesFactory.class);
         bind(new TypeLiteral<PropertiesFactory<RemoteFileItem>>(){}).to(RemoteFileItemPropertiesFactory.class);
     }
