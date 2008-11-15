@@ -1,9 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.search.resultpanel.HyperlinkTextUtil.hyperlinkText;
 import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 import static org.limewire.ui.swing.util.I18n.tr;
-import static org.limewire.ui.swing.util.I18n.trn;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,11 +17,13 @@ import java.util.EventObject;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -34,7 +34,6 @@ import javax.swing.table.TableCellRenderer;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -58,7 +57,6 @@ import com.google.inject.assistedinject.AssistedInject;
 /**
  * This class is responsible for rendering an individual SearchResult
  * in "List View".
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class ListViewTableEditorRenderer
 extends AbstractCellEditor
@@ -74,16 +72,24 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Icon similarResultsIcon;
     @Resource private Color subHeadingLabelColor;
     @Resource private Color metadataLabelColor;
+    @Resource private Color downloadSourceCountColor;
     @Resource private Color similarResultsBackgroundColor;
     @Resource private Color surplusRowLimitColor;
     @Resource private Color rowSelectionColor;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
-    @Resource private Font similarResultsButtonFont;
+    @Resource private Font downloadSourceCountFont;
     @Resource private Font surplusRowLimitFont;
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
+    @Resource private Icon optionsDownIcon;
+    @Resource private Icon optionsHoverIcon;
+    @Resource private Icon optionsUpIcon;
+    @Resource private Icon similarUpIcon;
+    @Resource private Icon similarDownIcon;
+    @Resource private Icon similarActiveIcon;
+    @Resource private Icon similarHoverIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
@@ -95,10 +101,12 @@ implements TableCellEditor, TableCellRenderer {
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
-    private JXHyperlink similarButton = new JXHyperlink();
+    private JToggleButton similarButton = new JToggleButton();
+    private JButton optionsButton = new JButton();
     private JEditorPane heading = new JEditorPane();
     private JLabel subheadingLabel = new JLabel();
     private JLabel metadataLabel = new JLabel();
+    private JLabel downloadSourceCount = new JLabel();
     private JXPanel editorComponent;
 
     private VisualSearchResult vsr;
@@ -143,7 +151,16 @@ implements TableCellEditor, TableCellRenderer {
         this.displayLimit = displayLimit;
         GuiUtils.assignResources(this);
 
-        similarButton.setFont(similarResultsButtonFont);
+        similarButton.setPressedIcon(similarDownIcon);
+        similarButton.setRolloverIcon(similarHoverIcon);
+        similarButton.setSelectedIcon(similarActiveIcon);
+        similarButton.setIcon(similarUpIcon);
+        similarButton.setBorderPainted(false);
+
+        optionsButton.setPressedIcon(optionsDownIcon);
+        optionsButton.setRolloverIcon(optionsHoverIcon);
+        optionsButton.setIcon(optionsUpIcon);
+        optionsButton.setBorderPainted(false);
         
         fromWidget = fromWidgetFactory.create(remoteHostActions);
          this.downloadHandler = downloadHandler;
@@ -196,7 +213,7 @@ implements TableCellEditor, TableCellRenderer {
                     table, value, isSelected, row, col);
 
         if (editorComponent == null) {
-            editorComponent = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0")) {
+            editorComponent = new JXPanel(new BorderLayout()) {
 
                 @Override
                 public void setBackground(final Color bg) {
@@ -261,7 +278,7 @@ implements TableCellEditor, TableCellRenderer {
             panel = col == 0 ? leftPanel : fromPanel;
         }
 
-        editorComponent.add(panel, "height 100%");
+        editorComponent.add(panel, BorderLayout.CENTER);
 
         return editorComponent;
     }
@@ -284,12 +301,10 @@ implements TableCellEditor, TableCellRenderer {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
                 vsr.setChildrenVisible(toggleVisibility);
-                
-                similarButton.setText(getHideShowSimilarFilesButtonText());
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "0[]0", "0[]0[]0")) {
+        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "[][][]", "0[]0")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -300,8 +315,9 @@ implements TableCellEditor, TableCellRenderer {
         };
 
         panel.setOpaque(false);
-        panel.add(fromWidget, "wrap");
+        panel.add(fromWidget, "push");
         panel.add(similarButton);
+        panel.add(optionsButton);
 
         return panel;
     }
@@ -336,21 +352,25 @@ implements TableCellEditor, TableCellRenderer {
         metadataLabel.setForeground(metadataLabelColor);
         metadataLabel.setFont(metadataFont);
         
-        JXPanel downloadPanel = new JXPanel(new MigLayout("insets 7 0 0 5", "0[]", "0[]0"));
-        downloadPanel.setOpaque(false);
-        downloadPanel.add(itemIconLabel);
+        downloadSourceCount.setForeground(downloadSourceCountColor);
+        downloadSourceCount.setFont(downloadSourceCountFont);
+        
+        JXPanel itemIconPanel = new JXPanel(new MigLayout("insets 7 0 0 5", "0[]", "0[]0"));
+        itemIconPanel.setOpaque(false);
+        itemIconPanel.add(itemIconLabel);
 
-        searchResultTextPanel = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]", "[]0[]0[]"));
+        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
         searchResultTextPanel.add(heading, "wrap");
         searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
         searchResultTextPanel.add(metadataLabel, "wmin 350");
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0", "5[][]0", "0[]0"));
+        JXPanel panel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "5[][][]5", "0[]0"));
         panel.setOpaque(false);
 
-        panel.add(downloadPanel);
-        panel.add(searchResultTextPanel);
+        panel.add(itemIconPanel);
+        panel.add(searchResultTextPanel, "push");
+        panel.add(downloadSourceCount);
         
         heading.addHyperlinkListener(new HyperlinkListener() {
 
@@ -391,11 +411,11 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private JPanel makeIndentablePanel(Component component) {
-        indentablePanel = new JPanel(new MigLayout("insets 0 0 0 5", "[][]", "[]"));
+        indentablePanel = new JPanel(new BorderLayout());
         indentablePanel.setOpaque(false);
         similarResultIndentation = new JPanel(new BorderLayout());
         similarResultIndentation.add(new JLabel(similarResultsIcon), BorderLayout.CENTER);
-        indentablePanel.add(component, "cell 1 0, top, left");
+        indentablePanel.add(component, BorderLayout.CENTER);
         return indentablePanel;
     }
 
@@ -405,6 +425,7 @@ implements TableCellEditor, TableCellRenderer {
 
     private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
         this.heading.setText(headingBuilder.getHeadingDocument(result.getHeading(), downloadState, isMouseOver, result.isSpam()));
+        this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
     
     private void populateOther(RowDisplayResult result) {
@@ -430,7 +451,7 @@ implements TableCellEditor, TableCellRenderer {
         
         if (column == 0) {
             if (vsr.getSimilarityParent() != null) {
-                indentablePanel.add(similarResultIndentation, "cell 0 0, height 100%");
+                indentablePanel.add(similarResultIndentation, BorderLayout.WEST);
                 similarResultIndentation.setBackground(similarResultsBackgroundColor);
             } else {
                 indentablePanel.remove(similarResultIndentation);
@@ -451,10 +472,6 @@ implements TableCellEditor, TableCellRenderer {
         } else if (column == 1) {
             similarButton.setVisible(getSimilarResultsCount() > 0);
             populateFrom(vsr);
-            
-            if (getSimilarResultsCount() > 0) {
-                similarButton.setText(getHideShowSimilarFilesButtonText());
-            }
         }
     }
 
@@ -495,13 +512,5 @@ implements TableCellEditor, TableCellRenderer {
      */
     private void populateSubheading(RowDisplayResult result) {
         subheadingLabel.setText(result.getSubheading());
-    }
-
-    private String getHideShowSimilarFilesButtonText() {
-        int similarResultsCount = getSimilarResultsCount();
-        if (isShowingSimilarResults()) {
-            return hyperlinkText(trn("Hide 1 similar file", "Hide {0} similar files", similarResultsCount));
-        }
-        return hyperlinkText(trn("Show 1 similar file", "Show {0} similar files", similarResultsCount));
     }
 }
