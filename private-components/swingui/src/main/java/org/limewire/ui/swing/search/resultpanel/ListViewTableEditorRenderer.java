@@ -156,11 +156,13 @@ implements TableCellEditor, TableCellRenderer {
         similarButton.setSelectedIcon(similarActiveIcon);
         similarButton.setIcon(similarUpIcon);
         similarButton.setBorderPainted(false);
+        similarButton.setContentAreaFilled(false);
 
         optionsButton.setPressedIcon(optionsDownIcon);
         optionsButton.setRolloverIcon(optionsHoverIcon);
         optionsButton.setIcon(optionsUpIcon);
         optionsButton.setBorderPainted(false);
+        optionsButton.setContentAreaFilled(false);
         
         fromWidget = fromWidgetFactory.create(remoteHostActions);
          this.downloadHandler = downloadHandler;
