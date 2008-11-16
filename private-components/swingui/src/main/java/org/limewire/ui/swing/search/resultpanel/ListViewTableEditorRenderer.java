@@ -314,7 +314,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("", "0[][][][]", "0[top]")) {
+        JXPanel panel = new JXPanel(new MigLayout("", "0[][][]8[]", "0[top]")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -327,8 +327,8 @@ implements TableCellEditor, TableCellRenderer {
         panel.setOpaque(false);
         panel.add(new JLabel(dividerIcon), "ay center");
         panel.add(fromWidget, "push, ay center");
-        panel.add(similarButton);
-        panel.add(optionsButton);
+        panel.add(similarButton, "wmax 25");
+        panel.add(optionsButton, "wmax 25, gaptop 2, gapbottom 0");
 
         return panel;
     }
