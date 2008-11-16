@@ -4,7 +4,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public interface ListViewRowHeightRule {
     enum RowDisplayConfig {
-        HeadingOnly(34), HeadingAndSubheading(44), HeadingAndMetadata(44), HeadingSubHeadingAndMetadata(56);
+        HeadingOnly(36), HeadingAndSubheading(44), HeadingAndMetadata(44), HeadingSubHeadingAndMetadata(56);
         
         private final int height;
         RowDisplayConfig(int height) {
