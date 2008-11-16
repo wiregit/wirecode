@@ -30,6 +30,9 @@ public interface SearchResult {
     
     public boolean isSpam();
     
+    /**
+     * @return full file name including extension
+     */
     String getFileName();
     
     String getMagnetURL();

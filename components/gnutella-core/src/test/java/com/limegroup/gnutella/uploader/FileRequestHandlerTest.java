@@ -85,6 +85,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
         HttpRequest request = new BasicHttpRequest("GET", "filename");
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
         HTTPUploader uploader = new HTTPUploader("filename", null);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
 
         NetworkManagerStub networkManager = (NetworkManagerStub) injector
@@ -101,6 +103,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testFeatureHeaderInterceptor() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
@@ -130,6 +134,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testFeatureHeaderInterceptorChat() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");
@@ -151,6 +157,8 @@ public class FileRequestHandlerTest extends LimeTestCase {
     public void testIsFWTBrowseHostEnabled() throws Exception {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session);
+        // setting host to a value, so we don't need to specify a session
+        uploader.setHost("somehost");
         uploader.setFileDesc(fd);
         sessionManager.uploader = uploader;
         HttpResponse response = new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "");

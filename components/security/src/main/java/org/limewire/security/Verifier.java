@@ -8,6 +8,7 @@ import java.security.SignatureException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.security.SecureMessage.Status;
 
 /**
  * An abstract base class to verify a {@link SecureMessage}. The
@@ -62,7 +63,7 @@ public abstract class Verifier implements Runnable {
         
         if(pubKey == null) {
             LOG.warn("Cannot verify message without a public key.");
-            message.setSecureStatus(SecureMessage.INSECURE);
+            message.setSecureStatus(Status.INSECURE);
             callback.handleSecureMessage(message, false);
             return;
         }
@@ -70,7 +71,7 @@ public abstract class Verifier implements Runnable {
         byte[] signature = message.getSecureSignature();
         if(signature == null) {
             LOG.warn("Cannot verify message without a signature.");
-            message.setSecureStatus(SecureMessage.INSECURE);
+            message.setSecureStatus(Status.INSECURE);
             callback.handleSecureMessage(message, false);
             return;
         }
@@ -80,7 +81,7 @@ public abstract class Verifier implements Runnable {
             verifier.initVerify(pubKey);
             message.updateSignatureWithSecuredBytes(verifier);
             if(verifier.verify(signature)) {
-                message.setSecureStatus(SecureMessage.SECURE);
+                message.setSecureStatus(Status.SECURE);
                 callback.handleSecureMessage(message, true);
                 return;
             }
@@ -95,7 +96,7 @@ public abstract class Verifier implements Runnable {
             LOG.error("bad cast", ccx);
         }
         
-        message.setSecureStatus(SecureMessage.FAILED);
+        message.setSecureStatus(Status.FAILED);
         callback.handleSecureMessage(message, false);
     }
 }

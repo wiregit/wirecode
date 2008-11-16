@@ -48,10 +48,10 @@ public class RemoteFileDescAdapter implements SearchResult {
     private final String extension;
     private final String fileName;
     
-    private volatile FriendPresence friendPresence;    
+    private volatile FriendPresence friendPresence; 
 
-    public RemoteFileDescAdapter(RemoteFileDesc rfd, QueryReply queryReply,
-            Set<? extends IpPort> locs) {
+    public RemoteFileDescAdapter(RemoteFileDesc rfd,
+                                 Set<? extends IpPort> locs) {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);        
         this.properties = new HashMap<FilePropertyKey, Object>();
@@ -214,7 +214,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                 return friendPresence;
             } else {
                 final Map<URI, Feature> features = new HashMap<URI, Feature>();
-                features.put(AddressFeature.ID, new AddressFeature(new ConnectableImpl(rfd)));
+                features.put(AddressFeature.ID, new AddressFeature(rfd.getAddress()));
                 // create dummy friend presence
                 return new FriendPresence() {
 
@@ -233,7 +233,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                             @Override
                             public String getName() {
-                                return rfd.getInetSocketAddress().toString();
+                                return rfd.toString();
                             }
 
                             @Override
@@ -303,7 +303,7 @@ public class RemoteFileDescAdapter implements SearchResult {
             if (friend != null) {
                 return friend.getRenderName();
             }
-            return rfd.getInetSocketAddress().toString();
+            return rfd.toString();
         }
 
         @Override
@@ -449,7 +449,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
     @Override
     public String getMagnetURL() {
-        MagnetOptions magnet = MagnetOptions.createMagnet(rfd, rfd.getInetSocketAddress(), rfd.getClientGUID());
+        MagnetOptions magnet = MagnetOptions.createMagnet(rfd, null, rfd.getClientGUID());
         return magnet.toExternalForm();
     }
 

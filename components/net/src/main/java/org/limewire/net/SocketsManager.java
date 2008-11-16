@@ -196,7 +196,7 @@ public interface SocketsManager extends ListenerSupport<ConnectivityChangeEvent>
      * 
      * @return the observer for fluent access
      */
-    public <T extends ConnectObserver> T connect(Address address, int timeout, T observer);
+    public <T extends ConnectObserver> T connect(Address address, T observer);
     
     /**
      * Asynchronously resolves <code>address</code> to other addresses if 
@@ -206,9 +206,9 @@ public interface SocketsManager extends ListenerSupport<ConnectivityChangeEvent>
      * If there is no resolver for address, the observer is notified of a address
      * resolution with the exact same address.
      * 
-     * @param timeout timeout in milliseconds
+     * @return observer for fluent access
      */
-    public void resolve(Address address, int timeout, AddressResolutionObserver observer);
+    public <T extends AddressResolutionObserver> T resolve(Address address, T observer);
 
     /**
      * Removes the given ConnectObserver from wanting to make a request.

@@ -199,13 +199,9 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
-        Connectable publicAddress;
         Address address = ((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
         byte[] clientGuid = null;
-        boolean firewalled;
-        Set<Connectable> proxies = null;
-        int fwtVersion = 0;
-
+        
         Set<String> urnsAsString = fileMeta.getURNsAsString();
         Set<URN> urns = new HashSet<URN>();
         for (String urnStr : urnsAsString) {
@@ -216,24 +212,10 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
         }
 
-        if (address instanceof FirewalledAddress) {
-            firewalled = true;
-            FirewalledAddress fwAddress = (FirewalledAddress) address;
-            publicAddress = fwAddress.getPublicAddress();
-            clientGuid = fwAddress.getClientGuid().bytes();
-            proxies = fwAddress.getPushProxies();
-            fwtVersion = fwAddress.getFwtVersion();
-        } else {
-            assert address instanceof Connectable;
-            firewalled = false;
-            publicAddress = (Connectable) address;
-        }
-
-        return remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(),
+        return remoteFileDescFactory.createRemoteFileDesc(address,
                 fileMeta.getIndex(), fileMeta.getName(), fileMeta.getSize(), clientGuid,
                 0, false, 0, true, null, urns, false,
-                firewalled, null, proxies, fileMeta.getCreateTime().getTime(), fwtVersion,
-                publicAddress.isTLSCapable());
+                null, fileMeta.getCreateTime().getTime());
     }
 
 
@@ -253,9 +235,6 @@ public class CoreDownloadListManager implements DownloadListManager {
         RemoteFileDesc sha1RFD = null;
         for(int i = 0; i < rfds.length; i++) {
             RemoteFileDesc next = rfds[i];
-            // this has been moved down until the download is actually started
-            // next.setDownloading(true);
-            next.setRetryAfter(0);
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
             alts.remove(next); // Removes an alt that matches the IpPort of the RFD

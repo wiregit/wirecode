@@ -9,19 +9,20 @@ import java.security.SignatureException;
  */
 public interface SecureMessage {
     
-    //TODO: Make the following final ints into enums.
-    /** A message that has not been verified.    */
-    public static final int INSECURE = 0;
-    /** A message that was attempted to be verified but failed verification.  */
-    public static final int FAILED = 1;
-    /** A message that was attempted to be verified and passed verification.  */
-    public static final int SECURE = 2;
+    public enum Status {
+        /** A message that has not been verified.    */
+        INSECURE,
+        /** A message that was attempted to be verified but failed verification.  */
+        FAILED,
+        /** A message that was attempted to be verified and passed verification.  */
+        SECURE
+    }
     
     /** Sets whether or not the message is verified. */
-    public void setSecureStatus(int secureStatus);
+    public void setSecureStatus(Status secureStatus);
     
     /** Determines if the message was verified. */
-    public int getSecureStatus();
+    public Status getSecureStatus();
 
     /** Returns the bytes of the signature from the secure GGEP block. */
     public byte[] getSecureSignature();

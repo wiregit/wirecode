@@ -15,7 +15,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
  */
 interface DownloadWorkerSupport extends ManagedDownloader {
 
-    void addRFD(RemoteFileDesc _rfd);
+    void addToRanker(RemoteFileDescContext rfdContext);
 
     void forgetRFD(RemoteFileDesc _rfd);
 

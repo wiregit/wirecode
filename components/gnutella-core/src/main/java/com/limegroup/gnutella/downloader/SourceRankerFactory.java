@@ -28,13 +28,21 @@ public class SourceRankerFactory {
         this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
+    PingRanker createPingRanker() {
+        return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
+    }
+    
+    DelegatingSourceRanker createDelegatingSourceRanker() {
+        return new DelegatingSourceRanker(createPingRanker());
+    }
+    
     /**
      * @return a ranker appropriate for our system's capabilities.
      */
     public SourceRanker getAppropriateRanker() {
         if (networkManager.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue())
-            return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
+            return createDelegatingSourceRanker();
         else 
             return new LegacyRanker();
     }
@@ -53,7 +61,7 @@ public class SourceRankerFactory {
                 DownloadSettings.USE_HEADPINGS.getValue()) {
             if (original instanceof PingRanker)
                 return original;
-            better = new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
+            better = createDelegatingSourceRanker();
         }else {
             if (original instanceof LegacyRanker)
                 return original;

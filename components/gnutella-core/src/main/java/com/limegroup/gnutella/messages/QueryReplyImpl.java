@@ -29,7 +29,6 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
-import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
@@ -84,7 +83,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     private byte[] _address = new byte[4];    
     
     /** Whether or not this message has been verified as secure. */
-    private int _secureStatus = SecureMessage.INSECURE;
+    private Status _secureStatus = Status.INSECURE;
     
     /** True if the responses and metadata have been extracted. */  
     private boolean _parsed = false;
@@ -553,12 +552,12 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 
 
     /** Determines if the message was verified. */
-    public synchronized int getSecureStatus() {
+    public synchronized Status getSecureStatus() {
         return _secureStatus;
     }
 
     /** Sets whether or not the message is verified. */
-    public synchronized void setSecureStatus(int secureStatus) {
+    public synchronized void setSecureStatus(Status secureStatus) {
         this._secureStatus = secureStatus;
     }    
     

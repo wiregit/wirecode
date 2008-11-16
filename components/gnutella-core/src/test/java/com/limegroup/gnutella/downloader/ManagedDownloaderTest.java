@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
@@ -173,11 +174,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	Endpoint e = new Endpoint("1.2.3.5",12345);
     	RemoteFileDesc other = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(newRFD("incomplete"), e);
     	HTTPDownloaderFactory httpDownloaderFactory =injector.getInstance(HTTPDownloaderFactory.class);
-    	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, other, null, false);
+    	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, new RemoteFileDescContext(other), null, false);
     	
     	ManagedDownloaderImpl md = (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd}, null, null, null, false);
         DownloadWorkerFactory downloadWorkerFactory = injector.getInstance(DownloadWorkerFactory.class);
-        AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, rfd, null);
+        AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, new RemoteFileDescContext(rfd), null);
         worker.setHTTPDownloader(fakeDownloader);
         
         List<DownloadWorker> l = new LinkedList<DownloadWorker>();
@@ -536,12 +537,12 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	}
 	
     
-    private RemoteFileDesc newRFD(String name) {
+    private RemoteFileDesc newRFD(String name) throws Exception {
         return newRFD(name, null);
     }
 
-    private RemoteFileDesc newRFD(String name, String hash) {
-        Set<URN> urns=null;
+    private RemoteFileDesc newRFD(String name, String hash) throws Exception {
+        Set<URN> urns = Collections.emptySet();
         if (hash!=null) {
             urns=new HashSet<URN>(1);
             try {
@@ -550,8 +551,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 fail("Couldn't create URN", e);
             }
         }        
-        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", PORT, 13l, name, 1024, new byte[16],
-                56, false, 4, true, null, urns, false, false, "", null, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("127.0.0.1", PORT, false), 13l, name, 1024, new byte[16],
+                56, false, 4, true, null, urns, false, "", -1);
     }
     
     
@@ -663,9 +664,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.networkInstanceUtils = networkInstanceUtils;
         }
         
-        public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
+        public HTTPDownloader create(Socket socket, RemoteFileDescContext rfdContext,
                 VerifyingFile incompleteFile, boolean inNetwork) {
-            return new AltLocDownloaderStub(rfd, networkManager,
+            return new AltLocDownloaderStub(rfdContext, networkManager,
                     alternateLocationFactory, downloadManager, creationTimeCache.get(),
                     bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
@@ -677,17 +678,17 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	private boolean _stubFalts;
         private final RemoteFileDesc rfd;
         
-    	public AltLocDownloaderStub(RemoteFileDesc rfd,
+    	public AltLocDownloaderStub(RemoteFileDescContext rfdContext,
                                     NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                                     DownloadManager downloadManager, CreationTimeCache creationTimeCache,
                                     BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
                                     PushEndpointFactory pushEndpointFactory,
                                     RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
                                     TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
-            super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
+            super(rfdContext, null, networkManager, alternateLocationFactory, downloadManager,
                     creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory,
                     remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
-            this.rfd = rfd;
+            this.rfd = rfdContext.getRemoteFileDesc();
         }
     	
     	public boolean _addedFailed,_addedSuccessfull;
@@ -738,7 +739,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         }
         
         public DownloadWorker create(DownloadWorkerSupport manager,
-                RemoteFileDesc rfd, VerifyingFile vf) {
+                RemoteFileDescContext rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
                     socketsManager, networkManager);
@@ -748,7 +749,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static class AltLocWorkerStub extends DownloadWorkerStub {
         private volatile HTTPDownloader httpDownloader;
         
-        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
+        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDescContext rfd, VerifyingFile vf,
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,

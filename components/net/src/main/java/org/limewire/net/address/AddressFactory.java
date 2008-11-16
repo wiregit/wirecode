@@ -9,9 +9,12 @@ import org.limewire.io.Address;
  * themselves with this factory via the <code>addSerializer()</code> method at injection time.
  */
 public interface AddressFactory {
-    public void addSerializer(AddressSerializer serializer);
-    public AddressSerializer getSerializer(Class <? extends Address> addressClass) throws IOException;
+    public void registerSerializer(AddressSerializer serializer);
+    public AddressSerializer getSerializer(Class <? extends Address> addressClass);
+    /**
+     * Looks up serializer by {@link AddressSerializer#getAddressType()}. 
+     * @return null if no serializer is registered for that type
+     */
     public AddressSerializer getSerializer(String addressType);
     public Address deserialize(String type, byte [] serializedAddress) throws IOException;
-    public byte [] serialize(Address address) throws IOException;
 }

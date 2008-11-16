@@ -12,11 +12,11 @@ import org.limewire.io.Address;
  */
 public class BlockingAddressResolutionObserver implements AddressResolutionObserver {
 
-    private final OnewayExchanger<Address[], IOException> exchanger = new OnewayExchanger<Address[], IOException>();
+    private final OnewayExchanger<Address, IOException> exchanger = new OnewayExchanger<Address, IOException>();
     
     @Override
-    public void resolved(Address... addresses) {
-        exchanger.setValue(addresses);
+    public void resolved(Address address) {
+        exchanger.setValue(address);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class BlockingAddressResolutionObserver implements AddressResolutionObser
         exchanger.setException(new IOException("shut down"));
     }
 
-    public Address[] getAddresses() throws IOException {
+    public Address getAddress() throws IOException {
         try {
             return exchanger.get();
         } catch (InterruptedException e) {
@@ -37,7 +37,7 @@ public class BlockingAddressResolutionObserver implements AddressResolutionObser
         }
     }
     
-    public Address[] getAddresses(long timeout, TimeUnit timeUnit) throws IOException, TimeoutException {
+    public Address getAddress(long timeout, TimeUnit timeUnit) throws IOException, TimeoutException {
         try {
             return exchanger.get(timeout, timeUnit);
         } catch (InterruptedException e) {

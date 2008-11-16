@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.spam;
 
+import java.net.UnknownHostException;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
@@ -14,6 +16,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.ConnectableImpl;
 
 public class RatingTableTest extends LimeTestCase {
 
@@ -90,10 +93,10 @@ public class RatingTableTest extends LimeTestCase {
     }
 
     private RemoteFileDesc createRFD(String addr, int port, String name,
-            int size) {
-        RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(addr, port, 1, name, size,
+            int size) throws UnknownHostException {
+        RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(new ConnectableImpl(addr, port, false), 1, name, size,
                 DataUtils.EMPTY_GUID, 3, false, 3, false, null, URN.NO_URN_SET,
-                false, false, "ALT", new IpPortSet(), 0L, false);
+                false, "ALT", 0L);
         // This would normally be called by the SearchResultHandler
         manager.calculateSpamRating(rfd);
         return rfd;

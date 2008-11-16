@@ -388,8 +388,6 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         public void handleQueryResult(RemoteFileDesc rfd,
                                       QueryReply queryReply,
                                       Set locs) {
-            // make sure the browse is not attempted as a TLS connection
-            rfd.setTLSCapable(false);
             remoteFileDesc = rfd;
             latch.countDown();
         }
@@ -431,7 +429,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
         public MockFriendPresence(RemoteFileDesc rfd) {
 //            this.rfd = rfd;
-            addFeature(new AddressFeature(rfd.toAddress()));
+            addFeature(new AddressFeature(rfd.getAddress()));
             addFeature(new AuthTokenFeature(new byte []{}));
         }
 
@@ -469,4 +467,3 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
     }
 
 }
-

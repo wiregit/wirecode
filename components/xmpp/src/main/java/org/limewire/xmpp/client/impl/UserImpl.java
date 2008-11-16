@@ -59,7 +59,7 @@ public class UserImpl implements User {
     private final Object chatListenerLock;
 
     @GuardedBy("chatListenerLock")
-    private  IncomingChatListenerAdapter listenerAdapter;
+    private volatile IncomingChatListenerAdapter listenerAdapter;
     // -----------------------------------------------------------------
 
 
@@ -118,7 +118,7 @@ public class UserImpl implements User {
     @Override
     public Map<String, Presence> getPresences() {
         synchronized (presenceLock) {
-            return Collections.unmodifiableMap(presences);
+            return Collections.unmodifiableMap(new HashMap<String, Presence>(presences));
         }
     }
 

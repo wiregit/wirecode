@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +14,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.RequestLine;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.ContentEncoderChannel;
 import org.apache.http.nio.IOControl;
@@ -91,7 +94,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         }
         
         try {
-            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(request, context);
+            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(getFriend(request), context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
                 iterables.add(list.pausableIterable());
@@ -112,6 +115,35 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         }
         
         sessionManager.sendResponse(uploader, response);
+    }
+    
+    /**
+     * Parses out the last element of the request uri's path and returns it.
+     * @throws com.limegroup.gnutella.uploader.HttpException if there was no such element
+     */
+    String getFriend(HttpRequest request) throws com.limegroup.gnutella.uploader.HttpException {
+        RequestLine requestLine = request.getRequestLine();
+        try {
+            URI uri = new URI(requestLine.getUri());
+            String path = uri.getPath();
+            if (path == null) {
+                throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
+            }
+            if (path.endsWith("/")) {
+                int previousSlash = path.lastIndexOf('/', path.length() - 2);
+                if (previousSlash != -1) {
+                    return path.substring(previousSlash + 1, path.length() - 1);
+                }
+            } else {
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash != -1) {
+                    return path.substring(lastSlash + 1);
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
     }
 
     public class BrowseResponseEntity extends AbstractProducingNHttpEntity {

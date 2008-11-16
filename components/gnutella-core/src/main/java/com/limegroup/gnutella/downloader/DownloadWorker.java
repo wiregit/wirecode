@@ -15,16 +15,21 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.statemachine.IOStateObserver;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -237,7 +242,9 @@ public class DownloadWorker {
     private final SocketsManager socketsManager;
     private final TLSManager TLSManager;
 
-    protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDesc rfd,
+    private final RemoteFileDescContext rfdContext;
+
+    protected DownloadWorker(DownloadWorkerSupport manager, RemoteFileDescContext rfdContext,
                              VerifyingFile vf, HTTPDownloaderFactory httpDownloaderFactory,
                              ScheduledExecutorService backgroundExecutor,
                              ScheduledExecutorService nioExecutor,
@@ -250,7 +257,8 @@ public class DownloadWorker {
         this.pushDownloadManager = pushDownloadManager;
         this.socketsManager = socketsManager;
         _manager = manager;
-        _rfd = rfd;
+        _rfd = rfdContext.getRemoteFileDesc();
+        this.rfdContext = rfdContext;
         _commonOutFile = vf;
         this.statsTracker = statsTracker;
         this.TLSManager = TLSManager;
@@ -384,14 +392,15 @@ public class DownloadWorker {
      * Handles a failure of an RFD.
      */
     private void handleRFDFailure() {
-        _rfd.incrementFailedCount();
-        LOG.debug("handling rfd failure for "+_rfd+" with count now "+_rfd.getFailedCount());
+        LOG.debug("rfd failure", new Exception());
+        rfdContext.incrementFailedCount();
+        LOG.debug("handling rfd failure for "+_rfd+" with count now "+ rfdContext.getFailedCount());
         // if this RFD had a failure, try it again.
-        if (_rfd.getFailedCount() < 2) {
+        if (rfdContext.getFailedCount() < 2) {
             LOG.debug("will try again in a minute");
             // set retry after, wait a little before retrying this RFD
-            _rfd.setRetryAfter(FAILED_RETRY_AFTER);
-            _manager.addRFD(_rfd);
+            rfdContext.setRetryAfter(FAILED_RETRY_AFTER);
+            _manager.addToRanker(rfdContext);
         } else
             // tried the location twice -- it really is bad
             _manager.informMesh(_rfd, false);
@@ -458,7 +467,7 @@ public class DownloadWorker {
                 @Override
                 protected void handleState(boolean success) {
                     if (success) {
-                        _rfd.resetFailedCount();
+                        rfdContext.resetFailedCount();
                     } else {
                         _manager.workerFailed(DownloadWorker.this);
                     }
@@ -483,7 +492,7 @@ public class DownloadWorker {
                                                             // http11
                                                             // _activeWorkers to
                                                             // files
-                                _manager.addRFD(_rfd);
+                                _manager.addToRanker(rfdContext);
                         }
                     }
                 }
@@ -548,7 +557,7 @@ public class DownloadWorker {
         ConnectionStatus status = _downloader.parseThexResponseHeaders();
         if (!status.isConnected()) {
             // retry this RFD without THEX, since that's why it failed.
-            _rfd.setTHEXFailed();
+            rfdContext.setTHEXFailed();
             incrementState(status);
         } else {
             _manager.removeQueuedWorker(this);
@@ -669,12 +678,10 @@ public class DownloadWorker {
 
         // this rfd may still be useful remember it
         if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
-            _manager.addRFD(_rfd);
+            _manager.addToRanker(rfdContext);
             finishWorker();
             return;
         }
-
-        final boolean needsPush = _rfd.needsPush(statsTracker);
 
         synchronized (_manager) {
             DownloadStatus state = _manager.getState();
@@ -696,24 +703,26 @@ public class DownloadWorker {
         }
 
         if (LOG.isDebugEnabled())
-            LOG.debug("WORKER: attempting connect to " + _rfd.getAddress() + ":"
-                    + _rfd.getPort());
+            LOG.debug("WORKER: attempting connect to " + _rfd.getAddress());
 
         // TODO move to DownloadStatsTracker?
         _manager.incrementTriedHostsCount();
 
+        Address address = _rfd.getAddress();
         if (_rfd.isReplyToMulticast()) {
             // Start with a push connect, fallback to a direct connect, and do
             // not forget the RFD upon push failure.
             connectWithPush(new PushConnector(false, true));
-        } else if (!needsPush) {
-            // Start with a direct connect, fallback to a push connect.
-            connectDirectly(new DirectConnector(true));
-        } else {
+        } else if (address instanceof PushEndpoint) {
             // Start with a push connect, do not fallback to a direct connect,
             // and do
             // forgot the RFD upon push failure.
-            connectWithPush(new PushConnector(true, false));
+            connectWithPush(new PushConnector(true, false));   
+        } else if (address instanceof Connectable) {
+            // Start with a direct connect, fallback to a push connect.
+            connectDirectly((Connectable)address, new DirectConnector(true));
+        } else { 
+            socketsManager.connect(address, new SocketsConnectObserver());
         }
     }
 
@@ -742,9 +751,9 @@ public class DownloadWorker {
      * will return immediately and the given observer will be notified of
      * success or failure.
      */
-    private void connectDirectly(DirectConnector observer) {
+    private void connectDirectly(Connectable connectable, DirectConnector observer) {
         if (!_interrupted.get()) {
-            ConnectType type = _rfd.isTLSCapable()
+            ConnectType type = connectable.isTLSCapable()
                     && TLSManager.isOutgoingTLSEnabled() ? ConnectType.TLS
                     : ConnectType.PLAIN;
             if (LOG.isTraceEnabled())
@@ -753,7 +762,7 @@ public class DownloadWorker {
             _connectObserver = observer;
             try {
                 Socket socket = socketsManager.connect(
-                        new InetSocketAddress(_rfd.getAddress(), _rfd.getPort()),
+                        new InetSocketAddress(connectable.getAddress(), connectable.getPort()),
                         NORMAL_CONNECT_TIME, observer, type);
                 if (!observer.isShutdown())
                     observer.setSocket(socket);
@@ -765,6 +774,7 @@ public class DownloadWorker {
         }
     }
 
+    
     /**
      * Attempts to connect by using a push to the remote end. This method will
      * return immediately and the given observer will be notified of success or
@@ -773,13 +783,14 @@ public class DownloadWorker {
     private void connectWithPush(PushConnector observer) {
         if (!_interrupted.get()) {
             if (LOG.isTraceEnabled())
-                LOG.trace("WORKER: attempt push connection to: " + _rfd+" proxies "+_rfd.getPushProxies());
+                LOG.trace("WORKER: attempt push connection to: " + _rfd+" proxies ");
             _connectObserver = null;
 
             // When the push is complete and we have a socket ready to use
             // the acceptor thread is going to notify us using this object
+            
             final PushDetails details = new PushDetails(_rfd.getClientGUID(),
-                    _rfd.getAddress());
+                    ((IpPort)_rfd.getAddress()).getAddress());
             observer.setPushDetails(details);
             _manager.registerPushObserver(observer, details);
             pushDownloadManager.get().sendPush(_rfd,
@@ -954,12 +965,12 @@ public class DownloadWorker {
         }
 
         // did not throw exception? OK. we are downloading
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
 
         synchronized (_manager) {
             if (_manager.isCancelled() || _manager.isPaused() || _interrupted.get()) {
                 LOG.trace("Stopped in assignAndRequest");
-                _manager.addRFD(_rfd);
+                _manager.addToRanker(rfdContext);
                 return ConnectionStatus.getNoData();
             }
 
@@ -1063,7 +1074,7 @@ public class DownloadWorker {
         Range interval;
         // If it's not a partial source, take the first chunk.
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if (!_downloader.getRemoteFileDesc().isPartialSource()) {
+        if (!rfdContext.isPartialSource()) {
             if (_currentState.isHttp11()) {
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
@@ -1074,8 +1085,7 @@ public class DownloadWorker {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         else {
             try {
-                IntervalSet availableRanges = _downloader.getRemoteFileDesc()
-                        .getAvailableRanges();
+                IntervalSet availableRanges = rfdContext.getAvailableRanges();
 
                 if (_currentState.isHttp11()) {
                     interval = _commonOutFile.leaseWhite(availableRanges,
@@ -1121,7 +1131,7 @@ public class DownloadWorker {
 
         // If this _downloader is a partial source, don't attempt to steal...
         // too confusing, too many problems, etc...
-        if (_downloader.getRemoteFileDesc().isPartialSource()) {
+        if (rfdContext.isPartialSource()) {
             handleNoRanges();
             return false;
         }
@@ -1343,7 +1353,7 @@ public class DownloadWorker {
      * download
      */
     private ConnectionStatus handleNoMoreDownloaders() {
-        _manager.addRFD(_rfd);
+        _manager.addToRanker(rfdContext);
         return ConnectionStatus.getNoData();
     }
 
@@ -1352,15 +1362,15 @@ public class DownloadWorker {
      */
     private ConnectionStatus handleNoRanges() {
         // forget the ranges we are pretending uploader is busy.
-        _rfd.setAvailableRanges(null);
+        rfdContext.setAvailableRanges(null);
 
         // if this RFD did not already give us a retry-after header
         // then set one for it.
-        if (!_rfd.isBusy())
-            _rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
+        if (!rfdContext.isBusy())
+            rfdContext.setRetryAfter(NO_RANGES_RETRY_AFTER);
 
-        _rfd.resetFailedCount();
-        _manager.addRFD(_rfd);
+        rfdContext.resetFailedCount();
+        _manager.addToRanker(rfdContext);
 
         return ConnectionStatus.getNoFile();
     }
@@ -1368,19 +1378,19 @@ public class DownloadWorker {
     private ConnectionStatus handleTryAgainLater() {
         // if this RFD did not already give us a retry-after header
         // then set one for it.
-        if (!_rfd.isBusy()) {
-            _rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
+        if (!rfdContext.isBusy()) {
+            rfdContext.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
         }
 
         // if we already have downloads going, then raise the
         // retry-after if it was less than the appropriate amount
         if (!_manager.getActiveWorkers().isEmpty()
-                && _rfd.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
-            _rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
+                && rfdContext.getWaitTime(System.currentTimeMillis()) < RETRY_AFTER_SOME_ACTIVE)
+            rfdContext.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
 
-        _manager.addRFD(_rfd);// try this rfd later
+        _manager.addToRanker(rfdContext);// try this rfd later
 
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
         return ConnectionStatus.getNoFile();
     }
 
@@ -1388,7 +1398,7 @@ public class DownloadWorker {
      * The ranges exist in the file, but the remote host does not have them
      */
     private ConnectionStatus handleRangeNotAvailable() {
-        _rfd.resetFailedCount();
+        rfdContext.resetFailedCount();
         _manager.informMesh(_rfd, true);
         // no need to add to files or busy we keep iterating
         return ConnectionStatus.getPartialData();
@@ -1412,7 +1422,7 @@ public class DownloadWorker {
                                                             // to stop.
                 _manager.setState(DownloadStatus.REMOTE_QUEUED);
             }
-            _rfd.resetFailedCount();
+            rfdContext.resetFailedCount();
             return ConnectionStatus.getQueued(position, pollTime);
         }
     }
@@ -1578,7 +1588,7 @@ public class DownloadWorker {
         @Override
         public void handleConnect(Socket socket) {
             // LOG.debug(_rfd + " -- Handling connect from PushConnector");
-            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
@@ -1628,7 +1638,8 @@ public class DownloadWorker {
                 finishConnect();
                 finishWorker();
             } else {
-                connectDirectly(new DirectConnector(false));
+                assert _rfd.isReplyToMulticast() : "only multicast replies have an address to direct connect to";
+                connectDirectly((Connectable)_rfd.getAddress(), new DirectConnector(false));
             }
         }
     }
@@ -1660,7 +1671,7 @@ public class DownloadWorker {
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
 
-            HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP(); // already connected, timeout doesn't
@@ -1703,5 +1714,39 @@ public class DownloadWorker {
         public boolean isShutdown() {
             return shutdown;
         }
+    }
+    
+    private class SocketsConnectObserver implements ConnectObserver {
+
+        @Override
+        public void handleConnect(Socket socket) throws IOException {
+            LOG.debug("got a socket");
+            HTTPDownloader dl = httpDownloaderFactory.create(socket, rfdContext, _commonOutFile,
+                    _manager instanceof InNetworkDownloader);
+            try {
+                dl.initializeTCP(); // already connected, timeout doesn't
+                                    // matter.
+                statsTracker.successfulDirectConnect();
+            } catch (IOException iox) {
+                shutdown(); // if it immediately IOX's, try a push instead.
+                return;
+            }
+            startDownload(dl);
+        }
+
+        @Override
+        public void handleIOException(IOException iox) {
+            LOG.debug("could not connect", iox);
+            finishConnect();
+            finishWorker();
+        }
+
+        @Override
+        public void shutdown() {
+            LOG.debug("shut down");
+            finishConnect();
+            finishWorker();
+        }
+        
     }
 }

@@ -134,11 +134,6 @@ public interface HeadPong extends VendorMessage {
     public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory);
 
     /**
-     * updates the rfd with information in this pong
-     */
-    public void updateRFD(RemoteFileDesc rfd);
-
-    /**
      * 
      * @return the remote vendor as string
      */

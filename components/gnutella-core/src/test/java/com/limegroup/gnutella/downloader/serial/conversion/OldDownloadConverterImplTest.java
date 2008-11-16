@@ -13,9 +13,12 @@ import org.limewire.collection.Range;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
+import org.limewire.net.address.AddressFactory;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
@@ -24,10 +27,17 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 import com.limegroup.gnutella.gui.search.SearchInformation;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.google.inject.Injector;
 
 public class OldDownloadConverterImplTest extends BaseTestCase {
+    private Injector injector;
+    private OldDownloadConverter oldDownloadConverter;
+    private AddressFactory addressFactory;
+    private PushEndpointFactory pushEndpointFactory;
+
 
     public OldDownloadConverterImplTest(String name) {
         super(name);
@@ -37,10 +47,19 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         return buildTestSuite(OldDownloadConverterImplTest.class);
     }
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        injector = LimeTestUtils.createInjector();
+        oldDownloadConverter = injector.getInstance(OldDownloadConverter.class);
+        addressFactory = injector.getInstance(AddressFactory.class);
+        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+    }
+
     public void testConversionForTypes() throws Exception {
         File file = TestUtils.getResourceInPackage("allKindsOfDownloads.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(5, mementos.size());
         
@@ -157,7 +176,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     public void testConversionForRanges() throws Exception {
         File file = TestUtils.getResourceInPackage("allKindsOfRanges.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(6, mementos.size());
         
@@ -356,7 +375,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     public void testMagnet() throws Exception {
         File file = TestUtils.getResourceInPackage("magnet.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(1, mementos.size());
         
@@ -382,7 +401,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     public void testXml() throws Exception {
         File file = TestUtils.getResourceInPackage("xml.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
+        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(1, mementos.size());
         

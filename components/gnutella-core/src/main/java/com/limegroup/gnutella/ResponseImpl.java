@@ -5,6 +5,8 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.Address;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
@@ -12,6 +14,7 @@ import org.limewire.util.ByteUtils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
@@ -232,16 +235,20 @@ class ResponseImpl implements Response {
         return verified;
     }
 
-    public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, RemoteFileDescFactory remoteFileDescFactory){
-        if(cachedRFD != null &&
-           cachedRFD.getPort() == queryReply.getPort() &&
-           cachedRFD.getAddress().equals(queryReply.getIP()))
+    public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, RemoteFileDescFactory remoteFileDescFactory, PushEndpointFactory pushEndpointFactory) throws UnknownHostException {
+        // TODO fberger move this to query reply, since they can all responses can share a common address
+        Address address = null;
+        if (queryReply.isFirewalled()) {
+            address = pushEndpointFactory.createPushEndpoint(queryReply.getClientGUID(), queryReply.getPushProxies(), PushEndpoint.PLAIN, queryReply.getFWTransferVersion(), new ConnectableImpl(queryReply.getIP(), queryReply.getPort(), queryReply.isTLSCapable()));
+        } else {
+            address = new ConnectableImpl(queryReply.getIP(), queryReply.getPort(), queryReply.isTLSCapable());
+        }
+        if (cachedRFD != null && cachedRFD.getAddress().equals(address)) {
             return cachedRFD;
-        else {
-            RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(queryReply.getIP(), queryReply.getPort(), getIndex(),
+        } else {
+            RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(address, getIndex(),
                     getName(), getSize(), queryReply.getClientGUID(), queryReply.getSpeed(), queryReply.getSupportsChat(), queryReply.calculateQualityOfService(), queryReply.getSupportsBrowseHost(),
-                    getDocument(), getUrns(), queryReply.isReplyToMulticastQuery(), queryReply.isFirewalled(), queryReply.getVendor(), queryReply.getPushProxies(), getCreateTime(),
-                    queryReply.getFWTransferVersion(), queryReply.isTLSCapable());
+                    getDocument(), getUrns(), queryReply.isReplyToMulticastQuery(), queryReply.getVendor(), getCreateTime());
             cachedRFD = rfd;
             return rfd;
         }

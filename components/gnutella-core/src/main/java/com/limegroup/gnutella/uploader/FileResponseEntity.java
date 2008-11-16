@@ -102,6 +102,8 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
     
     @Override
     public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
+//        Throwable t = new Throwable();
+//        LOG.debug(t, t);
         // flush current buffer
         if (buffer != null && buffer.hasRemaining()) {
             int written = contentEncoder.write(buffer);
@@ -110,10 +112,14 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
                 activateTimeout();
                 return true;
             } else if (remaining == 0) {
+                if (LOG.isTraceEnabled())
+                    LOG.trace("... buffer drained and upload complete");
                 reader.release(piece);
                 return false;
             }
         } else if (remaining == 0) {
+            if (LOG.isTraceEnabled())
+                LOG.trace("upload complete");
             // handle special case of empty file upload
             return false;            
         }
@@ -134,6 +140,8 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
                         buffer = null;
                         ioctrl.suspendOutput();
                         activateTimeout();
+                        if (LOG.isTraceEnabled())
+                            LOG.trace("Waiting for file contents to be read");
                         return true;
                     }
                     buffer = piece.getBuffer();
@@ -145,10 +153,14 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
                 LOG.trace("Uploading " + file.getName() + " [remaining=" + remaining + "+" + buffer.remaining() + "]");
 
             written = contentEncoder.write(buffer);
+//            if (LOG.isTraceEnabled())
+//                LOG.trace("wrote " + written + " bytes");
             uploader.addAmountUploaded(written);
         } while (written > 0 && remaining > 0);
 
         activateTimeout();
+//        if (LOG.isTraceEnabled())
+//                LOG.trace("returning " + (remaining > 0 || buffer.hasRemaining()) + " [remaining: " + remaining + ", buffer.hasRemaining(): " + buffer.hasRemaining() + "]");
         return remaining > 0 || buffer.hasRemaining();
     }
 
@@ -178,7 +190,10 @@ public class FileResponseEntity extends AbstractProducingNHttpEntity {
         }
 
         public void readSuccessful() {
-            ioControl.requestOutput();
+            synchronized (FileResponseEntity.this) {
+                LOG.debug("read successful");
+                ioControl.requestOutput();
+            }
         }
 
     }

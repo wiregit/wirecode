@@ -1,13 +1,12 @@
 package com.limegroup.gnutella;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
-import org.limewire.collection.IntervalSet;
+import org.apache.http.auth.Credentials;
 import org.limewire.io.Address;
+import org.limewire.security.SecureMessage.Status;
 
-import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 /**
@@ -23,42 +22,10 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     /** Typed reference to an empty list of RemoteFileDescs. */
     public static final List<RemoteFileDesc> EMPTY_LIST = Collections.emptyList();
 
-    public void setSerializeProxies();
-
-    /**
-     * Returns true if this is a partial source
-     */
-    public boolean isPartialSource();
-
     /**
      * @return whether this rfd points to myself.
      */
     public boolean isMe(byte[] myClientGUID);
-
-    /**
-     * Accessor for the available ranges.
-     */
-    public IntervalSet getAvailableRanges();
-
-    /**
-     * Mutator for the available ranges.
-     */
-    public void setAvailableRanges(IntervalSet availableRanges);
-
-    /**
-     * Returns the current failed count.
-     */
-    public int getFailedCount();
-
-    /**
-     * Increments the failed count by one.
-     */
-    public void incrementFailedCount();
-
-    /**
-     * Resets the failed count back to zero.
-     */
-    public void resetFailedCount();
 
     /**
      * Determines whether or not this RemoteFileDesc was created
@@ -67,66 +34,16 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     public boolean isFromAlternateLocation();
 
     /**
-     * @return true if this host is still busy and should not be retried
+     * Returns the url encoded HTTP request path.
      */
-    public boolean isBusy();
-
-    public boolean isBusy(long now);
-
+    public String getUrlPath();
+    
     /**
-     * @return time to wait until this host will be ready to be retried
-     * in seconds
+     * Returns credentials needed for downloading this file from the remote
+     * side
+     * @return null if no credentials are needed
      */
-    public int getWaitTime(long now);
-
-    /**
-     * Mutator for _earliestRetryTime. 
-     * @param seconds number of seconds to wait before retrying
-     */
-    public void setRetryAfter(int seconds);
-
-    /**
-     * @return Returns the _THEXFailed.
-     */
-    public boolean hasTHEXFailed();
-
-    /**
-     * Having THEX with this host is no good. We can get our THEX from anybody,
-     * so we won't bother again. 
-     */
-    public void setTHEXFailed();
-
-    /**
-     * Sets this RFD as downloading.
-     */
-    public void setDownloading(boolean dl);
-
-    /**
-     * Determines if this RFD is downloading.
-     *
-     * @return whether or not this is downloading
-     */
-    public boolean isDownloading();
-
-    /**
-     * Returns an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>.
-     *
-     * @return an <tt>URL</tt> instance for this <tt>RemoteFileDesc</tt>
-     */
-    public URL getUrl();
-
-    /**
-     * Determines whether or not this host reported a private address.
-     *
-     * @return <tt>true</tt> if the address for this host is private,
-     *  otherwise <tt>false</tt>.  If the address is unknown, returns
-     *  <tt>true</tt>
-     *
-     * TODO:: use InetAddress in this class for the host so that we don't 
-     * have to go through the process of creating one each time we check
-     * it it's a private address
-     */
-    public boolean isPrivate();
+    public Credentials getCredentials();
 
     /**
      * @return true if I am not a multicast host and have a hash.
@@ -135,36 +52,13 @@ public interface RemoteFileDesc extends RemoteFileDetails {
      */
     public boolean isAltLocCapable();
 
-    /**
-     * 
-     * @return whether a push should be sent to this rfd.
-     */
-    public boolean needsPush();
-    
-    /**
-     * 
-     * @return whether a push should be sent to this rfd.
-     * @param statsTracker used to track download statistics
-     */
-    public boolean needsPush(DownloadStatsTracker statsTracker);
-
-    /**
-     * 
-     * @return the push address.
-     */
-    public PushEndpoint getPushAddr();
-
-    public void setQueueStatus(int status);
-
-    public int getQueueStatus();
-
     public void setSpamRating(float rating);
 
     public float getSpamRating();
 
-    public int getSecureStatus();
+    public Status getSecureStatus();
 
-    public void setSecureStatus(int secureStatus);
+    public void setSecureStatus(Status secureStatus);
 
     /**
      * Returns a memento that can be used for serializing this object.
@@ -173,6 +67,6 @@ public interface RemoteFileDesc extends RemoteFileDetails {
     
     public boolean isSpam();
 
-    public Address toAddress();
+    public Address getAddress();
 
 }

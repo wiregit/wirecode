@@ -476,8 +476,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         REQUESTS.put(session.getHost(), rqc);
         rqc.countRequest();
         if (rqc.isHammering()) {
-            if (LOG.isWarnEnabled())
-                LOG.warn(session.getUploader() + " banned.");
+           if (LOG.isWarnEnabled())
+                LOG.warn("BANNED: " + session.getHost() + " (hammering)");
             return QueueStatus.BANNED;
         }
 
@@ -488,34 +488,46 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         URN sha1 = fd.getSHA1Urn();
 
-        if (rqc.isDupe(sha1) && UploadSettings.CHECK_DUPES.getValue())
-            return QueueStatus.REJECTED;
+        if (rqc.isDupe(sha1) && UploadSettings.CHECK_DUPES.getValue()) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("REJECTED: request " + sha1 + " from " + session.getHost() + " (duplicate request)");
+            return QueueStatus.REJECTED;    
+        }
 
         // check the host limit unless this is a poll
         if (slotManager.positionInQueue(session) == -1
                 && hostLimitReached(session.getHost())) {
             if (LOG.isDebugEnabled())
-                LOG.debug("host limit reached for " + session.getHost());
+                LOG.debug("REJECTED: request " + sha1 + " from " + session.getHost() + " (host limit reached)");
             return QueueStatus.REJECTED;
         }
 
         int queued = slotManager.pollForSlot(session, session.getUploader()
                 .supportsQueueing(), session.getUploader().isPriorityShare());
 
-        if (LOG.isDebugEnabled())
-            LOG.debug("queued at " + queued);
+//        if (LOG.isDebugEnabled())
+//            LOG.debug("queued at " + queued);
 
-        if (queued == -1) // not accepted nor queued.
+        if (queued == -1) { // not accepted nor queued.
+            if (LOG.isDebugEnabled())
+                LOG.debug("QUEUED: request " + sha1 + " from " + session.getHost() + " (attempt to queue failed)");
             return QueueStatus.REJECTED;
+        }
 
         if (queued > 0 && session.poll()) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("BANNED: request " + sha1 + " from " + session.getHost());
             slotManager.cancelRequest(session);
             // TODO we used to just drop the connection
             return QueueStatus.BANNED;
         }
         if (queued > 0) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("QUEUED: request " + sha1 + " from " + session.getHost());
             return QueueStatus.QUEUED;
         } else {
+            if (LOG.isDebugEnabled())
+                LOG.debug("ACCEPTED: request " + sha1 + " from " + session.getHost());
             rqc.startedTransfer(sha1);
             return QueueStatus.ACCEPTED;
         }

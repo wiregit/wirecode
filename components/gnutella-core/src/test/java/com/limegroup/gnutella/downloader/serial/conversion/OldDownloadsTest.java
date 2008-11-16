@@ -22,8 +22,7 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializerImpl;
-import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTask;
-import com.limegroup.gnutella.downloader.serial.conversion.OldDownloadConverterImpl;
+import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -32,9 +31,15 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         
     private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
+    private Injector injector;
     
     public OldDownloadsTest(String name) {
         super(name);
+    }
+    
+    @Override
+    protected void setUp() throws Exception {
+        injector = LimeTestUtils.createInjector();
     }
     
     public static void main(String[] args) {
@@ -83,7 +88,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         DownloadSerializeSettings newSettings = new DownloadSerialSettingsStub(newSaveFile, newSaveFile);
         DownloadSerializer downloadSerializer = new DownloadSerializerImpl(newSettings);
         
-        DownloadUpgradeTask downloadUpgradeTask = new DownloadUpgradeTask(new OldDownloadConverterImpl(), oldSettings, newSettings, downloadSerializer); 
+        DownloadUpgradeTask downloadUpgradeTask = new DownloadUpgradeTask(injector.getInstance(OldDownloadConverter.class), oldSettings, newSettings, downloadSerializer); 
         downloadUpgradeTask.upgrade();
         
         return downloadSerializer;

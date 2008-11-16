@@ -6,7 +6,15 @@ package org.limewire.core.api.library;
  */
 public interface FileItem extends PropertiableFile {
     
+    /**
+     * @return the name without the extension
+     */
     String getName();
+    
+    /**
+     * @return the full file name including extension
+     */
+    String getFileName(); 
     
     long getSize();
 

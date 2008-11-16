@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
+import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.util.StringUtils;
 
@@ -29,26 +31,30 @@ class FileRequestParser {
 
     /**
      * Parses a URN request.
-     * 
      * @param uri the <tt>String</tt> instance containing the get request
+     * 
      * @return information about the requested file, <code>null</code> if the
      *         request type is invalid or the URN does not map to a valid file
      * @throws IOException thrown if the request is malformed
      * @throws HttpException 
      */
     public static FileRequest parseRequest(HttpRequestFileListProvider fileListProvider, final String uri,
-            HttpRequest request, HttpContext context) throws IOException, HttpException {
+            HttpContext context) throws IOException, com.limegroup.gnutella.uploader.HttpException {
+        
         // Only parse URI requests.
-        if(!uri.toLowerCase(Locale.US).startsWith("/uri-res/")) {
+        int index = uri.toLowerCase(Locale.US).indexOf("/uri-res/");
+        if(index == -1) {
             throw new IOException("invalid request");
         }
         
-        URN urn = URN.createSHA1UrnFromHttpRequest(uri + " HTTP/1.1");
+        String uriRes = uri.substring(index);
+        
+        URN urn = URN.createSHA1UrnFromHttpRequest(uriRes + " HTTP/1.1");
     
         // Parse the service identifier, whether N2R, N2X or something
         // we cannot satisfy. URI scheme names are not case-sensitive.
         RequestType requestType;
-        String requestUpper = uri.toUpperCase(Locale.US);
+        String requestUpper = uriRes.toUpperCase(Locale.US);
         if (requestUpper.indexOf(HTTPConstants.NAME_TO_THEX) > 0) {
             requestType = RequestType.THEX;
         } else if (requestUpper.indexOf(HTTPConstants.NAME_TO_RESOURCE) > 0) {
@@ -58,7 +64,7 @@ class FileRequestParser {
         }
     
         FileDesc desc = null;
-        for (SharedFileList fileList : fileListProvider.getFileLists(request, context)) {
+        for (SharedFileList fileList : fileListProvider.getFileLists(index == 0 ? null : parseFriendId(uri.substring(0, index)), context)) {
             desc = fileList.getFileDesc(urn);
             if (desc != null) {
                 break;
@@ -69,6 +75,30 @@ class FileRequestParser {
         } else {
             return new FileRequest(desc, requestType);
         }
+    }
+
+    static String parseFriendId(String uriString) throws com.limegroup.gnutella.uploader.HttpException {
+        try {
+            URI uri = new URI(uriString);
+            String path = uri.getPath();
+            if (path == null) {
+                throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
+            }
+            if (path.endsWith("/")) {
+                int previousSlash = path.lastIndexOf('/', path.length() - 2);
+                if (previousSlash != -1) {
+                    return path.substring(previousSlash + 1, path.length() - 1);
+                }
+            } else {
+                int lastSlash = path.lastIndexOf('/');
+                if (lastSlash != -1) {
+                    return path.substring(lastSlash + 1);
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        throw new com.limegroup.gnutella.uploader.HttpException("no friend id:", HttpStatus.SC_BAD_REQUEST);
     }
 
     /** Record for storing information about a file request. */

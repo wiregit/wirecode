@@ -9,7 +9,7 @@ import org.limewire.nio.observer.IOErrorObserver;
 public interface AddressResolutionObserver extends IOErrorObserver {
 
     /**
-     * Called with the resolved addresses. 
+     * Called with the resolved address. 
      */
-    void resolved(Address...addresses);
+    void resolved(Address address);
 }

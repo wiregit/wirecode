@@ -62,7 +62,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         RemoteFileDesc rfd = newRFDPush(PPORT_1, 1);
 
-        assertTrue(rfd.needsPush());
+        assertTrue(rfd.getAddress() instanceof PushEndpoint);
 
         RemoteFileDesc[] rfds = { rfd };
         TestUploader uploader = injector.getInstance(TestUploader.class);
@@ -265,8 +265,8 @@ public class DownloadPushTest extends DownloadTestCase {
 
         RemoteFileDesc pushRFD = newRFDPush(PPORT_1, 1, 2);
 
-        assertFalse(pushRFD.supportsFWTransfer());
-        assertTrue(pushRFD.needsPush());
+        PushEndpoint pushEndpoint = (PushEndpoint) pushRFD.getAddress();
+        assertEquals(0, pushEndpoint.getFWTVersion());
 
         RemoteFileDesc openRFD1 = newRFDWithURN(PORTS[0], TestFile.hash().toString(), false);
         RemoteFileDesc openRFD2 = newRFDWithURN(PORTS[1], TestFile.hash().toString(), false);
@@ -311,6 +311,28 @@ public class DownloadPushTest extends DownloadTestCase {
      * This test that the X-FWTP is parsed and the push endpoint address and port
      * are updated with the value
      */
+    // problem is:
+    // old code ranked as follows: GUID:C72D25808E87DE738FD57BCF51F5FF00, address: 1.1.1.1:6346,
+    // proxies:{ /127.0.0.2:10002
+    // }]
+    // 
+    // GUID:C72D25808E87DE738FD57BCF51F5FF00, address: 127.0.0.1:7498,
+    // proxies:{ /1.2.3.4:5
+    // /6.7.8.9:10
+    //
+    // new code picks:
+    // GUID:7ECD430C3F5E93BB76B5CF3706C40700, address: 127.0.0.1:6346,
+    // proxies:{ /127.0.0.2:10002
+    //
+    // GUID:7ECD430C3F5E93BB76B5CF3706C40700, address: 127.0.0.1:7498,
+    // proxies:{ /1.2.3.4:5
+    //    /6.7.8.9:10
+    //
+    // GUID:7ECD430C3F5E93BB76B5CF3706C40700, address: 127.0.0.1:7498,
+    // proxies:{ /1.2.3.4:5
+    //    /6.7.8.9:10
+    //    /127.0.0.2:10002
+    //    }]
     public void testPushLocUpdatesStatus() throws Exception {
         int successfulPushes = ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("testing that a push loc updates its status");
@@ -350,8 +372,8 @@ public class DownloadPushTest extends DownloadTestCase {
 
         RemoteFileDesc openRFD = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 1, 2);
-        assertFalse(pushRFD2.supportsFWTransfer());
-        assertTrue(pushRFD2.needsPush());
+        PushEndpoint pushEndpoint = (PushEndpoint) pushRFD2.getAddress();
+        assertEquals(0, pushEndpoint.getFWTVersion());
 
         testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), pusher2, guid, _currentTestName);
 
@@ -374,13 +396,14 @@ public class DownloadPushTest extends DownloadTestCase {
         assertEquals(RUDPUtils.VERSION, pushLoc.supportsFWTVersion());
 
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1, remoteFileDescFactory);
-        assertTrue(readRFD.getPushAddr().getFWTVersion() > 0);
-        assertTrue(readRFD.supportsFWTransfer());
-        assertEquals(readRFD.getPushAddr().getPort(), FWTPort);
+        pushEndpoint = (PushEndpoint) readRFD.getAddress();
+        assertTrue(pushEndpoint.getFWTVersion() > 0);
+        assertEquals(pushEndpoint.getPort(), FWTPort);
 
-        assertEquals(expectedProxies.size(), readRFD.getPushProxies().size());
+        assertEquals("expected: " + expectedProxies + ", actual: " + pushEndpoint.getProxies(), 
+                expectedProxies.size(), pushEndpoint.getProxies().size());
 
-        assertTrue(expectedProxies.containsAll(readRFD.getPushProxies()));
+        assertTrue(expectedProxies.containsAll(pushEndpoint.getProxies()));
         
         assertEquals(successfulPushes + 1, ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue());
     }

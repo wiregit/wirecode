@@ -6,9 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,6 +16,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -30,8 +33,11 @@ import org.limewire.core.settings.SpeedConstants;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.PermanentAddress;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.net.ConnectivityChangeEvent;
+import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -214,6 +220,19 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  elements of type RemoteFileDesc and URLRemoteFileDesc
      */
     private Set<RemoteFileDesc> cachedRFDs;
+    
+    /**
+     * Set of {@link RemoteFileDesc remote file descs} that can't be resolved
+     * or connected to yet.
+     */
+    private final Set<RemoteFileDesc> permanentRFDs = new ConcurrentSkipListSet<RemoteFileDesc>(new Comparator<RemoteFileDesc>() {
+        @Override
+        public int compare(RemoteFileDesc o1, RemoteFileDesc o2) {
+            return o1.hashCode() - o2.hashCode();
+        }
+    });
+    
+    private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> remoteFileDescToContext = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>();
 
 	/**
 	 * The ranker used to select the next host we should connect to
@@ -293,7 +312,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	/**
 	 * A list of the most recent failed locations, so we don't try them again.
 	 */
-	private Set<RemoteHostData> invalidAlts;
+	private Set<RemoteFileDesc> invalidAlts;
 
     /**
      * Cache the most recent failed locations. 
@@ -433,6 +452,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final RemoteFileDescFactory remoteFileDescFactory;
     protected final Provider<PushList> pushListProvider;
 
+    private final SocketsManager socketsManager;
+    
+    private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
+
     /**
      * Creates a new ManagedDownload to download the given files.
      * 
@@ -454,7 +477,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider,
+            SocketsManager socketsManager) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
@@ -462,6 +486,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.downloadCallback = downloadCallback;
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
+        this.socketsManager = socketsManager;
         this.requeryManager = requeryManagerFactory.createRequeryManager(new RequeryListenerImpl());
         this.queryRequestFactory = queryRequestFactory;
         this.onDemandUnicaster = onDemandUnicaster;
@@ -480,13 +505,22 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
+        socketsManager.addListener(connectivityChangeEventHandler);
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
-        if(rfds == null)
+        if(rfds == null) {
+            LOG.debug("rfds are null");
             rfds = Collections.emptyList();
+        }
         
         cachedRFDs.addAll(rfds);
+        for (RemoteFileDesc rfd : rfds) {
+            if (rfd.getAddress() instanceof PermanentAddress) {
+                permanentRFDs.add(rfd);
+            }
+        }
+        
         if (rfds.size() > 0) 
             initPropertiesMap(rfds.iterator().next());
 
@@ -553,7 +587,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         synchronized(altLock) {
             validAlts = new HashSet<AlternateLocation>();
             // stores up to 1000 locations for up to an hour each
-            invalidAlts = new FixedSizeExpiringSet<RemoteHostData>(1000,60*60*1000L);
+            invalidAlts = new FixedSizeExpiringSet<RemoteFileDesc>(1000,60*60*1000L);
             // stores up to 10 locations for up to 10 minutes
             recentInvalidAlts = new FixedSizeExpiringSet<AlternateLocation>(10, 10*60*1000L);
         }
@@ -931,7 +965,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private synchronized void initializeRanker() {
         ranker.setMeshHandler(this);
-        ranker.addToPool(cachedRFDs);
+        ranker.addToPool(getContexts(cachedRFDs));
     }
     
     /**
@@ -1136,27 +1170,18 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected boolean hostIsAllowed(RemoteFileDesc other) {
          // If this host is banned, don't add.
-        if ( !ipFilter.allow(other.getAddress()) )
+        if (!ipFilter.allow(other.getAddress()))
             return false;            
 
-        if (networkManager.acceptedIncomingConnection() ||
-                !other.isFirewalled() ||
-                (other.supportsFWTransfer() && networkManager.canDoFWT())) {
-            // See if we have already tried and failed with this location
-            // This is only done if the location we're trying is an alternate..
-            synchronized(altLock) {
-                if (other.isFromAlternateLocation() && 
-                        invalidAlts.contains(new RemoteHostData(other.getAddress(), other.getPort(), other.getClientGUID()))) {
-                    return false;
-                }
+        // See if we have already tried and failed with this location
+        // This is only done if the location we're trying is an alternate..
+        synchronized(altLock) {
+            if (other.isFromAlternateLocation() && invalidAlts.contains(other)) {
+                return false;
             }
-            
-            return true;
         }
-        return false;
+        return true;
     }
-              
-
 
     private static boolean initDone = false; // used to init
 
@@ -1314,10 +1339,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(c.size());
         for(RemoteFileDesc rfd : c) {
             if (allowAddition(rfd)) {
-                // this is set here and not for all remote descs since only these
-                // could have possible come from the UI, this should be solved differently
-                // this is set even if the host is not allowed as a download source for UI's sake
-                rfd.setDownloading(true);
                 if (hostIsAllowed(rfd)) {
                     l.add(rfd);
                 }
@@ -1353,6 +1374,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from 
         copy.removeAll(currentRFDs);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("remaining new rfds: " + copy);
+        }
         
         byte[] myGUID = applicationServices.getMyGUID();
         for (Iterator<RemoteFileDesc> iter = copy.iterator(); iter.hasNext();) {
@@ -1360,20 +1384,40 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // do not download from ourselves
             if (rfd.isMe(myGUID)) {
                 iter.remove();
-            } else { 
-                prepareRFD(rfd,cache);
+                continue;
             }
-         //   if(LOG.isTraceEnabled())
-         //       LOG.trace("added rfd: " + rfd);
+            
+            prepareRFD(rfd,cache);
+            
+            if (!canResolve(rfd) && !canConnect(rfd)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("rfd not connectable yet: " + rfd);
+                }
+                permanentRFDs.add(rfd);
+                iter.remove();
+            }
         }
         
-        if ( ranker.addToPool(copy) ) {
+        if ( ranker.addToPool(getContexts(copy)) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
+            LOG.debug("got new sources");
             receivedNewSources = true;
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(copy + " not added");
+            }
         }
         
         return true;
+    }
+
+    private boolean canResolve(RemoteFileDesc rfd) {
+        return socketsManager.canResolve(rfd.getAddress());
+    }
+    
+    private boolean canConnect(RemoteFileDesc rfd) {
+        return socketsManager.canConnect(rfd.getAddress());
     }
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
@@ -1383,7 +1427,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
 
         //add to allFiles for resume purposes if caching...
-        if(cache) 
+        if(cache || rfd.getAddress() instanceof PermanentAddress) 
             cachedRFDs.add(rfd);        
     }
     
@@ -1391,9 +1435,21 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#hasNewSources()
      */
     public boolean hasNewSources() {
-        return !paused && receivedNewSources;
+        return (!paused && receivedNewSources);
     }
     
+    private Collection<RemoteFileDesc> getNewConnectableSources() {
+        List<RemoteFileDesc> newlyConnectables = new ArrayList<RemoteFileDesc>();
+        for (RemoteFileDesc rfd : permanentRFDs) {
+            if (canResolve(rfd) || canConnect(rfd)) {
+                newlyConnectables.add(rfd);
+            } else {
+                LOG.debug(rfd + " not connectable");
+            }
+        }
+        return newlyConnectables;
+    }
+
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#shouldBeRestarted()
      */
@@ -1603,13 +1659,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             HTTPDownloader httpDloader = worker.getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
             
-            // no need to tell uploader about itself and since many firewalled
-            // downloads may have the same port and host, we also check their
-            // push endpoints
-            if(! (local instanceof PushAltLoc) ? 
-                    (r.getAddress().equals(rfd.getAddress()) && r.getPort()==rfd.getPort()) :
-                    r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
+            // don't notify uploader of itself, == comparison should be correct too
+            if (r.equals(rfd)) {
                 continue;
+            }
             
             //no need to send push altlocs to older uploaders
             if (local instanceof DirectAltLoc || httpDloader.wantsFalts()) {
@@ -1631,7 +1684,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 }
             }  else {
                     validAlts.remove(local);
-                    invalidAlts.add(new RemoteHostData(rfd.getAddress(), rfd.getPort(), rfd.getClientGUID()));
+                    invalidAlts.add(rfd);
                     recentInvalidAlts.add(local);
             }
         }
@@ -1666,7 +1719,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
         for(RemoteFileDesc rfd : cachedRFDs)
-            rfd.setRetryAfter(0);
+            getContext(rfd).setRetryAfter(0);
 
         if(paused) {
             paused = false;
@@ -1775,10 +1828,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (getSha1Urn() != null)
             altLocManager.removeListener(getSha1Urn(), this);
         requeryManager.cleanUp();
-        if(cachedRFDs != null) {
-            for(RemoteFileDesc rfd : cachedRFDs)
-				rfd.setDownloading(false);
-        }       
+        socketsManager.removeListener(connectivityChangeEventHandler);
     }
 
     /** 
@@ -2150,11 +2200,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Starts a new Worker thread for the given <code>RemoteFileDesc</code>.
      */
-    private void startWorker(final RemoteFileDesc rfd) {
-        DownloadWorker worker = downloadWorkerFactory.create(this, rfd, commonOutFile);
+    private void startWorker(final RemoteFileDescContext rfdContext) {
+        DownloadWorker worker = downloadWorkerFactory.create(this, rfdContext, commonOutFile);
         synchronized(this) {
             _workers.add(worker);
-            currentRFDs.add(rfd);
+            currentRFDs.add(rfdContext.getRemoteFileDesc());
         }        
         worker.start();
     }        
@@ -2224,9 +2274,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             Set<AlternateLocation> ret;
             
             if (validAlts != null) {
-                ret = new HashSet<AlternateLocation>();
-                for(AlternateLocation next : validAlts)
-                    ret.add(next);
+                ret = new HashSet<AlternateLocation>(validAlts);
             } else
                 ret = Collections.emptySet();
             
@@ -2238,11 +2286,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public Set<AlternateLocation> getInvalidAlts() {
         synchronized(altLock) {
             Set<AlternateLocation>  ret;
-            
             if (invalidAlts != null) {
-                ret = new HashSet<AlternateLocation> ();
-                for(AlternateLocation next : recentInvalidAlts)
-                    ret.add(next);
+                ret = new HashSet<AlternateLocation> (recentInvalidAlts);
             } else {
                 ret = Collections.emptySet();
             }
@@ -2342,13 +2387,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     // see if we need to update our ranker
                     ranker = getSourceRanker(ranker);
 
-                    RemoteFileDesc rfd = ranker.getBest();
+                    RemoteFileDescContext rfd = ranker.getBest();
 
                     if (rfd != null) {
                         // If the rfd was busy, that means all possible RFDs
                         // are busy - store for later
                         if (rfd.isBusy()) {
-                            addRFD(rfd);
+                            addToRanker(rfd);
                         } else {
                             if(LOG.isDebugEnabled())
                                 LOG.debug("Staring worker for RFD: " + rfd);
@@ -2407,15 +2452,22 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return false;
     }
 	
-    public synchronized void addRFD(RemoteFileDesc rfd) {
+    public synchronized void addToRanker(RemoteFileDescContext rfd) {
         if (ranker != null)
             ranker.addToPool(rfd);
 	}
     
     public synchronized void forgetRFD(RemoteFileDesc rfd) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("remove rfd: " + rfd);
+        }
+        // don't remove permanent addresses
+        if (rfd.getAddress() instanceof PermanentAddress) {
+            permanentRFDs.add(rfd);
+            return;
+        }
         if (cachedRFDs.remove(rfd) && cachedRFDs.isEmpty()) {
             // remember our last RFD
-            rfd.setSerializeProxies();
             cachedRFDs.add(rfd);
         }
     }
@@ -3153,80 +3205,42 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return ranker;
     }
     
-    /**
-     * Simple representation of a remote host.
-     */
-    private class RemoteHostData {
-    
-        /**
-         * The host's address.
-         */
-        private final String _host;
-        
-        /**
-         * The host's port.
-         */
-        private final int _port;
-    
-        /**
-         * The host's clientGUID.
-         */
-        private final byte[] _clientGUID;
-    
-        /**
-         * The cached hashCode.
-         */
-        private volatile int _hashcode = 0;
-    
-        /**
-         * Constructs a new RemoteHostData with the specified host, port & guid.
-         */
-        public RemoteHostData(String host, int port, byte[] guid) {
-            _host = host;
-            _port = port;
-            _clientGUID = guid.clone();
+    private RemoteFileDescContext getContext(RemoteFileDesc rfd) {
+        RemoteFileDescContext context = remoteFileDescToContext.get(rfd);
+        if (context != null) {
+            return context;
         }
-        
-        
-        //////accessors
-        public String getHost() {
-            return _host;
+        RemoteFileDescContext newContext = new RemoteFileDescContext(rfd);
+        context = remoteFileDescToContext.putIfAbsent(rfd, newContext);
+        if (context != null) {
+            return context;
         }
-        
-        public int getPort() {
-            return _port;
+        return newContext;
+    }
+    
+    private Collection<RemoteFileDescContext> getContexts(Collection<? extends RemoteFileDesc> rfds) {
+        List<RemoteFileDescContext> contexts = new ArrayList<RemoteFileDescContext>();
+        for (RemoteFileDesc rfd : rfds) {
+            contexts.add(getContext(rfd));
         }
+        return contexts;
+    }
     
-        public byte[] getClientGUID() {
-            return _clientGUID;
-        }
-        
-    
-        //////////////////hashtable  methods///////////////
-    
+    private class ConnectivityChangeEventHandler implements EventListener<ConnectivityChangeEvent> {
+
         @Override
-        public boolean equals(Object o) {
-            if(this == o)
-                return true;
-            
-            RemoteHostData other = (RemoteHostData)o;//dont catch ClassCastException
-            return (_host.equals(other._host) &&
-                    _port==other._port &&
-                    Arrays.equals(_clientGUID, other._clientGUID) );
-        }
-    
-        @Override
-        public int hashCode() {
-            if(_hashcode == 0) {
-                int result = 17;
-                result = (37* result)+_host.hashCode();
-                result = (37* result)+_port;
-                for(int i=0; i < _clientGUID.length; i++) 
-                    result = (37* result)+_clientGUID[i];
-                _hashcode = result;
+        public void handleEvent(ConnectivityChangeEvent event) {
+            LOG.debug("connectivity change");
+            Collection<RemoteFileDesc> newConnectableSources = getNewConnectableSources();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("new connectables: " + newConnectableSources);
+                LOG.debug("all non-connectables" + permanentRFDs);
             }
-            return _hashcode;
+            if (!newConnectableSources.isEmpty()) {
+                receivedNewSources = true;
+                addDownloadForced(newConnectableSources, true);
+            }
         }
-    
+        
     }
 }

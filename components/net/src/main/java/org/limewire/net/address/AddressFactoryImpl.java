@@ -1,13 +1,13 @@
 package org.limewire.net.address;
 
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.io.Address;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.inject.Singleton;
 
 @Singleton
 public class AddressFactoryImpl implements AddressFactory {
@@ -16,14 +16,28 @@ public class AddressFactoryImpl implements AddressFactory {
     private ConcurrentHashMap<String, AddressSerializer> serializerTypeMap = new ConcurrentHashMap<String, AddressSerializer>();
     private ConcurrentHashMap<Class<? extends Address>, AddressSerializer> serializerClassMap = new ConcurrentHashMap<Class<? extends Address>, AddressSerializer>();
 
-    public void addSerializer(AddressSerializer serializer) {
+    public void registerSerializer(AddressSerializer serializer) {
         LOG.debugf("adding serializer type = {0}, class = {1}", serializer.getAddressType(), serializer.getAddressClass());
         serializerTypeMap.put(serializer.getAddressType(), serializer);
         serializerClassMap.put(serializer.getAddressClass(), serializer);
     }
 
-    public AddressSerializer getSerializer(Class<? extends Address> addressClass) throws IOException {
-        Class [] interfaces = addressClass.getInterfaces();
+    public AddressSerializer getSerializer(Class<? extends Address> addressClass) {
+        Class c = addressClass;
+        AddressSerializer serializer;
+        do {
+            Class[] interfaces = c.getInterfaces();
+            serializer = getSerializer(c, interfaces);
+            c = c.getSuperclass();
+        } while (serializer == null && c != null);
+        if(serializer != null) {
+            return serializer;
+        } else {
+            throw new IllegalArgumentException("no serializer available for: " + addressClass);
+        }
+    }
+
+    private AddressSerializer getSerializer(Class addressClass, Class[] interfaces) {
         AddressSerializer serializer = serializerClassMap.get(addressClass);
         if(serializer != null) {
             return serializer;
@@ -36,7 +50,7 @@ public class AddressFactoryImpl implements AddressFactory {
                 }
             }
         }
-        throw new IOException("unknown message type: " + addressClass);
+        return null;
     }
 
     public AddressSerializer getSerializer(String addressType) {
@@ -51,11 +65,4 @@ public class AddressFactoryImpl implements AddressFactory {
         throw new IOException("unknown message type: " + type);
     }
 
-    public byte[] serialize(Address address) throws IOException {
-        AddressSerializer serializer = getSerializer(address.getClass());
-        if(serializer != null) {
-            return serializer.serialize(address);
-        }
-        throw new IOException("unknown message type: " + address.getClass());
-    }
 }

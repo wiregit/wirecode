@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.search;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,11 +15,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
@@ -29,9 +31,11 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.filters.response.ResponseFilterFactory;
@@ -93,6 +97,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     
     private volatile ResponseFilter responseFilter;
 
+    private final PushEndpointFactory pushEndpointFactory;
+
     @Inject
     public SearchResultHandlerImpl(NetworkManager networkManager,
             Provider<ActivityCallback> activityCallback,
@@ -101,6 +107,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             Provider<SpamManager> spamManager,
             RemoteFileDescFactory remoteFileDescFactory,
             NetworkInstanceUtils networkInstanceUtils,
+            PushEndpointFactory pushEndpointFactory,
             ResponseFilterFactory responseFilterFactory) {
         this.networkManager = networkManager;
         this.activityCallback = activityCallback;
@@ -109,6 +116,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         this.spamManager = spamManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.pushEndpointFactory = pushEndpointFactory;
         this.responseFilter = responseFilterFactory.createResponseFilter();
     }
 
@@ -259,8 +267,8 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         }
 
         // throw away results that aren't secure.
-        int secureStatus = qr.getSecureStatus();
-        if(secureStatus == SecureMessage.FAILED) {
+        Status secureStatus = qr.getSecureStatus();
+        if(secureStatus == Status.FAILED) {
             return;
         }
         
@@ -276,9 +284,21 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
                 continue;
             }
             
+            // If there was an action, only allow it if it's a secure message.
+            LimeXMLDocument doc = response.getDocument();
+            if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
+               doc != null && !"".equals(doc.getAction()) && secureStatus != Status.SECURE) {
+                continue;
+            }
+            
             // we'll be showing the result to the user, count it
             countClassC(qr,response);
-            RemoteFileDesc rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory);
+            RemoteFileDesc rfd;
+            try {
+                rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory, pushEndpointFactory);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException("should not have happened", e);
+            }
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
             activityCallback.get().handleQueryResult(rfd, qr, alts);
@@ -470,4 +490,3 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     };
 
 }
-

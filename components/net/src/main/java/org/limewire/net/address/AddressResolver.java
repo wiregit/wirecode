@@ -18,6 +18,6 @@ public interface AddressResolver {
      * Asynchronously resolves the address to possibly several other addresses and
      * notifies <code>observer</code> of the resolved addresses.
      */
-    void resolve(Address address, int timeout, AddressResolutionObserver observer);
+    void resolve(Address address, AddressResolutionObserver observer);
     
 }

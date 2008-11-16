@@ -118,11 +118,14 @@ public class BrowseHostHandler {
         try {
             AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
             if(addressFeature != null) {
-                Socket socket = socketsManager.connect((addressFeature).getFeature(), (int)EXPIRE_TIME, new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("browsing address: " + addressFeature.getFeature());
+                }
+                Socket socket = socketsManager.connect(addressFeature.getFeature(), new BlockingConnectObserver()).getSocket(EXPIRE_TIME, TimeUnit.MILLISECONDS);
                 browseHost(socket, friendPresence);
                 browseListener.browseFinished(true);
-                return;    
-            }            
+                return;
+            }
         } catch (IOException ie) {
             LOG.debug("Error during browse host", ie);
         } catch (URISyntaxException e) {

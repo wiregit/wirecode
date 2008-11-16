@@ -5,11 +5,13 @@ import java.net.URL;
 import java.util.Set;
 
 import org.limewire.core.settings.SpeedConstants;
-import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.Address;
+import org.limewire.net.address.AddressFactory;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * A RemoteFileDesc augmented with a URL, which might be different from the
@@ -26,11 +28,10 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * 
      * @param url the url
      */
-    UrlRemoteFileDescImpl(String host, int port, String filename, long size,
-            Set<? extends URN> urns, URL url, NetworkInstanceUtils networkInstanceUtils) {
-        super(host, port, 1, filename, size, new byte[16], SpeedConstants.T3_SPEED_INT, false, 3,
-                false, null, urns, false, false, "", null, -1, 0, null, false, true,
-                networkInstanceUtils);
+    UrlRemoteFileDescImpl(Address address, String filename, long size,
+            Set<? extends URN> urns, URL url, AddressFactory addressFactory) {
+        super(address, 1, filename, size, DataUtils.EMPTY_GUID, SpeedConstants.T3_SPEED_INT, false, 3, false, 
+                null, urns, false, "", -1, false, addressFactory);
         this._url = url;
     }
 
@@ -39,8 +40,8 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * independent of getName()/getIndex().
      */
     @Override
-    public URL getUrl() {
-        return _url;
+    public String getUrlPath() {
+        return _url.getPath();
     }
     
     @Override

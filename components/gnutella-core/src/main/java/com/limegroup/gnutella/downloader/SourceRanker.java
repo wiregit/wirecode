@@ -2,21 +2,19 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Collection;
 
-import com.limegroup.gnutella.RemoteFileDesc;
-
 public interface SourceRanker {
 
     /**
      * @param hosts a collection of remote hosts to rank
      * @return if we didn't know about at least one of the hosts
      */
-    public boolean addToPool(Collection<? extends RemoteFileDesc> hosts);
+    public boolean addToPool(Collection<? extends RemoteFileDescContext> hosts);
 
     /**
      * @param host the host that the ranker should consider
      * @return if we did not already know about this host
      */
-    public boolean addToPool(RemoteFileDesc host);
+    public boolean addToPool(RemoteFileDescContext host);
 
     /**
      * @return whether the ranker has any more potential sources
@@ -24,9 +22,10 @@ public interface SourceRanker {
     public boolean hasMore();
 
     /**
-     * @return the source that should be tried next
+     * @return the source that should be tried next or <code>null</code>
+     * if there is none
      */
-    public RemoteFileDesc getBest();
+    public RemoteFileDescContext getBest();
 
     /**
      * @return the number of hosts this ranker knows about
@@ -66,5 +65,5 @@ public interface SourceRanker {
     /**
      * @return the collection of hosts that can be shared with other rankers
      */
-    public Collection<RemoteFileDesc> getShareableHosts();
+    public Collection<RemoteFileDescContext> getShareableHosts();
 }

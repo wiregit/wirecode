@@ -61,9 +61,9 @@ public class SameNATAddressResolverTest extends BaseTestCase {
     public void testResolvesSameNatAddressToConnectable() throws Exception {
         BlockingAddressResolutionObserver observer = new BlockingAddressResolutionObserver();
         FirewalledAddress behindSameNatAddress = createAddress("129.0.0.1", "192.168.0.2");
-        resolver.resolve(behindSameNatAddress, 1, observer);
-        Address[] resolvedAddresses = observer.getAddresses();
-        Connectable connectable = (Connectable) resolvedAddresses[0];
+        resolver.resolve(behindSameNatAddress, observer);
+        Address resolvedAddress = observer.getAddress();
+        Connectable connectable = (Connectable) resolvedAddress;
         assertEquals("192.168.0.2", connectable.getAddress());
     }
     
@@ -71,7 +71,7 @@ public class SameNATAddressResolverTest extends BaseTestCase {
         BlockingAddressResolutionObserver observer = new BlockingAddressResolutionObserver();
         FirewalledAddress samePublicAddressDifferentSiteLocalNetwork = createAddress("129.0.0.1", "172.16.0.5");
         try {
-            resolver.resolve(samePublicAddressDifferentSiteLocalNetwork, 1, observer);
+            resolver.resolve(samePublicAddressDifferentSiteLocalNetwork, observer);
             fail("expected assertion error");
         } catch (AssertionError ae) {
         }
@@ -81,7 +81,7 @@ public class SameNATAddressResolverTest extends BaseTestCase {
         BlockingAddressResolutionObserver observer = new BlockingAddressResolutionObserver();
         FirewalledAddress samePublicAddressDifferentSiteLocalNetwork = createAddress("128.0.0.1", "191.168.0.2");
         try {
-            resolver.resolve(samePublicAddressDifferentSiteLocalNetwork, 1, observer);
+            resolver.resolve(samePublicAddressDifferentSiteLocalNetwork, observer);
             fail("expected assertion error");
         } catch (AssertionError ae) {
         }

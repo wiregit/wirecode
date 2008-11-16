@@ -12,7 +12,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
@@ -65,7 +64,7 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.HTTPDownloaderFactory#create(java.net.Socket, com.limegroup.gnutella.RemoteFileDesc, com.limegroup.gnutella.downloader.VerifyingFile, boolean)
      */
-    public HTTPDownloader create(Socket socket, RemoteFileDesc rfd, VerifyingFile incompleteFile,
+    public HTTPDownloader create(Socket socket, RemoteFileDescContext rfd, VerifyingFile incompleteFile,
             boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork, true, networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache.get(),

@@ -16,7 +16,7 @@ class SecureResultFilter implements ResponseFilter {
         return !ApplicationSettings.USE_SECURE_RESULTS.getValue()
             || doc == null
             || "".equals(doc.getAction())
-            || qr.getSecureStatus() == SecureMessage.SECURE;
+            || qr.getSecureStatus() == SecureMessage.Status.SECURE;
     }
 
 }

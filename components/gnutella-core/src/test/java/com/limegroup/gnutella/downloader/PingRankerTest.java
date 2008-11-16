@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
@@ -17,6 +19,8 @@ import junit.framework.Test;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.IntervalSet;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -70,6 +74,7 @@ public class PingRankerTest extends LimeTestCase {
     private PushEndpointFactory pushEndpointFactory;
     private HeadPongFactory headPongFactory;
     private RemoteFileDescFactory remoteFileDescFactory;
+    private ConcurrentMap<RemoteFileDesc, RemoteFileDescContext> contexts = new ConcurrentHashMap<RemoteFileDesc, RemoteFileDescContext>(); 
         
     public PingRankerTest(String name) {
         super(name);
@@ -163,7 +168,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testLearnsFromAltLocs() throws Exception {
         networkManager.setAcceptedIncomingConnection(true);
-        RemoteFileDesc original = newRFDWithURN("1.2.3.4",3); 
+        RemoteFileDescContext original = newRFDWithURN("1.2.3.4",3); 
         ranker.addToPool(original);
         assertEquals(1,pinger.hosts.size());
         pinger.hosts.clear();
@@ -184,11 +189,11 @@ public class PingRankerTest extends LimeTestCase {
         ranker.setMeshHandler(mesh);
         ranker.processMessage(pong, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.4"),1, spamFilterFactory.createPersonalFilter()));
         assertNotNull(mesh.sources);
-        ranker.addToPool(mesh.sources);
+        ranker.addToPool(toContexts(mesh.sources));
         
         // now the ranker should know about more than one host.
         // the best host should be the one that actually replied.
-        RemoteFileDesc best = ranker.getBest();
+        RemoteFileDescContext best = ranker.getBest();
         assertEquals(original,best);
         
         // the ranker should have more available hosts, even if we haven't
@@ -205,9 +210,9 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testIgnoresDuplicateAlts() throws Exception {
         networkManager.setAcceptedIncomingConnection(true);
-        RemoteFileDesc original = newRFDWithURN("1.2.3.4",3);
+        RemoteFileDescContext original = newRFDWithURN("1.2.3.4",3);
         GUID g = new GUID(GUID.makeGuid());
-        RemoteFileDesc original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
+        RemoteFileDescContext original2 = newPushRFD(g.bytes(),"2.2.2.2:2;3.3.3.3:3","1.2.3.6:7");
         ranker.addToPool(original);
         ranker.addToPool(original2);
         
@@ -307,7 +312,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testPrefersPongedHost() throws Exception {
         assertFalse(ranker.hasMore());
-        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(10);
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>(10);
         for (int i =0;i < 10;i++) 
             l.add(newRFDWithURN("1.2.3."+i,3));
         ranker.addToPool(l);
@@ -320,14 +325,14 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(pong, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
         
         // now this host should be prefered over other hosts.
-        RemoteFileDesc rfd = ranker.getBest();
-        assertEquals("1.2.3.5",rfd.getAddress());
+        RemoteFileDescContext rfd = ranker.getBest();
+        assertEquals("1.2.3.5", ((Connectable)rfd.getAddress()).getAddress());
      
         // but if we ask for more hosts we'll get some of the unverified ones
         assertTrue(ranker.hasMore());
         rfd = ranker.getBest();
-        assertNotEquals("1.2.3.5",rfd.getAddress());
-        assertTrue(rfd.getAddress().startsWith("1.2.3."));
+        assertNotEquals("1.2.3.5", ((Connectable)rfd.getAddress()).getAddress());
+        assertTrue(((Connectable)rfd.getAddress()).getAddress().startsWith("1.2.3."));
     }
     
     /**
@@ -335,7 +340,7 @@ public class PingRankerTest extends LimeTestCase {
      * and informs the mesh handler if such exists
      */
     public void testDiscardsNoFile() throws Exception {
-        RemoteFileDesc noFile = newRFDWithURN("1.2.3.4",3); 
+        RemoteFileDescContext noFile = newRFDWithURN("1.2.3.4",3); 
         ranker.addToPool(noFile);
         MockMesh handler = new MockMesh(ranker);
         ranker.setMeshHandler(handler);
@@ -345,7 +350,7 @@ public class PingRankerTest extends LimeTestCase {
         
         ranker.processMessage(pong, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.4"),1, spamFilterFactory.createPersonalFilter()));
         assertFalse(ranker.hasMore());
-        assertEquals(noFile,handler.rfd);
+        assertEquals(noFile.getRemoteFileDesc(), handler.rfd);
         assertFalse(handler.good);
         ranker.setMeshHandler(null);
     }
@@ -354,7 +359,7 @@ public class PingRankerTest extends LimeTestCase {
      * Tests that the ranker offers hosts that indicated they were busy last
      */
     public void testBusyOfferedLast() throws Exception {
-        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>();
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
         ranker.addToPool(l);
@@ -365,17 +370,17 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(busy, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.4"),1, spamFilterFactory.createPersonalFilter()));
         ranker.processMessage(notBusy, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
         
-        RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getAddress()); // not busy
+        RemoteFileDescContext best = ranker.getBest();
+        assertEquals("1.2.3.5", ((Connectable)best.getAddress()).getAddress()); // not busy
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getAddress()); // busy
+        assertEquals("1.2.3.4", ((Connectable)best.getAddress()).getAddress()); // busy
     }
     
     /**
      * Tests that the ranker offers hosts that have more free slots first 
      */
     public void testSortedByQueueRank() throws Exception {
-        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>();
         
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
@@ -390,12 +395,12 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(oneFree,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
         ranker.processMessage(noFree,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),1, spamFilterFactory.createPersonalFilter()));
         
-        RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getAddress()); // one free slot
+        RemoteFileDescContext best = ranker.getBest();
+        assertEquals("1.2.3.5", ((Connectable)best.getAddress()).getAddress()); // one free slot
         best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getAddress()); // no free slots
+        assertEquals("1.2.3.6", ((Connectable)best.getAddress()).getAddress()); // no free slots
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getAddress()); // one queued
+        assertEquals("1.2.3.4", ((Connectable)best.getAddress()).getAddress()); // one queued
     }
     
     /**
@@ -404,10 +409,10 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testFirewalledPreferred() throws Exception {
         networkManager.setAcceptedIncomingConnection(true);
-        RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
-        RemoteFileDesc openMoreSlots = newRFDWithURN("1.2.3.5",3);
-        RemoteFileDesc push = newPushRFD(GUID.makeGuid(),"1.2.3.6:6",null);
-        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
+        RemoteFileDescContext open = newRFDWithURN("1.2.3.4",3);
+        RemoteFileDescContext openMoreSlots = newRFDWithURN("1.2.3.5",3);
+        RemoteFileDescContext push = newPushRFD(GUID.makeGuid(),"1.2.3.6:6",null);
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>();
         l.add(open);l.add(openMoreSlots);l.add(push);
         ranker.addToPool(l);
         
@@ -419,12 +424,12 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(openMorePong,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
         ranker.processMessage(pushPong,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),6, spamFilterFactory.createPersonalFilter()));
         
-        RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getAddress()); // open with more slots
+        RemoteFileDescContext best = ranker.getBest();
+        assertEquals("1.2.3.5", ((Connectable)best.getAddress()).getAddress()); // open with more slots
         best = ranker.getBest();
-        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.6",6))); // firewalled
+        assertTrue(((PushEndpoint)best.getAddress()).getProxies().contains(new IpPortImpl("1.2.3.6",6))); // firewalled
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getAddress()); // open
+        assertEquals("1.2.3.4", ((Connectable)best.getAddress()).getAddress()); // open
         
     }
     
@@ -433,7 +438,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testPartialPreferred() throws Exception {
         networkManager.setAcceptedIncomingConnection(true);
-        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
+        List<RemoteFileDescContext> l = new ArrayList<RemoteFileDescContext>();
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
         l.add(newRFDWithURN("1.2.3.6",3));
@@ -450,14 +455,14 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(oneFreePartial,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),1, spamFilterFactory.createPersonalFilter()));
         ranker.processMessage(oneFree,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.7"),7, spamFilterFactory.createPersonalFilter()));
         
-        RemoteFileDesc best = ranker.getBest();
-        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, firewalled , one slot
+        RemoteFileDescContext best = ranker.getBest();
+        assertTrue(((PushEndpoint)best.getAddress()).getProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, firewalled , one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getAddress()); // partial, open, one slot
+        assertEquals("1.2.3.6", ((Connectable)best.getAddress()).getAddress()); // partial, open, one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getAddress()); // full, open, one slot 
+        assertEquals("1.2.3.5", ((Connectable)best.getAddress()).getAddress()); // full, open, one slot 
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getAddress()); // full, no slots, firewalled
+        assertEquals("1.2.3.4", ((Connectable)best.getAddress()).getAddress()); // full, no slots, firewalled
     }
     
     /**
@@ -465,13 +470,13 @@ public class PingRankerTest extends LimeTestCase {
      * told or learned about.
      */
     public void testGetShareable() throws Exception {
-        RemoteFileDesc rfd1, rfd2;
+        RemoteFileDescContext rfd1, rfd2;
         rfd1 = newRFDWithURN("1.2.3.4",3);
         rfd2 = newRFDWithURN("1.2.3.5",3);
         ranker.addToPool(rfd1);
         ranker.addToPool(rfd2);
         
-        Collection<RemoteFileDesc> c = ranker.getShareableHosts();
+        Collection<RemoteFileDescContext> c = ranker.getShareableHosts();
         assertTrue(c.contains(rfd1));
         assertTrue(c.contains(rfd2));
         assertEquals(2,c.size());
@@ -490,16 +495,18 @@ public class PingRankerTest extends LimeTestCase {
         // the ranker should pass on the altlocs it discovered as well.
         c = ranker.getShareableHosts();
         assertEquals(4,c.size());
-        TreeSet<IpPort> s = new TreeSet<IpPort>(IpPort.COMPARATOR);
-        s.addAll(c);
+        Set<IpPort> s = new IpPortSet();
+        for (RemoteFileDescContext context : c) {
+            s.add(((Connectable)context.getAddress()));
+        }
         assertEquals(4,s.size());
         assertTrue(s.contains(ip1));
         assertTrue(s.contains(ip2));
-        assertTrue(s.contains(rfd1));
-        assertTrue(s.contains(rfd2));
+        assertTrue(s.contains(rfd1.getAddress()));
+        assertTrue(s.contains(rfd2.getAddress()));
     }
 
-    private  RemoteFileDesc newRFDWithURN(String host, int speed) {
+    private  RemoteFileDescContext newRFDWithURN(String host, int speed) throws Exception {
         Set<URN> set = new HashSet<URN>();
         try {
             // for convenience, don't require that they pass the urn.
@@ -508,27 +515,29 @@ public class PingRankerTest extends LimeTestCase {
         } catch(Exception e) {
             fail("SHA1 not created");
         }
-        return remoteFileDescFactory.createRemoteFileDesc(host, 1, 0, "asdf", TestFile.length(), new byte[16],
-                speed, false, 4, false, null, set, false, false, "", null, -1, false);
+        return toContext(remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(host, 1, false), 0, "asdf", TestFile.length(), new byte[16],
+                speed, false, 4, false, null, set, false, "", -1));
     }
     
     /**
      * constructs an rfd for testing.  if the host parameter is not null, the 
      * rfd indicates FWT capability
      */
-    private RemoteFileDesc newPushRFD(byte [] guid,String proxy, String host) 
-    throws IOException{
+    private RemoteFileDescContext newPushRFD(byte [] guid,String proxy, String hostPort) throws Exception{
         GUID g = new GUID(guid);
         String s = g.toHexString();
-        if (host != null)
-            s = s+";fwt/1.0;" +host.substring(host.indexOf(":")+1)+":"+host.substring(0,host.indexOf(":"));
+        if (hostPort != null)
+            s = s+";fwt/1.0;" +hostPort.substring(hostPort.indexOf(":")+1)+":"+hostPort.substring(0,hostPort.indexOf(":"));
         else 
-            host = "1.1.1.1";
+            hostPort = "1.1.1.1";
          s =s+ ";"+proxy;
         
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(s);
-        RemoteFileDesc ret = newRFDWithURN(host,3);
-        ret = remoteFileDescFactory.createRemoteFileDesc(ret, pe);
+        if (hostPort.contains(":")) {
+            hostPort = hostPort.substring(0, hostPort.indexOf(":"));
+        }
+        RemoteFileDescContext ret = newRFDWithURN(hostPort,3);
+        ret = new RemoteFileDescContext(remoteFileDescFactory.createRemoteFileDesc(ret.getRemoteFileDesc(), pe));
         return ret;
     }
     
@@ -676,8 +685,23 @@ public class PingRankerTest extends LimeTestCase {
     private static void assertIpPortEquals(IpPort a, IpPort b) {
         assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
     }
+
+    private RemoteFileDescContext toContext(RemoteFileDesc rfd) {
+        RemoteFileDescContext newContext = new RemoteFileDescContext(rfd);
+        RemoteFileDescContext oldContext = contexts.putIfAbsent(rfd, newContext);
+        return oldContext != null ? oldContext : newContext;
+    }
     
-    private static class MockMesh implements MeshHandler {
+    private Collection<RemoteFileDescContext> toContexts(Collection<? extends RemoteFileDesc> hosts) {
+        List<RemoteFileDescContext> list = new ArrayList<RemoteFileDescContext>();
+        for (RemoteFileDesc host : hosts) {
+            list.add(toContext(host));
+        }
+        return list;
+    }
+
+    
+    private class MockMesh implements MeshHandler {
         private final SourceRanker ranker;
         public MockMesh(SourceRanker ranker) {
             this.ranker = ranker;
@@ -690,9 +714,12 @@ public class PingRankerTest extends LimeTestCase {
             this.good = good;
         }
 
+        @Override
         public void addPossibleSources(Collection<? extends RemoteFileDesc> c) {
             sources = c;
-            ranker.addToPool(c);
+            ranker.addToPool(toContexts(c));
         }
+        
+
     }
 }

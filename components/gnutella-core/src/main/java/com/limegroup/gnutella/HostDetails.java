@@ -1,15 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.util.Set;
 
-import org.limewire.io.Connectable;
-import org.limewire.io.IpPort;
-
-public interface HostDetails extends Connectable {
-    /** Sets whether or not this host is TLS capable. */
-    // TODO push up into Connectable?
-    void setTLSCapable(boolean tlsCapable);
-
+public interface HostDetails {
     /** 
      * Accessor for HTTP11.
      *
@@ -61,25 +53,4 @@ public interface HostDetails extends Connectable {
      */
     boolean isReplyToMulticast();
 
-    /**
-     * Accessor for the <tt>Set</tt> of <tt>PushProxyInterface</tt>s for this
-     * file -- can be empty, but is guaranteed to be non-null.
-     *
-     * @return the <tt>Set</tt> of proxy hosts that will accept push requests
-     *  for this host -- can be empty
-     */
-    Set<? extends IpPort> getPushProxies();
-
-    /**
-     * @return whether this RFD supports firewall-to-firewall transfer.
-     * For this to be true we need to have some push proxies, indication that
-     * the host supports FWT and we need to know that hosts' external address.
-     */
-    boolean supportsFWTransfer();
-    
-    /**
-	 * Returns whether or not the host that holds this file is firewalled.
-	 * @return
-	 */	
-	boolean isFirewalled();
 }

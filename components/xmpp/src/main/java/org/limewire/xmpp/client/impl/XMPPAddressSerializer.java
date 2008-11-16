@@ -7,6 +7,7 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
@@ -16,8 +17,9 @@ import com.google.inject.Singleton;
 public class XMPPAddressSerializer implements AddressSerializer {
 
     @Override
+    @Inject
     public void register(AddressFactory factory) {
-        factory.addSerializer(this);
+        factory.registerSerializer(this);
     }
     
     @Override
@@ -38,7 +40,7 @@ public class XMPPAddressSerializer implements AddressSerializer {
     @Override
     public byte[] serialize(Address address) throws IOException {
         XMPPAddress xmppAddress = (XMPPAddress)address;
-        return StringUtils.toUTF8Bytes(xmppAddress.getId());
+        return StringUtils.toUTF8Bytes(xmppAddress.getFullId());
     }
 
 }

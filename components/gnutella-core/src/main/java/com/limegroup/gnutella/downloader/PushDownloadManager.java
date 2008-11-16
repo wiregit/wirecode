@@ -3,7 +3,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -35,6 +34,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -55,6 +55,7 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,10 +64,12 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
@@ -213,17 +216,35 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
     
     @Override
-    public void connect(Address addr, int timeout, ConnectObserver observer) {
-        FirewalledAddress address = (FirewalledAddress)addr;
-        Connectable publicAddress = address.getPublicAddress();
+    public void connect(Address address, ConnectObserver observer) {
+        if (address instanceof FirewalledAddress) {
+            connect((FirewalledAddress)address, observer);
+        } else if (address instanceof PushEndpoint) {
+            connect((PushEndpoint)address, observer);
+        }
+    }
+    
+    private void connect(PushEndpoint pushEndpoint, ConnectObserver observer) {
         RemoteFileDesc fakeRFD = 
-            remoteFileDescFactory.createRemoteFileDesc(publicAddress.getAddress(), publicAddress.getPort(), SPECIAL_INDEX, "fake",
-                0, address.getClientGuid().bytes(), 0, false, 0, false, null, null, false, true, "", address.getPushProxies(),
-                -1, address.getFwtVersion(), publicAddress.isTLSCapable());
-        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(address.getClientGuid(), observer);
+            remoteFileDescFactory.createRemoteFileDesc(pushEndpoint, SPECIAL_INDEX, "fake",
+                0, pushEndpoint.getClientGUID(), 0, false, 0, false, null, URN.NO_URN_SET, false, "",
+                -1, true);
+        connect(fakeRFD, observer);
+    }
+    
+    private void connect(FirewalledAddress address, ConnectObserver observer) {
+        RemoteFileDesc fakeRFD = 
+            remoteFileDescFactory.createRemoteFileDesc(address, SPECIAL_INDEX, "fake",
+                0, address.getClientGuid().bytes(), 0, false, 0, false, null, URN.NO_URN_SET, false, "",
+                -1, true);
+        connect(fakeRFD, observer);
+    }
+    
+    private void connect(RemoteFileDesc rfd, ConnectObserver observer) {
+        PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(rfd, observer);
         pushHandlers.add(handlerAdapter);
-        sendPush(fakeRFD, new MultiShutdownableConnectObserverAdapter(observer));
-        scheduleExpirerFor(handlerAdapter, (int)(timeout * 1.5));
+        sendPush(rfd, new MultiShutdownableConnectObserverAdapter(observer));
+        scheduleExpirerFor(handlerAdapter, 60 * 1000);
     }
     
     private void scheduleExpirerFor(final PushedSocketHandlerAdapter handlerAdapter, int timeout) {
@@ -269,8 +290,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         
         if (!hasValidLocalAddress()) {
             LOG.debug("no valid address or port yet");
-            if(observer != null)
-                observer.shutdown();
+            observer.shutdown();
             return;
         }
         
@@ -286,7 +306,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             // if we can do FWT, offload a TCP pusher.
             if (networkManager.canDoFWT())
                 sendPushTCP(file, guid, observer);
-            else if (observer != null) {
+            else {
                 LOG.debug("Firewalled and can't do FWT yet");
                 observer.shutdown();
             }
@@ -341,6 +361,38 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         }
         return false;
     }
+    
+    private Set<? extends IpPort> getPushProxies(RemoteFileDesc rfd) {
+        Address address = rfd.getAddress();
+        if (address instanceof PushEndpoint) {
+            return ((PushEndpoint)address).getProxies();
+        } else if (address instanceof FirewalledAddress) {
+            return ((FirewalledAddress)address).getPushProxies();
+        }
+        return IpPort.EMPTY_SET;
+    }
+    
+    
+    private IpPort getPublicAddress(RemoteFileDesc rfd) {
+        Address address = rfd.getAddress();
+        if (address instanceof PushEndpoint) {
+            IpPort externalAddress = ((PushEndpoint)address).getValidExternalAddress();
+            return externalAddress != null ? externalAddress : ConnectableImpl.INVALID_CONNECTABLE;
+        } else if (address instanceof FirewalledAddress) {
+            return ((FirewalledAddress)address).getPublicAddress();
+        }
+        return ConnectableImpl.INVALID_CONNECTABLE;
+    }
+    
+    private int getFWTVersion(RemoteFileDesc rfd) {
+        Address address = rfd.getAddress();
+        if (address instanceof PushEndpoint) {
+            return ((PushEndpoint)address).getFWTVersion();
+        } else if (address instanceof FirewalledAddress) {
+            return ((FirewalledAddress)address).getFwtVersion();
+        }
+        return 0;
+    }
 
     /**
      * Sends a push through UDP.
@@ -362,22 +414,27 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                     
         UDPService udpService = this.udpService.get();
         //and send the push to the node 
-        try {
-            InetAddress address = InetAddress.getByName(file.getAddress());
-            
-            //don't bother sending direct push if the node reported invalid
-            //address and port.
-            if (NetworkUtils.isValidAddress(address) &&
-                    NetworkUtils.isValidPort(file.getPort())) {
-                udpService.send(pr, address, file.getPort());
+        IpPort publicAddress = getPublicAddress(file);
+        //don't bother sending direct push if the node reported invalid
+        //address and port.
+        if (NetworkUtils.isValidIpPort(publicAddress)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("sending push to host itself via udp: " + publicAddress);
             }
-        } catch(UnknownHostException notCritical) {}
-    
+            udpService.send(pr, publicAddress);
+        }
+        
         //make sure we send it to the proxies, if any
-        for(IpPort ppi : file.getPushProxies()) {
+        for(IpPort ppi : getPushProxies(file)) {
             if (ipFilter.get().allow(ppi.getAddress())) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("sending udp push to: " + ppi);
+                }
                 udpService.send(pr, ppi.getInetSocketAddress());
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("removing disallowed pushproxy: " + ppi);
+                }
                 removePushProxy(file.getClientGUID(), ppi);
             }
         }
@@ -393,14 +450,14 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
-        final boolean shouldDoFWTransfer = file.supportsFWTransfer() &&
+        final boolean shouldDoFWTransfer = getFWTVersion(file) > 0 &&
                          networkManager.canDoFWT() &&
                         !networkManager.acceptedIncomingConnection();
 
     	PushData data = new PushData(observer, file, guid, shouldDoFWTransfer);
 
     	// if there are no proxies, send through the network
-        Set<? extends IpPort> proxies = file.getPushProxies();
+        Set<? extends IpPort> proxies = getPushProxies(file);
         if(proxies.isEmpty()) {
             sendPushThroughNetwork(data);
             return;
@@ -477,6 +534,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
         //TODO: send push msg directly to a proxy if you're connected to it.
 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("using guid: " + new GUID(data.getFile().getClientGUID()));
+        }
         // set up the request string --
         // if a fw-fw transfer is required, add the extra "file" parameter.
         final String request = "/gnutella/push-proxy?ServerID=" + 
@@ -585,7 +645,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     			    LOG.debug("Starting fwt communication");
     			    AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
                     data.getMultiShutdownable().addShutdownable(socket);
-    				socket.connect(data.getFile().getInetSocketAddress(), 20000, new FWTConnectObserver(socketProcessor.get()));
+    				socket.connect(getPublicAddress(data.getFile()).getInetSocketAddress(), 20000, new FWTConnectObserver(socketProcessor.get()));
                 }
                 
                 return false; // don't need to process any more methods.
@@ -616,6 +676,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         
         // if the push was sent through udp, make sure we cancel the failover push.
         cancelUDPFailover(clientGUID);
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("receiving socket: " + socket + ", line: " + line);
+        }
 
         boolean accepted = false;
         for(PushedSocketHandler handler : pushHandlers) {
@@ -819,6 +883,11 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             this.index=index;
             this.clientGUID=clientGUID;
         }
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this);
+        }
     }
     
 
@@ -890,18 +959,36 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     @Override
     public boolean canConnect(Address address) {
-        if (address instanceof FirewalledAddress) {
-            if (hasValidLocalAddress()) {
-                if (networkManager.acceptedIncomingConnection()) {
-                    return true;
-                }
-                FirewalledAddress firewalledAddress = (FirewalledAddress)address;
-                if (networkManager.canDoFWT() && firewalledAddress.getFwtVersion() > 0) {
-                    return true;
-                }
+        int fwtVersion = getFWTVersion(address);
+        if (fwtVersion == -1) {
+            return false;
+        }
+        if (hasValidLocalAddress()) {
+            if (networkManager.acceptedIncomingConnection()) {
+                return true;
+            }
+            if (networkManager.canDoFWT() && fwtVersion > 0) {
+                return true;
             }
         }
         return false;
+    }
+    
+    /**
+     * Returns the fwt version supported by address
+     * 
+     * 0 - if firewalled address or push endpoint but not fwt capability
+     * > 0 - if firewalled address or push endpoint and fwt capability
+     * -1 if not a valid address;
+     */
+    private static int getFWTVersion(Address address) {
+        if (address instanceof FirewalledAddress) {
+            return ((FirewalledAddress)address).getFwtVersion();
+        } else if (address instanceof PushEndpoint) {
+            return ((PushEndpoint)address).getFWTVersion();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -909,18 +996,26 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private class PushedSocketHandlerAdapter implements PushedSocketHandler {
 
-        private final GUID clientGuid;
+        private final RemoteFileDesc rfd;
         private final ConnectObserver observer;
 
-        public PushedSocketHandlerAdapter(GUID clientGuid, ConnectObserver observer) {
-            this.clientGuid = clientGuid;
+        public PushedSocketHandlerAdapter(RemoteFileDesc rfd, ConnectObserver observer) {
+            this.rfd = rfd;
             this.observer = observer;
         }
-        
+
         @Override
         public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket) {
-            if (Arrays.equals(clientGuid.bytes(), clientGUID)) {
+            if (Arrays.equals(rfd.getClientGUID(), clientGUID)) {
                 pushHandlers.remove(this);
+                IpPort publicAddress = getPublicAddress(rfd);
+                // this ensures that no malicious push proxy pretends to be the connecting client 
+                if (NetworkUtils.isValidIpPort(publicAddress) && !publicAddress.getInetAddress().equals(socket.getInetAddress())) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("received socket from unexpected location, expected: " + publicAddress.getInetAddress() + ", actual: " + socket.getInetAddress());
+                        return false;
+                    }
+                }
                 try {
                     observer.handleConnect(socket);
                 } catch (IOException e) {

@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
+import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.io.PermanentAddress;
 import org.limewire.util.Objects;
 
@@ -22,8 +23,19 @@ public class XMPPAddress implements PermanentAddress {
     /**
      * Returns the full jabber id including resource. 
      */
-    public String getId() {
+    public String getFullId() {
         return id;
     }
-            
+    
+    /**
+     * Returns the jabber id email address without resource. 
+     */
+    public String getId() {
+        return StringUtils.parseBareAddress(id);
+    }
+
+    @Override
+    public String toString() {
+        return org.limewire.util.StringUtils.toString(this);
+    }
 }

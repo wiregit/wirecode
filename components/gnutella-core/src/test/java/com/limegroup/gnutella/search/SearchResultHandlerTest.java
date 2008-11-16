@@ -7,7 +7,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.io.IpPort;
-import org.limewire.security.SecureMessage;
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.NameValue;
 
 import com.google.inject.AbstractModule;
@@ -78,14 +78,14 @@ public class SearchResultHandlerTest extends LimeTestCase {
         LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
-        reply.setSecureStatus(SecureMessage.SECURE);
+        reply.setSecureStatus(Status.SECURE);
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(1, callback.results.size());
         RemoteFileDesc rfd = callback.getRFD();
         assertNotNull(rfd.getXMLDocument());
         assertEquals("http://somewhere.com", rfd.getXMLDocument().getAction());
-        assertEquals(SecureMessage.SECURE, rfd.getSecureStatus());
+        assertEquals(Status.SECURE, rfd.getSecureStatus());
     }
     
     public void testInsecureActionNotSent() throws Exception {
@@ -126,7 +126,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         Response noDoc = responseFactory.createResponse(1, 2, "other");
         QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
-        reply.setSecureStatus(SecureMessage.FAILED);
+        reply.setSecureStatus(Status.FAILED);
         
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);

@@ -133,7 +133,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         HTTPUploader uploader = null;
 
         try {
-            fileRequest = FileRequestParser.parseRequest(fileListProvider, request.getRequestLine().getUri(), request, context);
+            fileRequest = FileRequestParser.parseRequest(fileListProvider, request.getRequestLine().getUri(), context);
         } catch (IOException e) {
             uploader = sessionManager.getOrCreateUploader(request, context,
                     UploadType.MALFORMED_REQUEST, "Malformed Request");

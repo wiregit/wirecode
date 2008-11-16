@@ -18,7 +18,7 @@ class ResponseQueryFilter implements ResponseFilter {
     @Override
     public boolean allow(QueryReply qr, Response response) {
         return qr.isBrowseHostReply()
-            || qr.getSecureStatus() == SecureMessage.SECURE
+            || qr.getSecureStatus() == SecureMessage.Status.SECURE
             || searchServices.matchesQuery(qr.getGUID(), response);
     }
 

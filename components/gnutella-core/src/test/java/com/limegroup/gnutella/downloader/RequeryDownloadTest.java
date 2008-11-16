@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.Range;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -176,8 +177,8 @@ public class RequeryDownloadTest extends LimeTestCase {
        IncompleteFileManager ifm= injector.getInstance(IncompleteFileManager.class);
        Set<URN> urns=new HashSet<URN>(1);
        urns.add(hash);
-       RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("1.2.3.4", PORT, 13l, filename, TestFile.length(),
-            new byte[16], 56, false, 4, true, null, urns, false, false, "", null, -1, false);
+       RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(new ConnectableImpl("1.2.3.4", PORT, false), 13l, filename, TestFile.length(),
+            new byte[16], 56, false, 4, true, null, urns, false, "", -1);
 
        //Create incompleteFile, write a few bytes
        incompleteFile=ifm.getFile(rfd);

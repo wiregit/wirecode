@@ -376,7 +376,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
         ChatFriend chatFriend = idToFriendMap.get(friend.getId());
         switch(presence.getType()) {
             case available:
-                // TODO not threadsafe!
                 if(chatFriend == null) {
                     chatFriend = new ChatFriendImpl(presence, myID);
                     chatFriends.add(chatFriend);

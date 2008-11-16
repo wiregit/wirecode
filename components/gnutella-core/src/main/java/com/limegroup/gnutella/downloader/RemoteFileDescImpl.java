@@ -2,27 +2,17 @@ package com.limegroup.gnutella.downloader;
 
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.IntervalSet;
+import org.apache.http.auth.Credentials;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.Address;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IpPort;
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.NetworkUtils;
-import org.limewire.net.address.StrictIpPortSet;
-import org.limewire.security.SecureMessage;
+import org.limewire.net.address.AddressFactory;
+import org.limewire.security.SecureMessage.Status;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.GUID;
@@ -31,19 +21,16 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A default implementation for {@link RemoteFileDesc}.
  */
-class RemoteFileDescImpl implements RemoteFileDesc {
+public class RemoteFileDescImpl implements RemoteFileDesc {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
 
-    private final String _host;
-	private final int _port;
-	private final String _filename; 
+    private final String _filename; 
 	private final long _index;
 	private final byte[] _clientGUID;
 	private final int _speed;
@@ -59,8 +46,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      */
 	private final boolean _browseHostEnabled;
 
-    private final boolean _firewalled;
     private final String _vendor;
+    
+    public static final String TYPE = "RFD";
     
     /**
      * Whether or not the remote host supports HTTP/1.1
@@ -82,85 +70,36 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     private boolean _tlsCapable;
     
     /**
-     * The <tt>PushEndpoint</tt> for this RFD.
-     * if null, the rfd is not behind a push proxy.
-     */
-    private final PushEndpoint _pushAddr;
-		
-
-    /**
-     * The list of available ranges.
-     * This is NOT SERIALIZED.
-     */
-    private IntervalSet _availableRanges = null;
-    
-    /**
-     * The last known queue status of the remote host
-     * negative values mean free slots
-     */
-    private int _queueStatus = Integer.MAX_VALUE;
-    
-    /**
-     * The number of times this download has failed while attempting
-     * to transfer data.
-     */
-    private int _failedCount = 0;
-
-    /**
-     * The earliest time to retry this host in milliseconds since 01-01-1970
-     */
-    private volatile long _earliestRetryTime = 0;
-
-    /**
      * The cached hash code for this RFD.
      */
     private int _hashCode = 0;
 
     /**
-     * Whether or not THEX retrieval has failed with this host.
-     */
-    private boolean _THEXFailed = false;
-    
-    /**
-     * Whether or not this RFD is/was used for downloading.
-     */
-    private volatile boolean _isDownloading = false;
-    
-    /**
      * The creation time of this file.
      */
     private final long _creationTime;
     
-    /** Whether to serialize the push proxies */
-    private volatile boolean _serializeProxies = false;
-	
-	/**
+    /**
 	 * the spam rating of this rfd.
 	 */
 	private float _spamRating = 0.f;
     
     /** the security of this RemoteFileDesc. */
-    private int _secureStatus = SecureMessage.INSECURE;
+    private Status _secureStatus = Status.INSECURE;
     
     private final long _size;
     
-    private final NetworkInstanceUtils networkInstanceUtils;
-    private static final DownloadStatsTracker STATS_TRACKER_STUB = new DownloadStatsTrackerStub();
+    private final Address address;
 
-    /**
-     * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE object is passed a new one is created.
-     */
-    RemoteFileDescImpl (String host, int port, long index, String filename,
-            long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
+    private final AddressFactory addressFactory;
+
+    public RemoteFileDescImpl(Address address, long index, String filename,
+            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
-            boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
-            int FWTVersion, PushEndpoint pe, boolean tlsCapable, boolean http11,
-            NetworkInstanceUtils networkInstanceUtils) {
-        Objects.nonNull(filename, "filename");
-        Objects.nonNull(host, "host");
-        if (!NetworkUtils.isValidPort(port))
-            throw new IllegalArgumentException("invalid port: " + port);
+            String vendor, long createTime, boolean http11,
+            AddressFactory addressFactory) {
+        this.addressFactory = addressFactory;
+        this.address = Objects.nonNull(address, "address");
         if ((speed & 0xFFFFFFFF00000000L) != 0)
             throw new IllegalArgumentException("invalid speed: " + speed);
         if (filename.equals(""))
@@ -171,45 +110,24 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             throw new IllegalArgumentException("invalid index: " + index);
         
         _speed = speed;
-		_host = host;
-		_port = port;
 		_index = index;
 		_filename = filename;
         _size = size;
-        assert (firewalled && pe != null) || (!firewalled && pe == null); 
-        _firewalled = firewalled;
-		_pushAddr = pe;
-		_clientGUID = clientGUID;
+        _clientGUID = clientGUID;
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
 		_replyToMulticast = replyToMulticast;
         _vendor = vendor;
         _creationTime = createTime;
-        _tlsCapable = tlsCapable;
         _xmlDoc = xmlDoc;
         _http11 = http11;
         _urns = Collections.unmodifiableSet(urns);
-        this.networkInstanceUtils = networkInstanceUtils;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setSerializeProxies()
-     */
-    public void setSerializeProxies() {
-        _serializeProxies = true;
-    }
-    
     /** Returns true if the host supports TLS. */
     public boolean isTLSCapable() {
         return _tlsCapable;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setTLSCapable(boolean)
-     */
-    public void setTLSCapable(boolean tlsCapable) {
-        _tlsCapable = tlsCapable;
     }
     
     /* (non-Javadoc)
@@ -227,57 +145,10 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isPartialSource()
-     */
-    public boolean isPartialSource() {
-        return (_availableRanges != null);
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#isMe(byte[])
      */
     public boolean isMe(byte[] myClientGUID) {
-        return needsPush() ? 
-                Arrays.equals(_clientGUID, myClientGUID) :
-                    networkInstanceUtils.isMe(getAddress(),getPort());
-    }
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getAvailableRanges()
-     */
-    public IntervalSet getAvailableRanges() {
-        try {
-            return _availableRanges.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setAvailableRanges(org.limewire.collection.IntervalSet)
-     */
-    public void setAvailableRanges(IntervalSet availableRanges) {
-        this._availableRanges = availableRanges;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getFailedCount()
-     */
-    public int getFailedCount() {
-        return _failedCount;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#incrementFailedCount()
-     */
-    public void incrementFailedCount() {
-        _failedCount++;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#resetFailedCount()
-     */
-    public void resetFailedCount() {
-        _failedCount = 0;
+        return Arrays.equals(_clientGUID, myClientGUID);
     }
     
     /* (non-Javadoc)
@@ -288,82 +159,11 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isBusy()
-     */
-    public boolean isBusy() {
-        return isBusy(System.currentTimeMillis());
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isBusy(long)
-     */
-    public boolean isBusy(long now) {
-        return now < _earliestRetryTime;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getWaitTime(long)
-     */
-    public int getWaitTime(long now) {
-        return (isBusy(now) ? 
-                (int) (_earliestRetryTime - now)/1000 + 1:
-                0 );
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setRetryAfter(int)
-     */
-    public void setRetryAfter(int seconds) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("setting retry after to be [" + seconds + 
-                      "] seconds for " + this);        
-        _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getCreationTime()
      */
     public long getCreationTime() {
         return _creationTime;
     }
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#hasTHEXFailed()
-     */
-    public boolean hasTHEXFailed() {
-        return _THEXFailed;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setTHEXFailed()
-     */
-    public void setTHEXFailed() {
-        _THEXFailed = true;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setDownloading(boolean)
-     */
-    public void setDownloading(boolean dl) {
-        _isDownloading = dl;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isDownloading()
-     */
-    public boolean isDownloading() { return _isDownloading; }
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getHost()
-     */
-	public final String getAddress() {return _host;}
-
-	/**
-	 * Accessor for the port of the host with this file.
-	 *
-	 * @return the file name for the port of the host
-	 */
-	public final int getPort() {return _port;}
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getIndex()
@@ -437,8 +237,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	 */
 	public final URN getSHA1Urn() {
         for(URN urn : _urns) {
-			// defensively check against null values added.
-			if(urn == null) continue;
 			if(urn.isSHA1()) {
 				return urn;
 			}
@@ -449,19 +247,14 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getUrl()
      */
-	public URL getUrl() {
-		try {
-			String fileName = "";
-			URN urn = getSHA1Urn();
-			if(urn == null) {
-				fileName = "/get/"+_index+"/"+_filename;
-			} else {
-				fileName = HTTPConstants.URI_RES_N2R+urn.httpStringValue();
-			}
-			return new URL("http", _host, _port, fileName);
-		} catch(MalformedURLException e) {
-			return null;
-		}
+	public String getUrlPath() {
+	    URN urn = getSHA1Urn();
+	    if (urn == null) {
+	        return "/get/"+_index+"/"+_filename;
+	    } else {
+	        return HTTPConstants.URI_RES_N2R + urn.httpStringValue();
+	    }
+
 	}
 	
     /* (non-Javadoc)
@@ -472,106 +265,21 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#isPrivate()
-     */
-	public final boolean isPrivate() {
-        return networkInstanceUtils.isPrivateAddress(_host);
-	}
-    
-    public boolean isFirewalled() {
-        return _firewalled;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getPushProxies()
-     */
-    public final Set<? extends IpPort> getPushProxies() {
-    	if (_pushAddr!=null)
-    		return _pushAddr.getProxies();
-    	else
-    		return Collections.emptySet();
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#supportsFWTransfer()
-     */
-    public final boolean supportsFWTransfer() {
-        
-        if (_host.equals(BOGUS_IP) ||
-                !NetworkUtils.isValidAddress(_host) || 
-                networkInstanceUtils.isPrivateAddress(_host))
-            return false;
-        
-        return _pushAddr == null ? false : _pushAddr.getFWTVersion() > 0;
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#isAltLocCapable()
      */
     public final boolean isAltLocCapable() {
-        boolean ret = getSHA1Urn() != null &&
-               !_replyToMulticast;
-        
-        if (_firewalled)
-        	ret = ret && 
-				_pushAddr!=null &&
-				_pushAddr.getProxies().size() > 0;
-		else
-             ret= ret &&  
-			    NetworkUtils.isValidPort(_port) &&
-                !networkInstanceUtils.isPrivateAddress(_host) &&
-                NetworkUtils.isValidAddress(_host);
-        
-        return ret;
-    }
-
-    public boolean needsPush() {
-        return needsPush(STATS_TRACKER_STUB);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#needsPush()
-     */
-    public boolean needsPush(DownloadStatsTracker statsTracker) {
-        
-        //if replying to multicast, do a push.
-        if ( isReplyToMulticast() ) {
-            statsTracker.increment(DownloadStatsTracker.PushReason.MULTICAST_REPLY);
-            return true;
-        }
-        //Return true if rfd is private or unreachable
-        if (isPrivate()) {
-            // Don't do a push for magnets in case you are in a private network.
-            // Note to Sam: This doesn't mean that isPrivate should be true.
-            if (this instanceof UrlRemoteFileDescImpl) 
+        if (address instanceof PushEndpoint) {
+            if (((PushEndpoint)address).getProxies().isEmpty()) {
                 return false;
-            else  {// Otherwise obey push rule for private rfds.
-                statsTracker.increment(DownloadStatsTracker.PushReason.PRIVATE_NETWORK);
-                return true;
             }
         }
-        else if (!NetworkUtils.isValidPort(getPort())) {
-            statsTracker.increment(DownloadStatsTracker.PushReason.INVALID_PORT);
+        if (getSHA1Urn() != null && !_replyToMulticast) {
             return true;
         }
-        
-        else {
-            boolean isFirewalled = isFirewalled();
-            if(isFirewalled) {
-                statsTracker.increment(DownloadStatsTracker.PushReason.FIREWALL);
-            }
-            return isFirewalled;
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getPushAddr()
-     */
-    public PushEndpoint getPushAddr() {
-    	return _pushAddr;
+        return false;
     }
 
-	/**
+    /**
 	 * Overrides <tt>Object.equals</tt> to return instance equality
 	 * based on the equality of all <tt>RemoteFileDesc</tt> fields.
 	 *
@@ -595,8 +303,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         if (! (o instanceof RemoteFileDesc))
             return false;
         RemoteFileDesc other=(RemoteFileDesc)o;
-        if (! (nullEquals(_host, other.getAddress()) && (_port==other.getPort())) )
+        if (!address.equals(other.getAddress())) {
             return false;
+        }
 
         if (_size != other.getSize())
             return false;
@@ -609,16 +318,12 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             return false;
 
         if (_urns.isEmpty() && other.getUrns().isEmpty())
-            return nullEquals(_filename, other.getFileName());
+            return Objects.equalOrNull(_filename, other.getFileName());
         else
             return _urns.equals(other.getUrns());
     }
     
-    private boolean nullEquals(Object one, Object two) {
-        return one == null ? two == null : one.equals(two);
-    }
-
-	/**
+    /**
 	 * Overrides the hashCode method of Object to meet the contract of 
 	 * hashCode.  Since we override equals, it is necessary to also 
 	 * override hashcode to ensure that two "equal" RemoteFileDescs
@@ -631,8 +336,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public int hashCode() {
 	   if(_hashCode == 0) {
             int result = 17;
-            result = (37* result)+_host.hashCode();
-            result = (37* result)+_port;
+            result = (37* result)+ address.hashCode();
 			result = (int)((37* result)+_size);
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
@@ -644,39 +348,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 
     @Override
     public String toString() {
-        return  ("<"+ getAddress() +":"+getPort()+", "
-				 +getFileName() + ">");
+        return  address.toString();
     }
 
-    public InetAddress getInetAddress() {
-        try {
-            return InetAddress.getByName(getAddress());
-        } catch(UnknownHostException ignore){}
-        return null;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setQueueStatus(int)
-     */
-    public void setQueueStatus(int status) {
-        _queueStatus = status;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#getQueueStatus()
-     */
-    public int getQueueStatus() {
-        return _queueStatus;
-    }
-
-	public InetSocketAddress getInetSocketAddress() {
-		InetAddress addr = getInetAddress();
-		if (addr != null) {
-			return new InetSocketAddress(addr, getPort());
-		}
-		return null;
-	}
-	
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#setSpamRating(float)
      */
@@ -694,14 +368,14 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getSecureStatus()
      */
-    public int getSecureStatus() {
+    public Status getSecureStatus() {
         return _secureStatus;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#setSecureStatus(int)
      */
-    public void setSecureStatus(int secureStatus) {
+    public void setSecureStatus(Status secureStatus) {
         this._secureStatus = secureStatus;
     }
     
@@ -709,9 +383,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#toMemento()
      */
     public RemoteHostMemento toMemento() {
-        return new RemoteHostMemento(_host, _port, _filename, _index, _clientGUID, _speed,
+        return new RemoteHostMemento(address, _filename, _index, _clientGUID, _speed,
                 _size, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
-                _browseHostEnabled, _firewalled, _vendor, _http11, _tlsCapable, pushAddrString()); 
+                _browseHostEnabled,_vendor, _http11, TYPE, addressFactory); 
     }
     
     private String xmlString() {
@@ -721,54 +395,19 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             return _xmlDoc.getXMLString();
     }
     
-    private String pushAddrString() {
-        if(_serializeProxies && _pushAddr != null)
-            return _pushAddr.httpStringValue();
-        else
-            return null;
-    }
-    
-    private static class DownloadStatsTrackerStub implements DownloadStatsTracker {
-        public Object inspect() {
-                return "this is a stub";
-            }
-
-            public void successfulDirectConnect() {}
-
-            public void failedDirectConnect() {}
-
-            public void successfulPushConnect() {}
-
-            public void failedPushConnect() {}
-
-            public void increment(DownloadStatsTracker.PushReason reason) {}    
-    }
-
     @Override
     public boolean isSpam() {
         return getSpamRating() >= SearchSettings.FILTER_SPAM_RESULTS.getValue();
     }
     
     @Override
-    public Address toAddress() {
-        if (isFirewalled()) {
-            Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
-            for (IpPort ipPort : _pushAddr.getProxies()) {
-                if (ipPort instanceof Connectable) {
-                   proxies.add((Connectable)ipPort);   
-                } else {
-                   proxies.add(new ConnectableImpl(ipPort, false));
-                }
-            }
-            // using the valid external address instead of this RemoteFileDescs values
-            // provided through the IpPort interface since they can be to BOGUS_IP and the default port 6346
-            // which might not be handled as wrong values in the new address code
-            IpPort validPublicIpPort = _pushAddr.getValidExternalAddress();
-            Connectable publicAddress = validPublicIpPort != null ? new ConnectableImpl(validPublicIpPort, false) : ConnectableImpl.INVALID_CONNECTABLE;
-            return new FirewalledAddress(publicAddress, ConnectableImpl.INVALID_CONNECTABLE, new GUID(getClientGUID()), proxies, _pushAddr
-                    .getFWTVersion());
-        } else {
-            return this;
-        }
+    public Address getAddress() {
+        return address;
     }
+
+    @Override
+    public Credentials getCredentials() {
+        return null;
+    }
+
 }

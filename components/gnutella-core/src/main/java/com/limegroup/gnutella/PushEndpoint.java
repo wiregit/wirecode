@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Set;
 
+import org.limewire.io.Address;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.http.HTTPHeaderValue;
@@ -60,7 +61,7 @@ import com.limegroup.gnutella.http.HTTPHeaderValue;
  * 
  * <ThisIsTheGUIDasdf23457>
  */
-public interface PushEndpoint extends HTTPHeaderValue, IpPort {
+public interface PushEndpoint extends HTTPHeaderValue, IpPort, Address {
 
     public static final int HEADER_SIZE = 17; //guid+# of proxies, maybe other things too
 

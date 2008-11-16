@@ -114,7 +114,7 @@ public class HTTPHeaderUtils {
      * @param httpValue the http value to be decoded
      * @param separator the separator that was used for encoding it
      * 
-     * @return an empty set if no pushproxies could be decoded
+     * @return an empty set if no pushproxies could not be decoded
      */
     public Set<Connectable> decodePushProxies(String httpValue, String separator) {
         Set<Connectable> newSet = new HashSet<Connectable>();

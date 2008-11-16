@@ -5,17 +5,18 @@ import java.net.Socket;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.CreationTimeCache;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
+@Singleton
 public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
     
     private final NetworkManager networkManager;
@@ -54,9 +55,9 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
         this.networkInstanceUtils = networkInstanceUtils;
     }
 
-    public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
+    public HTTPDownloader create(Socket socket, RemoteFileDescContext rfdContext,
             VerifyingFile incompleteFile, boolean inNetwork) {
-        return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork,
+        return new HTTPDownloader(socket, rfdContext, incompleteFile, inNetwork,
                 false, networkManager, alternateLocationFactory,
                 downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
     }

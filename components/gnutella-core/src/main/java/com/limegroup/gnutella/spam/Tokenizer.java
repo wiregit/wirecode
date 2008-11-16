@@ -8,6 +8,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -114,10 +116,13 @@ public class Tokenizer {
 		set.add(new SizeToken(desc.getSize()));
         set.add(new ApproximateSizeToken(desc.getSize()));
         // Ignore private addresses such as 192.168.x.x
-        InetAddress address = desc.getInetAddress();
-        if(!networkInstanceUtils.isPrivateAddress(address))
-            set.add(new AddressToken(address.getHostAddress(), ipFilter));
-	}
+        Address address = desc.getAddress();
+        if(address instanceof Connectable) {
+            Connectable connectable = (Connectable)address;
+            if(!networkInstanceUtils.isPrivateAddress(connectable.getInetAddress()))
+                set.add(new AddressToken(connectable.getAddress(), ipFilter));
+        }
+    }
 
 	/**
 	 * Tokenizes a QueryRequest, including the search terms, XML metadata and

@@ -79,6 +79,6 @@ public class ConnectableSerializer implements AddressSerializer {
 
     @Inject
     public void register(AddressFactory factory) {
-        factory.addSerializer(this);
+        factory.registerSerializer(this);
     }
 }

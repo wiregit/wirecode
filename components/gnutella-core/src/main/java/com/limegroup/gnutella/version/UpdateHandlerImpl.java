@@ -31,8 +31,8 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
-import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -704,10 +704,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
      */
     private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
         Set<URN> urns = new UrnSet(info.getUpdateURN());
-        return remoteFileDescFactory.createRemoteFileDesc(rh.getAddress(), rh.getPort(), Integer.MAX_VALUE,
-                info.getUpdateFileName(), (int)info.getSize(), rh.getClientGUID(), 0, false, 2, false, null, urns, false,
-                false, "LIME", IpPort.EMPTY_SET, 0, 0, rh instanceof Connectable ? 
-                      ((Connectable)rh).isTLSCapable() : false);  // tls capability
+        return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl(rh.getInetSocketAddress(), rh instanceof Connectable ? ((Connectable)rh).isTLSCapable() : false), Integer.MAX_VALUE,
+                info.getUpdateFileName(), info.getSize(), rh.getClientGUID(), 0, false, 2, false, null, urns,
+                false, "LIME", -1);
+                        
     }
     
     /**

@@ -20,6 +20,8 @@ public class ConnectableImpl implements Connectable {
     private final IpPort ipPort;
     private final boolean tlsCapable;
     
+    private int hashCode = -1;
+    
     /** Constructs a Connectable that delegates to the IpPort and may be tls capable. */
     public ConnectableImpl(IpPort ipPort, boolean tlsCapable) {
         this.ipPort = ipPort;
@@ -34,6 +36,10 @@ public class ConnectableImpl implements Connectable {
     /** Constructs a Connectable based on the given host data. */
     public ConnectableImpl(String host, int port, boolean tlsCapable) throws UnknownHostException {
         this(new IpPortImpl(host, port), tlsCapable);
+    }
+    
+    public ConnectableImpl(String hostPort, boolean tlsCapable) throws UnknownHostException {
+        this(new IpPortImpl(hostPort), tlsCapable);
     }
     
     /** Copy-constructor for Connectables. */
@@ -65,6 +71,32 @@ public class ConnectableImpl implements Connectable {
     @Override
     public String toString() {
         return ipPort + ", tlsCapable: " + tlsCapable;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof Connectable) {
+            Connectable connectable = (Connectable)obj;
+            return getAddress().equals(connectable.getAddress()) 
+            && getPort() == connectable.getPort() 
+            && isTLSCapable() == connectable.isTLSCapable();
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        int hash = hashCode;
+        if (hash == -1) {
+            hash = getInetAddress().hashCode();
+            hash = hash * 31 + getPort();
+            hash = hash * 31 + (tlsCapable ? 1 : 0);
+            hashCode = hash;
+        }
+        return hashCode;
     }
 
 }

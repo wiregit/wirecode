@@ -210,7 +210,7 @@ public class CoreSearch implements Search {
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
             for (SearchListener listener : searchListeners) {
-                listener.handleSearchResult(new RemoteFileDescAdapter(rfd, queryReply, locs));
+                listener.handleSearchResult(new RemoteFileDescAdapter(rfd, locs));
             }
         }
     }
