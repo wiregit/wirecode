@@ -326,8 +326,8 @@ implements TableCellEditor, TableCellRenderer {
 
         panel.setOpaque(false);
         panel.add(new JLabel(dividerIcon), "ay center");
-        panel.add(fromWidget, "push, ay center");
-        panel.add(similarButton, "wmax 25");
+        panel.add(fromWidget, "push, ay center, gaptop 2");
+        panel.add(similarButton, "wmax 25, gaptop 2");
         panel.add(optionsButton, "wmax 25, gaptop 2, gapbottom 0");
 
         return panel;
@@ -381,7 +381,7 @@ implements TableCellEditor, TableCellRenderer {
 
         panel.add(itemIconPanel);
         panel.add(searchResultTextPanel, "push");
-        panel.add(downloadSourceCount);
+        panel.add(downloadSourceCount, "gapbottom 3");
         
         heading.addHyperlinkListener(new HyperlinkListener() {
 
