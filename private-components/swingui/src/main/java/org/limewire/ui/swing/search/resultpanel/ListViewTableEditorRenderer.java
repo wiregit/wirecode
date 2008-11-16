@@ -90,6 +90,7 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Icon similarDownIcon;
     @Resource private Icon similarActiveIcon;
     @Resource private Icon similarHoverIcon;
+    @Resource private Icon dividerIcon;
     
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
@@ -313,7 +314,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("", "[][][]", "0[top]")) {
+        JXPanel panel = new JXPanel(new MigLayout("", "0[][][][]", "0[top]")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -324,6 +325,7 @@ implements TableCellEditor, TableCellRenderer {
         };
 
         panel.setOpaque(false);
+        panel.add(new JLabel(dividerIcon), "ay center");
         panel.add(fromWidget, "push, ay center");
         panel.add(similarButton);
         panel.add(optionsButton);
