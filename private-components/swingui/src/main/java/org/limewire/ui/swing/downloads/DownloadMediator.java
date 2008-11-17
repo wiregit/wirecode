@@ -20,7 +20,7 @@ class DownloadMediator {
 	private final EventList<DownloadItem> commonBaseList;
 	
 	public DownloadMediator(DownloadListManager downloadManager) {
-		commonBaseList= GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
+		commonBaseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	}
 
 	public void pauseAll() {
@@ -45,12 +45,16 @@ class DownloadMediator {
 	
 	public void clearFinished() {
 		List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-	    for (DownloadItem item : commonBaseList) {
-			if (item.getState() == DownloadState.DONE) {
-				finishedItems.add(item);
-			}
+		commonBaseList.getReadWriteLock().writeLock().lock();
+		try {
+		    for (DownloadItem item : commonBaseList) {
+		        if (item.getState() == DownloadState.DONE) {
+		            finishedItems.add(item);
+		        }
+		    }
+		    commonBaseList.removeAll(finishedItems);
+		} finally {
+		    commonBaseList.getReadWriteLock().writeLock().unlock();
 		}
-		
-	    commonBaseList.removeAll(finishedItems);
 	}
 }
