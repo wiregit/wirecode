@@ -78,6 +78,8 @@ public class SharingLibraryPanel extends LibraryPanel {
         loadHeader();
         loadSelectionPanel();
         createMyCategories(eventList, friend, friendFileList);
+        
+        selectFirst();
     }
         
     @Override

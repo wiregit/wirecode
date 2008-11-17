@@ -60,6 +60,8 @@ public class FriendLibraryPanel extends LibraryPanel {
         loadHeader();
         loadSelectionPanel();
         createMyCategories(eventList, friend);   
+        
+        selectFirst();
     }
 
     @Override
