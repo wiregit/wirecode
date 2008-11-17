@@ -251,7 +251,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             RemoteFileDesc next = rfds[i];
             if(next.getSHA1Urn() != null)
                 sha1RFD = next;
-            alts.remove(next); // Removes an alt that matches the IpPort of the RFD
+            alts.remove(next.getAddress()); // Removes an alt that matches the IpPort of the RFD
         }
 
         // If no SHA1 rfd, just use the first.
