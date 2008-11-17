@@ -192,7 +192,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     fileTransferIQListener = new FileTransferIQListener(fileOfferListener);
                     connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
                     
-                    authTokenIQListener = new AuthTokenIQListener(connection, authenticator);
+                    authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, connection, authenticator);
                     XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
                     connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
