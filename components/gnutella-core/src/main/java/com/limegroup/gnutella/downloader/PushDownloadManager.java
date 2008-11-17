@@ -983,7 +983,16 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private static int getFWTVersion(Address address) {
         if (address instanceof FirewalledAddress) {
-            return ((FirewalledAddress)address).getFwtVersion();
+            FirewalledAddress firewalledAddress = (FirewalledAddress)address;
+            if (NetworkUtils.isValidIpPort(firewalledAddress.getPrivateAddress())) {
+                return firewalledAddress.getFwtVersion();
+            } else {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("inconsistent firewalled address: " + firewalledAddress);
+                // TODO fberger comment in after alpha release
+//                throw new IllegalArgumentException("inconsistent firewalled address: " + firewalledAddress);
+                 return -1;
+            }
         } else if (address instanceof PushEndpoint) {
             return ((PushEndpoint)address).getFWTVersion();
         } else {
