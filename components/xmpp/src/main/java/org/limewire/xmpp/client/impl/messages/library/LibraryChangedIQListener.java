@@ -14,6 +14,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.UserImpl;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -21,12 +23,12 @@ public class LibraryChangedIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
     private final EventListener<LibraryChangedEvent> libChangedListeners;
-    private final Map<String, UserImpl> users;
+    private final XMPPConnection connection;
 
     public LibraryChangedIQListener(EventListener<LibraryChangedEvent> libChangedListeners,
-                                    Map<String, UserImpl> users) {
+                                    XMPPConnection connection) {
         this.libChangedListeners = libChangedListeners;
-        this.users = users;
+        this.connection = connection;
     }
 
     public void processPacket(Packet packet) {
@@ -56,11 +58,7 @@ public class LibraryChangedIQListener implements PacketListener {
         if (LOG.isDebugEnabled()) {
             LOG.debug("handling library changed set " + packet.getPacketID());
         }
-        String userID = StringUtils.parseBareAddress(packet.getFrom());
-        UserImpl user;
-        synchronized (users) {
-            user = users.get(userID);
-        }
+        User user = connection.getUser(StringUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
             Presence presence = user.getPresences().get(packet.getFrom());
             if(presence != null) {

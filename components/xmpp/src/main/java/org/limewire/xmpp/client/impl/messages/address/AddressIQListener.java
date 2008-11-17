@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
@@ -23,21 +23,22 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPConnection;
 
 public class AddressIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
     private final XMPPConnection connection;
+    private final org.jivesoftware.smack.XMPPConnection smackConnection;
     private volatile Address address;
     private final AddressFactory factory; 
-    
-    private final Map<String, Presence> presences = new HashMap<String, Presence>();
     private final RosterEventHandler rosterEventHandler;
 
-    public AddressIQListener(XMPPConnection connection,
+    public AddressIQListener(XMPPConnection connection, org.jivesoftware.smack.XMPPConnection smackConnection,
                              AddressFactory factory,
                              Address address) {
         this.connection = connection;
+        this.smackConnection = smackConnection;
         this.factory = factory;
         this.address = address;
         this.rosterEventHandler = new RosterEventHandler();
@@ -59,12 +60,15 @@ public class AddressIQListener implements PacketListener {
 
     private void handleAddressUpdate(AddressIQ iq) {
         synchronized (this) {
-            Presence presence = presences.get(iq.getFrom());
-            if(presence != null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
+            User user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
+            if (user != null) {
+                Presence presence = user.getPresences().get(iq.getFrom());
+                if(presence != null) {
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
+                    }
+                    presence.addFeature(new AddressFeature(iq.getAddress()));
                 }
-                presence.addFeature(new AddressFeature(iq.getAddress()));
             }
         }
     }
@@ -85,8 +89,12 @@ public class AddressIQListener implements PacketListener {
                     LOG.debugf("new address to publish: {0}", event.getSource().toString());
                     synchronized (AddressIQListener.this) {
                         address = event.getSource();
-                        for(String jid : presences.keySet()) {
-                            sendAddress(address, jid);
+                        for(User user : connection.getUsers()) {
+                            for(Map.Entry<String, Presence> presenceEntry : user.getPresences().entrySet()) {
+                                if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
+                                    sendAddress(address, presenceEntry.getKey());
+                                }
+                            }
                         }
                     }
                 }
@@ -98,9 +106,9 @@ public class AddressIQListener implements PacketListener {
         LOG.debugf("sending new address to {0}", jid);
         AddressIQ queryResult = new AddressIQ(address, factory);
         queryResult.setTo(jid);
-        queryResult.setFrom(connection.getUser());
+        queryResult.setFrom(smackConnection.getUser());
         queryResult.setType(IQ.Type.SET);
-        connection.sendPacket(queryResult);
+        smackConnection.sendPacket(queryResult);
     }
     
     public EventListener<RosterEvent> getRosterListener() {
@@ -120,16 +128,9 @@ public class AddressIQListener implements PacketListener {
                             if(event.getType() == Feature.EventType.FEATURE_ADDED) {
                                 if(event.getSource().getID().equals(LimewireFeature.ID)) {
                                     synchronized (AddressIQListener.this) {
-                                        presences.put(presence.getJID(), presence);
                                         if(address != null) {
                                             sendAddress(address, presence.getJID());
                                         }
-                                    }
-                                }
-                            } else if(event.getType() == Feature.EventType.FEATURE_REMOVED) {
-                                if(event.getSource().getID().equals(LimewireFeature.ID)) {
-                                    synchronized (AddressIQListener.this) {
-                                        presences.remove(presence.getJID());
                                     }
                                 }
                             }

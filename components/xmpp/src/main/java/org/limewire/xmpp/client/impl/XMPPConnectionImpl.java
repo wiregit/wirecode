@@ -3,6 +3,8 @@ package org.limewire.xmpp.client.impl;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
@@ -184,7 +186,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                         if(lastEvent != null) {
                             address = lastEvent.getSource();
                         }
-                        addressIQListener = new AddressIQListener(connection, addressFactory, address);     
+                        addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, connection, addressFactory, address);     
                     }                                   
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());                    
                     XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
@@ -196,7 +198,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                     XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
                     connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
-                    libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventListener, users);
+                    libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventListener, XMPPConnectionImpl.this);
                     connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
                 }
             }
@@ -428,6 +430,13 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
     public User getUser(String id) {
         synchronized (users) { 
             return users.get(id);
+        }
+    }
+
+    @Override
+    public Collection<User> getUsers() {
+        synchronized (users) { 
+            return new ArrayList<User>(users.values());
         }
     }
 }

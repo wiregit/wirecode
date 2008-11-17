@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import java.util.Collection;
+
 public interface XMPPConnection {
     
     public enum ConnectionEvent {LOGIN}
@@ -47,4 +49,10 @@ public interface XMPPConnection {
      * @return null if id is not registered on this connection
      */
     public User getUser(String id);
+
+    /**
+     * @return a copy of the current Collection of Users. Does NOT stay up to
+     * date with changes.
+     */
+    public Collection<User> getUsers();
 }
