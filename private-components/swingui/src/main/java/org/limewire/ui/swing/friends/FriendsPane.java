@@ -524,7 +524,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
             new CloseChatEvent(chatFriend).publish();
         }
         chatFriends.clear();
-        friendsTable.removeAll();
     }
 
     private class FriendCellRenderer implements TableCellRenderer {
