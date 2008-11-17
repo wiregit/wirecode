@@ -108,7 +108,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
             if (address instanceof PushEndpoint) {
                 copy = (PushEndpoint)address;
             } else  {
-                throw new IllegalArgumentException(address.getClass() + " should not have become an alternate location");
+                throw new IllegalArgumentException(address.getClass() + " should not have become an alternate location: " + rfd.getCreationTime());
                 // this is the old code, that would fail silently
                 // copy = pushEndpointFactory.createPushEndpoint(rfd.getClientGUID(), IpPort.EMPTY_SET, PushEndpoint.PLAIN, 0, null);
             }
