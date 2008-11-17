@@ -21,6 +21,8 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
@@ -44,6 +46,8 @@ import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
 public class NetworkManagerImpl implements NetworkManager {
+
+    private static final Log LOG = LogFactory.getLog(NetworkManagerImpl.class);
     
     private final Provider<UDPService> udpService;
     private final Provider<Acceptor> acceptor;
@@ -320,6 +324,7 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     private Connectable getPublicAddress() {
+        LOG.debugf("port {0} vs udp port {1}", getPort(), getStableUDPPort());
         try {
             return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
                     getPort(), isIncomingTLSEnabled());
@@ -446,6 +451,7 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     private void fireAddressChange(Address newAddress) {
+        LOG.debugf("firing new address: {0}", newAddress);
         listeners.broadcast(new AddressEvent(newAddress, Address.EventType.ADDRESS_CHANGED));
     }
     
