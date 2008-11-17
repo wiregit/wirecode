@@ -84,7 +84,7 @@ class NavList extends JXPanel {
         titleLabel.setName("LibraryNavigator.NavListTitle");
         add(titleLabel, "gapleft 5, alignx left, growx, wrap");
         
-        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0")) {
+        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx")) {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();

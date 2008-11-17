@@ -52,7 +52,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final ListViewTableEditorRendererFactory listViewTableEditorRendererFactory;
     private final Log LOG = LogFactory.getLog(BaseResultPanel.class);
     
-    private static final int TABLE_ROW_HEIGHT = 26;
+    private static final int TABLE_ROW_HEIGHT = 23;
     private static final int ROW_HEIGHT = 56;
     
     private final CardLayout layout = new CardLayout();

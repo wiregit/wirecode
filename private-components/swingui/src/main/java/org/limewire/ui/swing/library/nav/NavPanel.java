@@ -79,8 +79,8 @@ class NavPanel extends JXPanel {
         statusIcon = new JXBusyLabel(new Dimension(12, 12));
         statusIcon.setOpaque(false);
         
-        add(categoryLabel, "gapbefore 0, grow, alignx left");
-        add(statusIcon, "alignx right, gapafter 4, hidemode 2, wrap");
+        add(categoryLabel, "gapbefore 0, grow, push, alignx left");
+        add(statusIcon, "alignx right, gapafter 4, hidemode 3, wrap");
         if(libraryState == null) {
             unbusy();
         } else {
