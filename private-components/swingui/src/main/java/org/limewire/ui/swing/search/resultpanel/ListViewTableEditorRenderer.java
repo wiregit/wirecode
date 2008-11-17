@@ -300,7 +300,7 @@ implements TableCellEditor, TableCellRenderer {
         return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
-    private JPanel makeCenterPanel() {
+    private JPanel makeFromPanel() {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
@@ -315,7 +315,7 @@ implements TableCellEditor, TableCellRenderer {
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout("", "0[][][]8[]", "0[top]")) {
+        JXPanel panel = new JXPanel(new MigLayout("", "0[][][]8[]", "5[]")) {
             @Override
             public void setBackground(Color color) {
                 super.setBackground(color);
@@ -326,10 +326,10 @@ implements TableCellEditor, TableCellRenderer {
         };
 
         panel.setOpaque(false);
-        panel.add(new JLabel(dividerIcon), "ay center");
-        panel.add(fromWidget, "push, ay center, gaptop 2");
-        panel.add(similarButton, "wmax 25, gaptop 2");
-        panel.add(optionsButton, "wmax 25, gaptop 2, gapbottom 0");
+        panel.add(new JLabel(dividerIcon));
+        panel.add(fromWidget, "push");
+        panel.add(similarButton, "hmax 25, wmax 25");
+        panel.add(optionsButton, "hmax 25, wmax 25");
 
         return panel;
     }
@@ -409,7 +409,7 @@ implements TableCellEditor, TableCellRenderer {
     private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator) {
         leftPanel = makeIndentablePanel(makeLeftPanel(navigator, libraryNavigator));
 
-        fromPanel = makeCenterPanel();
+        fromPanel = makeFromPanel();
 
         lastRowPanel = new JPanel(new MigLayout("insets 10 30 0 0", "[]", "[]"));
         lastRowPanel.setOpaque(false);
