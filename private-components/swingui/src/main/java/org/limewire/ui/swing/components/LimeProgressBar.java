@@ -10,6 +10,12 @@ import javax.swing.JProgressBar;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
 
+/**
+ * Progress bar that uses painters.
+ * 
+ * This component implements a lazy caching update model.  
+ *  If cached changing the model will not fire repaints.
+ */
 public class LimeProgressBar extends JProgressBar {
 
     private static final boolean CACHING_SUPPORTED = true;
@@ -37,6 +43,10 @@ public class LimeProgressBar extends JProgressBar {
         this.backgroundPainter = painter;
     }
 
+	/**
+	 * Note: This component implements a lazy caching update model.  
+     *        If cached changing the model will not fire repaints.
+	 */
 	public boolean hasCacheSupport() {
 	    return CACHING_SUPPORTED;
 	}

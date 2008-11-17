@@ -13,15 +13,16 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-
+@Singleton
 class ConnectionStatusPanel extends JXPanel {
-
-    private final SharedFileCountPanel sharedFileCountPanel;
-    
-    private final JLabel connectionStrengthPanel;
+   
+    private final JLabel connectionStrengthLabel;
+    private final JLabel connectionStatusLabel;
     
     @Resource private Icon noInternet;
     @Resource private Icon disconnected;
@@ -32,25 +33,23 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Icon turbo;
     
     @Inject
-    ConnectionStatusPanel(SharedFileCountPanel countPanel, GnutellaConnectionManager connectionManager) {
+    ConnectionStatusPanel(GnutellaConnectionManager connectionManager) {
         GuiUtils.assignResources(this);
-        
+       
         this.setLayout(new BorderLayout());
-        
-        this.sharedFileCountPanel = countPanel;
-        
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         
-        this.sharedFileCountPanel.setVisible(false);        
-        this.sharedFileCountPanel.setFont(this.getFont());
-        this.sharedFileCountPanel.setForeground(this.getForeground());
+        this.connectionStrengthLabel = new JLabel();
+        this.connectionStrengthLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        this.connectionStatusLabel = new JLabel(I18n.tr("Connecting..."));
+        this.connectionStatusLabel.setVisible(false);
+        this.connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        this.connectionStatusLabel.setFont(this.getFont());
+        this.connectionStatusLabel.setForeground(this.getForeground());
         
-        this.connectionStrengthPanel = new JLabel();
-        this.connectionStrengthPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,3));
-                
-        this.add(this.connectionStrengthPanel,BorderLayout.WEST);
-        this.add(this.sharedFileCountPanel, BorderLayout.CENTER);
+        this.add(this.connectionStrengthLabel,BorderLayout.WEST);
+        this.add(this.connectionStatusLabel,BorderLayout.CENTER);
                 
         connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -65,41 +64,41 @@ class ConnectionStatusPanel extends JXPanel {
     
     private void setConnectionStrength(ConnectionStrength strength) {
 
-        boolean sharingVisible = false;
+        boolean connectingVisible = false;
         Icon strengthIcon = null;
         
         switch(strength) {
         case NO_INTERNET:
-            sharingVisible = false;
+            connectingVisible = false;
             strengthIcon = noInternet;
             break;
         case DISCONNECTED:
-            sharingVisible = false;
+            connectingVisible = false;
             strengthIcon = disconnected;
             break;
         case CONNECTING:
-            sharingVisible = false;
+            connectingVisible = true;
             strengthIcon = connecting;
             break;
         case WEAK:
-            sharingVisible = true;
+            connectingVisible = false;
             strengthIcon = weak;
             break;
         case MEDIUM:
-            sharingVisible = true;
+            connectingVisible = false;
             strengthIcon = medium; 
             break;            
         case FULL:
-            sharingVisible = true;
+            connectingVisible = false;
             strengthIcon = full;
             break;
         case TURBO:
-            sharingVisible = true;
+            connectingVisible = false;
             strengthIcon = turbo; 
             break;
         }
         
-        sharedFileCountPanel.setVisible(sharingVisible);
-        connectionStrengthPanel.setIcon(strengthIcon);
+        connectionStatusLabel.setVisible(connectingVisible);
+        connectionStrengthLabel.setIcon(strengthIcon);
     }
 }
