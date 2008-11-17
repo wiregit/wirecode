@@ -1,20 +1,19 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.BlockingEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -65,7 +64,7 @@ public class AddressIQListener implements PacketListener {
                 Presence presence = user.getPresences().get(iq.getFrom());
                 if(presence != null) {
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("updating address on presence " + presence.getJID() + " to " + address);
+                        LOG.debug("updating address on presence " + presence.getJID() + " to " + iq.getAddress());
                     }
                     presence.addFeature(new AddressFeature(iq.getAddress()));
                 }
@@ -86,7 +85,7 @@ public class AddressIQListener implements PacketListener {
             public void handleEvent(AddressEvent event) {
                 if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
                     // TODO async?
-                    LOG.debugf("new address to publish: {0}", event.getSource().toString());
+                    LOG.debugf("new address to publish: {0}", event.getSource());
                     synchronized (AddressIQListener.this) {
                         address = event.getSource();
                         for(User user : connection.getUsers()) {

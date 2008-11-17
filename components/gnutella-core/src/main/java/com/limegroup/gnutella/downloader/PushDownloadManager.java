@@ -384,16 +384,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         return ConnectableImpl.INVALID_CONNECTABLE;
     }
     
-    private int getFWTVersion(RemoteFileDesc rfd) {
-        Address address = rfd.getAddress();
-        if (address instanceof PushEndpoint) {
-            return ((PushEndpoint)address).getFWTVersion();
-        } else if (address instanceof FirewalledAddress) {
-            return ((FirewalledAddress)address).getFwtVersion();
-        }
-        return 0;
-    }
-
     /**
      * Sends a push through UDP.
      *
@@ -450,7 +440,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private void sendPushTCP(RemoteFileDesc file, final byte[] guid, MultiShutdownable observer) {
         // if this is a FW to FW transfer, we must consider special stuff
-        final boolean shouldDoFWTransfer = getFWTVersion(file) > 0 &&
+        final boolean shouldDoFWTransfer = getFWTVersion(file.getAddress()) > 0 &&
                          networkManager.canDoFWT() &&
                         !networkManager.acceptedIncomingConnection();
 
