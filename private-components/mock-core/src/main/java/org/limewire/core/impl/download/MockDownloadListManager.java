@@ -29,8 +29,8 @@ import ca.odell.glazedlists.ObservableElementList;
 @Singleton
 public class MockDownloadListManager implements DownloadListManager {
 	private static final String LOCALHOST = "127.0.0.1";
-    private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
-	private EventList<DownloadItem> downloadItems;
+    private final RemoveCancelledListener cancelListener = new RemoveCancelledListener();
+	private final EventList<DownloadItem> downloadItems;
 	
 	public MockDownloadListManager(){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector =
@@ -71,7 +71,7 @@ public class MockDownloadListManager implements DownloadListManager {
                 DownloadState.DOWNLOADING, Category.IMAGE);
     }
 
-	public synchronized void addDownload(DownloadItem downloadItem){
+	public void addDownload(DownloadItem downloadItem){
 	    downloadItem.addPropertyChangeListener(cancelListener);
 		downloadItems.add(downloadItem);
 	}

@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.event.SwingPropertyChangeSupport;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -16,19 +18,19 @@ import org.limewire.core.api.download.DownloadState;
 
 public class MockDownloadItem implements DownloadItem {
 
-	private String title;
+	private volatile String title;
 	private volatile long currentSize = 0;
     private volatile long remainingQueueTime = 9999;
 	private final long totalSize;
 	//guarded by this
-	private boolean running = true;
-	private DownloadState state = DownloadState.DOWNLOADING;
-	private List<DownloadSource> downloadSources;
-	private Category category;
+	private volatile boolean running = true;
+	private volatile DownloadState state = DownloadState.DOWNLOADING;
+	private final List<DownloadSource> downloadSources;
+	private final Category category;
 	
 	private ErrorState errorState = ErrorState.NONE;
 	
-	private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this);
 
 	//TODO: change constructor
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
@@ -63,7 +65,7 @@ public class MockDownloadItem implements DownloadItem {
 		return currentSize;
 	}
 
-	private synchronized void setCurrentSize(long newSize) {
+	private void setCurrentSize(long newSize) {
 		double oldSize = this.currentSize;
 		this.currentSize = newSize > getTotalSize() ? getTotalSize() : newSize;
 		if (currentSize == getTotalSize()) {
@@ -83,31 +85,31 @@ public class MockDownloadItem implements DownloadItem {
         return (long) ((getTotalSize() - getCurrentSize()) / getDownloadSpeed());
     }
 
-	public synchronized void cancel() {
+	public void cancel() {
 		setRunning(false);
 		setState(DownloadState.CANCELLED);
 	}
 
-	public synchronized void pause() {
+	public void pause() {
 		setRunning(false);
 		setState(DownloadState.PAUSED);
 	}
 
-	public synchronized void resume() {
+	public void resume() {
 		setRunning(true);
 		start();
 		setState(DownloadState.DOWNLOADING);
 	}
 
-	private synchronized boolean isRunning() {
+	private boolean isRunning() {
 		return running;
 	}
 
-	private synchronized void setRunning(boolean running) {
+	private void setRunning(boolean running) {
 		this.running = running;
 	}
 
-	private synchronized void start() {
+	private void start() {
 		new Thread() {
             @Override
 			public void run() {
@@ -126,11 +128,11 @@ public class MockDownloadItem implements DownloadItem {
 	}
 
 	@Override
-	public synchronized DownloadState getState() {
+	public DownloadState getState() {
 		return state;
 	}
 
-	public synchronized void setState(DownloadState state) {
+	public void setState(DownloadState state) {
 		DownloadState oldState = this.state;
 		this.state = state;
 		support.firePropertyChange("state", oldState, state);
@@ -186,7 +188,7 @@ public class MockDownloadItem implements DownloadItem {
         return remainingQueueTime;
     }
 
-    private synchronized void setRemainingQueueTime(long l) {
+    private void setRemainingQueueTime(long l) {
         remainingQueueTime = l;
     }
  
