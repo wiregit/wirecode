@@ -150,6 +150,11 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
     public Downloader download(RemoteFileDesc[] files, List<? extends RemoteFileDesc> alts,
             GUID queryGUID, boolean overwrite, File saveDir, String fileName)
             throws SaveLocationException;
+    
+    //TODO:  this is a hack to prevent inadvertent sharing - download from friend does not autoshare with gnutella
+    public Downloader downloadFromFriend(RemoteFileDesc[] files, List<? extends RemoteFileDesc> alts,
+            GUID queryGUID, boolean overwrite, File saveDir, String fileName)
+            throws SaveLocationException;
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from

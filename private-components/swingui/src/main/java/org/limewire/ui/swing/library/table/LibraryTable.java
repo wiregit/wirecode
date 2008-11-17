@@ -180,7 +180,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         public void download(int row) {
             final RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
             try {
-                downloadListManager.addDownload(file);
+                downloadListManager.addFriendDownload(file);
                 downloadingList.add(file);
                 TableCellEditor editor = table.getCellEditor();
                 if (editor != null) {          
@@ -191,7 +191,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {
-                        downloadListManager.addDownload(file, saveFile, overwrite);
+                        downloadListManager.addFriendDownload(file, saveFile, overwrite);
                         downloadingList.add(file);
                     }
                 }, e, true, null);

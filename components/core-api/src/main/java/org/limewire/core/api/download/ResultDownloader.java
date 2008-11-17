@@ -53,7 +53,7 @@ public interface ResultDownloader {
      *         saving the file
      * @throws InvalidDataException if the FileMetaData is malformed
      */
-    public DownloadItem addDownload(FriendPresence presence, FileMetaData chatFileDesc)
+    public DownloadItem addFriendDownload(FriendPresence presence, FileMetaData chatFileDesc)
             throws SaveLocationException, InvalidDataException;
 
     /**
@@ -63,7 +63,7 @@ public interface ResultDownloader {
      *         file
      * 
      */
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException;
+    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException;
     
 
     /**
@@ -77,7 +77,7 @@ public interface ResultDownloader {
      *         file
      * 
      */
-    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;
+    public DownloadItem addFriendDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;
 
     
     

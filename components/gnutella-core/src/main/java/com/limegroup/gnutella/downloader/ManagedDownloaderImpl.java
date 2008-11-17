@@ -55,6 +55,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.ShareSettingsOverride;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
@@ -455,6 +456,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     private final SocketsManager socketsManager;
     
     private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
+
+    private ShareSettingsOverride shareSettingsOverride = ShareSettingsOverride.DEFAULT;
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -2156,7 +2159,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Shares the newly downloaded file
      */
     protected void shareSavedFile(File saveFile){
-		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
+		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() 
+		        && shareSettingsOverride != ShareSettingsOverride.NO_SHARE)
 		    fileManager.getGnutellaFileList().add(saveFile, getXMLDocuments());
 		else
 		    fileManager.getManagedFileList().add(saveFile, getXMLDocuments());
@@ -3137,6 +3141,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if(getIncompleteFile() != null) {
             incompleteFileManager.initEntry(getIncompleteFile(), gmem.getSavedBlocks(), getSha1Urn(), shouldPublishIFD());
         }
+    }
+    
+    @Override
+    public void setShareSettingsOverride(ShareSettingsOverride shareSettingsOverride){
+        this.shareSettingsOverride = shareSettingsOverride;
     }
     
     /** Returns true if this download's IFD should be published as sharable. */

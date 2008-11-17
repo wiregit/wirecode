@@ -156,11 +156,11 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
         
         Category category = searchResults.iterator().next().getCategory();
-        return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category);
+        return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category, false);
     }
 	
 	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
-            GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category)
+            GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category, boolean isFriendDownload)
             throws SaveLocationException {
 
         // determine per mediatype directory if saveLocation == null
@@ -173,20 +173,24 @@ public class CoreDownloadListManager implements DownloadListManager {
                 saveDir = fs.getValue();
             }
        // }
-
-        Downloader downloader = downloadManager.download(files, alts, queryGuid, overwrite, saveDir, fileName);
+        Downloader downloader;
+        if (isFriendDownload) {
+            downloader = downloadManager.downloadFromFriend(files, alts, queryGuid, overwrite, saveDir, fileName);
+        } else {
+            downloader = downloadManager.download(files, alts, queryGuid, overwrite, saveDir, fileName);
+        }
         // This should have been funneled through our addDownload callback method, which
         // should have set the CoreDownloadItem.
         return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
     }
 
     @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
-        return addDownload(fileItem, null, false);
+    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException {
+        return addFriendDownload(fileItem, null, false);
     }
     
     @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem, File saveFile, boolean overwrite) throws SaveLocationException {
+    public DownloadItem addFriendDownload(RemoteFileItem fileItem, File saveFile, boolean overwrite) throws SaveLocationException {
         File saveDir = null;
         String fileName = null;
         
@@ -199,16 +203,16 @@ public class CoreDownloadListManager implements DownloadListManager {
             }
         }
         return createDownloader(new RemoteFileDesc[] { ((CoreRemoteFileItem) fileItem).getRfd() },
-                RemoteFileDesc.EMPTY_LIST, null, saveDir, fileName, overwrite, fileItem.getCategory());    
+                RemoteFileDesc.EMPTY_LIST, null, saveDir, fileName, overwrite, fileItem.getCategory(), true);    
     }
     
     @Override
-    public DownloadItem addDownload(FriendPresence presence, FileMetaData fileMeta)
+    public DownloadItem addFriendDownload(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
         Category category = CategoryConverter.categoryForFileName(fileMeta.getName());
         return createDownloader(new RemoteFileDesc[] { createRfdFromChatResult(presence, fileMeta) },
                 RemoteFileDesc.EMPTY_LIST, 
-                null, null, null, false, category);
+                null, null, null, false, category, true);
     }
 
     private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)

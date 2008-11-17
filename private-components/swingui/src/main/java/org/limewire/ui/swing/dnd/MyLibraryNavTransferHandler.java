@@ -50,7 +50,7 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
             
             for (RemoteFileItem file : remoteFileList) {
                 try {
-                    downloadListManager.addDownload(file);
+                    downloadListManager.addFriendDownload(file);
                 } catch (SaveLocationException e) {
                     throw new RuntimeException(e);
                 }

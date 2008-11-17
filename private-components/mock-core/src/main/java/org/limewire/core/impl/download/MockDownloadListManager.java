@@ -66,7 +66,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 
     @Override
-    public DownloadItem addDownload(FriendPresence presence, FileMetaData file) {
+    public DownloadItem addFriendDownload(FriendPresence presence, FileMetaData file) {
         return new MockDownloadItem("download from 1 source", 0,
                 DownloadState.DOWNLOADING, Category.IMAGE);
     }
@@ -115,7 +115,7 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
+    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -137,7 +137,7 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
+    public DownloadItem addFriendDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
         return null;
     }
 

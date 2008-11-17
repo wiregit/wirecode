@@ -315,7 +315,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   dl = downloader.addDownload(chatFriend.getBestPresence(),
+                   dl = downloader.addFriendDownload(chatFriend.getBestPresence(),
                            msgWithfileOffer.getFileOffer());
                 } catch(SaveLocationException sle) {
                     throw new RuntimeException("FIX ME", sle); // BROKEN
