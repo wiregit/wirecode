@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.jivesoftware.smack.PacketListener;
@@ -32,6 +33,7 @@ public class AddressIQListener implements PacketListener {
     private volatile Address address;
     private final AddressFactory factory; 
     private final RosterEventHandler rosterEventHandler;
+    private Map<String, Address> pendingAddresses;
 
     public AddressIQListener(XMPPConnection connection, org.jivesoftware.smack.XMPPConnection smackConnection,
                              AddressFactory factory,
@@ -41,6 +43,7 @@ public class AddressIQListener implements PacketListener {
         this.factory = factory;
         this.address = address;
         this.rosterEventHandler = new RosterEventHandler();
+        this.pendingAddresses = new HashMap<String, Address>();
     }
 
     public void processPacket(Packet packet) {
@@ -63,10 +66,11 @@ public class AddressIQListener implements PacketListener {
             if (user != null) {
                 Presence presence = user.getPresences().get(iq.getFrom());
                 if(presence != null) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("updating address on presence " + presence.getJID() + " to " + iq.getAddress());
-                    }
+                    LOG.debugf("updating address on presence {0} to {1}", presence.getJID(), iq.getAddress());
                     presence.addFeature(new AddressFeature(iq.getAddress()));
+                } else {
+                    LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), presence.getJID());
+                    pendingAddresses.put(iq.getFrom(), address);
                 }
             }
         }
@@ -130,11 +134,19 @@ public class AddressIQListener implements PacketListener {
                                         if(address != null) {
                                             sendAddress(address, presence.getJID());
                                         }
+                                        if(pendingAddresses.containsKey(presence.getJID())) {
+                                            LOG.debugf("updating address on presence {0} to {1}", presence.getJID(), address);
+                                            presence.addFeature(new AddressFeature(pendingAddresses.remove(presence.getJID())));    
+                                        }
                                     }
                                 }
                             }
                         }
                     });
+                } else if(presence.getType().equals(Presence.Type.unavailable)) {
+                    synchronized (AddressIQListener.this) {
+                        pendingAddresses.remove(presence.getJID());    
+                    }
                 }
             }
         });

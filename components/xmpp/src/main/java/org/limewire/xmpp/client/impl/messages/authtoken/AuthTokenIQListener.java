@@ -15,9 +15,8 @@ import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.BlockingEvent;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.Presence;
@@ -34,6 +33,7 @@ public class AuthTokenIQListener implements PacketListener {
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
     private final XMPPAuthenticator authenticator;
     private final RosterEventHandler rosterEventHandler;
+    private Map<String, byte []> pendingAuthTokens;
 
     public AuthTokenIQListener(XMPPConnection connection, org.jivesoftware.smack.XMPPConnection smackConnection,
                                XMPPAuthenticator authenticator) {
@@ -41,6 +41,7 @@ public class AuthTokenIQListener implements PacketListener {
         this.smackConnection = smackConnection;
         this.authenticator = authenticator;
         this.rosterEventHandler = new RosterEventHandler();
+        this.pendingAuthTokens = new HashMap<String, byte[]>();
     }
 
     public void processPacket(Packet packet) {
@@ -71,7 +72,8 @@ public class AuthTokenIQListener implements PacketListener {
                         presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
                     }
                 }  else {
-                    LOG.debugf("user not available yet {0}", iq.getFrom());
+                    LOG.debugf("auth token {0} for presence {1} is pending", iq.getAuthToken(), presence.getJID());
+                    pendingAuthTokens.put(iq.getFrom(), iq.getAuthToken());
                 }
             }
         }
@@ -112,11 +114,26 @@ public class AuthTokenIQListener implements PacketListener {
                                 if(event.getSource().getID().equals(LimewireFeature.ID)) {
                                     synchronized (AuthTokenIQListener.this) {
                                         sendResult(presence);
+                                        if(pendingAuthTokens.containsKey(presence.getJID())) {
+                                            byte [] authToken = pendingAuthTokens.remove(presence.getJID());
+                                            if(LOG.isDebugEnabled()) {
+                                                try {
+                                                    LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(authToken), "UTF-8"));
+                                                } catch (UnsupportedEncodingException e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
+                                            }
+                                            presence.addFeature(new AuthTokenFeature(authToken));
+                                        }
                                     }
                                 }
                             }
                         }
                     });
+                } else if(presence.getType().equals(Presence.Type.unavailable)) {
+                    synchronized (AuthTokenIQListener.this) {
+                        pendingAuthTokens.remove(presence.getJID());    
+                    }
                 }
             }
         });
