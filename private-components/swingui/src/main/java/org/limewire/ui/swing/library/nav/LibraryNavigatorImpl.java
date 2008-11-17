@@ -109,6 +109,7 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         browseList.getActionMap().put(NavKeys.MOVE_UP, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                LibraryNavigatorImpl.this.myLibraryMediator.showMainCard();
                 myLibrary.select();
             }
         });
@@ -183,6 +184,8 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             public void itemSelected(boolean selected) {
                 if(selected) {
                     scrollRectToVisible(myLibrary.getBounds());
+                } else {
+                    myLibraryMediator.showMainCard();
                 }
             }
         });

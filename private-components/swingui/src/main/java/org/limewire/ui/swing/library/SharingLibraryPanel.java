@@ -109,7 +109,7 @@ public class SharingLibraryPanel extends LibraryPanel {
             FilterList<LocalFileItem> filteredAll = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             FilterList<LocalFileItem> filteredShared = GlazedListsFactory.filterList(friendFileList.getSwingModel(), new CategoryFilter(category));
             createButton(categoryIconManager.getIcon(category), category,
-                        createMyCategoryAction(category, filteredAll, friend, friendFileList), filteredShared);
+                        createMyCategoryAction(category, filteredAll, friend, friendFileList), filteredAll, filteredShared);
         }
         return categories;
     }

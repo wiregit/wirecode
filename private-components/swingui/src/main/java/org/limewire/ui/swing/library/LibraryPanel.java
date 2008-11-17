@@ -117,6 +117,10 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     }
     
     protected <T extends FileItem> JButton createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredList) {
+        return createButton(icon, category, component, null, filteredList);
+    }
+    
+    protected <T extends FileItem> JButton createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
         cardPanel.add(component, category.name());
         
         ButtonItem item = new ButtonItemImpl(category);
@@ -129,7 +133,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         // If you only want to show the #s for the sharing panel -- make this false.
         boolean showForAll_NotJustSharing = true;
         if(showForAll_NotJustSharing || !isLibraryPanel) {
-            ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredList);
+            ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category.toString(), action, filteredAllFileList, filteredList, isLibraryPanel);
             filteredList.addListEventListener(listener);
             addDisposable(listener);
         }
@@ -268,17 +272,24 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
         private final String text;
         private final Action action;
+        private final FilterList<T> allFileList;
         private final FilterList<T> list;
+        private final boolean isLibraryPanel;
         
-        private ButtonSizeListener(String text, Action action, FilterList<T> list) {
+        private ButtonSizeListener(String text, Action action, FilterList<T> allFileList, FilterList<T> list, boolean isLibraryPanel) {
             this.text = text;
             this.action = action;
+            this.allFileList = allFileList;
             this.list = list;            
+            this.isLibraryPanel = isLibraryPanel;
             setText();
         }
 
         private void setText() {
-            action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + ")");
+            if(isLibraryPanel)
+                action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + ")");
+            else
+                action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + "/" + allFileList.size() + ")");
         }
         
         @Override
