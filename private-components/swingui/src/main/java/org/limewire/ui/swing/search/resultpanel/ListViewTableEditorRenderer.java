@@ -154,11 +154,32 @@ implements TableCellEditor, TableCellRenderer {
         GuiUtils.assignResources(this);
 
         similarButton.setPressedIcon(similarDownIcon);
-        similarButton.setRolloverIcon(similarHoverIcon);
-        similarButton.setSelectedIcon(similarActiveIcon);
         similarButton.setIcon(similarUpIcon);
         similarButton.setBorderPainted(false);
         similarButton.setContentAreaFilled(false);
+        //This mouse listener is unfortunately necessary. Setting the icons for rollover
+        //causes the wrong icon to be displayed after the button is active and the 
+        //mouse has entered "edit" mode in the cell.
+        similarButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent arg0) {
+                if (!isShowingSimilarResults()) {
+                    similarButton.setIcon(similarHoverIcon);
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent arg0) { 
+                if (!isShowingSimilarResults()) {
+                    similarButton.setIcon(similarUpIcon);
+                }
+            }
+        });
 
         optionsButton.setPressedIcon(optionsDownIcon);
         optionsButton.setRolloverIcon(optionsHoverIcon);
@@ -280,6 +301,10 @@ implements TableCellEditor, TableCellRenderer {
         } else {
             populatePanel((VisualSearchResult) value, col);
             panel = col == 0 ? leftPanel : fromPanel;
+            
+            if (col == 1) {
+                similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
+            }
         }
 
         editorComponent.add(panel, BorderLayout.CENTER);
