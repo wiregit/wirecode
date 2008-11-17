@@ -107,6 +107,9 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		} catch (IOException failed) {
 		    LOG.debug("iox", failed);
 			return !listener.requestFailed(method, null, failed);
+		} catch (Throwable t) {
+		    LOG.debug("throwable", t);
+		    return !listener.requestFailed(method, null, new IOException(t));
 		}
         return !listener.requestComplete(method, response);
 	}
