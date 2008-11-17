@@ -1,5 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
+import java.util.Locale;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.auth.Credentials;
 import org.limewire.http.auth.Authenticator;
@@ -42,6 +44,7 @@ public class XMPPAuthenticator implements Authenticator {
      * @return the ascii-encoded auth token
      */
     public String getAuthToken(String userId) {
+        userId = userId.toLowerCase(Locale.getDefault());
         SHA1 sha1 = new SHA1();
         byte[] hash = sha1.digest(StringUtils.toUTF8Bytes(userId));
         for (int i = 0; i < hash.length; i++) {

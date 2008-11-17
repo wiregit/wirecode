@@ -41,7 +41,7 @@ class FileManagerImpl implements FileManager, Service {
     private final ManagedFileListImpl managedFileList;
     private final GnutellaFileListImpl sharedFileList;
     private final IncompleteFileListImpl incompleteFileList;
-    private final Map<String, FriendFileListImpl> friendFileLists = new HashMap<String,FriendFileListImpl>();
+    private final Map<String, FriendFileListImpl> friendFileLists = new TreeMap<String,FriendFileListImpl>(String.CASE_INSENSITIVE_ORDER);
     
     private Saver saver;
     

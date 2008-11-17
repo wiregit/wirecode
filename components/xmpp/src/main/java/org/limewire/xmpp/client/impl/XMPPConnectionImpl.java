@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
