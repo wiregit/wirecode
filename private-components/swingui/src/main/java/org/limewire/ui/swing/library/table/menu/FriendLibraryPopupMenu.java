@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.Action;
@@ -13,6 +14,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
@@ -68,12 +70,17 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
             BackgroundExecutorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    for (RemoteFileItem fileItem : fileItemArray) {
+                    for (final RemoteFileItem fileItem : fileItemArray) {
                         try {
                             downloadListManager.addDownload(fileItem);
                         } catch (SaveLocationException e) {
-                            // TODO handle SaveLocationException
-                            throw new RuntimeException(e);
+                            SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                                @Override
+                                public void download(File saveFile, boolean overwrite)
+                                        throws SaveLocationException {
+                                    downloadListManager.addDownload(fileItem, saveFile, overwrite);
+                                }
+                            }, e, null);
                         }
                     }
                 }
