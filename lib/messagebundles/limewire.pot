@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-10 11:31-0500\n"
+"POT-Creation-Date: 2008-11-17 11:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,7 +78,7 @@ msgstr ""
 msgid "Trouble connecting to people"
 msgstr ""
 
-#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:38
+#: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
 msgid "XMPP Service"
 msgstr ""
 
@@ -209,23 +209,23 @@ msgstr ""
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:23
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:32
 msgid "Free to chat"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:24
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:33
 msgid "Available"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:25
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:34
 msgid "Away"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:26
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:35
 msgid "Away for a while"
 msgstr ""
 
-#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:27
+#: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:36
 msgid "Do not disturb"
 msgstr ""
 
@@ -248,7 +248,7 @@ msgstr ""
 msgid "Connection Listener"
 msgstr ""
 
-#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:76
+#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:73
 msgid "Browse Host Handler"
 msgstr ""
 
@@ -264,30 +264,30 @@ msgstr ""
 msgid "Stale Connection Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:102
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:104
 msgid "Various Core Services"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:107
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:109
 msgid "Gnutella Connections"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:195
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:200
 msgid "Old Downloads"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:218
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:223
 msgid "Download Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:267
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:272
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:269
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:274
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -432,7 +432,7 @@ msgstr ""
 msgid "RUDP Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/spam/RatingTable.java:74
+#: core/com/limegroup/gnutella/spam/RatingTable.java:98
 msgid "Spam Management"
 msgstr ""
 
@@ -2711,7 +2711,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:813
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:579
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:582
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr ""
@@ -3848,7 +3848,7 @@ msgid "Icon"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:145
-#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:129
+#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:130
 msgid "Path"
 msgstr ""
 
@@ -3905,7 +3905,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:325
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:348
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:200
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:204
 msgid "Advanced"
 msgstr ""
 
@@ -4012,7 +4012,7 @@ msgid "Show Magnet Details"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1456
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:165
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:169
 msgid "View License"
 msgstr ""
 
@@ -4496,11 +4496,13 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
+#. This is harmless if the button's already in the right state
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:329
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:513
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:643
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:458
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:516
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:621
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:646
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr ""
@@ -5487,23 +5489,23 @@ msgstr ""
 msgid "Start Upload Slots:"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:29
+#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:31
+#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:42
+#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:41
 msgid "Forget Training Data"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:50
+#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:49
 msgid "Relaxed"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:51
+#: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:50
 msgid "Strict"
 msgstr ""
 
@@ -5823,7 +5825,7 @@ msgstr ""
 msgid "Back To Search"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:163
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:167
 msgid "Download As..."
 msgstr ""
 
@@ -5874,39 +5876,40 @@ msgid ""
 "Six months of free updates"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:189
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:191
 msgid "View in Browser..."
 msgstr ""
 
 #. mark 'em red
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:499
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:640
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:643
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:459
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:517
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:622
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:647
 msgid "Mark selected search results as Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
 msgid "Mark selected search results as Not Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:563
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:566
 msgid "Search More"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:727
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:730
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1074
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1077
 msgid "More Info..."
 msgstr ""
 
@@ -6056,46 +6059,46 @@ msgstr ""
 msgid "Loading Search Window..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:341
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:343
 msgid "Firewalled Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:471
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:474
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
 msgid "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:477
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:479
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:483
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:486
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:488
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:495
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:497
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
 msgstr ""
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:498
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:500
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:809
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:813
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6127,14 +6130,14 @@ msgstr ""
 msgid "Media"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:134
+#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:135
 #, java-format
 msgid "... {0} more."
 msgid_plural "... {0} more."
 msgstr[0] ""
 msgstr[1] ""
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:750
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:752
 msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr ""
