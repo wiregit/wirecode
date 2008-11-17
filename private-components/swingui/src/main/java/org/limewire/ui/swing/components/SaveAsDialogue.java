@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -30,18 +29,16 @@ public class SaveAsDialogue extends JDialog {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
-        //TODO make looks pretty.
-        panel.setLayout(new MigLayout("hidemode 2", "[][]", "[][][]"));
-        panel.setPreferredSize(new Dimension(500, 500));
+        panel.setLayout(new MigLayout("hidemode 3, gapy 10", "", ""));
 
         final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode), badFile
-                .getName()), 500);
+                .getName()), 400);
 
-        final JTextField filePathField = new JTextField(50);
+        final JTextField filePathField = new JTextField(25);
         filePathField.setEnabled(false);
         filePathField.setText(badFile.getAbsolutePath());
 
-        JButton browseButton = new JButton(I18n.tr("Browse"));
+        JButton browseButton = new JButton(I18n.tr("Save As..."));
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,10 +85,10 @@ public class SaveAsDialogue extends JDialog {
             }
         });
         panel.add(message, "span 2, wrap");
-        panel.add(filePathField);
+        panel.add(filePathField, "grow x, push");
         panel.add(browseButton, "wrap");
-        panel.add(saveButton);
-        panel.add(overwriteButton);
+        panel.add(saveButton, "split 1, alignx right");
+        panel.add(overwriteButton, "alignx right");
         panel.add(cancelButton);
         setContentPane(panel);
         pack();
@@ -109,7 +106,7 @@ public class SaveAsDialogue extends JDialog {
     }
 
     private String getMessage(LocationCode locationCode) {
-        return "A file with this name already exists at this location. You can overwrite or save the download as whatever...";
+        return "A file with this name already exists at this location. You can overwrite or pick a new name for the file.";
     }
 
     public File getSaveFile() {
