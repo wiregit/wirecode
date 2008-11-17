@@ -48,12 +48,7 @@ public class SearchResultsModelFactory {
 
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory
                 .newSimilarResultsDetector();
-
-        
-        SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
-                similarResultsDetector);
-        visualSearchResults.addListEventListener(spamListEventListener);
-        
+            
         AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
         visualSearchResults.addListEventListener(alreadyDownloadedListEventListener);
         
@@ -63,6 +58,10 @@ public class SearchResultsModelFactory {
             visualSearchResults.addListEventListener(groupingListEventListener);
         }
 
+        SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
+                similarResultsDetector);
+        visualSearchResults.addListEventListener(spamListEventListener);
+                
         return searchResultsModel;
     }
 

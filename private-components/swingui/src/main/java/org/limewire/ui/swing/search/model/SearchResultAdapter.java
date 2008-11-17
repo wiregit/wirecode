@@ -229,8 +229,9 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public void setSpam(boolean spam) {
-        firePropertyChange("spam", isSpam(), spam);
+        boolean oldSpam = isSpam();
         spamCache = getSpamBoolean(spam);
+        firePropertyChange("spam", oldSpam, spam);
     }
 
     @Override
