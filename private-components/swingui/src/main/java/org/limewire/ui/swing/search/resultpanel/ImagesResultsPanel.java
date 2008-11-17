@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -20,7 +20,7 @@ public class ImagesResultsPanel extends BaseResultPanel {
     @AssistedInject
     public ImagesResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
-        ResultDownloader resultDownloader,
+        DownloadListManager downloadListManager,
         @Assisted Search search,
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
@@ -31,7 +31,7 @@ public class ImagesResultsPanel extends BaseResultPanel {
         ListViewRowHeightRule rowHeightRule) {
         
         super(listViewEditorRendererFactory,
-            eventList, new ImageTableFormat(), resultDownloader,
+            eventList, new ImageTableFormat(), downloadListManager,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
         
     }

@@ -3,13 +3,12 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JComponent;
@@ -22,7 +21,7 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
@@ -61,7 +60,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private ListViewTable resultsList;
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
-    private final ResultDownloader resultDownloader;
+    private final DownloadListManager downloadListManager;
     //cache for RowDisplayResult which could be expensive to generate with large search result sets
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
         new HashMap<VisualSearchResult, RowDisplayResult>();
@@ -71,7 +70,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
-            ResultDownloader resultDownloader,
+            DownloadListManager downloadListManager,
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
@@ -81,7 +80,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         
         this.baseEventList = eventList;
-        this.resultDownloader = resultDownloader;
+        this.downloadListManager = downloadListManager;
         this.search = search;
         
         setLayout(layout);
@@ -297,46 +296,35 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 // TODO: Need to go through some of the rigor that
                 // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
                 // went through.. checking for conflicts, etc.
-                DownloadItem di = resultDownloader.addDownload(
+                DownloadItem di = downloadListManager.addDownload(
                     search, vsr.getCoreSearchResults());
                 di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
                  
                 vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
             } catch (final SaveLocationException sle) {
                 if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
-                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                    //TODO get download item and add property change listener
+                    List<DownloadItem> downloads = downloadListManager.getSwingThreadSafeDownloads();
+                    // TODO instead of iterating through loop, it would be
+                    // nice to lookup download by urn potentially.
+                    for (DownloadItem downloadItem : downloads) {
+                        if (vsr.getUrn().equals(downloadItem.getUrn())) {
+                            downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                            break;
+                        }
+                    }
                 } else {
-                    handleSaveLocationException(vsr, sle);
+                    SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                        @Override
+                        public void download(File saveFile, boolean overwrite)
+                                throws SaveLocationException {
+                            DownloadItem di = downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
+                            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                        }
+                    }, sle, BaseResultPanel.this);
                 }
             }
-    }
-    
-    private void handleSaveLocationException(final VisualSearchResult vsr,
-            final SaveLocationException sle) {
-        
-        if(sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
-            //TODO better user feedback
-            throw new UnsupportedOperationException("Error starting download.", sle);
-        }
-        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode());
-        saveAsDialogue.addActionListener(new ActionListener() {
-           @Override
-            public void actionPerformed(ActionEvent e) {
-               File saveFile = saveAsDialogue.getSaveFile();
-               boolean overwrite = saveAsDialogue.isOverwrite();
-              try {
-                DownloadItem di = resultDownloader.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
-                di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-              } catch (SaveLocationException e1) {
-                  saveAsDialogue.dispose();
-                  handleSaveLocationException(vsr, e1);
-              }
-            } 
-        });
-        saveAsDialogue.setLocationRelativeTo(BaseResultPanel.this);
-        saveAsDialogue.setVisible(true);
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {

@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 
-import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -22,7 +22,7 @@ public class DocumentsResultsPanel extends BaseResultPanel {
     public DocumentsResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
         DocumentTableFormat tableFormat,
-        ResultDownloader resultDownloader,
+        DownloadListManager downloadListManager,
         @Assisted Search search,
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
@@ -32,7 +32,7 @@ public class DocumentsResultsPanel extends BaseResultPanel {
         PropertiesFactory<VisualSearchResult> properties,
         ListViewRowHeightRule rowHeightRule) {
 
-        super(listViewEditorRendererFactory, eventList, tableFormat, resultDownloader,
+        super(listViewEditorRendererFactory, eventList, tableFormat, downloadListManager,
             search, searchInfo, preserver, navigator, fromActions, properties, rowHeightRule);
         
     }

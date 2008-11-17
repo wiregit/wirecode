@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -115,5 +116,35 @@ public class SaveAsDialogue extends JDialog {
 
     public boolean isOverwrite() {
         return overwriteButton.isSelected();
+    }
+    
+    public interface DownLoadAction {
+        void download(File saveFile, boolean overwrite) throws SaveLocationException;
+    }
+
+    public static void handleSaveLocationException(final DownLoadAction downLoadAction,
+            final SaveLocationException sle, final Component component) {
+
+        if (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS
+                && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
+            // TODO better user feedback
+            throw new UnsupportedOperationException("Error starting download.", sle);
+        }
+        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode());
+        saveAsDialogue.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File saveFile = saveAsDialogue.getSaveFile();
+                boolean overwrite = saveAsDialogue.isOverwrite();
+                try {
+                    downLoadAction.download(saveFile, overwrite);
+                } catch (SaveLocationException e1) {
+                    saveAsDialogue.dispose();
+                    handleSaveLocationException(downLoadAction, e1, component);
+                }
+            }
+        });
+        saveAsDialogue.setLocationRelativeTo(component);
+        saveAsDialogue.setVisible(true);
     }
 }

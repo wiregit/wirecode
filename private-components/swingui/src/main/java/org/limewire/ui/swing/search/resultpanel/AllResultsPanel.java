@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import org.limewire.core.api.download.ResultDownloader;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -21,7 +21,7 @@ public class AllResultsPanel extends BaseResultPanel {
     public AllResultsPanel(
         @Assisted EventList<VisualSearchResult> eventList,
         AllTableFormat tableFormat,
-        ResultDownloader resultDownloader,
+        DownloadListManager downloadListManager,
         @Assisted Search search,
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
@@ -32,7 +32,7 @@ public class AllResultsPanel extends BaseResultPanel {
         ListViewRowHeightRule rowHeightRule) {
         
         super(listViewEditorRendererFactory, eventList, tableFormat,
-            resultDownloader, search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
+            downloadListManager, search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
     }
     
     @Override
