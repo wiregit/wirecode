@@ -93,8 +93,7 @@ public class ChatPanel extends JPanel implements Displayable {
             .append("<ul>");
             if (!isSharingWithFriends) {
                 // {0} and {1} are surrounding html tags to make 'here' a  link
-                bldr.append("<li>").append(tr("Share files with your friends {0}here{1}",
-                        "<a href=\"all_friends_share_list\">", "</a></li>"));
+                bldr.append("<li>").append(tr("Share files in your Library with your friends")).append("</li>");
             }
             
             if (!hasFriendsOnLimeWire) {
