@@ -203,6 +203,7 @@ public class FileMenu extends JMenu {
                 if (files != null) {
                     for (final File file : files) {
                         try {
+                            //TODO handle other magnet options, not jsut download
                             DownloadItem item = downloadListManager.addDownload(file);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                     .select(SimpleNavSelectable.create(item));
@@ -235,6 +236,7 @@ public class FileMenu extends JMenu {
                         URI uri = locationDialogue.getURI();
                         if (uri != null) {
                             try {
+                                //TODO handle other magnet options, not jsut download
                                 DownloadItem item = downloadListManager.addDownload(uri);
                                 navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                         .select(SimpleNavSelectable.create(item));
