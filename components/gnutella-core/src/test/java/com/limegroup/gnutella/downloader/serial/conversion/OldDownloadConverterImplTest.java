@@ -10,15 +10,18 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.util.BaseTestCase;
+import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.net.address.AddressFactory;
 import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
-import org.limewire.net.address.AddressFactory;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
@@ -26,13 +29,13 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
-import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.gui.search.SearchInformation;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.google.inject.Injector;
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class OldDownloadConverterImplTest extends BaseTestCase {
+public class OldDownloadConverterImplTest extends LimeTestCase {
     private Injector injector;
     private OldDownloadConverter oldDownloadConverter;
     private AddressFactory addressFactory;
@@ -54,6 +57,8 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         oldDownloadConverter = injector.getInstance(OldDownloadConverter.class);
         addressFactory = injector.getInstance(AddressFactory.class);
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+//        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        
     }
 
     public void testConversionForTypes() throws Exception {
@@ -75,8 +80,10 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(0, mem.getSavedBlocks().size());
             assertEquals(1, mem.getRemoteHosts().size());
             RemoteHostMemento rmem = mem.getRemoteHosts().iterator().next();
-            assertEquals("127.0.0.1", rmem.getHost());
-            assertEquals(1, rmem.getPort());
+            Address addr = rmem.getAddress(addressFactory, pushEndpointFactory);
+            assertInstanceof(PushEndpoint.class, addr);
+            PushEndpoint pe = (PushEndpoint)addr;
+            assertNull(pe.getInetSocketAddress()); // It's a private address, so filtered out
             assertEquals(1, rmem.getIndex());
             assertEquals("fileA.txt", rmem.getFileName());
             assertEquals(123, rmem.getSize());
@@ -88,7 +95,6 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(null, rmem.getXml());
             assertEquals(UrnHelper.URN_SETS[0], rmem.getUrns());
             assertEquals(false, rmem.isReplyToMulticast());
-            assertEquals(true, rmem.isFirewalled());
             assertEquals("MNGD", rmem.getVendor());
             
             Map<String, Object> attributes = mem.getAttributes();
@@ -105,8 +111,10 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(0, mem.getSavedBlocks().size());
             assertEquals(1, mem.getRemoteHosts().size());
             RemoteHostMemento rmem = mem.getRemoteHosts().iterator().next();
-            assertEquals("127.0.0.2", rmem.getHost());
-            assertEquals(2, rmem.getPort());
+            Address addr = rmem.getAddress(addressFactory, pushEndpointFactory);
+            assertInstanceof(PushEndpoint.class, addr);
+            PushEndpoint pe = (PushEndpoint)addr;
+            assertNull(pe.getInetSocketAddress()); // It's a private address, so filtered out
             assertEquals(1, rmem.getIndex());
             assertEquals("fileB.txt", rmem.getFileName());
             assertEquals(123, rmem.getSize());
@@ -118,7 +126,6 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(null, rmem.getXml());
             assertEquals(UrnHelper.URN_SETS[0], rmem.getUrns());
             assertEquals(false, rmem.isReplyToMulticast());
-            assertEquals(true, rmem.isFirewalled());
             assertEquals("STOR", rmem.getVendor());
             assertEquals(new HashMap(), mem.getAttributes());
             assertEquals(123L, mem.getContentLength());
@@ -210,14 +217,17 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             RemoteHostMemento rmem2 = mementoIterator.next();
             
             // Since remoteHosts is a HashSet, it can be out-of-order..
-            if(!rmem.getHost().equals("92.1.246.69")) {
+            if(2147483647 == rmem.getSpeed()) {
                 RemoteHostMemento tmp = rmem;
                 rmem = rmem2;
                 rmem2 = tmp;
             }   
             
-            assertEquals("92.1.246.69", rmem.getHost());
-            assertEquals(6346, rmem.getPort());
+            Address address = rmem.getAddress(addressFactory, pushEndpointFactory);
+            assertInstanceof(Connectable.class, address);
+            Connectable connectable = (Connectable)address;
+            assertEquals("92.1.246.69", connectable.getAddress());
+            assertEquals(6346, connectable.getPort());
             assertEquals(4, rmem.getIndex());
             assertEquals("LimeWireWin4.16.0.exe", rmem.getFileName());
             assertEquals(4495072L, rmem.getSize());
@@ -229,11 +239,13 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(null, rmem.getXml());
             assertEquals(new UrnSet(URN.createSHA1Urn("urn:sha1:A6DGMXEOJDBQOIJUQTAQWSWC2IQKFD5J")), rmem.getUrns());
             assertEquals(false, rmem.isReplyToMulticast());
-            assertEquals(false, rmem.isFirewalled());
             assertEquals("LIME", rmem.getVendor());
             
-            assertEquals("10.254.0.101", rmem2.getHost());
-            assertEquals(33053, rmem2.getPort());
+            address = rmem2.getAddress(addressFactory, pushEndpointFactory);
+            assertInstanceof(Connectable.class, address);
+            connectable = (Connectable)address;
+            assertEquals("10.254.0.101", connectable.getAddress());
+            assertEquals(33053, connectable.getPort());
             assertEquals(0, rmem2.getIndex());
             assertEquals("LimeWireWin4.16.0.exe", rmem2.getFileName());
             assertEquals(4495072L, rmem2.getSize());
@@ -245,7 +257,6 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             assertEquals(null, rmem2.getXml());
             assertEquals(new UrnSet(URN.createSHA1Urn("urn:sha1:A6DGMXEOJDBQOIJUQTAQWSWC2IQKFD5J")), rmem2.getUrns());
             assertEquals(true, rmem2.isReplyToMulticast());
-            assertEquals(false, rmem2.isFirewalled());
             assertEquals("LIME", rmem2.getVendor());
         }
         

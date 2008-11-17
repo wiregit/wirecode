@@ -118,7 +118,6 @@ public class RemoteHostMemento implements Serializable {
     @SuppressWarnings("unchecked")
     public Set<URN> getUrns() { return (Set<URN>)propertiesMap.get(Keys.URNS); }
     public boolean isBrowseHost() { return (Boolean)propertiesMap.get(Keys.BH); }
-    public boolean isFirewalled() { return (Boolean)propertiesMap.get(Keys.FIREWALLED); }
     public String getVendor() { return (String)propertiesMap.get(Keys.VENDOR); }
     public boolean isHttp11() { return (Boolean)propertiesMap.get(Keys.HTTP11); }
     public boolean isTls() { return (Boolean)propertiesMap.get(Keys.TLS); }

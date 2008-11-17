@@ -21,11 +21,12 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -49,7 +50,6 @@ import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream.Version;
 
-@Singleton
 public class OldDownloadConverterImpl implements OldDownloadConverter {
     
     private static Log LOG = LogFactory.getLog(OldDownloadConverterImpl.class);
@@ -317,8 +317,15 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     }
 
     private Address getAddress(SerialRemoteFileDesc rfd) throws IOException {
-        if (rfd.isFirewalled()) {
-            return pushEndpointFactory.createPushEndpoint(rfd.getHttpPushAddr());
+        if (rfd.isFirewalled() ) {
+            if(rfd.getHttpPushAddr() != null) {
+                return pushEndpointFactory.createPushEndpoint(rfd.getHttpPushAddr());
+            } else {
+            	// This is from very old versions, or versions that didn't have proxies.
+            	// In this case, we still make it, but the address might be private, in which
+            	// case the only useful bit of info is the clientGUID.
+                return pushEndpointFactory.createPushEndpoint(rfd.getClientGUID(), IpPort.EMPTY_SET, (byte)0, 0, new IpPortImpl(rfd.getHost(), rfd.getPort()));
+            }
         } else {
             return new ConnectableImpl(rfd.getHost(), rfd.getPort(), rfd.isTlsCapable());
         }
