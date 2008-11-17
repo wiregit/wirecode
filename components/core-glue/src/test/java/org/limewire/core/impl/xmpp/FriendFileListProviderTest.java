@@ -41,7 +41,7 @@ public class FriendFileListProviderTest extends BaseTestCase {
     public void testGetListsForValidUserId() throws Exception {
         context.checking(new Expectations() {{
             one(fileManager).getFriendFileList("me@you.com");
-            will(returnValue(context.mock(FileList.class)));
+            will(returnValue(context.mock(SharedFileList.class)));
         }});
         
         HttpContext httpContext = new BasicHttpContext();
