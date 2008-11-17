@@ -601,13 +601,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
         }
 
         @Override
-        public Point getToolTipLocation(MouseEvent event) {
-            Point location = scrollPane.getLocation();
-            int width2 = scrollPane.getWidth();
-            return new Point(location.x + width2, event.getPoint().y);
-        }
-
-        @Override
         public JToolTip createToolTip() {
             JToolTip tooltip = super.createToolTip();
             tooltip.setBackground(GRAY_BACKGROUND);
