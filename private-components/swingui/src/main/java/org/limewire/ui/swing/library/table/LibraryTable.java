@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.table;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.LibrarySelectable;
 import org.limewire.ui.swing.library.Sharable;
@@ -173,7 +175,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         }
         
         public void download(int row) {
-            RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
+            final RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
             try {
                 downloadListManager.addDownload(file);
                 downloadingList.add(file);
@@ -182,7 +184,14 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                    editor.cancelCellEditing();
                 }
             } catch (SaveLocationException e) {
-                throw new RuntimeException(e);
+                SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                    @Override
+                    public void download(File saveFile, boolean overwrite)
+                            throws SaveLocationException {
+                        downloadListManager.addDownload(file, saveFile, overwrite);
+                        downloadingList.add(file);
+                    }
+                }, e, null);
             }
         }
         

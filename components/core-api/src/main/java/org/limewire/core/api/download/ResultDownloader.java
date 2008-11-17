@@ -65,4 +65,20 @@ public interface ResultDownloader {
      */
     public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException;
     
+
+    /**
+     * Adds a download specified by the given RemoteFileItem
+     * 
+     * @param saveFile, if non null this file is used as teh file name to save as.
+     * @param overwrite if true the downloader will overwrite preexisting downloads with the same name.
+     * @throws SaveLocationException 
+     * 
+     * @throws IOException if an error occurs while downloading and saving the
+     *         file
+     * 
+     */
+    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;
+
+    
+    
 }
