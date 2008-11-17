@@ -34,6 +34,7 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -79,6 +80,7 @@ class NavList extends JXPanel {
                 collapsablePanels.setCollapsed(!collapsablePanels.isCollapsed());
             }
         }, false);
+        FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
         add(titleLabel, "gapleft 5, alignx left, growx, wrap");
         
