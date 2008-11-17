@@ -449,13 +449,6 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createBooleanSetting("SEARCH_FRIENDS_LIBRARIES", true);
     
     /**
-     * When searching, if a result displayed has already been downloaded,
-     * move that result to the bottom of the screen.
-     */
-    public static final BooleanSetting MOVE_DOWNLOADED_FILES_TO_BOTTOM =
-        FACTORY.createBooleanSetting("MOVE_DOWNLOADED_FILES_TO_BOTTOM", true);
-    
-    /**
      * The default search category for the search bar.
      */
     public static final IntSetting DEFAULT_SEARCH_CATEGORY_ID =
