@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
@@ -146,14 +147,17 @@ public class XMPPAddressResolver implements AddressResolver {
 
         @Override
         public void handleEvent(PresenceEvent event) {
-            Presence presence = event.getSource();
-            if (presence.getMode() == Presence.Mode.available) {
-                LOG.debugf("lime presence became available: {0}", presence);
-                if (presence.hasFeatures(LimewireFeature.ID)) {
-                    connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
-                } else {
-                    LOG.debug("no lime presence");
-                }
+            final Presence presence = event.getSource();
+            if (presence.getMode() == Presence.Mode.available && event.getType() == Presence.EventType.PRESENCE_NEW) {
+                presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
+                    @Override
+                    public void handleEvent(FeatureEvent event) {
+                        if (presence.hasFeatures(AuthTokenFeature.ID, AddressFeature.ID)) {
+                            LOG.debugf("presence with address and auth-token became available: {0}", presence.getJID());
+                            connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
+                        }
+                    }
+                });                
             }
         }
     }
