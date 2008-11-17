@@ -40,6 +40,7 @@ import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.Image
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
+import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -140,6 +141,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
         case AUDIO:
             if (friend != null) {
                 libTable = new LibraryTable<T>(eventList, new RemoteAudioTableFormat<T>());
+                libTable.getColumnModel().getColumn(RemoteAudioTableFormat.LENGTH_COL).setCellRenderer(new TimeRenderer());
+                libTable.getColumnModel().getColumn(RemoteAudioTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             } else {
                 libTable = new AudioLibraryTable<T>(eventList, player);
             }
@@ -156,6 +159,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             break;
         case IMAGE:
             libTable = new LibraryTable<T>(eventList, new ImageTableFormat<T>());
+            libTable.getColumnModel().getColumn(ImageTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             break;
         case OTHER:
             libTable = new LibraryTable<T>(eventList, new OtherTableFormat<T>());
@@ -166,6 +170,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             break;
         case PROGRAM:
             libTable = new LibraryTable<T>(eventList, new ProgramTableFormat<T>());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.NAME_COL).setCellRenderer(
+                    new IconLabelRenderer(iconManager));
             libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(
                     new FileSizeRenderer());
             break;
@@ -229,6 +235,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             break;
         case PROGRAM:
             libTable = new LibraryTable<T>(eventList, new ProgramTableFormat<T>());
+            libTable.getColumnModel().getColumn(ProgramTableFormat.NAME_COL).setCellRenderer(new IconLabelRenderer(iconManager));
             libTable.getColumnModel().getColumn(ProgramTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
             libTable.getColumnModel().getColumn(ProgramTableFormat.ACTION_COL).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
             libTable.getColumnModel().getColumn(ProgramTableFormat.ACTION_COL).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));

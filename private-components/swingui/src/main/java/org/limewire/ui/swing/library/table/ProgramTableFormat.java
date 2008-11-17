@@ -42,7 +42,7 @@ public class ProgramTableFormat<T extends FileItem> implements LibraryTableForma
 
         switch (column) {
         case NAME_COL:
-            return baseObject.getName();
+            return baseObject;
         case PLATFORM_COL:
         	//TODO
             return I18n.tr("Platform");
