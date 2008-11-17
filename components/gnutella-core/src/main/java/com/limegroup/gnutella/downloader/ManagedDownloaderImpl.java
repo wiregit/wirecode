@@ -1372,8 +1372,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
         // create copy, argument might not be modifiable
         Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
-        // remove any rfds we're currently downloading from 
-        copy.removeAll(currentRFDs);
+        // remove any rfds we're currently downloading from
+        // TODO fberger hack
+        if (currentRFDs != null) {
+            copy.removeAll(currentRFDs);
+        }
         if (LOG.isDebugEnabled()) {
             LOG.debug("remaining new rfds: " + copy);
         }
