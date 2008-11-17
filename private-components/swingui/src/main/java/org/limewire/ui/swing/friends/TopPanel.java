@@ -113,7 +113,6 @@ public class TopPanel extends JPanel {
         options.setBorderPainted(false);
         options.add(new AddFriendOption());
         options.add(new RemoveFriendOption());
-        options.add(new MoreChatOptionsOption());
         options.addSeparator();
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
         awayPopupItem = new JCheckBoxMenuItem(new AwayOption());
@@ -326,18 +325,7 @@ public class TopPanel extends JPanel {
             friendRemover.removeSelectedFriend();
         }
     }
-    
-    private static class MoreChatOptionsOption extends AbstractAction {
-        public MoreChatOptionsOption() {
-            super(tr("More chat options"));
-        }
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
-        }
-    }
-    
     private class MinimizeChat extends AbstractAction {
         public MinimizeChat() {
             super("", icons.getMinimizeNormal());
