@@ -419,6 +419,11 @@ public abstract class AbstractUploader implements Uploader {
     public InetSocketAddress getInetSocketAddress() {
         return new InetSocketAddress(getInetAddress(), getPort());
     }
+    
+    @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
 
     /** Returns the Gnutella Port, if one was provided.  Otherwise, the remote port from the socket. */
     public int getPort() {

@@ -330,21 +330,18 @@ public abstract class AbstractConnection implements Connection {
             throw new IllegalArgumentException("invalid port: " + port);
         this.port = port;
     }
+    
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.gnutella.Connection#getInetSocketAddress()
-     */
+    @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
+    
+    
     public InetSocketAddress getInetSocketAddress() throws IllegalStateException {
         return new InetSocketAddress(getInetAddress(), getPort());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.gnutella.Connection#getInetAddress()
-     */
     public InetAddress getInetAddress() throws IllegalStateException {
         if (socket == null) {
             throw new IllegalStateException("Not initialized");

@@ -17,6 +17,8 @@ public interface Address {
         ADDRESS_CHANGED
     }
     
+    String getAddressDescription();
+    
     public boolean equals(Object obj);
     
     public int hashCode();

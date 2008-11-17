@@ -69,6 +69,11 @@ public class ConnectableImpl implements Connectable {
     }
     
     @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
+    
+    @Override
     public String toString() {
         return ipPort + ", tlsCapable: " + tlsCapable;
     }

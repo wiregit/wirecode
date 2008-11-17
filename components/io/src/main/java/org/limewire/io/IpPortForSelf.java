@@ -65,6 +65,11 @@ public class IpPortForSelf implements IpPort, Connectable {
     public InetSocketAddress getInetSocketAddress() {
         return new InetSocketAddress(getInetAddress(), getPort());
     }
+    
+    @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
 	
 	@Override
     public String toString() {

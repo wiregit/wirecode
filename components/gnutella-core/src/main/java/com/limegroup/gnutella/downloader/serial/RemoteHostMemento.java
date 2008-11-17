@@ -78,7 +78,7 @@ public class RemoteHostMemento implements Serializable {
         }
     }
     
-    static Address deserializeAddress(String addressString, AddressFactory addressFactory) {
+    static Address deserializeAddress(final String addressString, AddressFactory addressFactory) {
         StringTokenizer st = new StringTokenizer(addressString, ":");
         if (st.hasMoreTokens()) {
             String type = st.nextToken();
@@ -95,7 +95,13 @@ public class RemoteHostMemento implements Serializable {
                 LOG.debug("not enough arguments");
             }
         }
-        return new Address() {};
+        
+        return new Address() {
+            @Override
+            public String getAddressDescription() {
+                return addressString;
+            }
+        };
     }
 
     public String getHost() { return (String)propertiesMap.get(Keys.HOST); }    

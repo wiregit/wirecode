@@ -27,6 +27,11 @@ public class XMPPAddress implements PermanentAddress {
         return id;
     }
     
+    @Override
+    public String getAddressDescription() {
+        return id;
+    }
+    
     /**
      * Returns the jabber id email address without resource. 
      */

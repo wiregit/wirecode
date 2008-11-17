@@ -40,6 +40,15 @@ public class FirewalledAddress implements Address {
         }
     }
     
+    @Override
+    public String getAddressDescription() {
+        if(NetworkUtils.isValidIpPort(getPublicAddress())) {
+            return publicAddress.getAddressDescription();
+        } else {
+            return privateAddress.getAddressDescription();
+        }
+    }
+    
     /**
      * @return an invalid address if public address it not known
      */

@@ -232,7 +232,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                             @Override
                             public String getName() {
-                                return rfd.toString();
+                                return rfd.getAddress().getAddressDescription();
                             }
 
                             @Override
@@ -297,12 +297,12 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public String getRenderName() {
-            Friend friend = friendPresence != null ? friendPresence.getFriend()
-                    : null;
+            Friend friend = friendPresence != null ?
+                    friendPresence.getFriend() : null;
             if (friend != null) {
                 return friend.getRenderName();
             }
-            return rfd.toString();
+            return rfd.getAddress().getAddressDescription();
         }
 
         @Override

@@ -257,6 +257,11 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
         return new InetSocketAddress(addr, getPort());
     }
     
+    @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
+    
     /** Returns the number of files the host has, or -1 if I don't know */
     public long getFiles()
     {

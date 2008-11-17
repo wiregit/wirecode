@@ -174,6 +174,11 @@ public class RoutedConnectionStub implements RoutedConnection {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public String getAddressDescription() {
+        return null;
+    }
 
     public int getListeningPort() {
         // TODO Auto-generated method stub

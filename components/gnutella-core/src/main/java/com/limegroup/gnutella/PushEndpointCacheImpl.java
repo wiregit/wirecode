@@ -297,6 +297,12 @@ class PushEndpointCacheImpl implements PushEndpointCache {
             IpPort address = _externalAddr;
             return address != null ? _externalAddr.getAddress() : RemoteFileDesc.BOGUS_IP;
         }
+        
+        @Override
+        public String getAddressDescription() {
+            IpPort addr = getValidExternalAddress();
+            return addr == null ? null : addr.getInetSocketAddress().toString();
+        }
 
         public InetAddress getInetAddress() {
             return null;

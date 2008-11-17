@@ -198,4 +198,9 @@ public class BTUploader implements Uploader, TorrentEventListener {
     public InetSocketAddress getInetSocketAddress() {
         return null;
     }
+
+    @Override
+    public String getAddressDescription() {
+        return null;
+    }
 }

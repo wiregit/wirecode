@@ -677,6 +677,11 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
     public InetSocketAddress getInetSocketAddress() {
         return new InetSocketAddress(getInetAddress(), getPort());
     }
+    
+    @Override
+    public String getAddressDescription() {
+        return getInetSocketAddress().toString();
+    }
 
     public InetAddress getMyInetAddress() {
         return MY_IP;
