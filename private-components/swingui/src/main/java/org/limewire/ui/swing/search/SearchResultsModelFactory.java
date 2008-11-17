@@ -24,15 +24,15 @@ public class SearchResultsModelFactory {
     private final SimilarResultsDetectorFactory similarResultsDetectorFactory;
 
     private final LibraryManager libraryManager;
-    
+
     private final DownloadListManager downloadListManager;
-    
+
     private final PropertiableHeadings propertiableHeadings;
-    
+
     @Inject
     public SearchResultsModelFactory(SimilarResultsDetectorFactory similarResultsDetectorFactory,
-            SpamManager spamManager, LibraryManager libraryManager, DownloadListManager downloadListManager,
-            PropertiableHeadings propertiableHeadings) {
+            SpamManager spamManager, LibraryManager libraryManager,
+            DownloadListManager downloadListManager, PropertiableHeadings propertiableHeadings) {
         this.similarResultsDetectorFactory = similarResultsDetectorFactory;
         this.spamManager = spamManager;
         this.libraryManager = libraryManager;
@@ -48,20 +48,24 @@ public class SearchResultsModelFactory {
 
         SimilarResultsDetector similarResultsDetector = similarResultsDetectorFactory
                 .newSimilarResultsDetector();
-            
-        AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = new AlreadyDownloadedListEventListener(libraryManager, downloadListManager);
+
+        // AlreadyDownloaded listener needs to be added to the list
+        // before the grouping listener because the grouping listener uses
+        // values set by the AlreadyDownloaded listener
+        AlreadyDownloadedListEventListener alreadyDownloadedListEventListener = new AlreadyDownloadedListEventListener(
+                libraryManager, downloadListManager);
         visualSearchResults.addListEventListener(alreadyDownloadedListEventListener);
-        
-        if(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
+
+        if (SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue()) {
             GroupingListEventListener groupingListEventListener = new GroupingListEventListener(
-                similarResultsDetector);
+                    similarResultsDetector);
             visualSearchResults.addListEventListener(groupingListEventListener);
         }
 
         SpamListEventListener spamListEventListener = new SpamListEventListener(spamManager,
                 similarResultsDetector);
         visualSearchResults.addListEventListener(spamListEventListener);
-                
+
         return searchResultsModel;
     }
 
