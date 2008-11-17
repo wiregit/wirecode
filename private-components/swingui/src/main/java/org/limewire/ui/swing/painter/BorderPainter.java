@@ -80,6 +80,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
                 
         // Draw bottom accent bubble
         if (this.hasBubble) {
+            g.setClip(0, singleArcHeight, width, height);
             g.setPaint(BUBBLE_PAINT3);
             g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
             g.setPaint(BUBBLE_PAINT2);        
