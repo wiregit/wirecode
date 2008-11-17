@@ -38,7 +38,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -140,7 +140,8 @@ implements TableCellEditor, TableCellRenderer {
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule,
         PropertiesFactory<VisualSearchResult> properties,
-        @Assisted ListViewDisplayedRowsLimit displayLimit) {
+        @Assisted ListViewDisplayedRowsLimit displayLimit,
+        LibraryNavigator libraryNavigator) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -170,7 +171,7 @@ implements TableCellEditor, TableCellRenderer {
         this.remoteHostActions = remoteHostActions;
         this.properties = properties;
        
-        makePanel(navigator);
+        makePanel(navigator, libraryNavigator);
     }
 
     public Object getCellEditorValue() {
@@ -333,7 +334,7 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private Component makeLeftPanel(final Navigator navigator) {
+    private Component makeLeftPanel(final Navigator navigator, final LibraryNavigator libraryNavigator) {
         itemIconLabel = new JLabel();
         itemIconLabel.setCursor(
             Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -396,9 +397,7 @@ implements TableCellEditor, TableCellRenderer {
                             NavCategory.DOWNLOAD,
                             MainDownloadPanel.NAME).select(vsr);
                     } else if (e.getDescription().equals("#library")) {
-                        navigator.getNavItem(
-                            NavCategory.LIBRARY,
-                            LibraryNavigator.NAME_PREFIX + vsr.getCategory()).select(vsr);
+                        libraryNavigator.selectInLibrary(vsr.getUrn(), vsr.getCategory());
                     }
                 }
             }
@@ -407,8 +406,8 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private void makePanel(Navigator navigator) {
-        leftPanel = makeIndentablePanel(makeLeftPanel(navigator));
+    private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator) {
+        leftPanel = makeIndentablePanel(makeLeftPanel(navigator, libraryNavigator));
 
         fromPanel = makeCenterPanel();
 

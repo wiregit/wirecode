@@ -80,9 +80,13 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
     private LibraryImageSubPanelFactory subPanelFactory;
 
     @Inject
-    public LibraryTableFactoryImpl(CategoryIconManager categoryIconManager, IconManager iconManager,
-            LibraryManager libraryManager, ShareListManager shareListManager, AudioPlayer player,
-            DownloadListManager downloadListManager, MagnetLinkFactory magnetLinkFactory,
+    public LibraryTableFactoryImpl(CategoryIconManager categoryIconManager, 
+            IconManager iconManager,
+            LibraryManager libraryManager, 
+            ShareListManager shareListManager, 
+            AudioPlayer player,
+            DownloadListManager downloadListManager, 
+            MagnetLinkFactory magnetLinkFactory,
             PropertiesFactory<LocalFileItem> localItemPropFactory,
             PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
             LibraryImageSubPanelFactory factory) {

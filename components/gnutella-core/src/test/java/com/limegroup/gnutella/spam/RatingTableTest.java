@@ -4,19 +4,17 @@ import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
-import com.google.inject.Injector;
+import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.ConnectableImpl;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
-
-import org.limewire.core.settings.FilterSettings;
-import org.limewire.core.settings.SearchSettings;
-import org.limewire.io.IpPortSet;
-import org.limewire.io.ConnectableImpl;
 
 public class RatingTableTest extends LimeTestCase {
 

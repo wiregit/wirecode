@@ -7,7 +7,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.Line;
-import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
@@ -24,7 +24,7 @@ public class LeftPanel extends JXCollapsiblePane implements VisibleComponent {
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
 
     @Inject
-    public LeftPanel(final Navigator navigator, LibraryNavigator libraryNavigator) {
+    public LeftPanel(Navigator navigator, LibraryNavigator libraryNavigator) {
         super(Direction.LEFT);
         GuiUtils.assignResources(this);
 
@@ -32,7 +32,7 @@ public class LeftPanel extends JXCollapsiblePane implements VisibleComponent {
 
         JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0, fill, gap 0", "", ""));
 
-        JScrollPane scrollableNav = new JScrollPane(libraryNavigator);
+        JScrollPane scrollableNav = new JScrollPane(libraryNavigator.getComponent());
         scrollableNav.setOpaque(false);
         scrollableNav.getViewport().setOpaque(false);
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

@@ -1,16 +1,12 @@
 package com.limegroup.gnutella;
 
 
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import org.hamcrest.core.IsInstanceOf;
-import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;

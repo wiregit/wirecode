@@ -12,7 +12,6 @@ import org.limewire.http.auth.ServerAuthState;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.FriendFileList;
 import com.limegroup.gnutella.library.SharedFileList;
 import com.limegroup.gnutella.uploader.HttpException;
 

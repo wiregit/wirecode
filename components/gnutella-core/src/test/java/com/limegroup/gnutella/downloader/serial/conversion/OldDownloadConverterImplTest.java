@@ -59,7 +59,6 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     public void testConversionForTypes() throws Exception {
         File file = TestUtils.getResourceInPackage("allKindsOfDownloads.dat", DownloadUpgradeTask.class);
         
-        OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl(pushEndpointFactory, addressFactory);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
         assertEquals(5, mementos.size());
         

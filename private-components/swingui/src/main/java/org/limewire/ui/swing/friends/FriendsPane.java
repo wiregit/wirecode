@@ -127,7 +127,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater, ShareListManager libraryManager, FriendSharingDisplay friendSharing) {
+    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater,
+            ShareListManager libraryManager, FriendSharingDisplay friendSharing) {
         super(new BorderLayout());
         this.icons = icons;
         this.chatFriends = new BasicEventList<ChatFriend>();

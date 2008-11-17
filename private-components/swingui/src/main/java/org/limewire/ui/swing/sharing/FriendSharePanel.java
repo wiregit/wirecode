@@ -77,8 +77,13 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     private final FriendSharingHeaderPanel headerPanel;
     
     @Inject
-    public FriendSharePanel(LibraryManager libraryManager, ShareListManager shareListManager, FriendNameTable friendNameTable, SharingFriendEmptyPanel emptyPanel, 
-                SharingFancyPanelFactory sharingFancyPanelFactory, FriendSharingHeaderPanel friendHeaderPanel, FriendSharingPopupHandler popupHandler) {        
+    public FriendSharePanel(LibraryManager libraryManager,
+            ShareListManager shareListManager,
+            FriendNameTable friendNameTable,
+            SharingFriendEmptyPanel emptyPanel,
+            SharingFancyPanelFactory sharingFancyPanelFactory,
+            FriendSharingHeaderPanel friendHeaderPanel,
+            FriendSharingPopupHandler popupHandler) {        
         GuiUtils.assignResources(this); 
         EventAnnotationProcessor.subscribe(this);
 

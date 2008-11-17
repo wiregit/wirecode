@@ -25,7 +25,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -33,12 +32,9 @@ import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.LibraryNavigator;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.AllFriendsList;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavSelectable;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -49,6 +45,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -58,33 +55,34 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     private final IconManager iconManager;
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
-    private final Navigator navigator;
     private final MetaDataManager metaDataManager;
     private final AllFriendsList allFriends;
     private final ShareListManager shareListManager;
+    private final Provider<LibraryNavigator> libraryNavigator; // provider to workaround circular ref
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager,
             CategoryIconManager categoryIconManager, IconManager iconManager,
             PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
-            Navigator navigator, MetaDataManager metaDataManager, AllFriendsList allFriends, 
-            ShareListManager shareListManager) {
+            MetaDataManager metaDataManager, AllFriendsList allFriends, 
+            ShareListManager shareListManager,
+            Provider<LibraryNavigator> libraryNavigator) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
         this.propertiableHeadings = propertiableHeadings;
         this.magnetLinkFactory = magnetLinkFactory;
-        this.navigator = navigator;
         this.metaDataManager = metaDataManager;
         this.allFriends = allFriends;
         this.shareListManager = shareListManager;
+        this.libraryNavigator = libraryNavigator;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
         return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, 
-                propertiableHeadings, magnetLinkFactory, navigator, metaDataManager, allFriends.getAllFriends(),
-                shareListManager);
+                propertiableHeadings, magnetLinkFactory, metaDataManager, allFriends.getAllFriends(),
+                shareListManager, libraryNavigator.get());
     }
 
     private static class LocalFileItemProperties extends AbstractFileItemDialog implements
@@ -92,11 +90,11 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final ThumbnailManager thumbnailManager;
         private final CategoryIconManager categoryIconManager;
         private final IconManager iconManager;
-        private final Navigator navigator;
         private final MetaDataManager metaDataManager;
         private final Map<FilePropertyKey, Object> changedProps = new HashMap<FilePropertyKey, Object>();
         private final List<SharingTarget> allFriends;
         private final ShareListManager shareListManager;
+        private final LibraryNavigator libraryNavigator;
         private final JPanel sharing = new JPanel();
         private LocalFileItem displayedItem;
 
@@ -108,13 +106,13 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private LocalFileItemProperties(ThumbnailManager thumbnailManager,
                 CategoryIconManager categoryIconManager, IconManager iconManager,
                 PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
-                Navigator navigator, MetaDataManager metaDataManager, List<SharingTarget> allFriends,
-                ShareListManager shareListManager) {
+                MetaDataManager metaDataManager, List<SharingTarget> allFriends,
+                ShareListManager shareListManager, LibraryNavigator libraryNavigator) {
             super(propertiableHeadings, magnetLinkFactory);
+            this.libraryNavigator = libraryNavigator;
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
-            this.navigator = navigator;
             this.metaDataManager = metaDataManager;
             this.allFriends = allFriends;
             this.shareListManager = shareListManager;
@@ -224,14 +222,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setVisible(false);
-                    navigator.getNavItem(NavCategory.LIBRARY,
-                            LibraryNavigator.NAME_PREFIX + propertiable.getCategory()).select(
-                            new NavSelectable<URN>() {
-                                @Override
-                                public URN getNavSelectionId() {
-                                    return propertiable.getUrn();
-                                }
-                            });
+                    libraryNavigator.selectInLibrary(propertiable.getUrn(), propertiable.getCategory());
                 }
             });
             

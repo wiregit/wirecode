@@ -13,6 +13,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;

@@ -7,8 +7,6 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JMenu;
 
-import org.limewire.core.api.Category;
-import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.AudioPlayer;
@@ -17,19 +15,16 @@ import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.LibraryNavigator;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavSelectable;
-import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
 public class PlayerMenu extends JMenu {
     @Inject
-    public PlayerMenu(final AudioPlayer audioPlayer, final Navigator navigator,
-            final LibraryManager libraryManager) {
+    public PlayerMenu(AudioPlayer audioPlayer,
+            LibraryNavigator libraryNavigator,
+            LibraryManager libraryManager) {
         super(I18n.tr("Player"));
 
         add(getPlayPauseAction(audioPlayer));
@@ -38,7 +33,7 @@ public class PlayerMenu extends JMenu {
         add(getPreviousAction(audioPlayer));
 
         addSeparator();
-        add(getShowCurrentFileAction(audioPlayer, navigator, libraryManager));
+        add(getShowCurrentFileAction(audioPlayer, libraryNavigator, libraryManager));
     }
 
     private Action getNextAction(final AudioPlayer audioPlayer) {
@@ -113,7 +108,7 @@ public class PlayerMenu extends JMenu {
         return action;
     }
 
-    private Action getShowCurrentFileAction(final AudioPlayer audioPlayer, final Navigator navigator,
+    private Action getShowCurrentFileAction(final AudioPlayer audioPlayer, final LibraryNavigator libraryNavigator,
             final LibraryManager libraryManager) {
         Action action = new AbstractAction(I18n.tr("Show current file")) {
             @Override
@@ -125,15 +120,7 @@ public class PlayerMenu extends JMenu {
                         final LocalFileItem localFileItem = libraryManager.getLibraryManagedList()
                                 .getFileItem(currentFile);
                         if (localFileItem != null) {
-                            Category category = localFileItem.getCategory();
-                            NavItem navItem = navigator.getNavItem(NavCategory.LIBRARY,
-                                    LibraryNavigator.NAME_PREFIX + category);
-                            navItem.select(new NavSelectable<URN>() {
-                                @Override
-                                public URN getNavSelectionId() {
-                                    return localFileItem.getUrn();
-                                }
-                            });
+                            libraryNavigator.selectInLibrary(localFileItem.getUrn(), localFileItem.getCategory());
                         }
                     }
                 }

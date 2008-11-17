@@ -36,7 +36,6 @@ import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class RemoteFileDescAdapter implements SearchResult {

@@ -4,7 +4,6 @@ import java.security.Signature;
 import java.security.SignatureException;
 
 import org.limewire.mojito.messages.StatsRequest;
-import org.limewire.security.SecureMessage.Status;
 
 
 public class StatsRequestWireImpl extends AbstractMessageWire<StatsRequest> 

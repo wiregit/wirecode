@@ -4,6 +4,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactoryImpl;
+import org.limewire.ui.swing.library.nav.LimeWireUiLibraryNavModule;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactoryImpl;
 import org.limewire.ui.swing.library.table.menu.LocalFileItemPropertiesFactory;
@@ -18,6 +19,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        install(new LimeWireUiLibraryNavModule());
+        
         bind(FriendLibraryFactory.class).toProvider(
                 FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
         bind(FriendLibraryMediatorFactory.class).toProvider(
@@ -28,6 +31,7 @@ public class LimeWireUiLibraryModule extends AbstractModule {
                 FactoryProvider.newFactory(SharingLibraryFactory.class, SharingLibraryPanel.class));
         bind(LibraryTableFactory.class).to(LibraryTableFactoryImpl.class);
         bind(LibraryImageSubPanelFactory.class).to(LibraryImageSubPanelFactoryImpl.class);
+        
         bind(new TypeLiteral<PropertiesFactory<LocalFileItem>>(){}).to(LocalFileItemPropertiesFactory.class);
         bind(new TypeLiteral<PropertiesFactory<RemoteFileItem>>(){}).to(RemoteFileItemPropertiesFactory.class);
     }

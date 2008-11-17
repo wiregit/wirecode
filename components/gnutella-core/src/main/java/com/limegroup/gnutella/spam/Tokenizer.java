@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.spam;
 
-import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -10,6 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -21,8 +22,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XMLStringUtils;
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.util.FileUtils;
 
 /**
  * This class splits a RemoteFileDesc or a QueryRequest into tokens that will
