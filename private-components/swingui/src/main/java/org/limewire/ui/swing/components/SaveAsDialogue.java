@@ -124,7 +124,7 @@ public class SaveAsDialogue extends JDialog {
 
     public static void handleSaveLocationException(final DownLoadAction downLoadAction,
             final SaveLocationException sle, final Component component) {
-
+//TODO dependiong on append to file name setting, don't show the dialogue, instead append a number to the end of the name.
         if (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS
                 && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
             // TODO better user feedback
