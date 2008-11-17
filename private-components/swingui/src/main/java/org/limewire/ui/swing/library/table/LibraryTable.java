@@ -18,6 +18,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.Disposable;
@@ -79,16 +80,16 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         hideColumns();
     }
     
-    public void enableDownloading(DownloadListManager downloadListManager){
+    public void enableDownloading(DownloadListManager downloadListManager, LibraryFileList fileList){
         ArrayList<RemoteFileItem> downloadingList = new ArrayList<RemoteFileItem>();
         
         DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this, downloadingList);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
-        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadingList);
+        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadingList, fileList);
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadingList));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadingList, fileList));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
         setRowHeight(downloadEditor.getPreferredSize().height);

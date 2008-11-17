@@ -15,6 +15,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -36,6 +37,7 @@ public class FriendLibraryPanel extends LibraryPanel {
     private LibraryTableFactory tableFactory;
     private DownloadListManager downloadListManager;
     private LibraryNavigator navigator;
+    private LibraryManager libraryManager;
     
     private JButton sharedLibraryButton;
     
@@ -45,13 +47,15 @@ public class FriendLibraryPanel extends LibraryPanel {
                     CategoryIconManager categoryIconManager, 
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
-                    LibraryNavigator navigator) {
+                    LibraryNavigator navigator,
+                    LibraryManager libraryManager) {
         super(friend, true);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
         this.navigator = navigator;
+        this.libraryManager = libraryManager;
 
         loadHeader();
         loadSelectionPanel();
@@ -93,7 +97,7 @@ public class FriendLibraryPanel extends LibraryPanel {
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
 
         LibraryTable table = tableFactory.createTable(category, filterList, friend);
-        table.enableDownloading(downloadListManager);
+        table.enableDownloading(downloadListManager, libraryManager.getLibraryManagedList());
         addDisposable(table);
         
         JScrollPane scrollPane = new JScrollPane(table);
