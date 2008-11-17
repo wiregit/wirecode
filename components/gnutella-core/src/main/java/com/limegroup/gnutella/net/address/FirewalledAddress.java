@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
@@ -31,6 +32,12 @@ public class FirewalledAddress implements Address {
         this.clientGuid = clientGuid;
         this.pushProxies = pushProxies;
         this.fwtVersion = fwtVersion;
+        if (fwtVersion > 0) {
+            if (!NetworkUtils.isValidIpPort(publicAddress)) {
+                // TODO fberger comment in after alpha release
+//                throw new IllegalArgumentException("inconsistent firewalled address: " + this);
+            }
+        }
     }
     
     /**
