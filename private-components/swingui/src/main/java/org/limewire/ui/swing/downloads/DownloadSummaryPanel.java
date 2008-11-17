@@ -83,6 +83,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	private static final int LEFT_MARGIN = 25;
 
 	private final LimeProgressBarFactory progressBarFactory;
+    private final Navigator navigator;
 	
 	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private AbstractDownloadTable table;
@@ -105,7 +106,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
 	        LimeProgressBarFactory progressBarFactory) {
-	    
+	    this.navigator = navigator;
         GuiUtils.assignResources(this);
 	    
         this.progressBarFactory = progressBarFactory;
@@ -125,6 +126,8 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
                 return getSortPriority(o2.getState()) - getSortPriority(o1.getState());
             }
         };
+        
+        navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
 
         SortedList<DownloadItem> sortedList = GlazedListsFactory.sortedList(allList, comparator);		
 		
@@ -198,13 +201,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         moreButton = new HyperLinkButton(I18n.tr("See All"));
         FontUtils.bold(moreButton);
         
-        final NavItem item = navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
-        MouseListener navMouseListener = new ActionHandListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                item.select();
-            }            
-        });
+        MouseListener navMouseListener = createDownloadNavListener();
         moreButton.addMouseListener(navMouseListener);
         header.addMouseListener(navMouseListener);
         for(Component c : header.getComponents()){
@@ -219,6 +216,18 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 		updateTitle();
 		addListeners();
 	}
+
+
+    private MouseListener createDownloadNavListener() {
+        final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
+        MouseListener navMouseListener = new ActionHandListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                item.select();
+            }            
+        });
+        return navMouseListener;
+    }
 	
     
 	private void addListeners(){
@@ -300,7 +309,13 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 
             gbc.gridy = 1;
             gbc.anchor = GridBagConstraints.NORTHWEST;
-            add(progressBar, gbc);			
+            add(progressBar, gbc);	
+            
+            MouseListener navMouseListener = createDownloadNavListener();
+            addMouseListener(navMouseListener);
+            nameLabel.addMouseListener(navMouseListener);
+            progressBar.addMouseListener(navMouseListener);
+            
 		}
 		
 
