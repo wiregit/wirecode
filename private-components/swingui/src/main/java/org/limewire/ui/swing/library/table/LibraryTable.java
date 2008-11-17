@@ -47,6 +47,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     
     private TableCellRenderer defaultRenderer;
     
+    protected final int rowHeight = 20;
+    
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
         super(new LibraryTableModel<T>(libraryItems, format));
         
@@ -69,6 +71,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         setFillsViewportHeight(true);
         setDragEnabled(true);
         setDefaultRenderer(Object.class, defaultRenderer);
+        setRowHeight(rowHeight);
     }
     
     public void enableMyLibrarySharing(LibrarySharePanel librarySharePanel) {
@@ -78,7 +81,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
-        setRowHeight(shareEditor.getPreferredSize().height);
+        setRowHeight(rowHeight);
         hideColumns();
     }
     
@@ -94,7 +97,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadingList, fileList));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
-        setRowHeight(downloadEditor.getPreferredSize().height);
+        setRowHeight(rowHeight);
         hideColumns();        
     }
     

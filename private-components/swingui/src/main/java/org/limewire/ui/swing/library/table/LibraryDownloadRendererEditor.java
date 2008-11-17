@@ -8,6 +8,8 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JTable;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -38,6 +40,8 @@ public class LibraryDownloadRendererEditor extends TableRendererEditor{
         GuiUtils.assignResources(this);
         this.downloadList = downloadList;
         this.fileList = libraryFileList;
+        
+        setLayout(new MigLayout("insets 2 18 2 18, hidemode 0, aligny 50%"));
 
         downloadButton = new IconButton(downloadButtonIcon, downloadButtonPressedRollover, downloadButtonPressedIcon);
         downloadButton.addActionListener(downloadAction);

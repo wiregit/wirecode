@@ -12,7 +12,6 @@ public class AudioLibraryTable<T extends FileItem> extends LibraryTable<T> {
     public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player) {
         super(libraryItems, new AudioTableFormat<T>());
         PlayRendererEditor playEditor = new PlayRendererEditor(this, player);
-        setRowHeight(playEditor.getPreferredSize().height);
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(playEditor.getPreferredSize().width);
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(playEditor);
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor(this, player));
