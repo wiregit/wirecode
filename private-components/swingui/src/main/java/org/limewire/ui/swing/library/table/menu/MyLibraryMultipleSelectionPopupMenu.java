@@ -21,6 +21,7 @@ import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
+import org.limewire.util.OSUtils;
 
 public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
    
@@ -121,7 +122,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
                         if (!fileItem.isIncomplete()) {
                             FileUtils.unlockFile(fileItem.getFile());
                             libraryManager.getLibraryManagedList().removeFile(fileItem.getFile());
-                            FileUtils.delete(fileItem.getFile(), true);
+                            FileUtils.delete(fileItem.getFile(), OSUtils.supportsTrash());
                         }
                     }
                 }
