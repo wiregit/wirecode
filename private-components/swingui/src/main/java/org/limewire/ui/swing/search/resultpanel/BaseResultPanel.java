@@ -322,7 +322,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                             di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
                             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                         }
-                    }, sle, BaseResultPanel.this);
+                    }, sle, true, BaseResultPanel.this);
                 }
             }
     }

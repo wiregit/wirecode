@@ -34,6 +34,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
@@ -200,14 +201,21 @@ public class FileMenu extends JMenu {
                         });
 
                 if (files != null) {
-                    for (File file : files) {
+                    for (final File file : files) {
                         try {
                             DownloadItem item = downloadListManager.addDownload(file);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                     .select(SimpleNavSelectable.create(item));
-                        } catch (SaveLocationException e1) {
-                            // TODO better user feedback
-                            throw new UnsupportedOperationException(e1);
+                        } catch (SaveLocationException sle) {
+                            SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                                @Override
+                                public void download(File saveFile, boolean overwrite)
+                                        throws SaveLocationException {
+                                    DownloadItem item = downloadListManager.addDownload(file, saveFile, overwrite);
+                                    navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                                            .select(SimpleNavSelectable.create(item));
+                                }
+                            }, sle, false, null);
                         }
                     }
                 }

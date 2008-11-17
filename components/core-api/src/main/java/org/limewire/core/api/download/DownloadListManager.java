@@ -23,8 +23,18 @@ public interface DownloadListManager extends ResultDownloader {
 
     /**
      * Opens the given file and starts a downloader based on the information inside of the file.
+     * @param file torrent or magnet file to download.
      */
     public DownloadItem addDownload(File file) throws SaveLocationException;
+    
+    /**
+     * Opens the given file and starts a downloader based on the information inside of the given file.
+     * 
+     * @param file torrent or magnet file to download.
+     * @param saveFile optional filename to save the file as. does nothing for torrent downloads
+     * @param overwrite whether or not to overwrite preexisting downloads with the same name
+     */
+    public DownloadItem addDownload(File file, File saveFile, boolean overwrite) throws SaveLocationException;
 
 	
 	

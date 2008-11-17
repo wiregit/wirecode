@@ -355,9 +355,15 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     @Override
     public DownloadItem addDownload(File file) throws SaveLocationException {
+        return addDownload(file, null, false);
+    }
+
+    @Override
+    public DownloadItem addDownload(File file, File saveFile, boolean overwrite)
+            throws SaveLocationException {
         //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
         //right now defaulting to bit torrent
-        Downloader downloader = downloadManager.downloadTorrent(file, true);
+        Downloader downloader = downloadManager.downloadTorrent(file, overwrite);
         return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
     }
 

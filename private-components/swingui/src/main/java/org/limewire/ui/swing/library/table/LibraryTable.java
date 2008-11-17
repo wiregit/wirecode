@@ -191,7 +191,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                         downloadListManager.addDownload(file, saveFile, overwrite);
                         downloadingList.add(file);
                     }
-                }, e, null);
+                }, e, true, null);
             }
         }
         

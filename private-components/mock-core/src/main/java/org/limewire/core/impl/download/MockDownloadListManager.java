@@ -140,4 +140,10 @@ public class MockDownloadListManager implements DownloadListManager {
     public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
         return null;
     }
+
+    @Override
+    public DownloadItem addDownload(File file, File saveFile, boolean overwrite)
+            throws SaveLocationException {
+        return null;
+    }
 }

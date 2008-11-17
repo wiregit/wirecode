@@ -80,7 +80,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                                         throws SaveLocationException {
                                     downloadListManager.addDownload(fileItem, saveFile, overwrite);
                                 }
-                            }, e, null);
+                            }, e, true, null);
                         }
                     }
                 }

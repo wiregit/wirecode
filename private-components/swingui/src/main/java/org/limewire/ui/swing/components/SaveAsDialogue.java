@@ -26,13 +26,13 @@ public class SaveAsDialogue extends JDialog {
 
     private File saveFile = null;
 
-    public SaveAsDialogue(final File badFile, final SaveLocationException.LocationCode locationCode) {
+    public SaveAsDialogue(final File badFile, final SaveLocationException.LocationCode locationCode, final boolean supportNewSaveDir) {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
         panel.setLayout(new MigLayout("hidemode 3, gapy 10", "", ""));
 
-        final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode), badFile
+        final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode, supportNewSaveDir), badFile
                 .getName()), 400);
 
         final JTextField filePathField = new JTextField(25);
@@ -50,7 +50,7 @@ public class SaveAsDialogue extends JDialog {
                     saveButton.setVisible(true);
                     overwriteButton.setVisible(false);
                 } else {
-                    message.setText(getMessage(locationCode));
+                    message.setText(getMessage(locationCode, supportNewSaveDir));
                     overwriteButton.setVisible(true);
                     saveButton.setVisible(false);
                 }
@@ -106,8 +106,8 @@ public class SaveAsDialogue extends JDialog {
         overwriteButton.removeActionListener(actionListener);
     }
 
-    private String getMessage(LocationCode locationCode) {
-        return "A file with this name already exists at this location. You can overwrite or pick a new name for the file.";
+    private String getMessage(LocationCode locationCode, boolean supportNewSaveDir) {
+        return supportNewSaveDir ? I18n.tr("A file with this name already exists at this location. You can overwrite or pick a new name for the file.") : I18n.tr("A file with this name already exists at this location. You can overwrite it or cancel the download.");
     }
 
     public File getSaveFile() {
@@ -123,7 +123,7 @@ public class SaveAsDialogue extends JDialog {
     }
 
     public static void handleSaveLocationException(final DownLoadAction downLoadAction,
-            final SaveLocationException sle, final Component component) {
+            final SaveLocationException sle, final boolean supportNewSaveDir, final Component component) {
         
         if(sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
             //ignore, just return
@@ -136,7 +136,7 @@ public class SaveAsDialogue extends JDialog {
             // TODO better user feedback
             throw new UnsupportedOperationException("Error starting download.", sle);
         }
-        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode());
+        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode(), supportNewSaveDir);
         saveAsDialogue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,7 +146,7 @@ public class SaveAsDialogue extends JDialog {
                     downLoadAction.download(saveFile, overwrite);
                 } catch (SaveLocationException e1) {
                     saveAsDialogue.dispose();
-                    handleSaveLocationException(downLoadAction, e1, component);
+                    handleSaveLocationException(downLoadAction, e1, supportNewSaveDir, component);
                 }
             }
         });
