@@ -67,6 +67,8 @@ public class AuthTokenIQListener implements PacketListener {
                     }
                     presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
                 }
+            } else {
+                LOG.debugf("presence not available yet {0}", iq.getFrom());
             }
         }
     }
