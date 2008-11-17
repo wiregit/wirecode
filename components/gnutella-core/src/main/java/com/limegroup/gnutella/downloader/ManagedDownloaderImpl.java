@@ -1401,7 +1401,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
         
-        if ( ranker.addToPool(getContexts(copy)) ) {
+        // TODO fberger null check is a hack
+        if ( ranker != null && ranker.addToPool(getContexts(copy)) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
             LOG.debug("got new sources");
