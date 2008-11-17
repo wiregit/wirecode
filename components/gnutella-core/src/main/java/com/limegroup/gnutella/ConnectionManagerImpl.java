@@ -1238,8 +1238,11 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             for(RoutedConnection currMC : getInitializedConnections()) {
                 if(proxies.size() >= 4)
                     break;
-                if (currMC.isMyPushProxy())
+                if (currMC.isMyPushProxy()) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug(currMC.getAddress() + " has version: " + currMC.getConnectionCapabilities().getUserAgent());
                     proxies.add(currMC);
+                }
             }
             return proxies;
         } else {

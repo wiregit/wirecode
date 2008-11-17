@@ -566,7 +566,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             HttpParams params = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(params, 5000);
             HttpConnectionParams.setSoTimeout(params, 5000);
-            HttpConnectionParams.setStaleCheckingEnabled(params, false);
             params = new DefaultedHttpParams(params, defaultParams.get());
             Shutdownable s = httpExecutor.get().executeAny(l, PUSH_THREAD_POOL, methods, params, data.getMultiShutdownable());
             data.getMultiShutdownable().addShutdownable(s);
