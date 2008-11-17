@@ -78,7 +78,7 @@ class ConnectionStatusPanel extends JXPanel {
             strengthIcon = disconnected;
             break;
         case CONNECTING:
-            sharingVisible = true;
+            sharingVisible = false;
             strengthIcon = connecting;
             break;
         case WEAK:
