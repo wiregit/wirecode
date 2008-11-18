@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -23,6 +24,9 @@ import javax.swing.border.Border;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.LimeProgressBar;
@@ -30,11 +34,12 @@ import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.assistedinject.AssistedInject;
 
-public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
+public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell {
 
     private final CategoryIconManager categoryIconManager;
     private final LimeProgressBarFactory progressBarFactory;
@@ -63,21 +68,22 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     @Resource private int progressBarWidth;
     @Resource private Color titleLabelColour;
     @Resource private Color statusLabelColour;
-    @Resource private Color stalledLabelColour;
+    @Resource private Color warningLabelColour;
+    @Resource private Color errorLabelColour;
     @Resource private Color finishedLabelColour;
     @Resource private Color linkColour;
     @Resource private Color progressBarBorderColour;
-    @Resource private Font statusFontPlain;
-    @Resource private Font statusFontBold;
+    @Resource private Font statusFontPlainMin;
+    @Resource private Font statusFontPlainFull;
     @Resource private Font titleFont;
-    
-    
+        
     private ActionListener editorListener = null;
     
     private List<JComponent> textComponents = new ArrayList<JComponent>();
     
     @AssistedInject
     public DownloadTableCellImpl(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory) {
+        
         GuiUtils.assignResources(this);
 
         this.categoryIconManager = categoryIconManager;
@@ -96,8 +102,10 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
     public void update(DownloadItem item) {
         updateComponent(this, item);
     }
-    
+
     private void initComponents() {
+        
+        this.setBackgroundPainter(this.createCellPainter());        
         
         statusViewLayout = new CardLayout();
         this.setLayout(statusViewLayout);
@@ -126,7 +134,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         textComponents.add(minTitleLabel);
 
         minStatusLabel = new JLabel();
-        minStatusLabel.setFont(statusFontPlain);
+        minStatusLabel.setFont(statusFontPlainMin);
         minStatusLabel.setForeground(statusLabelColour);
         textComponents.add(minStatusLabel);
 
@@ -137,7 +145,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
         minLinkButton.addActionListener(editorListener);
         minLinkButton.setForeground(linkColour);
-        minLinkButton.setFont(statusFontPlain);
+        minLinkButton.setFont(statusFontPlainMin);
                                 
         fullIconLabel = new JLabel();
 
@@ -147,7 +155,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         textComponents.add(fullTitleLabel);
 
         fullStatusLabel = new JLabel();
-        fullStatusLabel.setFont(statusFontPlain);
+        fullStatusLabel.setFont(statusFontPlainFull);
         fullStatusLabel.setForeground(statusLabelColour);
         fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         fullStatusLabel.setIconTextGap(0);
@@ -164,7 +172,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
                 createLineBorder(progressBarBorderColour));
         
         fullTimeLabel = new JLabel();
-        fullTimeLabel.setFont(statusFontPlain);
+        fullTimeLabel.setFont(statusFontPlainFull);
         
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);
@@ -195,7 +203,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         gbc.gridheight = 1;
         minPanel.add(minTitleLabel, gbc);
         
-        gbc.insets = new Insets(0,30,0,0);
+        gbc.insets = new Insets(0,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx = 4;
@@ -268,7 +276,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         gbc.gridwidth = 3;
         fullPanel.add(fullProgressBar, gbc);
         
-        gbc.insets = new Insets(0,30,0,0);
+        gbc.insets = new Insets(0,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx += gbc.gridwidth;
@@ -308,26 +316,34 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         
         
         case ERROR :
+
+            editor.minIconLabel.setIcon(warningIcon);
+            editor.minStatusLabel.setForeground(errorLabelColour);
+            editor.minStatusLabel.setFont(statusFontPlainMin);
+            
+            break;
+        
         case STALLED :
             
-            editor.minIconLabel.setIcon(warningIcon);
-            editor.minStatusLabel.setForeground(stalledLabelColour);
-            editor.minStatusLabel.setFont(statusFontBold);
+            editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            editor.minStatusLabel.setForeground(warningLabelColour);
+            editor.minStatusLabel.setFont(statusFontPlainMin);
             
             break;
             
+        case FINISHING :
         case DONE :
             
             editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
             editor.minStatusLabel.setForeground(finishedLabelColour);
-            editor.minStatusLabel.setFont(statusFontBold);
+            editor.minStatusLabel.setFont(statusFontPlainMin);
             
             break;
             
         default :
             editor.minIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));     
             editor.minStatusLabel.setForeground(statusLabelColour);
-            editor.minStatusLabel.setFont(statusFontPlain);
+            editor.minStatusLabel.setFont(statusFontPlainMin);
             
         }
         
@@ -368,25 +384,25 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
 
     private void updateButtonsMin(DownloadTableCellImpl editor, DownloadItem item) {
         DownloadState state = item.getState();
-        minButtonPanel.updateButtons(state);
+        editor.minButtonPanel.updateButtons(state);
         
         switch (state) {
         
             case ERROR :
-                minLinkButton.setVisible(true);
-                minLinkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
+                editor.minLinkButton.setVisible(true);
+                editor.minLinkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
                 
                 break;
                 
             case STALLED :
 
-                minLinkButton.setVisible(true);
-                minLinkButton.setText("<html><u>Refresh Now</u></html>");
+                editor.minLinkButton.setVisible(true);
+                editor.minLinkButton.setText("<html><u>Try Again</u></html>");
 
                 break;
                 
             default:
-                minLinkButton.setVisible(false);
+                editor.minLinkButton.setVisible(false);
         }
     }
     
@@ -409,14 +425,29 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
         }
     }
     
+    private Painter<JXPanel> createCellPainter() {
+        AbstractPainter<JXPanel> painter = new AbstractPainter<JXPanel>() {
+
+            @Override
+            protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
+                g.setPaint(new Color(0xed,0xed,0xed));
+                g.drawLine(10, height-3, width-10, height-3);
+            }
+        } ;
+        
+        painter.setCacheable(true);
+        painter.setAntialiasing(false);
+        painter.setFilters(PainterUtils.createSoftenFilter(0.03f));
+                        
+        return painter;
+    }
+    
     private String getMessage(DownloadItem item) {
         switch (item.getState()) {
         case CANCELLED:
             return I18n.tr("Cancelled");
         case FINISHING:
             return I18n.tr("Finishing download...");
-            //TODO: correct time for finishing
-            //return I18n.tr("Finishing download, {0} remaining", item.getRemainingStateTime());
         case DONE:
             return I18n.tr("Done");
         case CONNECTING:
@@ -433,8 +464,7 @@ public class DownloadTableCellImpl extends JPanel implements DownloadTableCell {
                     GuiUtils.rate2speed(item.getDownloadSpeed()), 
                     item.getDownloadSourceCount());
         case STALLED:
-            return I18n
-                    .tr("Stalled - ");
+            return I18n.tr("Stalled - ");
         case ERROR:         
             return I18n.tr("Unable to download: ");
         case PAUSED:

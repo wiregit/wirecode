@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 
 public class PainterUtils {
    
@@ -47,5 +49,20 @@ public class PainterUtils {
                 return Color.BLACK;
             }
         }
+    }
+
+    /** 
+     * Creates a new softening filter based on a softening factor
+     */
+    public static ConvolveOp createSoftenFilter(float factor) {
+ 
+        float[] transform = {0     , factor    , 0     , 
+                             factor, 1-factor*4, factor, 
+                             0     , factor    , 0    };
+        
+        Kernel kernel = new Kernel(3, 3, transform);
+        
+        return new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+        
     }
 }

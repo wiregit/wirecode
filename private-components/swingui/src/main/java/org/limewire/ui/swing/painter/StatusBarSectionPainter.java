@@ -1,33 +1,28 @@
 package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.geom.Line2D;
+import java.awt.Graphics2D;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.image.GaussianBlurFilter;
-import org.jdesktop.swingx.painter.ShapePainter;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PainterUtils;
 
-public class StatusBarSectionPainter<X> extends ShapePainter<X>{
+public class StatusBarSectionPainter<X> extends AbstractPainter<X>{
 
     @Resource private Color dividerForeground;
     
     public StatusBarSectionPainter() {
         GuiUtils.assignResources(this);
         
-        this.setAntialiasing(true);
-        this.setFilters(new GaussianBlurFilter(2));
-        
-        this.setBorderPaint(this.dividerForeground);
-        this.setShape(new Line2D.Float(0,0,0,10));
-        this.setHorizontalAlignment(HorizontalAlignment.RIGHT);
-        this.setFillVertical(true);
-        this.setFillPaint(this.dividerForeground);
-        this.setInsets(new Insets(3,0,2,0));
-        
+        this.setAntialiasing(false);
+        this.setFilters(PainterUtils.createSoftenFilter(0.1f));
         this.setCacheable(true);
-    }    
+    }
 
-    
+    @Override
+    protected void doPaint(Graphics2D g, X object, int width, int height) {
+        g.setPaint(this.dividerForeground);
+        g.drawLine(width-3, 4, width-3, height-4);
+    }    
 }

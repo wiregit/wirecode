@@ -33,7 +33,7 @@ class SharedFileCountPanel extends JXLabel {
         
         this.setFont(this.font);
         this.setForeground(this.foreground);
-        this.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        this.setBorder(BorderFactory.createEmptyBorder(0,0,0,8));
         
         shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
             @Override

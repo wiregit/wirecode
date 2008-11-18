@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.downloads.table;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -17,8 +19,7 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class DownloadTable extends AbstractDownloadTable {   
     
-    //TODO: Make resource
-    private int rowHeight = 60;    
+    @Resource private int rowHeight;    
     
     private DownloadTableModel model;
 
@@ -26,9 +27,12 @@ public class DownloadTable extends AbstractDownloadTable {
 	public DownloadTable(DownloadTableCellFactory tableCellFactory, PropertiesFactory<DownloadItem> propertiesFactory,
 	        @Assisted EventList<DownloadItem> downloadItems) {		
 
+        GuiUtils.assignResources(this);
+        
         initialise(downloadItems, propertiesFactory);
         
         setShowGrid(false, false);
+        this.setHighlighters();
         
         DownloadTableCell editorMutator   = tableCellFactory.create();
         DownloadTableCell rendererMutator = tableCellFactory.create();

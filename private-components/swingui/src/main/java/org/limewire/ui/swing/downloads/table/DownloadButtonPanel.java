@@ -24,7 +24,6 @@ public class DownloadButtonPanel extends JPanel {
 	private JButton pauseButton;
     private JButton cancelButton;
     private JButton resumeButton;
-    private JButton tryAgainButton;
 
 
     @Resource
@@ -44,20 +43,14 @@ public class DownloadButtonPanel extends JPanel {
     @Resource
     private Icon resumeIconPressed;
     @Resource
-    private Icon resumeIconRollover;
-    @Resource
-    private Icon tryAgainIcon;
-    @Resource
-    private Icon tryAgainIconPressed;
-    @Resource
-    private Icon tryAgainIconRollover;
-    
+    private Icon resumeIconRollover;   
 
 	/**
 	 * Create the panel
 	 */
 	public DownloadButtonPanel(ActionListener actionListener) {
 	    super(new BorderLayout(0,0));
+	    
 	    GuiUtils.assignResources(this);		
 
 		pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
@@ -69,7 +62,7 @@ public class DownloadButtonPanel extends JPanel {
 		cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
 		cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
 		cancelButton.addActionListener(actionListener);
-        cancelButton.setToolTipText(I18n.tr("Cancel Download"));
+        cancelButton.setToolTipText(I18n.tr("Remove Download"));
 
 		resumeButton = new IconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
 		resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
@@ -77,18 +70,11 @@ public class DownloadButtonPanel extends JPanel {
 		resumeButton.setVisible(false);
         resumeButton.setToolTipText(I18n.tr("Resume"));
 		
-		tryAgainButton = new IconButton(tryAgainIcon, tryAgainIconRollover, tryAgainIconPressed);
-		tryAgainButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
-		tryAgainButton.addActionListener(actionListener);
-		tryAgainButton.setToolTipText(I18n.tr("Try Again"));
-        
-		
 		JPanel leadPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
 		leadPanel.setOpaque(false);
 		
 		leadPanel.add(resumeButton);
 		leadPanel.add(pauseButton);
-		leadPanel.add(tryAgainButton);
 		
 		JPanel cancelPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0,0));
 		cancelPanel.setOpaque(false);
@@ -104,7 +90,6 @@ public class DownloadButtonPanel extends JPanel {
 	    pauseButton.addActionListener(actionListener);
         cancelButton.addActionListener(actionListener);
         resumeButton.addActionListener(actionListener);
-        tryAgainButton.addActionListener(actionListener);
 	}
 
 	
@@ -112,8 +97,7 @@ public class DownloadButtonPanel extends JPanel {
 	public void updateButtons(DownloadState state) {
 		pauseButton.setVisible(state.isPausable());
 		resumeButton.setVisible(state.isResumable());
-		cancelButton.setVisible(state.isCancellable());
-		tryAgainButton.setVisible(state.isSearchAgainable());	
+		cancelButton.setVisible(true);
 	}
 
 }
