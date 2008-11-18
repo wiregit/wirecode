@@ -2,7 +2,6 @@ package org.limewire.ui.swing.menu;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -264,10 +263,10 @@ public class FileMenu extends JMenu {
             setModalityType(ModalityType.APPLICATION_MODAL);
             JPanel urlPanel = new JPanel();
             JLabel urlLabel = new JLabel(I18n.tr("Link:"));
-            urlField = new JTextField(50);
+            urlField = new JTextField(30);
             urlField.setText("http://");
 
-            final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link"));
+            final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link!"));
             errorLabel.setForeground(Color.RED);
 
             urlField.addKeyListener(new KeyListener() {
@@ -315,13 +314,13 @@ public class FileMenu extends JMenu {
                     LocationDialogue.this.dispose();
                 }
             });
-            urlPanel.setLayout(new MigLayout("", "[]5[]", "[]5[]"));
-            urlPanel.setPreferredSize(new Dimension(500, 60));
-            urlPanel.add(urlLabel);
-            urlPanel.add(urlField, "wrap");
-            urlPanel.add(openButton, "split 1, alignx right");
-            urlPanel.add(cancelButton);
-            urlPanel.add(errorLabel);
+            urlPanel.setLayout(new MigLayout("debug", "[]5[]5[]", "[]5[]"));
+            urlPanel.add(new JLabel(I18n.tr("Open magnet or torrent link.")), "span 3, wrap");
+            urlPanel.add(urlLabel, "alignx right");
+            urlPanel.add(urlField, "span 2");
+            urlPanel.add(errorLabel, "wrap");
+            urlPanel.add(openButton, "skip 2, alignx right");
+            urlPanel.add(cancelButton, "alignx right");
 
             setContentPane(urlPanel);
             pack();
