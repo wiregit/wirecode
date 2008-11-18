@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.util;
 /*
- * $Id: GraphicsUtilities.java,v 1.9 2008-11-05 19:15:02 meverett Exp $
+ * $Id: GraphicsUtilities.java,v 1.10 2008-11-18 21:27:26 meverett Exp $
  *
  * Dual-licensed under LGPL (Sun and Romain Guy) and BSD (Romain Guy).
  *
@@ -431,17 +431,6 @@ public class GraphicsUtilities {
         int height = image.getHeight();
 
         boolean isTranslucent = image.getTransparency() != Transparency.OPAQUE;
-        boolean isWidthGreater = width > height;
-
-        if (isWidthGreater) {
-            if (maxTargetWidth >= width) {
-                throw new IllegalArgumentException("newSize must be lower than" +
-                                                   " the image width");
-            }
-        } else if (maxTargetHeight >= height) {
-            throw new IllegalArgumentException("newSize must be lower than" +
-                                               " the image height");
-        }
 
         if (maxTargetWidth <= 0 || maxTargetHeight <= 0) {
             throw new IllegalArgumentException("newSize must" +
