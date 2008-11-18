@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.nav;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,14 +53,7 @@ class NavList extends JXPanel {
         titleLabel.setName("LibraryNavigator.NavListTitle");
         add(titleLabel, "gapleft 5, alignx left, growx, wrap");
         
-        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx")) {
-            @Override
-            public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                d.width = NavList.this.getWidth();
-                return d;
-            }
-        };
+        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx"));
         collapsablePanels = new JXCollapsiblePane();
         collapsablePanels.setContentPane(panelContainer);
         add(collapsablePanels, "alignx left, aligny top, growx, wrap");
@@ -145,16 +137,8 @@ class NavList extends JXPanel {
                     return 1;
                 } else if(f2.isAnonymous() && !f1.isAnonymous()) {
                     return -1;
-                } else {
-//                    boolean f1HasLibrary = remoteLibraryManager.hasFriendLibrary(f1);
-//                    boolean f2HasLibrary = remoteLibraryManager.hasFriendLibrary(f2);
-//                    // show buddies that are logged into limewire first by alphabetical order, than everyone else
-//                    if(f1HasLibrary && !f2HasLibrary) {
-//                        return -1;
-//                    } else if(!f1HasLibrary && f2HasLibrary) {
-//                        return 1;
-//                    } else                   
-                        return f1.getRenderName().compareToIgnoreCase(f2.getRenderName());
+                } else {           
+                    return f1.getRenderName().compareToIgnoreCase(f2.getRenderName());
                 }
             }
         });
