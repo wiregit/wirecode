@@ -115,8 +115,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setTabInsets(new Insets(0,10,5,10));
                 
         setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
-        //add(homeButton);
-        //add(storeButton);
+        add(homeButton);
+        add(storeButton);
         add(libraryButton);
         add(searchBar, "gapleft 120, gapright 10");     //gap used to be 35
         add(searchList, "gapleft 0, gaptop 3, growy");
