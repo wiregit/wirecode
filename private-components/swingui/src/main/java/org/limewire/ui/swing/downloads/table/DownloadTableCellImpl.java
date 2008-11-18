@@ -76,6 +76,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     @Resource private Font statusFontPlainMin;
     @Resource private Font statusFontPlainFull;
     @Resource private Font titleFont;
+    @Resource private Color borderPaint;
         
     private ActionListener editorListener = null;
     
@@ -430,7 +431,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
 
             @Override
             protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
-                g.setPaint(new Color(0xed,0xed,0xed));
+                g.setPaint(borderPaint);
                 g.drawLine(10, height-3, width-10, height-3);
             }
         } ;
