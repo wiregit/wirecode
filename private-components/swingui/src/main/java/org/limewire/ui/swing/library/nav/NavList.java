@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.nav;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +54,14 @@ class NavList extends JXPanel {
         titleLabel.setName("LibraryNavigator.NavListTitle");
         add(titleLabel, "gapleft 5, alignx left, growx, wrap");
         
-        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx"));
+        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx")) {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                d.width = NavList.this.getWidth();
+                return d;
+            }
+        };
         collapsablePanels = new JXCollapsiblePane();
         collapsablePanels.setContentPane(panelContainer);
         add(collapsablePanels, "alignx left, aligny top, growx, wrap");
