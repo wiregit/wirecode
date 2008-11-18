@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.nav;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,8 +11,6 @@ import java.util.ListIterator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -23,17 +20,9 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ActionLabel;
-import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
-import org.limewire.ui.swing.library.Disposable;
-import org.limewire.ui.swing.library.FriendLibraryMediator;
-import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
-import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -44,9 +33,6 @@ import com.google.inject.Inject;
 class NavList extends JXPanel {
     
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
-    private final ShareListManager shareListManager;
-    private final FriendLibraryMediatorFactory friendLibraryBaseFactory;
-    private final NavPanelFactory navPanelFactory;
     
     private final Navigator navigator;
     
@@ -57,19 +43,12 @@ class NavList extends JXPanel {
     private final JXCollapsiblePane collapsablePanels;
     private final JXPanel panelContainer;
     
-    @Inject NavList(Navigator navigator,
-            ShareListManager shareListManager,
-            FriendLibraryMediatorFactory friendLibraryBaseFactory,
-            NavPanelFactory navPanelFactory,
-            LibraryNavigator libraryNavigator) {
+    @Inject NavList(Navigator navigator) {
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("gap 0, insets 0, fill"));
         
         this.navigator = navigator;
-        this.shareListManager = shareListManager;
-        this.friendLibraryBaseFactory = friendLibraryBaseFactory;
-        this.navPanelFactory = navPanelFactory;
         
         this.panelMoveUpAction = new NavPanelMoveAction(false);
         this.panelMoveDownAction = new NavPanelMoveAction(true);
@@ -130,27 +109,6 @@ class NavList extends JXPanel {
         }
     }
     
-    NavPanel addOrUpdateNavPanelForFriend(Friend friend, EventList<RemoteFileItem> eventList, LibraryState libraryState) {
-        if (!containsFriend(friend)) {
-            FriendLibraryMediator component = friendLibraryBaseFactory.createFriendLibraryBasePanel(friend);
-            NavPanel navPanel = navPanelFactory.createNavPanel(createAction(navigator, friend, component), 
-                    friend, component, libraryState);
-
-            navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
-            navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
-            navPanel.setTransferHandler(new FriendLibraryNavTransferHandler(friend, shareListManager));
-            
-            addNavPanel(navPanel);
-            if(eventList != null) {
-                navPanel.updateLibrary(eventList, libraryState);
-            }
-            
-            return navPanel;
-        } else {
-            return updateNavPanelForFriend(friend, libraryState, eventList);
-        }
-    }
-    
     NavPanel updateNavPanelForFriend(Friend friend, LibraryState state, EventList<RemoteFileItem> eventList) {
         NavPanel panel = getPanelForFriend(friend);
         if(panel != null) {
@@ -160,12 +118,14 @@ class NavList extends JXPanel {
         return panel;
     }
     
-    private NavPanel ensureFriendVisible(Friend friend) {
+    NavPanel ensureFriendVisible(Friend friend) {
         NavPanel panel = getPanelForFriend(friend);
         if(panel != null) {
+            collapsablePanels.setCollapsed(false);
             collapsablePanels.scrollRectToVisible(panel.getBounds());
         }
         return panel;
+        
     }
     
     NavPanel getPanelForFriend(Friend friend) {
@@ -175,11 +135,7 @@ class NavList extends JXPanel {
             }
         }
         return null;
-    }
-    
-    private boolean containsFriend(Friend friend) {
-        return getPanelForFriend(friend) != null;
-    }
+    }    
 
     void addNavPanel(NavPanel panel) {
         // Find the index where to insert.
@@ -313,31 +269,7 @@ class NavList extends JXPanel {
             panel.select();
         }
         return panel;
-    }    
-    
-    private Action createAction(Navigator navigator, Friend friend, JComponent component) {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getId(), component);
-        Action action = NavigatorUtils.getNavAction(navItem);
-        return decorateAction(action, navItem, (Disposable)component, friend);
-    }
-    
-    private Action decorateAction(Action action, NavItem navItem, final Disposable disposable, final Friend friend) {        
-        navItem.addNavItemListener(new NavItemListener() {
-            @Override
-            public void itemRemoved() {
-                disposable.dispose();
-            }
-            
-            @Override
-            public void itemSelected(boolean selected) {
-                if(selected) {
-                    ensureFriendVisible(friend);
-                    collapsablePanels.setCollapsed(false);
-                }
-            }
-        });
-        return action;
-    }
+    } 
     
     private class NavPanelMoveAction extends AbstractAction {
         private final boolean moveDown;

@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.nav;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -27,14 +28,19 @@ import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.library.FriendLibraryMediator;
+import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryMediator;
 import org.limewire.ui.swing.library.SharingLibraryFactory;
 import org.limewire.ui.swing.mainframe.SectionHeading;
@@ -46,6 +52,8 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
+
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,10 +71,14 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
     private final NavList browseList;
     private final NavList restList;
     
+    private final Navigator navigator;
     private final SharingLibraryFactory sharingFactory;
     private final MyLibraryMediator myLibraryMediator;
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
+    private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
+    private final NavPanelFactory navPanelFactory;
+    
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
@@ -77,7 +89,8 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             MyLibraryMediator myLibraryMediator,
             SharingLibraryFactory sharingFactory,
             Provider<NavList> navListProvider,
-            NavPanelFactory navPanelFactory) {
+            NavPanelFactory navPanelFactory,
+            FriendLibraryMediatorFactory friendLibraryMediatorFactory) {
         
         EventAnnotationProcessor.subscribe(this);
         
@@ -87,6 +100,9 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         this.shareListManager = shareListManager;
         this.browseList = navListProvider.get();
         this.restList = navListProvider.get();
+        this.navPanelFactory = navPanelFactory;
+        this.friendLibraryMediatorFactory = friendLibraryMediatorFactory;
+        this.navigator = navigator;
         
         browseList.setTitleText(I18n.tr("On LimeWire"));
         restList.setTitleText(I18n.tr("Not On LimeWire"));
@@ -98,8 +114,13 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         
         LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         myLibraryMediator.setMainCardEventList(libraryList.getSwingModel());
-        myLibrary = navPanelFactory.createNavPanel(createAction(navigator, Me.ME,
-                NAME, myLibraryMediator), Me.ME, null, libraryList.getState());
+        myLibrary = navPanelFactory.createNavPanel(createMyLibraryAction(), Me.ME, null, libraryList.getState());
+        myLibrary.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LibraryNavigatorImpl.this.myLibraryMediator.showMainCard();
+            }
+        });
         
         myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));
         
@@ -141,8 +162,8 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
                     panel.updateLibraryState(item.getState());
                     panel.updateLibrary(item.getSwingModel(), item.getState());
                 } else {
-                    // Happens with gnutella browses.
-                    browseList.addOrUpdateNavPanelForFriend(item.getFriend(), item.getSwingModel(), item.getState());
+                    NavPanel navPanel = createFriendNavPanel(item.getFriend(), item.getSwingModel(), item.getState());
+                    browseList.addNavPanel(navPanel);
                 }
             }
             
@@ -173,8 +194,8 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         return this;
     }
     
-    private Action createAction(Navigator navigator, Friend friend, String navId, JComponent component) {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, navId, component);
+    private Action createMyLibraryAction() {
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, NAME, myLibraryMediator);
         Action action = NavigatorUtils.getNavAction(navItem);  
         navItem.addNavItemListener(new NavItemListener() {
             @Override
@@ -184,8 +205,6 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             public void itemSelected(boolean selected) {
                 if(selected) {
                     scrollRectToVisible(myLibrary.getBounds());
-                } else {
-                    myLibraryMediator.showMainCard();
                 }
             }
         });
@@ -229,7 +248,7 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         case USER_ADDED:
             NavPanel panel = browseList.getPanelForFriend(friend);
             if(panel == null) {
-                restList.addOrUpdateNavPanelForFriend(friend, null, null);
+                restList.addNavPanel(createFriendNavPanel(friend, null, null));
             }
             break;
         case USER_REMOVED:
@@ -249,6 +268,51 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
     public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
         rosterEventListenerSupport.addListener(this);
     }
+    
+    private void ensureFriendVisible(Friend friend) {
+        if(browseList.ensureFriendVisible(friend) == null) {
+            restList.ensureFriendVisible(friend);
+        }
+    }
+    
+    private NavPanel createFriendNavPanel(Friend friend, EventList<RemoteFileItem> eventList, LibraryState libraryState) {
+        FriendLibraryMediator component = friendLibraryMediatorFactory.createFriendLibraryBasePanel(friend);
+        NavPanel navPanel = navPanelFactory.createNavPanel(createFriendAction(navigator, friend, component), 
+                friend, component, libraryState);
+
+        navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
+        navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
+        navPanel.setTransferHandler(new FriendLibraryNavTransferHandler(friend, shareListManager));
+        
+        if(eventList != null) {
+            navPanel.updateLibrary(eventList, libraryState);
+        }
+        
+        return navPanel;
+    }
+    
+    private Action createFriendAction(Navigator navigator, Friend friend, JComponent component) {
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getId(), component);
+        Action action = NavigatorUtils.getNavAction(navItem);
+        return decorateAction(action, navItem, (Disposable)component, friend);
+    }
+    
+    private Action decorateAction(Action action, NavItem navItem, final Disposable disposable, final Friend friend) {        
+        navItem.addNavItemListener(new NavItemListener() {
+            @Override
+            public void itemRemoved() {
+                disposable.dispose();
+            }
+            
+            @Override
+            public void itemSelected(boolean selected) {
+                if(selected) {
+                    ensureFriendVisible(friend);
+                }
+            }
+        });
+        return action;
+    }    
     
     private class MoveAction extends AbstractAction {
         private final NavList navList;

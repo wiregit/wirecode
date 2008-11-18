@@ -97,6 +97,10 @@ class NavPanel extends JXPanel {
         });
     }
     
+    void addActionListener(ActionListener listener) {
+        categoryLabel.addActionListener(listener);
+    }
+    
     private void busy() {
         removeEjectListener();
         BusyPainter painter = statusIcon.getBusyPainter();
