@@ -190,13 +190,12 @@ public class FileMenu extends JMenu {
                             @Override
                             public boolean accept(File f) {
                                 String extension = FileUtils.getFileExtension(f);
-                                return f.isDirectory() || "torrent".equalsIgnoreCase(extension)
-                                        || "magnet".equalsIgnoreCase(extension);
+                                return f.isDirectory() || "torrent".equalsIgnoreCase(extension);
                             }
 
                             @Override
                             public String getDescription() {
-                                return I18n.tr(".torrent or .magnet files");
+                                return I18n.tr(".torrent files");
                             }
                         });
 
@@ -319,7 +318,7 @@ public class FileMenu extends JMenu {
             urlPanel.setPreferredSize(new Dimension(500, 60));
             urlPanel.add(urlLabel);
             urlPanel.add(urlField, "wrap");
-            urlPanel.add(openButton, "align right");
+            urlPanel.add(openButton, "split 1, alignx right");
             urlPanel.add(cancelButton);
             urlPanel.add(errorLabel);
 

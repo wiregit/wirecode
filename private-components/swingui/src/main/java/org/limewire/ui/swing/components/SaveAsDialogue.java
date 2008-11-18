@@ -29,8 +29,7 @@ public class SaveAsDialogue extends JDialog {
     public SaveAsDialogue(final File badFile, final SaveLocationException.LocationCode locationCode, final boolean supportNewSaveDir) {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
-        JPanel panel = new JPanel();
-        panel.setLayout(new MigLayout("hidemode 3, gapy 10", "", ""));
+        
 
         final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode, supportNewSaveDir), badFile
                 .getName()), 400);
@@ -85,6 +84,9 @@ public class SaveAsDialogue extends JDialog {
                 SaveAsDialogue.this.dispose();
             }
         });
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new MigLayout("hidemode 3, gapy 10", "", ""));
         panel.add(message, "span 2, wrap");
         panel.add(filePathField, "grow x, push");
         panel.add(browseButton, "wrap");
