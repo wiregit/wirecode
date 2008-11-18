@@ -69,6 +69,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             final Component component) {
 
         final JDialog dialog = new JDialog();
+        dialog.setLocationRelativeTo(component);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
         final MultiLineLabel message = new MultiLineLabel(I18n

@@ -222,7 +222,7 @@ public class FileMenu extends JMenu {
                                                     MainDownloadPanel.NAME).select(
                                                     SimpleNavSelectable.create(item));
                                         }
-                                    }, sle, false, null);
+                                    }, sle, false, mainPanel);
                         }
                     }
                 }
