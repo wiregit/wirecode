@@ -311,10 +311,10 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             gbc.anchor = GridBagConstraints.NORTHWEST;
             add(progressBar, gbc);	
             
-            MouseListener navMouseListener = createDownloadNavListener();
-            addMouseListener(navMouseListener);
-            nameLabel.addMouseListener(navMouseListener);
-            progressBar.addMouseListener(navMouseListener);
+//            MouseListener navMouseListener = createDownloadNavListener();
+//            addMouseListener(navMouseListener);
+//            nameLabel.addMouseListener(navMouseListener);
+//            progressBar.addMouseListener(navMouseListener);
             
 		}
 		
