@@ -206,26 +206,31 @@ public final class BugManager {
         boolean sent = false;
         // never ignore bugs or auto-send when developing.
         if(!LimeWireUtils.isTestingVersion()) {
-    	    if( BugSettings.REPORT_BUGS.getValue() )
+    	    if(!BugSettings.REPORT_BUGS.getValue() ) {
     	        return; // ignore.
+    	    }
     	        
             // If we have already sent information about this bug, leave.
-            if( !shouldInform(info) )
+            if( !shouldInform(info) ) {
                return; // ignore.
+            }
 
             // If the user wants to automatically send to the servlet, do so.
             // Otherwise, display it for review.
             if( isSendableVersion()) {
-            	if (LimeWireUtils.isAlphaRelease() || ! BugSettings.SHOW_BUGS.getValue())
+            	if (LimeWireUtils.isAlphaRelease() || !BugSettings.SHOW_BUGS.getValue()) {
             		sent = true;
+            	}
             }
             
-            if (sent) 
+            if (sent) { 
             	sendToServlet(info);
+            }
         }
         
-        if (!sent &&  _dialogsShowing < MAX_DIALOGS )
+        if (!sent &&  _dialogsShowing < MAX_DIALOGS ) {
             reviewBug(info);
+        }
     }
     
     /**
