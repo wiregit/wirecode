@@ -1,5 +1,6 @@
 package org.limewire.core.impl.xmpp;
 
+import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -30,6 +31,8 @@ public class MockXmppModule extends AbstractModule {
         EventMulticaster<XMPPConnectionEvent> connectionMulticaster = new EventMulticasterImpl<XMPPConnectionEvent>();
         bind(new TypeLiteral<EventListener<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
+        
+        bind(RemoteFileItemFactory.class).to(MockRemoteFileItemFactory.class);
     }
 
 }
