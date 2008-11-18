@@ -19,6 +19,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.SystemUtils;
 
 public class IntentDialog extends JDialog {
 
@@ -94,9 +95,17 @@ public class IntentDialog extends JDialog {
         pack();        
     }
     
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        setAlwaysOnTop(true);
+        SystemUtils.setWindowTopMost(this);
+    }
+    
     private void finish(boolean agreed){
         this.agreed = agreed;
         setVisible(false);
+        dispose();
     }
     
     public boolean confirmLegal(){
