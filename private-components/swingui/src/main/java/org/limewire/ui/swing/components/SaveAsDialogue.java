@@ -26,13 +26,13 @@ public class SaveAsDialogue extends JDialog {
 
     private File saveFile = null;
 
-    public SaveAsDialogue(final File badFile, final SaveLocationException.LocationCode locationCode, final boolean supportNewSaveDir) {
+    public SaveAsDialogue(final File badFile,
+            final SaveLocationException.LocationCode locationCode, final boolean supportNewSaveDir) {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
-        
 
-        final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode, supportNewSaveDir), badFile
-                .getName()), 400);
+        final MultiLineLabel message = new MultiLineLabel(I18n.tr(getMessage(locationCode,
+                supportNewSaveDir), badFile.getName()), 400);
 
         final JTextField filePathField = new JTextField(25);
         filePathField.setEnabled(false);
@@ -53,8 +53,8 @@ public class SaveAsDialogue extends JDialog {
                     overwriteButton.setVisible(true);
                     saveButton.setVisible(false);
                 }
-                
-                if(saveFile != null) {
+
+                if (saveFile != null) {
                     filePathField.setText(saveFile.getAbsolutePath());
                 }
             }
@@ -84,7 +84,7 @@ public class SaveAsDialogue extends JDialog {
                 SaveAsDialogue.this.dispose();
             }
         });
-        
+
         JPanel panel = new JPanel();
         panel.setLayout(new MigLayout("hidemode 3, gapy 10", "", ""));
         panel.add(message, "span 2, wrap");
@@ -109,7 +109,7 @@ public class SaveAsDialogue extends JDialog {
     }
 
     private String getMessage(LocationCode locationCode, boolean supportNewSaveDir) {
-        return supportNewSaveDir ? I18n.tr("A file with this name already exists at this location. You can overwrite or pick a new name for the file.") : I18n.tr("A file with this name already exists at this location. You can overwrite it or cancel the download.");
+        return I18n.tr("File already exists. What do you want to do?");
     }
 
     public File getSaveFile() {
@@ -119,26 +119,29 @@ public class SaveAsDialogue extends JDialog {
     public boolean isOverwrite() {
         return overwriteButton.isSelected();
     }
-    
+
     public interface DownLoadAction {
         void download(File saveFile, boolean overwrite) throws SaveLocationException;
     }
 
     public static void handleSaveLocationException(final DownLoadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir, final Component component) {
-        
-        if(sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
-            //ignore, just return
+            final SaveLocationException sle, final boolean supportNewSaveDir,
+            final Component component) {
+
+        if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+            // ignore, just return
             return;
         }
-        
-//TODO dependiong on append to file name setting, don't show the dialogue, instead append a number to the end of the name.
+
+        // TODO dependiong on append to file name setting, don't show the
+        // dialogue, instead append a number to the end of the name.
         if (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS
                 && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
             // TODO better user feedback
             throw new UnsupportedOperationException("Error starting download.", sle);
         }
-        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode(), supportNewSaveDir);
+        final SaveAsDialogue saveAsDialogue = new SaveAsDialogue(sle.getFile(), sle.getErrorCode(),
+                supportNewSaveDir);
         saveAsDialogue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
