@@ -114,11 +114,13 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
             m = btMetaInfoFactory.createBTMetaInfoFromBytes(body);           
         } catch (SaveLocationException security) {
+            downloadStatus = DownloadStatus.INVALID;
             throw new UnsupportedOperationException("Need to implement feedback.", security);
             // TODO show warning
             // GUIMediator.showWarning(I18n.tr(
             // "The selected .torrent file may contain a security hazard."));
         } catch (IOException iox) {
+            downloadStatus = DownloadStatus.INVALID;
             throw new UnsupportedOperationException("Need to implement feedback.", iox);
             // TODO show warning
             // GUIMediator.showWarning(I18n.tr(
@@ -307,11 +309,8 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     public void stop() {
-        downloadStatus = DownloadStatus.ABORTED;
-        if (aborter != null) {
-            aborter.shutdown();
-            aborter = null;
-        }
+        finish();
+        downloadManager.remove(this, true);
     }
 
     public float getAverageBandwidth() {
@@ -351,7 +350,11 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
     }
 
     public void finish() {
-
+        downloadStatus = DownloadStatus.ABORTED;
+        if (aborter != null) {
+            aborter.shutdown();
+            aborter = null;
+        }    
     }
 
     public GUID getQueryGUID() {
