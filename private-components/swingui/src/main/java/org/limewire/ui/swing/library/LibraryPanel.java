@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -319,6 +320,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
             setContentAreaFilled(false);
             setBorderPainted(false);
             setFocusPainted(false);
+            setBorder(BorderFactory.createEmptyBorder(2,8,2,8));
             setHorizontalAlignment(SwingConstants.LEFT);
             
             getAction().addPropertyChangeListener(new PropertyChangeListener() {
