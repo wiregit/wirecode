@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.util;
 
+
 import com.google.inject.AbstractModule;
 
 public class LimeWireUiUtilModule extends AbstractModule {
@@ -8,5 +9,6 @@ public class LimeWireUiUtilModule extends AbstractModule {
     protected void configure() {
         bind(NonBlockFileIconController.class).to(BasicFileIconController.class);
         bind(PropertiableHeadings.class).to(PropertiableHeadingsImpl.class);
+        bind(SaveLocationExceptionHandler.class).to(SaveLocationExceptionHandlerImpl.class);
     }
 }

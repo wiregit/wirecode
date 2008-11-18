@@ -26,7 +26,6 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
@@ -39,6 +38,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -61,6 +61,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private ConfigurableTable<VisualSearchResult> resultsTable;
     private final Search search;
     private final DownloadListManager downloadListManager;
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     //cache for RowDisplayResult which could be expensive to generate with large search result sets
     private final Map<VisualSearchResult, RowDisplayResult> vsrToRowDisplayResultMap = 
         new HashMap<VisualSearchResult, RowDisplayResult>();
@@ -75,10 +76,11 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
             Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
-            ListViewRowHeightRule rowHeightRule) {
+            ListViewRowHeightRule rowHeightRule,
+            SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
-        
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.baseEventList = eventList;
         this.downloadListManager = downloadListManager;
         this.search = search;
@@ -314,7 +316,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                         }
                     }
                 } else {
-                    SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandler.DownLoadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {

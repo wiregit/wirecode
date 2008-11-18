@@ -14,10 +14,11 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 
 public class FriendLibraryPopupMenu extends JPopupMenu {
    
@@ -28,16 +29,17 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     final private JMenuItem propertiesItem;
 
     final private DownloadListManager downloadListManager;
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
 
     private MagnetLinkFactory magnetFactory;
     private PropertiesFactory<RemoteFileItem> propertiesFactory;
 
     public FriendLibraryPopupMenu(DownloadListManager downloadListManager, MagnetLinkFactory magnetFactory, 
-            PropertiesFactory<RemoteFileItem> propertiesFactory) {
+            PropertiesFactory<RemoteFileItem> propertiesFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.downloadListManager = downloadListManager;
         this.magnetFactory = magnetFactory;
         this.propertiesFactory = propertiesFactory;
-        
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         linkItem = new JMenuItem(linkAction);
         propertiesItem = new JMenuItem(propertiesAction);
 
@@ -74,7 +76,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                         try {
                             downloadListManager.addFriendDownload(fileItem);
                         } catch (SaveLocationException e) {
-                            SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                            saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandlerImpl.DownLoadAction() {
                                 @Override
                                 public void download(File saveFile, boolean overwrite)
                                         throws SaveLocationException {

@@ -22,7 +22,6 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.LibrarySelectable;
 import org.limewire.ui.swing.library.Sharable;
@@ -31,6 +30,8 @@ import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
@@ -41,6 +42,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
     private final EventList<T> listSelection;
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     
     private ShareTableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
@@ -49,11 +51,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     
     protected final int rowHeight = 20;
     
-    public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format) {
+    public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         super(new LibraryTableModel<T>(libraryItems, format));
-        
-        this.format = format;
 
+        this.format = format;
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         defaultRenderer = new DefaultLibraryRenderer();
         
         tableColors = new TableColors();
@@ -143,7 +145,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     }
     
     
-    private static class LibraryDownloadDoubleClickHandler implements TableDoubleClickHandler {
+    private class LibraryDownloadDoubleClickHandler implements TableDoubleClickHandler {
 
         private DownloadAction action;
 
@@ -158,7 +160,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
 
     }
 
-    private static class DownloadAction extends AbstractAction {
+    private class DownloadAction extends AbstractAction {
         private DownloadListManager downloadListManager;
         private LibraryTable table;
         
@@ -182,7 +184,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                    editor.cancelCellEditing();
                 }
             } catch (SaveLocationException e) {
-                SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
+                saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandlerImpl.DownLoadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {

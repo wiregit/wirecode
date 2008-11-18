@@ -11,6 +11,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 
@@ -30,10 +31,10 @@ public class VideoResultsPanel extends BaseResultPanel {
         RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
         PropertiesFactory<VisualSearchResult> properties,
-        ListViewRowHeightRule rowHeightRule) {
+        ListViewRowHeightRule rowHeightRule, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
         super(listViewEditorRendererFactory, eventList, new VideoTableFormat(), downloadListManager,
-            search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
+            search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, saveLocationExceptionHandler);
         
     }
     

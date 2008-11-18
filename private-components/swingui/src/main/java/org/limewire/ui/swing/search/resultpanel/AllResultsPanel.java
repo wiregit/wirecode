@@ -9,6 +9,7 @@ import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.FileSizeRenderer;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 
@@ -29,10 +30,11 @@ public class AllResultsPanel extends BaseResultPanel {
         RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
         PropertiesFactory<VisualSearchResult> properties,
-        ListViewRowHeightRule rowHeightRule) {
+        ListViewRowHeightRule rowHeightRule,
+        SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
         super(listViewEditorRendererFactory, eventList, tableFormat,
-            downloadListManager, search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule);
+            downloadListManager, search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, saveLocationExceptionHandler);
     }
     
     @Override

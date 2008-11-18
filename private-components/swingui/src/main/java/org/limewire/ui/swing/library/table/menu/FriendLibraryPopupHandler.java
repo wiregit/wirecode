@@ -10,6 +10,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 public class FriendLibraryPopupHandler implements TablePopupHandler {
     private int popupRow = -1;
@@ -19,9 +20,9 @@ public class FriendLibraryPopupHandler implements TablePopupHandler {
     final private FriendLibraryPopupMenu popupMenu;
 
     public FriendLibraryPopupHandler(LibraryTable<RemoteFileItem> table, DownloadListManager downloadListManager, 
-            MagnetLinkFactory magnetLinkFactory, PropertiesFactory<RemoteFileItem> propertiesFactory) {
+            MagnetLinkFactory magnetLinkFactory, PropertiesFactory<RemoteFileItem> propertiesFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.table = table;
-        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager,magnetLinkFactory, propertiesFactory);
+        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager,magnetLinkFactory, propertiesFactory, saveLocationExceptionHandler);
     }
 
     @Override

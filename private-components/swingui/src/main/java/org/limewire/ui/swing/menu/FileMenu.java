@@ -33,7 +33,6 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.SaveAsDialogue;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
@@ -45,6 +44,8 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 import org.limewire.util.FileUtils;
 import org.limewire.util.URIUtils;
 
@@ -57,10 +58,11 @@ public class FileMenu extends JMenu {
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
-            LibraryManager libraryManager, final MainPanel mainPanel) {
+            LibraryManager libraryManager, final MainPanel mainPanel,
+            SaveLocationExceptionHandler saveLocationExceptionHandler) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        add(buildOpenFileAction(downloadListManager, mainPanel));
+        add(buildOpenFileAction(downloadListManager, mainPanel, saveLocationExceptionHandler));
         add(buildOpenLinkAction(downloadListManager, mainPanel));
         add(getRecentDownloadsMenu(downloadListManager));
         addSeparator();
@@ -81,8 +83,8 @@ public class FileMenu extends JMenu {
         return new AbstractAction(I18n.tr("Add Folder To Library")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<File> folders = FileChooser.getInput(mainPanel, I18n.tr("Add Folder(s)"),
-                        I18n.tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
+                List<File> folders = FileChooser.getInput(mainPanel, I18n.tr("Add Folder(s)"), I18n
+                        .tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
                         JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
                         new FileFilter() {
                             @Override
@@ -178,7 +180,9 @@ public class FileMenu extends JMenu {
         return recentDownloads;
     }
 
-    private Action buildOpenFileAction(final DownloadListManager downloadListManager, final MainPanel mainPanel) {
+    private Action buildOpenFileAction(final DownloadListManager downloadListManager,
+            final MainPanel mainPanel,
+            final SaveLocationExceptionHandler saveLocationExceptionHandler) {
         return new AbstractAction(I18n.tr("&Open File")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -201,20 +205,24 @@ public class FileMenu extends JMenu {
                 if (files != null) {
                     for (final File file : files) {
                         try {
-                            //TODO handle other magnet options, not jsut download
+                            // TODO handle other magnet options, not jsut
+                            // download
                             DownloadItem item = downloadListManager.addDownload(file);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
-                            SaveAsDialogue.handleSaveLocationException(new SaveAsDialogue.DownLoadAction() {
-                                @Override
-                                public void download(File saveFile, boolean overwrite)
-                                        throws SaveLocationException {
-                                    DownloadItem item = downloadListManager.addDownload(file, saveFile, overwrite);
-                                    navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                            .select(SimpleNavSelectable.create(item));
-                                }
-                            }, sle, false, null);
+                            saveLocationExceptionHandler.handleSaveLocationException(
+                                    new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                                        @Override
+                                        public void download(File saveFile, boolean overwrite)
+                                                throws SaveLocationException {
+                                            DownloadItem item = downloadListManager.addDownload(
+                                                    file, saveFile, overwrite);
+                                            navigator.getNavItem(NavCategory.DOWNLOAD,
+                                                    MainDownloadPanel.NAME).select(
+                                                    SimpleNavSelectable.create(item));
+                                        }
+                                    }, sle, false, null);
                         }
                     }
                 }
@@ -222,7 +230,8 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private Action buildOpenLinkAction(final DownloadListManager downloadListManager, final MainPanel mainPanel) {
+    private Action buildOpenLinkAction(final DownloadListManager downloadListManager,
+            final MainPanel mainPanel) {
         return new AbstractAction(I18n.tr("Open &Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -234,7 +243,8 @@ public class FileMenu extends JMenu {
                         URI uri = locationDialogue.getURI();
                         if (uri != null) {
                             try {
-                                //TODO handle other magnet options, not jsut download
+                                // TODO handle other magnet options, not jsut
+                                // download
                                 DownloadItem item = downloadListManager.addDownload(uri);
                                 navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                         .select(SimpleNavSelectable.create(item));
@@ -274,7 +284,7 @@ public class FileMenu extends JMenu {
                 public void keyTyped(KeyEvent e) {
                     URI uri = getURI();
                     // TODO add stricter validation
-                    //TODO allow magnet files
+                    // TODO allow magnet files
 
                     if (uri == null || uri.getPath() == null || uri.getPath().trim().length() == 0) {
                         errorLabel.setVisible(true);
@@ -350,8 +360,11 @@ public class FileMenu extends JMenu {
 
     public static class SignInOutAction extends AbstractAction {
         private static final String SIGN_INTO_FRIENDS_TEXT = I18n.tr("&Sign into Friends");
+
         private static final String SIGN_OUT_OF_FRIENDS_TEXT = I18n.tr("&Sign out of Friends");
+
         boolean signedIn = false;
+
         public SignInOutAction() {
             super(SIGN_INTO_FRIENDS_TEXT);
             EventAnnotationProcessor.subscribe(this);
