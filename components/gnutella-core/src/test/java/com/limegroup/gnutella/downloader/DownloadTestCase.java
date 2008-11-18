@@ -63,8 +63,6 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected final Log LOG = LogFactory.getLog(getClass());
 
-    protected final GUID guid = new GUID();
-
     protected static final String filePath = "com/limegroup/gnutella/downloader/DownloadTestData/";
 
     protected File dataDir = TestUtils.getResourceFile(filePath);
@@ -373,11 +371,11 @@ public abstract class DownloadTestCase extends LimeTestCase {
         assertNull("verifying file should be null", vf);
     }
     
-    protected RemoteFileDesc newRFDPush(int port, int suffix) throws Exception {
-        return newRFDPush(port, suffix, 1);
+    protected RemoteFileDesc newRFDPush(GUID guid, int port, int suffix) throws Exception {
+        return newRFDPush(guid, port, suffix, 1);
     }
     
-    protected RemoteFileDesc newRFDPush(int port, int rfdSuffix, int proxySuffix) throws Exception {
+    protected RemoteFileDesc newRFDPush(GUID guid, int port, int rfdSuffix, int proxySuffix) throws Exception {
         PushAltLoc al = (PushAltLoc) alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0." + proxySuffix + ":" + port, TestFile.hash());
         al.updateProxies(true);
@@ -394,7 +392,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
     protected RemoteFileDesc newRFD(int port, boolean useTLS) throws Exception {
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, URN.NO_URN_SET, false, "", -1);
+                GUID.makeGuid(), 100, false, 4, false, null, URN.NO_URN_SET, false, "", -1);
     }
 
     protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) throws Exception {
@@ -414,7 +412,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
             fail("SHA1 not created for: " + savedFile, e);
         }
         return remoteFileDescFactory.createRemoteFileDesc(new ConnectableImpl("127.0.0.1", port, useTLS), 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, set, false, "", -1);
+                GUID.makeGuid(), 100, false, 4, false, null, set, false, "", -1);
     }
 
     /** Returns true if the complete file exists and is complete */
@@ -532,7 +530,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
 
         @SuppressWarnings("unchecked")
         @Override
-        public void removeDownload(Downloader d) {
+        public void downloadCompleted(Downloader d) {
             synchronized (COMPLETE_LOCK) {
                 REMOVED = true;
                 COMPLETE_LOCK.notify();

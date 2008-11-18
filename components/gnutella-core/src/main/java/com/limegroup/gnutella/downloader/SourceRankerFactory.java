@@ -32,8 +32,8 @@ public class SourceRankerFactory {
         return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
     }
     
-    DelegatingSourceRanker createDelegatingSourceRanker() {
-        return new DelegatingSourceRanker(createPingRanker());
+    FriendsFirstSourceRanker createDelegatingSourceRanker() {
+        return new FriendsFirstSourceRanker(createPingRanker());
     }
     
     /**

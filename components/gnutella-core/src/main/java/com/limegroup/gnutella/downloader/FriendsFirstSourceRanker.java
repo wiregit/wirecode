@@ -13,13 +13,13 @@ import com.limegroup.gnutella.PushEndpoint;
  * Delegates Gnutella rfds to {@link PingRanker} and non-gnutella rfds
  * to the {@link LegacyRanker}.
  */
-public class DelegatingSourceRanker extends AbstractSourceRanker {
+public class FriendsFirstSourceRanker extends AbstractSourceRanker {
 
     private final LegacyRanker legacyRanker = new LegacyRanker();
     
     private final PingRanker pingRanker;
     
-    public DelegatingSourceRanker(PingRanker pingRanker) {
+    public FriendsFirstSourceRanker(PingRanker pingRanker) {
         this.pingRanker = pingRanker;
     }
     
@@ -44,8 +44,8 @@ public class DelegatingSourceRanker extends AbstractSourceRanker {
 
     @Override
     public RemoteFileDescContext getBest() {
-        RemoteFileDescContext best = pingRanker.getBest();
-        return best != null ? best : legacyRanker.getBest();
+        RemoteFileDescContext best = legacyRanker.getBest();
+        return best != null ? best : pingRanker.getBest();
     }
 
     @Override

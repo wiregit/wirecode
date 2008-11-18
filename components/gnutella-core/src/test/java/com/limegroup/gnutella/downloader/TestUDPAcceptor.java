@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
+import org.limewire.util.DebugRunnable;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -33,7 +34,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 
-class TestUDPAcceptor extends ManagedThread {
+class TestUDPAcceptor implements Runnable {
     
     private static final Log LOG = LogFactory.getLog(TestUDPAcceptor.class);
     
@@ -59,15 +60,14 @@ class TestUDPAcceptor extends ManagedThread {
 
     private final MessageFactory messageFactory;
 
-    private final String testMethod;
-
     private final HeadPongFactory headPongFactory;
+    
+    private final Thread runningThread;
 
     TestUDPAcceptor(SocketsManager socketsManager, MessageFactory messageFactory, HeadPongFactory headPongFactory, int port, String testMethod) {
         this.socketsManager = socketsManager;
         this.messageFactory = messageFactory;
         this.headPongFactory = headPongFactory;
-        this.testMethod = testMethod;
         noFile = true;
         try {
             sock = new DatagramSocket(port);
@@ -76,11 +76,11 @@ class TestUDPAcceptor extends ManagedThread {
         } catch (IOException bad) {
             ErrorService.error(bad);
         }
-        start();
+        this.runningThread = new ManagedThread(new DebugRunnable(this), "unnamed UDP Acceptor in method: " + testMethod);
+        runningThread.start();
     }
 
     TestUDPAcceptor(SocketsManager socketsManager, MessageFactory messageFactory, HeadPongFactory headPongFactory, int portL, int portC, String filename, TestUploader uploader, GUID g, String testMethod) {
-        super("push acceptor " + portL + "->" + portC);
         this.socketsManager = socketsManager;
         this.messageFactory = messageFactory;
         this.headPongFactory = headPongFactory;
@@ -88,7 +88,6 @@ class TestUDPAcceptor extends ManagedThread {
         _fileName = filename;
         _uploader = uploader;
         _g = g;
-        this.testMethod = testMethod;
         try {
             sock = new DatagramSocket(portL);
             // sock.connect(InetAddress.getLocalHost(),portC);
@@ -96,13 +95,14 @@ class TestUDPAcceptor extends ManagedThread {
         } catch (IOException bad) {
             ErrorService.error(bad, testMethod);
         }
-        setPriority(Thread.MAX_PRIORITY);
-        start();
+        this.runningThread = new ManagedThread(new DebugRunnable(this), "push acceptor " + portL + "->" + portC + " in method: " + testMethod);
+        runningThread.setPriority(Thread.MAX_PRIORITY);
+        runningThread.start();
     }
 
     public void shutdown() {
         shutdown = true;
-        interrupt();
+        runningThread.interrupt();
     }
     
     @Override
@@ -144,12 +144,13 @@ class TestUDPAcceptor extends ManagedThread {
             _uploader.setSocket(s);
 
         } catch (BadPacketException bad) {
-            ErrorService.error(bad, testMethod);
+            throw new RuntimeException(bad);
         } catch (InterruptedIOException stop){
-            if (!shutdown)
-                ErrorService.error(stop, testMethod);
+            if (!shutdown) {
+                throw new RuntimeException(stop);
+            }
         } catch (IOException bad) {
-            ErrorService.error(bad, testMethod);
+            throw new RuntimeException(bad);
         } finally {
             sock.close();
         }
@@ -167,7 +168,7 @@ class TestUDPAcceptor extends ManagedThread {
             sock.send(pack);
             pings++;
         } catch (IOException e) {
-            ErrorService.error(e, testMethod);
+            throw new RuntimeException(e);
         }
 
         LOG.debug("sent a NoFile headPong to " + from);

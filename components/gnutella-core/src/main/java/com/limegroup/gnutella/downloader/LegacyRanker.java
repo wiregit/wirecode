@@ -60,47 +60,50 @@ public class LegacyRanker extends AbstractSourceRanker {
     }
     
     static RemoteFileDescContext getBest(Iterator<RemoteFileDescContext> iter) {
-        RemoteFileDescContext ret= iter.next();
-        
+        RemoteFileDescContext currentRfdContext = iter.next();
+
         long now = System.currentTimeMillis();
-        //Find max of each (remaining) element, storing in max.
-        //Follows the following logic:
-        //1) Find a non-busy host (make connections)
-        //2) Find a host that uses hashes (avoid corruptions)
-        //3) Find a better quality host (avoid dud locations)
-        //4) Find a speedier host (avoid slow downloads)
+        // Find max of each (remaining) element, storing in max.
+        // Follows the following logic:
+        // 1) Find a non-busy host (make connections)
+        // 2) Find a host that uses hashes (avoid corruptions)
+        // 3) Find a better quality host (avoid dud locations)
+        // 4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
             // define in loop to reflect current selection of ret
-            RemoteFileDesc retRfd = ret.getRemoteFileDesc();
-            
-            RemoteFileDescContext rfdContext= iter.next();
-            RemoteFileDesc rfd = rfdContext.getRemoteFileDesc();
-            
-            // 1.            
-            if (rfdContext.isBusy(now))
-                continue;
+            RemoteFileDesc currentRfd = currentRfdContext.getRemoteFileDesc();
 
-            if (ret.isBusy(now))
-                ret=rfdContext;
+            RemoteFileDescContext potentialRfdContext = iter.next();
+            RemoteFileDesc potentialRfd = potentialRfdContext.getRemoteFileDesc();
+
+            // 1.
+            if (potentialRfdContext.isBusy(now)) {
+                continue;
+            }
+
+            if (currentRfdContext.isBusy(now)) {
+                currentRfdContext = potentialRfdContext;
+            }
             // 2.
-            else if (rfd.getSHA1Urn()!=null && retRfd.getSHA1Urn()==null)
-                ret=rfdContext;
-            // 3 & 4.
+            else if (potentialRfd.getSHA1Urn() != null && currentRfd.getSHA1Urn() == null) {
+                currentRfdContext = potentialRfdContext;
+            }
             // (note the use of == so that the comparison is only done
-            //  if both rfd & ret either had or didn't have a SHA1)
-            else if ((rfd.getSHA1Urn()==null) == (retRfd.getSHA1Urn()==null)) {
+            // if both rfd & ret either had or didn't have a SHA1)
+            else if ((potentialRfd.getSHA1Urn() == null) == (currentRfd.getSHA1Urn() == null)) {
                 // 3.
-                if (rfd.getQuality() > retRfd.getQuality())
-                    ret=rfdContext;
-                else if (rfd.getQuality() == retRfd.getQuality()) {
+                if (potentialRfd.getQuality() > currentRfd.getQuality()) {
+                    currentRfdContext = potentialRfdContext;
+                } else if (potentialRfd.getQuality() == currentRfd.getQuality()) {
                     // 4.
-                    if (rfd.getSpeed() > retRfd.getSpeed())
-                        ret=rfdContext;
+                    if (potentialRfd.getSpeed() > currentRfd.getSpeed()) {
+                        currentRfdContext = potentialRfdContext;
+                    }
                 }            
             }
         }
         
-        return ret;
+        return currentRfdContext;
     }
 	
 	@Override

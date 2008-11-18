@@ -215,7 +215,7 @@ public class Main {
     
         public void addDownload(Downloader mgr) {}
     
-        public void removeDownload(Downloader mgr) {}
+        public void downloadCompleted(Downloader mgr) {}
     
         public void addUpload(Uploader mgr) {}
     

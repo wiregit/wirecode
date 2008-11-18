@@ -56,11 +56,12 @@ public class DownloadPushTest extends DownloadTestCase {
         int successfulPushes = ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("-Testing non-swarmed push download");
 
+        GUID guid = new GUID();
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0.1:" + PPORT_1, TestFile.hash());
         ((PushAltLoc) pushLoc).updateProxies(true);
 
-        RemoteFileDesc rfd = newRFDPush(PPORT_1, 1);
+        RemoteFileDesc rfd = newRFDPush(guid, PPORT_1, 1);
 
         assertTrue(rfd.getAddress() instanceof PushEndpoint);
 
@@ -76,6 +77,7 @@ public class DownloadPushTest extends DownloadTestCase {
     public void testSimpleSwarmPush() throws Exception {
         LOG.info("-Testing swarming from two sources, one push...");
 
+        GUID guid = new GUID();
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0.1:" + PPORT_2, TestFile.hash());
@@ -108,15 +110,18 @@ public class DownloadPushTest extends DownloadTestCase {
 
         int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
         ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.T3_SPEED_INT);
-        final int RATE = 20; // slow to allow swarming
+        final int RATE = 10; // slow to allow swarming
         RemoteFileDesc rfd1 = newRFDWithURN(PORTS[0], false);
         RemoteFileDesc rfd2 = newRFDWithURN(PORTS[1], false);
         RemoteFileDesc rfd3 = newRFDWithURN(PORTS[2], false);
         RemoteFileDesc rfd4 = newRFDWithURN(PORTS[3], false);
         RemoteFileDesc rfd5 = newRFDWithURN(PORTS[4], false);
-        RemoteFileDesc pushRFD1 = newRFDPush(PPORT_1, 1);
-        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 2);
-        RemoteFileDesc pushRFD3 = newRFDPush(PPORT_3, 3);
+        GUID guid1 = new GUID();
+        GUID guid2 = new GUID();
+        GUID guid3 = new GUID();
+        RemoteFileDesc pushRFD1 = newRFDPush(guid1, PPORT_1, 1);
+        RemoteFileDesc pushRFD2 = newRFDPush(guid2, PPORT_2, 2);
+        RemoteFileDesc pushRFD3 = newRFDPush(guid3, PPORT_3, 3);
 
         TestUploader first = injector.getInstance(TestUploader.class);
         first.start("first pusher");
@@ -125,9 +130,9 @@ public class DownloadPushTest extends DownloadTestCase {
         TestUploader third = injector.getInstance(TestUploader.class);
         third.start("third pusher");
 
-        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid, _currentTestName);
-        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid, _currentTestName);
-        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_3, networkManager.getPort(), savedFile.getName(), third, guid, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid1, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid2, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_3, networkManager.getPort(), savedFile.getName(), third, guid3, _currentTestName);
 
         testUploaders[0].setRate(RATE);
         testUploaders[1].setRate(RATE);
@@ -142,7 +147,7 @@ public class DownloadPushTest extends DownloadTestCase {
         testUploaders[0].setSendThexTree(true);
 
         RemoteFileDesc[] rfds = new RemoteFileDesc[] { rfd1, rfd2, rfd3, rfd4, rfd5, pushRFD1,
-                pushRFD2, pushRFD3 };
+                pushRFD2, pushRFD3, };
 
         tGeneric(rfds);
 
@@ -165,6 +170,7 @@ public class DownloadPushTest extends DownloadTestCase {
         pusher.start("push uploader");
         pusher.setRate(RATE);
 
+        GUID guid = new GUID();
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0.1:" + PPORT_1, TestFile.hash());
 
@@ -207,6 +213,7 @@ public class DownloadPushTest extends DownloadTestCase {
         second.stopAfter(700000);
         second.setInterestedInFalts(true);
 
+        GUID guid = new GUID();
         GUID guid2 = new GUID(GUID.makeGuid());
 
         AlternateLocation firstLoc = alternateLocationFactory.create(guid.toHexString()
@@ -224,7 +231,7 @@ public class DownloadPushTest extends DownloadTestCase {
         testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid, _currentTestName);
         testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid2, _currentTestName);
 
-        RemoteFileDesc[] rfd = { newRFDPush(PPORT_1, 1, 2) };
+        RemoteFileDesc[] rfd = { newRFDPush(guid, PPORT_1, 1, 2) };
 
         tGeneric(rfd);
 
@@ -260,10 +267,11 @@ public class DownloadPushTest extends DownloadTestCase {
         pusher.setRate(RATE);
         pusher.stopAfter(200000);
 
+        GUID guid = new GUID();
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0.2:" + PPORT_1, TestFile.hash());
 
-        RemoteFileDesc pushRFD = newRFDPush(PPORT_1, 1, 2);
+        RemoteFileDesc pushRFD = newRFDPush(guid, PPORT_1, 1, 2);
 
         PushEndpoint pushEndpoint = (PushEndpoint) pushRFD.getAddress();
         assertEquals(0, pushEndpoint.getFWTVersion());
@@ -355,6 +363,8 @@ public class DownloadPushTest extends DownloadTestCase {
         pusher2.setProxiesString("1.2.3.4:5,6.7.8.9:10");
         pusher2.setInterestedInFalts(true);
         pusher2.setFWTPort(FWTPort);
+        
+        GUID guid = new GUID();
 
         // create a set of the expected proxies and keep a ref to it
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid.toHexString()
@@ -371,7 +381,7 @@ public class DownloadPushTest extends DownloadTestCase {
         assertEquals(1, pushLocFWT.getPushAddress().getProxies().size());
 
         RemoteFileDesc openRFD = newRFDWithURN(PORTS[0], false);
-        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2, 1, 2);
+        RemoteFileDesc pushRFD2 = newRFDPush(guid, PPORT_2, 1, 2);
         PushEndpoint pushEndpoint = (PushEndpoint) pushRFD2.getAddress();
         assertEquals(0, pushEndpoint.getFWTVersion());
 
@@ -422,7 +432,7 @@ public class DownloadPushTest extends DownloadTestCase {
         // make sure we use the ping ranker
         networkManager.setCanReceiveSolicited(true);
         assertTrue(networkManager.canReceiveSolicited());
-        assertTrue(sourceRankerFactory.getAppropriateRanker() instanceof PingRanker);
+        assertTrue(sourceRankerFactory.getAppropriateRanker() instanceof FriendsFirstSourceRanker);
 
         // create one source that will actually download and another one to which a headping should be sent 
         RemoteFileDesc rfd = newRFDWithURN(PORTS[0], false);
@@ -479,6 +489,7 @@ public class DownloadPushTest extends DownloadTestCase {
         testUploaders[0].stopAfter(550000);
         testUploaders[1].stopAfter(550000);
         
+        GUID guid = new GUID();
         AlternateLocation badPushLoc=alternateLocationFactory.create(
                 guid.toHexString()+";1.2.3.4:5",TestFile.hash());
         ((PushAltLoc)badPushLoc).updateProxies(true);

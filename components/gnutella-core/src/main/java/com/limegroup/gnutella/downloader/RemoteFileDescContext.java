@@ -42,7 +42,7 @@ public class RemoteFileDescContext {
     /**
      * The earliest time to retry this host in milliseconds since 01-01-1970
      */
-   private volatile long earliestRetryTime;
+    private volatile long earliestRetryTime;
 
     public RemoteFileDescContext(RemoteFileDesc remoteFileDesc) {
         this.remoteFileDesc = Objects.nonNull(remoteFileDesc, "remoteFileDesc");

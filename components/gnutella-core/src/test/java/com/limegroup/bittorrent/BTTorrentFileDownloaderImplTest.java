@@ -567,7 +567,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void removeDownload(Downloader d) {
+            public void downloadCompleted(Downloader d) {
             }
 
             @Override

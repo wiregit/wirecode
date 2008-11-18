@@ -40,7 +40,7 @@ public class ActivityCallbackStub implements ActivityCallback {
 	                              Set alts) {}
     public void handleQueryString( String query ) { }    
     public void addDownload(Downloader d) { }    
-    public void removeDownload(Downloader d) { }    
+    public void downloadCompleted(Downloader d) { }    
     public void addUpload(Uploader u) { }
     public void removeUpload(Uploader u) { }    	
 	public void acceptChat(InstantMessenger ctr) { }

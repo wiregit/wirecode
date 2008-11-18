@@ -31,6 +31,7 @@ import org.limewire.io.BandwidthThrottle;
 import org.limewire.io.IP;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.util.DebugRunnable;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -269,12 +270,12 @@ public class TestUploader {
         }
         
         //spawn loop();
-        Thread t = new ManagedThread() {
+        Thread t = new ManagedThread(new DebugRunnable(new Runnable() {
             @Override
             public void run() {
                 loop(port);
             }
-        };
+        }));
         t.setDaemon(true);
         t.start();        
     }

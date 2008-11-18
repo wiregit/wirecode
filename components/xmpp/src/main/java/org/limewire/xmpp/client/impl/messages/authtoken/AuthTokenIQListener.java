@@ -72,7 +72,7 @@ public class AuthTokenIQListener implements PacketListener {
                         presence.addFeature(new AuthTokenFeature(iq.getAuthToken()));
                     }
                 }  else {
-                    LOG.debugf("auth token {0} for presence {1} is pending", iq.getAuthToken(), presence.getJID());
+                    LOG.debugf("auth token {0} for presence {1} is pending", iq.getAuthToken(), iq.getFrom());
                     pendingAuthTokens.put(iq.getFrom(), iq.getAuthToken());
                 }
             }

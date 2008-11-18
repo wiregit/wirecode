@@ -1,7 +1,6 @@
 package org.limewire.xmpp.client.impl.messages.library;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,9 +13,8 @@ import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.client.impl.UserImpl;
+import org.limewire.xmpp.api.client.XMPPConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class LibraryChangedIQListener implements PacketListener {

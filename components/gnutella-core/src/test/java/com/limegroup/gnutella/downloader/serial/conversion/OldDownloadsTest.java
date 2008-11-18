@@ -103,7 +103,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         }
     
         @Override
-        public void removeDownload(Downloader d) {
+        public void downloadCompleted(Downloader d) {
             downloaders.remove(d);
         }
         

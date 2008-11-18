@@ -23,7 +23,7 @@ public class InNetworkCallback implements DownloadCallback {
     public void addDownload(Downloader d) {
     }
 
-    public void removeDownload(Downloader d) {
+    public void downloadCompleted(Downloader d) {
         InNetworkDownloader downloader = (InNetworkDownloader) d;
         updateHandler.inNetworkDownloadFinished(
                 downloader.getSha1Urn(),

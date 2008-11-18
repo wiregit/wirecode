@@ -125,7 +125,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
        
     }
 
-    public void removeDownload(Downloader d) {
+    public void downloadCompleted(Downloader d) {
         
     }
 

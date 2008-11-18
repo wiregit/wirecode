@@ -1093,7 +1093,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         dl.finish();
         if (dl.getQueryGUID() != null)
             messageRouter.get().downloadFinished(dl.getQueryGUID());
-        callback(dl).removeDownload(dl);
+        callback(dl).downloadCompleted(dl);
         
         //Save this' state to disk for crash recovery.
         if(ser)
