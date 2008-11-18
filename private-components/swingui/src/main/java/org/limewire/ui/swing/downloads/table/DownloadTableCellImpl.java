@@ -34,7 +34,6 @@ import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.assistedinject.AssistedInject;
@@ -116,7 +115,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullPanel.setOpaque(false);
         minPanel.setOpaque(false);
 
-        Border blankBorder = BorderFactory.createEmptyBorder();
+        Border blankBorder = BorderFactory.createEmptyBorder(0,0,0,0);
         fullPanel.setBorder(blankBorder);
         minPanel.setBorder(blankBorder);
         this.setBorder(blankBorder);
@@ -201,7 +200,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.gridheight = 1;
         minPanel.add(minTitleLabel, gbc);
         
-        gbc.insets = new Insets(0,4,0,0);
+        gbc.insets = new Insets(5,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx = 4;
@@ -274,7 +273,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.gridwidth = 3;
         fullPanel.add(fullProgressBar, gbc);
         
-        gbc.insets = new Insets(0,4,0,0);
+        gbc.insets = new Insets(5,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx += gbc.gridwidth;
@@ -435,7 +434,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
         painter.setCacheable(true);
         painter.setAntialiasing(false);
-        painter.setFilters(PainterUtils.createSoftenFilter(0.025f));
+        //painter.setFilters(PainterUtils.createSoftenFilter(0.025f));
                         
         return painter;
     }
