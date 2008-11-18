@@ -5,21 +5,21 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence;
-
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 public class ChatPanelHarness {
     public static void main(String[] args) {
@@ -50,21 +50,17 @@ public class ChatPanelHarness {
     }
     
     private static JPanel addFriendPanel() {
-        FormLayout layout = new FormLayout("p, 2dlu, p");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        JPanel panel = new JPanel(new MigLayout("", "[][]", ""));
         
-        builder.append("Id:");
+        panel.add(new JLabel("Id:"));
         final JTextField idField = new JTextField(20);
-        builder.append(idField);
-        builder.nextLine();
-        builder.append("Name:");
+        panel.add(idField, "wrap");
+        panel.add(new JLabel("Name:"));
         final JTextField nameField = new JTextField(20);
-        builder.append(nameField);
-        builder.nextLine();
-        builder.append("Mood:");
+        panel.add(nameField, "wrap");
+        panel.add(new JLabel("Mood:"));
         final JTextField moodField = new JTextField(20);
-        builder.append(moodField);
-        builder.nextLine();
+        panel.add(moodField, "wrap");
         JButton addFriend = new JButton("Add Friend");
         addFriend.addActionListener(new ActionListener() {
             @Override
@@ -74,7 +70,7 @@ public class ChatPanelHarness {
                         Presence.EventType.PRESENCE_NEW).publish();
             }
         });
-        builder.append(addFriend, 3);
+        panel.add(addFriend, "span, wrap");
         JButton fillWithMessageBuddies = new JButton("Fill with Message Awaiting Buddies");
         fillWithMessageBuddies.addActionListener(new ActionListener() {
             @Override
@@ -82,9 +78,8 @@ public class ChatPanelHarness {
                 fillWithUnseenMessageAwaitingFriends();
             }
         });
-        builder.nextLine();
-        builder.append(fillWithMessageBuddies, 3);
-        return builder.getPanel();
+        panel.add(fillWithMessageBuddies, "span");
+        return panel;
     }
     
     private static void fillWithUnseenMessageAwaitingFriends() {
