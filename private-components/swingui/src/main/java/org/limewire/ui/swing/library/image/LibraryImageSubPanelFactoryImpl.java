@@ -8,10 +8,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
@@ -23,6 +26,7 @@ import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,10 +37,13 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private ThumbnailManager thumbnailManager;
     
     private Dimension subPanelDimension = new Dimension(ThumbnailManager.WIDTH,28);
+
+    private LibraryManager libraryManager;
     
     @Inject
-    public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager) {
+    public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager) {
         this.thumbnailManager = thumbnailManager;
+        this.libraryManager = libraryManager;
     }
     
     @Override
@@ -48,7 +55,9 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
         panel.setImageEditor(enableMyLibraryEditor(sharePanel, panel));
-        
+        TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList());
+        list.setTransferHandler(transferHandler);
+        panel.setTransferHandler(transferHandler);
         return panel;
     }
 
@@ -62,6 +71,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         panel.setImageEditor(enableSharingEditor(currentFriendFileList));
         
         return panel;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private EventSelectionModel<LocalFileItem> getSelectionModel(ImageList list){
+        return (EventSelectionModel<LocalFileItem>) list.getSelectionModel();
     }
     
     private ImageCellRenderer enableMyLibraryRenderer(ImageList imageList) {

@@ -177,10 +177,15 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
      */
     @Override
     public Dimension getPreferredSize() {
+        //ensure viewport is filled so dnd will work
         Dimension dimension = super.getPreferredSize();
         if (getParent() == null)
             return dimension;
-        return new Dimension(scrollPane.getWidth(), dimension.height);
+        if (dimension.height > scrollPane.getSize().height){
+            return new Dimension(scrollPane.getWidth(), dimension.height);
+        } else {
+            return scrollPane.getSize(); 
+        }
     }
 
     @Override

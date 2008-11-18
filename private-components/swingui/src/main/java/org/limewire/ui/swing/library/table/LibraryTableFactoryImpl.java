@@ -25,7 +25,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.dnd.LocalFileTransferable;
+import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -50,6 +50,7 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -114,10 +115,21 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             JScrollPane scrollPane, LibrarySharePanel sharePanel) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
                 shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
-        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
+        
+        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(),
                 categoryIconManager.getIcon(Category.IMAGE), scrollPane, subPanelFactory,
-                sharePanel, null);
+                sharePanel, null);       
+
+        TransferHandler noDragTransferHandler = new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList()){
+            @Override
+            public int getSourceActions(JComponent comp) {
+                return NONE;
+            }
+        };
+        
+        imagePanel.setTransferHandler(noDragTransferHandler);
+        return imagePanel;
     }
     
     @Override
@@ -190,7 +202,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
                     castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
                     remoteItemPropFactory, saveLocationExceptionHandler));
         } else {// Local
-            libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
+            libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
             libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                     category, libraryManager, shareListManager, magnetLinkFactory, friendList,
                     localItemPropFactory));
@@ -250,7 +262,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             throw new IllegalArgumentException("Unknown category: " + category);
         }
         
-        libTable.setTransferHandler(new MyLibraryTransferHandler(libTable));
+        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
                     magnetLinkFactory, friendList, localItemPropFactory));
         
@@ -268,61 +280,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
     private LibraryTable<LocalFileItem> castToLocalLibraryTable(LibraryTable table) {
         return (LibraryTable<LocalFileItem>) table;
     }
-
-    private class MyLibraryTransferHandler extends TransferHandler {
-
-        private LibraryTable table;
-
-        public MyLibraryTransferHandler(LibraryTable table) {
-            this.table = table;
-        }
-
-        @Override
-        public boolean canImport(TransferHandler.TransferSupport info) {
-            return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
-        }
-
-        @Override
-        public int getSourceActions(JComponent comp) {
-            return COPY;
-        }
-
-        @SuppressWarnings("unchecked")
-        public boolean importData(TransferHandler.TransferSupport info) {
-            if (!info.isDrop()) {
-                return false;
-            }
-
-            // Get the string that is being dropped.
-            Transferable t = info.getTransferable();
-            final List<File> fileList;
-            try {
-                fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-            } catch (Exception e) {
-                return false;
-            }
-
-            for (File file : fileList) {
-                if(file.isDirectory()) {
-                    libraryManager.getLibraryManagedList().addFolder(file);
-                } else {
-                    libraryManager.getLibraryManagedList().addFile(file);
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public Transferable createTransferable(JComponent comp) {
-            int indices[] = table.getSelectedRows();
-            File[] files = new File[indices.length];
-            for (int i = 0; i < indices.length; i++) {
-                files[i] = ((LocalFileItem) ((LibraryTableModel) table.getModel())
-                        .getFileItem(indices[i])).getFile();
-            }
-            return new LocalFileTransferable(files);
-        }
+    
+    @SuppressWarnings("unchecked")
+    private EventSelectionModel<LocalFileItem> getSelectionModel(LibraryTable table){
+        return (EventSelectionModel<LocalFileItem>) table.getSelectionModel();
     }
+
 
     private class FriendLibraryTransferHandler extends TransferHandler {
 

@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -118,8 +120,8 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         return (ImageListModel)imageList.getModel();
     }
     
-    public EventList<LocalFileItem> getSelectedItems(){
-        return listSelection;
+    public List<LocalFileItem> getSelectedItems(){
+        return new ArrayList<LocalFileItem>(listSelection);
     }
 
     
@@ -161,7 +163,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         @Override
         public void mouseClicked(MouseEvent e) {
             int index = imageList.locationToIndex(e.getPoint());
-            if( index > -1)
+            if(!e.isPopupTrigger() && !e.isShiftDown() && !e.isControlDown() && !e.isMetaDown() && index > -1)
                 imageList.setSelectedIndex(index);
         }
         @Override
@@ -193,7 +195,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
 
   
     public void dispose() {
-        // TODO Auto-generated method stub
-        
+        ((ImageListModel)imageList.getModel()).dispose();
     }
 }
