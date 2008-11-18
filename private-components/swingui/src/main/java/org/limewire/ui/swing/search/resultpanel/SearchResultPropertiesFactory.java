@@ -4,14 +4,12 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Font;
 
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
@@ -74,10 +72,6 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
         @Override
         public void showProperties(VisualSearchResult vsr) {
-            if (vsr.getCategory() == Category.OTHER) {
-                remove(detailsContainer);
-            }
-            
             icon.setIcon(iconManager.getIcon(vsr.getCategory()));
             heading.setText(vsr.getHeading());
             filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
