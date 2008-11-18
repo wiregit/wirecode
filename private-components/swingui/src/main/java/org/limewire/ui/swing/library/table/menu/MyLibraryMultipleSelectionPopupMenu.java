@@ -76,14 +76,12 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         add(removeAction);
         add(deleteAction);
         add(new JSeparator());
-        if (isGnutellaSharable(category)) {
-            add(gnutellaShareItem);
-        }
+        add(gnutellaShareItem);
+        gnutellaShareItem.setEnabled(isGnutellaSharable(category));
         add(friendShareSubMenu);
         add(new JSeparator());
-        if (isGnutellaSharable(category)) {
-            add(gnutellaUnshareItem);
-        }
+        add(gnutellaUnshareItem);
+        gnutellaUnshareItem.setEnabled(isGnutellaSharable(category));
         add(friendUnshareSubMenu);
 
     }

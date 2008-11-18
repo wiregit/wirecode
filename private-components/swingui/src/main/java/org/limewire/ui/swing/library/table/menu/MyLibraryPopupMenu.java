@@ -106,9 +106,8 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         add(removeAction);
         add(deleteAction);
         add(new JSeparator());
-        if (isGnutellaSharable(category)) {
-            add(gnutellaShareItem);
-        }
+        add(gnutellaShareItem);
+        gnutellaShareItem.setEnabled(isGnutellaSharable(category));
         add(friendSubMenu);
         add(new JSeparator());
         add(copyLinkAction);
@@ -137,7 +136,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         }
     };
 
-    private Action locateAction = new AbstractAction(I18n.tr("Locate file")) {
+    private Action locateAction = new AbstractAction(I18n.tr("Locate File")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -154,7 +153,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     };
 
-    private Action copyLinkAction = new AbstractAction(I18n.tr("Copy Link to clipboard")) {
+    private Action copyLinkAction = new AbstractAction(I18n.tr("Copy Link to Clipboard")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -172,7 +171,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     };
 
-    private Action removeAction = new AbstractAction(I18n.tr("Remove from library")) {
+    private Action removeAction = new AbstractAction(I18n.tr("Remove from Library")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -181,7 +180,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     };
 
-    private Action deleteAction = new AbstractAction(I18n.tr("Delete file")) {
+    private Action deleteAction = new AbstractAction(I18n.tr("Delete File")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {

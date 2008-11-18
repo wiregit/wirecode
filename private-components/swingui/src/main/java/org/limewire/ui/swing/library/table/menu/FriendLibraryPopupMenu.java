@@ -62,7 +62,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
         return fileItems.toArray(new RemoteFileItem[fileItems.size()]);
     }
     
-   private Action downloadAction = new AbstractAction(I18n.tr("DownloadSelected")) {
+   private Action downloadAction = new AbstractAction(I18n.tr("Download Selected Files")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             final RemoteFileItem[] fileItemArray = createFileItemArray();
