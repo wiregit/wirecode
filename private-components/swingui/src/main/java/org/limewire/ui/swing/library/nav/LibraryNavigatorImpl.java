@@ -6,7 +6,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
@@ -56,7 +58,6 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -88,7 +89,6 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             ShareListManager shareListManager,
             MyLibraryMediator myLibraryMediator,
             SharingLibraryFactory sharingFactory,
-            Provider<NavList> navListProvider,
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory) {
         
@@ -98,8 +98,8 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         this.myLibraryMediator = myLibraryMediator;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
-        this.browseList = navListProvider.get();
-        this.restList = navListProvider.get();
+        this.browseList = new NavList();
+        this.restList = new NavList();
         this.navPanelFactory = navPanelFactory;
         this.friendLibraryMediatorFactory = friendLibraryMediatorFactory;
         this.navigator = navigator;
@@ -171,7 +171,10 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             protected void itemRemoved(FriendLibrary item) {
                 Friend friend = item.getFriend();
                 if(friend.isAnonymous()) {
-                    browseList.removeNavPanelForFriend(item.getFriend());
+                    NavPanel panel = browseList.removePanelForFriend(item.getFriend());
+                    if(panel != null) {
+                        disposeNavPanel(panel);
+                    }
                 } else {
                     NavPanel panel = browseList.getPanelForFriend(item.getFriend());
                     if(panel != null) {
@@ -244,24 +247,34 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
     @SwingEDTEvent
     public void handleEvent(RosterEvent event) {
         Friend friend = event.getSource();
+        NavPanel panel;
         switch (event.getType()) {
         case USER_ADDED:
-            NavPanel panel = browseList.getPanelForFriend(friend);
+            panel = browseList.getPanelForFriend(friend);
             if(panel == null) {
                 restList.addNavPanel(createFriendNavPanel(friend, null, null));
             }
             break;
         case USER_REMOVED:
-            browseList.removeNavPanelForFriend(friend);
-            restList.removeNavPanelForFriend(friend);
+            panel = browseList.removePanelForFriend(friend);
+            if(panel == null) {
+                panel = restList.removePanelForFriend(friend);
+            }
+            if(panel != null) {
+                disposeNavPanel(panel);
+            }
             break;
         }
     }
     
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        browseList.clearFriends();
-        restList.clear();
+        List<NavPanel> removed = new ArrayList<NavPanel>();
+        removed.addAll(browseList.clearFriends());
+        removed.addAll(restList.clear());
+        for(NavPanel panel : removed) {
+            disposeNavPanel(panel);
+        }
     }
 
     @Inject
@@ -274,6 +287,10 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             restList.ensureFriendVisible(friend);
         }
     }
+    
+    private void disposeNavPanel(NavPanel navPanel) {
+        navigator.getNavItem(NavCategory.LIBRARY, navPanel.getFriend().getId()).remove();
+    }    
     
     private NavPanel createFriendNavPanel(Friend friend, EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         FriendLibraryMediator component = friendLibraryMediatorFactory.createFriendLibraryBasePanel(friend);

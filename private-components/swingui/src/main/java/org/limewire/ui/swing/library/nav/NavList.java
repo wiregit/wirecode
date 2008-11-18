@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -21,20 +20,14 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.ActionLabel;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
 
-import com.google.inject.Inject;
-
 class NavList extends JXPanel {
     
     private final List<NavPanel> navPanels = new ArrayList<NavPanel>();
-    
-    private final Navigator navigator;
     
     private final NavPanelMoveAction panelMoveUpAction;
     private final NavPanelMoveAction panelMoveDownAction;
@@ -43,12 +36,10 @@ class NavList extends JXPanel {
     private final JXCollapsiblePane collapsablePanels;
     private final JXPanel panelContainer;
     
-    @Inject NavList(Navigator navigator) {
+    NavList() {
         GuiUtils.assignResources(this);
         
         setLayout(new MigLayout("gap 0, insets 0, fill"));
-        
-        this.navigator = navigator;
         
         this.panelMoveUpAction = new NavPanelMoveAction(false);
         this.panelMoveDownAction = new NavPanelMoveAction(true);
@@ -93,20 +84,24 @@ class NavList extends JXPanel {
         titleLabel.setText(text);
     }
 
-    void clear() {
+    List<NavPanel> clear() {
         List<NavPanel> oldPanels = new ArrayList<NavPanel>(navPanels);
         for(NavPanel panel : oldPanels) {
-            removeNavPanelForFriend(panel.getFriend());
+            removePanel(panel);
         }
+        return oldPanels;
     }
     
-    void clearFriends() {
+    List<NavPanel> clearFriends() {
         List<NavPanel> oldPanels = new ArrayList<NavPanel>(navPanels);
+        List<NavPanel> removed = new ArrayList<NavPanel>();
         for(NavPanel panel : oldPanels) {
             if(!panel.getFriend().isAnonymous()) {
-                removeNavPanelForFriend(panel.getFriend());
+                removePanel(panel);
+                removed.add(panel);
             }
         }
+        return removed;
     }
     
     NavPanel updateNavPanelForFriend(Friend friend, LibraryState state, EventList<RemoteFileItem> eventList) {
@@ -228,17 +223,12 @@ class NavList extends JXPanel {
         checkVisibility();
     }
     
-    void removeNavPanelForFriend(Friend friend) {
-        for(Iterator<NavPanel> i = navPanels.iterator(); i.hasNext(); ) {
-            NavPanel panel = i.next();
-            if(panel.getFriend().getId().equals(friend.getId())) {
-                i.remove();
-                panelContainer.remove(panel);
-                navigator.getNavItem(NavCategory.LIBRARY, friend.getId()).remove();
-                break;
-            }
+    NavPanel removePanelForFriend(Friend friend) {
+        NavPanel panel = getPanelForFriend(friend);
+        if(panel != null) {
+            removePanel(panel);
         }
-        checkVisibility();
+        return panel;
     }
     
     NavPanel selectFirst() {
