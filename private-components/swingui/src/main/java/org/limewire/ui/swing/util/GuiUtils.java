@@ -3,7 +3,9 @@ package org.limewire.ui.swing.util;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.swing.JComponent;
@@ -33,6 +35,11 @@ public class GuiUtils {
     private static NumberFormat NUMBER_FORMAT0; // localized "#,##0"
     private static NumberFormat NUMBER_FORMAT1; // localized "#,##0.0"
     
+    /**
+     * Localizable Date Format constant for the current default locale
+     * set at init time.
+     */
+    private static DateFormat DATETIME_FORMAT;
       
     /**
      * Localizable constants
@@ -60,7 +67,10 @@ public class GuiUtils {
         NUMBER_FORMAT1.setMaximumFractionDigits(1);
         NUMBER_FORMAT1.setMinimumFractionDigits(1);
         NUMBER_FORMAT1.setGroupingUsed(true);
-               
+
+        DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, 
+                DateFormat.DEFAULT, locale);
+        
         GENERAL_UNIT_BYTES =
             I18n.tr("B");
         GENERAL_UNIT_KILOBYTES =
@@ -173,6 +183,15 @@ public class GuiUtils {
      */
     public static String rate2speed(double rate) {
         return NUMBER_FORMAT0.format(rate) + " " + GENERAL_UNIT_KBPSEC;
+    }
+    
+    /**
+     * Converts number of milliseconds since way back when to a
+     * local-formatted date String.
+     */
+    public static String msec2DateTime(long milliseconds) {
+        Date d = new Date(milliseconds);
+        return DATETIME_FORMAT.format(d);
     }
     
     /**
