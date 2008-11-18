@@ -43,7 +43,7 @@ public final class SettingsGroupManager {
     /**
      * The Executor for the Events
      */
-    private volatile Executor executor = ExecutorsHelper.newFixedSizeThreadPool(1, "SettingsHandlerEventDispatcher");
+    private final Executor executor = ExecutorsHelper.newFixedSizeThreadPool(1, "SettingsHandlerEventDispatcher");
     
     // never instantiate this class.
     private SettingsGroupManager() {}
@@ -218,16 +218,5 @@ public final class SettingsGroupManager {
      */
     protected void execute(Runnable evt) {
         executor.execute(evt);
-    }
-    
-    /**
-     * Replaces the current Executor
-     */
-    public void setExecutor(Executor executor) {
-        if (executor == null) {
-            throw new NullPointerException("Executor is null");
-        }
-        
-        this.executor = executor;
     }
 }    

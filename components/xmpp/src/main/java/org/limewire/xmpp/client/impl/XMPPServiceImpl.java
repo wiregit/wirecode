@@ -35,7 +35,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public static final String LW_SERVICE_NS = "http://www.limewire.org/";
     
     private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
-    private final Provider<List<XMPPConnectionConfiguration>> configurations;
     private final Provider<EventListener<RosterEvent>> rosterListener;
     private final Provider<EventListener<FileOfferEvent>> fileOfferListener;
     private final Provider<EventListener<LibraryChangedEvent>> libraryChangedListener;
@@ -52,7 +51,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
                     Provider<EventListener<XMPPConnectionEvent>> connectionListener,
                     AddressFactory addressFactory, XMPPAuthenticator authenticator) {
-        this.configurations = configurations;
         this.rosterListener = rosterListener;
         this.fileOfferListener = fileOfferListener;
         this.libraryChangedListener = libraryChangedListener;
@@ -60,6 +58,9 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
+        for(XMPPConnectionConfiguration configuration : configurations.get()) {
+            addConnectionConfiguration(configuration);
+        }
     }
     
     @Inject
@@ -84,9 +85,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     public void initialize() {
-        for(XMPPConnectionConfiguration configuration : configurations.get()) {
-            addConnectionConfiguration(configuration);
-        }
+        initializeConfigurations();
     }
 
     /**
@@ -133,14 +132,22 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         return Collections.unmodifiableList(copy);
     }
 
-    public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
+    private void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(),
                     fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory, authenticator);
-            connection.initialize();
             connections.add(connection);
-            if(lastEvent != null) {
-                connection.handleEvent(lastEvent);
+        }
+    }
+    
+    void initializeConfigurations() {
+        synchronized(this) {
+            for(XMPPConnection connection : connections) {
+                XMPPConnectionImpl impl = (XMPPConnectionImpl)connection;
+                impl.initialize();
+                if(lastEvent != null) {
+                    impl.handleEvent(lastEvent);
+                }
             }
         }
     }
