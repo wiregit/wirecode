@@ -86,15 +86,13 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     }
     
     public void enableDownloading(DownloadListManager downloadListManager, LibraryFileList fileList){
-        ArrayList<RemoteFileItem> downloadingList = new ArrayList<RemoteFileItem>();
-        
-        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this, downloadingList);
+        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
-        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadingList, fileList);
+        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadListManager, fileList);
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadingList, fileList));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadListManager, fileList));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
         setRowHeight(rowHeight);
@@ -163,11 +161,9 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     private static class DownloadAction extends AbstractAction {
         private DownloadListManager downloadListManager;
         private LibraryTable table;
-        private ArrayList<RemoteFileItem> downloadingList;
         
-        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table, ArrayList<RemoteFileItem> downloadingList){
+        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
             super(text);
-            this.downloadingList = downloadingList;
             this.downloadListManager = downloadListManager;
             this.table = table;
         }
@@ -181,7 +177,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
             final RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
             try {
                 downloadListManager.addFriendDownload(file);
-                downloadingList.add(file);
                 TableCellEditor editor = table.getCellEditor();
                 if (editor != null) {          
                    editor.cancelCellEditing();
@@ -192,7 +187,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {
                         downloadListManager.addFriendDownload(file, saveFile, overwrite);
-                        downloadingList.add(file);
                     }
                 }, e, true, null);
             }

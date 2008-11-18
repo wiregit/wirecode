@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
-import java.util.ArrayList;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -11,6 +10,7 @@ import javax.swing.JTable;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.IconButton;
@@ -28,7 +28,7 @@ public class LibraryDownloadRendererEditor extends TableRendererEditor{
     private Icon downloadButtonPressedRollover;
 
     private JButton downloadButton;
-    private ArrayList<RemoteFileItem> downloadList;
+    private DownloadListManager downloadListManager;
     
     private LibraryFileList fileList;
     
@@ -36,9 +36,9 @@ public class LibraryDownloadRendererEditor extends TableRendererEditor{
      * 
      * @param downloadList list of files being download from the friend's library
      */
-    public LibraryDownloadRendererEditor(Action downloadAction, ArrayList<RemoteFileItem> downloadList, LibraryFileList libraryFileList){
+    public LibraryDownloadRendererEditor(Action downloadAction, DownloadListManager downloadListManager, LibraryFileList libraryFileList){
         GuiUtils.assignResources(this);
-        this.downloadList = downloadList;
+        this.downloadListManager = downloadListManager;
         this.fileList = libraryFileList;
         
         setLayout(new MigLayout("insets 2 18 2 18, hidemode 0, aligny 50%"));
@@ -69,11 +69,11 @@ public class LibraryDownloadRendererEditor extends TableRendererEditor{
     
     private void setButton(Object value) {
         RemoteFileItem remoteItem = (RemoteFileItem) value;
-        downloadButton.setEnabled(!downloadList.contains(value) && !fileList.contains(remoteItem.getUrn()));
+        downloadButton.setEnabled(!downloadListManager.contains(remoteItem.getUrn()) && !fileList.contains(remoteItem.getUrn()));
         
         if(fileList.contains(remoteItem.getUrn())) {
             downloadButton.setToolTipText(I18n.tr("Already in My Library"));
-        } else if(downloadList.contains(value)) {
+        } else if(downloadListManager.contains(remoteItem.getUrn())) {
             downloadButton.setToolTipText(I18n.tr("Already downloading"));
         } else
             downloadButton.setToolTipText("Download this file");

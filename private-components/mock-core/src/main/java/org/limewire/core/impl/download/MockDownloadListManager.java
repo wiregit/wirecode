@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.download.DownloadListManager;
@@ -145,5 +146,10 @@ public class MockDownloadListManager implements DownloadListManager {
     public DownloadItem addDownload(File file, File saveFile, boolean overwrite)
             throws SaveLocationException {
         return null;
+    }
+
+    @Override
+    public boolean contains(URN urn) {
+        return false;
     }
 }

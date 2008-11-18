@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +73,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final QueueTimeCalculator queueTimeCalculator;
     
     private static final int PERIOD = 1000;
+    
+    private Map<org.limewire.core.api.URN, DownloadItem> urnMap = new HashMap<org.limewire.core.api.URN, DownloadItem>();
 	
 	@Inject
 	public CoreDownloadListManager(DownloadManager downloadManager,
@@ -287,6 +291,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             downloader.setAttribute(DOWNLOAD_ITEM, item, false);
             downloader.addListener(new TorrentListener(downloader));
             list.add(item);
+            urnMap.put(item.getUrn(), item);
         }
 
         @Override
@@ -296,6 +301,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             if (item.getState() != DownloadState.DONE && item.getState() != DownloadState.ERROR) {
                 list.remove(item);
             }
+            urnMap.remove(item.getUrn());
         }
 
         private DownloadItem getDownloadItem(Downloader downloader) {
@@ -368,7 +374,12 @@ public class CoreDownloadListManager implements DownloadListManager {
         //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
         //right now defaulting to bit torrent
         Downloader downloader = downloadManager.downloadTorrent(file, overwrite);
-        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+		return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+    }
+
+    @Override
+    public boolean contains(org.limewire.core.api.URN urn) {
+        return urnMap.containsKey(urn);
     }
 
 }

@@ -4,6 +4,8 @@ package org.limewire.core.api.download;
 import java.io.File;
 import java.net.URI;
 
+import org.limewire.core.api.URN;
+
 import ca.odell.glazedlists.EventList;
 
 public interface DownloadListManager extends ResultDownloader {
@@ -36,6 +38,10 @@ public interface DownloadListManager extends ResultDownloader {
      */
     public DownloadItem addDownload(File file, File saveFile, boolean overwrite) throws SaveLocationException;
 
-	
-	
+	/**
+	 * Return true if the downloader contains the given urn, false otherwise
+	 * @param urn
+	 * @return
+	 */
+    public boolean contains(URN urn);
 }
