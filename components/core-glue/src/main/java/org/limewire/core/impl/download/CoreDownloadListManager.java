@@ -2,11 +2,9 @@ package org.limewire.core.impl.download;
 
 import java.awt.EventQueue;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,8 +17,6 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -29,37 +25,31 @@ import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.io.Address;
-import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
 import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
-import org.limewire.xmpp.api.client.FileMetaData;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
-import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -209,37 +199,6 @@ public class CoreDownloadListManager implements DownloadListManager {
         return createDownloader(new RemoteFileDesc[] { ((CoreRemoteFileItem) fileItem).getRfd() },
                 RemoteFileDesc.EMPTY_LIST, null, saveDir, fileName, overwrite, fileItem.getCategory(), true);    
     }
-    
-    @Override
-    public DownloadItem addFriendDownload(FriendPresence presence, FileMetaData fileMeta)
-            throws SaveLocationException, InvalidDataException {
-        Category category = CategoryConverter.categoryForFileName(fileMeta.getName());
-        return createDownloader(new RemoteFileDesc[] { createRfdFromChatResult(presence, fileMeta) },
-                RemoteFileDesc.EMPTY_LIST, 
-                null, null, null, false, category, true);
-    }
-
-    private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
-            throws SaveLocationException, InvalidDataException {
-        Address address = ((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
-        byte[] clientGuid = null;
-        
-        Set<String> urnsAsString = fileMeta.getURNsAsString();
-        Set<URN> urns = new HashSet<URN>();
-        for (String urnStr : urnsAsString) {
-            try {
-                urns.add(URN.createUrnFromString(urnStr));
-            } catch(IOException iox) {
-                throw new InvalidDataException(iox);
-            }
-        }
-
-        return remoteFileDescFactory.createRemoteFileDesc(address,
-                fileMeta.getIndex(), fileMeta.getName(), fileMeta.getSize(), clientGuid,
-                0, false, 0, true, null, urns, false,
-                null, fileMeta.getCreateTime().getTime());
-    }
-
 
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(
             List<? extends SearchResult> searchResults, List<RemoteFileDesc> altList) {

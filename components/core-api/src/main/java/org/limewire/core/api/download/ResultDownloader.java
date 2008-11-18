@@ -4,12 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
-import org.limewire.io.InvalidDataException;
-import org.limewire.xmpp.api.client.FileMetaData;
 
 public interface ResultDownloader {
 
@@ -42,19 +39,6 @@ public interface ResultDownloader {
      */
     public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults)
             throws SaveLocationException;
-
-    /**
-     * Adds a download specified by the given remote file desc
-     * 
-     * @param chatFileDesc The chat file metadata
-     * @return DownloadItem with which the download can be tracked and
-     *         controlled
-     * @throws SaveLocationException if an error occurs while downloading and
-     *         saving the file
-     * @throws InvalidDataException if the FileMetaData is malformed
-     */
-    public DownloadItem addFriendDownload(FriendPresence presence, FileMetaData chatFileDesc)
-            throws SaveLocationException, InvalidDataException;
 
     /**
      * Adds a download specified by the given RemoteFileItem

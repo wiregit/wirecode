@@ -45,7 +45,9 @@ import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -99,13 +101,15 @@ public class ConversationPane extends JPanel implements Displayable {
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
     private final ResultDownloader downloader;
+    private final RemoteFileItemFactory remoteFileItemFactory;
 
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
-            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
-            ResultDownloader downloader) {
+                            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
+                            ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory) {
         this.writer = writer;
         this.chatFriend = chatFriend;
+        this.remoteFileItemFactory = remoteFileItemFactory;
         this.conversationName = chatFriend.getName();
         this.friendId = chatFriend.getID();
         this.loggedInID = loggedInID;
@@ -313,10 +317,11 @@ public class ConversationPane extends JPanel implements Displayable {
                     String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
                     msgWithfileOffer = idToMessageWithFileOffer.get(fileId);
 
+                    RemoteFileItem file = remoteFileItemFactory.create(chatFriend.getBestPresence(),
+                           msgWithfileOffer.getFileOffer());
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   dl = downloader.addFriendDownload(chatFriend.getBestPresence(),
-                           msgWithfileOffer.getFileOffer());
+                   dl = downloader.addFriendDownload(file);
                 } catch(SaveLocationException sle) {
                     throw new RuntimeException("FIX ME", sle); // BROKEN
                 } catch (InvalidDataException ide) {

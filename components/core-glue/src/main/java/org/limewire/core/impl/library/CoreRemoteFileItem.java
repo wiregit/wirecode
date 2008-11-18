@@ -13,7 +13,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 public class CoreRemoteFileItem implements RemoteFileItem {
     private final RemoteFileDescAdapter searchResult;
 
-    CoreRemoteFileItem(RemoteFileDescAdapter rfd) {
+    public CoreRemoteFileItem(RemoteFileDescAdapter rfd) {
         this.searchResult = rfd;
     }
     
