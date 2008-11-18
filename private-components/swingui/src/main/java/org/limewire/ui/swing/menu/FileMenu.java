@@ -314,7 +314,7 @@ public class FileMenu extends JMenu {
                     LocationDialogue.this.dispose();
                 }
             });
-            urlPanel.setLayout(new MigLayout("debug", "[]5[]5[]", "[]5[]"));
+            urlPanel.setLayout(new MigLayout("", "[]5[]5[]", "[]5[]"));
             urlPanel.add(new JLabel(I18n.tr("Open magnet or torrent link.")), "span 3, wrap");
             urlPanel.add(urlLabel, "alignx right");
             urlPanel.add(urlField, "span 2");
