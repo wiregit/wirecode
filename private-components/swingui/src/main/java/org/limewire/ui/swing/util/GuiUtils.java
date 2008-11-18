@@ -143,16 +143,16 @@ public class GuiUtils {
         if (bytes < 100) {
             unitName = GENERAL_UNIT_BYTES;
             unitValue = 1;
-        } else if (bytes < 0xA00000) {                // below 10MB, use KB
+        } else if (bytes < 0x100000) {                // below 1MB, use KB
             unitValue = 0x400;
             unitName = GENERAL_UNIT_KILOBYTES;
-        } else if (bytes < 0x280000000L) {     // below 10GB, use MB
+        } else if (bytes < 0x40000000L) {     // below 1GB, use MB
             unitValue = 0x100000;
             unitName = GENERAL_UNIT_MEGABYTES;
-        } else if (bytes < 0xA0000000000L) {   // below 10TB, use GB
+        } else if (bytes < 0x10000000000L) {   // below 1TB, use GB
             unitValue = 0x40000000;
             unitName = GENERAL_UNIT_GIGABYTES;
-        } else {                                // at least 10TB, use TB
+        } else {                                // at least 1TB, use TB
             unitValue = 0x10000000000L;
             unitName = GENERAL_UNIT_TERABYTES;
         }
