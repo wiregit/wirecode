@@ -275,6 +275,7 @@ public class FileMenu extends JMenu {
                 public void keyTyped(KeyEvent e) {
                     URI uri = getURI();
                     // TODO add stricter validation
+                    //TODO allow magnet files
 
                     if (uri == null || uri.getPath() == null || uri.getPath().trim().length() == 0) {
                         errorLabel.setVisible(true);
