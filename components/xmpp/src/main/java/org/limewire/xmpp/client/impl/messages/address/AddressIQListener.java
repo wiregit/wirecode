@@ -69,7 +69,7 @@ public class AddressIQListener implements PacketListener {
                     LOG.debugf("updating address on presence {0} to {1}", presence.getJID(), iq.getAddress());
                     presence.addFeature(new AddressFeature(iq.getAddress()));
                 } else {
-                    LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), presence.getJID());
+                    LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
                     pendingAddresses.put(iq.getFrom(), address);
                 }
             }
