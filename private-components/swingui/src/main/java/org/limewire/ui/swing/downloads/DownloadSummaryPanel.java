@@ -14,7 +14,6 @@ import java.awt.event.MouseListener;
 import java.util.Comparator;
 import java.util.EventObject;
 
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -274,7 +273,6 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 		private final LimeProgressBar progressBar;
 		private final Border mouseOverBorder;
 		
-	    @Resource private Color progressBarBorderColor;
 	    @Resource private Color mouseOverColor;
 
 		public DownloadStatusPanelRendererEditor() {
@@ -292,7 +290,6 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             progressBar.setPreferredSize(size);
             progressBar.setMaximumSize(size);
             progressBar.setMinimumSize(size);
-			progressBar.setBorder(BorderFactory.createLineBorder(progressBarBorderColor));
                         
 			setOpaque(false);
 			

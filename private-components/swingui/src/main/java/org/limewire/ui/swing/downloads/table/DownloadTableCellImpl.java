@@ -72,7 +72,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     @Resource private Color errorLabelColour;
     @Resource private Color finishedLabelColour;
     @Resource private Color linkColour;
-    @Resource private Color progressBarBorderColour;
     @Resource private Font statusFontPlainMin;
     @Resource private Font statusFontPlainFull;
     @Resource private Font titleFont;
@@ -169,8 +168,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullProgressBar.setMaximumSize(size);
         fullProgressBar.setMinimumSize(size);
         fullProgressBar.setPreferredSize(size);
-        fullProgressBar.setBorder(BorderFactory.
-                createLineBorder(progressBarBorderColour));
         
         fullTimeLabel = new JLabel();
         fullTimeLabel.setFont(statusFontPlainFull);
@@ -432,13 +429,13 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             @Override
             protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
                 g.setPaint(borderPaint);
-                g.drawLine(10, height-3, width-10, height-3);
+                g.drawLine(0, height-3, width-0, height-3);
             }
         } ;
         
         painter.setCacheable(true);
         painter.setAntialiasing(false);
-        painter.setFilters(PainterUtils.createSoftenFilter(0.03f));
+        painter.setFilters(PainterUtils.createSoftenFilter(0.025f));
                         
         return painter;
     }
