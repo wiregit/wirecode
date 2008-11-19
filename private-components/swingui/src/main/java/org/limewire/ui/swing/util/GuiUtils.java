@@ -72,7 +72,7 @@ public class GuiUtils {
                 DateFormat.DEFAULT, locale);
         
         GENERAL_UNIT_BYTES =
-            I18n.tr("B");
+            I18n.tr("bytes");
         GENERAL_UNIT_KILOBYTES =
             I18n.tr("KB");
         GENERAL_UNIT_MEGABYTES =
@@ -140,7 +140,7 @@ public class GuiUtils {
         long   unitValue; // the multiple associated with the unit
         String unitName;  // one of localizable units
         
-        if (bytes < 100) {
+        if (bytes < 1024) {
             unitName = GENERAL_UNIT_BYTES;
             unitValue = 1;
         } else if (bytes < 0x100000) {                // below 1MB, use KB
@@ -158,16 +158,11 @@ public class GuiUtils {
         }
         NumberFormat numberFormat; // one of localizable formats
         
-        if(bytes < 100) {
+        if(bytes <  0x100000) {
             numberFormat = NUMBER_FORMAT0;
-        }
-        else if ((double)bytes * 100 / unitValue < 99995) {
+        } else {
             // return a minimum "100.0xB", and maximum "999.9xB"
-            numberFormat = NUMBER_FORMAT1; // localized "#,##0.0"
-        }
-        else {
-            // return a minimum "1,000xB"
-            numberFormat = NUMBER_FORMAT0; // localized "#,##0"
+            numberFormat = NUMBER_FORMAT1; // localized "#,##0.00"
         }
         
         try {

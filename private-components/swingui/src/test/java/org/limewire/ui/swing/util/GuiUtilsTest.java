@@ -34,17 +34,16 @@ public class GuiUtilsTest extends BaseTestCase {
     }
 
     public void testUnitBytesBoundaries() {
-        assertEquals("0 B", GuiUtils.toUnitbytes(0));
-        assertEquals("1 B", GuiUtils.toUnitbytes(1));
-        assertEquals("10 B", GuiUtils.toUnitbytes(10));
-        assertEquals("51 B", GuiUtils.toUnitbytes(51));
-        assertEquals("52 B", GuiUtils.toUnitbytes(52));
-        assertEquals("53 B", GuiUtils.toUnitbytes(53));
-        assertEquals("99 B", GuiUtils.toUnitbytes(99));
-        assertEquals("0.10 KB", GuiUtils.toUnitbytes(100));
-        assertEquals("0.23 KB", GuiUtils.toUnitbytes(232));
-        assertEquals("0.23 KB", GuiUtils.toUnitbytes(232));
-        assertEquals("1.00 KB", GuiUtils.toUnitbytes(1024));
+        assertEquals("0 bytes", GuiUtils.toUnitbytes(0));
+        assertEquals("1 bytes", GuiUtils.toUnitbytes(1));
+        assertEquals("10 bytes", GuiUtils.toUnitbytes(10));
+        assertEquals("51 bytes", GuiUtils.toUnitbytes(51));
+        assertEquals("52 bytes", GuiUtils.toUnitbytes(52));
+        assertEquals("53 bytes", GuiUtils.toUnitbytes(53));
+        assertEquals("99 bytes", GuiUtils.toUnitbytes(99));
+        assertEquals("100 bytes", GuiUtils.toUnitbytes(100));
+        assertEquals("232 bytes", GuiUtils.toUnitbytes(232));
+        assertEquals("1 KB", GuiUtils.toUnitbytes(1024));
         assertEquals("1.00 MB", GuiUtils.toUnitbytes(1024 * 1024));
         assertEquals("1.50 MB", GuiUtils.toUnitbytes(1024 * 1024 + 512 * 1024));
         assertEquals("9.50 MB", GuiUtils.toUnitbytes(1024 * 1024 * 9 + 512 * 1024));
@@ -66,7 +65,7 @@ public class GuiUtilsTest extends BaseTestCase {
         assertEquals("10.00 GB", GuiUtils.toUnitbytes(TEN_GBS - 1024L * 1024L));
         assertEquals("10.00 GB", GuiUtils.toUnitbytes(TEN_GBS));
         assertEquals("10.10 GB", GuiUtils.toUnitbytes(TEN_GBS + TENTH_OF_A_GB));
-        assertEquals("1,023 GB", GuiUtils.toUnitbytes((1024L * 1024L * 1024L * 1023L)));
+        assertEquals("1,023.00 GB", GuiUtils.toUnitbytes((1024L * 1024L * 1024L * 1023L)));
 
         long TEN_TBS = TEN_GBS * 1024L;
         long TENTH_OF_A_TB = TENTH_OF_A_GB * 1024L;
@@ -80,8 +79,8 @@ public class GuiUtilsTest extends BaseTestCase {
         assertEquals("10.10 TB", GuiUtils.toUnitbytes(TEN_TBS + TENTH_OF_A_TB));
 
         long TEN_PBS = TEN_TBS * 1024L;
-        assertEquals("10,240 TB", GuiUtils.toUnitbytes(TEN_PBS));
-        assertEquals("10,241 TB", GuiUtils.toUnitbytes(TEN_PBS + 1024L * 1024L * 1024L * 1024L));
+        assertEquals("10,240.00 TB", GuiUtils.toUnitbytes(TEN_PBS));
+        assertEquals("10,241.00 TB", GuiUtils.toUnitbytes(TEN_PBS + 1024L * 1024L * 1024L * 1024L));
     }
 
 }
