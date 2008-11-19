@@ -57,6 +57,11 @@ public class XMPPAuthenticator implements Authenticator {
 
     @Override
     public boolean authenticate(Credentials credentials) {
-        return credentials.getPassword().equals(getAuthToken(credentials.getUserPrincipal().getName()));
+        // password can be null
+        String password = credentials.getPassword();
+        if (password == null) {
+            return false;
+        }
+        return password.equals(getAuthToken(credentials.getUserPrincipal().getName()));
     }
 }
