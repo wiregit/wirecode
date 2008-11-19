@@ -25,6 +25,8 @@ import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilderImpl
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultPropertiesFactory;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncatorImpl;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 
@@ -96,5 +98,6 @@ public class LimeWireUiSearchModule extends AbstractModule {
                         SearchResultFromWidgetFactory.class, SearchResultFromWidget.class));
         
         bind(ListViewRowHeightRule.class).to(ListViewRowHeightRuleImpl.class);
+        bind(SearchResultTruncator.class).to(SearchResultTruncatorImpl.class);
     }
 }

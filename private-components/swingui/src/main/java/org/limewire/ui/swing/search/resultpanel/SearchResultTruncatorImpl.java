@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-class SearchResultTruncatorImpl implements SearchResultTruncator {
+import com.google.inject.Singleton;
+
+@Singleton
+public class SearchResultTruncatorImpl implements SearchResultTruncator {
     private static final String OPEN_TAG = "<b>";
     private static final String CLOSE_TAG = "</b>";
     private static final String ELLIPSIS = "...";

@@ -9,6 +9,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -30,6 +31,8 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -48,6 +51,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.PropertyMatch;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
 import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -99,6 +103,7 @@ implements TableCellEditor, TableCellRenderer {
     private final RemoteHostActions remoteHostActions;
     private final PropertiesFactory<VisualSearchResult> properties;
     private final ListViewDisplayedRowsLimit displayLimit;
+    private final SearchResultTruncator truncator;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -141,7 +146,8 @@ implements TableCellEditor, TableCellRenderer {
         ListViewRowHeightRule rowHeightRule,
         PropertiesFactory<VisualSearchResult> properties,
         @Assisted ListViewDisplayedRowsLimit displayLimit,
-        LibraryNavigator libraryNavigator) {
+        LibraryNavigator libraryNavigator,
+        SearchResultTruncator truncator) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -151,6 +157,7 @@ implements TableCellEditor, TableCellRenderer {
         this.rowHeightRule = rowHeightRule;
         this.rowSelectionColor = rowSelectionColor;
         this.displayLimit = displayLimit;
+        this.truncator = truncator;
         GuiUtils.assignResources(this);
 
         similarButton.setPressedIcon(similarDownIcon);
@@ -396,13 +403,14 @@ implements TableCellEditor, TableCellRenderer {
         itemIconPanel.setOpaque(false);
         itemIconPanel.add(itemIconLabel);
 
-        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[]", "[]0[]0[]"));
+        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[fill]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
-        searchResultTextPanel.add(heading, "wrap");
-        searchResultTextPanel.add(subheadingLabel, "wrap, wmin 350");
-        searchResultTextPanel.add(metadataLabel, "wmin 350");
+        heading.setMinimumSize(new Dimension(350, 0));
+        searchResultTextPanel.add(heading, "wrap, growx");
+        searchResultTextPanel.add(subheadingLabel, "wrap");
+        searchResultTextPanel.add(metadataLabel);
 
-        JXPanel panel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "5[][][]5", "0[]0"));
+        JXPanel panel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "5[][fill][]5", "0[]0"));
         panel.setOpaque(false);
 
         panel.add(itemIconPanel);
@@ -459,7 +467,21 @@ implements TableCellEditor, TableCellRenderer {
     }
 
     private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
-        this.heading.setText(headingBuilder.getHeadingDocument(result.getHeading(), downloadState, isMouseOver, result.isSpam()));
+        int width = heading.getVisibleRect().width;
+        //Width is zero the first time editorpane is rendered - use a default based on the min width for the component
+        width = width == 0 ? heading.getMinimumSize().width : width;
+        String headingText = truncator.truncateHeading(result.getHeading(), width, new FontWidthResolver() {
+            @Override
+            public int getPixelWidth(String text) {
+                HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
+                StyleSheet css = editorKit.getStyleSheet();
+                int pointSize = (int)css.getPointSize(5);
+                Font font = css.getFont("Arial", Font.PLAIN, pointSize);
+                FontMetrics fontMetrics = css.getFontMetrics(font);
+                return fontMetrics.stringWidth(text.replaceAll("[<][/]?[b][>]", ""));
+            }
+        });
+        this.heading.setText(headingBuilder.getHeadingDocument(headingText, downloadState, isMouseOver, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
     

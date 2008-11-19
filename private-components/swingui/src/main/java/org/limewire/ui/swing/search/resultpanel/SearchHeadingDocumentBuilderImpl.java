@@ -12,7 +12,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                     ".title { " +
                         "font-family: Arial;" +
                         "color: #2152a6;" +
-                        "font-size: large;}" +
+                        "font-size: 18;}" +
                 "</style>" +
             "</head>" +
             "<body>";
