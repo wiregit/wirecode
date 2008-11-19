@@ -29,17 +29,15 @@ public class AddressIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
     private final XMPPConnection connection;
-    private final org.jivesoftware.smack.XMPPConnection smackConnection;
     private volatile Address address;
     private final AddressFactory factory; 
     private final RosterEventHandler rosterEventHandler;
     private Map<String, Address> pendingAddresses;
 
-    public AddressIQListener(XMPPConnection connection, org.jivesoftware.smack.XMPPConnection smackConnection,
+    public AddressIQListener(XMPPConnection connection,
                              AddressFactory factory,
                              Address address) {
         this.connection = connection;
-        this.smackConnection = smackConnection;
         this.factory = factory;
         this.address = address;
         this.rosterEventHandler = new RosterEventHandler();
@@ -84,34 +82,30 @@ public class AddressIQListener implements PacketListener {
         };
     }
     
-    public EventListener<AddressEvent> getAddressListener() {
-        return new EventListener<AddressEvent>() {
-            public void handleEvent(AddressEvent event) {
-                if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
-                    // TODO async?
-                    LOG.debugf("new address to publish: {0}", event.getSource());
-                    synchronized (AddressIQListener.this) {
-                        address = event.getSource();
-                        for(User user : connection.getUsers()) {
-                            for(Map.Entry<String, Presence> presenceEntry : user.getPresences().entrySet()) {
-                                if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
-                                    sendAddress(address, presenceEntry.getKey());
-                                }
-                            }
+    public void handleEvent(AddressEvent event) {
+        if (event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
+            // TODO async?
+            LOG.debugf("new address to publish: {0}", event);
+            synchronized (AddressIQListener.this) {
+                address = event.getSource();
+                for(User user : connection.getUsers()) {
+                    for(Map.Entry<String, Presence> presenceEntry : user.getPresences().entrySet()) {
+                        if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
+                            sendAddress(address, presenceEntry.getKey());
                         }
                     }
                 }
             }
-        };
+        }
     }
     
     private void sendAddress(Address address, String jid) {
         LOG.debugf("sending new address to {0}", jid);
         AddressIQ queryResult = new AddressIQ(address, factory);
         queryResult.setTo(jid);
-        queryResult.setFrom(smackConnection.getUser());
+        queryResult.setFrom(connection.getLocalJid());
         queryResult.setType(IQ.Type.SET);
-        smackConnection.sendPacket(queryResult);
+        connection.sendPacket(queryResult);
     }
     
     public EventListener<RosterEvent> getRosterListener() {

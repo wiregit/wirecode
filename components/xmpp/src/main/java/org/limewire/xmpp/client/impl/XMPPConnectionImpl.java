@@ -185,7 +185,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
                         if(lastEvent != null) {
                             address = lastEvent.getSource();
                         }
-                        addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, connection, addressFactory, address);     
+                        addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address);     
                     }                                   
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());                    
                     XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
@@ -420,7 +420,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         synchronized (this) {
             lastEvent = event;
             if(addressIQListener != null) {
-                addressIQListener.getAddressListener().handleEvent(event);    
+                addressIQListener.handleEvent(event);    
             }
         }
     }
@@ -437,5 +437,19 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         synchronized (users) { 
             return new ArrayList<User>(users.values());
         }
+    }
+
+    @Override
+    public void sendPacket(Packet packet) {
+        synchronized (this) {
+            if (connection.isConnected()) {
+                connection.sendPacket(packet);
+            }
+        }
+    }
+
+    @Override
+    public String getLocalJid() {
+        return connection.getUser();
     }
 }
