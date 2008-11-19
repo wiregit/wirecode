@@ -8,12 +8,14 @@ class SearchResultTruncatorImpl implements SearchResultTruncator {
 
     @Override
     public String truncateHeading(String headingText, int visibleWidthPixels, FontWidthResolver resolver) {
+        //Strip HTML characters *except* <b>bold-wrapped</b> strings
+        headingText = headingText.replaceAll("[<][/]?[\\w&&[^b]]*[>]", "");
         if (resolver.getPixelWidth(headingText) <= visibleWidthPixels) {
             return headingText;
         }
         
-        //Strip multiple whitespace characters (spaces, \r, \n, \t)
-        String truncated = headingText.replaceAll("[\\s]++", " ");
+        //Strip multiple whitespace characters (spaces, \r, \n, \t) and embedded whitespace characters
+        String truncated = headingText.replaceAll("[\\s]++", " ").replaceAll("[\\s&&[^ ]]", "");
         
         do {
             if (getEndEdge(truncated) >= (truncated.length() - (truncated.contains(ELLIPSIS) ? ELLIPSIS.length() : 0))) {

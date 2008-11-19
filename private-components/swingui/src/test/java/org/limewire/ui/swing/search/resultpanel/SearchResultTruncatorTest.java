@@ -57,6 +57,25 @@ public class SearchResultTruncatorTest extends TestCase {
         mockResolver.satisfactoryString = expected;
         assertEquals(expected, trunc.truncateHeading(result, 15, mockResolver));
     }
+
+    public void testStripEmbeddedWhitespaceCharactersOutOfText() {
+        String result = "I wo\rk for \the departme\nt of redundancy department";
+        String expected = "I wo k for he departme t...";
+        mockResolver.satisfactoryWidth = 22;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 22, mockResolver));
+    }
+    
+    public void testStripHTMLCaseInsensitivelyTags() {
+        String result = "<html>I work for the department of redundancy department</html>";
+        String expected = "I work for the department...";
+        mockResolver.satisfactoryWidth = 22;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 22, mockResolver));
+        
+        result = "<HTML>I work for the department of redundancy department</HTML>";
+        assertEquals(expected, trunc.truncateHeading(result, 22, mockResolver));
+    }
     
     private static class MockFontWidthResolver implements FontWidthResolver {
         int width;
