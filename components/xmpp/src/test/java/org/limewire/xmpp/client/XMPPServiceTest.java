@@ -50,9 +50,15 @@ import com.google.inject.TypeLiteral;
 public class XMPPServiceTest extends BaseTestCase {
     protected Injector injector;
     protected ServiceRegistry registry;
-    
+
+    // automatedtestfriend1 and automatedtestfriend2 are on each other's buddy list
     protected RosterListenerMock rosterListener;
     protected RosterListenerMock rosterListener2;
+
+    // automatedtestfriend3 and automatedtestfriend4 are on each other's buddy list
+    // 2 Signed In Presences for automatedtestfriend3, 1 Presence for automatedtestfriend4
+    protected RosterListenerMock rosterListenerUserAPresenceA, rosterListenerUserAPresenceB, rosterListenerUserB;
+
     protected AddressEventTestBroadcaster addressEventBroadcaster;
     private FileOfferHandlerMock fileOfferHandler;
 
@@ -93,21 +99,39 @@ public class XMPPServiceTest extends BaseTestCase {
     protected List<Module> getServiceModules() {
         rosterListener = new RosterListenerMock();
         rosterListener2 = new RosterListenerMock();
-        final XMPPConnectionConfiguration configuration =
+        rosterListenerUserAPresenceA = new RosterListenerMock();
+        rosterListenerUserAPresenceB = new RosterListenerMock();
+        rosterListenerUserB = new RosterListenerMock();
+
+        final XMPPConnectionConfiguration configs[] = {
             new XMPPConnectionConfigurationMock("automatedtestfriend1@gmail.com",
                     "automatedtestfriend123", "talk.google.com", 5222, "gmail.com",
-                    "Gmail", "http://gmail.com/", rosterListener);
-        final XMPPConnectionConfiguration configuration2 =
+                    "Gmail", "http://gmail.com/", rosterListener),
+
             new XMPPConnectionConfigurationMock("automatedtestfriend2@gmail.com",
                     "automatedtestfriend234", "talk.google.com", 5222, "gmail.com",
-                    "Gmail", "http://gmail.com/", rosterListener2);
+                    "Gmail", "http://gmail.com/", rosterListener2),
+
+            new XMPPConnectionConfigurationMock("automatedtestfriend4@gmail.com",
+                    "limebuddy123", "talk.google.com", 5222, "gmail.com",
+                    "Gmail", "http://gmail.com/", rosterListenerUserB),
+
+            new XMPPConnectionConfigurationMock("automatedtestfriend3@gmail.com",
+                    "limebuddy123", "talk.google.com", 5222, "gmail.com",
+                    "Gmail", "http://gmail.com/", rosterListenerUserAPresenceA),
+
+            new XMPPConnectionConfigurationMock("automatedtestfriend3@gmail.com",
+                    "limebuddy123", "talk.google.com", 5222, "gmail.com",
+                    "Gmail", "http://gmail.com/", rosterListenerUserAPresenceB) };
+
         Module xmppModule = new LimeWireXMPPModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
         fileOfferHandler = new FileOfferHandlerMock();
         Module m = new AbstractModule() {
             protected void configure() {
                 bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
-                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(new XMPPConnectionConfigurationListProvider(configuration, configuration2));                
+                bind(new TypeLiteral<List<XMPPConnectionConfiguration>>(){}).toProvider(
+                        new XMPPConnectionConfigurationListProvider(configs));
                 bind(FileOfferHandlerMock.class).toInstance(fileOfferHandler);
                 bind(XMPPConnectionListenerMock.class);
             }
@@ -339,6 +363,65 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
+    }
+
+    public void testChatWithMultiplePresencesOfSameUser() throws InterruptedException, XMPPException, UnknownHostException {
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
+
+        Thread.sleep(1000);
+
+        // Simulating LW talking to 2 presences of same user
+        MessageReaderMock read_From_User = new MessageReaderMock();
+        Presence friendPresence1 = rosterListenerUserB.roster.get("automatedtestfriend3@gmail.com").get(0);
+        MessageWriter write_To_User = friendPresence1.getUser().createChat(read_From_User);
+        
+        // LW (automatedtestfriend) writes a message to automatedtestfriend2
+        write_To_User.writeMessage("hello world");
+        write_To_User.writeMessage("get this message too");
+
+        Thread.sleep(5000);
+
+        // Confirm that both presences of automatedtestfriend2 get the message
+        List<String> messagesReceivedByPresenceA = rosterListenerUserAPresenceB.listener.reader.messages;
+        List<String> messagesReceivedByPresenceB = rosterListenerUserAPresenceA.listener.reader.messages;
+
+        assertEquals(2, messagesReceivedByPresenceA.size());
+        assertEquals("hello world", messagesReceivedByPresenceA.get(0));
+        assertEquals("get this message too", messagesReceivedByPresenceA.get(1));
+
+        assertEquals(2, messagesReceivedByPresenceB.size());
+        assertEquals("hello world", messagesReceivedByPresenceB.get(0));
+        assertEquals("get this message too", messagesReceivedByPresenceB.get(1));
+
+
+        // Have 1 presence of automatedtestfriend2 (A) send a message
+        // LW (automatedtestfriend) should get that message
+        MessageWriter presenceA_write_to_LW = rosterListenerUserAPresenceB.listener.writer;
+        presenceA_write_to_LW.writeMessage("Presence A writing to LW");
+        Thread.sleep(1000);
+        assertEquals("Presence A writing to LW", read_From_User.messages.get(0));
+
+        // When LW writes a message back, only Presence A should receive it. Presence B should not
+        write_To_User.writeMessage("only Presence A should get this");
+        Thread.sleep(1000);
+        assertEquals(3, messagesReceivedByPresenceA.size());                      // 1 extra msg received
+        assertEquals("only Presence A should get this", messagesReceivedByPresenceA.get(2));  // check msg contents
+        assertEquals(2, messagesReceivedByPresenceB.size());              // other presence is unaffected
+
+        // Presence B writes a message to LW
+        // When LW writes back, only Presence B receives the messages
+        MessageWriter presenceB_write_to_LW = rosterListenerUserAPresenceA.listener.writer;
+        presenceB_write_to_LW.writeMessage("Presence B writing to LW");
+        Thread.sleep(1000);
+        assertEquals("Presence A writing to LW", read_From_User.messages.get(0));
+        assertEquals("Presence B writing to LW", read_From_User.messages.get(1));
+
+        write_To_User.writeMessage("only Presence B should get this");
+        Thread.sleep(1000);
+        assertEquals(3, messagesReceivedByPresenceB.size());                      // 1 extra msg received
+        assertEquals("only Presence B should get this", messagesReceivedByPresenceB.get(2));  // check msg contents
+        assertEquals(3,messagesReceivedByPresenceA.size());              // other presence is unaffected
     }
     
     class LimeWireNetTestModule extends LimeWireNetModule {
