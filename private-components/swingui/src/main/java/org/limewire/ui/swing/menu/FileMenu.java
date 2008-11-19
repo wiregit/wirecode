@@ -1,29 +1,18 @@
 package org.limewire.ui.swing.menu;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
-
-import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
@@ -32,6 +21,9 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.magnet.MagnetFactory;
+import org.limewire.core.api.magnet.MagnetLink;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -42,12 +34,13 @@ import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 import org.limewire.util.FileUtils;
-import org.limewire.util.URIUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -59,11 +52,13 @@ public class FileMenu extends JMenu {
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager, final MainPanel mainPanel,
-            SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
+            SearchHandler searchHandler) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(buildOpenFileAction(downloadListManager, mainPanel, saveLocationExceptionHandler));
-        add(buildOpenLinkAction(downloadListManager, mainPanel));
+        add(buildOpenLinkAction(downloadListManager, magnetFactory, saveLocationExceptionHandler,
+                mainPanel, searchHandler));
         add(getRecentDownloadsMenu(downloadListManager));
         addSeparator();
         add(getAddFileAction(libraryManager, mainPanel));
@@ -205,9 +200,7 @@ public class FileMenu extends JMenu {
                 if (files != null) {
                     for (final File file : files) {
                         try {
-                            // TODO handle other magnet options, not jsut
-                            // download
-                            DownloadItem item = downloadListManager.addDownload(file);
+                            DownloadItem item = downloadListManager.addTorrentDownload(file, null, false);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
@@ -216,7 +209,7 @@ public class FileMenu extends JMenu {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
-                                            DownloadItem item = downloadListManager.addDownload(
+                                            DownloadItem item = downloadListManager.addTorrentDownload(
                                                     file, saveFile, overwrite);
                                             navigator.getNavItem(NavCategory.DOWNLOAD,
                                                     MainDownloadPanel.NAME).select(
@@ -231,7 +224,9 @@ public class FileMenu extends JMenu {
     }
 
     private Action buildOpenLinkAction(final DownloadListManager downloadListManager,
-            final MainPanel mainPanel) {
+            final MagnetFactory magnetFactory,
+            final SaveLocationExceptionHandler saveLocationExceptionHandler,
+            final MainPanel mainPanel, final SearchHandler searchHandler) {
         return new AbstractAction(I18n.tr("Open &Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -240,19 +235,80 @@ public class FileMenu extends JMenu {
                 locationDialogue.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        URI uri = locationDialogue.getURI();
+                        final URI uri = locationDialogue.getURI();
                         if (uri != null) {
-                            try {
-                                // TODO handle other magnet options, not jsut
-                                // download
-                                DownloadItem item = downloadListManager.addDownload(uri);
-                                navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                        .select(SimpleNavSelectable.create(item));
-                            } catch (SaveLocationException e1) {
-                                // TODO implement good user feedback
-                                throw new UnsupportedOperationException(
-                                        "Need to implement good user feedback for this.");
+                            if (magnetFactory.isMagnetLink(uri)) {
+                                MagnetLink[] magnetLinks = magnetFactory.parseMagnetLink(uri);
+                                if (magnetLinks.length == 0) {
+                                    throw new UnsupportedOperationException(
+                                            "TODO implement user feedback. Error parsing magnet link.");
+                                }
+
+                                for (final MagnetLink magnet : magnetLinks) {
+                                    if (magnet.isDownloadable()) {
+                                        downloadMagnet(downloadListManager,
+                                                saveLocationExceptionHandler, mainPanel, magnet);
+                                    } else if (magnet.isKeywordTopicOnly()) {
+                                        searchHandler.doSearch(DefaultSearchInfo
+                                                .createKeywordSearch(magnet.getQueryString(),
+                                                        SearchCategory.ALL));
+                                    } else {
+                                        throw new UnsupportedOperationException(
+                                                "TODO implement user feedback.");
+                                        // TODO error case?
+                                    }
+                                }
+                            } else {
+                                downloadTorrent(downloadListManager, saveLocationExceptionHandler,
+                                        mainPanel, uri);
                             }
+                        }
+                    }
+
+                    private void downloadTorrent(final DownloadListManager downloadListManager,
+                            final SaveLocationExceptionHandler saveLocationExceptionHandler,
+                            final MainPanel mainPanel, final URI uri) {
+                        try {
+                            DownloadItem item = downloadListManager.addTorrentDownload(uri, false);
+                            navigator.getNavItem(NavCategory.DOWNLOAD,
+                                    MainDownloadPanel.NAME).select(
+                                    SimpleNavSelectable.create(item));
+                        } catch (SaveLocationException sle) {
+                            saveLocationExceptionHandler.handleSaveLocationException(
+                                    new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                                        @Override
+                                        public void download(File saveFile,
+                                                boolean overwrite)
+                                                throws SaveLocationException {
+                                            DownloadItem item = downloadListManager
+                                                    .addTorrentDownload(uri, overwrite);
+                                            navigator.getNavItem(NavCategory.DOWNLOAD,
+                                                    MainDownloadPanel.NAME).select(
+                                                    SimpleNavSelectable.create(item));
+                                        }
+                                    }, sle, false, mainPanel);
+                        }
+                    }
+
+                    private void downloadMagnet(final DownloadListManager downloadListManager,
+                            final SaveLocationExceptionHandler saveLocationExceptionHandler,
+                            final MainPanel mainPanel, final MagnetLink magnet) {
+                        try {
+                            downloadListManager.addDownload(magnet, null, false);
+                        } catch (SaveLocationException e1) {
+                            saveLocationExceptionHandler.handleSaveLocationException(
+                                    new SaveLocationExceptionHandler.DownLoadAction() {
+                                        @Override
+                                        public void download(File saveFile, boolean overwrite)
+                                                throws SaveLocationException {
+
+                                            DownloadItem item = downloadListManager.addDownload(
+                                                    magnet, saveFile, overwrite);
+                                            navigator.getNavItem(NavCategory.DOWNLOAD,
+                                                    MainDownloadPanel.NAME).select(
+                                                    SimpleNavSelectable.create(item));
+                                        }
+                                    }, e1, true, mainPanel);
                         }
                     }
                 });
@@ -261,101 +317,6 @@ public class FileMenu extends JMenu {
 
             }
         };
-    }
-
-    private class LocationDialogue extends JDialog {
-        private JButton openButton = null;
-
-        private JTextField urlField = null;
-
-        public LocationDialogue() {
-            super();
-            setModalityType(ModalityType.APPLICATION_MODAL);
-            JPanel urlPanel = new JPanel();
-            JLabel urlLabel = new JLabel(I18n.tr("Link:"));
-            urlField = new JTextField(30);
-            urlField.setText("http://");
-
-            final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link!"));
-            errorLabel.setForeground(Color.RED);
-
-            urlField.addKeyListener(new KeyListener() {
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    URI uri = getURI();
-                    // TODO add stricter validation
-                    // TODO allow magnet files
-
-                    if (uri == null || uri.getScheme() == null) {
-                        errorLabel.setVisible(true);
-                        openButton.setEnabled(false);
-                    } else {
-                        errorLabel.setVisible(false);
-                        openButton.setEnabled(true);
-                    }
-                }
-
-                @Override
-                public void keyPressed(KeyEvent e) {
-                    if (openButton.isEnabled() && e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        openButton.doClick();
-                    }
-                }
-
-                @Override
-                public void keyReleased(KeyEvent e) {
-
-                }
-            });
-
-            openButton = new JButton(I18n.tr("Open"));
-            openButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-                    LocationDialogue.this.dispose();
-                }
-            });
-            openButton.setEnabled(false);
-
-            JButton cancelButton = new JButton(I18n.tr("Cancel"));
-            cancelButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    LocationDialogue.this.dispose();
-                }
-            });
-            urlPanel.setLayout(new MigLayout("", "[]5[]5[]", "[]5[]"));
-            urlPanel.add(new JLabel(I18n.tr("Open magnet or torrent link.")), "span 3, wrap");
-            urlPanel.add(urlLabel, "alignx right");
-            urlPanel.add(urlField, "span 2");
-            urlPanel.add(errorLabel, "wrap");
-            urlPanel.add(openButton, "skip 2, alignx right");
-            urlPanel.add(cancelButton, "alignx right");
-
-            setContentPane(urlPanel);
-            pack();
-        }
-
-        void addActionListener(ActionListener actionListener) {
-            openButton.addActionListener(actionListener);
-        }
-
-        void removeActionListener(ActionListener actionListener) {
-            openButton.removeActionListener(actionListener);
-        }
-
-        /**
-         * Returns a uri typed into this dialogue. Will return null if the last
-         * uri typed into the dialogue was invalid.
-         */
-        public synchronized URI getURI() {
-            try {
-                return URIUtils.toURI(urlField.getText());
-            } catch (URISyntaxException e) {
-                // eating exception and returning null for bad uris
-                return null;
-            }
-        }
     }
 
     public static class SignInOutAction extends AbstractAction {

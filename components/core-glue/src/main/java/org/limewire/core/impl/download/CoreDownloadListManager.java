@@ -18,9 +18,11 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
+import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -316,34 +318,33 @@ public class CoreDownloadListManager implements DownloadListManager {
 
 
     @Override
-    public DownloadItem addDownload(URI uri) throws SaveLocationException {
-        DownloadItem downloadItem = null;
-        if("magnet".equals(uri.getScheme())) {
-            MagnetOptions[] magnetOptionsArray = MagnetOptions.parseMagnet(uri.toString());
-            for(MagnetOptions magnet : magnetOptionsArray) {
-                if(magnet.isDownloadable()) {
-                    Downloader downloader = downloadManager.download(magnet, false, null, null);
-                    downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
-                } else {
-                    //TODO refactor code, move magnet handling somewhere else. 
-                    //handle other magnet options such as searching etc. 
-                    //might need to move some magnet apis into core-api
-                }
+    public DownloadItem addTorrentDownload(URI uri, boolean overwrite) throws SaveLocationException {
+        Downloader downloader =  downloadManager.downloadTorrent(uri, overwrite);
+        DownloadItem downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+        return downloadItem;
+    }
+    
+    @Override
+    public DownloadItem addDownload(MagnetLink magnet, File saveFile, boolean overwrite) throws SaveLocationException {
+        File saveDir = null;
+        String fileName = null;
+        
+        if(saveFile != null) {
+            if(saveFile.isDirectory()) {
+                saveDir = saveFile;
+            } else {
+                saveDir = saveFile.getParentFile();
+                fileName = saveFile.getName();
             }
-        } else {
-            Downloader downloader =  downloadManager.downloadTorrent(uri, true);
-            downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
         }
+        MagnetOptions magnetOptions = ((MagnetLinkImpl)magnet).getMagnetOptions();
+        Downloader downloader = downloadManager.download(magnetOptions, overwrite, saveDir, fileName);
+        DownloadItem downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
         return downloadItem;
     }
 
     @Override
-    public DownloadItem addDownload(File file) throws SaveLocationException {
-        return addDownload(file, null, false);
-    }
-
-    @Override
-    public DownloadItem addDownload(File file, File saveFile, boolean overwrite)
+    public DownloadItem addTorrentDownload(File file, File saveFile, boolean overwrite)
             throws SaveLocationException {
         //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
         //right now defaulting to bit torrent

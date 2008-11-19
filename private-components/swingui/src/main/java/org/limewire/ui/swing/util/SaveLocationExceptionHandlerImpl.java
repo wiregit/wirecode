@@ -17,6 +17,9 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.ui.swing.components.MultiLineLabel;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
 
     public void handleSaveLocationException(final DownLoadAction downLoadAction,
