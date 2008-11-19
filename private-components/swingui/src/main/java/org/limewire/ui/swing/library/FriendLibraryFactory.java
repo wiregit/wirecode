@@ -9,5 +9,5 @@ import ca.odell.glazedlists.EventList;
 
 public interface FriendLibraryFactory {
     
-    JComponent createFriendLibrary(Friend friend, EventList<RemoteFileItem> eventList);
+    JComponent createFriendLibrary(Friend friend, EventList<RemoteFileItem> eventList, FriendLibraryMediator mediator);
 }

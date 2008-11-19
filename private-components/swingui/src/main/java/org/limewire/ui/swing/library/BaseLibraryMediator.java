@@ -11,14 +11,15 @@ import org.limewire.ui.swing.nav.NavSelectable;
 
 public class BaseLibraryMediator extends JPanel implements Disposable, NavComponent {
 
-    private static final String mainCard = "MAIN_CARD";
-    private static final String auxCard = "AUX_CARD";
+    private static final String LIBRRY_CARD = "LIBRARY_CARD";
+    private static final String SHARING_CARD = "SHARING_CARD";
     
     private LibrarySelectable librarySelectable;
     
     private CardLayout cardLayout;
-    
-    private JComponent auxComponent = null;
+
+    private JComponent libraryComponent = null;
+    protected JComponent sharingComponent = null;
     
     public BaseLibraryMediator() {
         cardLayout = new CardLayout();
@@ -26,32 +27,33 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
         setLayout(cardLayout);
     }
     
-    public void setMainCard(JComponent panel) {
-        add(panel, mainCard);
+    public void setLibraryCard(JComponent panel) {
+        if(libraryComponent != null) {
+            ((Disposable)libraryComponent).dispose();
+            remove(libraryComponent);
+            libraryComponent = null;
+        }
+        libraryComponent = panel;
+        add(panel, LIBRRY_CARD);
     }
     
-    public void setAuxCard(JComponent panel) {
-        if(auxComponent != null) {
-            ((Disposable)auxComponent).dispose();
-            remove(auxComponent);
-            auxComponent = null;
+    public void setSharingCard(JComponent panel) {
+        if(sharingComponent != null) {
+            ((Disposable)sharingComponent).dispose();
+            remove(sharingComponent);
+            sharingComponent = null;
         }
-        auxComponent = panel;
+        sharingComponent = panel;
         panel.validate();
-        add(panel, auxCard);
+        add(panel, SHARING_CARD);
     }
     
-    public void showMainCard() {
-        if(auxComponent != null) {
-            ((Disposable)auxComponent).dispose();
-            remove(auxComponent);
-            auxComponent = null;
-        }
-        cardLayout.show(this, mainCard);
+    public void showLibraryCard() {
+        cardLayout.show(this, LIBRRY_CARD);
     }
     
-    public void showAuxCard() {
-        cardLayout.show(this, auxCard);
+    public void showSharingCard() {
+        cardLayout.show(this, SHARING_CARD);
     }
 
     @Override

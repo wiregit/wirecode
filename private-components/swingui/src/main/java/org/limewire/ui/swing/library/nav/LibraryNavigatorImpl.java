@@ -44,7 +44,6 @@ import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryMediator;
-import org.limewire.ui.swing.library.SharingLibraryFactory;
 import org.limewire.ui.swing.mainframe.SectionHeading;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -73,9 +72,7 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
     private final NavList restList;
     
     private final Navigator navigator;
-    private final SharingLibraryFactory sharingFactory;
     private final MyLibraryMediator myLibraryMediator;
-    private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
     private final NavPanelFactory navPanelFactory;
@@ -88,15 +85,12 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
             DownloadListManager downloadListManager,
             ShareListManager shareListManager,
             MyLibraryMediator myLibraryMediator,
-            SharingLibraryFactory sharingFactory,
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory) {
         
         EventAnnotationProcessor.subscribe(this);
         
-        this.sharingFactory = sharingFactory;
         this.myLibraryMediator = myLibraryMediator;
-        this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.browseList = new NavList();
         this.restList = new NavList();
@@ -113,12 +107,12 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         titleLabel.setName("LibraryNavigator.titleLabel");
         
         LibraryFileList libraryList = libraryManager.getLibraryManagedList();
-        myLibraryMediator.setMainCardEventList(libraryList.getSwingModel());
+        myLibraryMediator.setMainCardEventList(Me.ME, libraryList.getSwingModel());
         myLibrary = navPanelFactory.createNavPanel(createMyLibraryAction(), Me.ME, null, libraryList.getState());
         myLibrary.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LibraryNavigatorImpl.this.myLibraryMediator.showMainCard();
+                LibraryNavigatorImpl.this.myLibraryMediator.showLibraryCard();
             }
         });
         
@@ -130,7 +124,7 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         browseList.getActionMap().put(NavKeys.MOVE_UP, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LibraryNavigatorImpl.this.myLibraryMediator.showMainCard();
+                LibraryNavigatorImpl.this.myLibraryMediator.showLibraryCard();
                 myLibrary.select();
             }
         });
@@ -213,17 +207,6 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         });
         return action;
     }
-    
-    public void selectFriendShareList(Friend friend) {
-        JComponent component = sharingFactory.createSharingLibrary(myLibraryMediator, friend, 
-            libraryManager.getLibraryManagedList().getSwingModel(),
-            shareListManager.getFriendShareList(friend));
-
-        myLibraryMediator.setAuxCard(component);
-        myLibraryMediator.showAuxCard();
-
-        myLibrary.select();
-    }    
     
     @Override
     public void selectFriendLibrary(Friend friend) {
@@ -370,7 +353,7 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
 
         @Override
         public String getRenderName() {
-            return I18n.tr("Me");
+            return I18n.tr("My Library");
         }
 
         @Override

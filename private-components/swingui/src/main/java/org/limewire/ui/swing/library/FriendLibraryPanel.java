@@ -1,12 +1,11 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -17,7 +16,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.lists.CategoryFilter;
@@ -36,26 +35,24 @@ public class FriendLibraryPanel extends LibraryPanel {
     private CategoryIconManager categoryIconManager;
     private LibraryTableFactory tableFactory;
     private DownloadListManager downloadListManager;
-    private LibraryNavigator navigator;
     private LibraryManager libraryManager;
-    
-    private JButton sharedLibraryButton;
+    private FriendLibraryMediator mediator;
     
     @AssistedInject
     public FriendLibraryPanel(@Assisted Friend friend,
                     @Assisted EventList<RemoteFileItem> eventList, 
+                    @Assisted FriendLibraryMediator mediator,
                     CategoryIconManager categoryIconManager, 
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
-                    LibraryNavigator navigator,
                     LibraryManager libraryManager) {
         super(friend, true);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
-        this.navigator = navigator;
         this.libraryManager = libraryManager;
+        this.mediator = mediator;
 
         loadHeader();
         loadSelectionPanel();
@@ -66,20 +63,11 @@ public class FriendLibraryPanel extends LibraryPanel {
 
     @Override
     public void loadHeader() {
+        headerPanel.enableButton(new ViewSharedLibraryAction());
     }
-
+    
     @Override
     public void loadSelectionPanel() {
-        if(!friend.isAnonymous()) {
-            sharedLibraryButton = new JButton(I18n.tr("What I'm sharing"));
-            selectionPanel.add(sharedLibraryButton, "gapbottom 15, gaptop 15, alignx 50%");
-            sharedLibraryButton.addActionListener(new ActionListener(){
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    navigator.selectFriendShareList(friend);
-                }
-            });
-        }
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<RemoteFileItem> eventList, Friend friend) {       
@@ -112,5 +100,18 @@ public class FriendLibraryPanel extends LibraryPanel {
         }
         
         return scrollPane;
+    }
+    
+    private class ViewSharedLibraryAction extends AbstractAction {
+
+        public ViewSharedLibraryAction() {
+            putValue(Action.NAME, I18n.tr("Share with {0}", friend.getRenderName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", friend.getRenderName()));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            mediator.showSharingCard();
+        }
     }
 }

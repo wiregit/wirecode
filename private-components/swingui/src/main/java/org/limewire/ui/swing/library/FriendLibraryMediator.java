@@ -11,9 +11,10 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -23,33 +24,38 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class FriendLibraryMediator extends BaseLibraryMediator {
 
-	private final LibraryNavigator libraryNavigator;
     private final FriendLibraryFactory factory;
+    private final SharingLibraryFactory sharingFactory;
+    private final LibraryManager libraryManager;
+    private final ShareListManager shareListManager;
     private final Friend friend;
     private boolean setLibraryPanel;
     
     @AssistedInject
-    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, LibraryNavigator libraryNavigator) {
-	    this.libraryNavigator = libraryNavigator;
+    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory,  
+            SharingLibraryFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager) {
         this.factory = factory;
         this.friend = friend;        
-        setMainCard(new EmptyPanel(false));
+        this.sharingFactory = sharingFactory;
+        this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
+        setLibraryCard(new EmptyPanel(false));
     }
     
     public void createLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             setLibraryPanel = false;
-            setAuxCard(new EmptyPanel(true));
-            showAuxCard();
+            setLibraryCard(new EmptyPanel(true));
+            showLibraryCard();
             break;
         case LOADED:
         case LOADING:
             if(!setLibraryPanel) {
                 setLibraryPanel = true;
-                JComponent component = factory.createFriendLibrary(friend, eventList);
-                setAuxCard(component);
-                showAuxCard();
+                JComponent component = factory.createFriendLibrary(friend, eventList, this);
+                setLibraryCard(component);
+                showLibraryCard();
             }
             break;
         }
@@ -73,7 +79,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
                 button.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        libraryNavigator.selectFriendShareList(friend);
+                        FriendLibraryMediator.this.showSharingCard();
                     }
                 });
 
@@ -86,4 +92,13 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
         }
     }
 
+    @Override
+    public void showSharingCard() {
+        if(sharingComponent == null) {
+            setSharingCard(sharingFactory.createSharingLibrary(this, friend, 
+                    libraryManager.getLibraryManagedList().getSwingModel(),
+                    shareListManager.getFriendShareList(friend)));
+        }
+        super.showSharingCard();
+    }
 }

@@ -187,7 +187,7 @@ class NavPanel extends JXPanel {
     public void removeBrowse() {
         if(libraryPanel != null) {
             unbusy();
-            libraryPanel.showMainCard();
+            libraryPanel.showLibraryCard();
         }
     }
     

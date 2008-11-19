@@ -81,9 +81,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     }
     
     public void createHeader(Friend friend, boolean isLibraryPanel) {
-        Category category = Category.AUDIO;
-
-        headerPanel = new LibraryHeaderPanel(category, friend, isLibraryPanel);
+        headerPanel = new LibraryHeaderPanel(friend, isLibraryPanel);
     }
     
     public abstract void loadHeader();
@@ -102,7 +100,6 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         currentItem.fireSelected(true);
         
         cardLayout.show(cardPanel, id.name());
-        headerPanel.setCategory(currentItem.getCategory());
     }
     
     public void selectFirst() {

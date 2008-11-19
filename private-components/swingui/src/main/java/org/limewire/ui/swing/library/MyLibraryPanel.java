@@ -3,20 +3,18 @@
  */
 package org.limewire.ui.swing.library;
 
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
@@ -31,7 +29,6 @@ import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -47,32 +44,23 @@ class MyLibraryPanel extends LibraryPanel {
     private ShareListManager shareListManager;
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
-    private final FriendComboBox comboBox;
 
     private LibrarySharePanel shareAllPanel = null;
     
     @AssistedInject
-    public MyLibraryPanel( @Assisted EventList<LocalFileItem> eventList,
+    public MyLibraryPanel(  @Assisted Friend friend,
+                            @Assisted EventList<LocalFileItem> eventList,
                           IconManager iconManager,
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
-                          AllFriendsList allFriendsList,
-                          final FriendComboBox comboBox){
-        super(null, true);
+                          AllFriendsList allFriendsList){
+        super(friend, true);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;
-        this.comboBox = comboBox;
-        
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                comboBox.reset();
-            }
-        });
        
         loadHeader();
         loadSelectionPanel();
@@ -85,13 +73,10 @@ class MyLibraryPanel extends LibraryPanel {
     public void loadHeader() {
         shareAllPanel = new LibrarySharePanel(allFriendsList.getAllFriends());
         shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
-        headerPanel.enableShareAll(shareAllPanel);
     }
 
     @Override
     public void loadSelectionPanel() {
-        selectionPanel.add(new JLabel(I18n.tr("Show:")), "gapleft 5, gaptop 5, gapbottom 5");
-        selectionPanel.add(comboBox, "wmax 110, alignx 50%, gapbottom 15");
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {

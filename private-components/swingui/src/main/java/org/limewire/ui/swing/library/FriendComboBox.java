@@ -54,15 +54,15 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
                             libraryManager.getLibraryManagedList().getSwingModel(),
                             shareListManager.getGnutellaShareList());
                     
-                    basePanel.setAuxCard(component);
-                    basePanel.showAuxCard();
+                    basePanel.setSharingCard(component);
+                    basePanel.showSharingCard();
                 } else { 
                     JComponent component = sharingFactory.createSharingLibrary(basePanel, friendMap.get(friend.getId()), 
                             libraryManager.getLibraryManagedList().getSwingModel(),
                             shareListManager.getFriendShareList(friendMap.get(friend.getId())));
     
-                    basePanel.setAuxCard(component);
-                    basePanel.showAuxCard();
+                    basePanel.setSharingCard(component);
+                    basePanel.showSharingCard();
                 }
             }
         });

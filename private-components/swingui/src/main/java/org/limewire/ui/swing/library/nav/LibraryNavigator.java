@@ -11,9 +11,6 @@ public interface LibraryNavigator {
     
     /** Returns the renderable component. */
     Component getComponent();
-   
-    /** Selects a friend's sharelist. */
-    void selectFriendShareList(Friend friend);
     
     /** Selects a friend's library. */
     void selectFriendLibrary(Friend friend);

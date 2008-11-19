@@ -1,16 +1,14 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -24,6 +22,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.AllFriendsList;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
@@ -84,25 +83,14 @@ public class SharingLibraryPanel extends LibraryPanel {
         
     @Override
     public void loadHeader() {
-        headerPanel.setBackgroundPainter(null);
-        headerPanel.setBackground(Color.pink.darker());
+        headerPanel.enableButton(new BackToLibraryAction());
         
         shareAllPanel = new LibrarySharePanel(allFriendsList.getAllFriends());
         shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
-        headerPanel.enableShareAll(shareAllPanel);
     }
-
+    
     @Override
     public void loadSelectionPanel() {
-        JButton showAll = new JButton(I18n.tr("Show All Files"));
-        showAll.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                basePanel.showMainCard();
-            }
-        });
-        
-        selectionPanel.add(showAll, "gaptop 15, gapbottom 15, alignx 50%");
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList, Friend friend, LocalFileList friendFileList) {
@@ -221,5 +209,19 @@ public class SharingLibraryPanel extends LibraryPanel {
             //TODO cache values?
             return !(friendFileList.contains(fileItem.getUrn()));
         }       
-    }    
+    }
+    
+    private class BackToLibraryAction extends AbstractAction {
+
+        public BackToLibraryAction() {
+            putValue(Action.NAME, I18n.tr("Back to Library"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Returns to what's being shared with you."));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            basePanel.showLibraryCard();
+        }
+        
+    }
 }
