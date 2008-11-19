@@ -50,7 +50,7 @@ import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 
 
 
-class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
+public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
@@ -439,7 +439,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
     }
 
-    @Override
     public void sendPacket(Packet packet) {
         synchronized (this) {
             if (connection.isConnected()) {
@@ -448,7 +447,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection,
         }
     }
 
-    @Override
     public String getLocalJid() {
         return connection.getUser();
     }

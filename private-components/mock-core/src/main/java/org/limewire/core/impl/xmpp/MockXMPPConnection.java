@@ -1,7 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
@@ -58,4 +58,5 @@ public class MockXMPPConnection implements XMPPConnection {
     public Collection<User> getUsers() {
         return new ArrayList<User>();
     }
+
 }

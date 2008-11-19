@@ -2,8 +2,6 @@ package org.limewire.xmpp.api.client;
 
 import java.util.Collection;
 
-import org.jivesoftware.smack.packet.Packet;
-
 public interface XMPPConnection {
     
     public enum ConnectionEvent {LOGIN}
@@ -58,14 +56,4 @@ public interface XMPPConnection {
      */
     public Collection<User> getUsers();
     
-    /**
-     * Sends a packet asynchronously.
-     */
-    public void sendPacket(Packet packet);
-    
-    /**
-     * Returns the full jid including resource of the local user.
-     * @return null if user is not fully logged in and authenticated
-     */
-    public String getLocalJid();
 }

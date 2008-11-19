@@ -23,18 +23,18 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
 public class AddressIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
-    private final XMPPConnection connection;
+    private final XMPPConnectionImpl connection;
     private volatile Address address;
     private final AddressFactory factory; 
     private final RosterEventHandler rosterEventHandler;
     private Map<String, Address> pendingAddresses;
 
-    public AddressIQListener(XMPPConnection connection,
+    public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
                              Address address) {
         this.connection = connection;
