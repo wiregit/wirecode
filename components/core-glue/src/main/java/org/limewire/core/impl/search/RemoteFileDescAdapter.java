@@ -83,7 +83,7 @@ public class RemoteFileDescAdapter implements SearchResult {
                     relevance += 10;
                 }
                 
-                relevance++;
+                relevance++;//TODO might want to drop this line, spammers have lots of sources with nothing enabled.
             } else {
                 relevance += 20;
             }
