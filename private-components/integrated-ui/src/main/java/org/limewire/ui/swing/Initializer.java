@@ -135,7 +135,7 @@ public final class Initializer {
 //        stopwatch.resetAndLog("construct SetupManager");
         
         // show nifty alpha info
-        showAlphaInfo();
+//        showAlphaInfo();
         
         //must agree not to use LW for copyright infringement on first running
         confirmIntent();
