@@ -63,7 +63,9 @@ public class FriendLibraryPanel extends LibraryPanel {
 
     @Override
     public void loadHeader() {
-        headerPanel.enableButton(new ViewSharedLibraryAction());
+        //don't show share button for browse hosts
+        if(!friend.isAnonymous())
+            headerPanel.enableButton(new ViewSharedLibraryAction());
     }
     
     @Override

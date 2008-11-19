@@ -55,7 +55,7 @@ class MyLibraryPanel extends LibraryPanel {
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
                           AllFriendsList allFriendsList){
-        super(friend, true);
+        super(null, true);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;
