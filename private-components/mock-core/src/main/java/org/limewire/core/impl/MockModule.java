@@ -3,6 +3,7 @@ package org.limewire.core.impl;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
+import org.limewire.core.api.magnet.MockMagnetModule;
 import org.limewire.core.impl.browse.MockBrowseModule;
 import org.limewire.core.impl.connection.MockConnectionManagerImpl;
 import org.limewire.core.impl.daap.MockDaapModule;
@@ -37,6 +38,7 @@ public class MockModule extends AbstractModule {
         install(new MockPlayerModule());
         install(new MockXmppModule());
         install(new MockSupportModule());
+        install(new MockMagnetModule());
     }
 
 }
