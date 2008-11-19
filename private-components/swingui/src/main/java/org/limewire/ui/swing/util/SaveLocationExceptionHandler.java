@@ -10,6 +10,11 @@ public interface SaveLocationExceptionHandler {
         void download(File saveFile, boolean overwrite) throws SaveLocationException;
     }
 
+    /**
+     * Handles the supplied SaveLocationException. Result could be to eat the
+     * exception. To try downloading again using the supplied downloadAction, or
+     * to popup a dialogue to try and save the download in a new location.
+     */
     public void handleSaveLocationException(final DownLoadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir,
             final Component component);
