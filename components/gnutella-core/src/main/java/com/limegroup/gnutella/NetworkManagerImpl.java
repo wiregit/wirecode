@@ -284,6 +284,7 @@ public class NetworkManagerImpl implements NetworkManager {
             Connectable newDirectAddress = getPublicAddress();
             if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
                 directAddress = newDirectAddress;
+                assert NetworkUtils.isValidIpPort(newDirectAddress);
                 fireAddressChange(newDirectAddress);
             }
         } else {
@@ -315,6 +316,8 @@ public class NetworkManagerImpl implements NetworkManager {
         synchronized (addressLock) {
             if (!newAddress.equals(firewalledAddress) && directAddress == null) {
                 firewalledAddress = newAddress;
+                // ensure that we have a valid public address if we support fwts
+                assert firewalledAddress.getFwtVersion() == 0 || NetworkUtils.isValidIpPort(firewalledAddress.getPublicAddress());
                 changed = true;
             }
         }
