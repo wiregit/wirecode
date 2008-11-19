@@ -32,7 +32,7 @@ public class SourceRankerFactory {
         return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
     }
     
-    FriendsFirstSourceRanker createDelegatingSourceRanker() {
+    FriendsFirstSourceRanker createFriendsFirstSourceRanker() {
         return new FriendsFirstSourceRanker(createPingRanker());
     }
     
@@ -42,7 +42,7 @@ public class SourceRankerFactory {
     public SourceRanker getAppropriateRanker() {
         if (networkManager.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue())
-            return createDelegatingSourceRanker();
+            return createFriendsFirstSourceRanker();
         else 
             return new LegacyRanker();
     }
@@ -59,9 +59,9 @@ public class SourceRankerFactory {
         SourceRanker better;
         if (networkManager.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue()) {
-            if (original instanceof PingRanker)
+            if (original instanceof FriendsFirstSourceRanker)
                 return original;
-            better = createDelegatingSourceRanker();
+            better = createFriendsFirstSourceRanker();
         }else {
             if (original instanceof LegacyRanker)
                 return original;

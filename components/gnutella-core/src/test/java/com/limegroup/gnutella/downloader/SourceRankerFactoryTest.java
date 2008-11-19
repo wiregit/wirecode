@@ -83,7 +83,7 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         expectPingRanker();
         
         SourceRanker ranker = factory.getAppropriateRanker();
-        assertTrue(ranker instanceof PingRanker);
+        assertTrue(ranker instanceof FriendsFirstSourceRanker);
         context.assertIsSatisfied();
     }
 
@@ -95,10 +95,10 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         return ranker;
     }
     
-    private SourceRanker getPingRanker() {
+    private SourceRanker getFriendsFirstRanker() {
         expectPingRanker();
         SourceRanker ranker = factory.getAppropriateRanker();
-        assertTrue(ranker instanceof PingRanker);
+        assertTrue(ranker instanceof FriendsFirstSourceRanker);
         context.assertIsSatisfied();
         return ranker;
     }
@@ -111,7 +111,7 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         context.assertIsSatisfied();
         
         // ping ranker
-        ranker = getPingRanker();
+        ranker = getFriendsFirstRanker();
         
         expectPingRanker();
         assertSame(ranker, factory.getAppropriateRanker(ranker));
@@ -126,14 +126,14 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         
         expectPingRanker();
         SourceRanker copy = factory.getAppropriateRanker(original);
-        assertTrue(copy instanceof PingRanker);
+        assertTrue(copy instanceof FriendsFirstSourceRanker);
         assertSame(handler, copy.getMeshHandler());
         
     }
     
     public void testGetAppropriateRankerSourceRankerChangesFromPingToLegacyRanker() {
         // ping to legacy
-        SourceRanker original = getPingRanker();
+        SourceRanker original = getFriendsFirstRanker();
         MeshHandler handler = context.mock(MeshHandler.class);
         original.setMeshHandler(handler);
         
