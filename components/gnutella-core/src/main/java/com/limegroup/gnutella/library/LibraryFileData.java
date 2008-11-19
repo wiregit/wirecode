@@ -191,6 +191,7 @@ class LibraryFileData extends AbstractSettingsGroup {
                 return true;
             }
         } catch(Throwable throwable) {
+            throwable.printStackTrace();
             LOG.error("Error loading library", throwable);
         }
         
@@ -539,6 +540,7 @@ class LibraryFileData extends AbstractSettingsGroup {
     }
     
     private static class FileProperties implements Serializable {
+        private static final long serialVersionUID = 767248414812908206L;
         private boolean gnutella;
         private Set<String> friends;
     }
