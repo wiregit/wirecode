@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Set;
@@ -31,12 +32,14 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.net.address.FirewalledAddress;
+import com.limegroup.gnutella.stubs.AcceptorStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -62,6 +65,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
                 bind(DownloaderStub.class).asEagerSingleton();
                 bind(BrowserStub.class).asEagerSingleton();
                 bind(NetworkInstanceUtils.class).toInstance(new SimpleNetworkInstanceUtils(false));
+                bind(Acceptor.class).to(AcceptorStub.class);
             }
         });
         pushDownloadManager = injector.getInstance(PushDownloadManager.class);
@@ -76,6 +80,10 @@ public class PushDownloadManagerTest extends LimeTestCase {
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
+        Acceptor acceptor = injector.getInstance(Acceptor.class);
+        // need to have valid address and accepted incoming to support non-fwt push connects
+        acceptor.setAddress(InetAddress.getByAddress(new byte[] { (byte) 192, (byte) 168, 0, 1 }));
+        ((AcceptorStub)acceptor).setAcceptedIncoming(true);
         lifecycleManager.start();
         connectionServices.connect();
         HTTPPushProxyServer server = null;
@@ -88,9 +96,11 @@ public class PushDownloadManagerTest extends LimeTestCase {
             networkManager.newPushProxies(proxies);
             GUID guid = new GUID();
             Connectable hostAddress = new ConnectableImpl(new ConnectableImpl("localhost", 1111, false));
-            FirewalledAddress address = new FirewalledAddress(new ConnectableImpl("0.0.0.0", 1, false), hostAddress, guid, proxies, 0);
+            FirewalledAddress address = new FirewalledAddress(ConnectableImpl.INVALID_CONNECTABLE, hostAddress, guid, proxies, 0);
+            assertTrue(pushDownloadManager.canConnect(address));
             pushDownloadManager.connect(address, observer);
-            assertTrue(server.latch.await(2, TimeUnit.SECONDS));
+            // long wait, since we wait for the tcp push as failover after the udp push
+            assertTrue(server.latch.await(10, TimeUnit.SECONDS));
             GiveWritingSocket socket = new GiveWritingSocket(guid, networkManager.getPort());
             Socket receivedSocket = observer.getSocket(5, TimeUnit.SECONDS);
             assertEquals(socket.socket.getLocalSocketAddress(), receivedSocket.getRemoteSocketAddress());

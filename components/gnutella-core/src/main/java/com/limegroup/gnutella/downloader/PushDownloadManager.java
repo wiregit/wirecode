@@ -251,7 +251,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         backgroundExecutor.schedule(new Runnable() {
             @Override
             public void run() {
+                // always remove after timeout
                 pushHandlers.remove(handlerAdapter);
+                handlerAdapter.handleTimeout();
             }
         }, timeout, TimeUnit.MILLISECONDS);
     }
@@ -996,6 +998,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
         private final RemoteFileDesc rfd;
         private final ConnectObserver observer;
+        private final AtomicBoolean acceptedOrTimedOut = new AtomicBoolean(false);
 
         public PushedSocketHandlerAdapter(RemoteFileDesc rfd, ConnectObserver observer) {
             this.rfd = rfd;
@@ -1015,7 +1018,13 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                     }
                 }
                 try {
-                    observer.handleConnect(socket);
+                    if (acceptedOrTimedOut.compareAndSet(false, true)) {
+                        observer.handleConnect(socket);
+                    } else {
+                        IOUtils.close(socket);
+                        LOG.debug("push went through after timeout");
+                        return true;
+                    }
                 } catch (IOException e) {
                     IOUtils.close(socket);
                 }
@@ -1024,6 +1033,15 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             return false;
         }
         
-    }
+        /**
+         * Notifies observer that push has timed out unless it has already 
+         * succeeded.
+         */
+        public void handleTimeout() {
+            if (acceptedOrTimedOut.compareAndSet(false, true)) {
+                observer.handleIOException(new ConnectException("push timed out"));
+            }
+        }
 
+    }
 }
