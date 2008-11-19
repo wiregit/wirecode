@@ -42,6 +42,7 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -316,10 +317,24 @@ public class CoreDownloadListManager implements DownloadListManager {
 
     @Override
     public DownloadItem addDownload(URI uri) throws SaveLocationException {
-        //TODO figure out what type of download this is based on the file name and delegate to the correct downloader.
-        //right now defaulting to bit torrent
-        Downloader downloader =  downloadManager.downloadTorrent(uri, true);
-        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+        DownloadItem downloadItem = null;
+        if("magnet".equals(uri.getScheme())) {
+            MagnetOptions[] magnetOptionsArray = MagnetOptions.parseMagnet(uri.toString());
+            for(MagnetOptions magnet : magnetOptionsArray) {
+                if(magnet.isDownloadable()) {
+                    Downloader downloader = downloadManager.download(magnet, false, null, null);
+                    downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+                } else {
+                    //TODO refactor code, move magnet handling somewhere else. 
+                    //handle other magnet options such as searching etc. 
+                    //might need to move some magnet apis into core-api
+                }
+            }
+        } else {
+            Downloader downloader =  downloadManager.downloadTorrent(uri, true);
+            downloadItem = (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+        }
+        return downloadItem;
     }
 
     @Override

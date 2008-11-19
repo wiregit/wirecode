@@ -286,7 +286,7 @@ public class FileMenu extends JMenu {
                     // TODO add stricter validation
                     // TODO allow magnet files
 
-                    if (uri == null || uri.getPath() == null || uri.getPath().trim().length() == 0) {
+                    if (uri == null || uri.getScheme() == null) {
                         errorLabel.setVisible(true);
                         openButton.setEnabled(false);
                     } else {
