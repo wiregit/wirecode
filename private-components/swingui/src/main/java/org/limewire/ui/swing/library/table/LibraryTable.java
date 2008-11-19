@@ -3,8 +3,6 @@ package org.limewire.ui.swing.library.table;
 import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -88,15 +86,16 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         setRowHeight(rowHeight);
         hideColumns();
         
-        removeMouseMotionListener(mouseOverEditorListener);
-        addMouseMotionListener(new MouseMotionAdapter(){
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                int editRow = rowAtPoint(e.getPoint());
-                editCellAt(editRow, convertColumnIndexToView(format.getActionColumn()));
-            }
-            
-        });
+        //this isn't necessary if we aren't showing "share" on mouse over
+//        removeMouseMotionListener(mouseOverEditorListener);
+//        addMouseMotionListener(new MouseMotionAdapter(){
+//            @Override
+//            public void mouseMoved(MouseEvent e) {
+//                int editRow = rowAtPoint(e.getPoint());
+//                editCellAt(editRow, convertColumnIndexToView(format.getActionColumn()));
+//            }
+//            
+//        });
     }
     
     public void enableDownloading(DownloadListManager downloadListManager, LibraryFileList fileList){
