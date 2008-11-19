@@ -10,7 +10,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.ui.swing.components.HeadingLabel;
+import org.limewire.ui.swing.components.LimeHeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.util.FontUtils;
@@ -26,7 +26,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class SharingHeaderPanel extends JXPanel{
     
-    private HeadingLabel titleLabel;
+    private LimeHeadingLabel titleLabel;
     private JTextField filterBox;
     
     @Resource
@@ -60,7 +60,7 @@ public class SharingHeaderPanel extends JXPanel{
     }
     
     private void createComponents() {
-        titleLabel = new HeadingLabel(I18n.tr("Sharing with the LimeWire Network"));
+        titleLabel = new LimeHeadingLabel(I18n.tr("Sharing with the LimeWire Network"));
         titleLabel.setForeground(fontColor);
         FontUtils.setSize(titleLabel, fontSize);
         FontUtils.changeStyle(titleLabel, Font.PLAIN);

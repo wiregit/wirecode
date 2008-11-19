@@ -18,7 +18,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.components.HeadingLabel;
+import org.limewire.ui.swing.components.LimeHeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
@@ -74,7 +74,7 @@ public class LibraryHeaderPanel extends JXPanel {
         else
             title = getSharingTitle();
         
-        titleLabel = new HeadingLabel(title);
+        titleLabel = new LimeHeadingLabel(title);
         titleLabel.setForeground(fontColor);
         titleLabel.setFont(headerFont);
 

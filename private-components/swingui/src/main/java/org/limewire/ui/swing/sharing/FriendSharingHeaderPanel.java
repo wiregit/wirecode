@@ -16,7 +16,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.components.HeadingLabel;
+import org.limewire.ui.swing.components.LimeHeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.ButtonPainter;
 import org.limewire.ui.swing.painter.SubpanelPainter;
@@ -50,7 +50,7 @@ public class FriendSharingHeaderPanel extends JXPanel {
     @Resource 
     private int fontSize;
     
-    private HeadingLabel titleLabel;
+    private LimeHeadingLabel titleLabel;
     private JTextField filterBox;
     
     private JXButton shareButton;
@@ -74,7 +74,7 @@ public class FriendSharingHeaderPanel extends JXPanel {
     }
     
     private void createComponents() {     
-        titleLabel = new HeadingLabel(I18n.tr("Sharing with"));
+        titleLabel = new LimeHeadingLabel(I18n.tr("Sharing with"));
         titleLabel.setForeground(fontColor);
         FontUtils.setSize(titleLabel, fontSize);
         FontUtils.changeStyle(titleLabel, Font.PLAIN);
