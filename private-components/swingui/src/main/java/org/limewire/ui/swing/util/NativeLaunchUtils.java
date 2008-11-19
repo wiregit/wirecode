@@ -158,9 +158,9 @@ public final class NativeLaunchUtils {
 	 *         can be represented (e.g. the file was launched through a native
 	 *         call)
 	 */
-	public static Process launchFile(File file) {
+	public static void launchFile(File file) {
 	    try {
-	        return launchFileImpl(file);
+	        launchFileImpl(file);
 	    } catch(LaunchException le) {
 	        // TODO: show an error
 	    } catch(IOException iox) {
@@ -168,10 +168,9 @@ public final class NativeLaunchUtils {
 	    } catch(SecurityException se) {
 	        // TODO: show an error
 	    }
-	    return null;
 	}
 	
-	private static Process launchFileImpl(File file) throws IOException, SecurityException {
+	private static void launchFileImpl(File file) throws IOException, SecurityException {
 		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase(Locale.US);
 
@@ -186,25 +185,29 @@ public final class NativeLaunchUtils {
 //            path = file.getCanonicalPath();
 //            extCheckString = path.toLowerCase(Locale.US);
 //        }
-
-		if(!extCheckString.endsWith(".exe") &&
-		   !extCheckString.endsWith(".vbs") &&
-		   !extCheckString.endsWith(".lnk") &&
-		   !extCheckString.endsWith(".bat") &&
-		   !extCheckString.endsWith(".sys") &&
-		   !extCheckString.endsWith(".com")) {
-			if (OSUtils.isWindows()) {
-                launchFileWindows(path);
-                return null;
-            } else if (OSUtils.isMacOSX()) {
-                return launchFileMacOSX(path);
-            } else {
-                // Other OS, use helper apps
-                return launchFileOther(path);
-            }
-        } else {
-            throw new SecurityException();
-        }	
+	     if(!extCheckString.endsWith(".exe") &&
+	                !extCheckString.endsWith(".vbs") &&
+	                !extCheckString.endsWith(".lnk") &&
+	                !extCheckString.endsWith(".bat") &&
+	                !extCheckString.endsWith(".sys") &&
+	                !extCheckString.endsWith(".com")) {
+    		try {
+    		    Desktop.getDesktop().open(file);
+    		} catch (Throwable t) {
+    	   
+                     if (OSUtils.isWindows()) {
+                         launchFileWindows(path);
+                     } else if (OSUtils.isMacOSX()) {
+                         launchFileMacOSX(path);
+                     } else {
+                         // Other OS, use helper apps
+                         launchFileOther(path);
+                     }
+                            
+    		}
+	     } else {
+             throw new SecurityException();
+         }
 	}
 
     /**
