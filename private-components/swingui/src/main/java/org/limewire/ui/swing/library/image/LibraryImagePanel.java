@@ -53,7 +53,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     };
     
 
-    private final Map<String, EventList<LocalFileItem>> listMap;
     private final Map<String, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
@@ -89,7 +88,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         
         groupingList.addListEventListener(this);
 
-        listMap = new ConcurrentHashMap<String, EventList<LocalFileItem>>();
         panelMap = new ConcurrentHashMap<String, LibraryImageSubPanel>();
     
         initList();
@@ -108,18 +106,20 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     @Override
     public void listChanged(ListEvent<List<LocalFileItem>> listChanges) {
         while (listChanges.next()){
-            if (listChanges.getType() == ListEvent.INSERT){
-                //INSERT adds sublist to the GroupingList - UPDATEs are also fired for each file added to the sublist
+            if (listChanges.getType() == ListEvent.INSERT) {
+                // INSERT adds sublist to the GroupingList - UPDATEs are also
+                // fired for each file added to the sublist
                 final String parent = getParent(listChanges.getSourceList().get(listChanges.getIndex()).get(0));
-                final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
-                listMap.put(parent, newList);
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        createSubPanel(parent, newList);
-                    }
-                });
-            } 
+                if (!panelMap.containsKey(parent)) {
+                    final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
+                    SwingUtils.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            createSubPanel(parent, newList);
+                        }
+                    });
+                }
+            }
         }       
     }
     
@@ -127,7 +127,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         for( List<LocalFileItem> fileItemList : groupingList) {
             final String parent = getParent(fileItemList.get(0));
             final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
-            listMap.put(parent, newList);
             createSubPanel(parent, newList);
         }
     }
@@ -143,7 +142,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         panelMap.put(parent, subPanel);
         add(subPanel);
     }
-    
+        
     private String getParent(LocalFileItem localFileItem){
         return localFileItem.isIncomplete() ? incomplete : 
             ((localFileItem.getFile() == null) ? incomplete : localFileItem.getFile().getParent());
