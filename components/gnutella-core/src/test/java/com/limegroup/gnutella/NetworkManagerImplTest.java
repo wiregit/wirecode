@@ -258,9 +258,13 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(proxies, firewalledAddress.getPushProxies());
         assertEquals(applicationServices.getMyGUID(), firewalledAddress.getClientGuid().bytes());
         assertEquals(0, firewalledAddress.getFwtVersion());
+        // set valid external address and port for proper fwt support
+        acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
+        acceptor.setListeningPort(5001);
         
         addressChangedListener.events.clear();
         
+        // signal fwt capability
         UDPService udpService = injector.getInstance(UDPService.class);
         udpService.setReceiveSolicited(true);
         ConnectionSettings.CANNOT_DO_FWT.setValue(false);
@@ -269,7 +273,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(1, addressChangedListener.events.size());
         addressChangedListener.events.clear();
         
-        acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
+        acceptor.setExternalAddress(InetAddress.getByName("100.100.100.100"));
         acceptor.setListeningPort(5001);        
         networkManager.incomingStatusChanged();
         assertEquals(1, addressChangedListener.events.size());
@@ -278,7 +282,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(proxies, firewalledAddress.getPushProxies());
         assertEquals(applicationServices.getMyGUID(), firewalledAddress.getClientGuid().bytes());
         assertEquals(RUDPUtils.VERSION, firewalledAddress.getFwtVersion());
-        assertEquals(new ConnectableImpl("200.200.200.200", 5001, true), firewalledAddress.getPublicAddress());
+        assertEquals(new ConnectableImpl("100.100.100.100", 5001, true), firewalledAddress.getPublicAddress());
     }
     
     public void testNewPushProxyHolePunchAddressEventPushProxyTrigger() throws IOException {
@@ -294,6 +298,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         assertEquals(0, addressChangedListener.events.size());
         
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
+        InetAddress privateAddress = InetAddress.getByName("192.168.0.1");
+        acceptor.setAddress(privateAddress);
         acceptor.setListeningPort(5001);   
         
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
@@ -302,7 +308,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         
         assertEquals(1, addressChangedListener.events.size());
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), 5001), networkManager.isIncomingTLSEnabled()), new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
+                new ConnectableImpl(new InetSocketAddress(privateAddress, 5001), networkManager.isIncomingTLSEnabled()), new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         assertEquals(expectedAddress, addressChangedListener.events.get(0).getSource()); 
     }
     
@@ -316,6 +322,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         udpService.setReceiveSolicited(true);
         ConnectionSettings.CANNOT_DO_FWT.setValue(false);
         
+        InetAddress privateAddress = InetAddress.getByName("192.168.0.1");
+        acceptor.setAddress(privateAddress);
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         Set<Connectable> proxies = new StrictIpPortSet<Connectable>();
@@ -324,7 +332,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
+                new ConnectableImpl(new InetSocketAddress(privateAddress, networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
                 new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         
         assertEquals(1, addressChangedListener.events.size());
@@ -337,7 +345,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.newPushProxies(proxies);
         
         expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
+                new ConnectableImpl(new InetSocketAddress(privateAddress, networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
                 new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         
         assertEquals(1, addressChangedListener.events.size());
@@ -354,6 +362,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         udpService.setReceiveSolicited(true);
         ConnectionSettings.CANNOT_DO_FWT.setValue(false);
         
+        InetAddress privateAddress = InetAddress.getByName("192.168.0.1");
+        acceptor.setAddress(privateAddress);
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         
@@ -362,7 +372,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
+                new ConnectableImpl(new InetSocketAddress(privateAddress, networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
                 new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         
         assertEquals(1, addressChangedListener.events.size());
@@ -374,7 +384,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.incomingStatusChanged();
         
         expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
+                new ConnectableImpl(new InetSocketAddress(privateAddress, networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
                 new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         
         assertEquals(1, addressChangedListener.events.size());
@@ -391,6 +401,8 @@ public class NetworkManagerImplTest extends LimeTestCase {
         udpService.setReceiveSolicited(true);
         ConnectionSettings.CANNOT_DO_FWT.setValue(false);
         
+        InetAddress privateAddress = InetAddress.getByName("192.168.0.1");
+        acceptor.setAddress(privateAddress);
         acceptor.setExternalAddress(InetAddress.getByName("200.200.200.200"));
         acceptor.setListeningPort(5001);   
         
@@ -399,7 +411,7 @@ public class NetworkManagerImplTest extends LimeTestCase {
         networkManager.newPushProxies(proxies);
         
         FirewalledAddress expectedAddress = new FirewalledAddress(new ConnectableImpl("200.200.200.200", 5001, true),
-                new ConnectableImpl(new InetSocketAddress(InetAddress.getLocalHost(), networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
+                new ConnectableImpl(new InetSocketAddress(privateAddress, networkManager.getNonForcedPort()), networkManager.isIncomingTLSEnabled()),
                 new GUID(applicationServices.getMyGUID()), proxies, networkManager.supportsFWTVersion());
         
         
