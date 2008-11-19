@@ -64,8 +64,8 @@ public class GuiUtils {
         NUMBER_FORMAT0.setGroupingUsed(true);
         
         NUMBER_FORMAT1 = NumberFormat.getNumberInstance(locale);
-        NUMBER_FORMAT1.setMaximumFractionDigits(1);
-        NUMBER_FORMAT1.setMinimumFractionDigits(1);
+        NUMBER_FORMAT1.setMaximumFractionDigits(2);
+        NUMBER_FORMAT1.setMinimumFractionDigits(2);
         NUMBER_FORMAT1.setGroupingUsed(true);
 
         DATETIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, 
