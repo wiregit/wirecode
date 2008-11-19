@@ -108,16 +108,9 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
         
         LibraryFileList libraryList = libraryManager.getLibraryManagedList();
         myLibraryMediator.setMainCardEventList(Me.ME, libraryList.getSwingModel());
-        myLibrary = navPanelFactory.createNavPanel(createMyLibraryAction(), Me.ME, null, libraryList.getState());
-        myLibrary.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                LibraryNavigatorImpl.this.myLibraryMediator.showLibraryCard();
-            }
-        });
         
-        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));
-        
+        myLibrary = navPanelFactory.createNavPanel(createMyLibraryAction(), Me.ME, null, libraryList.getState());        
+        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));       
         myLibrary.getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(browseList, true));
         myLibrary.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         
@@ -276,9 +269,15 @@ public class LibraryNavigatorImpl extends JXPanel implements RegisteringEventLis
     }    
     
     private NavPanel createFriendNavPanel(Friend friend, EventList<RemoteFileItem> eventList, LibraryState libraryState) {
-        FriendLibraryMediator component = friendLibraryMediatorFactory.createFriendLibraryBasePanel(friend);
+        final FriendLibraryMediator component = friendLibraryMediatorFactory.createFriendLibraryBasePanel(friend);
         NavPanel navPanel = navPanelFactory.createNavPanel(createFriendAction(navigator, friend, component), 
                 friend, component, libraryState);
+        navPanel.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                component.showLibraryCard();
+            }
+        });
 
         navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
