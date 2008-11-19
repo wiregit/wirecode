@@ -34,7 +34,7 @@ public class AudioResultsPanel extends BaseResultPanel {
         ListViewRowHeightRule rowHeightRule, 
         SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
-        super(listViewEditorRendererFactory, eventList, new MusicTableFormat(), downloadListManager,
+        super(listViewEditorRendererFactory, eventList, new AudioTableFormat(), downloadListManager,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, saveLocationExceptionHandler);
         
     }
@@ -42,8 +42,8 @@ public class AudioResultsPanel extends BaseResultPanel {
     @Override
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         super.setupCellRenderers(tableFormat);
-        setCellRenderer(MusicTableFormat.SIZE_INDEX, new FileSizeRenderer());
-        setCellRenderer(MusicTableFormat.LENGTH_INDEX, new TimeRenderer());
-        setCellRenderer(MusicTableFormat.QUALITY_INDEX, new QualityRenderer());
+        setCellRenderer(AudioTableFormat.SIZE_INDEX, new FileSizeRenderer());
+        setCellRenderer(AudioTableFormat.LENGTH_INDEX, new TimeRenderer());
+        setCellRenderer(AudioTableFormat.QUALITY_INDEX, new QualityRenderer());
     }
 }

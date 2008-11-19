@@ -8,9 +8,8 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 /**
  * This class specifies the content of a table that contains
  * music track descriptions.
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
+public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public static final int NAME_INDEX = 0;
     public static final int ARTIST_INDEX = 1;
@@ -21,15 +20,16 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int BITRATE_INDEX = 6;
     public static final int GENRE_INDEX = 7;
     public static final int TRACK_INDEX = 8;
-    public static final int NUM_SOURCES_INDEX = 9;
-    public static final int FILE_EXTENSION_INDEX = 10;
-    public static final int SIZE_INDEX = 11;
+    public static final int YEAR_INDEX = 9;
+    public static final int NUM_SOURCES_INDEX = 10;
+    public static final int FILE_EXTENSION_INDEX = 11;
+    public static final int SIZE_INDEX = 12;
 
     
-    public MusicTableFormat() {
+    public AudioTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Artist"), tr("Album"), tr("Length"), tr("Quality"),
-                "", tr("Bitrate"), tr("Genre"), tr("Track"),
+                "", tr("Bitrate"), tr("Genre"), tr("Track"), tr("Year"),
                 tr("People with file"), tr("Extension"), tr("Size"));
     }
 
@@ -56,6 +56,7 @@ public class MusicTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
             case GENRE_INDEX: return getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return getProperty(FilePropertyKey.TRACK_NUMBER);
+            case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case FILE_EXTENSION_INDEX: return vsr.getFileExtension();
             case SIZE_INDEX: return vsr.getSize();

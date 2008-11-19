@@ -8,7 +8,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 /**
  * This class specifies the content of a table that contains
  * video descriptions.
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
@@ -23,19 +22,18 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int COMMENTS_INDEX = 8;
     public static final int HEIGHT_INDEX = 9;
     public static final int WIDTH_INDEX = 10;
-    public static final int BITRATE_INDEX = 11;
-    public static final int SIZE_INDEX = 12;
+    public static final int SIZE_INDEX = 11;
 
     public VideoTableFormat() {
         super(ACTION_INDEX, ACTION_INDEX,
                 tr("Name"), tr("Extension"), tr("Length"), tr("Year"), tr("Quality"), "",
                 tr("People with File"), tr("Rating"),
-                tr("Comments"), tr("Height"), tr("Width"), tr("Bitrate"), tr("Size"));
+                tr("Comments"), tr("Height"), tr("Width"), tr("Size"));
     }
 
     @Override
     public Class getColumnClass(int index) {
-        return index == BITRATE_INDEX ? Integer.class :
+        return 
             index == HEIGHT_INDEX ? Integer.class :
             index == NUM_SOURCES_INDEX ? Integer.class :
             index == RATING_INDEX ? Integer.class :
@@ -62,7 +60,6 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case COMMENTS_INDEX: return getProperty(FilePropertyKey.COMMENTS);
             case HEIGHT_INDEX: return getProperty(FilePropertyKey.HEIGHT);
             case WIDTH_INDEX: return getProperty(FilePropertyKey.WIDTH);
-            case BITRATE_INDEX: return getProperty(FilePropertyKey.BITRATE);
             case SIZE_INDEX: return vsr.getSize();
             default: return null;
         }

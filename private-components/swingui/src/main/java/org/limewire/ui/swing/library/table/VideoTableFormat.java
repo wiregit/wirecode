@@ -8,8 +8,7 @@ import org.limewire.ui.swing.util.I18n;
 
 
 public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
-  //  public static final int PLAY_COL = 0;
-    public static final int NAME_COL = 0;//PLAY_COL + 1;
+    public static final int NAME_COL = 0;
     public static final int LENGTH_COL = NAME_COL + 1;
     public static final int MISC_COL = LENGTH_COL + 1;
     public static final int YEAR_COL = MISC_COL + 1;
@@ -19,8 +18,7 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
     public static final int MODIFIED_COL = COMMENTS_COL + 1;
     public static final int HEIGHT_COL = MODIFIED_COL + 1;
     public static final int WIDTH_COL = HEIGHT_COL + 1;
-    public static final int BITRATE_COL = WIDTH_COL + 1;
-    public static final int ACTION_COL = BITRATE_COL + 1;
+    public static final int ACTION_COL = WIDTH_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
 
@@ -32,8 +30,6 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
     public String getColumnName(int column) {
 
         switch (column) {
-//        case PLAY_COL:
-//            return I18n.tr("Play");
         case NAME_COL:
             return I18n.tr("Name");
         case LENGTH_COL:
@@ -44,8 +40,6 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
             return I18n.tr("Year");
         case RATING_COL:
             return I18n.tr("Rating");
-        case BITRATE_COL:
-            return I18n.tr("Bitrate");
         case SIZE_COL:
             return I18n.tr("Size");
         case COMMENTS_COL:
@@ -68,8 +62,6 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
     public Object getColumnValue(FileItem baseObject, int column) {
 
         switch (column) {
-//        case PLAY_COL:
-//            return baseObject;
         case NAME_COL:
             return baseObject.getName();
         case LENGTH_COL:
@@ -80,8 +72,6 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
             return baseObject.getProperty(FilePropertyKey.YEAR);
         case RATING_COL:
             return baseObject.getProperty(FilePropertyKey.RATING);
-        case BITRATE_COL:
-            return baseObject.getProperty(FilePropertyKey.BITRATE);
         case SIZE_COL:
             return baseObject.getSize();
         case COMMENTS_COL:
@@ -106,12 +96,11 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { BITRATE_COL, WIDTH_COL, HEIGHT_COL, MODIFIED_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
+        return new int[] { WIDTH_COL, HEIGHT_COL, MODIFIED_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
     }
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        //return column == PLAY_COL || column == ACTION_COL;
         return column == ACTION_COL;
     }
 
@@ -119,6 +108,4 @@ public class VideoTableFormat<T extends FileItem> implements LibraryTableFormat<
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
-
-
 }

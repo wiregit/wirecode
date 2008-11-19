@@ -18,7 +18,8 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int FILE_COL = SIZE_COL + 1;
     public static final int TRACK_COL = FILE_COL + 1;
-    public static final int MODIFIED_COL = TRACK_COL + 1;
+    public static final int YEAR_COL = TRACK_COL + 1;
+    public static final int MODIFIED_COL = YEAR_COL + 1;
     public static final int ACTION_COL = MODIFIED_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
@@ -51,6 +52,8 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
             return I18n.tr("File Name");
         case TRACK_COL:
             return I18n.tr("Track");
+        case YEAR_COL:
+            return I18n.tr("Year");
         case MODIFIED_COL:
             return I18n.tr("Modified");
         case ACTION_COL:
@@ -84,6 +87,8 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
             return baseObject.getSize();
         case TRACK_COL:
             return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
+        case YEAR_COL:
+            return baseObject.getProperty(FilePropertyKey.YEAR);
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
@@ -100,7 +105,7 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { MODIFIED_COL, TRACK_COL, FILE_COL, SIZE_COL, BITRATE_COL};
+        return new int[] { MODIFIED_COL, YEAR_COL, TRACK_COL, FILE_COL, SIZE_COL, BITRATE_COL};
     }
 
     @Override
@@ -112,6 +117,4 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
-
- 
 }

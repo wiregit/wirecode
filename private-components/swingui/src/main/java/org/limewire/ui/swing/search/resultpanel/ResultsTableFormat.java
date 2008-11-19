@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 /**
  * This class is the base class for each of the TableFormat classes
  * that describe the various table views of search results.
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
     private IconManager iconManager;
