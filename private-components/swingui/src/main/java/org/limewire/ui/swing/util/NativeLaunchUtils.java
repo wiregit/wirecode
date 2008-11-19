@@ -248,11 +248,30 @@ public final class NativeLaunchUtils {
         } else if (OSUtils.isMacOSX()) {
             // launches the Finder and highlights the file
             return exec(selectFileCommand(file));
+        } else if (OSUtils.isLinux()) {
+            // launches the Finder and highlights the file
+            return exec(selectFileCommandLinux(file));
         }
         return null;
     }
     
-	/**
+	private static String[] selectFileCommandLinux(File file) {
+        String path = null;
+        File parentDir = file.isDirectory() ? file : file.getParentFile();
+        try {
+            path = parentDir.getCanonicalPath();
+        } catch (IOException err) {
+            path = parentDir.getAbsolutePath();
+        }
+        //TODO see what file browsers are available and use the one that is.
+        //TODO would be nice to select the file instead of just open the explorer
+        String[] command = new String[] { 
+                "nautilus", path};
+        
+        return command;
+    }
+
+    /**
 	 * Launches the given file on Windows.
 	 *
 	 * @param path the path of the file to launch
