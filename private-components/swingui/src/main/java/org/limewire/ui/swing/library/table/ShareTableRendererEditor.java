@@ -27,6 +27,10 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
    // private Icon shareFriendsIcon;
     @Resource
     private Font shareButtonFont;
+    @Resource
+    private Color shareForegroundColor;
+    @Resource
+    private Color shareMouseOverColor;
 
   //  private JLabel gnutellaLabel;
     private JLabel friendsLabel;
@@ -44,8 +48,8 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         shareButton.setFocusPainted(false);
         shareButton.setBorder(null);
         shareButton.setContentAreaFilled(false);
-        shareButton.setForeground(new Color(33,82,166));
-        shareButton.setMouseOverColor(new Color(0,49,255));
+        shareButton.setForeground(shareForegroundColor);
+        shareButton.setMouseOverColor(shareMouseOverColor);
         
         FontUtils.underline(shareButton);
         shareButton.addActionListener(shareAction);
