@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JButton;
 import javax.swing.ListSelectionModel;
@@ -35,6 +36,8 @@ public class MouseableTable extends StripedJXTable {
 	private TableColors colors = newTableColors();
 	
 	private boolean stripesPainted = false;
+	
+	protected MouseMotionListener mouseOverEditorListener;
 	
 	public MouseableTable() {
 		initialize();
@@ -77,10 +80,10 @@ public class MouseableTable extends StripedJXTable {
 		                colors.getOddHighLighter(),
 		                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		
-		//so that mouseovers will work within table
-		addMouseMotionListener(new MouseMotionAdapter() {
-			@Override
-			public void mouseMoved(MouseEvent e) {
+		//so that mouseovers will work within table		
+		mouseOverEditorListener = new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
                 // Get the table cell that the mouse is over.
                 int row = rowAtPoint(e.getPoint());
                 int col = columnAtPoint(e.getPoint());
@@ -91,7 +94,9 @@ public class MouseableTable extends StripedJXTable {
                     editCellAt(row, col);
                 }
             }
-		});
+        };
+        
+		addMouseMotionListener(mouseOverEditorListener);
 		
 		addMouseListener(new MouseAdapter() {
 			@Override

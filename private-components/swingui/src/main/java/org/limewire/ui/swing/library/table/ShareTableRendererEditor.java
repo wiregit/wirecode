@@ -64,7 +64,7 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        configure((LocalFileItem)value, isSelected);
+        configure((LocalFileItem)value, true);
         return this;
     }
     
