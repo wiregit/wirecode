@@ -274,22 +274,26 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void externalAddressChanged() {
-        synchronized (addressLock) {
-            maybeFireNewDirectConnectionAddress();
-        }
+        maybeFireNewDirectConnectionAddress();
     }
 
     private void maybeFireNewDirectConnectionAddress() {
-        if(isDirectConnectionCapable()) {
-            Connectable newDirectAddress = getPublicAddress();
-            if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
-                directAddress = newDirectAddress;
-                assert NetworkUtils.isValidIpPort(newDirectAddress);
-                fireAddressChange(newDirectAddress);
+        Connectable newDirectAddress = null;
+        boolean fireEvent = false;
+        synchronized (addressLock) {
+            if(isDirectConnectionCapable()) {
+                newDirectAddress = getPublicAddress(false);
+                if (directAddress == null || ConnectableImpl.COMPARATOR.compare(directAddress, newDirectAddress) != 0) {
+                    directAddress = newDirectAddress;
+                    fireEvent = true;
+                    assert NetworkUtils.isValidIpPort(newDirectAddress);
+                }
+            } else {
+                directAddress = null;
             }
-        } else {
-            directAddress = null;
-            fireNullAddressEvent();
+        }
+        if (fireEvent) {
+            fireAddressChange(newDirectAddress);
         }
     }
 
@@ -299,19 +303,15 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void portChanged() {
-        synchronized (addressLock) {
-            maybeFireNewDirectConnectionAddress();
-        }
+        maybeFireNewDirectConnectionAddress();
     }
 
     public void acceptedIncomingConnectionChanged() {
-        synchronized (addressLock) {
-            maybeFireNewDirectConnectionAddress();
-        }
+        maybeFireNewDirectConnectionAddress();
     }
 
     public void newPushProxies(Set<Connectable> pushProxies) {
-        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
+        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(canDoFWT()), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
         boolean changed = false;
         synchronized (addressLock) {
             if (!newAddress.equals(firewalledAddress) && directAddress == null) {
@@ -326,11 +326,13 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
     
-    private Connectable getPublicAddress() {
-        LOG.debugf("port {0} vs udp port {1}", getPort(), getStableUDPPort());
+    /**
+     * @param udpPort uses stable udp port if true otherwise {@link #getPort()}
+     */
+    private Connectable getPublicAddress(boolean udpPort) {
         try {
             return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()),
-                    getPort(), isIncomingTLSEnabled());
+                    udpPort ? getStableUDPPort() : getPort(), isIncomingTLSEnabled());
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
@@ -345,11 +347,6 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
     
-    private void fireNullAddressEvent() {
-        // TODO NullAddress
-        //fireEvent(new AddressEvent(null, Address.EventType.ADDRESS_CHANGED));
-    }
-
     /* (non-Javadoc)
     * @see com.limegroup.gnutella.NetworkManager#acceptedIncomingConnection()
     */
