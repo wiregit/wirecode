@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.sharing;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -14,14 +12,12 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.components.LimeHeadingLabel;
+import org.limewire.ui.swing.components.LimeHeaderBar;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.ButtonPainter;
-import org.limewire.ui.swing.painter.SubpanelPainter;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -39,18 +35,11 @@ import com.google.inject.Singleton;
  * file types with them.
  */
 @Singleton
-public class FriendSharingHeaderPanel extends JXPanel {
+public class FriendSharingHeaderPanel extends LimeHeaderBar {
     
     @Resource
     private Icon downIcon;
-    @Resource
-    protected int height;
-    @Resource
-    private Color fontColor;
-    @Resource 
-    private int fontSize;
     
-    private LimeHeadingLabel titleLabel;
     private JTextField filterBox;
     
     private JXButton shareButton;
@@ -58,30 +47,26 @@ public class FriendSharingHeaderPanel extends JXPanel {
     private FriendSharingPopupHandler popupHandler;
     
     @Inject
-    public FriendSharingHeaderPanel(FriendSharingPopupHandler popupHandler) {               
+    public FriendSharingHeaderPanel(FriendSharingPopupHandler popupHandler, 
+            LimeHeaderBarFactory headerBarFactory) {
+        
+        super(I18n.tr("Sharing with"));
+        
         GuiUtils.assignResources(this);
+        
+        headerBarFactory.decorateBasic(this);
         
         this.popupHandler = popupHandler;
         
-        setBackgroundPainter(new SubpanelPainter());
-
         createComponents();
-        layoutComponents();       
-        
-        setMinimumSize(new Dimension(0, height + 2));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
-        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
+        layoutComponents();  
     }
     
     private void createComponents() {     
-        titleLabel = new LimeHeadingLabel(I18n.tr("Sharing with"));
-        titleLabel.setForeground(fontColor);
-        FontUtils.setSize(titleLabel, fontSize);
-        FontUtils.changeStyle(titleLabel, Font.PLAIN);
         filterBox = new PromptTextField();
         
         shareButton = new JXButton(" ", downIcon);       
-        shareButton.setForeground(fontColor);
+        shareButton.setForeground(Color.WHITE);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
         shareButton.setBackgroundPainter(new ButtonPainter());
         shareButton.addActionListener(new PopupActionListener());
@@ -94,7 +79,6 @@ public class FriendSharingHeaderPanel extends JXPanel {
     protected void layoutComponents() {
         setLayout(new MigLayout("insets 0 0 0 0", "", "align 50%"));
 
-        add(titleLabel, "gapx 10");
         add(shareButton,"push");
         
         add(filterBox, "gapafter 10");

@@ -31,6 +31,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -64,15 +65,15 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private final Next next = new Next();
     private final Prev prev = new Prev();
     
-    public LibraryPanel(Friend friend, boolean isLibraryPanel) {        
+    public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
         setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[120!][]", "[][]"));
-        
+                
         cardPanel.setLayout(cardLayout);
         
         this.friend = friend;
         this.isLibraryPanel = isLibraryPanel;
         
-        createHeader(friend, isLibraryPanel);
+        createHeader(friend, isLibraryPanel, headerBarFactory);
         createSelectionPanel();
         
         add(headerPanel, "span, growx, wrap");
@@ -80,8 +81,16 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    public void createHeader(Friend friend, boolean isLibraryPanel) {
+    public void createHeader(Friend friend, boolean isLibraryPanel, 
+            LimeHeaderBarFactory headerBarFactory) {
+        
         headerPanel = new LibraryHeaderPanel(friend, isLibraryPanel);
+        if (isLibraryPanel) {
+            headerBarFactory.decorateBasic(headerPanel);
+        } 
+        else {
+            headerBarFactory.decorateSpecial(headerPanel);
+        }
     }
     
     public abstract void loadHeader();

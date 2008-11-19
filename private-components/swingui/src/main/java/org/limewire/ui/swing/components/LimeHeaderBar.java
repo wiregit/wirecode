@@ -2,8 +2,10 @@ package org.limewire.ui.swing.components;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.LayoutManager;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import org.jdesktop.swingx.JXLabel;
@@ -16,12 +18,17 @@ public class LimeHeaderBar extends JXPanel {
     
     private final JPanel componentContainer;
     
+    public LimeHeaderBar() {
+        this("");
+    }
+    
     public LimeHeaderBar(String title) {
         GuiUtils.assignResources(this);
         
         this.headerLabel = new LimeHeadingLabel(title);
         this.componentContainer = new JPanel();
         
+        this.headerLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,2));
         this.componentContainer.setOpaque(false);
         
         super.setLayout(new BorderLayout());
@@ -61,6 +68,16 @@ public class LimeHeaderBar extends JXPanel {
     
     public void setText(String text) {
         this.headerLabel.setText(text);
+    }
+    
+    @Override
+    public void setFont(Font font) {
+        if (this.headerLabel == null) {
+            super.setFont(font);
+        }
+        else {            
+            this.headerLabel.setFont(font);
+        }
     }
     
 }

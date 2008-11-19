@@ -23,6 +23,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.AllFriendsList;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
@@ -65,8 +66,9 @@ public class SharingLibraryPanel extends LibraryPanel {
                                 CategoryIconManager categoryIconManager,
                                 LibraryTableFactory tableFactory,
                                 AllFriendsList allFriendsList,
-                                ShareListManager shareListManager) {
-        super(friend, false);
+                                ShareListManager shareListManager,
+                                LimeHeaderBarFactory headerBarFactory){
+        super(friend, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;

@@ -17,6 +17,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.lists.CategoryFilter;
@@ -45,8 +46,10 @@ public class FriendLibraryPanel extends LibraryPanel {
                     CategoryIconManager categoryIconManager, 
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
-                    LibraryManager libraryManager) {
-        super(friend, true);
+                    LibraryManager libraryManager,
+                    LimeHeaderBarFactory headerBarFactory){
+        
+        super(friend, true, headerBarFactory);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;

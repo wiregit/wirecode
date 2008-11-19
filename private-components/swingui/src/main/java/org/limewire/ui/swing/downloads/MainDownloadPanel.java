@@ -172,7 +172,7 @@ public class MainDownloadPanel extends JPanel {
 	    clearFinishedButton.setPreferredSize(
 	            new Dimension((int)clearFinishedButton.getPreferredSize().getWidth(), 21));
 
-	    	    categoriseCheckBox.setOpaque(false);
+	    categoriseCheckBox.setOpaque(false);
 	    categoriseCheckBox.setForeground(Color.WHITE);
 	    FontUtils.changeStyle(categoriseCheckBox, Font.PLAIN);
 

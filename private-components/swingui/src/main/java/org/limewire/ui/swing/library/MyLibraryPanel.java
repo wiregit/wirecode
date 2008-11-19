@@ -17,6 +17,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.AllFriendsList;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
@@ -54,8 +55,9 @@ class MyLibraryPanel extends LibraryPanel {
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
-                          AllFriendsList allFriendsList){
-        super(null, true);
+                          AllFriendsList allFriendsList,
+                          LimeHeaderBarFactory headerBarFactory){
+        super(friend, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;

@@ -2,7 +2,6 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.painter.AbstractPainter;
@@ -17,6 +16,7 @@ public class LimeHeadingLabel extends JXLabel {
             
         TextShadowPainter() {
             this.setAntialiasing(true);
+            this.setCacheable(true);
         }
             
         @Override
@@ -26,12 +26,11 @@ public class LimeHeadingLabel extends JXLabel {
             g.setFont(object.getFont());
                 
             int h = g.getFontMetrics().getAscent();
-            Insets insets = object.getInsets();
                 
             g.setColor(this.shadowColour);
-            g.drawString(label, insets.left+1, insets.top+h-2);
+            g.drawString(label, 1, height/2 + h/2 - 1);
             g.setColor(Color.WHITE);
-            g.drawString(label, insets.left, insets.top+h-3);
+            g.drawString(label, 0, height/2 + h/2 - 2);
         }
     };
     

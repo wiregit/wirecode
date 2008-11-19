@@ -9,6 +9,8 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.sharing.dragdrop.SharingTransferHandler;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
@@ -34,7 +36,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
        
     private final SharingFancyPanelFactory sharingFancyPanelFactory;
     
-    private final SharingHeaderPanel sharingHeaderPanel;
+    private final JPanel sharingHeaderPanel;
        
     private final LocalFileList fileList;
     
@@ -43,11 +45,17 @@ public class GnutellaSharePanel extends GenericSharingPanel {
     private JPanel nonEmptyPanel;
     private final SharingEmptyPanel emptyPanel;
     
+    private final PromptTextField filterBox;
+    
     @Inject
-    public GnutellaSharePanel(ShareListManager libraryManager, SharingEmptyPanel sharingEmptyPanel, SharingFancyPanelFactory sharingFancyPanelFactory, SharingHeaderPanel headerPanel) {       
+    public GnutellaSharePanel(ShareListManager libraryManager, SharingEmptyPanel sharingEmptyPanel,
+            SharingFancyPanelFactory sharingFancyPanelFactory, LimeHeaderBarFactory headerBarFactory) {       
         this.sharingFancyPanelFactory = sharingFancyPanelFactory;
-        this.sharingHeaderPanel = headerPanel;
+        this.sharingHeaderPanel = headerBarFactory.createBasic(I18n.tr("Sharing with the LimeWire Network"));
         this.emptyPanel = sharingEmptyPanel;
+        
+        this.filterBox = new PromptTextField(I18n.tr("Filter..."));
+        this.sharingHeaderPanel.add(this.filterBox);
         
         this.fileList = libraryManager.getGnutellaShareList();
         this.fileList.getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>(){
@@ -95,7 +103,7 @@ public class GnutellaSharePanel extends GenericSharingPanel {
         nonEmptyPanel.setLayout(new BorderLayout());
 
         FilterList<LocalFileItem> filteredList = GlazedListsFactory.filterList(fileList.getSwingModel(), 
-                new TextComponentMatcherEditor<LocalFileItem>(sharingHeaderPanel.getFilterBox(), new SharingTextFilterer()));
+                new TextComponentMatcherEditor<LocalFileItem>(this.filterBox, new SharingTextFilterer()));
         
         SharingFancyPanel sharingFancyPanel = sharingFancyPanelFactory.create(filteredList, scrollPane, fileList);
         scrollPane.setViewportView(sharingFancyPanel);
