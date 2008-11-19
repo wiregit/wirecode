@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.search.resultpanel;
 
 class SearchResultTruncatorImpl implements SearchResultTruncator {
-    private static final String OPEN_BOLD = "<b>";
-    private static final String CLOSE_BOLD = "</b>";
+    private static final String OPEN_TAG = "<b>";
+    private static final String CLOSE_TAG = "</b>";
     private static final String ELLIPSIS = "...";
     private static final int ELLIPSIS_SHRINK_INCREMENT = ELLIPSIS.length() + 1;
 
@@ -12,7 +12,8 @@ class SearchResultTruncatorImpl implements SearchResultTruncator {
             return headingText;
         }
         
-        String truncated = headingText;
+        //Strip multiple whitespace characters (spaces, \r, \n, \t)
+        String truncated = headingText.replaceAll("[\\s]++", " ");
         
         do {
             if (getEndEdge(truncated) >= (truncated.length() - (truncated.contains(ELLIPSIS) ? ELLIPSIS.length() : 0))) {
@@ -26,10 +27,11 @@ class SearchResultTruncatorImpl implements SearchResultTruncator {
     }
 
     private int getLeadEdge(String headingText) {
-        return headingText.indexOf(OPEN_BOLD);
+        int indexOf = headingText.indexOf(OPEN_TAG);
+        return indexOf == -1 ? 0 : indexOf;
     }
 
     private int getEndEdge(String headingText) {
-        return headingText.indexOf(CLOSE_BOLD) + CLOSE_BOLD.length();
+        return headingText.indexOf(CLOSE_TAG) + CLOSE_TAG.length();
     }
 }

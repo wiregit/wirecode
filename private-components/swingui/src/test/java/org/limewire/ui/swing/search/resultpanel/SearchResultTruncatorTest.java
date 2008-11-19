@@ -42,6 +42,22 @@ public class SearchResultTruncatorTest extends TestCase {
         assertEquals(expected, trunc.truncateHeading(result, 15, mockResolver));
     }
     
+    public void testLongTextHasNoBoldMatch() {
+        String result = "I work for the department of redundancy department";
+        String expected = "I work for the ...";
+        mockResolver.satisfactoryWidth = 15;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 15, mockResolver));
+    }
+    
+    public void testStripMultipleSpacesOutOfText() {
+        String result = "I work\r    \nfor  \t  the  department   of  redundancy   department";
+        String expected = "I work for the ...";
+        mockResolver.satisfactoryWidth = 15;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 15, mockResolver));
+    }
+    
     private static class MockFontWidthResolver implements FontWidthResolver {
         int width;
         int satisfactoryWidth;
