@@ -170,30 +170,30 @@ public final class Initializer {
         postinit();        
     }
     
-    private void showAlphaInfo() {
-        final String msg = "Welcome to the LimeWire 5 Alpha!\n\n"
-                   + "Here's some important information about the alpha...\n"
-                   + " - There are bugs.  Lots.  It's because this is an alpha.\n"
-                   + "   We're confident the program is stable (it's not going\n"
-                   + "   to delete your computer or anything), but you will run\n"
-                   + "   into some internal errors.\n"
-                   + " - It isn't finished.  We're very actively working on\n"
-                   + "   changes, tweaks, rewrites, and all sorts of things.\n"
-                   + " - Everything can (and probably will) change.  Don't\n"
-                   + "   take inclusion or exclusion of a certain feature to\n"
-                   + "   mean that we're adding or dropping it.  It's probably\n"
-                   + "   just an oversight.\n\n"
-                   + " Thanks!\n"
-                   + "     The LimeWire Team";                   
-        SwingUtils.invokeAndWait(new Runnable() {
-            public void run() {
-                JOptionPane.showMessageDialog(null,
-                        msg,
-                        "LimeWire 5 Alpha Info",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-    }
+//    private void showAlphaInfo() {
+//        final String msg = "Welcome to the LimeWire 5 Alpha!\n\n"
+//                   + "Here's some important information about the alpha...\n"
+//                   + " - There are bugs.  Lots.  It's because this is an alpha.\n"
+//                   + "   We're confident the program is stable (it's not going\n"
+//                   + "   to delete your computer or anything), but you will run\n"
+//                   + "   into some internal errors.\n"
+//                   + " - It isn't finished.  We're very actively working on\n"
+//                   + "   changes, tweaks, rewrites, and all sorts of things.\n"
+//                   + " - Everything can (and probably will) change.  Don't\n"
+//                   + "   take inclusion or exclusion of a certain feature to\n"
+//                   + "   mean that we're adding or dropping it.  It's probably\n"
+//                   + "   just an oversight.\n\n"
+//                   + " Thanks!\n"
+//                   + "     The LimeWire Team";                   
+//        SwingUtils.invokeAndWait(new Runnable() {
+//            public void run() {
+//                JOptionPane.showMessageDialog(null,
+//                        msg,
+//                        "LimeWire 5 Alpha Info",
+//                        JOptionPane.INFORMATION_MESSAGE);
+//            }
+//        });
+//    }
     
     
     /** shows legal stuff and exits if the user does not agree */

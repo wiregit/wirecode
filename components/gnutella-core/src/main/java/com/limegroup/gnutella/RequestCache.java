@@ -11,6 +11,7 @@ import org.limewire.logging.LogFactory;
  */
 public class RequestCache {
     
+    @SuppressWarnings("unused")
     private static final Log LOG = LogFactory.getLog(RequestCache.class);
     
     // we don't allow more than 1 request per 5 seconds

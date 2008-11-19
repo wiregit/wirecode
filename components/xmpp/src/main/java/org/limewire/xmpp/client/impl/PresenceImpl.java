@@ -18,6 +18,7 @@ import org.limewire.xmpp.api.client.User;
 
 class PresenceImpl implements Presence {
 
+    @SuppressWarnings("unused")
     private static final Log LOG = LogFactory.getLog(PresenceImpl.class);
 
     private final org.jivesoftware.smack.packet.Presence presence;

@@ -28,6 +28,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public class RemoteFileDescImpl implements RemoteFileDesc {
     
+    @SuppressWarnings("unused")
     private static final Log LOG = LogFactory.getLog(RemoteFileDesc.class);
 
     private final String _filename; 
