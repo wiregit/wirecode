@@ -37,16 +37,19 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     }
     
     /**
-     * As long as its not a store file it can be added
+     * Returns false if it's an {@link IncompleteFileDesc} or it's a store
+     * file.
      */
     @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
+        if (fileDesc instanceof IncompleteFileDesc) {
+            return false;
+        }
         if( fileDesc.getLimeXMLDocuments().size() != 0 && 
                 isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
             return false;
-        } else {
-            return true;
-        }
+        } 
+        return true;
     }
     
     /**
