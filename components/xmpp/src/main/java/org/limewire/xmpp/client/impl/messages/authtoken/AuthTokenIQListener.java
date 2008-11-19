@@ -23,22 +23,20 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
+import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
 public class AuthTokenIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(AuthTokenIQListener.class);
 
-    private final XMPPConnection connection;
-    private final org.jivesoftware.smack.XMPPConnection smackConnection;
+    private final XMPPConnectionImpl connection;
     private final XMPPAuthenticator authenticator;
     private final RosterEventHandler rosterEventHandler;
     private Map<String, byte []> pendingAuthTokens;
 
-    public AuthTokenIQListener(XMPPConnection connection, org.jivesoftware.smack.XMPPConnection smackConnection,
+    public AuthTokenIQListener(XMPPConnectionImpl connection,
                                XMPPAuthenticator authenticator) {
         this.connection = connection;
-        this.smackConnection = smackConnection;
         this.authenticator = authenticator;
         this.rosterEventHandler = new RosterEventHandler();
         this.pendingAuthTokens = new HashMap<String, byte[]>();
@@ -83,9 +81,9 @@ public class AuthTokenIQListener implements PacketListener {
         byte [] authToken = authenticator.getAuthToken(StringUtils.parseBareAddress(presence.getJID())).getBytes(Charset.forName("UTF-8"));
         AuthTokenIQ queryResult = new AuthTokenIQ(authToken);
         queryResult.setTo(presence.getJID());
-        queryResult.setFrom(smackConnection.getUser());
+        queryResult.setFrom(connection.getLocalJid());
         queryResult.setType(IQ.Type.SET);
-        smackConnection.sendPacket(queryResult);
+        connection.sendPacket(queryResult);
     }
 
     public PacketFilter getPacketFilter() {
