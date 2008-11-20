@@ -52,7 +52,7 @@ public class GenericBarPainter<X> extends AbstractPainter<X> {
         g.drawLine(0, 0, width, 0);
         g.setPaint(this.topBorder2);
         g.drawLine(0, 1, width, 1);
-        
+
         //paint the bottom borders
         g.setPaint(this.bottomBorder1);
         g.drawLine(0, height-1, width, height-1);

@@ -48,7 +48,7 @@ import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.painter.DownloadSummaryPainter;
+import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -104,7 +104,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
-	        LimeProgressBarFactory progressBarFactory) {
+	        LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory) {
 	    this.navigator = navigator;
         GuiUtils.assignResources(this);
 	    
@@ -115,7 +115,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         this.allList = downloadListManager.getSwingThreadSafeDownloads();
 
         setLayout(new MigLayout());
-        setBackgroundPainter(new DownloadSummaryPainter());
+        setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());
                 
 		header = new SummaryPanelHeader();
 

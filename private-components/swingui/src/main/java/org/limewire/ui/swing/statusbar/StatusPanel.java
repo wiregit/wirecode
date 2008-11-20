@@ -14,7 +14,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.painter.StatusBarPainter;
+import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.StatusBarSectionPainter;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -32,7 +32,8 @@ public class StatusPanel extends JXPanel {
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
             FriendStatusPanel friendStatusPanel, 
-            ConnectionStatusPanel connectionStatus, SharedFileCountPanel sharedFileCountPanel) {
+            ConnectionStatusPanel connectionStatus, SharedFileCountPanel sharedFileCountPanel,
+            BarPainterFactory barPainterFactory) {
         
         GuiUtils.assignResources(this);
         
@@ -42,7 +43,7 @@ public class StatusPanel extends JXPanel {
         setMinimumSize(new Dimension(0, height + 2));
         setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
         setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
-        setBackgroundPainter(new StatusBarPainter());
+        setBackgroundPainter(barPainterFactory.createStatusBarPainter());
  
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
         connectionStatus.setBackgroundPainter(sectionPainter);

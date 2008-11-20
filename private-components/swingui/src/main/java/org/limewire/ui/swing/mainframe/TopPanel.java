@@ -36,8 +36,8 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
+import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
-import org.limewire.ui.swing.painter.TopPanelPainter;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
@@ -65,7 +65,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final StorePanel storePanel,
                     LeftPanel leftPanel,
                     SearchBar searchBar,
-                    FancyTabListFactory fancyTabListFactory) {
+                    FancyTabListFactory fancyTabListFactory,
+                    BarPainterFactory barPainterFactory) {
         
         GuiUtils.assignResources(this);
         
@@ -76,7 +77,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         setName("TopPanel");
         
-        setBackgroundPainter(new TopPanelPainter());
+        setBackgroundPainter(barPainterFactory.createTopBarPainter());
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
@@ -118,7 +119,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(homeButton);
         add(storeButton);
         add(libraryButton);
-        add(searchBar, "gapleft 120, gapright 10");     //gap used to be 35
+        add(searchBar, "gapleft 30, gapright 10");
         add(searchList, "gapleft 0, gaptop 3, growy");
     };
 
