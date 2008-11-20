@@ -179,14 +179,6 @@ public class ChatPanel extends JPanel implements Displayable {
         setConversationPanel(buildMessagesPane());
     }
     
-    @EventSubscriber
-    public void handleRemoveFriend(RemoveFriendEvent event) {
-        final String friendID = event.getFriend().getID();
-        if (chats.containsKey(friendID)) {
-            closeChat(friendID);
-        }
-    }
-
     private void closeChat(String chatKey) {
         LOG.debugf("Closing chat panel for {0}", chatKey);
         ConversationPane conversation = chats.remove(chatKey);

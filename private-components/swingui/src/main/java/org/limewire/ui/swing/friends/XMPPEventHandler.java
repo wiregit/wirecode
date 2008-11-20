@@ -78,22 +78,4 @@ public class XMPPEventHandler {
             }, "add-friend");
         }
     }
-    
-    @EventSubscriber
-    public void handleRemoveFriend(final RemoveFriendEvent event) {
-        final XMPPConnection connection = getLoggedInConnection();
-        if (connection != null) {
-            LOG.debugf("Removing friend: ID {0} - Name {1}", event.getFriend().getID(), event.getFriend().getName());
-            ThreadExecutor.startThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        connection.removeUser(event.getFriend().getID());
-                    } catch (XMPPException e) {
-                        LOG.error("Could not remove friend", e);
-                    }
-                }
-            }, "remove-friend");
-        }
-    }
 }

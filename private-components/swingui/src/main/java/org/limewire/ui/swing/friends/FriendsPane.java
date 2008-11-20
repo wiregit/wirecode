@@ -100,7 +100,7 @@ import net.miginfocom.swing.MigLayout;
  *
  */
 @Singleton
-public class FriendsPane extends JPanel implements FriendRemover {
+public class FriendsPane extends JPanel {
     
     private static final Color MEDIUM_GRAY = new Color(183, 183, 183);
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -236,9 +236,7 @@ public class FriendsPane extends JPanel implements FriendRemover {
         nonChattingPopup.addSeparator();
         nonChattingPopup.add(viewLibrary);
         nonChattingPopup.add(viewSharedFiles);
-        nonChattingPopup.addSeparator();
-        nonChattingPopup.add(new RemoveFriend(context));
-        
+       
         JPopupMenu chattingPopup = PopupUtil.addPopupMenus(comp, new FriendPopupDecider(true, context), viewLibrary, viewSharedFiles);
         chattingPopup.addSeparator();
         chattingPopup.add(new CloseChat(context));
@@ -910,17 +908,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
         }
     }
     
-    private class RemoveFriend extends AbstractContextAction {
-        public RemoveFriend(FriendContext context) {
-            super(I18n.tr("Remove friend from list"), context);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            removeBuddy(context.getFriend());
-        }
-    }
-    
     private class CloseChat extends AbstractContextAction {
         public CloseChat(FriendContext context) {
             super(I18n.tr("Close chat (closes the current chat window)"), context);
@@ -933,33 +920,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
         }
     }
 
-    @Override
-    public boolean canRemoveSelectedFriend() {
-        ChatFriend selectedFriend = getSelectedFriend();
-        return selectedFriend != null && !selectedFriend.isChatting();
-    }
-
-    @Override
-    public void removeSelectedFriend() {
-        removeBuddy(getSelectedFriend());
-    }
-
-    private void removeBuddy(ChatFriend selectedFriend) {
-        if (selectedFriend != null) {
-            chatFriends.remove(selectedFriend);
-            idToFriendMap.remove(selectedFriend.getID());
-            new RemoveFriendEvent(selectedFriend).publish();
-        }
-    }
-    
-    private ChatFriend getSelectedFriend() {
-        int selectedRow = friendsTable.getSelectedRow();
-        if (selectedRow > -1) {
-            return getFriend(friendsTable, selectedRow);
-        }
-        return null;
-    }
-    
     public boolean isSharingFilesWithFriends() {
         for(ChatFriend chatFriend : chatFriends) {
             if (libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()).size() > 0) {

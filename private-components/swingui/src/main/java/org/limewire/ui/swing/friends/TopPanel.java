@@ -52,17 +52,14 @@ public class TopPanel extends JPanel {
     private JLabel friendNameLabel;
     private JLabel friendStatusLabel;
     private final IconLibrary icons;
-    private final FriendRemover friendRemover;
     private final XMPPEventHandler xmppEventHandler;
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
     private JCheckBoxMenuItem awayPopupItem;
     
     @Inject
-    public TopPanel(final IconLibrary icons, FriendRemover friendRemover,
-                    XMPPEventHandler xmppEventHandler) {
+    public TopPanel(final IconLibrary icons, XMPPEventHandler xmppEventHandler) {
         this.icons = icons;
-        this.friendRemover = friendRemover;
         this.xmppEventHandler = xmppEventHandler;
         
         setBackground(Color.BLACK);
@@ -112,8 +109,6 @@ public class TopPanel extends JPanel {
         options.setBackground(getBackground());
         options.setBorderPainted(false);
         options.add(new AddFriendOption());
-        options.add(new RemoveFriendOption());
-        options.addSeparator();
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
         awayPopupItem = new JCheckBoxMenuItem(new AwayOption());
         availabilityButtonGroup = new ButtonGroup();
@@ -310,22 +305,6 @@ public class TopPanel extends JPanel {
         }
     }
     
-    private class RemoveFriendOption extends AbstractAction {
-        public RemoveFriendOption() {
-            super(tr("Remove friend"));
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return friendRemover.canRemoveSelectedFriend();
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            friendRemover.removeSelectedFriend();
-        }
-    }
-
     private class MinimizeChat extends AbstractAction {
         public MinimizeChat() {
             super("", icons.getMinimizeNormal());
