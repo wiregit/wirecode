@@ -105,6 +105,7 @@ public final class PushManager {
             if(LOG.isDebugEnabled())
                 LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
             // TODO: should FW-FW connections also use TLS?
+            assert NetworkUtils.isValidAddress(host) : "invalid host for fwt request: " + host;
             NBSocket socket = udpSelectorProvider.get().openAcceptorSocketChannel().socket();
             socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushConnectObserver(data, true, httpAcceptor.get()));
         } else {
