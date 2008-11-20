@@ -2,7 +2,6 @@ package org.limewire.xmpp.client.impl;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.lifecycle.Asynchronous;
@@ -135,11 +134,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     @Override
     public synchronized XMPPConnection getLoggedInConnection() {
-        try {
-            return connections.pop();
-        } catch (NoSuchElementException nsex) {
-            return null;
-        }
+        return connections.peek();
     }
 
     @Override

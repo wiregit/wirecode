@@ -1,6 +1,5 @@
 package org.limewire.xmpp.api.client;
 
-
 import com.google.inject.Inject;
 
 public interface XMPPErrorListener {

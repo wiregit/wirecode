@@ -7,7 +7,6 @@ import javax.swing.ImageIcon;
 
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 /**
  * Stores all the information required to log into an XMPP server and
@@ -140,11 +139,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     
     @Override
     public EventListener<RosterEvent> getRosterListener() {
-        return null;
-    }
-    
-    @Override
-    public XMPPErrorListener getErrorListener() {
         return null;
     }
 }

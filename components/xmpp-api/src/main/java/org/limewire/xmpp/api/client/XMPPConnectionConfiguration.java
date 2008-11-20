@@ -15,5 +15,4 @@ public interface XMPPConnectionConfiguration extends Network {
     public String getServiceName();
     public String getResource();
     public EventListener<RosterEvent> getRosterListener();
-    public XMPPErrorListener getErrorListener();
 }

@@ -36,7 +36,9 @@ import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
+import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
 import org.limewire.xmpp.client.impl.XMPPServiceImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
@@ -82,6 +84,15 @@ public class XMPPServiceTest extends BaseTestCase {
         registry.start();
         service = injector.getInstance(XMPPServiceImpl.class);
         service.setMultipleConnectionsAllowed(true);
+        service.setXmppErrorListener(new XMPPErrorListener() {
+            public void register(XMPPService xmppService) {
+                xmppService.setXmppErrorListener(this);
+            }
+
+            public void error(XMPPException exception) {
+                exception.printStackTrace();
+            }
+        });
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
         alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
