@@ -77,7 +77,6 @@ public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
         g.drawLine(width-1,height-2,width-1,height-2);
         g.setColor(new Color(0xab,0xab,0xab));
         g.drawLine(1,height-2,1,height-2);
-        g.drawLine(width-2,height-2,width-2,height-2);
     }
 
 }
