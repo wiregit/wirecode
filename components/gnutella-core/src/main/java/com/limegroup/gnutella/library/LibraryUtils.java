@@ -66,7 +66,7 @@ public class LibraryUtils {
             return false;
         }
         
-        if(!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+        if(!LibrarySettings.ALLOW_PROGRAMS.getValue() && !LibraryUtils.isForcedShare(file)) {
             MediaType ext = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
             return ext != MediaType.getProgramMediaType();
         }
