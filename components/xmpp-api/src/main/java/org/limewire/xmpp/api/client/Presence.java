@@ -31,7 +31,7 @@ public interface Presence extends FriendPresence {
         // defined in smack
         chat(I18nMarker.marktr("Free to chat"), 0),
         available(I18nMarker.marktr("Available"), 1),
-        away(I18nMarker.marktr("Away"), 2),
+        away(I18nMarker.marktr("Away"), 2),//away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
         xa(I18nMarker.marktr("Away for a while"), 2),
         dnd(I18nMarker.marktr("Do not disturb"), 3);
 
