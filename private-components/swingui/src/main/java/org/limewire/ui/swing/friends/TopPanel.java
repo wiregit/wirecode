@@ -110,7 +110,7 @@ public class TopPanel extends JPanel {
         options.setBorderPainted(false);
         options.add(new AddFriendOption());
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
-        dndPopupItem = new JCheckBoxMenuItem(new AwayOption());
+        dndPopupItem = new JCheckBoxMenuItem(new DndOption());
         availabilityButtonGroup = new ButtonGroup();
         availabilityButtonGroup.add(availablePopupItem);
         availabilityButtonGroup.add(dndPopupItem);
@@ -229,6 +229,7 @@ public class TopPanel extends JPanel {
         Mode newMode = event.getNewMode();
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
                             (newMode == Mode.dnd) ? dndPopupItem.getModel() : null;
+                            
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }

@@ -7,8 +7,8 @@ import javax.swing.AbstractAction;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
-public class AwayOption extends AbstractAction {
-    public AwayOption() {
+public class DndOption extends AbstractAction {
+    public DndOption() {
         super(tr(Mode.dnd.toString()));
     }
 

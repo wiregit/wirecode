@@ -27,7 +27,7 @@ import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
-import org.limewire.ui.swing.friends.AwayOption;
+import org.limewire.ui.swing.friends.DndOption;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.FriendsCountUpdater;
 import org.limewire.ui.swing.friends.FriendsUtil;
@@ -92,7 +92,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         statusMenu.addSeparator();
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
         statusMenu.add(availablePopupItem);
-        dndPopupItem = new JCheckBoxMenuItem(new AwayOption());
+        dndPopupItem = new JCheckBoxMenuItem(new DndOption());
         statusMenu.add(dndPopupItem);
         //Set the menu location so that the popup will appear up instead of the default down for menus
         statusMenu.setMenuLocation(0, (statusMenu.getPopupMenu().getPreferredSize().height * -1));
