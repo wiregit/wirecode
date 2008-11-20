@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -40,6 +42,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
@@ -51,6 +54,7 @@ import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -63,18 +67,17 @@ import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPException;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 
 /**
  *
@@ -106,7 +109,8 @@ public class ConversationPane extends JPanel implements Displayable {
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
-                            ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory) {
+                            ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
+                            @Named("available") ListenerSupport<FriendEvent> friendSupport) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.remoteFileItemFactory = remoteFileItemFactory;
@@ -154,6 +158,15 @@ public class ConversationPane extends JPanel implements Displayable {
         setBackground(DEFAULT_BACKGROUND);
 
         EventAnnotationProcessor.subscribe(this);
+        friendSupport.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                if(event.getSource().getId().equals(friendId)) {
+                    handleFriendEvent(event);
+                }
+            }
+        });
     }
 
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
@@ -185,17 +198,16 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
 
-    @RuntimeTopicEventSubscriber(methodName="getPresenceUpdateTopicName")
-    public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
-        Presence updatedPresence = event.getPresence();
-        org.limewire.xmpp.api.client.Presence.Type type = updatedPresence.getType();
-        if ((type == Presence.Type.unavailable) && (!updatedPresence.getUser().isSignedIn())) {
-            displayMessages(true);
-            inputPanel.getInputComponent().setEnabled(false);
-        } else if (event.isNewPresence() &&
-                type == Presence.Type.available) {
+    private void handleFriendEvent(FriendEvent event) {
+        switch(event.getType()) {
+        case ADDED:
             displayMessages(false);
             inputPanel.getInputComponent().setEnabled(true);
+            break;
+        case REMOVED:
+            displayMessages(true);
+            inputPanel.getInputComponent().setEnabled(false);
+            break;
         }
     }
 
@@ -217,10 +229,6 @@ public class ConversationPane extends JPanel implements Displayable {
 
     public String getChatStateTopicName() {
         return ChatStateEvent.buildTopic(friendId);
-    }
-
-    public String getPresenceUpdateTopicName() {
-        return PresenceUpdateEvent.buildTopic(friendId);
     }
 
     private void displayMessages() {

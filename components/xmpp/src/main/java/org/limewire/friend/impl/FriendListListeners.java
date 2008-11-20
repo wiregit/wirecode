@@ -41,7 +41,7 @@ class FriendListListeners {
                     addKnownFriend(event.getSource());
                     break;
                 case USER_DELETED:
-                    removeKnownFriend(event.getSource());
+                    removeKnownFriend(event.getSource(), true);
                     break;
                 }
             }
@@ -53,7 +53,7 @@ class FriendListListeners {
                 switch(event.getType()) {
                 case DISCONNECTED:
                     for(User user : event.getSource().getUsers()) {
-                        removeKnownFriend(user);
+                        removeKnownFriend(user, false);
                     }
                     break;
                 }
@@ -65,18 +65,35 @@ class FriendListListeners {
         user.addPresenceListener(new EventListener<PresenceEvent>() {
             @Override
             public void handleEvent(PresenceEvent event) {
-                if(event.getType() == Presence.EventType.PRESENCE_NEW && event.getSource().getType() == Presence.Type.available) {
-                    addPresence(event.getSource());
-                } else if(event.getSource().getType() == Presence.Type.unavailable) {
+                switch(event.getSource().getType()) {
+                case available:
+                    switch(event.getType()) {
+                    case PRESENCE_NEW:
+                        addPresence(event.getSource());
+                        break;
+                    case PRESENCE_UPDATE:
+                        updatePresence(event.getSource());
+                        break;
+                    }
+                    break;
+                case unavailable:
                     removePresence(event.getSource());
+                    break;
                 }
             }
         });
         knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.ADDED));
     }
     
-    private void removeKnownFriend(User user) {
-        knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.REMOVED));  
+    private void removeKnownFriend(User user, boolean delete) {
+        if(delete) {
+            knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.DELETE));
+        }
+        knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.REMOVED));
+    }
+    
+    private void updatePresence(Presence presence) {
+        friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.UPDATE));
     }
     
     private void addPresence(Presence presence) {

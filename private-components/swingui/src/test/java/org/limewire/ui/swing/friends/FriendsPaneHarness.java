@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.impl.library.MockLibraryManager;
+import org.limewire.listener.EventListenerList;
 import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.api.client.Presence;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -22,8 +23,8 @@ public class FriendsPaneHarness {
             @Override
             public void run() {
                 JFrame frame = new JFrame();
-
-                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater(), new MockLibraryManager(), new MockFriendSharingDisplay());
+                final EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
+                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater(), new MockLibraryManager(), new MockFriendSharingDisplay(), presenceSupport);
                 frame.add(pane);
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();
@@ -33,7 +34,7 @@ public class FriendsPaneHarness {
                 for(String name : names) {
                     MockUser user = new MockUser("", name);
                     MockPresence presence = new MockPresence(user, randomMode(), "Sort-in", "jid" + i++);
-                    new PresenceUpdateEvent(presence, Presence.EventType.PRESENCE_NEW).publish();
+                    presenceSupport.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.ADDED));
                     presences.add(new Duo(presence));
                 }
 
@@ -46,7 +47,7 @@ public class FriendsPaneHarness {
                         while (true) {
                             Duo duo = presences.get(get1to10());
                             duo.presence.setMode(randomMode());
-                            new PresenceUpdateEvent(duo.presence, Presence.EventType.PRESENCE_NEW).publish();
+                            presenceSupport.broadcast(new FriendPresenceEvent(duo.presence, FriendPresenceEvent.Type.ADDED));
                             try {
                                 Thread.sleep(10000);
                             } catch (InterruptedException e) {

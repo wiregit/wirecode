@@ -5,8 +5,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -16,20 +14,18 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanel;
 import org.limewire.ui.swing.sharing.fancy.SharingFancyPanelFactory;
@@ -39,23 +35,22 @@ import org.limewire.ui.swing.sharing.friends.FriendNameTable;
 import org.limewire.ui.swing.sharing.friends.FriendTableFormat;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 @Singleton
-public class FriendSharePanel extends GenericSharingPanel implements RegisteringEventListener<RosterEvent> {
+public class FriendSharePanel extends GenericSharingPanel {
     public static final String NAME = "All Friends";
 
     @Resource
@@ -67,7 +62,6 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
     
     private JScrollPane friendTableScrollPane;
 
-    private final Map<String, String> friendMap = new HashMap<String, String>();
     private final EventList<FriendItem> friendsList;
 
     private final FriendNameTable friendTable;
@@ -85,7 +79,6 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             FriendSharingHeaderPanel friendHeaderPanel,
             FriendSharingPopupHandler popupHandler) {        
         GuiUtils.assignResources(this); 
-        EventAnnotationProcessor.subscribe(this);
 
         this.friendTable = friendNameTable;
         this.shareListManager = shareListManager;
@@ -292,35 +285,30 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
         }
     }
     
-    @Inject
-    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
-        rosterEventListenerSupport.addListener(this);
-    }
-
-    @Override
-    @SwingEDTEvent
-    public void handleEvent(final RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {
-            if(friendMap.containsKey(event.getSource().getId()))
-                return;
-            LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
-            friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));
-            friendMap.put(event.getSource().getId(), "");
-        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
-            shareListManager.removeFriendShareList(event.getSource());
-            friendMap.remove(event.getSource().getId());
-            // TODO remove from friendList ??
-        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-        }
-    }   
-    
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
-        for(FriendItem friendItem : friendsList) {
-            friendItem.dispose();
-        }
-        friendsList.clear();
-        friendMap.clear();
+    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
+        knownFriends.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                    LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
+                    friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));
+                    break;
+                case DELETE:
+                    shareListManager.removeFriendShareList(event.getSource());
+                    // fallthrough.
+                case REMOVED:
+                    for(FriendItem item : friendsList) {
+                        if(item.getFriend().getId().equals(event.getSource().getId())) {
+                            item.dispose();
+                            friendsList.remove(item);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
     }
     
     /**

@@ -71,8 +71,6 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
-import com.google.inject.Inject;
-
 public class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable {
 
     private static final int SHARED_ROW_COUNT = 20;
@@ -160,7 +158,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private AWTEventListener eventListener;
     
     
-    @Inject
     public LibrarySharePanel(List<SharingTarget> allFriends) {
         //TODO clean up constructor
         GuiUtils.assignResources(this);

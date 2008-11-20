@@ -12,12 +12,14 @@ import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.impl.library.MockLibraryManager;
+import org.limewire.listener.EventListenerList;
 import org.limewire.ui.swing.friends.Message.Type;
 import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
@@ -30,11 +32,13 @@ public class ChatPanelHarness {
                 final IconLibraryImpl icons = new IconLibraryImpl();
                 final MockLibraryManager libraryManager = new MockLibraryManager();
                 MockFriendSharingDisplay friendSharing = new MockFriendSharingDisplay();
-                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager, friendSharing);
+                EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
+                final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
+                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager, friendSharing, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {
-                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay(), null, null);
+                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay(), null, null, friendSupport);
                     }
                 }, icons, friendsPane, new TopPanel(icons, friendsPane, null), friendSharing));
                 
@@ -42,14 +46,15 @@ public class ChatPanelHarness {
                 frame.setVisible(true);
                 
                 JFrame frame2 = new JFrame();
-                frame2.add(addFriendPanel());
+                frame2.add(addFriendPanel(presenceSupport, friendSupport));
                 frame2.pack();
                 frame2.setVisible(true);
             }
         });
     }
     
-    private static JPanel addFriendPanel() {
+    private static JPanel addFriendPanel(final EventListenerList<FriendPresenceEvent> presenceSupport, 
+                                         final EventListenerList<FriendEvent> friendSupport) {
         JPanel panel = new JPanel(new MigLayout("", "[][]", ""));
         
         panel.add(new JLabel("Id:"));
@@ -66,8 +71,9 @@ public class ChatPanelHarness {
             @Override
             public void actionPerformed(ActionEvent e) {
                 User user = new MockUser(idField.getText(), nameField.getText());
-                new PresenceUpdateEvent(new MockPresence(user, Mode.available, moodField.getText(), idField.getText()),
-                        Presence.EventType.PRESENCE_NEW).publish();
+                friendSupport.broadcast(new FriendEvent(user, FriendEvent.Type.ADDED));
+                presenceSupport.broadcast(new FriendPresenceEvent(
+                        new MockPresence(user, Mode.available, moodField.getText(), idField.getText()), FriendPresenceEvent.Type.ADDED));
             }
         });
         panel.add(addFriend, "span, wrap");
@@ -75,19 +81,22 @@ public class ChatPanelHarness {
         fillWithMessageBuddies.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fillWithUnseenMessageAwaitingFriends();
+                fillWithUnseenMessageAwaitingFriends(presenceSupport, friendSupport);
             }
         });
         panel.add(fillWithMessageBuddies, "span");
         return panel;
     }
     
-    private static void fillWithUnseenMessageAwaitingFriends() {
+    private static void fillWithUnseenMessageAwaitingFriends(
+            final EventListenerList<FriendPresenceEvent> presenceSupport, 
+            final EventListenerList<FriendEvent> friendSupport) {
         for(int i = 0; i < 50; i++) {
             String id = "foo" + i;
             User user = new MockUser(id, "foo");
-            new PresenceUpdateEvent(new MockPresence(user, Mode.available, "hey", id),
-                    Presence.EventType.PRESENCE_NEW).publish();
+            friendSupport.broadcast(new FriendEvent(user, FriendEvent.Type.ADDED));
+            presenceSupport.broadcast(new FriendPresenceEvent(
+                    new MockPresence(user, Mode.available,"hey", id), FriendPresenceEvent.Type.ADDED));
         }
         
         for(int i = 0; i < 50; i++) {

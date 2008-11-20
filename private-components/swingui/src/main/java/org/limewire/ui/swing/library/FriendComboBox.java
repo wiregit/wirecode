@@ -2,36 +2,33 @@ package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
-public class FriendComboBox extends JComboBox implements RegisteringEventListener<RosterEvent> {
+public class FriendComboBox extends JComboBox {
     
-    private final Map<String, User> friendMap = new ConcurrentHashMap<String, User>();
-    private final Map<String, FriendItem> friendItemMap = new ConcurrentHashMap<String, FriendItem>();
+    private final Map<String, Friend> friendMap = new HashMap<String, Friend>();
+    private final Map<String, FriendItem> friendItemMap = new HashMap<String, FriendItem>();
      
     private static final String ALL = I18n.tr("All Files");
     private static final String GNUTELLA = I18n.tr("LimeWire Network");
@@ -40,8 +37,6 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
     
     @Inject
     public FriendComboBox(final Navigator navigator, final SharingLibraryFactory sharingFactory, final LibraryManager libraryManager, final ShareListManager shareListManager) {
-        EventAnnotationProcessor.subscribe(this);
-        
         addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -78,37 +73,30 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         addItem(new FriendItem(ALL, ALL));
         addItem(new FriendItem(GNUTELLA, GNUTELLA));
     }
-    
-    @Override
-    @SwingEDTEvent
-    public void handleEvent(final RosterEvent event) {
-        if(event.getType().equals(User.EventType.USER_ADDED)) {
-            if(friendMap.containsKey(event.getSource().getId()))
-                return;
-            FriendItem item = new FriendItem(event.getSource().getId(), event.getSource().getRenderName());
-            addItem(item);
-            friendMap.put(event.getSource().getId(), event.getSource());
-            friendItemMap.put(event.getSource().getId(), item);
-        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
-            FriendItem item = friendItemMap.remove(event.getSource().getId());
-            friendMap.remove(event.getSource().getId());
-            removeItem(item);
-        } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-        }
-    }   
-    
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
-        for(User user : friendMap.values()) {
-            FriendItem item = friendItemMap.remove(user.getId());
-            friendMap.remove(user.getId());
-            removeItem(item);
-        }
-    }
 
-    @Inject
-    public void register(ListenerSupport<RosterEvent> rosterEventListenerSupport) {
-        rosterEventListenerSupport.addListener(this);
+    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
+        knownFriends.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                FriendItem item;
+                switch(event.getType()) {
+                case ADDED:
+                    item = new FriendItem(event.getSource().getId(), event.getSource().getRenderName());
+                    addItem(item);
+                    friendMap.put(event.getSource().getId(), event.getSource());
+                    friendItemMap.put(event.getSource().getId(), item);
+                    break;
+                case REMOVED:
+                    item = friendItemMap.remove(event.getSource().getId());
+                    friendMap.remove(event.getSource().getId());
+                    removeItem(item);
+                    break;
+                }
+            }
+        });
+        
+       
     }
     
     public void reset() {

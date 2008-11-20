@@ -9,6 +9,7 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
@@ -16,13 +17,11 @@ import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
@@ -32,17 +31,25 @@ public class AddressIQListener implements PacketListener {
     private final XMPPConnectionImpl connection;
     private volatile Address address;
     private final AddressFactory factory; 
-    private final RosterEventHandler rosterEventHandler;
-    private Map<String, Address> pendingAddresses;
+    private final Map<String, Address> pendingAddresses;
+    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+    private final EventListener<FriendPresenceEvent> presenceListener;
 
     public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
-                             Address address) {
+                             Address address,
+                             ListenerSupport<FriendPresenceEvent> presenceSupport) {
         this.connection = connection;
         this.factory = factory;
         this.address = address;
-        this.rosterEventHandler = new RosterEventHandler();
         this.pendingAddresses = new HashMap<String, Address>();
+        this.presenceSupport = presenceSupport;
+        this.presenceListener = new PresenceListener();
+        presenceSupport.addListener(presenceListener);
+    }
+    
+    public void dispose() {
+        presenceSupport.removeListener(presenceListener);
     }
 
     public void processPacket(Packet packet) {
@@ -109,59 +116,36 @@ public class AddressIQListener implements PacketListener {
         connection.sendPacket(queryResult);
     }
     
-    public EventListener<RosterEvent> getRosterListener() {
-        return rosterEventHandler;
-    }
-
-    private void userAdded(User user) {
-        user.addPresenceListener(new EventListener<PresenceEvent>() {
-            public void handleEvent(PresenceEvent event) {
-                final Presence presence = event.getSource();
-                if(event.getType().equals(Presence.EventType.PRESENCE_NEW) && 
-                        presence.getType().equals(Presence.Type.available)) {
-                    presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
-                        
-                        @BlockingEvent
-                        public void handleEvent(FeatureEvent event) {
-                            if(event.getType() == Feature.EventType.FEATURE_ADDED) {
-                                if(event.getSource().getID().equals(LimewireFeature.ID)) {
-                                    synchronized (AddressIQListener.this) {
-                                        if(address != null) {
-                                            sendAddress(address, presence.getJID());
-                                        }
-                                        if(pendingAddresses.containsKey(presence.getJID())) {
-                                            LOG.debugf("updating address on presence {0} to {1}", presence.getJID(), address);
-                                            presence.addFeature(new AddressFeature(pendingAddresses.remove(presence.getJID())));    
-                                        }
-                                    }
+    private class PresenceListener implements EventListener<FriendPresenceEvent> {
+        @Override
+        public void handleEvent(final FriendPresenceEvent presenceEvent) {
+            switch(presenceEvent.getType()) {
+            case ADDED:
+                presenceEvent.getSource().getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
+                    @BlockingEvent
+                    public void handleEvent(FeatureEvent featureEvent) {
+                        if(featureEvent.getType() == Feature.EventType.FEATURE_ADDED
+                        && featureEvent.getSource().getID().equals(LimewireFeature.ID)) {
+                            String jid = presenceEvent.getSource().getPresenceId();
+                            synchronized (AddressIQListener.this) {
+                                if(address != null) {
+                                    sendAddress(address, jid);
+                                }
+                                if(pendingAddresses.containsKey(jid)) {
+                                    LOG.debugf("updating address on presence {0} to {1}", jid, address);
+                                    presenceEvent.getSource().addFeature(new AddressFeature(pendingAddresses.remove(jid)));    
                                 }
                             }
                         }
-                    });
-                } else if(presence.getType().equals(Presence.Type.unavailable)) {
-                    synchronized (AddressIQListener.this) {
-                        pendingAddresses.remove(presence.getJID());    
                     }
+                });
+                break;
+            case REMOVED:
+                synchronized (AddressIQListener.this) {
+                    pendingAddresses.remove(presenceEvent.getSource().getPresenceId());    
                 }
-            }
-        });
-    }
-    
-    private class RosterEventHandler implements EventListener<RosterEvent> {
-        public void handleEvent(RosterEvent event) {
-            if(event.getType().equals(User.EventType.USER_ADDED)) {
-                userAdded(event.getSource());
-            } else if(event.getType().equals(User.EventType.USER_DELETED)) {
-                userDeleted(event.getSource().getId());
-            } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
-                userUpdated(event.getSource());
+                break;
             }
         }
     }
-
-    @SuppressWarnings({"UnusedDeclaration"})
-    private void userUpdated(User user) {}
-
-    @SuppressWarnings({"UnusedDeclaration"})
-    private void userDeleted(String id) {}
 }

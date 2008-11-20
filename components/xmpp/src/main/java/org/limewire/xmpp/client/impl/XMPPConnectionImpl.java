@@ -18,6 +18,7 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
@@ -26,8 +27,7 @@ import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
-import org.limewire.listener.EventRebroadcaster;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -61,10 +61,10 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
+    private final EventBroadcaster<RosterEvent> rosterBroadcaster;
     private final AddressFactory addressFactory;
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     
-    private final EventListenerList<RosterEvent> rosterListeners;
     private final Map<String, UserImpl> users;
     private volatile AddressIQListener addressIQListener;
     private volatile FileTransferIQListener fileTransferIQListener;
@@ -72,25 +72,24 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile LibraryChangedIQListener libChangedIQListener;
     private volatile AddressEvent lastEvent;
     private final XMPPAuthenticator authenticator;
+    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
                        EventBroadcaster<FileOfferEvent> fileOfferBroadcaster,
                        EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster,
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
-                       AddressFactory addressFactory, XMPPAuthenticator authenticator) {
+                       AddressFactory addressFactory, XMPPAuthenticator authenticator,
+                       ListenerSupport<FriendPresenceEvent> presenceSupport) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
-        this.rosterListeners = new EventListenerList<RosterEvent>();
-        if(configuration.getRosterListener() != null) {
-            this.rosterListeners.addListener(configuration.getRosterListener());
-        }
-        this.rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
+        this.rosterBroadcaster = rosterBroadcaster;
         this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
+        this.presenceSupport = presenceSupport;
     }
 
     public void setMode(Presence.Mode mode) {
@@ -135,8 +134,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 if (LOG.isInfoEnabled())
                     LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
                 connection.disconnect();
-                rosterListeners.removeListener(addressIQListener.getRosterListener());
-                rosterListeners.removeListener(authTokenIQListener.getRosterListener());
+                addressIQListener.dispose();
+                authTokenIQListener.dispose();
                 addressIQListener = null;
                 fileTransferIQListener = null;
                 authTokenIQListener = null;
@@ -197,16 +196,14 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(lastEvent != null) {
                         address = lastEvent.getSource();
                     }
-                    addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address);     
+                    addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, presenceSupport);     
                 }                                   
-                connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());                    
-                XMPPConnectionImpl.this.rosterListeners.addListener(addressIQListener.getRosterListener());
+                connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 
                 fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);
                 connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
                 
-                authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, authenticator);
-                XMPPConnectionImpl.this.rosterListeners.addListener(authTokenIQListener.getRosterListener());
+                authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, authenticator, presenceSupport);
                 connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
 
                 libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
@@ -232,7 +229,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                         LOG.debug("user " + user + " added");
                     }
                     users.put(id, user);
-                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_ADDED));
+                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_ADDED));
                 }
                 users.notifyAll();
             }
@@ -254,7 +251,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " updated");
                     }                    
-                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
+                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
                 }
                 users.notifyAll();
             }
@@ -268,7 +265,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " removed");
                     }
-                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
+                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
                 }
                 users.notifyAll();
             }

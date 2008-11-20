@@ -11,10 +11,10 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -22,13 +22,12 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
@@ -45,19 +44,16 @@ import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.User;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
-public class LibraryTableFactoryImpl implements LibraryTableFactory,
-        RegisteringEventListener<RosterEvent> {
+public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     private IconManager iconManager;
 
@@ -107,9 +103,25 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
         this.remoteItemPropFactory = remoteItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        EventAnnotationProcessor.subscribe(this);
     }
 
+    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
+        knownFriends.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                switch(event.getType()) {
+                case ADDED:
+                    friendList.add(new SharingTarget(event.getSource()));
+                    break;
+                case REMOVED:
+                    friendList.remove(new SharingTarget(event.getSource()));
+                    break;
+                }
+            }
+        });
+    }
+    
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, LibrarySharePanel sharePanel) {
@@ -343,48 +355,5 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
             }
             return new RemoteFileTransferable(files);
         }
-    }
-
-    @Inject
-    @Override
-    public void register(ListenerSupport<RosterEvent> listenerSupport) {
-        listenerSupport.addListener(this);
-    }
-
-    @Override
-    public void handleEvent(RosterEvent event) {
-        if (event.getType().equals(User.EventType.USER_ADDED)) {
-            addFriend(event.getSource());
-        } else if (event.getType().equals(User.EventType.USER_DELETED)) {
-            removeFriend(event.getSource());
-        }
-    }
-
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
-        SwingUtils.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                friendList.clear();
-            }
-        });
-    }
-
-    private void removeFriend(final Friend friend) {
-        SwingUtils.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                friendList.remove(new SharingTarget(friend));
-            }
-        });
-    }
-
-    private void addFriend(final Friend friend) {
-        SwingUtils.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                friendList.add(new SharingTarget(friend));
-            }
-        });
     }
 }

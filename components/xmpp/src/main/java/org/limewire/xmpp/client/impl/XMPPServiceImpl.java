@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
@@ -39,6 +40,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
+    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
     private Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
@@ -51,11 +53,13 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
                     Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
                     Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
-                    AddressFactory addressFactory, XMPPAuthenticator authenticator) {
+                    AddressFactory addressFactory, XMPPAuthenticator authenticator,
+                    ListenerSupport<FriendPresenceEvent> presenceSupport) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
+        this.presenceSupport = presenceSupport;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
@@ -137,7 +141,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         synchronized (this) {
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterBroadcaster
                     .get(), fileOfferBroadcaster.get(), libraryChangedBroadcaster.get(),
-                    connectionBroadcaster.get(), addressFactory, authenticator);
+                    connectionBroadcaster.get(), addressFactory, authenticator, presenceSupport);
             connections.add(connection);
         }
     }

@@ -19,7 +19,6 @@ public class LimeWireUiFriendsModule extends AbstractModule {
         bind(ConversationPaneFactory.class).toProvider(
                 FactoryProvider.newFactory(
                         ConversationPaneFactory.class, ConversationPane.class));
-        bind(FriendsPaneRosterListener.class);
         bind(XMPPErrorListener.class).to(LoginPanel.class);
         bind(FileOfferHandlerImpl.class);
         bind(XMPPConnectionListenerImpl.class);

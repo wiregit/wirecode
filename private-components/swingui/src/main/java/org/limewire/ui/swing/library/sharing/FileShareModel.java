@@ -22,7 +22,7 @@ public class FileShareModel implements LibraryShareModel {
     public FileShareModel(ShareListManager shareListManager) {
         this.shareListManager = shareListManager;
         gnutellaList = shareListManager.getGnutellaShareList();
-    }
+    }   
     
     @Override
     public void shareFriend(SharingTarget friend) {        
@@ -61,7 +61,7 @@ public class FileShareModel implements LibraryShareModel {
     public boolean isShared(SharingTarget friend){
         //Handle gnutella 
         if(friend.isGnutellaNetwork()){
-            return gnutellaList.getSwingModel().contains(fileItem);
+            return gnutellaList.contains(fileItem.getFile());
         }
         
         //check for share all settings
@@ -84,7 +84,7 @@ public class FileShareModel implements LibraryShareModel {
         }
         
         //check individual file share settings
-        return shareListManager.getOrCreateFriendShareList(friend.getFriend()).getSwingModel().contains(fileItem);
+        return shareListManager.getOrCreateFriendShareList(friend.getFriend()).contains(fileItem.getFile());
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
@@ -18,9 +19,6 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
-import org.limewire.xmpp.api.client.Presence;
-import org.limewire.xmpp.api.client.PresenceEvent;
-import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -40,8 +38,6 @@ public class XMPPAddressResolver implements AddressResolver {
     private final XMPPService xmppService;
 
     private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
-    
-    private final PresenceHandler presenceHandler = new PresenceHandler();
 
     @Inject
     public XMPPAddressResolver(XMPPService xmppService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
@@ -50,10 +46,9 @@ public class XMPPAddressResolver implements AddressResolver {
         
     }
     
-    @Inject
-    public void register(SocketsManager socketsManager,  ListenerSupport<RosterEvent> rosterListenerSupport) {
+    @Inject void register(SocketsManager socketsManager, ListenerSupport<FriendPresenceEvent> presenceSupport) {
         socketsManager.registerResolver(this);
-        rosterListenerSupport.addListener(new RosterHandler());
+        presenceSupport.addListener(new PresenceHandler());
     }
     
     @Override
@@ -128,35 +123,22 @@ public class XMPPAddressResolver implements AddressResolver {
             observer.resolved(((AddressFeature)resolvedPresence.getFeature(AddressFeature.ID)).getFeature());
         }
     }
-
-    private class RosterHandler implements EventListener<RosterEvent> {
-
-        @Override
-        public void handleEvent(RosterEvent event) {
-            if (event.getType() == User.EventType.USER_ADDED) {
-                User user = event.getSource();
-                LOG.debugf("user added: {0}", user);
-                user.addPresenceListener(presenceHandler);
-            }
-        }
-        
-    }
     
-    private class PresenceHandler implements EventListener<PresenceEvent> {
-
+    private class PresenceHandler implements EventListener<FriendPresenceEvent> {
         @Override
-        public void handleEvent(PresenceEvent event) {
-            final Presence presence = event.getSource();
-            if (presence.getMode() == Presence.Mode.available && event.getType() == Presence.EventType.PRESENCE_NEW) {
+        public void handleEvent(FriendPresenceEvent event) {
+            switch(event.getType()) {
+            case ADDED:
+                final FriendPresence presence = event.getSource();
                 presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
                     @Override
                     public void handleEvent(FeatureEvent event) {
                         if (presence.hasFeatures(AuthTokenFeature.ID, AddressFeature.ID)) {
-                            LOG.debugf("presence with address and auth-token became available: {0}", presence.getJID());
+                            LOG.debugf("presence with address and auth-token became available: {0}", presence.getPresenceId());
                             connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
                         }
                     }
-                });                
+                });
             }
         }
     }

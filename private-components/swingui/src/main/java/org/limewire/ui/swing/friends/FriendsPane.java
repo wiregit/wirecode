@@ -55,8 +55,13 @@ import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.ItemNotifyable;
@@ -106,7 +111,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
     private static final int ICON_WIDTH_FUDGE_FACTOR = 4;
     private static final Log LOG = LogFactory.getLog(FriendsPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
-    private static final String ALL_PRESENCE_UPDATES_TOPIC_PATTERN = PresenceUpdateEvent.buildTopic(".*");
     private static final Color LIGHT_GREY = new Color(218, 218, 218);
     private static final int TWENTY_MINUTES_IN_MILLIS = 1200000;
     
@@ -128,7 +132,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
 
     @Inject
     public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater,
-            ShareListManager libraryManager, FriendSharingDisplay friendSharing) {
+            ShareListManager libraryManager, FriendSharingDisplay friendSharing,
+            ListenerSupport<FriendPresenceEvent> presenceSupport) {
         super(new BorderLayout());
         this.icons = icons;
         this.chatFriends = new BasicEventList<ChatFriend>();
@@ -154,6 +159,13 @@ public class FriendsPane extends JPanel implements FriendRemover {
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
         EventAnnotationProcessor.subscribe(this);
+        presenceSupport.addListener(new EventListener<FriendPresenceEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendPresenceEvent event) {
+                handlePresenceEvent(event);
+            }
+        });
         
         idleTimer = new IdleTimer();
         idleTimer.start();
@@ -369,29 +381,29 @@ public class FriendsPane extends JPanel implements FriendRemover {
         }
     }
     
-    @RuntimeTopicPatternEventSubscriber(methodName="getPresenceUpdateTopicPatternName")
-    public void handlePresenceUpdate(String topic, PresenceUpdateEvent event) {
-        LOG.debugf("handling presence {0}, {1}", event.getPresence().getJID(), event.getPresence().getType());
-        final Presence presence = event.getPresence();
-        final Friend friend = event.getFriend();
+    private void handlePresenceEvent(FriendPresenceEvent event) {
+        LOG.debugf("handling presence event {0}", event);
+        FriendPresence presence = event.getSource();
+        Friend friend = presence.getFriend();
         ChatFriend chatFriend = idToFriendMap.get(friend.getId());
-        switch(presence.getType()) {
-            case available:
-                if(chatFriend == null) {
-                    chatFriend = new ChatFriendImpl(presence, myID);
-                    chatFriends.add(chatFriend);
-                    idToFriendMap.put(friend.getId(), chatFriend);
+        switch(event.getType()) {
+        case ADDED:
+        case UPDATE:
+            if(chatFriend == null) {
+                chatFriend = new ChatFriendImpl((Presence)presence, myID);
+                chatFriends.add(chatFriend);
+                idToFriendMap.put(friend.getId(), chatFriend);
+            }
+            chatFriend.update();
+            break;
+        case REMOVED:
+            if (chatFriend != null) {
+                if (shouldRemoveFromFriendsList(chatFriend)) {
+                    chatFriends.remove(idToFriendMap.remove(friend.getId()));
                 }
                 chatFriend.update();
-                break;
-            case unavailable:
-                if (chatFriend != null) {
-                    if (shouldRemoveFromFriendsList(chatFriend)) {
-                        chatFriends.remove(idToFriendMap.remove(friend.getId()));
-                    }
-                    chatFriend.update();
-                }
-                break;
+            }
+            break;
         }
         friendsCountUpdater.setFriendsCount(chatFriends.size());
     }
@@ -431,10 +443,6 @@ public class FriendsPane extends JPanel implements FriendRemover {
     
     public String getMessagingTopicPatternName() {
         return ALL_CHAT_MESSAGES_TOPIC_PATTERN;
-    }
-    
-    public String getPresenceUpdateTopicPatternName() {
-        return ALL_PRESENCE_UPDATES_TOPIC_PATTERN;
     }
     
     public void setLoggedInID(String id) {
