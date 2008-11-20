@@ -1,33 +1,31 @@
 package org.limewire.ui.swing.friends.settings;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import org.limewire.core.api.xmpp.XMPPResourceFactory;
+import org.limewire.xmpp.api.client.PasswordManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ApplicationServices;
-import org.apache.commons.codec.binary.Base64;
-import org.limewire.security.SHA1;
-import org.limewire.util.StringUtils;
 
 @Singleton
 public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigurationManager {
     
-    private PasswordManager passwordManager;
+    private final PasswordManager passwordManager;
     private HashMap<String,XMPPAccountConfiguration> configs; // Indexed by label
     private XMPPAccountConfiguration autoLoginConfig = null;
+    private final String resource;
     
     @Inject
     public XMPPAccountConfigurationManagerImpl(PasswordManager passwordManager,
-            ApplicationServices applicationServices) {
+            XMPPResourceFactory xmppResourceFactory) {
         this.passwordManager = passwordManager;
-        // The resource is set to the hash of the GUID to uniquely identify
-        // the instance of the client
-        byte[] hash = new SHA1().digest(applicationServices.getMyGUID());
-        String resource = StringUtils.getUTF8String(Base64.encodeBase64(hash));
         configs = new HashMap<String,XMPPAccountConfiguration>();
+        resource = xmppResourceFactory.getResource();
         for(String server : XMPPSettings.XMPP_SERVERS.getValue()) {
             try {
                 XMPPAccountConfiguration config =
@@ -54,7 +52,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                 // Malformed string - no soup for you!
             } catch(IllegalArgumentException ignored) {
                 // Empty username - no soup for you!
-            } catch(XMPPEncryptionException ignored) {
+            } catch(IOException ignored) {
                 // Error decrypting password - no soup for you!
             }
         }
@@ -93,7 +91,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                 autoLoginConfig = config;
             } catch (IllegalArgumentException ignored) {
                 // Empty username or password - no soup for you!
-            } catch (XMPPEncryptionException ignored) {
+            } catch (IOException ignored) {
                 // Error encrypting password - no more Soup Nazi jokes for you!
             }
         }

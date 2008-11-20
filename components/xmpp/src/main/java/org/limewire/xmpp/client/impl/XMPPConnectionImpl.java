@@ -53,8 +53,6 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 
-
-
 public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);

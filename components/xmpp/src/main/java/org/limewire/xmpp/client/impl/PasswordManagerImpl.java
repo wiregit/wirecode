@@ -1,27 +1,30 @@
-package org.limewire.ui.swing.friends.settings;
+package org.limewire.xmpp.client.impl;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.prefs.Preferences;
+
+import org.limewire.xmpp.api.client.PasswordManager;
+import org.limewire.security.certificate.CipherProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.limewire.security.certificate.CipherProvider;
 
 @Singleton
-public class PasswordManager {
+public class PasswordManagerImpl implements PasswordManager {
 
     private static final String PREFERENCES_NODE = "/limewire/xmpp/auth";
 
     private CipherProvider cipherProvider;
 
     @Inject
-    public PasswordManager(CipherProvider cipherProvider) {
+    public PasswordManagerImpl(CipherProvider cipherProvider) {
         this.cipherProvider = cipherProvider;
     }
 
-    public String loadPassword(String userName) throws XMPPEncryptionException {
+    @Override
+    public String loadPassword(String userName) throws IOException {
         if (userName == null || userName.equals("")) {
             throw new IllegalArgumentException("User Name cannot be null or empty String");
         }
@@ -33,13 +36,14 @@ public class PasswordManager {
         try {
             return pwd.decryptPassword();
         } catch (IOException e) {
-            throw new XMPPEncryptionException("Error decrypting password", e);
+            throw new IOException("Error decrypting password", e);
         } catch (GeneralSecurityException e) {
-            throw new XMPPEncryptionException("Error decrypting password", e);
+            throw new IOException("Error decrypting password", e);
         }
     }
 
-    public void storePassword(String userName, String rawPassword) throws XMPPEncryptionException {
+    @Override
+    public void storePassword(String userName, String rawPassword) throws IOException {
         if (rawPassword == null || rawPassword.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty String");
         }
@@ -50,12 +54,13 @@ public class PasswordManager {
         try {
             prefs.put(userName, pwd.encryptPassword());
         } catch (NoSuchAlgorithmException e) {
-            throw new XMPPEncryptionException("Error encrypting password", e);
+            throw new IOException("Error encrypting password", e);
         } catch (IOException e) {
-            throw new XMPPEncryptionException("Error encrypting password", e);
+            throw new IOException("Error encrypting password", e);
         }
     }
 
+    @Override
     public void removePassword(String userName) {
         Preferences prefs = getPreferences();
         prefs.remove(userName);

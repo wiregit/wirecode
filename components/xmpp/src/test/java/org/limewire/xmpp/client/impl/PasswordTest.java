@@ -1,14 +1,18 @@
-package org.limewire.ui.swing.friends.settings;
+package org.limewire.xmpp.client.impl;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.AbstractModule;
+import java.io.IOException;
+
 import junit.framework.Test;
+
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.security.LimeWireSecurityModule;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.util.BaseTestCase;
-import org.limewire.http.httpclient.LimeHttpClient;
-import org.limewire.http.httpclient.SimpleLimeHttpClient;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Unit tests for {@link Password}
@@ -62,7 +66,7 @@ public class PasswordTest extends BaseTestCase {
         try {
             passwd.decryptPassword();
             fail("Should have encountered error decrypting password!");
-        } catch (XMPPEncryptionException e) {
+        } catch (IOException e) {
             // received expected error    
         }
     }
