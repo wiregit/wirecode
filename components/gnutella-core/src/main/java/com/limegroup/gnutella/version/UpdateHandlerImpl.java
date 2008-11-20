@@ -181,6 +181,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
     
+    private volatile UpdateCollection updateCollection;
+    
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
@@ -366,6 +368,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             networkUpdateSanityChecker.get().handleValidResponse(handler, RequestType.VERSION);
 
         UpdateCollection uc = updateCollectionFactory.createUpdateCollection(xml);
+        updateCollection = uc;
         if (LOG.isDebugEnabled())
             LOG.debug("Got a collection with id: " + uc.getId() + ", from " + updateType + ".  Current id is: " + _lastId);
 
@@ -379,7 +382,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
                 if (_lastId != IGNORE_ID)
                     doHttpMaxFailover(uc);
             } else if (uc.getId() <= _lastId) {
-                checkForStaleUpdateAndMaybeDoHttpFailover(uc);
+                checkForStaleUpdateAndMaybeDoHttpFailover();
                 addSourceIfIdMatches(handler, uc.getId());
             } else {// is greater
                 storeAndUpdate(data, uc, updateType);
@@ -389,7 +392,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             // on first load:
             // a) always check for stale
             // b) update if we didn't get an update before this ran.
-            checkForStaleUpdateAndMaybeDoHttpFailover(uc);
+            checkForStaleUpdateAndMaybeDoHttpFailover();
             if (uc.getId() > _lastId)
                 storeAndUpdate(data, uc, updateType);
             break;
@@ -506,7 +509,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     /**
      * begins an http failover.
      */
-    private void checkForStaleUpdateAndMaybeDoHttpFailover(UpdateCollection uc) {
+    private void checkForStaleUpdateAndMaybeDoHttpFailover() {
         LOG.debug("checking for timeout http failover");
         long monthAgo = clock.now() - ONE_MONTH;
         if (UpdateSettings.LAST_UPDATE_TIMESTAMP.getValue() < monthAgo && // more than a month ago
@@ -1022,5 +1025,10 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
             tryToDownloadUpdates();
         }
+    }
+
+    @Override
+    public UpdateCollection getUpdateCollection() {
+        return updateCollection;
     }
 }

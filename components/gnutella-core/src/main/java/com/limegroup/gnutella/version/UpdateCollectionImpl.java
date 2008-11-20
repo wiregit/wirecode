@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.version;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
     /**
      * The list of UpdateData's in this collection.
      */
-    private List<UpdateData> updateDataList = new LinkedList<UpdateData>();
+    private final List<UpdateData> updateDataList;
     
     /**
      * The list of DownloadDatas in this collection.
@@ -52,7 +53,9 @@ public class UpdateCollectionImpl implements UpdateCollection {
         this.applicationServices = applicationServices;
         if(LOG.isTraceEnabled())
             LOG.trace("Parsing Update XML: " + xml);
-        parse(xml);
+        List<UpdateData> updateData = new ArrayList<UpdateData>();
+        parse(xml, updateData);
+        updateDataList = Collections.unmodifiableList(updateData);
     }
     
     /**
@@ -122,8 +125,9 @@ public class UpdateCollectionImpl implements UpdateCollection {
 
     /**
      * Parses the XML and fills in the data of this collection.
+     * @param updateDataList 
      */
-    private void parse(String xml) {
+    private void parse(String xml, List<UpdateData> updateDataList) {
         Document d;
         try {
             d = XMLUtils.getDocument(xml, LOG);
@@ -132,7 +136,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
             return;
         }
         
-        parseDocumentElement(d.getDocumentElement());
+        parseDocumentElement(d.getDocumentElement(), updateDataList);
     }
     
     /**
@@ -141,8 +145,9 @@ public class UpdateCollectionImpl implements UpdateCollection {
      * This requires that the element be "update" and has the attribute 'id'.
      * The 'timestamp' attribute is checked (but is optional), as are child 'msg'
      * elements.
+     * @param updateDataList 
      */
-    private void parseDocumentElement(Node doc) {
+    private void parseDocumentElement(Node doc, List<UpdateData> updateDataList) {
         // Ensure the document element is the 'update' element.
         if(!"update".equals(doc.getNodeName()))
             return;
@@ -178,7 +183,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
             if("msg".equals(child.getNodeName()))
-                parseMsgItem(child);
+                parseMsgItem(child, updateDataList);
         }
     }
     
@@ -206,8 +211,9 @@ public class UpdateCollectionImpl implements UpdateCollection {
      *
      * If any values exist but error while parsing, the entire block is considered
      * invalid and ignored.
+     * @param updateDataList 
      */
-    private void parseMsgItem(Node msg) {
+    private void parseMsgItem(Node msg, List<UpdateData> updateDataList) {
         UpdateData data = new UpdateData();
         
         NamedNodeMap attr = msg.getAttributes();
@@ -306,7 +312,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
         for(int i = 0; i < children.getLength(); i++) {
             Node child = children.item(i);
             if("lang".equals(child.getNodeName()))
-                parseLangItem((UpdateData)data.clone(), child);
+                parseLangItem((UpdateData)data.clone(), child, updateDataList);
         }
     }
     
@@ -316,8 +322,9 @@ public class UpdateCollectionImpl implements UpdateCollection {
      * Accepts attributes 'id', 'button1', and 'button2'.
      * 'id' is REQUIRD.  others are optional.
      * REQUIRES a text content inside.
+     * @param updateDataList 
      */
-    private void parseLangItem(UpdateData data, Node lang) {
+    private void parseLangItem(UpdateData data, Node lang, List<UpdateData> updateDataList) {
         // Parse the id & url & current attributes -- all MUST exist.
         NamedNodeMap attr = lang.getAttributes();
         String id = getAttributeText(attr, "id");

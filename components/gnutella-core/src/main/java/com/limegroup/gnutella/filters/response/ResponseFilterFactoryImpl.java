@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters.response;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -13,18 +14,21 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     private final Provider<ResponseTypeFilter> typeFilter;
     private final Provider<SecureResultFilter> secureFilter;
     private final Provider<ProgramsFilter> programsFilter;
+    private final Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter;
     
     @Inject
     public ResponseFilterFactoryImpl(Provider<MandragoreWormFilter> wormFilter,
             Provider<ResponseQueryFilter> queryFilter,
             Provider<ResponseTypeFilter> typeFilter,
             Provider<SecureResultFilter> secureFilter,
-            Provider<ProgramsFilter> programsFilter) {
+            Provider<ProgramsFilter> programsFilter,
+            Provider<WhiteListUpdateUrnFilter> whiteListUpdateUrnFilter) {
         this.wormFilter = wormFilter;
         this.queryFilter = queryFilter;
         this.typeFilter = typeFilter;
         this.secureFilter = secureFilter;
         this.programsFilter = programsFilter;
+        this.whiteListUpdateUrnFilter = whiteListUpdateUrnFilter;
     }
     
     @Override
@@ -37,7 +41,7 @@ class ResponseFilterFactoryImpl implements ResponseFilterFactory {
         filters.add(secureFilter.get());
         filters.add(programsFilter.get());
         
-        return new CompoundResponseFilter(filters);
+        return new CompoundResponseFilter(filters, Collections.singletonList(whiteListUpdateUrnFilter.get()));
     }
 
 }

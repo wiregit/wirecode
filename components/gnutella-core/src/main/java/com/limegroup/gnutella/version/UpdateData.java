@@ -11,7 +11,7 @@ import com.limegroup.gnutella.URN;
  *
  * Contains information if the current architecture applies to this update.
  */
-class UpdateData implements Cloneable, UpdateInformation {
+public class UpdateData implements Cloneable, UpdateInformation {
     
     private static final Log LOG = LogFactory.getLog(UpdateData.class);
     
