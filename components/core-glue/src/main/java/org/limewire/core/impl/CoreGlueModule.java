@@ -1,6 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.api.magnet.MagnetFactory;
@@ -30,6 +31,7 @@ public class CoreGlueModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ActivityCallback.class).to(GlueActivityCallback.class);
+        bind(GuiCallbackService.class).to(GlueActivityCallback.class);
         bind(QueryReplyListenerList.class).to(GlueActivityCallback.class);
         bind(DownloadListenerList.class).to(GlueActivityCallback.class);
         bind(Application.class).to(ApplicationImpl.class);

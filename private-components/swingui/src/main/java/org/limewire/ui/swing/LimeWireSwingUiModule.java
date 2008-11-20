@@ -1,5 +1,6 @@
 package org.limewire.ui.swing;
 
+import org.limewire.ui.swing.callback.GuiCallbackImpl;
 import org.limewire.ui.swing.components.LimeWireUiComponentsModule;
 import org.limewire.ui.swing.downloads.LimeWireUiDownloadsModule;
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
@@ -21,6 +22,7 @@ public class LimeWireSwingUiModule extends AbstractModule {
     
     @Override
     protected void configure() {
+        bind(GuiCallbackImpl.class);
         install(new LimeWireUiUtilModule());
         install(new LimeWireUiSearchModule());
         install(new LimeWireUiNavModule());

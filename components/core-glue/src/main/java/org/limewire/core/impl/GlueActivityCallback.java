@@ -7,6 +7,8 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.core.api.callback.GuiCallback;
+import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
@@ -30,13 +32,15 @@ import com.limegroup.gnutella.version.UpdateInformation;
 
 @Singleton
 class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
-        DownloadListenerList {
+        DownloadListenerList, GuiCallbackService {
 
     private final SortedMap<byte[], List<QueryReplyListener>> queryReplyListeners;
 
     private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
 
     private final DownloadManager downloadManager;
+    
+    private GuiCallback guiCallback = null;
     
     @Inject
     public GlueActivityCallback(DownloadManager downloadManager) {
@@ -247,5 +251,14 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     public void showDownloads() {
         // TODO Auto-generated method stub
     }
-
+    
+    public void setGuiCallback(GuiCallback guiCallback) {
+        this.guiCallback = guiCallback;
+    }
+    
+    
+    public void handleSaveLocationException() {
+        //TODO implement real handler
+        guiCallback.handleSaveLocationException();
+    }
 }
