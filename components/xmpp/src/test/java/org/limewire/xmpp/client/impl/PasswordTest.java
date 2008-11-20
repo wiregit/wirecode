@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import junit.framework.Test;
 
+import org.apache.http.client.HttpClient;
+
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.security.LimeWireSecurityModule;
@@ -34,6 +36,7 @@ public class PasswordTest extends BaseTestCase {
         Injector injector = Guice.createInjector(new LimeWireSecurityModule(), new AbstractModule() {
             @Override
             protected void configure() {
+                bind(HttpClient.class).to(SimpleLimeHttpClient.class);
                 bind(LimeHttpClient.class).to(SimpleLimeHttpClient.class);
             }
         });
