@@ -5,8 +5,6 @@ import java.awt.Color;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
@@ -21,6 +19,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
+
+import net.miginfocom.swing.MigLayout;
 
 
 
@@ -40,7 +40,7 @@ public class SetupPage1 extends WizardPage {
     private JCheckBox filterCheck;
 
     private String associationsAndStartupTitle = I18n.tr("File Associations and Startup");
-    private String associationsText = I18n.tr("Associate .magnet and .torrent fiels with LimeWire");    
+    private String associationsText = I18n.tr("Associate .magnet and .torrent files with LimeWire");    
     private String startupText = I18n.tr("Launch LimeWire at Startup");
     
     private JCheckBox associationCheck;

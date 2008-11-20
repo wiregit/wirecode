@@ -27,6 +27,8 @@ import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventRebroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -61,7 +63,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
-    private final EventBroadcaster<RosterEvent> rosterBroadcaster;
+    private final EventListenerList<RosterEvent> rosterListeners;
     private final AddressFactory addressFactory;
     private volatile org.jivesoftware.smack.XMPPConnection connection;
     
@@ -87,7 +89,11 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
-        this.rosterBroadcaster = rosterBroadcaster;
+        this.rosterListeners = new EventListenerList<RosterEvent>();
+        if(configuration.getRosterListener() != null) {
+            this.rosterListeners.addListener(configuration.getRosterListener());
+        }
+        this.rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
         this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
         this.presenceSupport = presenceSupport;
     }
@@ -229,7 +235,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                         LOG.debug("user " + user + " added");
                     }
                     users.put(id, user);
-                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_ADDED));
+                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_ADDED));
                 }
                 users.notifyAll();
             }
@@ -251,7 +257,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " updated");
                     }                    
-                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
+                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_UPDATED));
                 }
                 users.notifyAll();
             }
@@ -265,7 +271,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " removed");
                     }
-                    rosterBroadcaster.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
+                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
                 }
                 users.notifyAll();
             }
