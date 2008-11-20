@@ -129,6 +129,18 @@ public class LoginPanel extends JPanel
         passwordField.getActionMap().put("signin", signinAction);
 
         rememberMeCheckbox = new JCheckBox(tr("Remember me"));
+        rememberMeCheckbox.addActionListener( new ActionListener() {
+           @Override
+            public void actionPerformed(ActionEvent e) {
+               String friendlyName = (String)serviceComboBox.getSelectedItem();
+               XMPPConnectionConfiguration config =
+                   xmppEventHandler.getConfigByFriendlyName(friendlyName);
+               if(!rememberMeCheckbox.isSelected()) {
+                   //immediatley having remember me action take effect if it is not to be remembered.
+                   config.setAutoLogin(false);
+               }
+            } 
+        });
         signInButton = new JButton(signinAction);
         registerButton = new JButton(tr("Sign up"));
 
