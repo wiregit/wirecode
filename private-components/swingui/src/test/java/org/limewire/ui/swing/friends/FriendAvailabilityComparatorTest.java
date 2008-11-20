@@ -40,8 +40,8 @@ public class FriendAvailabilityComparatorTest extends TestCase {
         
         String[] sorted = new String[] {"b_chat", 
                                         "a_available", "b_available",
-                                        "A_away", "b_away",
-                                        "a_xa", "b_xa",
+                                        "A_away", 
+                                        "a_xa", "b_away", "b_xa",
                                         "a_dnd", "b_dnd"};
         
         assertOrder(sorted);
