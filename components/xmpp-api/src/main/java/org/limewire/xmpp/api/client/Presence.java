@@ -29,18 +29,26 @@ public interface Presence extends FriendPresence {
     enum Mode {
         // lower case enum values to allow direct mapping from to the Mode enum
         // defined in smack
-        chat(I18nMarker.marktr("Free to chat")),
-        available(I18nMarker.marktr("Available")),
-        away(I18nMarker.marktr("Away")),
-        xa(I18nMarker.marktr("Away for a while")),
-        dnd(I18nMarker.marktr("Do not disturb"));
+        chat(I18nMarker.marktr("Free to chat"), 1),
+        available(I18nMarker.marktr("Available"), 1),
+        away(I18nMarker.marktr("Away"), 2),
+        xa(I18nMarker.marktr("Away for a while"), 2),
+        dnd(I18nMarker.marktr("Do not disturb"), 3);
 
         private final String name;
-
-        Mode(String name) {
+        private final int order;
+        
+        Mode(String name, int order) {
             this.name = name;
+            this.order = order;
         }
-
+        
+        /**
+         * @return the Order that this Mode should be sorted against other modes.
+         */
+        public int getOrder() {
+            return order;
+        }
 
         public String toString() {
             return name;
