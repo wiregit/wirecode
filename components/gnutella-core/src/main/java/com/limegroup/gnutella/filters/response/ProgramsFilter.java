@@ -3,11 +3,9 @@ package com.limegroup.gnutella.filters.response;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.MediaType;
 
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 
-@Singleton
 class ProgramsFilter implements ResponseFilter {
 
     @Override

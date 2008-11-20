@@ -6,7 +6,9 @@ import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
+@Singleton
 class ResponseFilterFactoryImpl implements ResponseFilterFactory {
     
     private final Provider<MandragoreWormFilter> wormFilter;

@@ -47,6 +47,7 @@ public interface UpdateHandler {
     public byte[] getOldUpdateResponse();
 
     /**
+     * Returns the currently known update collection.
      * @return null if there is none
      */
     public UpdateCollection getUpdateCollection();

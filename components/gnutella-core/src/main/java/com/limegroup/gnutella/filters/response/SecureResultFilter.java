@@ -3,12 +3,10 @@ package com.limegroup.gnutella.filters.response;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.security.SecureMessage;
 
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-@Singleton
 class SecureResultFilter implements ResponseFilter {
 
     @Override

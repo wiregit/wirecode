@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.filters.response;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -14,8 +13,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
  * Allows responses to go through whose sha1 urns match one of the urns
  * in the {@link UpdateCollection}. 
  */
-@Singleton
-public class WhiteListUpdateUrnFilter implements ResponseFilter {
+class WhiteListUpdateUrnFilter implements ResponseFilter {
 
     private final UpdateHandler updateHandler;
 

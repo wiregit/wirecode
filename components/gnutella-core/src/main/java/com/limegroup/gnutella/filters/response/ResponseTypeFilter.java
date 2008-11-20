@@ -3,12 +3,10 @@ package com.limegroup.gnutella.filters.response;
 import org.limewire.security.SecureMessage;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
 
-@Singleton
 class ResponseTypeFilter implements ResponseFilter {
     
     private final SearchServices searchServices;
