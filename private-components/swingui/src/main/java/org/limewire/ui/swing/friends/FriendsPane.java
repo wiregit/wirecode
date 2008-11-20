@@ -634,7 +634,8 @@ public class FriendsPane extends JPanel implements FriendRemover {
                 .append("<b>").append(chatFriend.getName()).append("</b><br/>");
             String status = chatFriend.getStatus();
             if (status != null && status.length() > 0) {
-                tooltip.append("<div color=\"rgb(255,255,255)\">").append(status).append("</div>");
+                //using width to limit the size of the tooltip, unfortunatley looks like max-width does not work 
+                tooltip.append("<div color=\"rgb(255,255,255)\" style=\"width: 300px;\">").append(status).append("</div>");
             }
             tooltip.append("</body>")
                 .append("</html>");
