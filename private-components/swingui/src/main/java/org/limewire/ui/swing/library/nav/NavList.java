@@ -17,13 +17,9 @@ import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.LibraryState;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-
-import ca.odell.glazedlists.EventList;
 
 class NavList extends JXPanel {
     
@@ -104,15 +100,6 @@ class NavList extends JXPanel {
         return removed;
     }
     
-    NavPanel updateNavPanelForFriend(Friend friend, LibraryState state, EventList<RemoteFileItem> eventList) {
-        NavPanel panel = getPanelForFriend(friend);
-        if(panel != null) {
-            panel.updateLibraryState(state);
-            panel.updateLibrary(eventList, state);
-        }
-        return panel;
-    }
-    
     NavPanel ensureFriendVisible(Friend friend) {
         NavPanel panel = getPanelForFriend(friend);
         if(panel != null) {
@@ -154,6 +141,7 @@ class NavList extends JXPanel {
         navPanels.add(insertIdx, panel);
         panelContainer.add(panel, "alignx left, aligny top, growx, wrap", insertIdx);
 
+        panel.setParentList(this);
         panel.getActionMap().put(NavKeys.MOVE_DOWN, panelMoveDownAction);
         panel.getActionMap().put(NavKeys.MOVE_UP, panelMoveUpAction);
         
@@ -210,6 +198,7 @@ class NavList extends JXPanel {
     }
     
     void removePanel(NavPanel panel) {
+        panel.setParentList(null);
         navPanels.remove(panel);
         panelContainer.remove(panel);
         checkVisibility();

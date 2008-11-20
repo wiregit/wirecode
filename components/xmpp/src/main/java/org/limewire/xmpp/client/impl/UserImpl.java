@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jivesoftware.smack.RosterEntry;
@@ -13,6 +15,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.listener.EventListener;
@@ -48,7 +51,7 @@ public class UserImpl implements User {
     private final Object presenceLock;
     
     @GuardedBy("presenceLock")
-    private final HashMap<String, Presence> presences;
+    private final SortedMap<String, Presence> presences;
 
     @GuardedBy("presenceLock")
     private String activePresenceJid;
@@ -68,7 +71,7 @@ public class UserImpl implements User {
         this.id = id;
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
-        this.presences = new HashMap<String, Presence>();
+        this.presences = new TreeMap<String, Presence>(String.CASE_INSENSITIVE_ORDER);
         this.presenceListeners = new EventListenerList<PresenceEvent>();
         this.activePresenceJid = null;
         this.connection = connection;
@@ -115,6 +118,13 @@ public class UserImpl implements User {
         t.start();
     }
 
+    @Override
+    public Map<String, FriendPresence> getFriendPresences() {
+        synchronized (presenceLock) {
+            return Collections.unmodifiableMap(new HashMap<String, FriendPresence>(presences));
+        }
+    }
+    
     @Override
     public Map<String, Presence> getPresences() {
         synchronized (presenceLock) {

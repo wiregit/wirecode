@@ -3,14 +3,15 @@ package org.limewire.ui.swing.friends;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.Network;
+import org.limewire.listener.EventListener;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.core.api.friend.Network;
-import org.limewire.listener.EventListener;
 
 public class MockUser implements User {
     private String id;
@@ -47,6 +48,11 @@ public class MockUser implements User {
         return name;
     }
 
+    @Override
+    public Map<String, FriendPresence> getFriendPresences() {
+        return new HashMap<String, FriendPresence>();
+    }
+    
     @Override
     public Map<String, Presence> getPresences() {
         return new HashMap<String, Presence>();

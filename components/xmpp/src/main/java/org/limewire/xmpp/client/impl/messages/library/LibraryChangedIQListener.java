@@ -9,10 +9,10 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
-import org.limewire.listener.EventListener;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.xmlpull.v1.XmlPullParserException;
@@ -20,12 +20,12 @@ import org.xmlpull.v1.XmlPullParserException;
 public class LibraryChangedIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
-    private final EventListener<LibraryChangedEvent> libChangedListeners;
+    private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
     private final XMPPConnection connection;
 
-    public LibraryChangedIQListener(EventListener<LibraryChangedEvent> libChangedListeners,
+    public LibraryChangedIQListener(EventBroadcaster<LibraryChangedEvent> libChangedListeners,
                                     XMPPConnection connection) {
-        this.libChangedListeners = libChangedListeners;
+        this.libChangedBroadcaster = libChangedListeners;
         this.connection = connection;
     }
 
@@ -58,9 +58,9 @@ public class LibraryChangedIQListener implements PacketListener {
         }
         User user = connection.getUser(StringUtils.parseBareAddress(packet.getFrom()));
         if (user != null) {
-            Presence presence = user.getPresences().get(packet.getFrom());
+            FriendPresence presence = user.getFriendPresences().get(packet.getFrom());
             if(presence != null) {
-                libChangedListeners.handleEvent(new LibraryChangedEvent(presence, LibraryChanged.LIBRARY_CHANGED));
+                libChangedBroadcaster.broadcast(new LibraryChangedEvent(presence, LibraryChanged.LIBRARY_CHANGED));
             }
         }
     }

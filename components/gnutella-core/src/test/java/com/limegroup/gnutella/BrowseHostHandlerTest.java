@@ -8,9 +8,9 @@ import java.net.Socket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
@@ -34,7 +34,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
-import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -315,8 +314,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                     
                 }
 
-                public Map<String, Presence> getPresences() {
-                    return new HashMap<String, Presence>();
+                public Map<String, FriendPresence> getFriendPresences() {
+                    return Collections.emptyMap();
                 }
             };
         }
@@ -400,8 +399,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 public void setName(String name) {
                 }
 
-                public Map<String, Presence> getPresences() {
-                    return new HashMap<String, Presence>();
+                public Map<String, FriendPresence> getFriendPresences() {
+                    return Collections.emptyMap();
                 }
             };
         }

@@ -9,7 +9,7 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
-import org.limewire.listener.EventListener;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.FileOffer;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.xmlpull.v1.XmlPullParserException;
@@ -17,10 +17,10 @@ import org.xmlpull.v1.XmlPullParserException;
 public class FileTransferIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(FileTransferIQListener.class);
 
-    private final EventListener<FileOfferEvent> fileOfferListener;
+    private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
 
-    public FileTransferIQListener(EventListener<FileOfferEvent> fileOfferListener) {
-        this.fileOfferListener = fileOfferListener;
+    public FileTransferIQListener(EventBroadcaster<FileOfferEvent> fileOfferBroadcaster) {
+        this.fileOfferBroadcaster = fileOfferBroadcaster;
     }
 
     public void processPacket(Packet packet) {
@@ -52,7 +52,7 @@ public class FileTransferIQListener implements PacketListener {
         }
         // TODO async?
         String userID = StringUtils.parseBareAddress(packet.getFrom());
-        fileOfferListener.handleEvent(new FileOfferEvent(new FileOffer(packet.getFileMetaData(), userID), FileOffer.EventType.OFFER));
+        fileOfferBroadcaster.broadcast(new FileOfferEvent(new FileOffer(packet.getFileMetaData(), userID), FileOffer.EventType.OFFER));
         // TODO send acceptance or rejection;
         // TODO only needed for user feedback
     }

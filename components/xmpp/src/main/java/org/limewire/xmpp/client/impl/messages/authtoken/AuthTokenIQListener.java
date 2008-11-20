@@ -11,6 +11,7 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
@@ -57,12 +58,12 @@ public class AuthTokenIQListener implements PacketListener {
         synchronized (this) {
             User user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
             if (user != null) {
-                Presence presence = user.getPresences().get(iq.getFrom());
+                FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
                     if(iq.getAuthToken() != null) {
                         if(LOG.isDebugEnabled()) {
                             try {
-                                LOG.debug("updating auth token on presence " + presence.getJID() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
+                                LOG.debug("updating auth token on presence " + presence.getPresenceId() + " to " + new String(Base64.encodeBase64(iq.getAuthToken()), "UTF-8"));
                             } catch (UnsupportedEncodingException e) {
                                 LOG.error(e.getMessage(), e);
                             }
@@ -141,7 +142,7 @@ public class AuthTokenIQListener implements PacketListener {
         public void handleEvent(RosterEvent event) {
             if(event.getType().equals(User.EventType.USER_ADDED)) {
                 userAdded(event.getSource());
-            } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            } else if(event.getType().equals(User.EventType.USER_DELETED)) {
                 userDeleted(event.getSource().getId());
             } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
                 userUpdated(event.getSource());

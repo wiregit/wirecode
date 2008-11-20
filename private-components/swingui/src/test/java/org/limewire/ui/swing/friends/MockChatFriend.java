@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -55,7 +56,7 @@ class MockChatFriend implements ChatFriend {
             }
 
             @Override
-            public Map<String, Presence> getPresences() {
+            public Map<String, FriendPresence> getFriendPresences() {
                 return Collections.emptyMap();
             }
         };

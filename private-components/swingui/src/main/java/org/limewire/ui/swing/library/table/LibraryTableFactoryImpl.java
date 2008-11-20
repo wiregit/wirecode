@@ -355,7 +355,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory,
     public void handleEvent(RosterEvent event) {
         if (event.getType().equals(User.EventType.USER_ADDED)) {
             addFriend(event.getSource());
-        } else if (event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if (event.getType().equals(User.EventType.USER_DELETED)) {
             removeFriend(event.getSource());
         }
     }

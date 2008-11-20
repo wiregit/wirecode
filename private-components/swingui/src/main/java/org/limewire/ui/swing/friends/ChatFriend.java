@@ -3,9 +3,9 @@ package org.limewire.ui.swing.friends;
 import java.beans.PropertyChangeListener;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.xmpp.api.client.MessageReader;
 import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 /**
@@ -60,7 +60,7 @@ public interface ChatFriend {
      * 1. Active presence
      * 2. Highest priority XMPP presence
      */
-    Presence getBestPresence();
+    FriendPresence getBestPresence();
 
     /**
      * updates the state of this chatFriend based on its underlying attributes, for instance 

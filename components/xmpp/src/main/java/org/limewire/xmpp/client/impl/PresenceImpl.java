@@ -67,8 +67,7 @@ class PresenceImpl implements Presence {
     }
 
     public String toString() {
-        // TODO add StringUtils.toString(object, Method...)
-        return super.toString();
+        return getJID() + " for " + user.toString();
     }
 
     @Override

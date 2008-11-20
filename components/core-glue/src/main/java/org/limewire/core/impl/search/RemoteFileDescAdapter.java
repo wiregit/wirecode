@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
-import org.limewire.xmpp.api.client.Presence;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.GUID;
@@ -250,8 +250,8 @@ public class RemoteFileDescAdapter implements SearchResult {
                                 return null; 
                             }
 
-                            public Map<String, Presence> getPresences() {
-                                return new HashMap<String, Presence>();
+                            public Map<String, FriendPresence> getFriendPresences() {
+                                return Collections.emptyMap();
                             }
                         };
                     }
@@ -382,8 +382,8 @@ public class RemoteFileDescAdapter implements SearchResult {
                             return null;
                         }
 
-                        public Map<String, Presence> getPresences() {
-                            return new HashMap<String, Presence>();
+                        public Map<String, FriendPresence> getFriendPresences() {
+                            return Collections.emptyMap();
                         }
                     };
                 }

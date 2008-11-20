@@ -78,7 +78,7 @@ public class XMPPAddressResolver implements AddressResolver {
         for (XMPPConnection connection : xmppService.getConnections()) {
             User user = connection.getUser(id);
             if (user != null) {
-                for (Entry<String, Presence> entry : user.getPresences().entrySet()) {
+                for (Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
                     FriendPresence resolvedPresence = getMatchingPresence(address, entry.getKey(), entry.getValue());
                     if (resolvedPresence != null) {
                         return resolvedPresence;
@@ -96,7 +96,7 @@ public class XMPPAddressResolver implements AddressResolver {
      * 
      * Also ensures that auth-token and presence address are set.
      */
-    private FriendPresence getMatchingPresence(XMPPAddress address, String resourceId, Presence presence) {
+    private FriendPresence getMatchingPresence(XMPPAddress address, String resourceId, FriendPresence presence) {
         String originalId = address.getFullId();
         int slash = originalId.indexOf('/');
         if (slash == -1) {

@@ -33,7 +33,7 @@ public class AllFriendsList implements RegisteringEventListener<RosterEvent> {
     public void handleEvent(final RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {              
             allFriends.add(new SharingTarget(event.getSource()));
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
             allFriends.remove(new SharingTarget(event.getSource()));
         }
     }   

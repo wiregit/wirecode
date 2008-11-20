@@ -4,7 +4,9 @@ import java.util.Collection;
 
 public interface XMPPConnection {
     
-    public enum ConnectionEvent {LOGIN}
+    public enum ConnectionEvent {
+        CONNECTED, DISCONNECTED, RECONNECTING, RECONNECTING_FAILED
+    }
 
     public XMPPConnectionConfiguration getConfiguration();
 

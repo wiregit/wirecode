@@ -11,7 +11,11 @@ import com.google.inject.Singleton;
 class XMPPConnectionListenerImpl implements RegisteringEventListener<XMPPConnectionEvent> {
 
     public void handleEvent(XMPPConnectionEvent event) {
-        new XMPPConnectionEstablishedEvent(event.getSource()).publish();
+        switch(event.getType()) {
+        case CONNECTED:
+            new XMPPConnectionEstablishedEvent(event.getSource().getConfiguration().getUsername()).publish();
+            break;
+        }
     }
 
     @Inject

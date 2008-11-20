@@ -1,5 +1,7 @@
 package org.limewire.xmpp.api.client;
 
+import java.util.Map;
+
 import org.limewire.core.api.friend.Friend;
 import org.limewire.listener.EventListener;
 
@@ -8,7 +10,11 @@ import org.limewire.listener.EventListener;
  */
 public interface User extends Friend {
 
-    public enum EventType {USER_ADDED, USER_UPDATED, USER_REMOVED}
+    public enum EventType {
+        USER_ADDED,
+        USER_UPDATED,
+        USER_DELETED
+    }
 
     /**
      * Allows the xmpp service user to register a listener for presence changes of this user
@@ -55,4 +61,11 @@ public interface User extends Friend {
      * @return true if this user is signed in with at least 1 presence
      */
     public boolean isSignedIn();
+    
+    /**
+     * An analague to {@link Friend#getFriendPresences()},
+     * except returns a Map of {@link Presence}, the keys being
+     * the {@link Presence#getJID()}.
+     */
+    public Map<String, Presence> getPresences();
 }

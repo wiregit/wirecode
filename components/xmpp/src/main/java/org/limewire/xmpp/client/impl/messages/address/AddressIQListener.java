@@ -8,6 +8,7 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
@@ -62,9 +63,9 @@ public class AddressIQListener implements PacketListener {
         synchronized (this) {
             User user = connection.getUser(StringUtils.parseBareAddress(iq.getFrom()));
             if (user != null) {
-                Presence presence = user.getPresences().get(iq.getFrom());
+                FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
-                    LOG.debugf("updating address on presence {0} to {1}", presence.getJID(), iq.getAddress());
+                    LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), iq.getAddress());
                     presence.addFeature(new AddressFeature(iq.getAddress()));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
@@ -89,7 +90,7 @@ public class AddressIQListener implements PacketListener {
             synchronized (AddressIQListener.this) {
                 address = event.getSource();
                 for(User user : connection.getUsers()) {
-                    for(Map.Entry<String, Presence> presenceEntry : user.getPresences().entrySet()) {
+                    for(Map.Entry<String, FriendPresence> presenceEntry : user.getFriendPresences().entrySet()) {
                         if(presenceEntry.getValue().hasFeatures(LimewireFeature.ID)) {
                             sendAddress(address, presenceEntry.getKey());
                         }
@@ -150,7 +151,7 @@ public class AddressIQListener implements PacketListener {
         public void handleEvent(RosterEvent event) {
             if(event.getType().equals(User.EventType.USER_ADDED)) {
                 userAdded(event.getSource());
-            } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+            } else if(event.getType().equals(User.EventType.USER_DELETED)) {
                 userDeleted(event.getSource().getId());
             } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
                 userUpdated(event.getSource());

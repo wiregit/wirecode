@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
@@ -35,26 +36,26 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public static final String LW_SERVICE_NS = "http://www.limewire.org/";
     
     private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
-    private final Provider<EventListener<RosterEvent>> rosterListener;
-    private final Provider<EventListener<FileOfferEvent>> fileOfferListener;
-    private final Provider<EventListener<LibraryChangedEvent>> libraryChangedListener;
+    private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
+    private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
+    private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
-    private Provider<EventListener<XMPPConnectionEvent>> connectionListener;
+    private Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
     private AddressEvent lastEvent;
     private final XMPPAuthenticator authenticator;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                    Provider<EventListener<RosterEvent>> rosterListener,
-                    Provider<EventListener<FileOfferEvent>> fileOfferListener,
-                    Provider<EventListener<LibraryChangedEvent>> libraryChangedListener,
-                    Provider<EventListener<XMPPConnectionEvent>> connectionListener,
+                    Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
+                    Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
+                    Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
+                    Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
                     AddressFactory addressFactory, XMPPAuthenticator authenticator) {
-        this.rosterListener = rosterListener;
-        this.fileOfferListener = fileOfferListener;
-        this.libraryChangedListener = libraryChangedListener;
-        this.connectionListener = connectionListener;
+        this.rosterBroadcaster = rosterBroadcaster;
+        this.fileOfferBroadcaster = fileOfferBroadcaster;
+        this.libraryChangedBroadcaster = libraryChangedBroadcaster;
+        this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
@@ -134,8 +135,9 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     private void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
         synchronized (this) {
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterListener.get(),
-                    fileOfferListener.get(), libraryChangedListener.get(), connectionListener.get(), addressFactory, authenticator);
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterBroadcaster
+                    .get(), fileOfferBroadcaster.get(), libraryChangedBroadcaster.get(),
+                    connectionBroadcaster.get(), addressFactory, authenticator);
             connections.add(connection);
         }
     }

@@ -23,7 +23,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
             userAdded(event.getSource());
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
             userDeleted(event.getSource().getId());
         } else if(event.getType().equals(User.EventType.USER_UPDATED)) {
             userUpdated(event.getSource());

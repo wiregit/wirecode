@@ -10,6 +10,7 @@ import javax.swing.JComponent;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.ShareListManager;
@@ -22,7 +23,6 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -89,7 +89,7 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
             addItem(item);
             friendMap.put(event.getSource().getId(), event.getSource());
             friendItemMap.put(event.getSource().getId(), item);
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
             FriendItem item = friendItemMap.remove(event.getSource().getId());
             friendMap.remove(event.getSource().getId());
             removeItem(item);
@@ -146,7 +146,7 @@ public class FriendComboBox extends JComboBox implements RegisteringEventListene
         }
 
         @Override
-        public Map<String, Presence> getPresences() {
+        public Map<String, FriendPresence> getFriendPresences() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }

@@ -3,6 +3,7 @@ package org.limewire.core.impl.xmpp;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
@@ -11,15 +12,14 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-import org.limewire.xmpp.api.client.Presence;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 public class FriendShareListRefresher {
 
@@ -53,8 +53,8 @@ public class FriendShareListRefresher {
                     @SuppressWarnings("unchecked")
                     public void listChanged(ListEvent<LocalFileItem> listChanges) {
                         if(FILE_MANAGER_LOADED.get()) {
-                            Map<String,Presence> presences = event.getFriend().getPresences();
-                            for(Presence presence : presences.values()) {
+                            Map<String,FriendPresence> presences = event.getFriend().getFriendPresences();
+                            for(FriendPresence presence : presences.values()) {
                                 Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
                                 if(notifier != null) {
                                     notifier.getFeature().sendLibraryRefresh();

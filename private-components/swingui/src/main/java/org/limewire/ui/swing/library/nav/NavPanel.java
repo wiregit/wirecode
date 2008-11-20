@@ -55,13 +55,13 @@ class NavPanel extends JXPanel {
     private final JXBusyLabel statusIcon;
     private final Action action;
     
+    private NavList parentList;
     private MouseListener removeListener;
     
     @AssistedInject
     NavPanel(@Assisted Action action,
             @Assisted Friend friend,
             @Assisted FriendLibraryMediator libraryPanel,
-            @Assisted LibraryState libraryState,
             RemoteLibraryManager remoteLibraryManager) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
@@ -81,11 +81,7 @@ class NavPanel extends JXPanel {
         
         add(categoryLabel, "gapbefore 0, grow, push, alignx left");
         add(statusIcon, "alignx right, gapafter 4, hidemode 3, wrap");
-        if(libraryState == null) {
-            unbusy();
-        } else {
-            updateLibraryState(libraryState);
-        }
+        unbusy();
         
         action.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -95,6 +91,14 @@ class NavPanel extends JXPanel {
                 }
             }
         });
+    }
+    
+    NavList getParentList() {
+        return parentList;
+    }
+    
+    void setParentList(NavList parentList) {
+        this.parentList = parentList;
     }
     
     void addActionListener(ActionListener listener) {

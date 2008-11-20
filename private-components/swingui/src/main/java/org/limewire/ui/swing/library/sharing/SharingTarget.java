@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.Presence;
 
 public class SharingTarget {
     
@@ -82,7 +82,7 @@ public class SharingTarget {
             return null;
         }
 
-        public Map<String, Presence> getPresences() {
+        public Map<String, FriendPresence> getFriendPresences() {
             return Collections.emptyMap();
         }
     }

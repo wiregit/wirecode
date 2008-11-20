@@ -306,7 +306,7 @@ public class FriendSharePanel extends GenericSharingPanel implements Registering
             LocalFileList fileList = shareListManager.getOrCreateFriendShareList(event.getSource());
             friendsList.add(new FriendItemImpl(event.getSource(), fileList.getSwingModel()));
             friendMap.put(event.getSource().getId(), "");
-        } else if(event.getType().equals(User.EventType.USER_REMOVED)) {
+        } else if(event.getType().equals(User.EventType.USER_DELETED)) {
             shareListManager.removeFriendShareList(event.getSource());
             friendMap.remove(event.getSource().getId());
             // TODO remove from friendList ??
