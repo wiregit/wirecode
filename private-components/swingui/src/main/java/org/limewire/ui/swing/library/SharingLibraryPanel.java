@@ -1,7 +1,13 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -9,16 +15,24 @@ import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
@@ -36,6 +50,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -54,6 +69,7 @@ public class SharingLibraryPanel extends LibraryPanel {
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final BaseLibraryMediator basePanel;
+    private final FriendFileList friendFileList;
     
     private LibrarySharePanel shareAllPanel = null;
     
@@ -61,20 +77,21 @@ public class SharingLibraryPanel extends LibraryPanel {
     public SharingLibraryPanel( @Assisted BaseLibraryMediator basePanel,
                                 @Assisted Friend friend,
                                 @Assisted EventList<LocalFileItem> eventList,
-                                @Assisted LocalFileList friendFileList,
+                                @Assisted FriendFileList friendFileList,
                                 IconManager iconManager,
                                 CategoryIconManager categoryIconManager,
                                 LibraryTableFactory tableFactory,
                                 AllFriendsList allFriendsList,
                                 ShareListManager shareListManager,
                                 LimeHeaderBarFactory headerBarFactory){
-        super(friend, true, headerBarFactory);
+        super(friend, false, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.basePanel = basePanel;
+        this.friendFileList = friendFileList;
         
         loadHeader();
         loadSelectionPanel();
@@ -161,6 +178,11 @@ public class SharingLibraryPanel extends LibraryPanel {
     }   
     
     @Override
+    protected JComponent createSelectionButton(Action action, Category category) {
+        return new SharingSelectionPanel(action, category);
+    }
+    
+    @Override
     public void dispose() {
         super.dispose();
         
@@ -224,6 +246,91 @@ public class SharingLibraryPanel extends LibraryPanel {
         public void actionPerformed(ActionEvent e) {
             basePanel.showLibraryCard();
         }
-        
     }
+    
+    private class SharingSelectionPanel extends JPanel {
+        @Resource Color selectedBackground;
+        @Resource Color nonSelectedBackground;
+        @Resource Color selectedTextColor;
+        @Resource Color textColor;
+        
+        private JCheckBox checkBox;
+        private JButton button;
+        
+        public SharingSelectionPanel(Action action, final Category category) {
+            super(new MigLayout("insets 0, fill"));
+            
+            GuiUtils.assignResources(this);     
+
+            checkBox = new JCheckBox();                
+            checkBox.setContentAreaFilled(false);
+            checkBox.setBorderPainted(false);
+            checkBox.setFocusPainted(false);
+            checkBox.setBorder(BorderFactory.createEmptyBorder(2,2,2,0));
+            checkBox.setOpaque(false);
+            
+            add(checkBox);
+            
+            if(category != Category.AUDIO && category != Category.VIDEO && category != Category.IMAGE) {
+                checkBox.setVisible(false);
+            } else {
+                if(category == Category.AUDIO) {
+                    checkBox.setSelected(friendFileList.isAddNewAudioAlways());
+                } else if(category == Category.VIDEO) {
+                    checkBox.setSelected(friendFileList.isAddNewVideoAlways());
+                } else if(category == Category.IMAGE) {
+                    checkBox.setSelected(friendFileList.isAddNewImageAlways());
+                }
+                
+                checkBox.addItemListener(new ItemListener(){
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                        select(category);
+                        if(category == Category.AUDIO) {
+                            friendFileList.setAddNewAudioAlways(checkBox.isSelected());
+                        } else if(category == Category.VIDEO) {
+                            friendFileList.setAddNewVideoAlways(checkBox.isSelected());
+                        } else if(category == Category.IMAGE) {
+                            friendFileList.setAddNewImageAlways(checkBox.isSelected());
+                        }
+                    }
+                });
+            }
+
+            button = new JButton(action);           
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+            button.setBorder(BorderFactory.createEmptyBorder(2,0,2,0));
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                        SharingSelectionPanel.this.repaint();
+                    }
+                }
+            });
+            
+            add(button, "growx");
+        
+            addNavigation(button);
+        }
+        
+        @Override
+        public void paintComponent(Graphics g) {
+            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
+                setBackground(selectedBackground);
+                button.setForeground(selectedTextColor);
+            } else {
+                setBackground(nonSelectedBackground);
+                button.setForeground(textColor);
+            }
+            super.paintComponent(g);
+        }
+        
+        public JButton getButton() {
+            return button;
+        }
+    }    
 }

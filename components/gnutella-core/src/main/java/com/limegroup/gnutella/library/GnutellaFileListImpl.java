@@ -12,13 +12,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.limewire.util.FileUtils;
 
 
-class GnutellaFileListImpl extends AbstractFileList implements GnutellaFileList {
+class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileList {
+    
+    /**
+     * ID for share all functionality
+     */
+    private static final String ID = "GNUTELLA";
     
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
-    
-    /** Where to store the info. */
-    private final LibraryFileData data;
     
     /** A list of session-shared data -- it isn't saved. */
     private Map<File, File> sessionFiles = new ConcurrentHashMap<File, File>();
@@ -27,8 +29,7 @@ class GnutellaFileListImpl extends AbstractFileList implements GnutellaFileList 
     private final AtomicInteger applicationShared = new AtomicInteger();
     
     public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
-        super(managedList);
-        this.data = data;
+        super(data, managedList, ID);
         this.numBytes = new AtomicLong();
     }
     

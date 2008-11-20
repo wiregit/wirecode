@@ -61,7 +61,7 @@ class SearchTabItems {
         switch(category) {
         case ALL:
             addCategory(tr("All"), SearchCategory.ALL);
-            addCategory(tr("Music"), SearchCategory.AUDIO);
+            addCategory(tr("Audio"), SearchCategory.AUDIO);
             addCategory(tr("Videos"), SearchCategory.VIDEO);
             addCategory(tr("Images"), SearchCategory.IMAGE);
             addCategory(tr("Documents"), SearchCategory.DOCUMENT);
@@ -69,7 +69,7 @@ class SearchTabItems {
             addCategory(tr("Other"), SearchCategory.OTHER);
             break;
         case AUDIO:
-            addCategory(tr("Music results"), SearchCategory.AUDIO);
+            addCategory(tr("Audio results"), SearchCategory.AUDIO);
             break;
         case VIDEO:
             addCategory(tr("Video results"), SearchCategory.VIDEO);

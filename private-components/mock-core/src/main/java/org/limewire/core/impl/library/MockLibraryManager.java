@@ -26,7 +26,7 @@ import com.google.inject.Singleton;
 public class MockLibraryManager implements ShareListManager, LibraryManager {
 
     private FileListAdapter allFileList;
-    private FileListAdapter gnutellaList;
+    private FriendFileListAdapter gnutellaList;
     private FriendFileListAdapter friendList;
     private LibraryData libraryData;
     
@@ -34,7 +34,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     
     public MockLibraryManager() {
         allFileList = new FileListAdapter();
-        gnutellaList = new FileListAdapter();
+        gnutellaList = new FriendFileListAdapter();
         friendList = new FriendFileListAdapter();
         libraryData = new LibraryDataAdapter();
         
@@ -132,7 +132,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     @Override
-    public LocalFileList getGnutellaShareList() {
+    public FriendFileList getGnutellaShareList() {
         return gnutellaList;
     }        
 

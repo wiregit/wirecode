@@ -3,20 +3,34 @@
  */
 package org.limewire.ui.swing.library;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.AllFriendsList;
@@ -30,6 +44,9 @@ import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -57,7 +74,7 @@ class MyLibraryPanel extends LibraryPanel {
                           ShareListManager shareListManager,
                           AllFriendsList allFriendsList,
                           LimeHeaderBarFactory headerBarFactory){
-        super(friend, true, headerBarFactory);
+        super(null, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriendsList = allFriendsList;
@@ -129,6 +146,11 @@ class MyLibraryPanel extends LibraryPanel {
         return scrollPane;
     }
     
+    @Override
+    protected JComponent createSelectionButton(Action action, Category category) {
+        return new MySelectionPanel(action, new ShareAllAction(category), category);
+    }
+    
     @SuppressWarnings("unchecked")
     private LibraryTableModel<LocalFileItem> getTableModel(LibraryTable table){
         return (LibraryTableModel<LocalFileItem>)table.getModel();
@@ -171,4 +193,100 @@ class MyLibraryPanel extends LibraryPanel {
             }
         }
     }
+    
+    /**
+     * Display the Share Collection widget when pressed
+     */
+    private class ShareAllAction extends AbstractAction {
+
+        private Category category;
+        
+        public ShareAllAction(Category category) {
+            this.category = category;
+            
+            putValue(Action.NAME, I18n.tr("Share"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share collection"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          ((CategoryShareModel)shareAllPanel.getShareModel()).setCategory(category);
+          shareAllPanel.setBottomLabel(
+                  I18n.tr("Sharing your {0} collection automatically shares new {0} files added to your Library", category));
+          shareAllPanel.show((JComponent)e.getSource());
+        }
+    }
+    
+    //TODO: use a button painter and JXButton
+    private class MySelectionPanel extends JPanel {
+        @Resource Color selectedBackground;
+        @Resource Color nonSelectedBackground;
+        @Resource Color selectedTextColor;
+        @Resource Color textColor;
+        @Resource Color linkColor;
+        
+        private JButton button;
+        private JButton shareButton;
+        
+        public MySelectionPanel(Action action, Action shareAction, Category category) {
+            super(new MigLayout("insets 0, fill"));
+
+            GuiUtils.assignResources(this);
+
+            button = new JButton(action);           
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+            button.setBorder(BorderFactory.createEmptyBorder(2,8,2,0));
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                        MySelectionPanel.this.repaint();
+                    }
+                }
+            });
+            
+            add(button, "growx, push");
+            
+            // only add a share category button if its an audio/video/image category
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+                shareButton = new JButton(shareAction);
+                shareButton.setContentAreaFilled(false);
+                shareButton.setBorderPainted(false);
+                shareButton.setFocusPainted(false);
+                shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
+                shareButton.setOpaque(false);
+                shareButton.setForeground(linkColor);
+                shareButton.setVisible(false);
+                shareButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                FontUtils.underline(shareButton);
+                shareButton.setName("my name yo");
+                add(shareButton);
+            }
+        
+            addNavigation(button);
+        }
+        
+        @Override
+        public void paintComponent(Graphics g) {
+            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
+                setBackground(selectedBackground);
+                button.setForeground(selectedTextColor);
+                if(shareButton != null)
+                    shareButton.setVisible(true);
+            } else {
+                setBackground(nonSelectedBackground);
+                button.setForeground(textColor);
+                if(shareButton != null)
+                    shareButton.setVisible(false);
+            }
+            super.paintComponent(g);
+        }
+        
+        public JButton getButton() {
+            return button;
+        }
+    }    
 }

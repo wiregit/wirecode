@@ -50,4 +50,31 @@ public class GnutellaFileListStub extends AbstractFileListStub implements Gnutel
     public List<FileDesc> getFilesInDirectory(File directory) {
         return super.getFilesInDirectory(directory);
     }
+
+    @Override
+    public boolean isAddNewAudioAlways() {
+        return false;
+    }
+
+    @Override
+    public boolean isAddNewImageAlways() {
+        return false;
+    }
+
+    @Override
+    public boolean isAddNewVideoAlways() {
+        return false;
+    }
+
+    @Override
+    public void setAddNewAudioAlways(boolean value) {
+    }
+
+    @Override
+    public void setAddNewImageAlways(boolean value) {
+    }
+
+    @Override
+    public void setAddNewVideoAlways(boolean value) {
+    }
 }

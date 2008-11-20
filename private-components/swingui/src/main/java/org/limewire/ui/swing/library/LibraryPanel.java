@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -66,8 +67,8 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private final Prev prev = new Prev();
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
-        setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[120!][]", "[][]"));
-                
+        setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[125!][]", "[][]"));
+
         cardPanel.setLayout(cardLayout);
         
         this.friend = friend;
@@ -96,7 +97,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     public abstract void loadHeader();
     
     public void createSelectionPanel() {
-        selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap", "[120!]", ""));
+        selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap", "[125!]", ""));
     }
     
     public abstract void loadSelectionPanel();
@@ -123,11 +124,11 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         disposableList.add(disposable);
     }
     
-    protected <T extends FileItem> JButton createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredList) {
+    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredList) {
         return createButton(icon, category, component, null, filteredList);
     }
     
-    protected <T extends FileItem> JButton createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
         cardPanel.add(component, category.name());
         
         ButtonItem item = new ButtonItemImpl(category);
@@ -135,7 +136,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         categoryOrder.add(category);
         
         Action action = new SelectionAction(icon, category, item);
-        SelectionButton button = new SelectionButton(action);
+        JComponent button = createSelectionButton(action, category);
         
         // If you only want to show the #s for the sharing panel -- make this false.
         boolean showForAll_NotJustSharing = true;
@@ -144,19 +145,14 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
             filteredList.addListEventListener(listener);
             addDisposable(listener);
         }
-
-        
-        button.getActionMap().put(Next.KEY, next);
-        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), Next.KEY);
-        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), Next.KEY);
-        
-        button.getActionMap().put(Prev.KEY, prev);
-        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), Prev.KEY);
-        button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), Prev.KEY);
         
         selectionPanel.add(button, "growx");
         
         return button;
+    }
+    
+    protected JComponent createSelectionButton(Action action, Category category) {
+        return new SelectionPanel(action);
     }
     
 
@@ -295,8 +291,9 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         private void setText() {
             if(isLibraryPanel)
                 action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + ")");
-            else
+            else {
                 action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + "/" + allFileList.size() + ")");
+            }
         }
         
         @Override
@@ -311,25 +308,41 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         }
     }
     
-    private class SelectionButton extends JButton {
+    protected void addNavigation(JComponent component) {
+        component.getActionMap().put(Next.KEY, next);
+        component.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), Next.KEY);
+        component.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), Next.KEY);
+        
+        component.getActionMap().put(Prev.KEY, prev);
+        component.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), Prev.KEY);
+        component.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), Prev.KEY);
+    }
+    
+    private class SelectionPanel extends JPanel {
         @Resource Color selectedBackground;
         @Resource Font selectedTextFont;
         @Resource Color selectedTextColor;
         @Resource Font textFont;
         @Resource Color textColor;
         
-        public SelectionButton(Action action) {
-            super(action);
+        private JButton button;
+        
+        public SelectionPanel(Action action) {
+            super(new BorderLayout());
 
             GuiUtils.assignResources(this);
             
-            setContentAreaFilled(false);
-            setBorderPainted(false);
-            setFocusPainted(false);
-            setBorder(BorderFactory.createEmptyBorder(2,8,2,8));
-            setHorizontalAlignment(SwingConstants.LEFT);
+            button = new JButton(action);
             
-            getAction().addPropertyChangeListener(new PropertyChangeListener() {
+            add(button, BorderLayout.CENTER);
+            
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
+            button.setFocusPainted(false);
+            button.setBorder(BorderFactory.createEmptyBorder(2,8,2,8));
+            button.setHorizontalAlignment(SwingConstants.LEFT);
+
+            button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
@@ -337,23 +350,28 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
                     }
                 }
             });
-
+            
+            addNavigation(button);
         }
         
         @Override
         public void paintComponent(Graphics g) {
-            if(Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
-                setBackground(selectedBackground);
-                setForeground(selectedTextColor);
-                setFont(selectedTextFont);
+            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
                 setOpaque(true);
+                setBackground(selectedBackground);
+                button.setForeground(selectedTextColor);
+//                setFont(selectedTextFont);
             } else {
                 setOpaque(false);
-                setForeground(textColor);
-                setFont(textFont);
+                button.setForeground(textColor);
+//                setFont(textFont);
             }
             
             super.paintComponent(g);
+        }
+        
+        public JButton getButton() {
+            return button;
         }
     }    
 }

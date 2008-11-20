@@ -10,7 +10,6 @@ import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
@@ -55,7 +54,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     @Override
-    public LocalFileList getGnutellaShareList() {
+    public FriendFileList getGnutellaShareList() {
         return gnutellaFileList;
     }
     
@@ -97,7 +96,7 @@ class ShareListManagerImpl implements ShareListManager {
         }
     }
     
-    private class GnutellaFileList extends LocalFileListImpl {
+    private class GnutellaFileList extends LocalFileListImpl implements FriendFileList {
         private final com.limegroup.gnutella.library.GnutellaFileList shareList;
         
         public GnutellaFileList(com.limegroup.gnutella.library.GnutellaFileList shareList) {
@@ -110,6 +109,30 @@ class ShareListManagerImpl implements ShareListManager {
         @Override
         protected com.limegroup.gnutella.library.GnutellaFileList getCoreFileList() {
             return shareList;
+        }
+
+        public boolean isAddNewAudioAlways() {
+            return getCoreFileList().isAddNewAudioAlways();
+        }
+        
+        public void setAddNewAudioAlways(boolean value) {
+            getCoreFileList().setAddNewAudioAlways(value);
+        }
+        
+        public boolean isAddNewVideoAlways() {
+            return getCoreFileList().isAddNewVideoAlways();
+        }
+        
+        public void setAddNewVideoAlways(boolean value) {
+            getCoreFileList().setAddNewVideoAlways(value);
+        }
+        
+        public boolean isAddNewImageAlways() {
+            return getCoreFileList().isAddNewImageAlways();
+        }
+        
+        public void setAddNewImageAlways(boolean value) {
+            getCoreFileList().setAddNewImageAlways(value);
         }
     }
     

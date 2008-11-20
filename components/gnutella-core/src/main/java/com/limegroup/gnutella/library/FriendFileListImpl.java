@@ -19,7 +19,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     private boolean addNewAudioAlways = false;
     private boolean addNewVideoAlways = false;
     
-    private final LibraryFileData data;
+    protected final LibraryFileData data;
 
     public FriendFileListImpl(LibraryFileData data, ManagedFileListImpl managedList,  String id) {
         super(managedList);

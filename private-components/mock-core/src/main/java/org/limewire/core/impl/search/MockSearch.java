@@ -185,7 +185,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.QUALITY, "good quality");
         handleSearchResult(msr);
 
-        // Create a search result that will be categorized as "Music".
+        // Create a search result that will be categorized as "Audio".
         msr = new MockSearchResult();
         name = "Dawn Last Long";
         msr.setExtension("mp3");

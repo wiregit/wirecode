@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GradientPaint;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -32,7 +33,7 @@ public class LimeHeaderBarFactory {
         return bar;        
     }
     
-    public void decorateBasic(LimeHeaderBar bar) {
+    public void decorateBasic(JXPanel bar) {
         bar.setBackgroundPainter(new GenericBarPainter<LimeHeaderBar>(
                 new GradientPaint(0,0,this.gradientTop,0,1,this.gradientBottom), 
                 this.borderTop1, this.borderTop2, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT));
@@ -42,9 +43,9 @@ public class LimeHeaderBarFactory {
         bar.setFont(this.headingFont);
     }
     
-    public void decorateSpecial(LimeHeaderBar bar) {
+    public void decorateSpecial(JXPanel bar) {
         bar.setBackgroundPainter(new GenericBarPainter<LimeHeaderBar>(
-                new GradientPaint(0,0,Color.RED,0,1,Color.RED), 
+                new GradientPaint(0,0,new Color(209,247,144),0,1,new Color(209,247,144)), 
                 this.borderTop1, this.borderTop2, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT));
         
         bar.setMinimumSize(new Dimension(0, this.height));
