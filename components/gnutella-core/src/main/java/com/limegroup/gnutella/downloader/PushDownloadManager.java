@@ -244,7 +244,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(rfd, observer);
         pushHandlers.add(handlerAdapter);
         sendPush(rfd, new MultiShutdownableConnectObserverAdapter(observer));
-        scheduleExpirerFor(handlerAdapter, 60 * 1000);
+        scheduleExpirerFor(handlerAdapter, 30 * 1000);
     }
     
     private void scheduleExpirerFor(final PushedSocketHandlerAdapter handlerAdapter, int timeout) {
