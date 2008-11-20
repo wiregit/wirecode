@@ -2,7 +2,9 @@ package org.limewire.xmpp.client.impl;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
@@ -13,6 +15,8 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.security.SHA1;
+import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -26,6 +30,8 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
+import com.limegroup.gnutella.ApplicationServices;
 
 @Singleton
 public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {
@@ -43,6 +49,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private AddressEvent lastAddressEvent;
     private final XMPPAuthenticator authenticator;
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+    private final String resource;
     private LinkedList<XMPPConnectionImpl> connections;
     private boolean multipleConnectionsAllowed;
 
@@ -52,14 +59,20 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
             Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
-            ListenerSupport<FriendPresenceEvent> presenceSupport) {
+            ListenerSupport<FriendPresenceEvent> presenceSupport,
+            ApplicationServices applicationServices) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
-        this.presenceSupport = presenceSupport;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
+        this.presenceSupport = presenceSupport;
+        // The resource is set to the hash of the GUID to uniquely identify
+        // the instance of the client
+        byte[] hash = new SHA1().digest(applicationServices.getMyGUID());
+        byte[] base64 = Base64.encodeBase64(hash);
+        resource = StringUtils.getUTF8String(base64);
         connections = new LinkedList<XMPPConnectionImpl>();
         multipleConnectionsAllowed = false;
     }
@@ -107,7 +120,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
                 rosterBroadcaster.get(), fileOfferBroadcaster.get(),
                 libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                addressFactory, authenticator, presenceSupport);
+                addressFactory, authenticator, presenceSupport, resource);
         connection.initialize();
         // Give the new connection the latest information about our IP address
         // and firewall status
@@ -133,7 +146,11 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     @Override
     public synchronized XMPPConnection getLoggedInConnection() {
-        return connections.pop(); // Returns null if the list is empty
+        try {
+            return connections.pop();
+        } catch (NoSuchElementException nsex) {
+            return null;
+        }
     }
 
     @Override
