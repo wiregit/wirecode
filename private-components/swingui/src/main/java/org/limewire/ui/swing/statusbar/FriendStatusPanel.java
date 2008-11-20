@@ -53,7 +53,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
     private final JMenu statusMenu;
     private final ButtonGroup availabilityButtonGroup;
     private final JCheckBoxMenuItem availablePopupItem;
-    private final JCheckBoxMenuItem awayPopupItem;
+    private final JCheckBoxMenuItem dndPopupItem;
     private final UnseenMessageFlasher flasher;
 
     private boolean loggedIn;
@@ -92,13 +92,13 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         statusMenu.addSeparator();
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
         statusMenu.add(availablePopupItem);
-        awayPopupItem = new JCheckBoxMenuItem(new AwayOption());
-        statusMenu.add(awayPopupItem);
+        dndPopupItem = new JCheckBoxMenuItem(new AwayOption());
+        statusMenu.add(dndPopupItem);
         //Set the menu location so that the popup will appear up instead of the default down for menus
         statusMenu.setMenuLocation(0, (statusMenu.getPopupMenu().getPreferredSize().height * -1));
         availabilityButtonGroup = new ButtonGroup();
         availabilityButtonGroup.add(availablePopupItem);
-        availabilityButtonGroup.add(awayPopupItem);
+        availabilityButtonGroup.add(dndPopupItem);
         
         updateStatus(I18n.tr("Sign In"), icons.getEndChat(), I18n.tr("Offline"));
         
@@ -139,7 +139,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         Mode newMode = event.getNewMode();
         updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), I18n.tr(newMode.toString()));
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
-                            (newMode == Mode.away || newMode == Mode.xa) ? awayPopupItem.getModel() : null;
+                            (newMode == Mode.dnd) ? dndPopupItem.getModel() : null;
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }

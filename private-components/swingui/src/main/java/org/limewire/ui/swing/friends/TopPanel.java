@@ -55,7 +55,7 @@ public class TopPanel extends JPanel {
     private final XMPPEventHandler xmppEventHandler;
     private ButtonGroup availabilityButtonGroup;
     private JCheckBoxMenuItem availablePopupItem;
-    private JCheckBoxMenuItem awayPopupItem;
+    private JCheckBoxMenuItem dndPopupItem;
     
     @Inject
     public TopPanel(final IconLibrary icons, XMPPEventHandler xmppEventHandler) {
@@ -110,12 +110,12 @@ public class TopPanel extends JPanel {
         options.setBorderPainted(false);
         options.add(new AddFriendOption());
         availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
-        awayPopupItem = new JCheckBoxMenuItem(new AwayOption());
+        dndPopupItem = new JCheckBoxMenuItem(new AwayOption());
         availabilityButtonGroup = new ButtonGroup();
         availabilityButtonGroup.add(availablePopupItem);
-        availabilityButtonGroup.add(awayPopupItem);
+        availabilityButtonGroup.add(dndPopupItem);
         options.add(availablePopupItem);
-        options.add(awayPopupItem);
+        options.add(dndPopupItem);
         options.addSeparator();
         options.add(new SignoffAction());
         JMenuBar menuBar = new JMenuBar();
@@ -228,7 +228,7 @@ public class TopPanel extends JPanel {
     public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
         Mode newMode = event.getNewMode();
         ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
-                            (newMode == Mode.away  || newMode == Mode.xa) ? awayPopupItem.getModel() : null;
+                            (newMode == Mode.dnd) ? dndPopupItem.getModel() : null;
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }
