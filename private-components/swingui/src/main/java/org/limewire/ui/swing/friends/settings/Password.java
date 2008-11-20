@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.ui.swing.friends.settings;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,7 +76,7 @@ public final class Password {
         return new String(Base64.encodeBase64(magicBytes), DEFAULT_ENCODING);
     }
 
-    public String decryptPassword() throws XmppEncryptionException, IOException, GeneralSecurityException {
+    public String decryptPassword() throws XMPPEncryptionException, IOException, GeneralSecurityException {
 
         if (!isEncrypted) {
             throw new IllegalStateException("Password is not encrypted; Cannot decrypt.");    
@@ -101,7 +101,7 @@ public final class Password {
 
         // should have reached the end - any extraneous bytes indicates corrupted bytes
         if (bais.available() > 0) {
-            throw new XmppEncryptionException("Additional bytes after encryption key");
+            throw new XMPPEncryptionException("Additional bytes after encryption key");
         }
         return new String(pwdAsBytes, DEFAULT_ENCODING);
 
@@ -112,13 +112,13 @@ public final class Password {
         baos.write(data);
     }
 
-    private static byte[] readField(ByteArrayInputStream bais) throws XmppEncryptionException {
+    private static byte[] readField(ByteArrayInputStream bais) throws XMPPEncryptionException {
 
         // read length of key
         int fieldStatedLen = bais.read();
 
         if (fieldStatedLen <= 0) {
-            throw new XmppEncryptionException("Corrupt key detected");
+            throw new XMPPEncryptionException("Corrupt key detected");
         }
 
         byte[] fieldBytes = new byte[fieldStatedLen];
@@ -126,12 +126,12 @@ public final class Password {
         try {
             actualFieldLen = bais.read(fieldBytes);
         } catch (IOException e) {
-            throw new XmppEncryptionException("Corrupt key detected: " + e.getMessage());
+            throw new XMPPEncryptionException("Corrupt key detected: " + e.getMessage());
         }
 
 
         if (actualFieldLen != fieldStatedLen) {
-            throw new XmppEncryptionException("Corrupt key detected: Mismatch between " +
+            throw new XMPPEncryptionException("Corrupt key detected: Mismatch between " +
                     "stated key length and actual key length.");
         }
         return fieldBytes;

@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends;
 
+import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManagerImpl;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 
 import com.google.inject.AbstractModule;
@@ -22,5 +24,6 @@ public class LimeWireUiFriendsModule extends AbstractModule {
         bind(XMPPErrorListener.class).to(LoginPanel.class);
         bind(FileOfferHandlerImpl.class);
         bind(XMPPConnectionListenerImpl.class);
+        bind(XMPPAccountConfigurationManager.class).to(XMPPAccountConfigurationManagerImpl.class);
     }
 }

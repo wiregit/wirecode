@@ -1,26 +1,26 @@
 package org.limewire.core.impl.xmpp;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPService;
 
 class MockXmppService implements XMPPService {
-//    private XMPPConnection connection;
-
-//    @Inject
 
     @Override
-    public List<XMPPConnection> getConnections() {
-//        return Arrays.asList(connection);
-        return Collections.emptyList();
+    public void login(XMPPConnectionConfiguration configuration) {
+    }
+
+    @Override
+    public void logout() {
+    }
+
+    @Override
+    public XMPPConnection getLoggedInConnection() {
+        return null;
     }
 
     @Override
     public void setXmppErrorListener(XMPPErrorListener errorListener) {
-        // TODO Auto-generated method stub
-        
     }
 }

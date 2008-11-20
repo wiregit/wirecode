@@ -70,14 +70,16 @@ public class XMPPAddressResolver implements AddressResolver {
      */
     public FriendPresence getPresence(XMPPAddress address) {
         String id = address.getId();
-        for (XMPPConnection connection : xmppService.getConnections()) {
-            User user = connection.getUser(id);
-            if (user != null) {
-                for (Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
-                    FriendPresence resolvedPresence = getMatchingPresence(address, entry.getKey(), entry.getValue());
-                    if (resolvedPresence != null) {
-                        return resolvedPresence;
-                    }
+        XMPPConnection connection = xmppService.getLoggedInConnection();
+        if(connection == null)
+            return null;
+        User user = connection.getUser(id);
+        if(user != null) {
+            for(Entry<String, FriendPresence> entry : user.getFriendPresences().entrySet()) {
+                FriendPresence resolvedPresence =
+                    getMatchingPresence(address, entry.getKey(), entry.getValue());
+                if(resolvedPresence != null) {
+                    return resolvedPresence;
                 }
             }
         }

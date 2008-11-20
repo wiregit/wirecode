@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.ui.swing.friends.settings;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -62,7 +62,7 @@ public class PasswordTest extends BaseTestCase {
         try {
             passwd.decryptPassword();
             fail("Should have encountered error decrypting password!");
-        } catch (XmppEncryptionException e) {
+        } catch (XMPPEncryptionException e) {
             // received expected error    
         }
     }

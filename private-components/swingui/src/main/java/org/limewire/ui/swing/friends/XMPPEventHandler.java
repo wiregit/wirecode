@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends;
 
-import java.util.List;
-
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.FriendSettings;
@@ -30,34 +28,10 @@ public class XMPPEventHandler {
         EventAnnotationProcessor.subscribe(this);
     }
     
-    public void login(String serviceName, String username, String password, boolean autologin) throws XMPPException {
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getServiceName().equals(serviceName)) {
-                if(!connection.isLoggedIn()) {
-                    configuration.setUsername(username);
-                    configuration.setPassword(password);
-                    connection.login();
-                    configuration.setAutoLogin(autologin);
-                }
-            }
-        }
+    public void login(XMPPConnectionConfiguration configuration) {
+        xmppService.login(configuration);
     }
 
-
-    public boolean hasAutoLogin(String serviceName) {
-        List<XMPPConnection> connections = xmppService.getConnections();
-        for(XMPPConnection connection : connections) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if (configuration.getServiceName().equals(serviceName) &&
-                configuration.isAutoLogin()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
         new SelfAvailabilityUpdateEvent(Mode.available).publish();
@@ -69,38 +43,9 @@ public class XMPPEventHandler {
     public void handleSignoffEvent(SignoffEvent event) {
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
-                logout();
+                xmppService.logout();
             }
         }, "xmpp-logout");
-    }
-    
-    private void logout() {
-        final XMPPConnection connection = getLoggedInConnection();
-        if (connection != null) {
-            connection.logout();
-        }
-    }
-    
-    public List<XMPPConnection> getAllConnections() {
-        return xmppService.getConnections();
-    }
-    
-    public XMPPConnectionConfiguration getConfigByServiceName(String serviceName) {
-        for(XMPPConnection connection : xmppService.getConnections()) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getServiceName().equals(serviceName))
-                return configuration;
-        }
-        return null;
-    }
-    
-    public XMPPConnectionConfiguration getConfigByFriendlyName(String friendlyName) {
-        for(XMPPConnection connection : xmppService.getConnections()) {
-            XMPPConnectionConfiguration configuration = connection.getConfiguration();
-            if(configuration.getFriendlyName().equals(friendlyName))
-                return configuration;
-        }
-        return null;
     }
     
     @EventSubscriber
@@ -113,11 +58,7 @@ public class XMPPEventHandler {
     }
     
     public XMPPConnection getLoggedInConnection() {
-        for(XMPPConnection connection : xmppService.getConnections()) {
-            if (connection.isLoggedIn())
-                return connection;
-        }
-        return null;
+        return xmppService.getLoggedInConnection();
     }
     
     @EventSubscriber

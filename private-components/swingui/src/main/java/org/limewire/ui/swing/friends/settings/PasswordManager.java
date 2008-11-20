@@ -1,4 +1,4 @@
-package org.limewire.core.impl.xmpp;
+package org.limewire.ui.swing.friends.settings;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -21,7 +21,7 @@ public class PasswordManager {
         this.cipherProvider = cipherProvider;
     }
 
-    public String loadPasswordFromUserName(String userName) throws XmppEncryptionException {
+    public String loadPassword(String userName) throws XMPPEncryptionException {
         if (userName == null || userName.equals("")) {
             throw new IllegalArgumentException("User Name cannot be null or empty String");
         }
@@ -33,13 +33,13 @@ public class PasswordManager {
         try {
             return pwd.decryptPassword();
         } catch (IOException e) {
-            throw new XmppEncryptionException("Error decrypting password", e);
+            throw new XMPPEncryptionException("Error decrypting password", e);
         } catch (GeneralSecurityException e) {
-            throw new XmppEncryptionException("Error decrypting password", e);
+            throw new XMPPEncryptionException("Error decrypting password", e);
         }
     }
 
-    public void storePassword(String userName, String rawPassword) throws XmppEncryptionException {
+    public void storePassword(String userName, String rawPassword) throws XMPPEncryptionException {
         if (rawPassword == null || rawPassword.equals("")) {
             throw new IllegalArgumentException("Password cannot be null or empty String");
         }
@@ -50,9 +50,9 @@ public class PasswordManager {
         try {
             prefs.put(userName, pwd.encryptPassword());
         } catch (NoSuchAlgorithmException e) {
-            throw new XmppEncryptionException("Error encrypting password", e);
+            throw new XMPPEncryptionException("Error encrypting password", e);
         } catch (IOException e) {
-            throw new XmppEncryptionException("Error encrypting password", e);
+            throw new XMPPEncryptionException("Error encrypting password", e);
         }
     }
 

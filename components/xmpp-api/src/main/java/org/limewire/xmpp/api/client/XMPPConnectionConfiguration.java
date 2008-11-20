@@ -8,19 +8,12 @@ import org.limewire.listener.EventListener;
  */
 public interface XMPPConnectionConfiguration extends Network {
     public boolean isDebugEnabled();
-    public boolean requiresDomain();
     public String getUsername();
-    public void setUsername(String username);
     public String getPassword();
-    public void setPassword(String password);
     public String getHost();
     public int getPort();
     public String getServiceName();
-    public String getFriendlyName();
-    public String getRegistrationURL();
-    public boolean isAutoLogin();
-    public void setAutoLogin(boolean autoLogin);
+    public String getResource();
     public EventListener<RosterEvent> getRosterListener();
     public XMPPErrorListener getErrorListener();
-    public String getResource();
 }

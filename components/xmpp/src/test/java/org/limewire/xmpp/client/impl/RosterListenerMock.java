@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,18 +7,16 @@ import java.util.List;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventListener;
-import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
 public class RosterListenerMock implements EventListener<RosterEvent> {
+    // Lock 'this' while accessing or changing these maps
     public HashMap<String, User> users = new HashMap<String, User>();
     public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
-    ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
-    FeatureEventListener featureEventListener = new FeatureEventListener();
     
     public void handleEvent(RosterEvent event) {
         if(event.getType().equals(User.EventType.USER_ADDED)) {
@@ -30,7 +28,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         }
     }
 
-    private void userAdded(User user) {
+    private synchronized void userAdded(User user) {
         System.out.println("user added: " + user.getId()); 
         users.put(user.getId(), user);
         if(roster.get(user.getId()) == null) {
@@ -66,7 +64,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         });
     }
 
-    private void replace(ArrayList<Presence> presences, Presence presence) {
+    private synchronized void replace(ArrayList<Presence> presences, Presence presence) {
         for(Presence p : presences) {
             if(p.getJID().equals(presence.getJID())) {
                 presences.remove(p);
@@ -75,7 +73,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         }
     }
 
-    private boolean contains(ArrayList<Presence> presences, String jid) {
+    private synchronized boolean contains(ArrayList<Presence> presences, String jid) {
         for(Presence presence : presences) {
             if(presence.getJID().equals(jid)) {
                 return true;
@@ -84,7 +82,7 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
         return false;
     }
 
-    private void remove(String id, Presence p) {
+    private synchronized void remove(String id, Presence p) {
         for(Presence presence : roster.get(id)) {
             if(presence.getJID().equals(p.getJID())) {
                 roster.get(id).remove(presence);

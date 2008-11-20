@@ -1,9 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.lifecycle.Asynchronous;
@@ -33,28 +31,28 @@ import com.google.inject.Singleton;
 public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
-    
+
     public static final String LW_SERVICE_NS = "http://www.limewire.org/";
-    
-    private final CopyOnWriteArrayList<XMPPConnectionImpl> connections;
+
     private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
-    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
     private final AddressFactory addressFactory;
     private XMPPErrorListener errorListener;
     private Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
-    private AddressEvent lastEvent;
+    private AddressEvent lastAddressEvent;
     private final XMPPAuthenticator authenticator;
+    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+    private LinkedList<XMPPConnectionImpl> connections;
+    private boolean multipleConnectionsAllowed;
 
     @Inject
-    XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                    Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
-                    Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
-                    Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
-                    Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
-                    AddressFactory addressFactory, XMPPAuthenticator authenticator,
-                    ListenerSupport<FriendPresenceEvent> presenceSupport) {
+    public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
+            Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
+            Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
+            Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
+            AddressFactory addressFactory, XMPPAuthenticator authenticator,
+            ListenerSupport<FriendPresenceEvent> presenceSupport) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
@@ -62,109 +60,100 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.presenceSupport = presenceSupport;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
-        this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
-        for(XMPPConnectionConfiguration configuration : configurations.get()) {
-            addConnectionConfiguration(configuration);
-        }
+        connections = new LinkedList<XMPPConnectionImpl>();
+        multipleConnectionsAllowed = false;
     }
-    
+
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
     }
-    
+
     @Inject
     void register(ListenerSupport<AddressEvent> registry) {
         registry.addListener(this);
     }
 
-//    public void register(RosterListener rosterListener) {
-//        this.rosterListener = rosterListener;
-//        for(XMPPConnectionImpl connection : connections) {
-//            connection.addRosterListener(rosterListener);
-//        }
-//    }
-
     public void setXmppErrorListener(XMPPErrorListener errorListener) {
         this.errorListener = errorListener;
     }
 
+    @Override
     public void initialize() {
-        initializeConfigurations();
     }
 
-    /**
-     * Logs into the xmpp service specified in the <code>XMPPConfiguration</code>
-     */
-    @Asynchronous 
+    @Override
     public void start() {
-        for(XMPPConnection connection : connections) {
-            if(connection.getConfiguration().isAutoLogin()) {
-                login(connection);
-            }
-        }        
-    }
-
-    private void login(XMPPConnection connection) {
-        try {
-            // TODO async
-            connection.login();
-        } catch (XMPPException e) {
-            LOG.error(e.getMessage(), e);
-            // TODO connection.getConfiguration().getErrorListener()
-            errorListener.error(e);
-        }
     }
 
     /**
-     * Disconnects from the xmpp server
+     * Logs out all existing connections.
      */
     @Asynchronous
+    @Override
     public void stop() {
-        for(XMPPConnection connection : connections) {
-            // TODO async
-            connection.logout();
-        }
+        logout();
     }
 
+    @Override
     public String getServiceName() {
         return "XMPP";
     }
 
-    public List<XMPPConnection> getConnections() {
-        List<XMPPConnection> copy = new ArrayList<XMPPConnection>();
-        copy.addAll(connections);
-        return Collections.unmodifiableList(copy);
-    }
-
-    private void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        synchronized (this) {
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, rosterBroadcaster
-                    .get(), fileOfferBroadcaster.get(), libraryChangedBroadcaster.get(),
-                    connectionBroadcaster.get(), addressFactory, authenticator, presenceSupport);
+    @Override
+    public synchronized void login(XMPPConnectionConfiguration configuration) {
+        if(!multipleConnectionsAllowed)
+            logout();
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
+                rosterBroadcaster.get(), fileOfferBroadcaster.get(),
+                libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
+                addressFactory, authenticator, presenceSupport);
+        connection.initialize();
+        // Give the new connection the latest information about our IP address
+        // and firewall status
+        if(lastAddressEvent != null)
+            connection.handleEvent(lastAddressEvent);
+        try {
+            connection.login();
             connections.add(connection);
-        }
-    }
-    
-    void initializeConfigurations() {
-        synchronized(this) {
-            for(XMPPConnection connection : connections) {
-                XMPPConnectionImpl impl = (XMPPConnectionImpl)connection;
-                impl.initialize();
-                if(lastEvent != null) {
-                    impl.handleEvent(lastEvent);
-                }
-            }
+        } catch(XMPPException e) {
+            LOG.error(e.getMessage(), e);
+            errorListener.error(e);
         }
     }
 
+    @Override
+    public synchronized void logout() {
+        for(XMPPConnection connection : connections) {
+            if(connection.isLoggedIn())
+                connection.logout();
+        }
+        connections.clear();
+    }
+
+    @Override
+    public synchronized XMPPConnection getLoggedInConnection() {
+        return connections.pop(); // Returns null if the list is empty
+    }
+
+    @Override
     public void handleEvent(AddressEvent event) {
         LOG.debugf("handling address event: {0}", event.getSource().toString());
-        synchronized (this) {
-            for(XMPPConnectionImpl connection : connections) {
+        synchronized(this) {
+            for(XMPPConnectionImpl connection : connections)
                 connection.handleEvent(event);
-            }
-            lastEvent = event;
+            lastAddressEvent = event;
         }
     }
+
+    // Only for testing
+    void setMultipleConnectionsAllowed(boolean allowed) {
+        multipleConnectionsAllowed = allowed;
+    }
+
+    // Only for testing
+    synchronized List<? extends XMPPConnection> getConnections() {
+        // Return a copy in case we modify the list while the caller's using it
+        return new LinkedList<XMPPConnectionImpl>(connections);
+    }    
 }
