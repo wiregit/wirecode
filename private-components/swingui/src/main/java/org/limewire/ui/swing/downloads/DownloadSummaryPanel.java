@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,13 +14,12 @@ import java.util.EventObject;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.Border;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -32,11 +29,14 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
@@ -60,6 +60,7 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
+import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
@@ -79,7 +80,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
      */
 	private static final int NUMBER_DISPLAYED = 5;
 
-	private static final int LEFT_MARGIN = 25;
+	//private static final int LEFT_MARGIN = 25;
 
 	private final LimeProgressBarFactory progressBarFactory;
     private final Navigator navigator;
@@ -87,22 +88,28 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private AbstractDownloadTable table;
 
-	private SummaryPanelHeader header;
+	private JLabel header;
 	private JButton moreButton;
 	private EventList<DownloadItem> allList;
     private RangeList<DownloadItem> chokeList;    
-    
+
+   // private JButton minimizeButton;
 
     @Resource private Font itemFont; 
     @Resource private Color fontColor; 
     @Resource private Icon downloadIcon;
+//    @Resource private Icon downloadCompletedIcon;
+//    @Resource private Icon minimizeIcon;
+//    @Resource private Icon minimizeIconHover;
+//    @Resource private Icon minimizeIconDown;
 
-    private DownloadStatusPanelRendererEditor downloadStatusPanelRenderer;
-    private DownloadStatusPanelRendererEditor downloadStatusPanelEditor;
+
+    private DownloadSummaryPanelRendererEditor downloadStatusPanelRenderer;
+    private DownloadSummaryPanelRendererEditor downloadStatusPanelEditor;
 
     
     @Inject
-	public DownloadSummaryPanel(DownloadListManager downloadListManager, MainDownloadPanel mainDownloadPanel, 
+	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
 	        LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory) {
 	    this.navigator = navigator;
@@ -112,12 +119,12 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         
         setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
-        this.allList = downloadListManager.getSwingThreadSafeDownloads();
+        this.allList = downloadMediator.getDownloadList();//downloadListManager.getSwingThreadSafeDownloads();
 
         setLayout(new MigLayout());
         setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());
                 
-		header = new SummaryPanelHeader();
+		header = new JLabel(downloadIcon);
 
         Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
             @Override
@@ -133,22 +140,23 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 		chokeList = GlazedListsFactory.rangeList(sortedList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		final HorizontalDownloadTableModel tableModel = new HorizontalDownloadTableModel(sortedList);
-		table = new AbstractDownloadTable(){
+		table = new AbstractDownloadTable() {
             @Override
             public DownloadItem getDownloadItem(int row) {
-                //row is actually a column here
+                // row is actually a column here
                 return tableModel.getDownloadItem(row);
-            }};
-            table.setModel(tableModel);
+            }
+        };
+        table.setModel(tableModel);
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
 		
-		downloadStatusPanelRenderer = new DownloadStatusPanelRendererEditor();
+		downloadStatusPanelRenderer = new DownloadSummaryPanelRendererEditor();
 		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
         table.setRowHeight(45);
         
-        downloadStatusPanelEditor = new DownloadStatusPanelRendererEditor();
+        downloadStatusPanelEditor = new DownloadSummaryPanelRendererEditor();
         table.setDefaultEditor(DownloadItem.class, downloadStatusPanelEditor);
         
         table.setColumnDoubleClickHandler(new DownloadClickHandler());
@@ -195,6 +203,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         tableScroll.setOpaque(false);
         tableScroll.getViewport().setOpaque(false);
         tableScroll.setBorder(new EmptyBorder(0, 0, 0, 0));
+        tableScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         
 
         moreButton = new HyperLinkButton(I18n.tr("See All"));
@@ -203,10 +212,6 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         MouseListener navMouseListener = createDownloadNavListener();
         moreButton.addMouseListener(navMouseListener);
         header.addMouseListener(navMouseListener);
-        for(Component c : header.getComponents()){
-            c.addMouseListener(navMouseListener);
-        }
-        
 
         add(header, "aligny 50%");
         add(tableScroll, "aligny 50%, growx, push");
@@ -263,24 +268,43 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
     }
 
 	private void updateTitle(){
-	    header.setCount(allList.size());
+	    setCount(allList.size());
 	}
-	
-	
-	private class DownloadStatusPanelRendererEditor extends TableRendererEditor {
+		
+	private class DownloadSummaryPanelRendererEditor extends TableRendererEditor {
 		
 	    private final JLabel nameLabel;
 		private final LimeProgressBar progressBar;
-		private final Border mouseOverBorder;
+	//	private final Border mouseOverBorder;
+	    private JButton pauseButton;
+	    private JButton resumeButton; 
+	    private Painter mouseOverPainter;
+	    private JLabel statusLabel;
 		
-	    @Resource private Color mouseOverColor;
+	//    @Resource private Color mouseOverColor;
+	    @Resource private Icon pauseIcon;
+	    @Resource private Icon pauseIconHover;
+	    @Resource private Icon pauseIconDown;
+	    @Resource private Icon resumeIcon;
+	    @Resource private Icon resumeIconHover;
+	    @Resource private Icon resumeIconDown;
 
-		public DownloadStatusPanelRendererEditor() {
-            setLayout(new GridBagLayout());
+		public DownloadSummaryPanelRendererEditor() {
+            //setLayout(new GridBagLayout());
+            setLayout(new MigLayout("nogrid, ins 0, gap 0! 0!, novisualpadding"));
 			GuiUtils.assignResources(this);
 			
-			mouseOverBorder = new LineBorder(mouseOverColor, 3);
+			//mouseOverBorder = new LineBorder(mouseOverColor, 3);
 			
+			mouseOverPainter = new AbstractPainter<JComponent>(){
+                @Override
+                protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
+                    g.setPaint(Color.WHITE);
+                    g.fillRoundRect(0, 0, width, height, 10, 10);
+                }
+			};
+			
+			statusLabel = new JLabel();			
 			nameLabel = new JLabel();
             nameLabel.setFont(itemFont);
             nameLabel.setForeground(fontColor);
@@ -290,23 +314,36 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             progressBar.setPreferredSize(size);
             progressBar.setMaximumSize(size);
             progressBar.setMinimumSize(size);
+
+            pauseButton = new IconButton(pauseIcon, pauseIconHover, pauseIconDown);
+            resumeButton = new IconButton(resumeIcon, resumeIconHover, resumeIconDown);
                         
 			setOpaque(false);
 			
-	        GridBagConstraints gbc = new GridBagConstraints();
-
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.SOUTHWEST;
-            nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
-            nameLabel.setOpaque(false);
-            gbc.insets = new Insets(0, LEFT_MARGIN, 6, 0);
-            add(nameLabel, gbc);
-
-            gbc.gridy = 1;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            add(progressBar, gbc);	
+			add(nameLabel, "wrap");
+			add(progressBar, "hidemode 3");
+            add(statusLabel, "hidemode 3");
+            add(pauseButton, "hidemode 3");
+            add(resumeButton, "hidemode 3");
+			
+//	        GridBagConstraints gbc = new GridBagConstraints();
+//
+//            gbc.gridx = 0;
+//            gbc.gridy = 0;
+//            gbc.fill = GridBagConstraints.NONE;
+//            gbc.anchor = GridBagConstraints.SOUTHWEST;
+//            nameLabel.setAlignmentY(JLabel.LEFT_ALIGNMENT);
+//            nameLabel.setOpaque(false);
+//            gbc.insets = new Insets(0, LEFT_MARGIN, 6, 0);
+//            add(nameLabel, gbc);
+//
+//            gbc.gridy = 1;
+//            gbc.anchor = GridBagConstraints.NORTHWEST;
+//            add(progressBar, gbc);	
+//            
+//            gbc.gridx++;
+//            add(pauseButton, gbc);
+//            add(resumeButton, gbc);
             
 //            MouseListener navMouseListener = createDownloadNavListener();
 //            addMouseListener(navMouseListener);
@@ -321,7 +358,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
             updateCell((DownloadItem) value);
-            setBorder(null);
+            setBackgroundPainter(null);
             return this;
         }
 
@@ -330,7 +367,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             updateCell((DownloadItem) value);
-            setBorder(mouseOverBorder);
+            setBackgroundPainter(mouseOverPainter);
             return this;
         }
 
@@ -342,7 +379,50 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         
         private void updateCell(DownloadItem item){
             nameLabel.setText(item.getTitle());
+            progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
+            if (progressBar.isVisible()){
             progressBar.setValue(item.getPercentComplete());
+            }
+            pauseButton.setVisible(item.getState().isPausable());
+            resumeButton.setVisible(item.getState().isResumable());
+            statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);
+            if (statusLabel.isVisible()){
+                statusLabel.setText(getMessage(item));
+            }
+        }
+        
+        private String getMessage(DownloadItem item) {
+            switch (item.getState()) {
+            case CANCELLED:
+                return I18n.tr("Cancelled");
+            case FINISHING:
+                return I18n.tr("Finishing download...");
+            case DONE:
+                return I18n.tr("Done");
+            case CONNECTING:
+                return I18n.tr("Connecting...");           
+            case STALLED:
+                return I18n.tr("Stalled - ");
+            case ERROR:         
+                return I18n.tr("Unable to download: ");            
+            case LOCAL_QUEUED:
+                long queueTime = item.getRemainingQueueTime();
+                if(queueTime == DownloadItem.UNKNOWN_TIME){
+                    return I18n.tr("Queued - remaining time unknown");                
+                } else {
+                    return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
+                }
+            case REMOTE_QUEUED:
+                if(item.getQueuePosition() == -1){
+                    return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(item.getRemainingQueueTime()));
+                }
+                return I18n.trn("Queued - {0} person ahead of you for this file",
+                        "Queued - {0} people ahead of you for this file",
+                        item.getQueuePosition(), item.getQueuePosition());
+            default:
+                throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
+            }
+            
         }
      
 	}
@@ -373,26 +453,10 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	    return 0;
 	}
 	
-	private class SummaryPanelHeader extends JPanel {
-	    private JLabel countLabel;
-	    public SummaryPanelHeader(){
-	        super(new MigLayout());
-	        setOpaque(false);
-	        
-	        JLabel dlLabel = new JLabel(I18n.tr("DL"), JLabel.RIGHT);
-	        FontUtils.bold(dlLabel);
-	        
-	        countLabel = new JLabel(Integer.toString(0, JLabel.LEFT));
-	        add(new JLabel(downloadIcon), "spanx 3, grow, wrap");
-	        add(dlLabel);
-	        add(new JLabel("|"));
-	        add(countLabel);
-	    }
-	    
-	    public void setCount(int count){
-	        countLabel.setText(Integer.toString(count));
-	    }
-	}
+    private void setCount(int count){
+        moreButton.setText(I18n.tr("See All {0}", Integer.toString(count)));
+    }
+	
 
 	private class DownloadClickHandler implements TableColumnDoubleClickHandler {
 	    @Override
@@ -404,6 +468,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	    }
 	}
 	
+	@Override
 	public void toggleVisibility() {
 	    boolean visible = !isVisible(); 
 	    setVisible(visible);

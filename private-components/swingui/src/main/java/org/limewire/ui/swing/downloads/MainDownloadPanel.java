@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.CustomCheckBox;
@@ -92,10 +91,10 @@ public class MainDownloadPanel extends JPanel {
 	@Inject
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
-	        DownloadListManager downloadListManager, AudioPlayer player,
+	        DownloadMediator downloadMediator, AudioPlayer player,
 	        LimeHeaderBarFactory headerBarFactory) {
 	    
-		this.downloadMediator = new DownloadMediator(downloadListManager);
+		this.downloadMediator = downloadMediator;
 		setLayout(new BorderLayout());
 		
         resumeAction.setEnabled(false);

@@ -9,9 +9,12 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.table.DownloadStateExcluder;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.EventList;
 
-
+@Singleton
 class DownloadMediator {
 
 	/**
@@ -19,6 +22,7 @@ class DownloadMediator {
 	 */
 	private final EventList<DownloadItem> commonBaseList;
 	
+	@Inject
 	public DownloadMediator(DownloadListManager downloadManager) {
 		commonBaseList = GlazedListsFactory.filterList(downloadManager.getSwingThreadSafeDownloads(), new DownloadStateExcluder(DownloadState.CANCELLED));
 	}
