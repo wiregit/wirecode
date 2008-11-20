@@ -29,7 +29,7 @@ public interface Presence extends FriendPresence {
     enum Mode {
         // lower case enum values to allow direct mapping from to the Mode enum
         // defined in smack
-        chat(I18nMarker.marktr("Free to chat"), 1),
+        chat(I18nMarker.marktr("Free to chat"), 0),
         available(I18nMarker.marktr("Available"), 1),
         away(I18nMarker.marktr("Away"), 2),
         xa(I18nMarker.marktr("Away for a while"), 2),
