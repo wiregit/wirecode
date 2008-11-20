@@ -362,8 +362,9 @@ implements TableCellEditor, TableCellRenderer {
         panel.setOpaque(false);
         panel.add(new JLabel(dividerIcon));
         panel.add(fromWidget, "push");
-        panel.add(similarButton, "hmax 25, wmax 25");
-        panel.add(optionsButton, "hmax 25, wmax 25");
+        //Tweaked the width of the icon because display gets clipped otherwise
+        panel.add(similarButton, "hmax 25, wmax 27");
+        panel.add(optionsButton, "hmax 25, wmax 27");
 
         return panel;
     }
@@ -407,7 +408,7 @@ implements TableCellEditor, TableCellRenderer {
 
         searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[fill]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
-        heading.setMinimumSize(new Dimension(350, 0));
+        heading.setMinimumSize(new Dimension(450, 0));
         searchResultTextPanel.add(heading, "wrap, growx");
         searchResultTextPanel.add(subheadingLabel, "wrap");
         searchResultTextPanel.add(metadataLabel);
@@ -472,13 +473,17 @@ implements TableCellEditor, TableCellRenderer {
         int width = heading.getVisibleRect().width;
         //Width is zero the first time editorpane is rendered - use a default based on the min width for the component
         width = width == 0 ? heading.getMinimumSize().width : width;
-        String headingText = truncator.truncateHeading(result.getHeading(), width, headingFontWidthResolver);
+        //Make the visible rect seem a little smaller than usual to trigger a more hungry truncation
+        //otherwise the JEditorPane word-wrapping logic kicks in and the edge word just disappears
+        int fudgeFactorPixelWidth = width - 10;
+        String headingText = truncator.truncateHeading(result.getHeading(), fudgeFactorPixelWidth, headingFontWidthResolver);
         this.heading.setText(headingBuilder.getHeadingDocument(headingText, downloadState, isMouseOver, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
     
     private class HeadingFontWidthResolver implements FontWidthResolver {
-        private final Pattern stripBoldTags = Pattern.compile("[<][/]?[b][>]");
+        private static final String EMPTY_STRING = "";
+        private final Pattern findBoldTags = Pattern.compile("[<][/]?[b][>]");
         
         @Override
         public int getPixelWidth(String text) {
@@ -487,7 +492,8 @@ implements TableCellEditor, TableCellRenderer {
             int pointSize = (int)css.getPointSize(5);
             Font font = css.getFont("Arial", Font.PLAIN, pointSize);
             FontMetrics fontMetrics = css.getFontMetrics(font);
-            return fontMetrics.stringWidth(stripBoldTags.matcher(text).replaceAll(""));
+            text = findBoldTags.matcher(text).replaceAll(EMPTY_STRING);
+            return fontMetrics.stringWidth(text);
         }
     }
     
