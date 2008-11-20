@@ -15,7 +15,9 @@ import javax.swing.JToggleButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.util.FileUtils;
 
 import com.google.inject.Singleton;
 
@@ -31,8 +33,6 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             return;
         }
 
-        // TODO depending on append to file name setting, don't show the
-        // dialogue, instead append a number to the end of the name.
         if (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS
                 && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
             // TODO better user feedback
@@ -40,15 +40,31 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
 
         File saveFile = null;
-        if (supportNewSaveDir) {
-            saveFile = FileChooser.getSaveAsFile(component, I18n.tr("Save File As..."), sle
-                    .getFile());
-        } else {
-            saveFile = sle.getFile();
-        }
 
-        if (saveFile == null) {
-            return;
+        if (supportNewSaveDir && DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.getValue()) {
+            saveFile = sle.getFile();
+            int index = 1;
+            String fileName = FileUtils.getFilenameNoExtension(saveFile.getName());
+            String extension = FileUtils.getFileExtension(saveFile);
+            while (saveFile.exists()) {
+                String newFileName = fileName + "(" + index + ")";
+                if (extension.length() > 0) {
+                    newFileName += "." + extension;
+                }
+                saveFile = new File(saveFile.getParentFile(), newFileName);
+                index++;
+            }
+        } else {
+            if (supportNewSaveDir) {
+                saveFile = FileChooser.getSaveAsFile(component, I18n.tr("Save File As..."), sle
+                        .getFile());
+            } else {
+                saveFile = sle.getFile();
+            }
+
+            if (saveFile == null) {
+                return;
+            }
         }
 
         if (saveFile.exists()) {
@@ -97,7 +113,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
-                if(supportNewSaveDir) {
+                if (supportNewSaveDir) {
                     handleSaveLocationException(downLoadAction, sle, supportNewSaveDir, component);
                 }
             }

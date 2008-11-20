@@ -111,6 +111,6 @@ public class DownloadSettings extends LimeProps {
      * Auto rename new downloads with filenames matching old downloads.
      */
     public static final BooleanSetting AUTO_RENAME_DUPLICATE_FILES =
-        FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", false);
+        FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", true);
         
 }
