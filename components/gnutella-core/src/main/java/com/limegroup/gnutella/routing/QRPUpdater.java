@@ -240,6 +240,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 case REMOVED:
                 case CLEAR:
                     needRebuild = true;
+					break;
                 }
             }
         });
@@ -251,6 +252,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 case REMOVED:
                 case CLEAR:
                     needRebuild = true;
+					break;
                 }   
             }
         });
@@ -260,6 +262,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
                 switch(event.getType()) {
                 case URNS_CHANGED:
                     needRebuild = true;
+					break;
                 }
             }
         });

@@ -1,10 +1,18 @@
 package org.limewire.core.api.friend.feature;
 
-import org.limewire.listener.DefaultEvent;
+import org.limewire.listener.DefaultDataEvent;
+import org.limewire.xmpp.api.client.Presence;
 
-public class FeatureEvent extends DefaultEvent<Feature, Feature.EventType> {
+public class FeatureEvent extends DefaultDataEvent<Presence, FeatureEvent.Type, Feature> {
 
-    public FeatureEvent(Feature source, Feature.EventType event) {
-        super(source, event);
+    public static enum Type {
+        ADDED, 
+        REMOVED 
+    }
+    
+    public FeatureEvent(Presence source, Type type, Feature feature) {
+        super(source, type, feature);
     }
 }
+
+

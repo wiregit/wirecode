@@ -306,6 +306,7 @@ public class FriendSharePanel extends GenericSharingPanel {
                             break;
                         }
                     }
+					break;
                 }
             }
         });

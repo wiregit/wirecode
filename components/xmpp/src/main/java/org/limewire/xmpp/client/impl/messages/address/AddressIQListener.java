@@ -10,7 +10,6 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
@@ -124,8 +123,8 @@ public class AddressIQListener implements PacketListener {
                 presenceEvent.getSource().getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
                     @BlockingEvent
                     public void handleEvent(FeatureEvent featureEvent) {
-                        if(featureEvent.getType() == Feature.EventType.FEATURE_ADDED
-                        && featureEvent.getSource().getID().equals(LimewireFeature.ID)) {
+                        if(featureEvent.getType() == FeatureEvent.Type.ADDED
+                                && featureEvent.getData().getID().equals(LimewireFeature.ID)) {
                             String jid = presenceEvent.getSource().getPresenceId();
                             synchronized (AddressIQListener.this) {
                                 if(address != null) {

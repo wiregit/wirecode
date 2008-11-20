@@ -211,6 +211,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                     for(FileDesc fd : fds) {
                         remove(fd);
                     }
+					break;
                 }
             }
         });

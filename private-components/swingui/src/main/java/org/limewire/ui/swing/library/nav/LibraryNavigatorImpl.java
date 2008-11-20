@@ -220,6 +220,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                         panel.getParentList().removePanel(panel);
                         disposeNavPanel(panel);
                     }
+					break;
                 }
             }
         });
@@ -244,6 +245,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                         panel.getParentList().removePanel(panel);
                         offlineList.addNavPanel(panel);
                     }
+					break;
                 }
             }
         });

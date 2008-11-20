@@ -11,7 +11,6 @@ import org.limewire.util.Objects;
  * or an action, such as recommending a file to them. 
  */
 public class Feature<T> {
-    public enum EventType {FEATURE_ADDED, FEATURE_REMOVED}
     private final T feature;
     private final URI id;
 

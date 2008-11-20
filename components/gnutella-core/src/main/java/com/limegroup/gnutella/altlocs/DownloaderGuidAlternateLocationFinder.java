@@ -117,6 +117,7 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
                 searchForPushEndpoints(magnetDownloader);
             }
+			break;
         }
     }
     

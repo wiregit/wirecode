@@ -117,14 +117,14 @@ class PresenceImpl implements Presence {
     @Override
     public void addFeature(Feature feature) {
         features.put(feature.getID(), feature);
-        featureListeners.broadcast(new FeatureEvent(feature, Feature.EventType.FEATURE_ADDED));
+        featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.ADDED, feature));
     }
 
     @Override
     public void removeFeature(URI id) {
         Feature feature = features.remove(id);
         if(feature != null) {
-            featureListeners.broadcast(new FeatureEvent(feature, Feature.EventType.FEATURE_REMOVED));
+            featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
         }
     }
 }

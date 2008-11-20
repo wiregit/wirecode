@@ -1,12 +1,14 @@
 package org.limewire.xmpp.client.impl;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureEvent.Type;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.io.Address;
@@ -19,6 +21,7 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -38,6 +41,8 @@ public class XMPPAddressResolver implements AddressResolver {
     private final XMPPService xmppService;
 
     private final EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster;
+    
+    private final ConnectivyFeatureListener connectivyFeatureListener = new ConnectivyFeatureListener();
 
     @Inject
     public XMPPAddressResolver(XMPPService xmppService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
@@ -129,18 +134,31 @@ public class XMPPAddressResolver implements AddressResolver {
     private class PresenceHandler implements EventListener<FriendPresenceEvent> {
         @Override
         public void handleEvent(FriendPresenceEvent event) {
+            FriendPresence presence = event.getSource();
             switch(event.getType()) {
             case ADDED:
-                final FriendPresence presence = event.getSource();
-                presence.getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
-                    @Override
-                    public void handleEvent(FeatureEvent event) {
-                        if (presence.hasFeatures(AuthTokenFeature.ID, AddressFeature.ID)) {
-                            LOG.debugf("presence with address and auth-token became available: {0}", presence.getPresenceId());
-                            connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
-                        }
-                    }
-                });
+                presence.getFeatureListenerSupport().addListener(connectivyFeatureListener);
+                break;
+            case REMOVED:
+                presence.getFeatureListenerSupport().removeListener(connectivyFeatureListener);
+                break;
+            }
+        }
+    }
+    
+    private class ConnectivyFeatureListener implements EventListener<FeatureEvent> {
+        @Override
+        public void handleEvent(FeatureEvent event) {
+            if (event.getType() != Type.ADDED) {
+                return;
+            }
+            URI id = event.getData().getID();
+            if (id.equals(AuthTokenFeature.ID) || id.equals(AddressFeature.ID)) {
+                Presence presence = event.getSource();
+                if (presence.hasFeatures(AuthTokenFeature.ID, AddressFeature.ID)) {
+                    LOG.debugf("presence with address and auth-token became available: {0}", presence.getPresenceId());
+                    connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    
+                }
             }
         }
     }
