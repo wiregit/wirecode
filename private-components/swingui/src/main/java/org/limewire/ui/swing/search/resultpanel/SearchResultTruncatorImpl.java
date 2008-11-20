@@ -12,21 +12,21 @@ public class SearchResultTruncatorImpl implements SearchResultTruncator {
     private static final String CLOSE_TAG = "</b>";
     private static final String ELLIPSIS = "...";
     private static final int ELLIPSIS_SHRINK_INCREMENT = ELLIPSIS.length() + 1;
-    private final Pattern stripHTMLMinusBoldTags = Pattern.compile("[<][/]?[\\w&&[^b]]*[>]");
-    private final Pattern stripMultipleWhitespaceChars = Pattern.compile("[\\s]++");
-    private final Pattern stripEmbeddedWhitespaceChars = Pattern.compile("[\\s&&[^ ]]");
+    private final Pattern findHTMLMinusBoldTags = Pattern.compile("[<][/]?[\\w&&[^b]]*[>]");
+    private final Pattern findMultipleWhitespaceChars = Pattern.compile("[\\s]++");
+    private final Pattern findWhitespaceMinusSpaceChars = Pattern.compile("[\\s&&[^ ]]");
 
     @Override
     public String truncateHeading(String headingText, int visibleWidthPixels, FontWidthResolver resolver) {
         //Strip HTML characters *except* <b>bold-wrapped</b> strings
-        headingText = replaceAll(stripHTMLMinusBoldTags, headingText, EMPTY_STRING);
+        headingText = replaceAll(findHTMLMinusBoldTags, headingText, EMPTY_STRING);
         if (resolver.getPixelWidth(headingText) <= visibleWidthPixels) {
             return headingText;
         }
         
         //Strip multiple whitespace characters (spaces, \r, \n, \t) and embedded whitespace characters
-        String truncated = replaceAll(stripMultipleWhitespaceChars, headingText, SINGLE_SPACE);
-               truncated = replaceAll(stripEmbeddedWhitespaceChars, truncated, EMPTY_STRING);
+        String truncated = replaceAll(findMultipleWhitespaceChars, headingText, SINGLE_SPACE);
+               truncated = replaceAll(findWhitespaceMinusSpaceChars, truncated, EMPTY_STRING);
         
         do {
             if (getEndEdge(truncated) >= (truncated.length() - (truncated.contains(ELLIPSIS) ? ELLIPSIS.length() : 0))) {
