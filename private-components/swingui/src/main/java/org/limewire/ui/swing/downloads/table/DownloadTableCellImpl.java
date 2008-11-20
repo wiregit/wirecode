@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -11,13 +12,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
@@ -51,13 +49,13 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
 
     private DownloadButtonPanel minButtonPanel;
     private JLabel minIconLabel;
-    private JLabel minTitleLabel;
+    private TitleLabel minTitleLabel;
     private JLabel minStatusLabel;
     private JXHyperlink minLinkButton;
     
     private DownloadButtonPanel fullButtonPanel;
     private JLabel fullIconLabel;
-    private JLabel fullTitleLabel;
+    private TitleLabel fullTitleLabel;
     private JLabel fullStatusLabel;
     private LimeProgressBar fullProgressBar;
     private JLabel fullTimeLabel;
@@ -77,8 +75,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     @Resource private Color borderPaint;
         
     private ActionListener editorListener = null;
-    
-    private List<JComponent> textComponents = new ArrayList<JComponent>();
     
     @AssistedInject
     public DownloadTableCellImpl(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory) {
@@ -127,15 +123,11 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
         minIconLabel = new JLabel();
         
-        minTitleLabel = new JLabel();
-        minTitleLabel.setFont(titleFont);
-        minTitleLabel.setForeground(titleLabelColour);
-        textComponents.add(minTitleLabel);
+        minTitleLabel = new TitleLabel();
 
         minStatusLabel = new JLabel();
         minStatusLabel.setFont(statusFontPlainMin);
         minStatusLabel.setForeground(statusLabelColour);
-        textComponents.add(minStatusLabel);
 
         minButtonPanel = new DownloadButtonPanel(editorListener);
         minButtonPanel.setOpaque(false);
@@ -148,10 +140,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
                                 
         fullIconLabel = new JLabel();
 
-        fullTitleLabel = new JLabel();
-        fullTitleLabel.setFont(titleFont);
-        fullTitleLabel.setForeground(titleLabelColour);
-        textComponents.add(fullTitleLabel);
+        fullTitleLabel = new TitleLabel();
 
         fullStatusLabel = new JLabel();
         fullStatusLabel.setFont(statusFontPlainFull);
@@ -160,8 +149,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel.setIconTextGap(0);
         fullStatusLabel.setIcon(downloadIcon);
         
-        textComponents.add(fullStatusLabel);
-
         fullProgressBar = progressBarFactory.create();
         Dimension size = new Dimension(progressBarWidth, 16);
         fullProgressBar.setMaximumSize(size);
@@ -493,4 +480,27 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         return this;
     }
 
+    /**
+     * Class to make trimming the title length inside the current GridBagLayout possible 
+     */
+    private class TitleLabel extends JPanel {
+        private final JLabel label = new JLabel();
+        
+        public TitleLabel() {
+            this.setLayout(new BorderLayout());
+            this.setOpaque(false);
+            this.setBorder(BorderFactory.createEmptyBorder());
+            
+            this.label.setFont(titleFont);
+            this.label.setForeground(titleLabelColour);
+            this.label.setMaximumSize(new Dimension(progressBarWidth-30, 20));
+            this.label.setPreferredSize(new Dimension(progressBarWidth-30, 20));
+            
+            this.add(this.label, BorderLayout.WEST);
+        }
+        
+        public void setText(String text) {
+            this.label.setText(text);
+        }
+    }
 }
