@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -104,6 +105,7 @@ implements TableCellEditor, TableCellRenderer {
     private final PropertiesFactory<VisualSearchResult> properties;
     private final ListViewDisplayedRowsLimit displayLimit;
     private final SearchResultTruncator truncator;
+    private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -470,19 +472,23 @@ implements TableCellEditor, TableCellRenderer {
         int width = heading.getVisibleRect().width;
         //Width is zero the first time editorpane is rendered - use a default based on the min width for the component
         width = width == 0 ? heading.getMinimumSize().width : width;
-        String headingText = truncator.truncateHeading(result.getHeading(), width, new FontWidthResolver() {
-            @Override
-            public int getPixelWidth(String text) {
-                HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
-                StyleSheet css = editorKit.getStyleSheet();
-                int pointSize = (int)css.getPointSize(5);
-                Font font = css.getFont("Arial", Font.PLAIN, pointSize);
-                FontMetrics fontMetrics = css.getFontMetrics(font);
-                return fontMetrics.stringWidth(text.replaceAll("[<][/]?[b][>]", ""));
-            }
-        });
+        String headingText = truncator.truncateHeading(result.getHeading(), width, headingFontWidthResolver);
         this.heading.setText(headingBuilder.getHeadingDocument(headingText, downloadState, isMouseOver, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
+    }
+    
+    private class HeadingFontWidthResolver implements FontWidthResolver {
+        private final Pattern stripBoldTags = Pattern.compile("[<][/]?[b][>]");
+        
+        @Override
+        public int getPixelWidth(String text) {
+            HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
+            StyleSheet css = editorKit.getStyleSheet();
+            int pointSize = (int)css.getPointSize(5);
+            Font font = css.getFont("Arial", Font.PLAIN, pointSize);
+            FontMetrics fontMetrics = css.getFontMetrics(font);
+            return fontMetrics.stringWidth(stripBoldTags.matcher(text).replaceAll(""));
+        }
     }
     
     private void populateOther(RowDisplayResult result) {

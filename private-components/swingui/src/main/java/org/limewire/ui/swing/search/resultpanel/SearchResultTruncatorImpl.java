@@ -1,24 +1,32 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.util.regex.Pattern;
+
 import com.google.inject.Singleton;
 
 @Singleton
 public class SearchResultTruncatorImpl implements SearchResultTruncator {
+    private static final String SINGLE_SPACE = " ";
+    private static final String EMPTY_STRING = "";
     private static final String OPEN_TAG = "<b>";
     private static final String CLOSE_TAG = "</b>";
     private static final String ELLIPSIS = "...";
     private static final int ELLIPSIS_SHRINK_INCREMENT = ELLIPSIS.length() + 1;
+    private final Pattern stripHTMLMinusBoldTags = Pattern.compile("[<][/]?[\\w&&[^b]]*[>]");
+    private final Pattern stripMultipleWhitespaceChars = Pattern.compile("[\\s]++");
+    private final Pattern stripEmbeddedWhitespaceChars = Pattern.compile("[\\s&&[^ ]]");
 
     @Override
     public String truncateHeading(String headingText, int visibleWidthPixels, FontWidthResolver resolver) {
         //Strip HTML characters *except* <b>bold-wrapped</b> strings
-        headingText = headingText.replaceAll("[<][/]?[\\w&&[^b]]*[>]", "");
+        headingText = replaceAll(stripHTMLMinusBoldTags, headingText, EMPTY_STRING);
         if (resolver.getPixelWidth(headingText) <= visibleWidthPixels) {
             return headingText;
         }
         
         //Strip multiple whitespace characters (spaces, \r, \n, \t) and embedded whitespace characters
-        String truncated = headingText.replaceAll("[\\s]++", " ").replaceAll("[\\s&&[^ ]]", "");
+        String truncated = replaceAll(stripMultipleWhitespaceChars, headingText, SINGLE_SPACE);
+               truncated = replaceAll(stripEmbeddedWhitespaceChars, truncated, EMPTY_STRING);
         
         do {
             if (getEndEdge(truncated) >= (truncated.length() - (truncated.contains(ELLIPSIS) ? ELLIPSIS.length() : 0))) {
@@ -29,6 +37,10 @@ public class SearchResultTruncatorImpl implements SearchResultTruncator {
         } while (resolver.getPixelWidth(truncated) > visibleWidthPixels);
         
         return truncated;
+    }
+    
+    private String replaceAll(Pattern pattern, String source, String replacement) {
+        return pattern.matcher(source).replaceAll(replacement);
     }
 
     private int getLeadEdge(String headingText) {
