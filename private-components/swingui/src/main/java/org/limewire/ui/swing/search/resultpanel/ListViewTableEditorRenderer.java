@@ -80,7 +80,6 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Color downloadSourceCountColor;
     @Resource private Color similarResultsBackgroundColor;
     @Resource private Color surplusRowLimitColor;
-    @Resource private Color rowSelectionColor;
     @Resource private Font headingFont;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
@@ -101,9 +100,6 @@ implements TableCellEditor, TableCellRenderer {
     private final ActionColumnTableCellEditor actionEditor;
     private final SearchHeadingDocumentBuilder headingBuilder;
     private final ListViewRowHeightRule rowHeightRule;
-    private final DownloadHandler downloadHandler;
-    private final RemoteHostActions remoteHostActions;
-    private final PropertiesFactory<VisualSearchResult> properties;
     private final ListViewDisplayedRowsLimit displayLimit;
     private final SearchResultTruncator truncator;
     private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
@@ -141,14 +137,14 @@ implements TableCellEditor, TableCellRenderer {
             SearchResultFromWidgetFactory fromWidgetFactory,
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
-        @Assisted RemoteHostActions remoteHostActions, 
+        final @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
-        @Assisted Color rowSelectionColor,
-        @Assisted DownloadHandler downloadHandler,
+        final @Assisted Color rowSelectionColor,
+        final @Assisted DownloadHandler downloadHandler,
         SearchHeadingDocumentBuilder headingBuilder,
         ListViewRowHeightRule rowHeightRule,
-        PropertiesFactory<VisualSearchResult> properties,
-        @Assisted ListViewDisplayedRowsLimit displayLimit,
+        final PropertiesFactory<VisualSearchResult> properties,
+        final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryNavigator libraryNavigator,
         SearchResultTruncator truncator) {
 
@@ -158,7 +154,6 @@ implements TableCellEditor, TableCellRenderer {
         this.searchText = searchText;
         this.headingBuilder = headingBuilder;
         this.rowHeightRule = rowHeightRule;
-        this.rowSelectionColor = rowSelectionColor;
         this.displayLimit = displayLimit;
         this.truncator = truncator;
         GuiUtils.assignResources(this);
@@ -198,11 +193,52 @@ implements TableCellEditor, TableCellRenderer {
         optionsButton.setContentAreaFilled(false);
         
         fromWidget = fromWidgetFactory.create(remoteHostActions);
-         this.downloadHandler = downloadHandler;
-        this.remoteHostActions = remoteHostActions;
-        this.properties = properties;
        
-        makePanel(navigator, libraryNavigator);
+        makePanel(navigator, libraryNavigator, properties);
+        
+        editorComponent = new JXPanel(new BorderLayout()) {
+
+            @Override
+            public void setBackground(final Color bg) {
+                //Don't highlight the limit row
+                if (currentRow == displayLimit.getLastDisplayedRow()) {
+                    super.setBackground(Color.WHITE);
+                    return;
+                }
+                boolean editingColumn = mousePressedColumn == currentColumn;
+                boolean editingRow = mousePressedRow == currentRow;
+                boolean paintForCellSelection = editingColumn && editingRow;
+                super.setBackground(paintForCellSelection ? rowSelectionColor : bg);
+                if (paintForCellSelection) {
+                    mousePressedColumn = -1;
+                    mousePressedRow = -1;
+                }
+            }
+        };
+        
+        itemIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(e.getButton() == MouseEvent.BUTTON1) {
+                    actionButtonPanel.startDownload();
+                    table.editingStopped(new ChangeEvent(table));
+                } else if(e.getButton() == MouseEvent.BUTTON3) {
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
+                    searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
+                } 
+            }
+        });
+        
+        heading.addMouseListener( new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(e.getButton() == MouseEvent.BUTTON3) {
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
+                    searchResultMenu.show(heading, e.getX(), e.getY());
+                }
+            }
+        });
+
     }
 
     public Object getCellEditorValue() {
@@ -247,59 +283,6 @@ implements TableCellEditor, TableCellRenderer {
             (ActionButtonPanel) actionEditor.getTableCellEditorComponent(
                     table, value, isSelected, row, col);
 
-        if (editorComponent == null) {
-            editorComponent = new JXPanel(new BorderLayout()) {
-
-                @Override
-                public void setBackground(final Color bg) {
-                    //Don't highlight the limit row
-                    if (currentRow == displayLimit.getLastDisplayedRow()) {
-                        super.setBackground(Color.WHITE);
-                        return;
-                    }
-                    boolean editingColumn = mousePressedColumn == currentColumn;
-                    boolean editingRow = mousePressedRow == currentRow;
-                    boolean paintForCellSelection = editingColumn && editingRow;
-                    super.setBackground(paintForCellSelection ? rowSelectionColor : bg);
-                    if (paintForCellSelection) {
-                        mousePressedColumn = -1;
-                        mousePressedRow = -1;
-                    }
-                }
-            };
-            
-            itemIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if(e.getButton() == MouseEvent.BUTTON1) {
-                        actionButtonPanel.startDownload();
-                        table.editingStopped(new ChangeEvent(table));
-                    } 
-                }
-            });
-            
-            itemIconLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if(e.getButton() == MouseEvent.BUTTON3) {
-                        SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
-                        searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
-                    }
-                }
-            });
-            
-            
-            heading.addMouseListener( new MouseAdapter() {
-                @Override
-                    public void mousePressed(MouseEvent e) {
-                        if(e.getButton() == MouseEvent.BUTTON3) {
-                            SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
-                            searchResultMenu.show(heading, e.getX(), e.getY());
-                        }
-                    }
-            });
-        }
-
         LOG.debugf("row: {0} shouldIndent: {1}", row, vsr.getSimilarityParent() != null);
         
         editorComponent.removeAll();
@@ -335,7 +318,7 @@ implements TableCellEditor, TableCellRenderer {
         return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
-    private JPanel makeFromPanel() {
+    private JPanel makeFromPanel(final PropertiesFactory<VisualSearchResult> properties) {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 boolean toggleVisibility = !isShowingSimilarResults();
@@ -443,10 +426,10 @@ implements TableCellEditor, TableCellRenderer {
         return panel;
     }
 
-    private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator) {
+    private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator, PropertiesFactory<VisualSearchResult> properties) {
         leftPanel = makeIndentablePanel(makeLeftPanel(navigator, libraryNavigator));
 
-        fromPanel = makeFromPanel();
+        fromPanel = makeFromPanel(properties);
 
         lastRowPanel = new JPanel(new MigLayout("insets 10 30 0 0", "[]", "[]"));
         lastRowPanel.setOpaque(false);
