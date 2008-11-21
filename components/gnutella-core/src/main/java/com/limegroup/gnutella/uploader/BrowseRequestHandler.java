@@ -94,7 +94,9 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         }
         
         try {
-            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(getFriend(request), context);
+            // TODO handler code should not know that much about request uris
+            String uri = request.getRequestLine().getUri();
+            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(uri.equals("/") ? null : getFriend(request), context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
                 iterables.add(list.pausableIterable());
@@ -110,6 +112,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                 response.setStatusCode(HttpStatus.SC_OK);
             }
         } catch (com.limegroup.gnutella.uploader.HttpException he) {
+            LOG.debug("invalid request", he);
             response.setStatusCode(he.getErrorCode());
             response.setReasonPhrase(he.getMessage());
         }
