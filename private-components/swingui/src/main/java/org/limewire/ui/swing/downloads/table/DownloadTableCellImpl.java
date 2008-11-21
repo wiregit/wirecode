@@ -188,7 +188,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.gridheight = 1;
         minPanel.add(minTitleLabel, gbc);
         
-        gbc.insets = new Insets(6,4,0,0);
+        gbc.insets = new Insets(5,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.gridx = 4;
