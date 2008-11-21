@@ -45,7 +45,6 @@ import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
@@ -254,7 +253,7 @@ public class FileMenu extends JMenu {
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
                             saveLocationExceptionHandler.handleSaveLocationException(
-                                    new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                                    new SaveLocationExceptionHandler.DownLoadAction() {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
@@ -323,7 +322,7 @@ public class FileMenu extends JMenu {
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
                             saveLocationExceptionHandler.handleSaveLocationException(
-                                    new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                                    new SaveLocationExceptionHandler.DownLoadAction() {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {

@@ -18,7 +18,6 @@ import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 
 public class FriendLibraryPopupMenu extends JPopupMenu {
    
@@ -76,7 +75,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                         try {
                             downloadListManager.addFriendDownload(fileItem);
                         } catch (SaveLocationException e) {
-                            saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                            saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandler.DownLoadAction() {
                                 @Override
                                 public void download(File saveFile, boolean overwrite)
                                         throws SaveLocationException {

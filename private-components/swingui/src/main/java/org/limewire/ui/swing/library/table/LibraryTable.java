@@ -31,7 +31,6 @@ import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
@@ -195,7 +194,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                    editor.cancelCellEditing();
                 }
             } catch (SaveLocationException e) {
-                saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandlerImpl.DownLoadAction() {
+                saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandler.DownLoadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {
