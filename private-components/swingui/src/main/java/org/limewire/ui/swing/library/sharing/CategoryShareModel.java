@@ -23,7 +23,6 @@ public class CategoryShareModel implements LibraryShareModel{
         this.category = category;
         support.firePropertyChange("category", oldCategory, category);
     }
-
  
     @Override
     public void shareFriend(SharingTarget friend) {
@@ -40,7 +39,6 @@ public class CategoryShareModel implements LibraryShareModel{
             break;
         default:
             throw new IllegalStateException("Can not share " + category + " collection");
-
         }
     }
 
@@ -59,12 +57,8 @@ public class CategoryShareModel implements LibraryShareModel{
             break;
         default:
             throw new IllegalStateException("Can not share " + category + " collection");
-
         }
-
     }
- 
-
 
     public boolean isShared(SharingTarget friend) {
         switch (category) {
@@ -82,7 +76,7 @@ public class CategoryShareModel implements LibraryShareModel{
 
     @Override
     public boolean isGnutellaNetworkSharable() {
-        return false;
+        return true;
     }
 
     @Override
@@ -94,6 +88,4 @@ public class CategoryShareModel implements LibraryShareModel{
     public void removePropertyChangeListener(PropertyChangeListener listener){
         support.removePropertyChangeListener(listener);
     }
-
-
 }

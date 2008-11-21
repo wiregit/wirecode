@@ -462,6 +462,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         if (noShareFilterList.size() > 0) {
             friendCombo.setSelectedIndex(0);
         }
+        reloadSharedBuddies();
         adjustSize();
         dialog.setLocationRelativeTo(c);
         dialog.setVisible(true);

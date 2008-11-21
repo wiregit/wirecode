@@ -14,11 +14,6 @@ import org.limewire.util.FileUtils;
 
 class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileList {
     
-    /**
-     * ID for share all functionality
-     */
-    private static final String ID = "GNUTELLA";
-    
     /** Size of all the FileDescs in this list in bytes */
     private final AtomicLong numBytes;
     

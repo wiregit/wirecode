@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -10,6 +13,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -18,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -26,6 +31,10 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.jxlayer.JXLayer;
+import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
+import org.jdesktop.jxlayer.plaf.ext.LockableUI;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
@@ -35,13 +44,9 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
-import org.limewire.ui.swing.library.sharing.AllFriendsList;
-import org.limewire.ui.swing.library.sharing.CategoryShareModel;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -63,15 +68,14 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class SharingLibraryPanel extends LibraryPanel {
-    private AllFriendsList allFriendsList;
-    private ShareListManager shareListManager;
+public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeListener {
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final BaseLibraryMediator basePanel;
     private final FriendFileList friendFileList;
     
-    private LibrarySharePanel shareAllPanel = null;
+    private final Map<Category, LockableUI> locked = new HashMap<Category, LockableUI>();
+    private final Map<Category, SharingSelectionPanel> listeners = new HashMap<Category, SharingSelectionPanel>();
     
     @AssistedInject
     public SharingLibraryPanel( @Assisted BaseLibraryMediator basePanel,
@@ -81,17 +85,15 @@ public class SharingLibraryPanel extends LibraryPanel {
                                 IconManager iconManager,
                                 CategoryIconManager categoryIconManager,
                                 LibraryTableFactory tableFactory,
-                                AllFriendsList allFriendsList,
-                                ShareListManager shareListManager,
                                 LimeHeaderBarFactory headerBarFactory){
         super(friend, false, headerBarFactory);
         
-        this.shareListManager = shareListManager;
-        this.allFriendsList = allFriendsList;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.basePanel = basePanel;
         this.friendFileList = friendFileList;
+        
+        this.friendFileList.addPropertyChangeListener(this);
         
         loadHeader();
         loadSelectionPanel();
@@ -103,9 +105,6 @@ public class SharingLibraryPanel extends LibraryPanel {
     @Override
     public void loadHeader() {
         headerPanel.enableButton(new BackToLibraryAction());
-        
-        shareAllPanel = new LibrarySharePanel(allFriendsList.getAllFriends());
-        shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
     }
     
     @Override
@@ -169,6 +168,21 @@ public class SharingLibraryPanel extends LibraryPanel {
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
         }
+        
+        if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+            LockableUI blurUI = new LockedUI(category.name());
+            JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
+            
+            if(category == Category.AUDIO && this.friendFileList.isAddNewAudioAlways()) {
+                blurUI.setLocked(true);
+            } else if(category == Category.VIDEO && this.friendFileList.isAddNewVideoAlways()) {
+                blurUI.setLocked(true);
+            } if(category == Category.IMAGE && this.friendFileList.isAddNewImageAlways()) {
+                blurUI.setLocked(true);
+            }
+            locked.put(category, blurUI);
+            return jxlayer;
+        }
         return scrollPane;
     }
     
@@ -179,14 +193,15 @@ public class SharingLibraryPanel extends LibraryPanel {
     
     @Override
     protected JComponent createSelectionButton(Action action, Category category) {
-        return new SharingSelectionPanel(action, category);
+        SharingSelectionPanel panel = new SharingSelectionPanel(action, category);
+        listeners.put(category, panel);
+        return panel;
     }
     
     @Override
     public void dispose() {
         super.dispose();
-        
-        shareAllPanel.dispose();
+        friendFileList.removePropertyChangeListener(this);
     }
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
@@ -311,7 +326,6 @@ public class SharingLibraryPanel extends LibraryPanel {
                     }
                 }
             });
-            
             add(button, "growx");
         
             addNavigation(button);
@@ -329,8 +343,70 @@ public class SharingLibraryPanel extends LibraryPanel {
             super.paintComponent(g);
         }
         
-        public JButton getButton() {
-            return button;
+        public void setSelect(boolean value) {
+            checkBox.setSelected(value);
         }
     }    
+    
+    /**
+     * Creates a locked layer over a table. This layer prevents the user from
+     * interacting with the contents underneath it.
+     */
+    private class LockedUI extends LockableUI {
+        private JXPanel panel;
+        private JLabel label;
+        
+        public LockedUI(String category, LayerEffect... lockedEffects) {
+            super(lockedEffects);
+            label = new JLabel(I18n.tr("Sharing all {0} files in My Library including any new {0} files added", category));
+            label.setBackground(new Color(209,247,144));
+            label.setOpaque(true);
+            label.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+            
+            panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));
+            panel.setBackground(new Color(147,170,209,80));
+            panel.setVisible(false);
+            panel.add(label);
+        }
+        
+        @SuppressWarnings("unchecked")
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            JXLayer<JComponent> l = (JXLayer<JComponent>) c;
+            l.getGlassPane().setLayout(new BorderLayout());
+            l.getGlassPane().add(panel, BorderLayout.CENTER);
+        }
+        
+        @SuppressWarnings("unchecked")
+        public void uninstall(JComponent c) {
+            super.uninstallUI(c);
+            JXLayer<JComponent> l = (JXLayer<JComponent>) c;
+            l.getGlassPane().setLayout(new FlowLayout());
+            l.getGlassPane().remove(panel);
+        }
+        
+        public void setLocked(boolean isLocked) {
+            super.setLocked(isLocked);
+            panel.setVisible(isLocked);
+        }
+        
+        @Override
+        public Cursor getLockedCursor() {
+            return Cursor.getDefaultCursor();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if(evt.getPropertyName().equals("audioCollection")) {
+            locked.get(Category.AUDIO).setLocked((Boolean)evt.getNewValue());
+            listeners.get(Category.AUDIO).setSelect((Boolean)evt.getNewValue());
+        } else if(evt.getPropertyName().equals("videoCollection")) {
+            locked.get(Category.VIDEO).setLocked((Boolean)evt.getNewValue());
+            listeners.get(Category.VIDEO).setSelect((Boolean)evt.getNewValue());
+        } else if(evt.getPropertyName().equals("imageCollection")) {
+            locked.get(Category.IMAGE).setLocked((Boolean)evt.getNewValue());
+            listeners.get(Category.IMAGE).setSelect((Boolean)evt.getNewValue());
+        }
+    }
 }

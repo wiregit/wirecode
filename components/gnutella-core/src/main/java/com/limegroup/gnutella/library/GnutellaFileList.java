@@ -6,6 +6,11 @@ import java.util.concurrent.Future;
 
 public interface GnutellaFileList extends FriendFileList {
 
+    /**
+     * ID for share all functionality
+     */
+    static final String ID = "GNUTELLA";
+    
     /** Adds this FileList just for this session. */
     Future<FileDesc> addForSession(File file);
 
