@@ -307,7 +307,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public boolean isAnonymous() {
-            return true;
+            return getFriendPresence().getFriend().isAnonymous();
         }
     }
     
