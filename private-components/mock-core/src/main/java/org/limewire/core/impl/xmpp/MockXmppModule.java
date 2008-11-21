@@ -3,6 +3,7 @@ package org.limewire.core.impl.xmpp;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
+import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
@@ -51,6 +52,7 @@ public class MockXmppModule extends AbstractModule {
         
         bind(new TypeLiteral<ListenerSupport<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
+        bind(XMPPResourceFactory.class).to(MockXmppResourceFactory.class);
     }
 
 }
