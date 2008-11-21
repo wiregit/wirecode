@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;

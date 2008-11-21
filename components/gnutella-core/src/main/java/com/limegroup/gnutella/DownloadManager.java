@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.bittorrent.BTMetaInfo;

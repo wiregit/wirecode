@@ -14,6 +14,7 @@ import javax.swing.JToggleButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.mainframe.MainPanel;
@@ -25,11 +26,13 @@ import com.google.inject.Singleton;
 @Singleton
 public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
 
-    final MainPanel mainPanel;
+    private final MainPanel mainPanel;
+    private final SaveLocationManager saveLocationManager;
     
     @Inject
-    public SaveLocationExceptionHandlerImpl(MainPanel mainPanel) {
+    public SaveLocationExceptionHandlerImpl(MainPanel mainPanel, SaveLocationManager saveLocationManager) {
         this.mainPanel = mainPanel;
+        this.saveLocationManager = saveLocationManager;
     }
     
     public void handleSaveLocationException(final DownLoadAction downLoadAction,
@@ -53,7 +56,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             int index = 1;
             String fileName = FileUtils.getFilenameNoExtension(saveFile.getName());
             String extension = FileUtils.getFileExtension(saveFile);
-            while (saveFile.exists()) {
+            while (saveFile.exists() || saveLocationManager.isSaveLocationTaken(saveFile)) {
                 String newFileName = fileName + "(" + index + ")";
                 if (extension.length() > 0) {
                     newFileName += "." + extension;
@@ -87,7 +90,6 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         } catch (SaveLocationException e1) {
             handleSaveLocationException(downLoadAction, e1, supportNewSaveDir);
         }
-        //TODO handle possible infinite loop.
     }
 
     private void createOverwriteDialogue(final File saveFile, final DownLoadAction downLoadAction,

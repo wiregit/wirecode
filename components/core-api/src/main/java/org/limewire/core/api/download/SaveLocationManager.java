@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.core.api.download;
 
 import java.io.File;
 

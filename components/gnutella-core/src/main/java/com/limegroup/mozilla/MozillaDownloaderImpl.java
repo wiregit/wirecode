@@ -12,7 +12,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.InsufficientDataException;
-import com.limegroup.gnutella.NoOpSaveLocationManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
@@ -33,7 +32,7 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     private final DownloadManager downloadManager;
 
     public MozillaDownloaderImpl(DownloadManager downloadManager, MozillaDownload download) {
-        super(new NoOpSaveLocationManager());
+        super(downloadManager);
         this.downloadManager = downloadManager;
         this.download = download;
         this.download.addListener(this);

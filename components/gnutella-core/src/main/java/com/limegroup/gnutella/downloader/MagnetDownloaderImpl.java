@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.HttpException;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.io.InvalidDataException;
 import org.limewire.net.SocketsManager;
 
@@ -19,7 +20,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.CommonUtils;
@@ -22,7 +23,6 @@ import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;

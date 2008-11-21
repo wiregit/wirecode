@@ -10,6 +10,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
