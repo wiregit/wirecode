@@ -81,6 +81,7 @@ implements TableCellEditor, TableCellRenderer {
     @Resource private Color similarResultsBackgroundColor;
     @Resource private Color surplusRowLimitColor;
     @Resource private Color rowSelectionColor;
+    @Resource private Font headingFont;
     @Resource private Font subHeadingFont;
     @Resource private Font metadataFont;
     @Resource private Font downloadSourceCountFont;
@@ -489,9 +490,7 @@ implements TableCellEditor, TableCellRenderer {
         public int getPixelWidth(String text) {
             HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
             StyleSheet css = editorKit.getStyleSheet();
-            int pointSize = (int)css.getPointSize(5);
-            Font font = css.getFont("Arial", Font.PLAIN, pointSize);
-            FontMetrics fontMetrics = css.getFontMetrics(font);
+            FontMetrics fontMetrics = css.getFontMetrics(headingFont);
             text = findBoldTags.matcher(text).replaceAll(EMPTY_STRING);
             return fontMetrics.stringWidth(text);
         }
