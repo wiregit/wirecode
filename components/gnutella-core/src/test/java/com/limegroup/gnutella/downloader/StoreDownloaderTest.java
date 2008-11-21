@@ -8,6 +8,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.AbstractModule;
@@ -127,7 +128,12 @@ public class StoreDownloaderTest extends LimeTestCase{
         
         assertTrue(rfd.getUrns().contains(urn));
         
-        assertEquals( url, rfd.getUrlPath());
+        assertEquals("", rfd.getUrlPath());
+        
+        Connectable connectable = (Connectable) rfd.getAddress();
+        assertEquals("test.com", connectable.getAddress());
+        assertEquals(80, connectable.getPort());
+        assertFalse(connectable.isTLSCapable());
         
         assertEquals( "test.txt", rfd.getFileName());
         
