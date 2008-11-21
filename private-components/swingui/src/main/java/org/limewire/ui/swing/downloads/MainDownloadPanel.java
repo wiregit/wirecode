@@ -26,7 +26,7 @@ import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.painter.ButtonPainter;
+import org.limewire.ui.swing.painter.DarkButtonPainter;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -163,7 +163,7 @@ public class MainDownloadPanel extends JPanel {
 	    clearFinishedButton = new JXButton(clearAction);
 	    categoriseCheckBox = new CustomCheckBox(categorizeAction);
 
-	    clearFinishedButton.setBackgroundPainter(new ButtonPainter());
+	    clearFinishedButton.setBackgroundPainter(new DarkButtonPainter());
 	    clearFinishedButton.setOpaque(false);
 	    clearFinishedButton.setForeground(Color.WHITE);
 	    clearFinishedButton.setFont(new Font("Arial", Font.PLAIN, 10));

@@ -39,7 +39,7 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
-import org.limewire.ui.swing.painter.ButtonPainter;
+import org.limewire.ui.swing.painter.DarkButtonPainter;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingDelegateComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -156,7 +156,7 @@ public class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setMargin(new Insets(0, 10, 0, 6));
         listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
-        listViewToggleButton.setBackgroundPainter(new ButtonPainter());
+        listViewToggleButton.setBackgroundPainter(new DarkButtonPainter());
         listViewToggleButton.setBorderPainted(false);
         listViewToggleButton.setPaintBorderInsets(true);
         listViewToggleButton.setContentAreaFilled(false);
@@ -175,7 +175,7 @@ public class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
         tableViewToggleButton.setOpaque(false);
         tableViewToggleButton.setToolTipText(tr("Table view"));
-        tableViewToggleButton.setBackgroundPainter(new ButtonPainter());
+        tableViewToggleButton.setBackgroundPainter(new DarkButtonPainter());
         tableViewToggleButton.setBorderPainted(false);
         tableViewToggleButton.setPaintBorderInsets(true);
         tableViewToggleButton.setContentAreaFilled(false);

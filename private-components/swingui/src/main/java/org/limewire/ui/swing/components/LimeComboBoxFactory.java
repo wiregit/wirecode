@@ -12,7 +12,7 @@ import javax.swing.Icon;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
-import org.limewire.ui.swing.painter.ButtonPainter;
+import org.limewire.ui.swing.painter.DarkButtonPainter;
 import org.limewire.ui.swing.painter.LightButtonPainter;
 import org.limewire.ui.swing.painter.PopupButtonPainter;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -51,7 +51,7 @@ public class LimeComboBoxFactory {
     private final Painter<JXButton> popupButtonPainter;
     
     @Inject
-    LimeComboBoxFactory(ButtonPainter darkButtonPainter, 
+    LimeComboBoxFactory(DarkButtonPainter darkButtonPainter, 
             LightButtonPainter lightButtonPainter,
             PopupButtonPainter popupButtonPainter) {
         GuiUtils.assignResources(this);    

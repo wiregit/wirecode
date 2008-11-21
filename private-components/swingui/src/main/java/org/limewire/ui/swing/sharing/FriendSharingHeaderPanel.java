@@ -16,7 +16,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.PromptTextField;
-import org.limewire.ui.swing.painter.ButtonPainter;
+import org.limewire.ui.swing.painter.DarkButtonPainter;
 import org.limewire.ui.swing.sharing.menu.FriendSharingPopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -68,7 +68,7 @@ public class FriendSharingHeaderPanel extends LimeHeaderBar {
         shareButton = new JXButton(" ", downIcon);       
         shareButton.setForeground(Color.WHITE);
         shareButton.setHorizontalTextPosition(SwingConstants.LEFT);
-        shareButton.setBackgroundPainter(new ButtonPainter());
+        shareButton.setBackgroundPainter(new DarkButtonPainter());
         shareButton.addActionListener(new PopupActionListener());
     }
     

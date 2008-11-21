@@ -10,7 +10,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 /**
  * Background painter for a gradient button. 
  */
-public class LightButtonPainter extends ButtonPainter {
+public class DarkButtonPainter extends ButtonPainter {
         
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -27,23 +27,23 @@ public class LightButtonPainter extends ButtonPainter {
     @Resource private Color bevelRightGradientBottom;
     @Resource private Color bevelBottom;
     
-    public LightButtonPainter() {
+    public DarkButtonPainter() {
         GuiUtils.assignResources(this);
-                
+        
         GradientPaint gradientRight = new GradientPaint(0,0, this.bevelRightGradientTop, 
                 0, 1, this.bevelRightGradientBottom, false);
         
         this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, false);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, false);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, false);
         
         this.setCacheable(false);
     }
