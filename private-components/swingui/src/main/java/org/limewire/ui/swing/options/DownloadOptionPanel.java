@@ -283,6 +283,9 @@ public class DownloadOptionPanel extends OptionPanel {
         @Override
         void applyOptions() {
             DownloadSettings.REMEMBER_RECENT_DOWNLOADS.setValue(rememberDownloadsCheckBox.isSelected());
+            if(!rememberDownloadsCheckBox.isSelected()) {
+                DownloadSettings.RECENT_DOWNLOADS.clear();
+            }
         }
 
         @Override
