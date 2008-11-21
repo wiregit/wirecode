@@ -49,13 +49,13 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
 
     private DownloadButtonPanel minButtonPanel;
     private JLabel minIconLabel;
-    private TitleLabel minTitleLabel;
+    private LabelContainer minTitleLabel;
     private JLabel minStatusLabel;
     private JXHyperlink minLinkButton;
     
     private DownloadButtonPanel fullButtonPanel;
     private JLabel fullIconLabel;
-    private TitleLabel fullTitleLabel;
+    private LabelContainer fullTitleLabel;
     private JLabel fullStatusLabel;
     private LimeProgressBar fullProgressBar;
     private JLabel fullTimeLabel;
@@ -123,7 +123,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
         minIconLabel = new JLabel();
         
-        minTitleLabel = new TitleLabel();
+        minTitleLabel = new LabelContainer();
 
         minStatusLabel = new JLabel();
         minStatusLabel.setFont(statusFontPlainMin);
@@ -140,7 +140,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
                                 
         fullIconLabel = new JLabel();
 
-        fullTitleLabel = new TitleLabel();
+        fullTitleLabel = new LabelContainer();
 
         fullStatusLabel = new JLabel();
         fullStatusLabel.setFont(statusFontPlainFull);
@@ -148,6 +148,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         fullStatusLabel.setIconTextGap(0);
         fullStatusLabel.setIcon(downloadIcon);
+        fullStatusLabel.setPreferredSize(new Dimension(20, 20));
         
         fullProgressBar = progressBarFactory.create();
         Dimension size = new Dimension(progressBarWidth, 16);
@@ -250,9 +251,9 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         fullPanel.add(fullTitleLabel, gbc);
         
-        gbc.insets = new Insets(3,10,0,0);
+        gbc.insets = new Insets(2,10,0,0);
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0;
@@ -273,7 +274,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
         gbc.insets = insets;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.weightx = 0;
@@ -283,7 +284,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullPanel.add(fullStatusLabel, gbc);
         
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.EAST;
+        gbc.anchor = GridBagConstraints.NORTHEAST;
         gbc.gridx = 2;
         gbc.gridy = 2;
         gbc.weightx = 0;
@@ -343,13 +344,9 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         editor.fullIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
         editor.fullTitleLabel.setText(item.getTitle());
         
-        long totalSize = item.getTotalSize();
-        long curSize = item.getCurrentSize();
-        if (curSize < totalSize) {
-            editor.fullProgressBar.setHidden(false);
-            editor.fullProgressBar.setMaximum((int) item.getTotalSize());
-            editor.fullProgressBar.setValue((int) item.getCurrentSize());
-        }
+        editor.fullProgressBar.setMaximum((int) item.getTotalSize());
+        editor.fullProgressBar.setValue((int) item.getCurrentSize());
+
         editor.fullProgressBar.setEnabled(item.getState() != DownloadState.PAUSED);
         
         editor.fullStatusLabel.setText(getMessage(item));
@@ -437,9 +434,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         case CONNECTING:
             return I18n.tr("Connecting...");
         case DOWNLOADING:
-            //TODO : uploaders in DownloadItem & plural, not sure if this TODO is addressed
-            // with adding proper plural handling?
-            // {0}: current file size, {2} final file size, {3}, number of people
             return I18n.trn("Downloading {0} of {1} ({2}) from {3} person",
                     "Downloading {0} of {1} ({2}) from {3} people",
                     item.getDownloadSourceCount(),
@@ -483,10 +477,10 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     /**
      * Class to make trimming the title length inside the current GridBagLayout possible 
      */
-    private class TitleLabel extends JPanel {
+    private class LabelContainer extends JPanel {
         private final JLabel label = new JLabel();
         
-        public TitleLabel() {
+        public LabelContainer() {
             this.setLayout(new BorderLayout());
             this.setOpaque(false);
             this.setBorder(BorderFactory.createEmptyBorder());
