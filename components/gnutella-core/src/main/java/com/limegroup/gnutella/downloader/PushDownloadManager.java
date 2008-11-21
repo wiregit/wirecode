@@ -243,7 +243,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void connect(RemoteFileDesc rfd, ConnectObserver observer) {
         PushedSocketHandlerAdapter handlerAdapter = new PushedSocketHandlerAdapter(rfd, observer);
         pushHandlers.add(handlerAdapter);
-        sendPush(rfd, new MultiShutdownableConnectObserverAdapter(observer));
+        sendPush(rfd, handlerAdapter);
         scheduleExpirerFor(handlerAdapter, 30 * 1000);
     }
     
@@ -914,32 +914,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         }
     }
     
-    private static class MultiShutdownableConnectObserverAdapter implements MultiShutdownable {
-
-        private final ConnectObserver observer;
-
-        public MultiShutdownableConnectObserverAdapter(ConnectObserver observer) {
-            this.observer = observer;
-        }
-        
-        @Override
-        public void addShutdownable(Shutdownable shutdowner) {
-            // we don't shutdown from the caller side, so we don't need to
-            // notify
-        }
-
-        @Override
-        public void shutdown() {
-            observer.handleIOException(new ConnectException("Could not connect"));
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-        
-    }
-
     /**
      * Returns true if <code>address</code> is a {@link FirewalledAddress}
      * the network manager has a valid local addresss and one of the following
@@ -992,13 +966,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
 
     /**
-     * Adapts {@link PushedSocketHandler} to {@link ConnectObserver}.
+     * Adapts {@link PushedSocketHandler} and {@link MultiShutdownable} to {@link ConnectObserver}.
      */
-    private class PushedSocketHandlerAdapter implements PushedSocketHandler {
+    private class PushedSocketHandlerAdapter implements PushedSocketHandler, MultiShutdownable {
 
         private final RemoteFileDesc rfd;
         private final ConnectObserver observer;
-        private final AtomicBoolean acceptedOrTimedOut = new AtomicBoolean(false);
+        /**
+         * Keeps state whether connect has already succeeded or failed to make sure
+         * the observer is not notified several times.
+         */
+        private final AtomicBoolean acceptedOrFailed = new AtomicBoolean(false);
 
         public PushedSocketHandlerAdapter(RemoteFileDesc rfd, ConnectObserver observer) {
             this.rfd = rfd;
@@ -1018,7 +996,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                     }
                 }
                 try {
-                    if (acceptedOrTimedOut.compareAndSet(false, true)) {
+                    if (acceptedOrFailed.compareAndSet(false, true)) {
                         observer.handleConnect(socket);
                     } else {
                         IOUtils.close(socket);
@@ -1038,9 +1016,27 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
          * succeeded.
          */
         public void handleTimeout() {
-            if (acceptedOrTimedOut.compareAndSet(false, true)) {
+            if (acceptedOrFailed.compareAndSet(false, true)) {
                 observer.handleIOException(new ConnectException("push timed out"));
             }
+        }
+
+        @Override
+        public void addShutdownable(Shutdownable shutdowner) {
+            // we don't shutdown from the caller side, so we don't need to
+            // notify
+        }
+
+        @Override
+        public void shutdown() {
+            if (acceptedOrFailed.compareAndSet(false, true)) {
+                observer.handleIOException(new ConnectException("shut down"));
+            }
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
         }
 
     }
