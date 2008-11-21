@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -23,6 +25,7 @@ import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -37,11 +40,15 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandlerImpl;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,13 +61,13 @@ public class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager, final MainPanel mainPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
-            SearchHandler searchHandler) {
+            SearchHandler searchHandler, final AudioPlayer audioPlayer) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(buildOpenFileAction(downloadListManager, mainPanel, saveLocationExceptionHandler));
         add(buildOpenLinkAction(downloadListManager, magnetFactory, saveLocationExceptionHandler,
                 mainPanel, searchHandler));
-        add(getRecentDownloadsMenu(downloadListManager));
+        add(getRecentDownloadsMenu(downloadListManager, libraryManager, audioPlayer));
         addSeparator();
         add(getAddFileAction(libraryManager, mainPanel));
         add(getAddFolderAction(libraryManager, mainPanel));
@@ -133,7 +140,8 @@ public class FileMenu extends JMenu {
         };
     }
 
-    private JMenu getRecentDownloadsMenu(DownloadListManager downloadListManager) {
+    private JMenu getRecentDownloadsMenu(DownloadListManager downloadListManager,
+            final LibraryManager libraryManager, final AudioPlayer audioPlayer) {
         final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
         final JMenuItem emptyItem = new JMenuItem(I18n.tr("(empty)"));
         emptyItem.setEnabled(false);
@@ -147,40 +155,73 @@ public class FileMenu extends JMenu {
                 recentDownloads.add(emptyItem);
             }
         };
-        
-        populateRecentDownloads(recentDownloads, clearMenu, emptyItem);
+
+        populateRecentDownloads(recentDownloads, clearMenu, emptyItem, libraryManager, audioPlayer);
 
         DownloadSettings.RECENT_DOWNLOADS.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                populateRecentDownloads(recentDownloads, clearMenu, emptyItem);
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        populateRecentDownloads(recentDownloads, clearMenu, emptyItem,
+                                libraryManager, audioPlayer);
+                    }
+                });
             }
         });
 
         return recentDownloads;
     }
-    
-    private void populateRecentDownloads(final JMenu recentDownloads, final Action clearMenu, JMenuItem emptyItem) {
+
+    private void populateRecentDownloads(final JMenu recentDownloads, final Action clearMenu,
+            JMenuItem emptyItem, final LibraryManager libraryManager, final AudioPlayer audioPlayer) {
+        // TODO do not rebuild whole menu, just add and remove needed components
         recentDownloads.removeAll();
-        //call clean first to make sure we are only populating existing downloads
-        DownloadSettings.RECENT_DOWNLOADS.clean();
-        Set<File> files = DownloadSettings.RECENT_DOWNLOADS.getValue();
+        //DownloadSettings.RECENT_DOWNLOADS.clean();
+
+        Set<File> files = null;
+        files = new HashSet<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
         if (files.size() > 0) {
             for (final File file : files) {
-                recentDownloads.add(new AbstractAction(file.getName()) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        //TODO perform some action on the file TBD
-                        System.out.println("performing some great file acction: "
-                                + file.getName());
-                    }
-                });
+                addRecentDownloadAction(recentDownloads, audioPlayer, file);
             }
             recentDownloads.addSeparator();
             recentDownloads.add(clearMenu);
         } else {
             recentDownloads.add(emptyItem);
         }
+    }
+
+    private void addRecentDownloadAction(final JMenu recentDownloads,
+            final AudioPlayer audioPlayer, final File file) {
+        recentDownloads.add(new AbstractAction(file.getName()) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MediaType mediaType = MediaType.getMediaTypeForExtension(FileUtils
+                        .getFileExtension(file));
+                Category category = CategoryUtils.getCategory(mediaType);
+
+                switch (category) {
+                case AUDIO:
+                    audioPlayer.stop();
+                    audioPlayer.loadSong(file);
+                    audioPlayer.playSong();
+                    break;
+                case DOCUMENT:
+                case IMAGE:
+                case VIDEO:
+                    NativeLaunchUtils.launchFile(file);
+                    break;
+                case PROGRAM:
+                case OTHER:
+                    NativeLaunchUtils.launchExplorer(file);
+                    break;
+                default:
+                    break;
+                }
+            }
+        });
     }
 
     private Action buildOpenFileAction(final DownloadListManager downloadListManager,
