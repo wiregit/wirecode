@@ -201,7 +201,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                             throws SaveLocationException {
                         downloadListManager.addFriendDownload(file, saveFile, overwrite);
                     }
-                }, e, true, LibraryTable.this);
+                }, e, true);
             }
         }
         

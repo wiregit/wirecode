@@ -17,16 +17,24 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
 
+    final MainPanel mainPanel;
+    
+    @Inject
+    public SaveLocationExceptionHandlerImpl(MainPanel mainPanel) {
+        this.mainPanel = mainPanel;
+    }
+    
     public void handleSaveLocationException(final DownLoadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir,
-            final Component component) {
+            final SaveLocationException sle, final boolean supportNewSaveDir) {
 
         if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
             // ignore, just return
@@ -56,7 +64,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             }
         } else {
             if (supportNewSaveDir) {
-                saveFile = FileChooser.getSaveAsFile(component, I18n.tr("Save File As..."), sle
+                saveFile = FileChooser.getSaveAsFile(mainPanel, I18n.tr("Save File As..."), sle
                         .getFile());
             } else {
                 saveFile = sle.getFile();
@@ -68,9 +76,9 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
 
         if (saveFile.exists()) {
-            createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir, component);
+            createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir, mainPanel);
         } else {
-            download(downLoadAction, supportNewSaveDir, component, saveFile, false);
+            download(downLoadAction, supportNewSaveDir, mainPanel, saveFile, false);
         }
     }
 
@@ -79,7 +87,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         try {
             downLoadAction.download(saveFile, overwrite);
         } catch (SaveLocationException e1) {
-            handleSaveLocationException(downLoadAction, e1, supportNewSaveDir, component);
+            handleSaveLocationException(downLoadAction, e1, supportNewSaveDir);
         }
     }
 
@@ -114,7 +122,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             public void actionPerformed(ActionEvent e) {
                 dialog.dispose();
                 if (supportNewSaveDir) {
-                    handleSaveLocationException(downLoadAction, sle, supportNewSaveDir, component);
+                    handleSaveLocationException(downLoadAction, sle, supportNewSaveDir);
                 }
             }
         });

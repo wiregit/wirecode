@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.util;
 
-import java.awt.Component;
 import java.io.File;
 
 import org.limewire.core.api.download.SaveLocationException;
@@ -16,6 +15,5 @@ public interface SaveLocationExceptionHandler {
      * to popup a dialogue to try and save the download in a new location.
      */
     public void handleSaveLocationException(final DownLoadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir,
-            final Component component);
+            final SaveLocationException sle, final boolean supportNewSaveDir);
 }

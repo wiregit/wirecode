@@ -215,7 +215,7 @@ public class FileMenu extends JMenu {
                                                     MainDownloadPanel.NAME).select(
                                                     SimpleNavSelectable.create(item));
                                         }
-                                    }, sle, false, mainPanel);
+                                    }, sle, false);
                         }
                     }
                 }
@@ -286,7 +286,7 @@ public class FileMenu extends JMenu {
                                                     MainDownloadPanel.NAME).select(
                                                     SimpleNavSelectable.create(item));
                                         }
-                                    }, sle, false, mainPanel);
+                                    }, sle, false);
                         }
                     }
 
@@ -308,7 +308,7 @@ public class FileMenu extends JMenu {
                                                     MainDownloadPanel.NAME).select(
                                                     SimpleNavSelectable.create(item));
                                         }
-                                    }, e1, true, mainPanel);
+                                    }, e1, true);
                         }
                     }
                 });
