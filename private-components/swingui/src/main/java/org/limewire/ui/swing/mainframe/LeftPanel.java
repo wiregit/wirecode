@@ -30,21 +30,16 @@ public class LeftPanel extends JXCollapsiblePane implements VisibleComponent {
 
         setName("LeftPanel");
 
-        JXPanel panel = new JXPanel(new MigLayout("insets 0 0 0 0, fill, gap 0", "", ""));
+        JXPanel panel = new JXPanel(new MigLayout("insets 0, fill, gap 0"));
 
-        JScrollPane scrollableNav = new JScrollPane(libraryNavigator.getComponent());
+        JXPanel libraryNav = libraryNavigator.getComponent();
+        JScrollPane scrollableNav = new JScrollPane(libraryNav);
         scrollableNav.setOpaque(false);
         scrollableNav.getViewport().setOpaque(false);
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollableNav.setBorder(null);
         panel.add(scrollableNav, "grow");
-
-        // gbc.fill = GridBagConstraints.HORIZONTAL;
-        // gbc.insets = new Insets(0, 0, 0, 0);
-        // gbc.weighty = 0;
-        // gbc.gridy++;
-        // add(filesSharingPanel, gbc);
 
         Line line = Line.createVerticalLine();
         line.setName("LeftPanel.rightBorder");

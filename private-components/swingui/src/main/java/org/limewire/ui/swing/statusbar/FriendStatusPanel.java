@@ -27,9 +27,8 @@ import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.friends.AvailableOption;
-import org.limewire.ui.swing.friends.DndOption;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
-import org.limewire.ui.swing.friends.FriendsCountUpdater;
+import org.limewire.ui.swing.friends.DndOption;
 import org.limewire.ui.swing.friends.FriendsUtil;
 import org.limewire.ui.swing.friends.IconLibrary;
 import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
@@ -38,7 +37,6 @@ import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
@@ -46,7 +44,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 // Note: this should not be public, but needs to be for EventBus to work properly.
-public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageListener {
+public class FriendStatusPanel implements UnseenMessageListener {
 
     private final IconLibrary icons;
     private final JXButton friendsButton;
@@ -55,8 +53,6 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
     private final JCheckBoxMenuItem availablePopupItem;
     private final JCheckBoxMenuItem dndPopupItem;
     private final UnseenMessageFlasher flasher;
-
-    private boolean loggedIn;
     
     private Component mainComponent;
     
@@ -84,7 +80,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         statusMenu.setBackground(whiteBackground);
         statusMenu.setBorderPainted(false);
         menuBar.add(statusMenu);
-        friendsButton = new JXButton(new FriendsAction(I18n.tr("Sign In")));
+        friendsButton = new JXButton(new FriendsAction(I18n.tr("Chat")));
         friendsButton.setBackgroundPainter(new RectanglePainter<JXButton>(whiteBackground, whiteBackground));
         menuPanel.add(friendsButton, BorderLayout.EAST);
         
@@ -100,7 +96,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         availabilityButtonGroup.add(availablePopupItem);
         availabilityButtonGroup.add(dndPopupItem);
         
-        updateStatus(I18n.tr("Sign In"), icons.getEndChat(), I18n.tr("Offline"));
+        updateStatus(I18n.tr("Chat"), icons.getEndChat(), I18n.tr("Offline"));
         
         this.flasher = new UnseenMessageFlasher(friendsButton);
         
@@ -115,8 +111,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
     
     @EventSubscriber
     public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        loggedIn = true;
-        updateStatus(I18n.tr("Friends"), FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
+        updateStatus(I18n.tr("Chat"), FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
         statusMenu.setEnabled(true);
     }
     
@@ -129,8 +124,7 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
     
     @EventSubscriber
     public void handleSignoffEvent(SignoffEvent event) {
-        loggedIn = false;
-        updateStatus(I18n.tr("Sign In"), icons.getEndChat(), I18n.tr("Offline"));
+        updateStatus(I18n.tr("Chat"), icons.getEndChat(), I18n.tr("Offline"));
         statusMenu.setEnabled(false);
     }
     
@@ -143,18 +137,6 @@ public class FriendStatusPanel implements FriendsCountUpdater, UnseenMessageList
         if (model != null) {
             availabilityButtonGroup.setSelected(model, true);
         }
-    }
-    
-    @Override
-    public void setFriendsCount(final int count) {
-        SwingUtils.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (loggedIn) {
-                    friendsButton.setText(I18n.tr("Friends ({0})", count));        
-                }
-            }
-        });
     }
 
     private class FriendsAction extends AbstractAction {

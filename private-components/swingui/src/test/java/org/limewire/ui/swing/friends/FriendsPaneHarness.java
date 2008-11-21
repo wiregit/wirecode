@@ -24,7 +24,7 @@ public class FriendsPaneHarness {
             public void run() {
                 JFrame frame = new JFrame();
                 final EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
-                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockFriendsCountUpdater(), new MockLibraryManager(), new MockFriendSharingDisplay(), presenceSupport);
+                FriendsPane pane = new FriendsPane(new IconLibraryImpl(), new MockLibraryManager(), new MockFriendSharingDisplay(), presenceSupport);
                 frame.add(pane);
 
                 final ArrayList<Duo> presences = new ArrayList<Duo>();

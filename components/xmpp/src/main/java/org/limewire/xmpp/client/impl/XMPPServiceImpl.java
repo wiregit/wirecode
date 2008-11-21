@@ -1,13 +1,15 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -19,7 +21,6 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
-import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -39,12 +40,13 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
     private final AddressFactory addressFactory;
-    private XMPPErrorListener errorListener;
-    private Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
-    private AddressEvent lastAddressEvent;
+    private final Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
     private final XMPPAuthenticator authenticator;
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
-    private LinkedList<XMPPConnectionImpl> connections;
+    private final List<XMPPConnectionImpl> connections;
+    
+    private EventListener<XMPPException> errorListener;
+    private AddressEvent lastAddressEvent;
     private boolean multipleConnectionsAllowed;
 
     @Inject
@@ -61,8 +63,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.presenceSupport = presenceSupport;
-        connections = new LinkedList<XMPPConnectionImpl>();
-        multipleConnectionsAllowed = false;
+        this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
+        this.multipleConnectionsAllowed = false;
     }
 
     @Inject
@@ -75,7 +77,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         registry.addListener(this);
     }
 
-    public void setXmppErrorListener(XMPPErrorListener errorListener) {
+    public void setXmppErrorListener(EventListener<XMPPException> errorListener) {
         this.errorListener = errorListener;
     }
 
@@ -102,9 +104,11 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     @Override
-    public synchronized void login(XMPPConnectionConfiguration configuration) {
-        if(!multipleConnectionsAllowed)
+    public void login(XMPPConnectionConfiguration configuration) {
+        if(!multipleConnectionsAllowed) {
             logout();
+        }
+        
         XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
                 rosterBroadcaster.get(), fileOfferBroadcaster.get(),
                 libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
@@ -119,22 +123,41 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             connections.add(connection);
         } catch(XMPPException e) {
             LOG.error(e.getMessage(), e);
-            errorListener.error(e);
+            EventListenerList.dispatch(errorListener, e);
         }
+    }
+    
+    @Override
+    public boolean isLoggedIn() {
+        for(XMPPConnection connection : connections) {
+            if(connection.isLoggedIn()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
-    public synchronized void logout() {
+    public void logout() {
         for(XMPPConnection connection : connections) {
-            if(connection.isLoggedIn())
+            if(connection.isLoggedIn()) {
                 connection.logout();
+            }
         }
         connections.clear();
     }
 
     @Override
-    public synchronized XMPPConnection getLoggedInConnection() {
-        return connections.peek();
+    public XMPPConnection getLoggedInConnection() {
+        if(connections.isEmpty()) {
+            return null;
+        } else {
+            try {
+                return connections.get(0);
+            } catch(IndexOutOfBoundsException ioobe) {
+                return null; // possible because connections is CoW
+            }
+        }
     }
 
     @Override
@@ -153,8 +176,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     // Only for testing
-    synchronized List<? extends XMPPConnection> getConnections() {
-        // Return a copy in case we modify the list while the caller's using it
-        return new LinkedList<XMPPConnectionImpl>(connections);
+    List<? extends XMPPConnection> getConnections() {
+        return Collections.unmodifiableList(connections);
     }    
 }

@@ -23,6 +23,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.EmptyProxySettings;
 import org.limewire.net.EmptySocketBindingSettings;
@@ -36,11 +37,8 @@ import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
-import org.limewire.xmpp.client.impl.XMPPServiceImpl;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -84,13 +82,10 @@ public class XMPPServiceTest extends BaseTestCase {
         registry.start();
         service = injector.getInstance(XMPPServiceImpl.class);
         service.setMultipleConnectionsAllowed(true);
-        service.setXmppErrorListener(new XMPPErrorListener() {
-            public void register(XMPPService xmppService) {
-                xmppService.setXmppErrorListener(this);
-            }
-
-            public void error(XMPPException exception) {
-                exception.printStackTrace();
+        service.setXmppErrorListener(new EventListener<XMPPException>() {
+            @Override
+            public void handleEvent(XMPPException event) {
+                event.printStackTrace();
             }
         });
         aliceRosterListener = new RosterListenerMock();

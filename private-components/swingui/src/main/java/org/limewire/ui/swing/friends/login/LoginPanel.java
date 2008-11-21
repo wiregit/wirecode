@@ -1,40 +1,47 @@
-package org.limewire.ui.swing.friends;
+package org.limewire.ui.swing.friends.login;
+
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
-import javax.swing.border.LineBorder;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.concurrent.ThreadExecutor;
-//import org.limewire.logging.Log;
-//import org.limewire.logging.LogFactory;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
+import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.friends.SignoffEvent;
+import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.friends.XMPPEventHandler;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.NativeLaunchUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
-import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
@@ -43,33 +50,29 @@ import com.google.inject.Singleton;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
- * TODO: Swap labels on network button press?
  */
 @Singleton
-public class LoginPanel extends JPanel
-implements Displayable, XMPPErrorListener, ActionListener {
+public class LoginPanel extends JXPanel {
 
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
     private static final String AUTHENTICATION_ERROR = tr("Please try again."); // See spec
     private static final String NETWORK_ERROR = tr("Network error. Please try again later.");
-    private static final String BLANK_CREDENTIALS = tr("Please enter your username and password.");
 
     private JComboBox serviceComboBox;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckBox;
+    private JLabel authFailedLabel;
     private JButton signInButton;
-    private JButton registerButton;
-    private JPanel normalTopPanel;
-    private JPanel detailsPanel;
     private final XMPPEventHandler xmppEventHandler;
     private final XMPPAccountConfigurationManager accountManager;
+    private final SignInAction signinAction = new SignInAction();
     // private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 
     @Inject
-    public LoginPanel(XMPPEventHandler xmppEventHandler,
+    LoginPanel(XMPPEventHandler xmppEventHandler,
             XMPPAccountConfigurationManager accountManager) {
         this.xmppEventHandler = xmppEventHandler;
         this.accountManager = accountManager;
@@ -77,11 +80,51 @@ implements Displayable, XMPPErrorListener, ActionListener {
         initComponents();
         EventAnnotationProcessor.subscribe(this);
     }
+    
+    @Inject void register(ServiceRegistry registry) {
+        registry.register(new Service() {
+            @Override
+            public String getServiceName() {
+                return tr("Friend Auto-Login");
+            }
+            @Override
+            public void initialize() {
+            }
+            
+            @Override
+            public void start() {
+                // If there's an auto-login account, select it and log in
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
+                        serviceComboBox.setSelectedItem(auto.getLabel());
+                        login(auto);
+                    }
+                });
+            }
+            
+            @Override
+            public void stop() {
+            }
+        });
+    }
+    
+    @Override
+    public void setVisible(boolean flag) {
+        boolean becameVisible = flag && !isVisible();
+        super.setVisible(flag);
+        if(becameVisible) {
+            populateInputs();
+            usernameField.requestFocusInWindow();
+        }
+    }
 
     private void initComponents() {
         serviceComboBox = new JComboBox();
-        for(String label : accountManager.getLabels())
+        for(String label : accountManager.getLabels()) {
             serviceComboBox.addItem(label); // FIXME: icons?
+        }
         serviceComboBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -92,39 +135,56 @@ implements Displayable, XMPPErrorListener, ActionListener {
         usernameField = new JTextField(18);
         passwordField = new JPasswordField(18);
 
-        SignInAction signinAction = new SignInAction();
-        passwordField.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "signin");
-        passwordField.getActionMap().put("signin", signinAction);
+        passwordField.setAction(signinAction);
 
         autoLoginCheckBox = new JCheckBox(tr("Remember me"));
+        autoLoginCheckBox.setOpaque(false);
+        autoLoginCheckBox.setMargin(new Insets(0, 0, 0, 0));
+        autoLoginCheckBox.setBorder(BorderFactory.createEmptyBorder());
+        
         signInButton = new JButton(signinAction);
-        registerButton = new JButton(tr("Sign up"));
+        signInButton.setOpaque(false);
+        
+        authFailedLabel = new JLabel();
+        
+        JLabel hideButton = new ActionLabel(new AbstractAction(("X")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LoginPanel.this.setVisible(false);
+            }
+        }, true);
 
-        setLayout(new MigLayout());
-        normalTopPanel = normalTopPanel();
-        detailsPanel = getDetailsPanel();
-        add(normalTopPanel, "wrap");
-        add(detailsPanel);
+        setLayout(new MigLayout("gap 0, fill"));
+        add(hideButton, "alignx right, wrap");
+        add(new JLabel(tr("Using")), "alignx left, split");
+        add(serviceComboBox, "wmin 0, wrap");
+        add(new JLabel(tr("Username")), "alignx left, wrap");
+        add(usernameField, "alignx left, wmin 0, wrap");
+        add(new JLabel(tr("Password")), "alignx left, wrap");
+        add(passwordField, "alignx left, wmin 0, wrap");
+        add(autoLoginCheckBox, "gaptop 2, alignx left, wmin 0, wrap");
+        add(authFailedLabel, "alignx left, wmin 0, hidemode 3, wrap");
+        add(signInButton, "gaptop 2, alignx left, wmin 0");
+        
+        authFailedLabel.setVisible(false);
+        authFailedLabel.setForeground(Color.RED);
+        authFailedLabel.setOpaque(false);
+        FontUtils.changeStyle(authFailedLabel, Font.ITALIC);
+        
+        setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
 
-        // If there's an auto-login account, select it and log in
-        XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-        if(auto == null) {
-            serviceComboBox.setSelectedItem("Gmail");
-            setSignInComponentsEnabled(true);
-        } else {
-            serviceComboBox.setSelectedItem(auto.getLabel());
-            login(auto);
-        }
+        serviceComboBox.setSelectedItem("Gmail");
+        setSignInComponentsEnabled(true);
     }
 
-    @Override
-    public void error(XMPPException exception) {
-        loginFailed(exception);
-    }
-
-    @Inject
-    public void register(XMPPService xmppService) {
-        xmppService.setXmppErrorListener(this);
+    @Inject void register(XMPPService xmppService) {
+        xmppService.setXmppErrorListener(new EventListener<XMPPException>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPException event) {
+                loginFailed(event);
+            }
+        });
     }
 
     private void populateInputs() {
@@ -139,70 +199,29 @@ implements Displayable, XMPPErrorListener, ActionListener {
             passwordField.setText("");
             autoLoginCheckBox.setSelected(false);
         }
+        authFailedLabel.setVisible(false);
     }
 
     @EventSubscriber
     public void handleSignoff(SignoffEvent event) {
-        setTopPanelMessage(normalTopPanel);
         setSignInComponentsEnabled(true);
         populateInputs();
     }
 
-    @Override
-    public void handleDisplay() {
-        usernameField.requestFocusInWindow();
-        populateInputs(); // Config may have been changed in options dialog
-    }
-
-    private JPanel normalTopPanel() {
-        JPanel p = new JPanel();
-        p.setLayout(new MigLayout());
-        p.add(new JLabel(tr("Have a Jabber account?")), "wrap");
-        p.add(new JLabel(tr("- Access your friends' libraries")), "wrap");
-        p.add(new JLabel(tr("- See what new files they have")), "wrap");
-        p.add(new JLabel(tr("- Chat with your friends")));
-        return p;
-    }
-
-    private void loginFailed(final XMPPException e) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (e.getMessage().contains("authentication failed")) {
-                    setTopPanelMessage(loginErrorPanel(AUTHENTICATION_ERROR));
-                    passwordField.setText("");
-                } else {
-                    setTopPanelMessage(loginErrorPanel(NETWORK_ERROR));
-                }
-                setSignInComponentsEnabled(true);
-            }
-
-        });
-    }
-
-    private void setTopPanelMessage(JPanel messagePanel) {
-        removeAll();
-        add(messagePanel, "wrap");
-        add(detailsPanel);
-        validate();
-    }
-
-    private JPanel loginErrorPanel(String message) {
-        JPanel p = new JPanel();
-        p.setLayout(new MigLayout());
-        JLabel label = new JLabel(tr("Could not sign you in."));
-        //A pretty crimson
-        label.setForeground(new Color(112, 13, 37));
-        FontUtils.changeSize(label, 2.0f);
-        p.add(label, "wrap");
-        p.add(new JLabel(message));
-        return p;
+    private void loginFailed(XMPPException e) {
+        authFailedLabel.setVisible(true);
+        if (e.getMessage().contains("authentication failed")) {
+            authFailedLabel.setText(AUTHENTICATION_ERROR);
+            passwordField.setText("");
+        } else {
+            authFailedLabel.setText(NETWORK_ERROR);
+        }
+        setSignInComponentsEnabled(true);
     }
 
     private void setSignInComponentsEnabled(boolean isEnabled) {
-        signInButton.setEnabled(isEnabled);
-        signInButton.setText(isEnabled ? SIGNIN_ENABLED_TEXT : SIGNIN_DISABLED_TEXT);
-        registerButton.setEnabled(isEnabled);
+        signinAction.setEnabled(isEnabled);
+        signinAction.putValue(Action.NAME, isEnabled ? SIGNIN_ENABLED_TEXT : SIGNIN_DISABLED_TEXT);
         usernameField.setEnabled(isEnabled);
         passwordField.setEnabled(isEnabled);
         autoLoginCheckBox.setEnabled(isEnabled);
@@ -213,40 +232,9 @@ implements Displayable, XMPPErrorListener, ActionListener {
         setSignInComponentsEnabled(true);
     }
 
-    private JPanel getDetailsPanel() {
-        JPanel p = new JPanel();
-        p.setLayout(new MigLayout());
-        p.add(new JLabel(tr("Sign in using")), "split");
-        p.add(serviceComboBox, "wrap");
-        p.add(new JLabel(tr("Username")), "split");
-        p.add(usernameField, "wrap");
-        p.add(new JLabel(tr("Password")), "split");
-        p.add(passwordField, "wrap");
-        JPanel sign = new JPanel();
-        sign.setLayout(new MigLayout());
-        sign.add(autoLoginCheckBox, "wrap");
-        sign.add(signInButton);
-        p.add(sign, "split");
-        JPanel reg = new JPanel();
-        reg.setBorder(new LineBorder(Color.BLACK));
-        reg.setLayout(new MigLayout());
-        reg.add(new JLabel(tr("Don't have an account?")), "wrap");
-        reg.add(registerButton);
-        p.add(reg);
-        registerButton.addActionListener(this);
-        return p;
-    }
-
-    // ActionListener for registerButton
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        String label = (String)serviceComboBox.getSelectedItem();
-        XMPPAccountConfiguration config = accountManager.getConfig(label);
-        NativeLaunchUtils.openURL(config.getRegistrationURL());
-    }
-
     private void login(final XMPPAccountConfiguration config) {
         setSignInComponentsEnabled(false);
+        authFailedLabel.setVisible(false);
         ThreadExecutor.startThread(new Runnable() {
             public void run() {
                 xmppEventHandler.login(config);
@@ -263,7 +251,6 @@ implements Displayable, XMPPErrorListener, ActionListener {
             String user = usernameField.getText().trim();
             String password = new String(passwordField.getPassword());
             if(user.equals("") || password.equals("")) {
-                setTopPanelMessage(loginErrorPanel(BLANK_CREDENTIALS));
                 return;
             }            
             String label = (String)serviceComboBox.getSelectedItem();
@@ -289,8 +276,9 @@ implements Displayable, XMPPErrorListener, ActionListener {
             String label = value.toString();
             setText(label);
             XMPPAccountConfiguration config = accountManager.getConfig(label);
-            if(config != null)
+            if(config != null) {
                 setIcon(config.getIcon());
+            }
             return this;
         }
     }

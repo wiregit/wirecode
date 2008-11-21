@@ -2,7 +2,6 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;

@@ -125,7 +125,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     LOG.infof("logging in " + configuration.getUsername() + " with resource: " + configuration.getResource());
                 connection.login(configuration.getUsername(), configuration.getPassword(), configuration.getResource());
                 LOG.info("logged in.");
-                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, ConnectionEvent.CONNECTED));
+                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
                 throw new XMPPException(e);
             }
@@ -466,27 +466,27 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private class SmackConnectionListener implements ConnectionListener {
         @Override
         public void connectionClosed() {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, ConnectionEvent.DISCONNECTED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, ConnectionEvent.DISCONNECTED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
         }
 
         @Override
         public void reconnectingIn(int seconds) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, ConnectionEvent.RECONNECTING));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING));
         }
 
         @Override
         public void reconnectionFailed(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, ConnectionEvent.RECONNECTING_FAILED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING_FAILED));
         }
 
         @Override
         public void reconnectionSuccessful() {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, ConnectionEvent.CONNECTED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.CONNECTED));
         }
     }
 }

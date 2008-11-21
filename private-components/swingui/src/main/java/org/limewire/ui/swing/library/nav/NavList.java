@@ -10,12 +10,12 @@ import java.util.ListIterator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-
-import net.miginfocom.swing.MigLayout;
+import javax.swing.BorderFactory;
 
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.util.FontUtils;
@@ -35,7 +35,7 @@ class NavList extends JXPanel {
     NavList() {
         GuiUtils.assignResources(this);
         
-        setLayout(new MigLayout("gap 0, insets 0, fill"));
+        setLayout(new VerticalLayout(0));
         
         this.panelMoveUpAction = new NavPanelMoveAction(false);
         this.panelMoveDownAction = new NavPanelMoveAction(true);
@@ -48,9 +48,10 @@ class NavList extends JXPanel {
         }, false);
         FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
-        add(titleLabel, "gapleft 5, alignx left, growx, wrap");
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        add(titleLabel);
         
-        panelContainer = new JXPanel(new MigLayout("gap 0, insets 0, fillx")) {
+        panelContainer = new JXPanel(new VerticalLayout(0)) {
             @Override
             public Dimension getPreferredSize() {
                 Dimension d = super.getPreferredSize();
@@ -60,7 +61,7 @@ class NavList extends JXPanel {
         };
         collapsablePanels = new JXCollapsiblePane();
         collapsablePanels.setContentPane(panelContainer);
-        add(collapsablePanels, "alignx left, aligny top, growx, wrap");
+        add(collapsablePanels);
         
         checkVisibility();
     }
@@ -139,7 +140,7 @@ class NavList extends JXPanel {
         });
         int insertIdx = idx >= 0 ? idx : -(idx+1);
         navPanels.add(insertIdx, panel);
-        panelContainer.add(panel, "alignx left, aligny top, growx, wrap", insertIdx);
+        panelContainer.add(panel, insertIdx);
 
         panel.setParentList(this);
         panel.getActionMap().put(NavKeys.MOVE_DOWN, panelMoveDownAction);

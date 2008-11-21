@@ -4,10 +4,6 @@ import java.util.Collection;
 
 public interface XMPPConnection {
     
-    public enum ConnectionEvent {
-        CONNECTED, DISCONNECTED, RECONNECTING, RECONNECTING_FAILED
-    }
-
     public XMPPConnectionConfiguration getConfiguration();
 
     /**
@@ -21,6 +17,8 @@ public interface XMPPConnection {
      * @throws XMPPException
      */
     public void logout();
+    
+    /** Returns true if this connection is logged in. */
     public boolean isLoggedIn();
 
     /**

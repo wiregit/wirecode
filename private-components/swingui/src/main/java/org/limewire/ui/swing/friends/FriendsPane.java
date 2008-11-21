@@ -119,7 +119,6 @@ public class FriendsPane extends JPanel {
     private final IconLibrary icons;
     private final Map<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
-    private final FriendsCountUpdater friendsCountUpdater;
     private final ShareListManager libraryManager;
     private final FriendSharingDisplay friendSharing;
     private final JScrollPane scrollPane;
@@ -131,7 +130,7 @@ public class FriendsPane extends JPanel {
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
 
     @Inject
-    public FriendsPane(IconLibrary icons, FriendsCountUpdater friendsCountUpdater,
+    public FriendsPane(IconLibrary icons, 
             ShareListManager libraryManager, FriendSharingDisplay friendSharing,
             ListenerSupport<FriendPresenceEvent> presenceSupport) {
         super(new BorderLayout());
@@ -139,7 +138,6 @@ public class FriendsPane extends JPanel {
         this.chatFriends = new BasicEventList<ChatFriend>();
         this.idToFriendMap = new HashMap<String, ChatFriend>();
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
-        this.friendsCountUpdater = friendsCountUpdater;
         this.libraryManager = libraryManager;
         this.friendSharing = friendSharing;
         ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
@@ -403,7 +401,6 @@ public class FriendsPane extends JPanel {
             }
             break;
         }
-        friendsCountUpdater.setFriendsCount(chatFriends.size());
     }
 
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")

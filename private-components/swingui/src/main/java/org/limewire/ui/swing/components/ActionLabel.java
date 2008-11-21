@@ -16,7 +16,7 @@ import javax.swing.UIManager;
 import org.jdesktop.swingx.JXLabel;
 import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.listener.ActionHandListener;
-import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.FontUtils;
 
 
 /**
@@ -65,15 +65,16 @@ public class ActionLabel extends JXLabel  {
     public void setText(String text) {
         this.text = text;
         if(renderAsLink) {
-            String htmlString = null;
-            if(text != null) {
-                htmlString = ("<html><a href=\"\"" + 
-                    (linkColor != null ? "color=\"#" + GuiUtils.colorToHex(linkColor) + "\"" : "") +
-                    ">" + text + "</a></html>");
+            super.setText(text);
+            FontUtils.underline(this);
+            if(linkColor != null) {
+                setForeground(linkColor);
+            } else {
+                setForeground(Color.BLUE);
             }
-            super.setText(htmlString);
         } else {
             super.setText(text);
+            FontUtils.removeUnderline(this);
         }
     }
    

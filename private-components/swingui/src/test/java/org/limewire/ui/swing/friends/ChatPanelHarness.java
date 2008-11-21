@@ -34,7 +34,7 @@ public class ChatPanelHarness {
                 MockFriendSharingDisplay friendSharing = new MockFriendSharingDisplay();
                 EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
                 final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
-                FriendsPane friendsPane = new FriendsPane(icons, new MockFriendsCountUpdater(), libraryManager, friendSharing, presenceSupport);
+                FriendsPane friendsPane = new FriendsPane(icons, libraryManager, friendSharing, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {

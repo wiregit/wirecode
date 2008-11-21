@@ -425,19 +425,23 @@ public class LimeComboBox extends JXButton {
     }
     
     private void updateMenu() {
-        
+
         if (this.isMenuOverrided) {
-            
-            if (this.updateHandler == null)  return;
-            
+
+            if (this.updateHandler == null) {
+                return;
+            }
+
             // Notify that the overrided menu
-            //  is ready to be updated
+            // is ready to be updated
             this.updateHandler.fireUpdate();
-            
+
             return;
         }
-        
-        if (this.isMenuUpdated) return;
+
+        if (this.isMenuUpdated) {
+            return;
+        }
         this.isMenuUpdated = true;
         
         this.menu.removeAll();

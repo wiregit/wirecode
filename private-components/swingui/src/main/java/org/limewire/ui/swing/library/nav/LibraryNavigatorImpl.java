@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.nav;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -14,9 +13,8 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
@@ -36,6 +34,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
+import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
@@ -81,7 +80,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             ShareListManager shareListManager,
             MyLibraryMediator myLibraryMediator,
             NavPanelFactory navPanelFactory,
-            FriendLibraryMediatorFactory friendLibraryMediatorFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            FriendLibraryMediatorFactory friendLibraryMediatorFactory,
+            FriendsSignInPanel friendsPanel,
+            SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
         this.myLibraryMediator = myLibraryMediator;
         this.shareListManager = shareListManager;
@@ -125,9 +126,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
 
-        setLayout(new MigLayout("insets 0, gap 0, hidemode 2"));
-        add(titleLabel, "growx, alignx left, aligny top, wrap");
-        add(myLibrary, "growx, alignx left, aligny top, wrap"); 
+        setLayout(new VerticalLayout(0));
+        add(titleLabel);
+        add(myLibrary); 
+        add(friendsPanel);
         
         // Add all the navlists and hook up the actions.
         myLibrary.getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(allLists[0], true));        
@@ -151,7 +153,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 allLists[i].getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(allLists[i+1], true));
             }
             
-            add(allLists[i], "growx, alignx left, aligny top, wrap");
+            add(allLists[i]);
         }
 
         new AbstractListEventListener<FriendLibrary>() {
@@ -264,7 +266,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     }
     
     @Override
-    public Component getComponent() {
+    public JXPanel getComponent() {
         return this;
     }
     

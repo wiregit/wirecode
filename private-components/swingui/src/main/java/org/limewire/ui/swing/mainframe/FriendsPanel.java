@@ -29,7 +29,6 @@ import org.limewire.ui.swing.friends.ChatPanel;
 import org.limewire.ui.swing.friends.DisplayFriendsEvent;
 import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.Displayable;
-import org.limewire.ui.swing.friends.LoginPanel;
 import org.limewire.ui.swing.friends.Message;
 import org.limewire.ui.swing.friends.MessageReceivedEvent;
 import org.limewire.ui.swing.friends.SignoffEvent;
@@ -42,6 +41,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -55,7 +55,6 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final Log LOG = LogFactory.getLog(FriendsPanel.class);
     private static final String MESSAGE_SOUND_PATH = "/org/limewire/ui/swing/mainframe/resources/sounds/friends/message.wav";
-    private final LoginPanel loginPanel;
     private final ChatPanel chatPanel;
     private final UnseenMessageListener unseenMessageListener;
     private final TrayNotifier notifier;
@@ -65,12 +64,14 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     
+    private final XMPPService xmppService;
+    
     @Inject
-    public FriendsPanel(LoginPanel loginPanel, ChatPanel chatPanel, UnseenMessageListener unseenMessageListener, 
-            TrayNotifier notifier) {
+    public FriendsPanel(ChatPanel chatPanel, UnseenMessageListener unseenMessageListener, 
+            TrayNotifier notifier, XMPPService xmppService) {
         super(new BorderLayout());
+        this.xmppService = xmppService;
         this.chatPanel = chatPanel;
-        this.loginPanel = loginPanel;
         this.notifier = notifier;
         this.unseenMessageListener = unseenMessageListener;
         this.mainPanel = new java.awt.Panel();
@@ -81,8 +82,6 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
 
         Border lineBorder = BorderFactory.createLineBorder(Color.BLACK);
         chatPanel.setBorder(lineBorder);
-        loginPanel.setBorder(lineBorder);
-        mainPanel.add(loginPanel);
         add(mainPanel);
         setVisible(false);
         
@@ -105,8 +104,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     }
 
     @EventSubscriber
-    public void handleAppear(DisplayFriendsToggleEvent event) {
-       
+    public void handleAppear(DisplayFriendsToggleEvent event) {       
         if(event.getVisible() != null) {
            boolean shouldDisplay = event.getVisible().booleanValue();
            displayFriendsPanel(shouldDisplay);
@@ -117,8 +115,13 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     }
 
     private void displayFriendsPanel(boolean shouldDisplay) {
-        if (shouldDisplay) {
-            resetBounds();
+        if(shouldDisplay) {
+            // If we're not logged in -- signin is handled elsewhere.
+            if(!xmppService.isLoggedIn()) {
+                return;
+            } else {
+                resetBounds();
+            }
         }
 
         mainPanel.setVisible(shouldDisplay);
@@ -179,7 +182,6 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     
     @EventSubscriber
     public void handleConnectionEstablished(XMPPConnectionEstablishedEvent event) {
-        mainPanel.remove(loginPanel);
         mainPanel.add(chatPanel);
         chatPanel.setLoggedInID(event.getID());
         resetBounds();
@@ -188,7 +190,6 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     @EventSubscriber
     public void handleLogoffEvent(SignoffEvent event) {
         mainPanel.remove(chatPanel);
-        mainPanel.add(loginPanel);
         resetBounds();
         displayFriendsPanel(false);
     }
