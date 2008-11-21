@@ -8,8 +8,8 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.ByteReader;
 import org.limewire.io.IOUtils;
@@ -130,7 +130,7 @@ public class ExternalControl {
 
 		for ( int i = 0; i < options.length; i++ ) {
 
-			MagnetOptions curOpt = options[i];
+			final MagnetOptions curOpt = options[i];
 			
 		    if (LOG.isDebugEnabled()) {
 				URN urn = curOpt.getSHA1Urn();
@@ -163,15 +163,14 @@ public class ExternalControl {
 			    ErrorService.error(il);
 			}
 			catch (SaveLocationException sle) {
-				if (sle.getErrorCode() == LocationCode.FILE_ALREADY_EXISTS) {
-                MessageService.showFormattedError(
-                    I18nMarker.marktr("You have already downloaded {0}"), sle.getFile().getName());
-				}
-				else if (sle.getErrorCode() == LocationCode.FILE_ALREADY_DOWNLOADING) {
-					MessageService.showFormattedError(
-		                    I18nMarker
-                                    .marktr("You are already downloading this file to {0}"), sle.getFile().getName());	
-				}
+			    activityCallback.get().handleSaveLocationException(new DownLoadAction() {
+			        @Override
+			        public void download(File saveFile, boolean overwrite)
+			                throws SaveLocationException {
+			            downloadServices.download(curOpt, overwrite, saveFile.getParentFile(), saveFile.getName());
+			            
+			        }
+			    }, sle, true);
 			}
 		}
 	}

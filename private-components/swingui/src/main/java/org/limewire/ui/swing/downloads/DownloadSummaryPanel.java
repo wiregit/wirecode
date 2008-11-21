@@ -56,6 +56,7 @@ import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
@@ -107,13 +108,13 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
-	        LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory) {
+	        LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
 	    this.navigator = navigator;
         GuiUtils.assignResources(this);
 	    
         this.progressBarFactory = progressBarFactory;
         
-        setTransferHandler(new DownloadableTransferHandler(downloadListManager));
+        setTransferHandler(new DownloadableTransferHandler(downloadListManager, saveLocationExceptionHandler));
 	    
         this.allList = downloadMediator.getDownloadList();
 

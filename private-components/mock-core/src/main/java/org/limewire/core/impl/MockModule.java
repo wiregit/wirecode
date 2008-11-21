@@ -1,10 +1,12 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.callback.GuiCallbackService;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.core.api.lifecycle.MockLifeCycleModule;
 import org.limewire.core.api.magnet.MockMagnetModule;
 import org.limewire.core.impl.browse.MockBrowseModule;
+import org.limewire.core.impl.callback.MockGuiCallbackService;
 import org.limewire.core.impl.connection.MockConnectionManagerImpl;
 import org.limewire.core.impl.daap.MockDaapModule;
 import org.limewire.core.impl.download.MockDownloadModule;
@@ -25,6 +27,7 @@ public class MockModule extends AbstractModule {
     protected void configure() {
         bind(Application.class).to(MockApplication.class);
         bind(GnutellaConnectionManager.class).to(MockConnectionManagerImpl.class);
+        bind(GuiCallbackService.class).to(MockGuiCallbackService.class);
 
         install(new MockLifeCycleModule());
         install(new MockDaapModule());

@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
@@ -162,9 +163,14 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     @Override
     public void handleTorrent(File torrentFile) {
         try {
-            downloadManager.downloadTorrent(torrentFile, true);
+            downloadManager.downloadTorrent(torrentFile, false);
         } catch (SaveLocationException e) {
-          throw new UnsupportedOperationException("give user feedback", e);
+            handleSaveLocationException(new DownLoadAction() {
+              @Override
+                public void download(File saveFile, boolean overwrite) throws SaveLocationException {
+                      downloadManager.downloadTorrent(saveFile, overwrite);
+                }  
+            },e,false);
         }
     }
 
@@ -255,10 +261,15 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     public void setGuiCallback(GuiCallback guiCallback) {
         this.guiCallback = guiCallback;
     }
-    
-    
-    public void handleSaveLocationException() {
-        //TODO implement real handler
-        guiCallback.handleSaveLocationException();
+
+    @Override
+    public void handleSaveLocationException(DownLoadAction downLoadAction,
+            SaveLocationException sle, boolean supportsNewSaveDir) {
+        if(guiCallback != null) {
+            guiCallback.handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);
+        } else {
+            throw new UnsupportedOperationException("TODO notify user");
+        }
     }
+    
 }

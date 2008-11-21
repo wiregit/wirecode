@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IpPort;
 
@@ -153,4 +155,11 @@ public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleL
      * @return the translated String
      */
     public String translate(String s);
+    
+    /**
+     * Handles the supplied SaveLocation exception by prompting the user for a new savelocation 
+     * or whether to overwrite the file. 
+     */
+    void handleSaveLocationException(DownLoadAction downLoadAction, SaveLocationException sle, boolean supportsNewSaveDir);
+
 }

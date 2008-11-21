@@ -3,6 +3,9 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.SaveLocationException;
+
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Downloader;
@@ -79,4 +82,9 @@ public class ActivityCallbackStub implements ActivityCallback {
 	}
     public boolean handleDAAPConnectionError(Throwable t) { return false; }
     public String translate(String s) { return s;}
+
+    @Override
+    public void handleSaveLocationException(DownLoadAction downLoadAction,
+            SaveLocationException sle, boolean supportsNewSaveDir) {
+    }
 }

@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileFilter;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -253,7 +254,7 @@ public class FileMenu extends JMenu {
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
                             saveLocationExceptionHandler.handleSaveLocationException(
-                                    new SaveLocationExceptionHandler.DownLoadAction() {
+                                    new DownLoadAction() {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
@@ -322,7 +323,7 @@ public class FileMenu extends JMenu {
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
                             saveLocationExceptionHandler.handleSaveLocationException(
-                                    new SaveLocationExceptionHandler.DownLoadAction() {
+                                    new DownLoadAction() {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
@@ -343,7 +344,7 @@ public class FileMenu extends JMenu {
                             downloadListManager.addDownload(magnet, null, false);
                         } catch (SaveLocationException e1) {
                             saveLocationExceptionHandler.handleSaveLocationException(
-                                    new SaveLocationExceptionHandler.DownLoadAction() {
+                                    new DownLoadAction() {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {

@@ -9,10 +9,12 @@ import java.util.List;
 
 import javax.swing.TransferHandler;
 
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 public class MyLibraryNavTransferHandler extends TransferHandler {
 
@@ -20,10 +22,13 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
 
     private LibraryManager libraryManager;
 
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    
     public MyLibraryNavTransferHandler(DownloadListManager downloadListManager,
-            LibraryManager libraryManager) {
+            LibraryManager libraryManager, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
     public boolean canImport(TransferHandler.TransferSupport info) {
@@ -48,11 +53,17 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
                 return false;
             }
             
-            for (RemoteFileItem file : remoteFileList) {
+            for (final RemoteFileItem file : remoteFileList) {
                 try {
                     downloadListManager.addFriendDownload(file);
                 } catch (SaveLocationException e) {
-                    throw new RuntimeException(e);
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                        @Override
+                        public void download(File saveFile, boolean overwrite)
+                                throws SaveLocationException {
+                            downloadListManager.addFriendDownload(file, saveFile, overwrite);
+                        }
+                    }, e, true);
                 }
             }
         } else {// LocalFile

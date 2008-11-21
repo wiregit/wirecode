@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -36,25 +37,26 @@ import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.BTTorrentFileDownloader;
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -66,6 +68,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
 	private final QueueTimeCalculator queueTimeCalculator;
+    private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
     
     private static final int PERIOD = 1000;
@@ -76,10 +79,10 @@ public class CoreDownloadListManager implements DownloadListManager {
 	public CoreDownloadListManager(DownloadManager downloadManager,
             DownloadListenerList listenerList, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor,
-            RemoteFileDescFactory remoteFileDescFactory,
-            SpamManager spamManager) {
+            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager) {
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
+	    this.activityCallback = activityCallback;
         this.spamManager = spamManager;
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedListsFactory.threadSafeList(
@@ -312,12 +315,18 @@ public class CoreDownloadListManager implements DownloadListManager {
                             String fileExtension = FileUtils.getFileExtension(possibleTorrentFile);
                             if("torrent".equalsIgnoreCase(fileExtension)) {
                                 list.remove(getDownloadItem(downloader));
-                                downloadManager.downloadTorrent(possibleTorrentFile, true);
+                                downloadManager.downloadTorrent(possibleTorrentFile, false);
                             }
                         }
-                    } catch (SaveLocationException e) {
-                        //TODO implement good user feedback
-                        throw new UnsupportedOperationException("Need to implement good user feedback.");
+                    } catch (SaveLocationException sle) {
+                        activityCallback.handleSaveLocationException(new DownLoadAction() {
+                            @Override
+                            public void download(File saveFile, boolean overwrite)
+                                    throws SaveLocationException {
+                                list.remove(getDownloadItem(downloader));
+                                downloadManager.downloadTorrent(saveFile, overwrite);
+                            }
+                        }, sle, false);
                     }
                 }
             }

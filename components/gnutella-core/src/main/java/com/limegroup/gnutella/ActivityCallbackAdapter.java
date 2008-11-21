@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;
@@ -135,5 +137,10 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     
     public boolean handleDAAPConnectionError(Throwable t) { return false; }
     public String translate(String s) { return s;}
+
+    @Override
+    public void handleSaveLocationException(DownLoadAction downLoadAction,
+            SaveLocationException sle, boolean supportsNewSaveDir) {
+    }
 
 }

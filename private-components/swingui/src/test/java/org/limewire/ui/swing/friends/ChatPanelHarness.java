@@ -38,7 +38,7 @@ public class ChatPanelHarness {
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {
-                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay(), null, null, friendSupport);
+                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay(), null, null, friendSupport, null);
                     }
                 }, icons, friendsPane, new TopPanel(icons, null), friendSharing));
                 

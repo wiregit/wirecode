@@ -20,6 +20,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -316,7 +317,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                         }
                     }
                 } else {
-                    saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandler.DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {

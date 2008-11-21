@@ -38,6 +38,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
@@ -69,6 +70,7 @@ import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
@@ -105,12 +107,13 @@ public class ConversationPane extends JPanel implements Displayable {
     private ChatState currentChatState;
     private final ResultDownloader downloader;
     private final RemoteFileItemFactory remoteFileItemFactory;
-
+    private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
                             ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
-                            @Named("available") ListenerSupport<FriendEvent> friendSupport) {
+                            @Named("available") ListenerSupport<FriendEvent> friendSupport, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.remoteFileItemFactory = remoteFileItemFactory;
@@ -121,6 +124,7 @@ public class ConversationPane extends JPanel implements Displayable {
         this.iconManager = iconManager;
         this.friendSharingDisplay = friendSharingDisplay;
         this.downloader = downloader;
+        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
 
         setLayout(new BorderLayout());
 
@@ -318,20 +322,32 @@ public class ConversationPane extends JPanel implements Displayable {
                 LOG.debugf("File offer download requested. FileId: {0}", event.getData());
 
                 DownloadItem dl;
-                final MessageFileOffer msgWithfileOffer;
+                MessageFileOffer msgWithfileOffer = null;
+                RemoteFileItem file = null;
                 try {
                     String dataStr = event.getData();
                     String fileIdEncoded = dataStr.substring(dataStr.indexOf("=")+1).trim();
                     String fileId = URLDecoder.decode(fileIdEncoded, "UTF-8");
                     msgWithfileOffer = idToMessageWithFileOffer.get(fileId);
 
-                    RemoteFileItem file = remoteFileItemFactory.create(chatFriend.getBestPresence(),
+                    file = remoteFileItemFactory.create(chatFriend.getBestPresence(),
                            msgWithfileOffer.getFileOffer());
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
                    dl = downloader.addFriendDownload(file);
+                   // Track download states by adding listeners to dl item
+                   addPropertyListener(dl, msgWithfileOffer);
                 } catch(SaveLocationException sle) {
-                    throw new RuntimeException("FIX ME", sle); // BROKEN
+                    final RemoteFileItem remoteFileItem = file;
+                    final MessageFileOffer messageFileOffer = msgWithfileOffer;
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                        @Override
+                        public void download(File saveFile, boolean overwrite)
+                                throws SaveLocationException {
+                            DownloadItem dl = downloader.addFriendDownload(remoteFileItem, saveFile, overwrite);
+                            addPropertyListener(dl, messageFileOffer);
+                        }
+                    }, sle, true); 
                 } catch (InvalidDataException ide) {
                     // not exactly broken, but need better behavior --
                     // this means the FileMetaData we received isn't well-formed.
@@ -340,16 +356,7 @@ public class ConversationPane extends JPanel implements Displayable {
                     throw new RuntimeException(uee); // impossible
                 }
 
-                // Track download states by adding listeners to dl item
-                dl.addPropertyChangeListener(new PropertyChangeListener() {
-                    public void propertyChange(PropertyChangeEvent evt) {
-                        if ("state".equals(evt.getPropertyName())) {
-                            DownloadState state = (DownloadState) evt.getNewValue();
-                            msgWithfileOffer.setDownloadState(state);
-                            displayMessages();
-                        }
-                    }
-                });
+               
 
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
@@ -367,6 +374,18 @@ public class ConversationPane extends JPanel implements Displayable {
                     }
                 }
             }
+        }
+
+        private void addPropertyListener(DownloadItem dl, final MessageFileOffer msgWithfileOffer) {
+            dl.addPropertyChangeListener(new PropertyChangeListener() {
+                   public void propertyChange(PropertyChangeEvent evt) {
+                       if ("state".equals(evt.getPropertyName())) {
+                           DownloadState state = (DownloadState) evt.getNewValue();
+                           msgWithfileOffer.setDownloadState(state);
+                           displayMessages();
+                       }
+                   }
+               });
         }
     }
     

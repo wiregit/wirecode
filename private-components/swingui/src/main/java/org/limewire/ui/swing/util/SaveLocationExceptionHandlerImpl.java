@@ -13,6 +13,7 @@ import javax.swing.JToggleButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.DownloadSettings;

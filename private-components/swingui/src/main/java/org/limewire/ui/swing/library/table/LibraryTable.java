@@ -16,6 +16,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
@@ -194,7 +195,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                    editor.cancelCellEditing();
                 }
             } catch (SaveLocationException e) {
-                saveLocationExceptionHandler.handleSaveLocationException(new SaveLocationExceptionHandler.DownLoadAction() {
+                saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {

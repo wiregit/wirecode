@@ -47,6 +47,7 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -80,7 +81,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             ShareListManager shareListManager,
             MyLibraryMediator myLibraryMediator,
             NavPanelFactory navPanelFactory,
-            FriendLibraryMediatorFactory friendLibraryMediatorFactory) {
+            FriendLibraryMediatorFactory friendLibraryMediatorFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         
         this.myLibraryMediator = myLibraryMediator;
         this.shareListManager = shareListManager;
@@ -112,7 +113,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager));
+        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager, saveLocationExceptionHandler));
         myLibrary.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         
         libraryList.addPropertyChangeListener(new PropertyChangeListener() {
