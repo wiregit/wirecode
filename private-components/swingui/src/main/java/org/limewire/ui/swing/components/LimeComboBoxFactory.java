@@ -39,11 +39,18 @@ public class LimeComboBoxFactory {
     private Icon  miniDownIcon;
     
     @Resource
-    private Font  fullTextFont;
+    private Font  lightFullTextFont;
     @Resource
-    private Color fullTextColour;
+    private Color lightFullTextColour;
     @Resource
-    private Icon  fullIcon;
+    private Icon  lightFullIcon;
+    
+    @Resource
+    private Font  darkFullTextFont;
+    @Resource
+    private Color darkFullTextColour;
+    @Resource
+    private Icon  darkFullIcon;
     
     
     private final Painter<JXButton> darkButtonPainter;
@@ -71,9 +78,9 @@ public class LimeComboBoxFactory {
         
         box.setBackgroundPainter(painter);
         box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
-        box.setIcon(this.fullIcon);
-        box.setFont(this.fullTextFont);
-        box.setForeground(this.fullTextColour);
+        box.setIcon(this.darkFullIcon);
+        box.setFont(this.darkFullTextFont);
+        box.setForeground(this.darkFullTextColour);
         
         return box;
         
@@ -85,9 +92,9 @@ public class LimeComboBoxFactory {
         
         box.setBackgroundPainter(this.lightButtonPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
-        box.setIcon(this.miniRegIcon);
-        box.setFont(this.fullTextFont);
-        box.setForeground(this.miniRegTextColour);
+        box.setIcon(this.lightFullIcon);
+        box.setFont(this.lightFullTextFont);
+        box.setForeground(this.lightFullTextColour);
         
         return box;
     }

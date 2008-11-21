@@ -29,6 +29,10 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     private static final Paint BUBBLE_PAINT2 = new Color(0xed,0xed,0xed);
     private static final Paint BUBBLE_PAINT3 = new Color(0xf0,0xf0,0xf0);
     
+    private static final Paint SHADOW_PAINT1 = new Color(0x80,0x80,0x80);
+    private static final Paint SHADOW_PAINT2 = new Color(0x80,0x80,0x80);
+    private static final Paint SHADOW_PAINT3 = new Color(0x80,0x80,0x80);
+    
     public BorderPainter(int arcWidth, int arcHeight, Paint border, 
             Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
             Paint bevelRight, Paint bevelBottom) {
@@ -58,7 +62,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     
     @Override
     protected void doPaint(Graphics2D g, X object, int width, int height) {
-     
+        
         int singleArcHeight = this.arcHeight/2;
         
         // Draw upper bevels
@@ -78,18 +82,16 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         g.setPaint(PaintUtils.resizeGradient(this.bevelRight, 0, height-singleArcHeight+1));
         g.drawLine(width-3,singleArcHeight-1,width-3,height-singleArcHeight);
                 
-        // Draw bottom accent bubble
-        if (this.hasBubble) {
-            g.setClip(0, singleArcHeight, width, height);
-            g.setPaint(BUBBLE_PAINT3);
-            g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
-            g.setPaint(BUBBLE_PAINT2);        
-            g.drawLine(0,singleArcHeight,0,height/2);
-            g.drawLine(width-1,singleArcHeight,width-1,height/2);
-            g.setPaint(BUBBLE_PAINT1);
-            g.drawLine(0,height/2,0,height-singleArcHeight);
-            g.drawLine(width-1,height/2,width-1,height-singleArcHeight);
-        }
+        // Draw the bottom accent bubble or shadow
+        g.setClip(0, singleArcHeight, width, height);
+        g.setPaint(this.hasBubble ? BUBBLE_PAINT3 : SHADOW_PAINT3);
+        g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
+        g.setPaint(this.hasBubble ? BUBBLE_PAINT2 : SHADOW_PAINT2);        
+        g.drawLine(0,singleArcHeight,0,height/2);
+        g.drawLine(width-1,singleArcHeight,width-1,height/2);
+        g.setPaint(this.hasBubble ? BUBBLE_PAINT1 : SHADOW_PAINT1);
+        g.drawLine(0,height/2,0,height-singleArcHeight);
+        g.drawLine(width-1,height/2,width-1,height-singleArcHeight);
          
         g.setClip(0, 0, width, height);
         
