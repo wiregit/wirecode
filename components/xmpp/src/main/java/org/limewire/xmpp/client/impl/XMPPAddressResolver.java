@@ -21,7 +21,6 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -154,7 +153,7 @@ public class XMPPAddressResolver implements AddressResolver {
             }
             URI id = event.getData().getID();
             if (id.equals(AuthTokenFeature.ID) || id.equals(AddressFeature.ID)) {
-                Presence presence = event.getSource();
+                FriendPresence presence = event.getSource();
                 if (presence.hasFeatures(AuthTokenFeature.ID, AddressFeature.ID)) {
                     LOG.debugf("presence with address and auth-token became available: {0}", presence.getPresenceId());
                     connectivityEventBroadcaster.broadcast(new ConnectivityChangeEvent());    

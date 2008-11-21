@@ -5,12 +5,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
@@ -22,16 +18,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
 
@@ -135,7 +125,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket, new AnonymousPresence());
+            browseHostHandler.browseHost(socket, new MockFriendPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -148,7 +138,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
-        browseHostHandler.browseHost(socket, new AnonymousPresence());
+        browseHostHandler.browseHost(socket, new MockFriendPresence());
 
         List<String> files = new ArrayList<String>();
         for(QueryReply reply : queryReplyHandler.replies) {
@@ -182,7 +172,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
-        browseHostHandler.browseHost(socket, new AnonymousPresence());
+        browseHostHandler.browseHost(socket, new MockFriendPresence());
 
         boolean mp3Found = false;
         List<String> files = new ArrayList<String>();
@@ -241,7 +231,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         Socket socket = socketsManager.connect(new InetSocketAddress(host.getAddress(), host.getPort()),
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
         try {
-            browseHostHandler.browseHost(socket, new AnonymousPresence());
+            browseHostHandler.browseHost(socket, new MockFriendPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -268,7 +258,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                                                 BrowseHostHandler.DIRECT_CONNECT_TIME, type);
 
         try {
-            browseHostHandler.browseHost(socket, new AnonymousPresence());
+            browseHostHandler.browseHost(socket, new MockFriendPresence());
             fail();
         } catch (IOException ioe) {
             // expected result
@@ -276,163 +266,8 @@ public class BrowseHostHandlerTest extends LimeTestCase {
     }
     
     public void testGetPathForNonAnonymousFriend() {
-        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new StubFriendPresence("me@you.com")));
-        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new StubFriendPresence("Hello There")));
-    }
-    
-    private static class AnonymousPresence implements FriendPresence {
-        @Override
-        public Friend getFriend() {
-            return new Friend() {
-                @Override
-                public String getId() {
-                    // TODO Auto-generated method stub
-                    return null;
-                }
-                @Override
-                public String getName() {
-                    // TODO Auto-generated method stub
-                    return null;
-                }
-                @Override
-                public Network getNetwork() {
-                    // TODO Auto-generated method stub
-                    return null;
-                }
-                @Override
-                public String getRenderName() {
-                    // TODO Auto-generated method stub
-                    return null;
-                }
-                @Override
-                public boolean isAnonymous() {
-                    return true;
-                }
-                @Override
-                public void setName(String name) {
-                    // TODO Auto-generated method stub
-                    
-                }
-
-                public Map<String, FriendPresence> getFriendPresences() {
-                    return Collections.emptyMap();
-                }
-            };
-        }
-
-        public String getPresenceId() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Collection<Feature> getFeatures() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Feature getFeature(URI id) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public boolean hasFeatures(URI... id) {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void addFeature(Feature feature) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void removeFeature(URI id) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-    }
-    
-    private static class StubFriendPresence implements FriendPresence {
-
-        private final String myId;
-
-        public StubFriendPresence(String myId) {
-            this.myId = myId;
-        }
-
-        @Override
-        public Friend getFriend() {
-            return new Friend() {
-
-                @Override
-                public String getId() {
-                    return null;
-                }
-
-                @Override
-                public String getName() {
-                    return null;
-                }
-
-                @Override
-                public Network getNetwork() {
-                    return new Network() {
-                        @Override
-                        public String getMyID() {
-                            return myId;
-                        }
-                        @Override
-                        public String getNetworkName() {
-                            return "";
-                        }
-                    };
-                }
-
-                @Override
-                public String getRenderName() {
-                    return null;
-                }
-
-                @Override
-                public boolean isAnonymous() {
-                    return false;
-                }
-
-                @Override
-                public void setName(String name) {
-                }
-
-                public Map<String, FriendPresence> getFriendPresences() {
-                    return Collections.emptyMap();
-                }
-            };
-        }
-
-        @Override
-        public String getPresenceId() {
-            return null;
-        }
-
-        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Collection<Feature> getFeatures() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Feature getFeature(URI id) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public boolean hasFeatures(URI... id) {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void addFeature(Feature feature) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void removeFeature(URI id) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
+        assertEquals("/friend/browse/me%40you.com/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("me@you.com", false))));
+        assertEquals("/friend/browse/Hello+There/", browseHostHandler.getPath(new MockFriendPresence(new MockFriend("Hello There", false))));
     }
 
     @Singleton

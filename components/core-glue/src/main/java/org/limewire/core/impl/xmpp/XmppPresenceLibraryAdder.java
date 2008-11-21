@@ -11,7 +11,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.xmpp.api.client.Presence;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -53,7 +52,7 @@ class XmppPresenceLibraryAdder {
     private class LibraryAdderFeatureListener implements EventListener<FeatureEvent> {                        
         @BlockingEvent
         public void handleEvent(FeatureEvent featureEvent) {
-            Presence presence = featureEvent.getSource();
+            FriendPresence presence = featureEvent.getSource();
             if(featureEvent.getType() == FeatureEvent.Type.ADDED) {
                 if(presence.hasFeatures(AddressFeature.ID, AuthTokenFeature.ID)) {
                     remoteLibraryManager.addPresenceLibrary(presence);

@@ -10,11 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
@@ -23,17 +19,10 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
-import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.util.Base32;
 
 import com.google.inject.AbstractModule;
@@ -136,7 +125,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
             // tell the leaf to browse host the file, should result in direct HTTP
             // request
-            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
+            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(new MockFriend(), new AddressFeature(callback.getRFD().getAddress())), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -207,7 +196,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             
             // tell the leaf to browse host the file, should result in PushProxy
             // request
-            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
+            searchServices.doAsynchronousBrowseHost(new MockFriendPresence(new MockFriend(), new AddressFeature(callback.getRFD().getAddress())), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -314,7 +303,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         assertNotNull(callback.getRFD());
 
         // tell the leaf to browse host the file,
-        searchServices.doAsynchronousBrowseHost(new MockFriendPresence(callback.getRFD()), new GUID(), new BrowseListener() {
+        searchServices.doAsynchronousBrowseHost(new MockFriendPresence(new MockFriend(), new AddressFeature(callback.getRFD().getAddress())), new GUID(), new BrowseListener() {
                 public void handleBrowseResult(SearchResult searchResult) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -389,79 +378,6 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                                       Set locs) {
             remoteFileDesc = rfd;
             latch.countDown();
-        }
-    }
-    
-    class MockFriend implements Friend {
-        public String getId() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public String getName() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public String getRenderName() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void setName(String name) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public boolean isAnonymous() {
-            return true;
-        }
-
-        public Network getNetwork() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Map<String, FriendPresence> getFriendPresences() {
-            return new HashMap<String, FriendPresence>();
-        }
-    }
-    
-    class MockFriendPresence implements FriendPresence {
-
-//        private final RemoteFileDesc rfd;
-
-        public MockFriendPresence(RemoteFileDesc rfd) {
-//            this.rfd = rfd;
-            addFeature(new AddressFeature(rfd.getAddress()));
-            addFeature(new AuthTokenFeature(new byte []{}));
-        }
-
-        public Friend getFriend() {
-            return new MockFriend();
-        }
-
-        public String getPresenceId() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Collection<Feature> getFeatures() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public Feature getFeature(URI id) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public boolean hasFeatures(URI... id) {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void addFeature(Feature feature) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void removeFeature(URI id) {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 
