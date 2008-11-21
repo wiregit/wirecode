@@ -27,16 +27,12 @@ public class PopupButtonPainter extends AbstractPainter<JXButton> {
     
     public PopupButtonPainter() {
         GuiUtils.assignResources(this);
+        
+        this.setAntialiasing(true);
     }
     
     @Override
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
-        // get original antialiasing value for reset
-        Object origAntiAliasHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-        
-        //turn on antialiasing
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    
-        
         if (button.getModel().isPressed()) {
             g.setColor(this.backgroundPressed);
             g.fillRoundRect(0, 0, width-1, height-1, arcWidth, height-1);
@@ -45,8 +41,5 @@ public class PopupButtonPainter extends AbstractPainter<JXButton> {
             g.setColor(this.backgroundRollover);
             g.fillRoundRect(0, 0, width-1, height-1, arcWidth, height-1);
         }
-        
-        // reset antialiasing propery
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, origAntiAliasHint); 
     }
 }
