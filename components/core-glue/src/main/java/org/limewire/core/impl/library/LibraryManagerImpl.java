@@ -16,14 +16,14 @@ import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
-import ca.odell.glazedlists.BasicEventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.ManagedFileList;
+
+import ca.odell.glazedlists.BasicEventList;
 
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
@@ -56,7 +56,7 @@ class LibraryManagerImpl implements LibraryManager {
         
         @Override
         public boolean isFileManageable(File f) {
-            return LibraryUtils.isFilePhysicallyManagable(f);
+            return LibraryUtils.isFileManagable(f);
         }
         
         @Override

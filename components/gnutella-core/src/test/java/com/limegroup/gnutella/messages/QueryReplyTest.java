@@ -1496,7 +1496,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 // use files with a $ because they'll generally
                 // trigger a single-response return, which is
                 // easier to check
-                return LibraryUtils.isFilePhysicallyManagable(file) && file.getName().indexOf("$") != -1;
+                return LibraryUtils.isFileManagable(file) && file.getName().indexOf("$") != -1;
             }
         });
 

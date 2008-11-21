@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
@@ -11,6 +9,8 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
+
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 
 public class LibraryUtils {
@@ -48,11 +48,18 @@ public class LibraryUtils {
         } catch(IOException ignored) {}
         APPLICATION_SPECIAL_SHARE = forceShare;
     }
-    
+
+    /** 
+     * @param file
+     * @return <code>isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file))</code>
+     */
+    public static boolean isFileManagable(File file) {
+        return isFilePhysicallyManagable(file) && isFileAllowedToBeManaged(file);
+    }
+
     /**
      * Returns true if this file is not too large, not too small,
-     * not null, not a directory, not unreadable, not hidden,
-     * and not a program (if we're not allowing programs).
+     * not null, not a directory, not unreadable, not hidden.
      * 
      * Returns false otherwise.
      */
@@ -60,18 +67,27 @@ public class LibraryUtils {
         if (file == null || !file.exists() || file.isDirectory() || !file.canRead() || file.isHidden() ) { 
             return false;
         }
-                
+
         long fileLength = file.length();
         if (fileLength <= 0 || fileLength > MAX_FILE_SIZE)  {
             return false;
         }
-        
+
+        return true;
+    }
+
+    /**
+     * Checks to see if this file is an program; if it is, and it's also not
+     * a forrced share, this returns false.  For all other files types
+     * it return true.
+     */
+    public static boolean isFileAllowedToBeManaged(File file) {
         if(!LibrarySettings.ALLOW_PROGRAMS.getValue() && !LibraryUtils.isForcedShare(file)) {
             MediaType ext = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(file));
             return ext != MediaType.getProgramMediaType();
         }
         
-        return true;
+        return true;    
     }
     
     

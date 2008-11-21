@@ -669,6 +669,12 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "File isn't physically manageable"));
         }
+        
+        if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
+            LOG.debugf("Not adding {0} because programs are not allowed to be manageable", file);
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Programs not manageable"));
+        }
 
         getLibraryData().addManagedFile(file, explicitAdd);
 
@@ -1250,7 +1256,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         @Override
         public boolean accept(File file) {
             return file.isFile()
-                && LibraryUtils.isFilePhysicallyManagable(file)
+                && LibraryUtils.isFileManagable(file)
                 && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
                 && (allowExcludedFiles || !getLibraryData().isFileExcluded(file));
         }

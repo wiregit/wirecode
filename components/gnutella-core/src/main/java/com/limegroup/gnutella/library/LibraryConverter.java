@@ -115,7 +115,7 @@ class LibraryConverter {
         File[] fileList = directory.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return LibraryUtils.isFilePhysicallyManagable(file)
+                return LibraryUtils.isFileManagable(file)
                         && extensions.contains(FileUtils.getFileExtension(file))
                         && !data.isFileExcluded(file);
             }

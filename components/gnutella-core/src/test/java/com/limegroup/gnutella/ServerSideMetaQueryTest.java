@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -17,10 +18,10 @@ import com.google.inject.Stage;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.FileManagerTestUtils;
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -63,6 +64,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fm = injector.getInstance(FileManager.class);
         FileManagerTestUtils.waitForLoad(fm, 500);
+        LibrarySettings.ALLOW_PROGRAMS.setValue(true);
         assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/berkeley.mp3")).get(1, TimeUnit.SECONDS));
         assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta audio.mp3")).get(1, TimeUnit.SECONDS));
         assertNotNull(fm.getGnutellaFileList().add(TestUtils.getResourceFile("com/limegroup/gnutella/resources/meta video.wmv")).get(1, TimeUnit.SECONDS));

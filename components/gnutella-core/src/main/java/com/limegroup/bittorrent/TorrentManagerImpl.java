@@ -326,7 +326,7 @@ public class TorrentManagerImpl implements TorrentManager {
         
         Runnable r = new Runnable() {
             public void run() {
-            	if (LibraryUtils.isFilePhysicallyManagable(f))
+            	if (LibraryUtils.isFileManagable(f))
             		fileManager.getGnutellaFileList().addForSession(f);
             }
         };
