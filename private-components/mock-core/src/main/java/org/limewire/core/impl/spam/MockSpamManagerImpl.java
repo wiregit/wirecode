@@ -14,7 +14,7 @@ public class MockSpamManagerImpl implements SpamManager {
     }
 
     @Override
-    public void handleUserMarkedGood(List<SearchResult> searchResults) {
+    public void handleUserMarkedGood(List<? extends SearchResult> searchResults) {
         for (SearchResult searchResult : searchResults) {
             MockSearchResult result = (MockSearchResult) searchResult;
             result.setSpam(false);
@@ -22,7 +22,7 @@ public class MockSpamManagerImpl implements SpamManager {
     }
 
     @Override
-    public void handleUserMarkedSpam(List<SearchResult> searchResults) {
+    public void handleUserMarkedSpam(List<? extends SearchResult> searchResults) {
         for (SearchResult searchResult : searchResults) {
             MockSearchResult result = (MockSearchResult) searchResult;
             result.setSpam(true);

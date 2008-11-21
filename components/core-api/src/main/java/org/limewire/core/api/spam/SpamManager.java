@@ -6,8 +6,8 @@ import org.limewire.core.api.search.SearchResult;
 
 public interface SpamManager {
     public void clearFilterData();
-    public void handleUserMarkedGood(List<SearchResult> searchResults);
-    public void handleUserMarkedSpam(List<SearchResult> searchResults);
+    public void handleUserMarkedGood(List<? extends SearchResult> searchResults);
+    public void handleUserMarkedSpam(List<? extends SearchResult> searchResults);
     
     /**
      * Reloads the IP Filter data & adjusts spam filters when ready.

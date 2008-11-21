@@ -21,6 +21,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
@@ -65,6 +66,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final DownloadManager downloadManager;
 	private final RemoteFileDescFactory remoteFileDescFactory;
 	private final QueueTimeCalculator queueTimeCalculator;
+    private final SpamManager spamManager;
     
     private static final int PERIOD = 1000;
     
@@ -74,9 +76,11 @@ public class CoreDownloadListManager implements DownloadListManager {
 	public CoreDownloadListManager(DownloadManager downloadManager,
             DownloadListenerList listenerList, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            SpamManager spamManager) {
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
+        this.spamManager = spamManager;
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedListsFactory.threadSafeList(
 	            GlazedListsFactory.observableElementList(new BasicEventList<DownloadItem>(), downloadConnector));
@@ -132,6 +136,8 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public DownloadItem addDownload(Search search, List<? extends SearchResult> searchResults,
             File saveFile, boolean overwrite) throws SaveLocationException {
+        // Train the spam filter even if the results weren't rated as spam
+        spamManager.handleUserMarkedGood(searchResults);
         File saveDir = null;
         String fileName = null;
         

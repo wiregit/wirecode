@@ -29,18 +29,18 @@ public class SpamManagerImpl implements SpamManager {
     }
 
     @Override
-    public void handleUserMarkedGood(List<SearchResult> searchResults) {
+    public void handleUserMarkedGood(List<? extends SearchResult> searchResults) {
         RemoteFileDesc[] remoteFileDescs = buildArray(searchResults);
         spamManager.handleUserMarkedGood(remoteFileDescs);
     }
 
     @Override
-    public void handleUserMarkedSpam(List<SearchResult> searchResults) {
+    public void handleUserMarkedSpam(List<? extends SearchResult> searchResults) {
         RemoteFileDesc[] remoteFileDescs = buildArray(searchResults);
         spamManager.handleUserMarkedSpam(remoteFileDescs);
     }
 
-    private RemoteFileDesc[] buildArray(List<SearchResult> searchResults) {
+    private RemoteFileDesc[] buildArray(List<? extends SearchResult> searchResults) {
         RemoteFileDesc[] remoteFileDescs = new RemoteFileDesc[searchResults.size()];
         int index = 0;
         for (SearchResult searchResult : searchResults) {
