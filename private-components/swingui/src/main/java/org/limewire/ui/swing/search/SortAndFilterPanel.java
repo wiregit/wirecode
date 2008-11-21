@@ -4,7 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
-import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -83,7 +83,7 @@ public class SortAndFilterPanel extends JXPanel {
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
-    @Resource private Font sortLabelFont; 
+    @Resource private Font sortLabelFont;
 
     private final LimeComboBox sortCombo;
     
@@ -111,8 +111,13 @@ public class SortAndFilterPanel extends JXPanel {
         
         this.sortCombo = comboBoxFactory.createDarkFullComboBox();
         
-        sortLabel.setForeground(Color.WHITE);
-        sortLabel.setFont(sortLabelFont);
+        // TODO: Resources and bar conversion
+        this.setMinimumSize(new Dimension(10, 34));
+        this.setMaximumSize(new Dimension(10000, 34));
+        this.sortCombo.setPreferredSize(new Dimension(5, 22));
+        this.sortCombo.setMinimumSize(this.sortCombo.getPreferredSize());
+        this.sortCombo.setMaximumSize(new Dimension(1000,22));
+        
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         setSearchCategory(SearchCategory.ALL);

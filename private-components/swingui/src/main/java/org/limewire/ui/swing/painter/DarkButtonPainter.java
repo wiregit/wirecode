@@ -21,8 +21,6 @@ public class DarkButtonPainter extends ButtonPainter {
     @Resource private Color clickGradientTop;
     @Resource private Color clickGradientBottom;
     @Resource private Color borderColour;
-    @Resource private Color bevelTop1;
-    @Resource private Color bevelTop2;
     @Resource private Color bevelRightGradientTop;
     @Resource private Color bevelRightGradientBottom;
     @Resource private Color bevelBottom;
@@ -34,11 +32,11 @@ public class DarkButtonPainter extends ButtonPainter {
                 0, 1, this.bevelRightGradientBottom, false);
         
         this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
-                this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
+                this.borderColour,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
                 gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, false);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
-                this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
+                this.borderColour,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
                 gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, false);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
