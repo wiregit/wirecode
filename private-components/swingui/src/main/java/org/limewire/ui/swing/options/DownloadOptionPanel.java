@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,6 +32,7 @@ public class DownloadOptionPanel extends OptionPanel {
 
     private SharingDownloadsPanel sharingDownloadsPanel;
     private SavingPanel savingPanel;
+    private RecentDownloadsPanel recentDownloadsPanel;
     private ITunesPanel iTunesPanel;
     
     @Inject
@@ -38,8 +41,10 @@ public class DownloadOptionPanel extends OptionPanel {
         
         add(getSharingDownloadsPanel(), "pushx, growx");
         add(getSavingPanel(), "pushx, growx");
-        if(OSUtils.isAnyMac() || OSUtils.isWindows())
+        if(OSUtils.isAnyMac() || OSUtils.isWindows()) {
             add(getITunesPanel(), "pushx, growx");
+        }
+        add(getRecentDownloadsPanel(), "pushx, growx");
     }
     
     private OptionPanel getSharingDownloadsPanel() {
@@ -56,6 +61,13 @@ public class DownloadOptionPanel extends OptionPanel {
         return savingPanel;
     }
     
+    private OptionPanel getRecentDownloadsPanel() {
+        if(recentDownloadsPanel == null) {
+            recentDownloadsPanel = new RecentDownloadsPanel();
+        }
+        return recentDownloadsPanel;
+    }
+    
     private OptionPanel getITunesPanel() {
         if(iTunesPanel == null) {
             iTunesPanel = new ITunesPanel();
@@ -67,18 +79,20 @@ public class DownloadOptionPanel extends OptionPanel {
     void applyOptions() {
         getSharingDownloadsPanel().applyOptions();
         getSavingPanel().applyOptions();
+        getRecentDownloadsPanel().applyOptions();
         getITunesPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return getSharingDownloadsPanel().hasChanged() || getSavingPanel().hasChanged() || getITunesPanel().hasChanged();
+        return getSharingDownloadsPanel().hasChanged() || getSavingPanel().hasChanged() || getRecentDownloadsPanel().hasChanged() || getITunesPanel().hasChanged();
     }
 
     @Override
     public void initOptions() {
         getSharingDownloadsPanel().initOptions();
         getSavingPanel().initOptions();
+        getRecentDownloadsPanel().initOptions();
         getITunesPanel().initOptions();
     }
     
@@ -240,4 +254,46 @@ public class DownloadOptionPanel extends OptionPanel {
         }        
     }
 
+    private class RecentDownloadsPanel extends OptionPanel {
+
+        private JCheckBox rememberDownloadsCheckBox;
+        private JButton clearButton;
+        
+        public RecentDownloadsPanel() {
+            super(I18n.tr("Recent downloads"));
+            
+            rememberDownloadsCheckBox = new JCheckBox();
+            rememberDownloadsCheckBox.setContentAreaFilled(false);
+            
+            clearButton = new JButton(I18n.tr("Clear Now"));
+            clearButton.addActionListener(new ActionListener() {
+               @Override
+                public void actionPerformed(ActionEvent e) {
+                   DownloadSettings.RECENT_DOWNLOADS.clear();
+                   clearButton.setEnabled(false);
+                } 
+            });
+            
+            add(rememberDownloadsCheckBox);
+            add(new JLabel(I18n.tr("Remember recent downloads")));
+            add(clearButton);
+            
+        }
+        
+        @Override
+        void applyOptions() {
+            DownloadSettings.REMEMBER_RECENT_DOWNLOADS.setValue(rememberDownloadsCheckBox.isSelected());
+        }
+
+        @Override
+        boolean hasChanged() {
+            return DownloadSettings.REMEMBER_RECENT_DOWNLOADS.getValue() != rememberDownloadsCheckBox.isSelected();
+        }
+
+        @Override
+        public void initOptions() {
+            clearButton.setEnabled(true);
+            rememberDownloadsCheckBox.setSelected(DownloadSettings.REMEMBER_RECENT_DOWNLOADS.getValue());
+        }
+    }
 }

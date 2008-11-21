@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.util;
 
-import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,14 +75,13 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
 
         if (saveFile.exists()) {
-            createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir, mainPanel);
+            createOverwriteDialogue(saveFile, downLoadAction, sle, supportNewSaveDir);
         } else {
-            download(downLoadAction, supportNewSaveDir, mainPanel, saveFile, false);
+            download(downLoadAction, supportNewSaveDir, saveFile, false);
         }
     }
 
-    private void download(final DownLoadAction downLoadAction, final boolean supportNewSaveDir,
-            final Component component, File saveFile, boolean overwrite) {
+    private void download(final DownLoadAction downLoadAction, final boolean supportNewSaveDir, File saveFile, boolean overwrite) {
         try {
             downLoadAction.download(saveFile, overwrite);
         } catch (SaveLocationException e1) {
@@ -92,11 +90,10 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     }
 
     private void createOverwriteDialogue(final File saveFile, final DownLoadAction downLoadAction,
-            final SaveLocationException sle, final boolean supportNewSaveDir,
-            final Component component) {
+            final SaveLocationException sle, final boolean supportNewSaveDir) {
 
         final JDialog dialog = new JDialog();
-        dialog.setLocationRelativeTo(component);
+        dialog.setLocationRelativeTo(mainPanel);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
         final MultiLineLabel message = new MultiLineLabel(I18n
@@ -112,7 +109,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             @Override
             public void actionPerformed(ActionEvent event) {
                 dialog.dispose();
-                download(downLoadAction, supportNewSaveDir, component, saveFile, true);
+                download(downLoadAction, supportNewSaveDir, saveFile, true);
             }
         });
 

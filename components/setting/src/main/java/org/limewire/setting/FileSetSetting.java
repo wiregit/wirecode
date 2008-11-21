@@ -143,4 +143,10 @@ public class FileSetSetting extends AbstractSetting {
         
 	    setValue(value);
     }
+	
+	/** Removes all members **/
+	public synchronized void clear() {
+	    value.clear();
+	    setValue(value);
+	}
 }

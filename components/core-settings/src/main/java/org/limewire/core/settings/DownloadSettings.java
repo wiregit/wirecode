@@ -1,6 +1,9 @@
 package org.limewire.core.settings;
 
+import java.io.File;
+
 import org.limewire.setting.BooleanSetting;
+import org.limewire.setting.FileSetSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
@@ -112,5 +115,22 @@ public class DownloadSettings extends LimeProps {
      */
     public static final BooleanSetting AUTO_RENAME_DUPLICATE_FILES =
         FACTORY.createBooleanSetting("AUTO_RENAME_DUPLICATE_FILES", true);
+    
+    /**
+     * Whether or not to remember recently completed downloads.
+     */
+    public static final BooleanSetting REMEMBER_RECENT_DOWNLOADS =
+        FACTORY.createBooleanSetting("REMEMBER_RECENT_DOWNLOADS", true);
+    
+    /**
+     * List of recent downloads.
+     */
+    public static final FileSetSetting RECENT_DOWNLOADS =
+        FACTORY.createFileSetSetting("RECENT_DOWNLOADS", new File[0]);
+    
+    static {
+        RECENT_DOWNLOADS.setPrivate(true);
+    }
+    
         
 }

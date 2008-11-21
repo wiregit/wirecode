@@ -26,6 +26,7 @@ import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -252,6 +253,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             DownloadItem item = new CoreDownloadItem(downloader, queueTimeCalculator);
             downloader.setAttribute(DOWNLOAD_ITEM, item, false);
             downloader.addListener(new TorrentListener(downloader));
+            downloader.addListener(new RecentDownloadListener(downloader));
             list.add(item);
             urnMap.put(item.getUrn(), item);
         }
@@ -310,6 +312,35 @@ public class CoreDownloadListManager implements DownloadListManager {
                     } catch (SaveLocationException e) {
                         //TODO implement good user feedback
                         throw new UnsupportedOperationException("Need to implement good user feedback.");
+                    }
+                }
+            }
+        }
+        
+        
+        /**
+         * Listens for the completion of downloads, adding completed downloads to the DownloadSettings.RECENT_DOWNLOADS list.
+         */
+        private class RecentDownloadListener implements EventListener<DownloadStatusEvent> {
+            private final Downloader downloader;
+            public RecentDownloadListener(Downloader downloader) {
+                this.downloader = Objects.nonNull(downloader, "downloader");
+                if(downloader.getState() == DownloadStatus.COMPLETE) {
+                    if(downloader instanceof CoreDownloader) {
+                        handleEvent(new DownloadStatusEvent((CoreDownloader)downloader, DownloadStatus.COMPLETE));
+                    }
+                }
+            }
+            @Override
+            public void handleEvent(DownloadStatusEvent event) {
+                //TODO don't do anything for torrent downloads?
+                DownloadStatus downloadStatus = event.getType();
+                if(DownloadStatus.COMPLETE == downloadStatus) {
+                    File saveFile = downloader.getSaveFile();
+                    if(saveFile != null) {
+                        if(DownloadSettings.REMEMBER_RECENT_DOWNLOADS.getValue()) {
+                            DownloadSettings.RECENT_DOWNLOADS.add(saveFile);
+                        }
                     }
                 }
             }

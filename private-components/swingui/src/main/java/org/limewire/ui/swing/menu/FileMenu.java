@@ -1,12 +1,11 @@
 package org.limewire.ui.swing.menu;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.JFileChooser;
@@ -16,7 +15,6 @@ import javax.swing.filechooser.FileFilter;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
-import org.limewire.collection.glazedlists.AbstractListEventListener;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -24,6 +22,9 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
+import org.limewire.core.settings.DownloadSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
@@ -134,45 +135,52 @@ public class FileMenu extends JMenu {
 
     private JMenu getRecentDownloadsMenu(DownloadListManager downloadListManager) {
         final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
-        new AbstractListEventListener<DownloadItem>() {
-            @Override
-            protected void itemAdded(final DownloadItem item) {
-                recentDownloads.add(new AbstractAction(item.getFileName() + " - "
-                        + item.getPercentComplete() + "%") {
-                    {
-                        putValue("DOWNLOAD", item);
-                        item.addPropertyChangeListener(new PropertyChangeListener() {
-                            public void propertyChange(java.beans.PropertyChangeEvent evt) {
-                                putValue(Action.NAME, item.getFileName() + " - "
-                                        + item.getPercentComplete() + "%");
-                            }
-                        });
-                    }
+        final JMenuItem emptyItem = new JMenuItem(I18n.tr("(empty)"));
+        emptyItem.setEnabled(false);
+        recentDownloads.add(emptyItem);
 
+        final Action clearMenu = new AbstractAction(I18n.tr("Clear list")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DownloadSettings.RECENT_DOWNLOADS.clear();
+                recentDownloads.removeAll();
+                recentDownloads.add(emptyItem);
+            }
+        };
+        
+        populateRecentDownloads(recentDownloads, clearMenu, emptyItem);
+
+        DownloadSettings.RECENT_DOWNLOADS.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                populateRecentDownloads(recentDownloads, clearMenu, emptyItem);
+            }
+        });
+
+        return recentDownloads;
+    }
+    
+    private void populateRecentDownloads(final JMenu recentDownloads, final Action clearMenu, JMenuItem emptyItem) {
+        recentDownloads.removeAll();
+        //call clean first to make sure we are only populating existing downloads
+        DownloadSettings.RECENT_DOWNLOADS.clean();
+        Set<File> files = DownloadSettings.RECENT_DOWNLOADS.getValue();
+        if (files.size() > 0) {
+            for (final File file : files) {
+                recentDownloads.add(new AbstractAction(file.getName()) {
+                    @Override
                     public void actionPerformed(ActionEvent e) {
-                        navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
-                                SimpleNavSelectable.create(item));
+                        //TODO perform some action on the file TBD
+                        System.out.println("performing some great file acction: "
+                                + file.getName());
                     }
                 });
             }
-
-            @Override
-            protected void itemRemoved(DownloadItem item) {
-                for (Component component : recentDownloads.getMenuComponents()) {
-                    if (component instanceof JMenuItem) {
-                        if (item.equals(((JMenuItem) component).getAction().getValue("DOWNLOAD"))) {
-                            recentDownloads.remove(component);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            @Override
-            protected void itemUpdated(DownloadItem item) {
-            }
-        }.install(downloadListManager.getSwingThreadSafeDownloads());
-        return recentDownloads;
+            recentDownloads.addSeparator();
+            recentDownloads.add(clearMenu);
+        } else {
+            recentDownloads.add(emptyItem);
+        }
     }
 
     private Action buildOpenFileAction(final DownloadListManager downloadListManager,
@@ -200,7 +208,8 @@ public class FileMenu extends JMenu {
                 if (files != null) {
                     for (final File file : files) {
                         try {
-                            DownloadItem item = downloadListManager.addTorrentDownload(file, null, false);
+                            DownloadItem item = downloadListManager.addTorrentDownload(file, null,
+                                    false);
                             navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
                                     .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
@@ -209,8 +218,8 @@ public class FileMenu extends JMenu {
                                         @Override
                                         public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
-                                            DownloadItem item = downloadListManager.addTorrentDownload(
-                                                    file, saveFile, overwrite);
+                                            DownloadItem item = downloadListManager
+                                                    .addTorrentDownload(file, saveFile, overwrite);
                                             navigator.getNavItem(NavCategory.DOWNLOAD,
                                                     MainDownloadPanel.NAME).select(
                                                     SimpleNavSelectable.create(item));
@@ -270,15 +279,13 @@ public class FileMenu extends JMenu {
                             final MainPanel mainPanel, final URI uri) {
                         try {
                             DownloadItem item = downloadListManager.addTorrentDownload(uri, false);
-                            navigator.getNavItem(NavCategory.DOWNLOAD,
-                                    MainDownloadPanel.NAME).select(
-                                    SimpleNavSelectable.create(item));
+                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
+                                    .select(SimpleNavSelectable.create(item));
                         } catch (SaveLocationException sle) {
                             saveLocationExceptionHandler.handleSaveLocationException(
                                     new SaveLocationExceptionHandlerImpl.DownLoadAction() {
                                         @Override
-                                        public void download(File saveFile,
-                                                boolean overwrite)
+                                        public void download(File saveFile, boolean overwrite)
                                                 throws SaveLocationException {
                                             DownloadItem item = downloadListManager
                                                     .addTorrentDownload(uri, overwrite);
