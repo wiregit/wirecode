@@ -19,7 +19,7 @@ public class DefaultDataEvent<S, E, D> extends DefaultEvent<S, E> {
     
     @Override
     public String toString() {
-        return super.toString() + "data: " + data;
+        return super.toString() + ", data: " + data;
     }
 
 }
