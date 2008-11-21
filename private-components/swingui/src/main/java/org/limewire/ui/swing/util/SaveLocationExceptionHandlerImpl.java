@@ -87,6 +87,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         } catch (SaveLocationException e1) {
             handleSaveLocationException(downLoadAction, e1, supportNewSaveDir);
         }
+        //TODO handle possible infinite loop.
     }
 
     private void createOverwriteDialogue(final File saveFile, final DownLoadAction downLoadAction,
