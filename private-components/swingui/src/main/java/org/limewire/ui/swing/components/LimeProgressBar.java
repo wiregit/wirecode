@@ -8,7 +8,6 @@ import javax.swing.JComponent;
 import javax.swing.JProgressBar;
 
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.jdesktop.swingx.painter.Painter;
 
 /**
  * Progress bar that uses painters.
@@ -21,12 +20,12 @@ public class LimeProgressBar extends JProgressBar {
     private static final boolean CACHING_SUPPORTED = true;
     
     private AbstractPainter<JProgressBar> foregroundPainter;
-    private Painter<JComponent> backgroundPainter;
+    private AbstractPainter<JComponent> backgroundPainter;
     
 	private boolean isHidden = false;
 	
 	public LimeProgressBar(AbstractPainter<JProgressBar> foregroundPainter, 
-	        Painter<JComponent> backgroundPainter) {
+	        AbstractPainter<JComponent> backgroundPainter) {
 	    
 	    this.foregroundPainter = foregroundPainter;
 	    this.backgroundPainter = backgroundPainter;
@@ -39,7 +38,7 @@ public class LimeProgressBar extends JProgressBar {
 	    painter.setCacheable(true);
 	}
 	
-	public void setBackgroundPainter(Painter<JComponent> painter) {
+	public void setBackgroundPainter(AbstractPainter<JComponent> painter) {
         this.backgroundPainter = painter;
     }
 
@@ -55,6 +54,7 @@ public class LimeProgressBar extends JProgressBar {
 	public void setValue(int v) {
 	    if (this.getValue() != v) {
             this.foregroundPainter.clearCache();
+            this.backgroundPainter.clearCache();
         }
 	    super.setValue(v);
 	}
@@ -63,6 +63,7 @@ public class LimeProgressBar extends JProgressBar {
 	public void setEnabled(boolean b) {
 	    if (this.isEnabled() != b) {
             this.foregroundPainter.clearCache();
+            this.backgroundPainter.clearCache();
         }
 	    super.setEnabled(b);
 	}

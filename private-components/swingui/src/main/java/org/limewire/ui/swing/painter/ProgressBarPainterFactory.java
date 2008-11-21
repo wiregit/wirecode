@@ -8,7 +8,6 @@ import javax.swing.JProgressBar;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Singleton;
@@ -31,7 +30,7 @@ public class ProgressBarPainterFactory {
         GuiUtils.assignResources(this);
     }
     
-    public Painter<JComponent> createBackgroundPainter() {
+    public AbstractPainter<JComponent> createBackgroundPainter() {
         return new ProgressBarBackgroundPainter(
              new GradientPaint(0,0,this.barBackgroundGradientTop,0,1,this.barBackgroundGradientBottom),
              this.border, this.borderDisabled);

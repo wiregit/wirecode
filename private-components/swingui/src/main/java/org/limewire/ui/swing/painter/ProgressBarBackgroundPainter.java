@@ -22,7 +22,7 @@ public class ProgressBarBackgroundPainter extends AbstractPainter<JComponent> {
         this.borderDisabled = borderDisabled;
         
         this.setAntialiasing(false);
-        this.setCacheable(true);
+        this.setCacheable(false);
     }
     
     @Override
