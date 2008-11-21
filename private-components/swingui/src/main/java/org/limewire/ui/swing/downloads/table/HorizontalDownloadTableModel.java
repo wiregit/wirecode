@@ -24,17 +24,25 @@ public class HorizontalDownloadTableModel implements TableModel {
         downloadItems.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                // TODO: more specific event that reflects the actual changes
-                //listChanged happens on the EDT
-                fireTableModelEvent(new TableModelEvent(HorizontalDownloadTableModel.this,
-                        TableModelEvent.HEADER_ROW));
+                HorizontalDownloadTableModel.this.downloadItems.getReadWriteLock().readLock().lock();
+                try {
+                    while(listChanges.nextBlock()) {
+                        if(listChanges.getType() == ListEvent.INSERT || listChanges.getType() == ListEvent.DELETE){
+                            fireTableModelEvent(new TableModelEvent(HorizontalDownloadTableModel.this,TableModelEvent.HEADER_ROW));
+                        } else if(listChanges.getType() == ListEvent.UPDATE){
+                            fireTableModelEvent(new TableModelEvent(HorizontalDownloadTableModel.this, TableModelEvent.UPDATE));
+                          }
+                    }
+                } finally {
+                    HorizontalDownloadTableModel.this.downloadItems.getReadWriteLock().readLock().unlock();
+                }
             }
         });
      
     }
     
     public DownloadItem getDownloadItem(int index){
-        return downloadItems.get(index);
+        return downloadItems.get(downloadItems.size() - 1 - index);
     }
 
 
@@ -72,7 +80,7 @@ public class HorizontalDownloadTableModel implements TableModel {
         if (rowIndex > 0){
             throw new IllegalArgumentException("Unknown row:" + rowIndex);
         }
-        return downloadItems.get(columnIndex);
+        return getDownloadItem(columnIndex);
     }
 
     @Override

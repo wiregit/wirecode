@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads.table;
 
 import java.awt.Component;
-import java.awt.event.ActionListener;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -23,7 +22,4 @@ public class DownloadTableRenderer implements TableCellRenderer {
         return cellComponent.getComponent();
     }
     
-    public void initialiseRenderer(ActionListener editorListener) {
-        this.cellComponent.setEditorListener(editorListener);
-    }
 }

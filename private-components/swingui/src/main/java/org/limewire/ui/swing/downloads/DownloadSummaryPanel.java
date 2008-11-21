@@ -9,15 +9,12 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
-import java.util.Comparator;
-import java.util.EventObject;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -28,6 +25,7 @@ import javax.swing.event.TableColumnModelListener;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
@@ -43,6 +41,9 @@ import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.downloads.table.DownloadPopupHandler;
+import org.limewire.ui.swing.downloads.table.DownloadTableCell;
+import org.limewire.ui.swing.downloads.table.DownloadTableEditor;
+import org.limewire.ui.swing.downloads.table.DownloadTableRenderer;
 import org.limewire.ui.swing.downloads.table.HorizontalDownloadTableModel;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.nav.NavCategory;
@@ -52,7 +53,6 @@ import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
-import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -64,7 +64,6 @@ import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
-import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -104,9 +103,6 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 //    @Resource private Icon minimizeIconDown;
 
 
-    private DownloadSummaryPanelRendererEditor downloadStatusPanelRenderer;
-    private DownloadSummaryPanelRendererEditor downloadStatusPanelEditor;
-
     
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
@@ -119,48 +115,53 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
         
         setTransferHandler(new DownloadableTransferHandler(downloadListManager));
 	    
-        this.allList = downloadMediator.getDownloadList();//downloadListManager.getSwingThreadSafeDownloads();
+        this.allList = downloadMediator.getDownloadList();
 
         setLayout(new MigLayout());
         setBackgroundPainter(barPainterFactory.createDownloadSummaryBarPainter());
                 
 		header = new JLabel(downloadIcon);
 
-        Comparator<DownloadItem> comparator = new Comparator<DownloadItem>() {
-            @Override
-            public int compare(DownloadItem o1, DownloadItem o2) {
-                return getSortPriority(o2.getState()) - getSortPriority(o1.getState());
-            }
-        };
         
-        navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);
-
-        SortedList<DownloadItem> sortedList = GlazedListsFactory.sortedList(allList, comparator);		
+        navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);	
 		
-		chokeList = GlazedListsFactory.rangeList(sortedList);
+		chokeList = GlazedListsFactory.rangeList(allList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-		final HorizontalDownloadTableModel tableModel = new HorizontalDownloadTableModel(sortedList);
+		final HorizontalDownloadTableModel tableModel = new HorizontalDownloadTableModel(allList);
 		table = new AbstractDownloadTable() {
             @Override
             public DownloadItem getDownloadItem(int row) {
                 // row is actually a column here
                 return tableModel.getDownloadItem(row);
-            }
+            } 
         };
         table.setModel(tableModel);
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
+
 		
-		downloadStatusPanelRenderer = new DownloadSummaryPanelRendererEditor();
-		table.setDefaultRenderer(DownloadItem.class, downloadStatusPanelRenderer);
+		DownloadSummaryPanelRendererEditor rendererPanel = new DownloadSummaryPanelRendererEditor();
+		DownloadTableRenderer renderer = new DownloadTableRenderer(rendererPanel);
+		table.setDefaultRenderer(DownloadItem.class, renderer);
         table.setRowHeight(45);
         
-        downloadStatusPanelEditor = new DownloadSummaryPanelRendererEditor();
-        table.setDefaultEditor(DownloadItem.class, downloadStatusPanelEditor);
+
+        final DownloadSummaryPanelRendererEditor editorPanel = new DownloadSummaryPanelRendererEditor();
+        Painter mouseOverPainter = new AbstractPainter<JComponent>(){
+            @Override
+            protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
+                g.setPaint(Color.WHITE);
+                g.fillRoundRect(0, 0, width, height, 10, 10);
+            }
+        };
+        editorPanel.setBackgroundPainter(mouseOverPainter);
+        final DownloadTableEditor editor = new DownloadTableEditor(editorPanel);
+        editor.initialiseEditor(allList, propertiesFactory);
+        table.setDefaultEditor(DownloadItem.class, editor);
         
         table.setColumnDoubleClickHandler(new DownloadClickHandler());
-        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(sortedList, propertiesFactory), table){
+        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(allList, propertiesFactory), table){
             @Override
             protected int getPopupRow(int x, int y){
                 //columns and rows are reversed in this table
@@ -177,7 +178,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
                 table.getColumnModel().getColumn(columnIndex).setWidth(225);
                 table.getColumnModel().getColumn(columnIndex).setMaxWidth(225);
                 table.getColumnModel().getColumn(columnIndex).setMinWidth(225);
-                table.getColumnModel().getColumn(columnIndex).setCellEditor(downloadStatusPanelEditor);
+                table.getColumnModel().getColumn(columnIndex).setCellEditor(editor);
             }
 
             @Override
@@ -271,17 +272,21 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	    setCount(allList.size());
 	}
 		
-	private class DownloadSummaryPanelRendererEditor extends TableRendererEditor {
+	private class DownloadSummaryPanelRendererEditor extends JXPanel implements DownloadTableCell{
 		
 	    private final JLabel nameLabel;
 		private final LimeProgressBar progressBar;
-	//	private final Border mouseOverBorder;
-	    private JButton pauseButton;
-	    private JButton resumeButton; 
-	    private Painter mouseOverPainter;
-	    private JLabel statusLabel;
+
+        private final JLabel statusLabel;
+	    private final JButton pauseButton;
+	    private final JButton resumeButton; 
+        private final JButton launchButton; 
+        private final JButton shareButton;
+        private final JButton tryAgainButton;
+        private final JButton removeButton;
+	    
+	    private final JButton[] buttons;
 		
-	//    @Resource private Color mouseOverColor;
 	    @Resource private Icon pauseIcon;
 	    @Resource private Icon pauseIconHover;
 	    @Resource private Icon pauseIconDown;
@@ -290,19 +295,8 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	    @Resource private Icon resumeIconDown;
 
 		public DownloadSummaryPanelRendererEditor() {
-            //setLayout(new GridBagLayout());
-            setLayout(new MigLayout("nogrid, ins 0, gap 0! 0!, novisualpadding"));
+            setLayout(new MigLayout("ins 0, gap 0! 0!, novisualpadding"));
 			GuiUtils.assignResources(this);
-			
-			//mouseOverBorder = new LineBorder(mouseOverColor, 3);
-			
-			mouseOverPainter = new AbstractPainter<JComponent>(){
-                @Override
-                protected void doPaint(Graphics2D g, JComponent object, int width, int height) {
-                    g.setPaint(Color.WHITE);
-                    g.fillRoundRect(0, 0, width, height, 10, 10);
-                }
-			};
 			
 			statusLabel = new JLabel();			
 			nameLabel = new JLabel();
@@ -316,15 +310,37 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             progressBar.setMinimumSize(size);
 
             pauseButton = new IconButton(pauseIcon, pauseIconHover, pauseIconDown);
+            pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
+            
             resumeButton = new IconButton(resumeIcon, resumeIconHover, resumeIconDown);
+            resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
+
+            launchButton = new JXHyperlink();
+            launchButton.setText(I18n.tr("Launch"));
+            launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
+            
+            shareButton = new JXHyperlink();
+            shareButton.setText(I18n.tr("Share"));
+           // shareButton.setActionCommand(DownloadActionHandler.SHARE_COMMAND);
+            
+            tryAgainButton = new JXHyperlink();
+            tryAgainButton.setText(I18n.tr("Try again"));
+            tryAgainButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
+
+            removeButton = new JXHyperlink();
+            removeButton.setText(I18n.tr("Remove"));
+            removeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
+            
+            buttons = new JButton[]{pauseButton, resumeButton, launchButton, shareButton, tryAgainButton, removeButton};
                         
 			setOpaque(false);
 			
 			add(nameLabel, "wrap");
-			add(progressBar, "hidemode 3");
-            add(statusLabel, "hidemode 3");
-            add(pauseButton, "hidemode 3");
-            add(resumeButton, "hidemode 3");
+			add(progressBar, "hidemode 3, pushx");
+            add(statusLabel, "hidemode 3, pushx");
+            for(JButton button : buttons){
+                add(button, "hidemode 3");
+            }
 			
 //	        GridBagConstraints gbc = new GridBagConstraints();
 //
@@ -353,38 +369,45 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 		}
 		
 
-		@Override
-		public Component getTableCellRendererComponent(JTable table,
-				Object value, boolean isSelected, boolean hasFocus, int row,
-				int column) {
-            updateCell((DownloadItem) value);
-            setBackgroundPainter(null);
-            return this;
-        }
-
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            updateCell((DownloadItem) value);
-            setBackgroundPainter(mouseOverPainter);
-            return this;
-        }
-
-
-        @Override
-        public boolean isCellEditable(EventObject anEvent) {
-            return true;
-        }
+//		@Override
+//		public Component getTableCellRendererComponent(JTable table,
+//				Object value, boolean isSelected, boolean hasFocus, int row,
+//				int column) {
+//		    update((DownloadItem) value);
+//            setBackgroundPainter(null);
+//            return this;
+//        }
+//
+//
+//        @Override
+//        public Component getTableCellEditorComponent(JTable table, Object value,
+//                boolean isSelected, int row, int column) {
+//            update((DownloadItem) value);
+//            setBackgroundPainter(mouseOverPainter);
+//            return this;
+//        }
+//
+//
+//        @Override
+//        public boolean isCellEditable(EventObject anEvent) {
+//            return true;
+//        }
         
-        private void updateCell(DownloadItem item){
+        @Override
+        public void update(DownloadItem item){
             nameLabel.setText(item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
             if (progressBar.isVisible()){
             progressBar.setValue(item.getPercentComplete());
             }
+            
             pauseButton.setVisible(item.getState().isPausable());
             resumeButton.setVisible(item.getState().isResumable());
+            tryAgainButton.setVisible(item.getState() == DownloadState.STALLED);
+            launchButton.setVisible(item.getState() == DownloadState.DONE);
+            shareButton.setVisible(item.getState() == DownloadState.DONE);
+            removeButton.setVisible(item.getState() == DownloadState.ERROR);
+            
             statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);
             if (statusLabel.isVisible()){
                 statusLabel.setText(getMessage(item));
@@ -424,34 +447,48 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             }
             
         }
+
+
+        @Override
+        public Component getComponent() {
+            return this;
+        }
+
+
+        @Override
+        public void setEditorListener(ActionListener editorListener) {
+            for (JButton button : buttons){
+                button.addActionListener(editorListener);
+            }
+        }
      
 	}
 	
-	private int getSortPriority(DownloadState state){
-	    switch(state){
-        case DOWNLOADING:
-            return 8;
-        case DONE:
-            return 7;
-        case PAUSED:
-            return 6;
-        case CONNECTING:
-            return 5;
-        case FINISHING:
-            return 4;
-        case LOCAL_QUEUED:
-        case REMOTE_QUEUED:
-            return 3;
-        case STALLED:
-            return 2;
-	    case ERROR:
-            return 1;
-        case CANCELLED:
-            return 0;
-	    
-	    }
-	    return 0;
-	}
+//	private int getSortPriority(DownloadState state){
+//	    switch(state){
+//        case DOWNLOADING:
+//            return 8;
+//        case DONE:
+//            return 7;
+//        case PAUSED:
+//            return 6;
+//        case CONNECTING:
+//            return 5;
+//        case FINISHING:
+//            return 4;
+//        case LOCAL_QUEUED:
+//        case REMOTE_QUEUED:
+//            return 3;
+//        case STALLED:
+//            return 2;
+//	    case ERROR:
+//            return 1;
+//        case CANCELLED:
+//            return 0;
+//	    
+//	    }
+//	    return 0;
+//	}
 	
     private void setCount(int count){
         moreButton.setText(I18n.tr("See All {0}", Integer.toString(count)));

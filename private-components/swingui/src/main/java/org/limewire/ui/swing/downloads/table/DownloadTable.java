@@ -42,7 +42,6 @@ public class DownloadTable extends AbstractDownloadTable {
         getColumnModel().getColumn(0).setCellEditor(editor);
         
         DownloadTableRenderer renderer = new DownloadTableRenderer(rendererMutator);
-        renderer.initialiseRenderer(editor.getEditorListener());
         getColumnModel().getColumn(0).setCellRenderer(renderer);
         
         setRowHeight(this.rowHeight);

@@ -92,6 +92,8 @@ public class MouseableTable extends StripedJXTable {
                 // it's not already being edited ...
                 if (isCellEditable(row, col) && (row != getEditingRow() || col != getEditingColumn())) {
                     editCellAt(row, col);
+                } else {
+                    maybeCancelEditing();
                 }
             }
         };
@@ -129,28 +131,11 @@ public class MouseableTable extends StripedJXTable {
 				}
 			}
 			
-//            //This isn't necessary if we aren't doing mouseover highlighting
-//			@Override
-//			public void mouseExited(MouseEvent e) {
-//                // clears mouseover color -
-//                // necessary for coordinating between multiple tables
-//
-//				TableCellEditor editor = getCellEditor();
-//				Component component = e.getComponent();
-//
-//				// if component isn't editor we shouldn't be editing
-//				if (editor != null && component != editor) {
-//					// check subcomponent too - this prevents
-//                    // color from flashing when mousing over the buttons
-//					Component componentAtPoint =
-//                        component.getComponentAt(e.getPoint());
-//
-//					if (componentAtPoint != editor) {
-//                        // Mark commented the following line.
-//						//editor.cancelCellEditing();
-//					}
-//				}
-//			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+			    maybeCancelEditing();
+			}
 			
 			@Override
             public void mouseReleased(MouseEvent e) {
@@ -179,7 +164,7 @@ public class MouseableTable extends StripedJXTable {
 
 		});
 	}
-	//Don't set the cell value when editing is cancelled
+    //Don't set the cell value when editing is cancelled
 	@Override
     public void editingStopped(ChangeEvent e) {
         TableCellEditor editor = getCellEditor();
@@ -352,4 +337,14 @@ public class MouseableTable extends StripedJXTable {
             super.paintEmptyRows(g);
         }
     }
+
+
+    //clears mouseover color
+    private void maybeCancelEditing() {
+        if (getCellEditor() != null && 
+                (getMousePosition() == null || rowAtPoint(getMousePosition()) == -1 || columnAtPoint(getMousePosition()) == -1)){
+            getCellEditor().cancelCellEditing();
+        } 
+    }
+
 }

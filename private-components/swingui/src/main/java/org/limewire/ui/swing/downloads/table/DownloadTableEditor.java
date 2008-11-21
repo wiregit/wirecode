@@ -140,7 +140,8 @@ public class DownloadTableEditor implements TableCellEditor {
 
         public void actionPerformed(ActionEvent e) {
             actionHandler.performAction(e.getActionCommand(), editItem);
-            cancelCellEditing();
+            //TODO: confirm that this can be removed.
+//            cancelCellEditing();
         }
 
     }
