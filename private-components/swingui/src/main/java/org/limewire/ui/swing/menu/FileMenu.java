@@ -178,7 +178,9 @@ public class FileMenu extends JMenu {
         recentDownloads.removeAll();
 
         Set<File> files = null;
-        files = new HashSet<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
+        synchronized (DownloadSettings.RECENT_DOWNLOADS) {
+            files = new HashSet<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
+        }
         if (files.size() > 0) {
             for (final File file : files) {
                 addRecentDownloadAction(recentDownloads, audioPlayer, file);
