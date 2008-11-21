@@ -70,7 +70,7 @@ public class ConnectableImpl implements Connectable {
     
     @Override
     public String getAddressDescription() {
-        return getInetSocketAddress().toString();
+        return getAddress();
     }
     
     @Override

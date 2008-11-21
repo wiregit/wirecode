@@ -301,7 +301,7 @@ class PushEndpointCacheImpl implements PushEndpointCache {
         @Override
         public String getAddressDescription() {
             IpPort addr = getValidExternalAddress();
-            return addr == null ? null : addr.getInetSocketAddress().toString();
+            return addr == null ? null : addr.getAddress();
         }
 
         public InetAddress getInetAddress() {

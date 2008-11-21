@@ -307,16 +307,25 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public boolean isAnonymous() {
-            return getFriendPresence().getFriend().isAnonymous();
+            return true;
         }
     }
     
     
     private final class AltLocRemoteHost implements RemoteHost {
-        private final int index;
+        private final Map<URI, Feature> features;
+        private final IpPort ipPort;
+        private final Address address;        
 
         private AltLocRemoteHost(int index) {
-            this.index = index;
+            ipPort = locs.get(index - 1);
+            if(ipPort instanceof Connectable) {
+                address = ((Connectable)ipPort);
+            } else {
+                address = new ConnectableImpl(ipPort, false);
+            }
+            features = new HashMap<URI, Feature>(1);
+            features.put(AddressFeature.ID, new AddressFeature(address));
         }
 
         @Override
@@ -336,18 +345,8 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public FriendPresence getFriendPresence() {
-            final Map<URI, Feature> features = new HashMap<URI, Feature>();
-            IpPort ipPort = locs.get(index - 1);
-            Address address;
-            if(ipPort instanceof Connectable) {
-                address = ((Connectable)ipPort);
-            } else {
-                address = new ConnectableImpl(ipPort, false);
-            }
-            features.put(AddressFeature.ID, new AddressFeature(address));
             // create dummy friend presence
             return new FriendPresence() {
-
                 @Override
                 public Friend getFriend() {
                     return new Friend() {
@@ -358,8 +357,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                         @Override
                         public String getId() {
-                            return locs.get(index - 1).getInetSocketAddress()
-                                    .toString();
+                            return ipPort.getInetSocketAddress().toString();
                         }
 
                         @Override
@@ -369,7 +367,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
                         @Override
                         public String getRenderName() {
-                            return getId();
+                            return address.getAddressDescription();
                         }
 
                         @Override
@@ -432,12 +430,12 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public String getRenderName() {
-            return getFriendPresence().getFriend().getRenderName();
+            return address.getAddressDescription();
         }
 
         @Override
         public boolean isAnonymous() {
-            return getFriendPresence().getFriend().isAnonymous();
+            return true;
         }
     }
 

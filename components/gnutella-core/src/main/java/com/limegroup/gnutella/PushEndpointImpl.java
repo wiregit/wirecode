@@ -164,7 +164,7 @@ public class PushEndpointImpl extends AbstractPushEndpoint {
     @Override
     public String getAddressDescription() {
         IpPort addr = getIpPort();
-        return addr != null ? addr.getInetSocketAddress().toString() : null;
+        return addr != null ? addr.getAddress() : null;
     }
     
     public boolean isLocal() {
