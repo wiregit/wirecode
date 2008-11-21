@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
@@ -18,12 +19,11 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.lists.CategoryFilter;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -327,7 +327,8 @@ class ShareListManagerImpl implements ShareListManager {
         final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
         EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(category));
         final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
-        BackgroundExecutorService.execute(new Runnable(){
+        //TODO: change this to an executor, quick change to fix build
+        Thread t = new Thread(new Runnable(){
             @Override
             public void run() {
                 for(LocalFileItem item : items) {
@@ -335,13 +336,15 @@ class ShareListManagerImpl implements ShareListManager {
                 }
             }
         });
+        t.start();
     }
     
     private void removeAll(String friend, Category category, EventList<LocalFileItem> list) {
         final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
         EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(list, new CategoryFilter(category));
         final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
-        BackgroundExecutorService.execute(new Runnable(){
+        //TODO: change this to an executor, quick change to fix build
+        Thread t = new Thread(new Runnable(){
             @Override
             public void run() {
                 for(LocalFileItem item : items) {
@@ -350,6 +353,7 @@ class ShareListManagerImpl implements ShareListManager {
                 }
             }
         });
+        t.start();
     }
     
     private void fireAudioCollectionChange(PropertyChangeSupport propertyChange, boolean newValue) {
@@ -362,5 +366,26 @@ class ShareListManagerImpl implements ShareListManager {
     
     private void fireImageCollectionChange(PropertyChangeSupport propertyChange, boolean newValue) {
         propertyChange.firePropertyChange("imageCollection", !newValue, newValue);
+    }
+    
+    public class CategoryFilter implements Matcher<FileItem>{
+        private final Category category;
+        
+        public CategoryFilter(Category category) {
+            this.category = category;
+        }
+
+        @Override
+        public boolean matches(FileItem item) {
+            if (item == null) {
+                return false;
+            }
+            
+            if (category == null) {
+                return true;
+            }
+
+            return item.getCategory().equals(category);
+        }
     }
 }
