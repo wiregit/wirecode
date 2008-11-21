@@ -145,14 +145,11 @@ public class FileMenu extends JMenu {
         final JMenu recentDownloads = new JMenu(I18n.tr("Recent Downloads"));
         final JMenuItem emptyItem = new JMenuItem(I18n.tr("(empty)"));
         emptyItem.setEnabled(false);
-        recentDownloads.add(emptyItem);
 
         final Action clearMenu = new AbstractAction(I18n.tr("Clear list")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DownloadSettings.RECENT_DOWNLOADS.clear();
-                recentDownloads.removeAll();
-                recentDownloads.add(emptyItem);
             }
         };
 
@@ -176,9 +173,9 @@ public class FileMenu extends JMenu {
 
     private void populateRecentDownloads(final JMenu recentDownloads, final Action clearMenu,
             JMenuItem emptyItem, final LibraryManager libraryManager, final AudioPlayer audioPlayer) {
-        // TODO do not rebuild whole menu, just add and remove needed components
+        //TODO do not rebuild whole menu, just add and remove needed components
+        //TODO how long can this list get?
         recentDownloads.removeAll();
-        //DownloadSettings.RECENT_DOWNLOADS.clean();
 
         Set<File> files = null;
         files = new HashSet<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
