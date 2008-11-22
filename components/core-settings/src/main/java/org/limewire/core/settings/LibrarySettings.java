@@ -14,7 +14,7 @@ public class LibrarySettings extends LimeProps {
      * A saved list of names of all the friendLists that have been created.
      */
     public static final StringArraySetting SHARED_FRIEND_LIST_NAMES = 
-        FACTORY.createStringArraySetting("SHARED_FRIEND_LIST_NAMES", new String[0]);
+        (StringArraySetting)FACTORY.createStringArraySetting("SHARED_FRIEND_LIST_NAMES", new String[0]).setPrivate(true);
     
     /**
      * Removes a name of a saved friendlist.
@@ -50,7 +50,7 @@ public class LibrarySettings extends LimeProps {
      * be shared with that friend. 
      */
     public static StringArraySetting SHARE_NEW_IMAGES_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_IMAGES_ALWAYS", new String[0]);
+        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_IMAGES_ALWAYS", new String[0]).setPrivate(true);
     /**
      * Returns true if this friend is sharing all images and new images, false
      * otherwise.
@@ -66,7 +66,7 @@ public class LibrarySettings extends LimeProps {
      * be shared with that friend. 
      */
     public static StringArraySetting SHARE_NEW_AUDIO_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_AUDIO_ALWAYS", new String[0]);
+        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_AUDIO_ALWAYS", new String[0]).setPrivate(true);
     /**
      * Returns true if this friend is sharing all audio files and new audio files,
      * false otherwise.
@@ -82,7 +82,7 @@ public class LibrarySettings extends LimeProps {
      * be shared with that friend. 
      */
     public static StringArraySetting SHARE_NEW_VIDEO_ALWAYS =
-        FACTORY.createStringArraySetting("SHARE_NEW_VIDEO_ALWAYS", new String[0]);
+        (StringArraySetting)FACTORY.createStringArraySetting("SHARE_NEW_VIDEO_ALWAYS", new String[0]).setPrivate(true);
     /**
      * Returns true if this friend is sharing all videos and new video files,
      * false otherwise.

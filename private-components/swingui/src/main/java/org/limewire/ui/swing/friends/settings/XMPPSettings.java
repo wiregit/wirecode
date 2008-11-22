@@ -25,5 +25,5 @@ public class XMPPSettings extends LimeProps {
         "");
 
     public static final StringSetting XMPP_AUTO_LOGIN =
-        FACTORY.createStringSetting("XMPP_AUTO_LOGIN", "");
+        (StringSetting)FACTORY.createStringSetting("XMPP_AUTO_LOGIN", "").setPrivate(true);
 }

@@ -128,9 +128,5 @@ public class DownloadSettings extends LimeProps {
     public static final FileSetSetting RECENT_DOWNLOADS =
         FACTORY.createFileSetSetting("RECENT_DOWNLOADS", new File[0]);
     
-    static {
-        RECENT_DOWNLOADS.setPrivate(true);
-    }
-    
         
 }
