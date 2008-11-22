@@ -54,6 +54,11 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     }
     
     @Override
+    public String getLabel() {
+        return serviceName;
+    }
+    
+    @Override
     public String getMyID() {
         return getUsername();
     }

@@ -20,6 +20,9 @@ public interface XMPPConnection {
     
     /** Returns true if this connection is logged in. */
     public boolean isLoggedIn();
+    
+    /** Returns true if this connection is logging in. */
+    public boolean isLoggingIn();
 
     /**
      * Sets a new <code>&lt;presence&gt;</code> mode (i.e., status)
@@ -55,5 +58,6 @@ public interface XMPPConnection {
      * date with changes.
      */
     public Collection<User> getUsers();
+
     
 }

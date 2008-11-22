@@ -74,7 +74,7 @@ public class XMPPAddressResolver implements AddressResolver {
      */
     public FriendPresence getPresence(XMPPAddress address) {
         String id = address.getId();
-        XMPPConnection connection = xmppService.getLoggedInConnection();
+        XMPPConnection connection = xmppService.getActiveConnection();
         if(connection == null)
             return null;
         User user = connection.getUser(id);

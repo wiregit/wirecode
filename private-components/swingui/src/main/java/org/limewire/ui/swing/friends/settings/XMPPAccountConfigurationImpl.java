@@ -3,9 +3,11 @@ package org.limewire.ui.swing.friends.settings;
 import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+
 import javax.swing.ImageIcon;
 
 import org.limewire.listener.EventListener;
+import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 
 /**
@@ -26,8 +28,8 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final String label;
     private final String registrationURL;
     private final ImageIcon icon;
-    private String username;
-    private String password;
+    private volatile String username;
+    private volatile String password;
 
     public XMPPAccountConfigurationImpl(String configString, String resource)
     throws IllegalArgumentException {
@@ -140,5 +142,10 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     @Override
     public EventListener<RosterEvent> getRosterListener() {
         return null;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toStringBlacklist(this, password);
     }
 }

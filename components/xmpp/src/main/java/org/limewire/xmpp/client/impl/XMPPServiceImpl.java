@@ -9,7 +9,6 @@ import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -45,7 +44,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
     private final List<XMPPConnectionImpl> connections;
     
-    private EventListener<XMPPException> errorListener;
     private AddressEvent lastAddressEvent;
     private boolean multipleConnectionsAllowed;
 
@@ -77,10 +75,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         registry.addListener(this);
     }
 
-    public void setXmppErrorListener(EventListener<XMPPException> errorListener) {
-        this.errorListener = errorListener;
-    }
-
     @Override
     public void initialize() {
     }
@@ -106,7 +100,12 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     @Override
     public void login(XMPPConnectionConfiguration configuration) {
         if(!multipleConnectionsAllowed) {
-            logout();
+            XMPPConnection activeConnection = getActiveConnection();
+            if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
+                return; // We're already logging in with this connection.
+            } else {
+                logout();
+            }
         }
         
         XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
@@ -116,14 +115,16 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         connection.initialize();
         // Give the new connection the latest information about our IP address
         // and firewall status
-        if(lastAddressEvent != null)
+        if(lastAddressEvent != null) {
             connection.handleEvent(lastAddressEvent);
+        }
         try {
-            connection.login();
             connections.add(connection);
+            connection.login();
         } catch(XMPPException e) {
+            connections.remove(connection);
             LOG.error(e.getMessage(), e);
-            EventListenerList.dispatch(errorListener, e);
+            connectionBroadcaster.get().broadcast(new XMPPConnectionEvent(connection, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
         }
     }
     
@@ -131,6 +132,16 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public boolean isLoggedIn() {
         for(XMPPConnection connection : connections) {
             if(connection.isLoggedIn()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean isLoggingIn() {
+        for(XMPPConnection connection : connections) {
+            if(connection.isLoggingIn()) {
                 return true;
             }
         }
@@ -148,7 +159,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     @Override
-    public XMPPConnection getLoggedInConnection() {
+    public XMPPConnection getActiveConnection() {
         if(connections.isEmpty()) {
             return null;
         } else {

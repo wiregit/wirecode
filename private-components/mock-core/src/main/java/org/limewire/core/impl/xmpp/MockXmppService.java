@@ -1,9 +1,7 @@
 package org.limewire.core.impl.xmpp;
 
-import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
 class MockXmppService implements XMPPService {
@@ -20,13 +18,14 @@ class MockXmppService implements XMPPService {
     public boolean isLoggedIn() {
         return false;
     }
-
+    
     @Override
-    public XMPPConnection getLoggedInConnection() {
-        return null;
+    public boolean isLoggingIn() {
+        return false;
     }
 
     @Override
-    public void setXmppErrorListener(EventListener<XMPPException> errorListener) {
+    public XMPPConnection getActiveConnection() {
+        return null;
     }
 }

@@ -13,6 +13,7 @@ import java.awt.event.ItemListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -20,30 +21,19 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.lifecycle.Service;
-import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.ActionLabel;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
 import org.limewire.ui.swing.friends.XMPPEventHandler;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,12 +42,12 @@ import com.google.inject.Singleton;
  * @author Mario Aquino, Object Computing, Inc.
  */
 @Singleton
-public class LoginPanel extends JXPanel {
+class LoginPanel extends JXPanel {
 
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
-    private static final String AUTHENTICATION_ERROR = tr("Please try again."); // See spec
+    private static final String AUTHENTICATION_ERROR = tr("Invalid username/password."); // See spec
     private static final String NETWORK_ERROR = tr("Network error. Please try again later.");
 
     private JComboBox serviceComboBox;
@@ -78,37 +68,12 @@ public class LoginPanel extends JXPanel {
         this.accountManager = accountManager;
         GuiUtils.assignResources(this);
         initComponents();
-        EventAnnotationProcessor.subscribe(this);
     }
     
-    @Inject void register(ServiceRegistry registry) {
-        registry.register(new Service() {
-            @Override
-            public String getServiceName() {
-                return tr("Friend Auto-Login");
-            }
-            @Override
-            public void initialize() {
-            }
-            
-            @Override
-            public void start() {
-                // If there's an auto-login account, select it and log in
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-                        serviceComboBox.setSelectedItem(auto.getLabel());
-                        login(auto);
-                    }
-                });
-            }
-            
-            @Override
-            public void stop() {
-            }
-        });
-    }
+    void autoLogin(XMPPAccountConfiguration auto) {
+        serviceComboBox.setSelectedItem(auto.getLabel());
+        login(auto);
+    }    
     
     @Override
     public void setVisible(boolean flag) {
@@ -168,23 +133,12 @@ public class LoginPanel extends JXPanel {
         
         authFailedLabel.setVisible(false);
         authFailedLabel.setForeground(Color.RED);
-        authFailedLabel.setOpaque(false);
         FontUtils.changeStyle(authFailedLabel, Font.ITALIC);
         
         setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
 
         serviceComboBox.setSelectedItem("Gmail");
         setSignInComponentsEnabled(true);
-    }
-
-    @Inject void register(XMPPService xmppService) {
-        xmppService.setXmppErrorListener(new EventListener<XMPPException>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(XMPPException event) {
-                loginFailed(event);
-            }
-        });
     }
 
     private void populateInputs() {
@@ -202,21 +156,24 @@ public class LoginPanel extends JXPanel {
         authFailedLabel.setVisible(false);
     }
 
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
+    void disconnected(Exception reason) {
         setSignInComponentsEnabled(true);
         populateInputs();
+        if(reason != null) {
+            loginFailed(reason);
+        } else {
+            authFailedLabel.setVisible(false);
+        }
     }
 
-    private void loginFailed(XMPPException e) {
+    private void loginFailed(Exception reason) {
         authFailedLabel.setVisible(true);
-        if (e.getMessage().contains("authentication failed")) {
+        if (reason.getMessage().contains("authentication failed")) {
             authFailedLabel.setText(AUTHENTICATION_ERROR);
             passwordField.setText("");
         } else {
             authFailedLabel.setText(NETWORK_ERROR);
         }
-        setSignInComponentsEnabled(true);
     }
 
     private void setSignInComponentsEnabled(boolean isEnabled) {
@@ -227,19 +184,18 @@ public class LoginPanel extends JXPanel {
         autoLoginCheckBox.setEnabled(isEnabled);
     }
 
-    @EventSubscriber
-    public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
+    void connected(XMPPConnectionConfiguration config) {
         setSignInComponentsEnabled(true);
     }
 
     private void login(final XMPPAccountConfiguration config) {
         setSignInComponentsEnabled(false);
         authFailedLabel.setVisible(false);
-        ThreadExecutor.startThread(new Runnable() {
+        BackgroundExecutorService.execute(new Runnable() {
             public void run() {
                 xmppEventHandler.login(config);
             }
-        }, "xmpp-login");            
+        });            
     }
 
     class SignInAction extends AbstractAction {
@@ -261,25 +217,34 @@ public class LoginPanel extends JXPanel {
                 // Set this as the auto-login account
                 accountManager.setAutoLoginConfig(config);
             } else {
+                passwordField.setText("");
+                
                 // If this was previously the auto-login account, delete it
                 XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-                if(auto != null && auto.getLabel().equals(label))
+                if(auto != null && auto.getLabel().equals(label)) {
                     accountManager.setAutoLoginConfig(null);
+                }
             }
             login(config);
         }
     }
     
-    class Renderer extends JLabel implements ListCellRenderer {
+    private class Renderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
-            String label = value.toString();
-            setText(label);
-            XMPPAccountConfiguration config = accountManager.getConfig(label);
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            
+            XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
             if(config != null) {
                 setIcon(config.getIcon());
+            } else {
+                setIcon(null);
             }
             return this;
         }
+    }
+
+    public void connecting(XMPPConnectionConfiguration config) {
+        setSignInComponentsEnabled(false);
     }
 }

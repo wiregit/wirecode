@@ -117,7 +117,7 @@ public class FriendsPanel extends JXPanel implements Resizable, ApplicationLifec
     private void displayFriendsPanel(boolean shouldDisplay) {
         if(shouldDisplay) {
             // If we're not logged in -- signin is handled elsewhere.
-            if(!xmppService.isLoggedIn()) {
+            if(!xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
                 return;
             } else {
                 resetBounds();

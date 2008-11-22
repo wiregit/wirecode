@@ -10,11 +10,6 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 public interface XMPPAccountConfiguration extends XMPPConnectionConfiguration {
     
     /**
-     * Returns a user-friendly name for the account.
-     */
-    public String getLabel();
-    
-    /**
      * Returns a URL where users can register new accounts with the service
      * provider.
      */

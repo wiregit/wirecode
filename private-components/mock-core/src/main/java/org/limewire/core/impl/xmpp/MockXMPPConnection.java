@@ -25,6 +25,11 @@ public class MockXMPPConnection implements XMPPConnection {
     public boolean isLoggedIn() {
         return true;
     }
+    
+    @Override
+    public boolean isLoggingIn() {
+        return false;
+    }
 
     @Override
     public void login() throws XMPPException {

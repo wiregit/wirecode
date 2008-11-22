@@ -4,13 +4,13 @@ import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -231,14 +231,17 @@ public class MiscOptionPanel extends OptionPanel {
         }
     }
     
-    class Renderer extends JLabel implements ListCellRenderer {
+    private class Renderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
-            String label = value.toString();
-            setText(label);
-            XMPPAccountConfiguration config = accountManager.getConfig(label);
-            if(config != null)
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            
+            XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
+            if(config != null) {
                 setIcon(config.getIcon());
+            } else {
+                setIcon(null);
+            }
             return this;
         }
     }

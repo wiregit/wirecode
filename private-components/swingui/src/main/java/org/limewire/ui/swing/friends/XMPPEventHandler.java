@@ -58,7 +58,7 @@ public class XMPPEventHandler {
     }
     
     public XMPPConnection getLoggedInConnection() {
-        return xmppService.getLoggedInConnection();
+        return xmppService.getActiveConnection();
     }
     
     @EventSubscriber

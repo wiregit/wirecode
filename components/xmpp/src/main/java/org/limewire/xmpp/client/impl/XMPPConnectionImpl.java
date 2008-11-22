@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
@@ -73,6 +74,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile AddressEvent lastEvent;
     private final XMPPAuthenticator authenticator;
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+    private final AtomicBoolean loggingIn = new AtomicBoolean(false);
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -112,6 +114,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     }
 
     public void login() throws XMPPException {
+        connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTING));
+        loggingIn.set(true);
         synchronized (this) {
             try {
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
@@ -128,8 +132,15 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
                 throw new XMPPException(e);
+            } finally {
+                loggingIn.set(false);
             }
         }
+    }
+    
+    @Override
+    public boolean isLoggingIn() {
+        return loggingIn.get();
     }
 
     public void logout() {
@@ -471,7 +482,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         @Override
         public void connectionClosedOnError(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
         }
 
         @Override
@@ -481,7 +492,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         @Override
         public void reconnectionFailed(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING_FAILED));
+            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING_FAILED, e));
         }
 
         @Override

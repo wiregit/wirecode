@@ -23,7 +23,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.EmptyProxySettings;
 import org.limewire.net.EmptySocketBindingSettings;
@@ -82,12 +81,6 @@ public class XMPPServiceTest extends BaseTestCase {
         registry.start();
         service = injector.getInstance(XMPPServiceImpl.class);
         service.setMultipleConnectionsAllowed(true);
-        service.setXmppErrorListener(new EventListener<XMPPException>() {
-            @Override
-            public void handleEvent(XMPPException event) {
-                event.printStackTrace();
-            }
-        });
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
         alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,

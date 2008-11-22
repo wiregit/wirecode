@@ -67,6 +67,12 @@ public class HyperLinkButton extends JButton implements MouseListener {
     }
     
     @Override
+    public void setAction(Action a) {
+        super.setAction(a);
+        updateLabel(text);
+    }
+    
+    @Override
     public void mouseEntered(MouseEvent e) {
         if(isEnabled()) {
             super.setForeground(mouseOverColor);

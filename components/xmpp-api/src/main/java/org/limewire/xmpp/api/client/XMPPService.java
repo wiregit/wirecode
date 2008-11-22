@@ -1,6 +1,5 @@
 package org.limewire.xmpp.api.client;
 
-import org.limewire.listener.EventListener;
 
 /**
  * Describes an interface for managing XMPP connections. Only one connection
@@ -22,16 +21,13 @@ public interface XMPPService {
     /**
      * Returns the logged in connection, or null if there isn't one.
      */
-    public XMPPConnection getLoggedInConnection();
-
-    /**
-     * Sets the error listener that will be informed if an error occurs
-     * while logging in a connection.
-     */
-    public void setXmppErrorListener(EventListener<XMPPException> errorListener);
+    public XMPPConnection getActiveConnection();
     
     /**
      * Returns true if this is logged in to atleast one host.
      */
     public boolean isLoggedIn();
+    
+    /** Returns true if any connections are currently logging in. */
+    public boolean isLoggingIn();
 }

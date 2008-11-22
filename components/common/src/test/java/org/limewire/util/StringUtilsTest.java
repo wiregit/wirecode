@@ -309,6 +309,11 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("SomeFields {a=a, n=null}", result);
     }
     
+    public void testToStringBlacklist() {
+        BlacklistFields someFields = new BlacklistFields();
+        String result = someFields.toString();
+        assertEquals("BlacklistFields {i=2147483647, thiz=circular structure}", result);
+    }
     
     public void testToStringWithArrayFields() {
         ArrayFields fields = new ArrayFields();
@@ -350,6 +355,18 @@ public class StringUtilsTest extends BaseTestCase {
         @Override
         public String toString() {
             return StringUtils.toString(this);
+        }
+    }
+    
+    private static class BlacklistFields {
+        String a = "a";
+        int i = Integer.MAX_VALUE;
+        Object n = null;
+        BlacklistFields thiz = this;
+        
+        @Override
+        public String toString() {
+            return StringUtils.toStringBlacklist(this, a, n);
         }
     }
 }
