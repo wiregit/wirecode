@@ -8,6 +8,7 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.EnumMap;
@@ -249,6 +250,13 @@ public class IOUtils {
      */
     public static void flush(Flushable flushable) {
         FileUtils.flush(flushable);
+    }
+    
+    /** Closes the socket if it is not null. */
+    public static void close(DatagramSocket s) {
+        if(s != null) {
+            s.close();
+        }
     }
     
     /**

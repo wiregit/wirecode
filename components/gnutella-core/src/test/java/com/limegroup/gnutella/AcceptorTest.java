@@ -175,9 +175,7 @@ public class AcceptorTest extends LimeTestCase {
             acceptor.setListeningPort(portToTry);
             assertTrue("had no trouble binding UDP port!", false);
         } catch (IOException expected) {
-            if(udp != null) {
-                udp.close();
-            }
+            IOUtils.close(udp);
         }
     }
         
@@ -207,11 +205,7 @@ public class AcceptorTest extends LimeTestCase {
                 fail("had no trouble binding TCP port!");
         }
         catch (IOException expected) {
-            try {
-                if(tcp != null) {
-                    tcp.close();
-                }
-            } catch (IOException ignored) {}
+            IOUtils.close(tcp);
         }
     }
 
