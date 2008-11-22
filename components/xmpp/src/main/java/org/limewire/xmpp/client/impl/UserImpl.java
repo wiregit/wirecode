@@ -2,15 +2,18 @@ package org.limewire.xmpp.client.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.jivesoftware.smack.RosterEntry;
+import net.jcip.annotations.GuardedBy;
+
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.ChatStateListener;
 import org.jivesoftware.smackx.ChatStateManager;
@@ -24,21 +27,21 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.api.client.ChatState;
+import org.limewire.xmpp.api.client.IncomingChatListener;
+import org.limewire.xmpp.api.client.MessageReader;
+import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.MessageWriter;
-import org.limewire.xmpp.api.client.MessageReader;
-import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.api.client.IncomingChatListener;
-import net.jcip.annotations.GuardedBy;
 
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
 
     private final String id;
+    private final String idNoService;
     private AtomicReference<RosterEntry> rosterEntry;
     private final org.jivesoftware.smack.XMPPConnection connection;
     private final EventListenerList<PresenceEvent> presenceListeners;
@@ -69,6 +72,7 @@ public class UserImpl implements User {
     UserImpl(String id, RosterEntry rosterEntry, Network network,
              org.jivesoftware.smack.XMPPConnection connection) {
         this.id = id;
+        this.idNoService = stripService(id, network.getNetworkName());
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
         this.presences = new TreeMap<String, Presence>(String.CASE_INSENSITIVE_ORDER);
@@ -77,6 +81,15 @@ public class UserImpl implements User {
         this.connection = connection;
         this.presenceLock = new Object();
         this.chatListenerLock = new Object();
+    }
+    
+    private static String stripService(String id, String service) {
+        int idx = id.toLowerCase(Locale.US).lastIndexOf("@" + service);
+        if(idx == -1) {
+            return id;
+        } else {
+            return id.substring(0, idx);    
+        }
     }
 
     @Override
@@ -98,7 +111,7 @@ public class UserImpl implements User {
     public String getRenderName() {
         String visualName = rosterEntry.get().getName();
         if(visualName == null) {
-            return id;
+            return idNoService;
         } else {
             return visualName;
         }
