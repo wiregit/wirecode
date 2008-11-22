@@ -44,7 +44,7 @@ class LoggedInPanel extends JXPanel {
     LoggedInPanel(LimeComboBoxFactory comboFactory,
                   XMPPService xmppService,
                   XMPPAccountConfigurationManager accountManager) {
-        setLayout(new MigLayout("insets 0, gap 0, hidemode 3"));
+        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
         
         this.xmppService = xmppService;
         this.accountManager = accountManager;
