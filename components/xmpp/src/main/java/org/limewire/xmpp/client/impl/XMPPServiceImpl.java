@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;

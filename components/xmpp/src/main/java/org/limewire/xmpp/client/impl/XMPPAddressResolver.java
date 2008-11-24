@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.Map.Entry;
 
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;

@@ -12,7 +12,6 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
@@ -22,7 +21,6 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 

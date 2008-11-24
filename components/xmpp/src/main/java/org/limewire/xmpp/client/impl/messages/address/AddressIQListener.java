@@ -9,7 +9,6 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
@@ -22,7 +21,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.User;
-import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
 public class AddressIQListener implements PacketListener {
