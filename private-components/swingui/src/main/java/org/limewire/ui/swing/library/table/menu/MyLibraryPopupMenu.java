@@ -74,7 +74,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
        friendSubMenu.removeAll();
        for (SharingTarget target : friendList){
            JCheckBoxMenuItem item = new JCheckBoxMenuItem(I18n.tr("Share with {0}", target.getFriend().getRenderName()));
-           item.setSelected(shareListManager.getFriendShareList(target.getFriend()).getSwingModel().contains(fileItem));
+           item.setSelected(shareListManager.getOrCreateFriendShareList(target.getFriend()).getSwingModel().contains(fileItem));
            item.addItemListener(new FriendShareListener(target.getFriend()));
            friendSubMenu.add(item);
        }
