@@ -8,10 +8,14 @@ import java.io.File;
 import java.util.Map;
 
 import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
@@ -25,6 +29,7 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 public class PlayRendererEditor extends TableRendererEditor implements AudioPlayerListener{
 
     private JToggleButton playButton;
+    private JLabel label;
 
     @Resource
     private Icon playIcon;
@@ -35,12 +40,15 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     private File file;
     
     private LibraryTable table;
+    private AudioPlayer player;
 
     public PlayRendererEditor(LibraryTable table, final AudioPlayer player) {
         GuiUtils.assignResources(this);
         
         this.table = table;
+        this.player = player;
         
+        setLayout(new MigLayout("aligny 50%, hidemode 3"));
         
         playButton = new JToggleButton();
         playButton.setIcon(playIcon);
@@ -70,10 +78,14 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
                 } else {                
                     NativeLaunchUtils.launchFile(file);
                 }
-                update(file);
+                cancelCellEditing();
             }
         }));
+        
+        label = new JLabel();
+        
         add(playButton);
+        add(label, "growx");
         
         player.addAudioPlayerListener(this);
     }
@@ -94,22 +106,26 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     
     private File update(Object value){
         if(value instanceof LocalFileItem){
-            if(((LocalFileItem)value).isIncomplete()){
+            LocalFileItem item = (LocalFileItem)value;
+            
+            if(item.getProperty(FilePropertyKey.TITLE) == null)
+                label.setText(item.getName());
+            else
+                label.setText((String)item.getProperty(FilePropertyKey.TITLE));      
+            
+            if(item.isIncomplete()){
                 playButton.setVisible(false);
                 return null;
             } else {
-                playButton.setVisible(true);
                 File file = ((LocalFileItem) value).getFile();
-                update(file);
+                playButton.setVisible(player.isPaused(file) || player.isPlaying(file));           
+                playButton.setSelected(player.isPlaying(file));
+
                 return file;
-            }
+            }      
         } else {
             throw new IllegalStateException(value + " must be LocalFileItem");
         }
-    }
-    
-    private void update(File file){
-        playButton.setSelected(PlayerUtils.isPlaying(file));
     }
 
     @Override
@@ -130,5 +146,4 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
            table.repaint();
        }
     }
-
 }

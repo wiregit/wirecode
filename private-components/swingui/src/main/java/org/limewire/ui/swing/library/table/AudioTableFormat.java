@@ -8,8 +8,7 @@ import org.limewire.ui.swing.util.I18n;
 
 public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
 
-    public static final int PLAY_COL = 0;
-    public static final int NAME_COL = PLAY_COL + 1;
+    public static final int NAME_COL = 0;
     public static final int ARTIST_COL = NAME_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
     public static final int LENGTH_COL = ALBUM_COL + 1;
@@ -32,8 +31,6 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
     public String getColumnName(int column) {
 
         switch (column) {
-        case PLAY_COL:
-            return I18n.tr("Play");
         case NAME_COL:
             return I18n.tr("Name");
         case ARTIST_COL:
@@ -67,10 +64,8 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
     public Object getColumnValue(FileItem baseObject, int column) {
 
         switch (column) {
-        case PLAY_COL:
-            return baseObject;
         case NAME_COL:
-            return (baseObject.getProperty(FilePropertyKey.TITLE) == null) ? baseObject.getName() : (String)baseObject.getProperty(FilePropertyKey.TITLE);
+            return baseObject;
         case ARTIST_COL:
             return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_COL:
@@ -110,7 +105,7 @@ public class AudioTableFormat<T extends FileItem> implements LibraryTableFormat<
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == PLAY_COL || column == ACTION_COL;
+        return column == NAME_COL || column == ACTION_COL;
     }
 
     @Override
