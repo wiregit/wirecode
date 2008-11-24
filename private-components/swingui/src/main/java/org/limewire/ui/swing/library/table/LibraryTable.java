@@ -1,13 +1,19 @@
 package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -29,6 +35,7 @@ import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -60,7 +67,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         
         tableColors = new TableColors();
         setStripesPainted(true);
-        setColumnControlVisible(true);
         setShowHorizontalLines(false);
         
         EventSelectionModel<T> model = new EventSelectionModel<T>(libraryItems);
@@ -74,6 +80,25 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         setDragEnabled(true);
         setDefaultRenderer(Object.class, defaultRenderer);
         setRowHeight(rowHeight);
+        
+        final JTableHeader header = getTableHeader();
+        header.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(SwingUtilities.isRightMouseButton(e)){
+                    showHeaderPopupMenu(e.getPoint());
+                }
+            }
+        });
+    }
+    
+    public void showHeaderPopupMenu(Point p) {
+        JPopupMenu menu = createColumnMenu();
+        menu.show(getTableHeader(), p.x, p.y);
+    }
+    
+    public JPopupMenu createColumnMenu() {
+        return new TableColumnSelector(this, format).getPopupMenu();
     }
     
     public void enableMyLibrarySharing(LibrarySharePanel librarySharePanel) {
@@ -155,9 +180,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         
     }
     
-    
     private class LibraryDownloadDoubleClickHandler implements TableDoubleClickHandler {
-
         private DownloadAction action;
 
         public LibraryDownloadDoubleClickHandler(DownloadAction action) {
@@ -168,7 +191,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         public void handleDoubleClick(int row) {
             action.download(row);
         }
-
     }
 
     private class DownloadAction extends AbstractAction {
@@ -204,7 +226,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                 }, e, true);
             }
         }
-        
     }
     
     /**

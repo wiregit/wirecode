@@ -1,26 +1,15 @@
 package org.limewire.ui.swing.table;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -32,37 +21,24 @@ import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
  * This class is a subclass of JTable that adds features from Glazed Lists.
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
 public class ConfigurableTable<E> extends MouseableTable implements RowPresevationListener {
     private final Log LOG = LogFactory.getLog(getClass());
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
-    private JMenuItem disabledMenuItem;
-    private JPopupMenu headerPopup;
     private TableFormat<E> tableFormat;
-    private boolean showHeaders;
     private E selectedRow;
 
     public ConfigurableTable(boolean showHeaders) {
-        this.showHeaders = showHeaders;
-
         if (showHeaders) {
             // Set up table headers to have a context menu
             // that configures which columns are visible.
             final JTableHeader header = getTableHeader();
-            header.setToolTipText(tr("Right-click to select columns to display"));
             header.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getButton() == 3) {
-                        // If a header popup menu was created ...
-                        if (headerPopup != null) {
-                            // Display the header popup menu where the user clicked.
-                            headerPopup.show(
-                                ConfigurableTable.this,
-                                e.getX(), e.getY() - header.getHeight());
-                        }
+                    if(SwingUtilities.isRightMouseButton(e)){
+                        showHeaderPopupMenu(e.getPoint());
                     }
                 }
             });
@@ -75,90 +51,21 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public EventList<E> getEventList() {
         return eventList;
     }
-
+    
     /**
-     * Makes the header popup menu.
+     * Displays the popup menu on the table header
      */
-    private void makeHeaderPopup() {
-        // Create a listener that toggles the visibility
-        // of the selected table column.
-        ActionListener listener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String name = e.getActionCommand();
-                TableColumnExt selectedColumn =
-                    ConfigurableTable.this.getColumnExt(name);
-                boolean visible = selectedColumn.isVisible();
-
-                selectedColumn.setVisible(!visible);
-
-                managePopup();
-                
-                Action action = getActionMap().get(JXTable.PACKALL_ACTION_COMMAND);
-                if (action != null) {
-	                action.actionPerformed(
-	                	new ActionEvent(ConfigurableTable.this, 0,
-	                					JXTable.PACKALL_ACTION_COMMAND));
-	            }
-            }
-        };
-
-        // Get the column headings in sorted order.
-        Set<String> headerSet = new TreeSet<String>();
-        int columnCount = tableFormat.getColumnCount();
-        for (int i = 0; i < columnCount; i++) {
-            headerSet.add(tableFormat.getColumnName(i));
-        }
-
-        headerPopup = new JPopupMenu();
-        headerPopup.setBorder(
-            BorderFactory.createLineBorder(Color.BLACK, 1));
-
-        // Create a checkbox menu item for each column heading.
-        for (String headerName : headerSet) {
-            JMenuItem item = new JCheckBoxMenuItem(headerName, true);
-            item.addActionListener(listener);
-            headerPopup.add(item);
-        }
+    public void showHeaderPopupMenu(Point p) {
+        JPopupMenu menu = createHeaderColumnMenu();
+        menu.show(getTableHeader(), p.x, p.y);
     }
-
+    
     /**
-     * Handle disabling and enabling header popup menu items
-     * based on the number of visible columns.
+     * Lazily creates the popup menu to display
+     * @return
      */
-    private void managePopup() {
-        int visibleColumnCount = getColumnCount(false);
-
-        // If there is only one visible column in the table ...
-        if (visibleColumnCount == 1) {
-            // Find the menu item for the lone visible column and
-            // disable it for now so the user can't ask to hide it.
-            int allColumnCount = getColumnCount(true);
-            TableColumnExt column = null;
-            for (int i = 0; i < allColumnCount; i++) {
-                column = getColumnExt(i);
-                if (column.isVisible())
-                    break;
-            }
-            
-            assert column != null;
-            String headerName = column.getTitle();
-
-            // Find the header popup menu item that matches this name.
-            Component[] components = headerPopup.getComponents();
-            for (Component component : components) {
-                JMenuItem item = (JMenuItem) component; 
-                if (item.getText().equals(headerName)) {
-                    // Don't all it to be selected.
-                    item.setEnabled(false);
-                    disabledMenuItem = item;
-                    break;
-                }
-            }
-        } else if (disabledMenuItem != null) {
-            // Reenable the previously disabled menu item
-            // because it's column is no longer the only one visible.
-            disabledMenuItem.setEnabled(true);
-        }
+    public JPopupMenu createHeaderColumnMenu() {
+        return new TableColumnSelector(this, tableFormat).getPopupMenu();
     }
 
     /**
@@ -178,22 +85,6 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public void setColumnVisible(int columnIndex, boolean visible) {
         TableColumnExt column = getColumnExt(columnIndex);
         column.setVisible(visible);
-        String columnTitle = column.getTitle();
-
-        // Find the matching checkbox menu item.
-        JCheckBoxMenuItem matchingItem = null;
-        int itemCount = headerPopup.getComponentCount();
-        for (int i = 0; i < itemCount; i++) {
-            JCheckBoxMenuItem item =
-                (JCheckBoxMenuItem) headerPopup.getComponent(i);
-            String itemTitle = item.getText();
-            if (itemTitle.equals(columnTitle)) {
-                matchingItem = item;
-                break;
-            }
-        }
-
-        if (matchingItem != null) matchingItem.setSelected(visible);
     }
 
     /**
@@ -217,8 +108,6 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
         this.tableFormat = tableFormat;
         tableModel = new EventTableModel<E>(eventList, tableFormat);
         setModel(tableModel);
-
-        if (showHeaders) makeHeaderPopup();
     }
 
     /**
