@@ -5,7 +5,6 @@ import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -83,7 +82,6 @@ public class SortAndFilterPanel extends JXPanel {
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
-    @Resource private Font sortLabelFont;
 
     private final LimeComboBox sortCombo;
     
