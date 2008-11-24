@@ -150,7 +150,11 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             if(connection != null) {
                 if (LOG.isInfoEnabled())
                     LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
-                connection.disconnect();
+                try {
+                    connection.disconnect();
+                } catch (NullPointerException npe) {
+                    // FIXME: this is a workaround
+                }
                 addressIQListener.dispose();
                 authTokenIQListener.dispose();
                 addressIQListener = null;
