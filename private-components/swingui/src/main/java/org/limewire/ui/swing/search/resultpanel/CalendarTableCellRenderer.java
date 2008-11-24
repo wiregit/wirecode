@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -11,10 +10,12 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
+
+import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
- * This class renders icons in JTables.
- * @author R. Mark Volkmann, Object Computing, Inc.
+ * This class renders a date in human readable format.
  */
 public class CalendarTableCellRenderer implements TableCellRenderer {
 
@@ -29,7 +30,6 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
     public CalendarTableCellRenderer() {
         panel.add(label);
         label.setOpaque(false);
-        //panel.setOpaque(false);
 
         int align = FlowLayout.LEFT;
         panel.setLayout(new FlowLayout(align, HGAP, VGAP));
@@ -43,20 +43,14 @@ public class CalendarTableCellRenderer implements TableCellRenderer {
         String text = null;
         if (value instanceof Long) {
             text = DATE_FORMAT.format(new Date((Long)value));
+            EventTableModel tableModel = (EventTableModel) table.getModel();
+            VisualSearchResult vsr = (VisualSearchResult) tableModel.getElementAt(row);
+            panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
         } else {
             text = value == null ? "" : value.toString();
         }
         
         label.setText(text);
-
-        // Change the font so it's not bold.
-        Font font = label.getFont().deriveFont(Font.PLAIN);
-        label.setFont(font);
-
-        // TODO: RMV How can you determine the VisualSearchResult being rendered?
-        //float opacity = vsr.isMarkedAsJunk() ? 0.2f : 1.0f;
-        float opacity = 0.2f;
-        panel.setAlpha(opacity);
 
         return panel;
     }
