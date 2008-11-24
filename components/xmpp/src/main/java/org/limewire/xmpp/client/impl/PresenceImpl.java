@@ -1,8 +1,8 @@
 package org.limewire.xmpp.client.impl;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -11,8 +11,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.io.Address;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 
@@ -24,10 +23,10 @@ class PresenceImpl implements Presence {
     private final org.jivesoftware.smack.packet.Presence presence;
     private final User user;
     private Map<URI, Feature> features;
-    private final EventMulticaster<FeatureEvent> featureListeners;
+    private final EventBroadcaster<FeatureEvent> featureListeners;
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
-                 User user, EventMulticaster<FeatureEvent> featureSupport) {
+                 User user, EventBroadcaster<FeatureEvent> featureSupport) {
         this.presence = presence;
         this.user = user;
         features = new ConcurrentHashMap<URI, Feature>();
@@ -108,11 +107,6 @@ class PresenceImpl implements Presence {
 
     public Address getPresenceAddress() {
         return null;
-    }
-
-    @Override
-    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-        return featureListeners;
     }
 
     @Override

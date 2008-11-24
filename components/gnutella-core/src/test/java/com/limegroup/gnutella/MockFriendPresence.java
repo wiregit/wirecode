@@ -1,15 +1,14 @@
 package com.limegroup.gnutella;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.net.URI;
 
-import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.listener.ListenerSupport;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventListenerList;
 
 public class MockFriendPresence implements FriendPresence{
@@ -39,11 +38,6 @@ public class MockFriendPresence implements FriendPresence{
     @Override
     public String getPresenceId() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-        return featureListeners;
     }
 
     @Override

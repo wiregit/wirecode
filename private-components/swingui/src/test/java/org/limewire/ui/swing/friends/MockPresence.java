@@ -5,8 +5,6 @@ import java.util.Collection;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 
@@ -69,11 +67,6 @@ public class MockPresence implements Presence {
 
     @Override
     public String getPresenceId() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

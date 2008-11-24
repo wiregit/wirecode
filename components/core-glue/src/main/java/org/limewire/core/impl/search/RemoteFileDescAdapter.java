@@ -18,7 +18,6 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
@@ -27,8 +26,6 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.listener.EventListenerList;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
@@ -256,11 +253,6 @@ public class RemoteFileDescAdapter implements SearchResult {
                         };
                     }
 
-                    @Override
-                    public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-                        return new EventListenerList<FeatureEvent>();
-                    }
-
                     public Collection<Feature> getFeatures() {
                         return features.values();
                     }
@@ -384,11 +376,6 @@ public class RemoteFileDescAdapter implements SearchResult {
                             return Collections.emptyMap();
                         }
                     };
-                }
-
-                @Override
-                public ListenerSupport<FeatureEvent> getFeatureListenerSupport() {
-                    return new EventListenerList<FeatureEvent>();
                 }
 
                 @Override

@@ -34,7 +34,6 @@ public class ChatPanelHarness {
                 EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
                 final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
                 final EventListenerList<FeatureEvent> featureSupport = new EventListenerList<FeatureEvent>();
-                final 
                 FriendsPane friendsPane = new FriendsPane(icons, libraryManager, null, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override

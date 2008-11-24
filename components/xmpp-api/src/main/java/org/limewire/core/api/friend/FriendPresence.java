@@ -4,8 +4,6 @@ import java.net.URI;
 import java.util.Collection;
 
 import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.listener.ListenerSupport;
 
 /**
  * A presence for a friend. One friend can have multiple presences.
@@ -23,12 +21,6 @@ public interface FriendPresence {
      * Presence would be the clientGUID.
      */
     String getPresenceId();
-
-    /**
-     * @return ListenerSupport to add EventListeners to.  Used to listen 
-     * for the addition / removal of features
-     */
-    ListenerSupport<FeatureEvent> getFeatureListenerSupport();
 
     /**
      * @return a Collection of Features that this FriendPresence supports
