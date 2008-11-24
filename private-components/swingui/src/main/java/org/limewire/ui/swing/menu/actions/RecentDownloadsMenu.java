@@ -5,8 +5,9 @@ package org.limewire.ui.swing.menu.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
@@ -65,10 +66,13 @@ public class RecentDownloadsMenu extends JMenu {
 
     private void populateRecentDownloads() {
         removeAll();
-        Set<File> files = null;
+        List<File> files = null;
         synchronized (DownloadSettings.RECENT_DOWNLOADS) {
-            files = new HashSet<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
+            files = new ArrayList<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
         }
+        
+        Collections.sort(files);
+        
         if (files.size() > 0) {
             for (final File file : files) {
                 addRecentDownloadAction(file);
