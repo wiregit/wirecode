@@ -67,6 +67,8 @@ public class ListViewTableEditorRenderer
 extends AbstractCellEditor
 implements TableCellEditor, TableCellRenderer {
 
+    private static final int LEFT_COLUMN_WIDTH = 450;
+
     private final CategoryIconManager categoryIconManager;
     
     private static final String HTML = "<html>";
@@ -392,7 +394,6 @@ implements TableCellEditor, TableCellRenderer {
 
         searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[fill]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
-        heading.setMinimumSize(new Dimension(450, 0));
         searchResultTextPanel.add(heading, "wrap, growx");
         searchResultTextPanel.add(subheadingLabel, "wrap");
         searchResultTextPanel.add(metadataLabel);
@@ -455,8 +456,8 @@ implements TableCellEditor, TableCellRenderer {
 
     private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
         int width = heading.getVisibleRect().width;
-        //Width is zero the first time editorpane is rendered - use a default based on the min width for the component
-        width = width == 0 ? heading.getMinimumSize().width : width;
+        //Width is zero the first time editorpane is rendered - use a wide default (roughly width of left column)
+        width = width == 0 ? LEFT_COLUMN_WIDTH : width;
         //Make the visible rect seem a little smaller than usual to trigger a more hungry truncation
         //otherwise the JEditorPane word-wrapping logic kicks in and the edge word just disappears
         int fudgeFactorPixelWidth = width - 10;
@@ -544,16 +545,16 @@ implements TableCellEditor, TableCellRenderer {
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndSubheading:
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350");
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1");
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndMetadata:
             searchResultTextPanel.remove(subheadingLabel);
-            searchResultTextPanel.add(metadataLabel, "cell 0 1, wmin 350");
+            searchResultTextPanel.add(metadataLabel, "cell 0 1");
             break;
         case HeadingSubHeadingAndMetadata:
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wmin 350, wrap");
-            searchResultTextPanel.add(metadataLabel, "cell 0 2, wmin 350");
+            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wrap");
+            searchResultTextPanel.add(metadataLabel, "cell 0 2");
         }
     }
 
