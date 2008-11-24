@@ -29,9 +29,9 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     private static final Paint BUBBLE_PAINT2 = new Color(0xed,0xed,0xed);
     private static final Paint BUBBLE_PAINT3 = new Color(0xf0,0xf0,0xf0);
     
-    private static final Paint SHADOW_PAINT1 = new Color(0x80,0x80,0x80);
-    private static final Paint SHADOW_PAINT2 = new Color(0x80,0x80,0x80);
-    private static final Paint SHADOW_PAINT3 = new Color(0x80,0x80,0x80);
+    private static final Paint SHADOW_PAINT1 = new Color(0x5f,0x5f,0x5f);
+    private static final Paint SHADOW_PAINT2 = new Color(0x5e,0x5e,0x5e);
+    private static final Paint SHADOW_PAINT3 = new Color(0x64,0x64,0x64);
     
     public BorderPainter(int arcWidth, int arcHeight, Paint border, 
             Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 

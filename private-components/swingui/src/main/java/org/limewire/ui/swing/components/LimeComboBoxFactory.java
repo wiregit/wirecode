@@ -72,18 +72,16 @@ public class LimeComboBoxFactory {
         return this.createDarkFullComboBox(null);
     }
     
-    private LimeComboBox createFullComboBox(List<Action> items, Painter<JXButton> painter) {
-        
+    public LimeComboBox createDarkFullComboBox(List<Action> items) {
         LimeComboBox box = new LimeComboBox(items);
         
-        box.setBackgroundPainter(painter);
-        box.setBorder(BorderFactory.createEmptyBorder(3,10,3,20));
+        box.setBackgroundPainter(this.darkButtonPainter);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         box.setIcon(this.darkFullIcon);
         box.setFont(this.darkFullTextFont);
         box.setForeground(this.darkFullTextColour);
         
         return box;
-        
     }
     
     public LimeComboBox createLightFullComboBox(List<Action> items) {
@@ -99,14 +97,18 @@ public class LimeComboBoxFactory {
         return box;
     }
     
-    public LimeComboBox createDarkFullComboBox(List<Action> items) {
-        return createFullComboBox(items, darkButtonPainter);
-    }
-    
-
-    
     public LimeComboBox createMiniComboBox() {
         return createMiniComboBox(null,null);
+    }
+    
+    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
+    
+        LimeComboBox box = new LimeComboBox(items);
+        
+        this.decorateMiniComboBox(box, promptText);
+        
+        return box;
+        
     }
     
     public void decorateMiniComboBox(LimeComboBox box, String promptText) {
@@ -120,13 +122,5 @@ public class LimeComboBoxFactory {
         box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
     
-    public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
     
-        LimeComboBox box = new LimeComboBox(items);
-        
-        this.decorateMiniComboBox(box, promptText);
-        
-        return box;
-        
-    }
 }
