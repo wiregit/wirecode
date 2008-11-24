@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing.components;
+package org.limewire.ui.swing.components;
 
 import javax.swing.Action;
 import javax.swing.Icon;

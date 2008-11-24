@@ -9,7 +9,13 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -65,8 +71,8 @@ import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.FriendSharingDisplay;
-import org.limewire.ui.swing.sharing.dragdrop.ShareDropTarget;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -102,7 +108,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final ChatFriend chatFriend;
     private final ShareListManager shareListManager;
     private final IconManager iconManager;
-    private final FriendSharingDisplay friendSharingDisplay;
+    private final LibraryNavigator libraryNavigator;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
     private final ResultDownloader downloader;
@@ -111,7 +117,7 @@ public class ConversationPane extends JPanel implements Displayable {
     
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
-                            ShareListManager libraryManager, IconManager iconManager, FriendSharingDisplay friendSharingDisplay,
+                            ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
                             @Named("available") ListenerSupport<FriendEvent> friendSupport, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.writer = writer;
@@ -122,7 +128,7 @@ public class ConversationPane extends JPanel implements Displayable {
         this.loggedInID = loggedInID;
         this.shareListManager = libraryManager;
         this.iconManager = iconManager;
-        this.friendSharingDisplay = friendSharingDisplay;
+        this.libraryNavigator = libraryNavigator;
         this.downloader = downloader;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
 
@@ -308,7 +314,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            friendSharingDisplay.selectFriendLibrary(chatFriend.getFriend());
+            libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
         }
     }
 
@@ -436,22 +442,34 @@ public class ConversationPane extends JPanel implements Displayable {
         
     }
     
-    private class FriendShareDropTarget extends ShareDropTarget {
+    private class FriendShareDropTarget implements DropTargetListener {
+        private final DropTarget dropTarget;
+        private LocalFileList fileList;
+        
         public FriendShareDropTarget(JComponent component, LocalFileList fileList) {
-            super(component, fileList);
+            dropTarget = new DropTarget(component, DnDConstants.ACTION_COPY, this, true, null);
+            this.fileList = fileList;
+        }
+        
+        public void setModel(LocalFileList fileList) {
+            this.fileList = fileList;
+        }
+        
+        public DropTarget getDropTarget() {
+            return dropTarget;
         }
 
         @Override
         public void dragEnter(DropTargetDragEvent dtde) {
-            super.dragEnter(dtde);
-
             checkLimewireConnected(dtde);
         }
         
         @Override
+        public void dragExit(DropTargetEvent dte) {
+        }
+        
+        @Override
         public void dragOver(DropTargetDragEvent dtde) {
-            super.dragOver(dtde);
-            
             checkLimewireConnected(dtde);
         }
 
@@ -462,11 +480,43 @@ public class ConversationPane extends JPanel implements Displayable {
         }
         
         @Override
+        public void drop(DropTargetDropEvent dtde) {
+            if ((dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) != 0) {
+                // Accept the drop and get the transfer data
+                dtde.acceptDrop(dtde.getDropAction());
+                Transferable transferable = dtde.getTransferable();
+
+                try {
+                    final LocalFileList currentModel = fileList;
+                    final File[] droppedFiles = DNDUtils.getFiles(transferable); 
+              
+                    for(File file : droppedFiles) {
+                        if(file != null) {
+                            if(file.isDirectory()) {
+                                acceptedFolder(file, currentModel.addFolder(file));
+                            } else {
+                                acceptedFile(file, currentModel.addFile(file));
+                            }
+                        }
+                    }
+                    
+                    dtde.dropComplete(true);
+                } catch (Exception e) {
+                    dtde.dropComplete(false);
+                }
+              } else {
+                    dtde.rejectDrop();
+              }
+        }
+        
+        @Override
+        public void dropActionChanged(DropTargetDragEvent dtde) {
+        }
+        
         protected void acceptedFile(File file, ListeningFuture<LocalFileItem> future) {
             offerFile(file, future);
         }
         
-        @Override
         protected void acceptedFolder(File folder, ListeningFuture<List<ListeningFuture<LocalFileItem>>> future) {
             offerFolder(folder, future);
         }

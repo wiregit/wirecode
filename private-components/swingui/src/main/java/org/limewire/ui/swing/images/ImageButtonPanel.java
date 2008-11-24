@@ -7,9 +7,9 @@ import javax.swing.Action;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
+import org.limewire.ui.swing.components.UnshareButton;
 
-import org.limewire.ui.swing.sharing.components.UnshareButton;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Panel to display buttons in a thumbnail view

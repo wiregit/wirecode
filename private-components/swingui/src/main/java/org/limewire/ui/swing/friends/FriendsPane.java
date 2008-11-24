@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.friends;
 
+import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -44,6 +47,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -69,19 +74,14 @@ import org.limewire.ui.swing.action.PopupDecider;
 import org.limewire.ui.swing.action.PopupUtil;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
-import static org.limewire.ui.swing.friends.FriendsUtil.getIcon;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.FriendSharingDisplay;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.table.AbstractTableFormat;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.Presence.Mode;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -93,11 +93,12 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import ca.odell.glazedlists.swing.EventTableModel;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
- * @author Mario Aquino, Object Computing, Inc.
- *
+ * 
  */
 @Singleton
 public class FriendsPane extends JPanel {
@@ -120,7 +121,7 @@ public class FriendsPane extends JPanel {
     private final Map<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
     private final ShareListManager libraryManager;
-    private final FriendSharingDisplay friendSharing;
+    private final LibraryNavigator libraryNavigator;
     private final JScrollPane scrollPane;
     private final IdleTimer idleTimer;
     private final JLabel unseenMessageCountPopupLabel = new JLabel();
@@ -131,7 +132,7 @@ public class FriendsPane extends JPanel {
 
     @Inject
     public FriendsPane(IconLibrary icons, 
-            ShareListManager libraryManager, FriendSharingDisplay friendSharing,
+            ShareListManager libraryManager, LibraryNavigator libraryNavigator,
             ListenerSupport<FriendPresenceEvent> presenceSupport) {
         super(new BorderLayout());
         this.icons = icons;
@@ -139,7 +140,7 @@ public class FriendsPane extends JPanel {
         this.idToFriendMap = new HashMap<String, ChatFriend>();
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.libraryManager = libraryManager;
-        this.friendSharing = friendSharing;
+        this.libraryNavigator = libraryNavigator;
         ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
         SortedList<ChatFriend> sortedFriends = GlazedListsFactory.sortedList(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
@@ -848,7 +849,7 @@ public class FriendsPane extends JPanel {
             if (chatFriend != null) {
                 //minimize chat
                 new DisplayFriendsEvent(false).publish();
-                friendSharing.selectFriendLibrary(chatFriend.getFriend());
+                libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
     }
@@ -864,7 +865,7 @@ public class FriendsPane extends JPanel {
             new DisplayFriendsEvent(false).publish();
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                friendSharing.selectFriendInFileSharingList(chatFriend.getFriend());
+                libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
 

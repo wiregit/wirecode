@@ -97,7 +97,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
         if(sharingComponent == null) {
             setSharingCard(sharingFactory.createSharingLibrary(this, friend, 
                     libraryManager.getLibraryManagedList().getSwingModel(),
-                    shareListManager.getFriendShareList(friend)));
+                    shareListManager.getOrCreateFriendShareList(friend)));
         }
         super.showSharingCard();
     }

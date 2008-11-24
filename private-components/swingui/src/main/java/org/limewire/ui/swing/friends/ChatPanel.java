@@ -20,13 +20,11 @@ import org.limewire.core.settings.FriendSettings;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.sharing.FriendSharingDisplay;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * @author Mario Aquino, Object Computing, Inc.
  *
  */
 @Singleton
@@ -35,17 +33,15 @@ public class ChatPanel extends JPanel implements Displayable {
     private final ConversationPaneFactory conversationFactory;
     private final JPanel conversationPanel;
     private final FriendsPane friendsPanel;
-    private final FriendSharingDisplay friendSharing;
     private final Map<String, ConversationPane> chats;
     
     @Inject
     public ChatPanel(ConversationPaneFactory conversationFactory, IconLibrary icons, FriendsPane friendsPanel,
-            TopPanel topPanel, FriendSharingDisplay friendSharing) {
+            TopPanel topPanel) {
         super(new BorderLayout());
         this.conversationFactory = conversationFactory;
         this.friendsPanel = friendsPanel;
         this.chats = new HashMap<String, ConversationPane>();
-        this.friendSharing = friendSharing;
 
         //Dimensions according to the spec
         setPreferredSize(new Dimension(400, 235));
@@ -64,7 +60,7 @@ public class ChatPanel extends JPanel implements Displayable {
         pane.setEditable(false);
         pane.setContentType("text/html");
         pane.setText(getMessagesPaneText());
-        pane.addHyperlinkListener(new HyperlinkHandler(friendSharing));
+        pane.addHyperlinkListener(new HyperlinkHandler());
         panel.add(pane, BorderLayout.CENTER);
         return panel;
     }
@@ -115,10 +111,8 @@ public class ChatPanel extends JPanel implements Displayable {
     }
 
     private static class HyperlinkHandler implements HyperlinkListener {
-        private final FriendSharingDisplay friendSharing;
         
-        public HyperlinkHandler(FriendSharingDisplay friendSharing) {
-            this.friendSharing = friendSharing;
+        public HyperlinkHandler() {
         }
         
         @Override
@@ -126,7 +120,7 @@ public class ChatPanel extends JPanel implements Displayable {
             if (EventType.ACTIVATED == e.getEventType()) {
                 LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
                 if (e.getDescription().equals("all_friends_share_list")) {
-                    friendSharing.displaySharing();
+                    throw new IllegalArgumentException("TODO: implement me. There is no longer any such view");
                 }
             }
         }

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.sharing.table;
+package org.limewire.ui.swing.table;
 
 import java.awt.Color;
 import java.awt.Component;

@@ -17,7 +17,6 @@ import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.listener.EventListenerList;
 import org.limewire.ui.swing.friends.Message.Type;
-import org.limewire.ui.swing.sharing.MockFriendSharingDisplay;
 import org.limewire.ui.swing.util.IconManagerStub;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.User;
@@ -31,16 +30,15 @@ public class ChatPanelHarness {
                 JFrame frame = new JFrame();
                 final IconLibraryImpl icons = new IconLibraryImpl();
                 final MockLibraryManager libraryManager = new MockLibraryManager();
-                MockFriendSharingDisplay friendSharing = new MockFriendSharingDisplay();
                 EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
                 final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
-                FriendsPane friendsPane = new FriendsPane(icons, libraryManager, friendSharing, presenceSupport);
+                FriendsPane friendsPane = new FriendsPane(icons, libraryManager, null, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {
-                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), new MockFriendSharingDisplay(), null, null, friendSupport, null);
+                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), null, null, null, friendSupport, null);
                     }
-                }, icons, friendsPane, new TopPanel(icons, null), friendSharing));
+                }, icons, friendsPane, new TopPanel(icons, null)));
                 
                 frame.pack();
                 frame.setVisible(true);

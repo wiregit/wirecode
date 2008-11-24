@@ -11,10 +11,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.friends.FriendsPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.sharing.FriendSharePanel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,19 +27,14 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     private final FriendsPane friendsPane;
 
     private final LibraryNavigator libraryNavigator;
-    
-    private final FriendSharePanel friendSharePanel;
-    
-    private final Navigator navigator;
+
     @Inject
     public RemoteHostActionsImpl(RemoteLibraryManager remoteLibraryManager,
-            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator, FriendSharePanel friendSharePanel, Navigator navigator) {
+            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator, Navigator navigator) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
         this.libraryNavigator = libraryNavigator;
-        this.friendSharePanel = friendSharePanel;
-        this.navigator = navigator;
     }
 
     @Override
@@ -61,9 +53,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void showFilesSharedBy(RemoteHost person) {
         LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
         Friend friend = person.getFriendPresence().getFriend();
-        friendSharePanel.selectFriend(friend);
-        NavItem navItem = navigator.getNavItem(NavCategory.SHARING, FriendSharePanel.NAME);
-        navItem.select();
+        libraryNavigator.selectFriendLibrary(friend);
     }
 
     @Override

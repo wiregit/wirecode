@@ -13,9 +13,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import net.miginfocom.swing.MigLayout;
+import org.limewire.ui.swing.components.UnshareButton;
 
-import org.limewire.ui.swing.sharing.components.UnshareButton;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Generic Renderer/Editor that allows for one or more buttons to 
