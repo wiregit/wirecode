@@ -74,7 +74,7 @@ public class SortAndFilterPanel extends JXPanel {
     private final String ARTIST = tr("Artist");
     private final String SIZE_LOW_TO_HIGH = tr("Size (low to high)");
     private final String SIZE_HIGH_TO_LOW = tr("Size (high to low)");
-    private final String FILE_TYPE = tr("File type");
+    private final String CATEGORY = tr("Category");
     private final String NAME = tr("Name");
     private final String RELEVANCE_ITEM = tr("Relevance");
 
@@ -137,7 +137,7 @@ public class SortAndFilterPanel extends JXPanel {
         this.actions.put(ARTIST,createAction(ARTIST));
         this.actions.put(SIZE_LOW_TO_HIGH,createAction(SIZE_LOW_TO_HIGH));
         this.actions.put(SIZE_HIGH_TO_LOW,createAction(SIZE_HIGH_TO_LOW));
-        this.actions.put(FILE_TYPE,createAction(FILE_TYPE));
+        this.actions.put(CATEGORY,createAction(CATEGORY));
         this.actions.put(NAME,createAction(NAME));
         this.actions.put(RELEVANCE_ITEM,createAction(RELEVANCE_ITEM));
     }
@@ -375,7 +375,7 @@ public class SortAndFilterPanel extends JXPanel {
             };
         }
 
-        if (FILE_TYPE.equals(item)) {
+        if (CATEGORY.equals(item)) {
             return new SimilarResultsGroupingComparator() {
                 private Comparator<VisualSearchResult> nameComparator = getNameComparator(true);
 
@@ -510,7 +510,7 @@ public class SortAndFilterPanel extends JXPanel {
         switch (category) {
             case ALL:
                 items = new String[] {
-                    RELEVANCE_ITEM, NAME, FILE_TYPE,
+                    RELEVANCE_ITEM, NAME, CATEGORY,
                     SIZE_HIGH_TO_LOW, SIZE_LOW_TO_HIGH
                 };
                 break;
