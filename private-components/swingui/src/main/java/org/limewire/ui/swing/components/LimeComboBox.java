@@ -267,7 +267,7 @@ public class LimeComboBox extends JXButton {
     
     
     
-    
+    // TODO: use ButtonForegroundPainters
     @Override
     protected void paintComponent(Graphics g) {
 

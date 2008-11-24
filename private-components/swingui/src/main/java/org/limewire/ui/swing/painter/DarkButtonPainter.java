@@ -43,7 +43,13 @@ public class DarkButtonPainter extends ButtonPainter {
     
     
     public DarkButtonPainter() {
+        this(DrawMode.FULLY_ROUNDED);
+    }
+    
+    public DarkButtonPainter(DrawMode mode) {
         GuiUtils.assignResources(this);
+        
+        this.drawMode = mode;
         
         GradientPaint normalRightGradient = new GradientPaint(0,0, this.normalBevelRightGradientTop, 
                 0, 1, this.normalBevelRightGradientBottom, false);

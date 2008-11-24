@@ -3,6 +3,7 @@ package org.limewire.ui.swing.util;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -11,6 +12,7 @@ public class PainterUtils {
    
     
     public static Color TRASPARENT = new Color(0,0,0,0);
+    public static Insets BLANK_INSETS = new Insets(0,0,0,0);
     
     /**
      * Draws a string to a graphics with antialiasing

@@ -20,6 +20,8 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
  */
 public abstract class ButtonPainter extends AbstractPainter<JXButton> {
     
+    protected DrawMode drawMode = DrawMode.FULLY_ROUNDED;
+    
     protected Painter<JXButton> normalPainter;
     protected Painter<JXButton> clickedPainter;
     protected Painter<JXButton> hoveredPainter;
@@ -33,21 +35,43 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
         
         RectanglePainter<JXButton> painter = new RectanglePainter<JXButton>();
         
+        int shiftX1 = 0;
+        int shiftX2 = 0;
+        
+        switch (this.drawMode) {
+        
+        case LEFT_ROUNDED :
+            System.out.println("hi");
+            shiftX1 = 0;
+            shiftX2 = -arcWidth+2;
+            break;
+            
+        case RIGHT_ROUNDED :
+            
+            shiftX1 = -arcWidth-2;
+            shiftX2 = 0;
+            break;
+            
+        }
+        
         painter.setRounded(true);
         painter.setFillPaint(new GradientPaint(0,0, gradientTop, 0, 1, gradientBottom, false));
         painter.setRoundWidth(arcWidth);
         painter.setRoundHeight(arcHeight);
-        painter.setInsets(new Insets(1,2,2,2));
+        painter.setInsets(new Insets(1,2+shiftX1,2,2+shiftX2));
         painter.setPaintStretched(true);
         painter.setBorderPaint(null);
         painter.setFillVertical(true);
         painter.setFillHorizontal(true);
         painter.setAntialiasing(true);
         painter.setCacheable(true);
-        
-        compoundPainter.setPainters(painter, new BorderPainter(arcWidth, arcHeight,
+                
+        BorderPainter borderPainter = new BorderPainter(arcWidth, arcHeight,
                 border,  bevelLeft,  bevelTop1,  bevelTop2, 
-                bevelRight,  bevelBottom, accentType));
+                bevelRight,  bevelBottom, accentType);
+        borderPainter.setInsets(new Insets(0,shiftX1, 0, shiftX2));        
+        
+        compoundPainter.setPainters(painter, borderPainter);
         compoundPainter.setCacheable(true);
         
         return compoundPainter;
@@ -71,5 +95,9 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
         else {
             this.normalPainter.paint(g, object, width, height);
         }        
+    }
+    
+    public enum DrawMode {
+        FULLY_ROUNDED, RIGHT_ROUNDED, LEFT_ROUNDED 
     }
 }
