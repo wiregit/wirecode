@@ -64,7 +64,6 @@ public class RecentDownloadsMenu extends JMenu {
     }
 
     private void populateRecentDownloads() {
-        // TODO how long can this list get?
         removeAll();
         Set<File> files = null;
         synchronized (DownloadSettings.RECENT_DOWNLOADS) {
