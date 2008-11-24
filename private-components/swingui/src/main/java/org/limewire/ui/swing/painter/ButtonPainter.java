@@ -13,6 +13,7 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 
 /**
  * Background painter for a gradient button. 
@@ -22,10 +23,11 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
     protected Painter<JXButton> normalPainter;
     protected Painter<JXButton> clickedPainter;
     protected Painter<JXButton> hoveredPainter;
+    protected Painter<JXButton> disabledPainter;
     
     protected Painter<JXButton> createPainter(Color gradientTop, Color gradientBottom, 
             Paint border, Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
-            Paint bevelRight, Paint bevelBottom, int arcWidth, int arcHeight, boolean hasBubble) {
+            Paint bevelRight, Paint bevelBottom, int arcWidth, int arcHeight, AccentType accentType) {
         
         CompoundPainter<JXButton> compoundPainter = new CompoundPainter<JXButton>();
         
@@ -45,7 +47,7 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
         
         compoundPainter.setPainters(painter, new BorderPainter(arcWidth, arcHeight,
                 border,  bevelLeft,  bevelTop1,  bevelTop2, 
-                bevelRight,  bevelBottom, hasBubble));
+                bevelRight,  bevelBottom, accentType));
         compoundPainter.setCacheable(true);
         
         return compoundPainter;
@@ -54,6 +56,11 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
     @Override
     public void doPaint(Graphics2D g, JXButton object, int width, int height) {
         ButtonModel model = object.getModel();
+        
+        if (!object.isEnabled()) {
+            this.disabledPainter.paint(g, object, width, height);
+            return;
+        }
         
         if(model.isPressed() || model.isSelected()) {
             this.clickedPainter.paint(g, object, width, height);

@@ -23,7 +23,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     private final Paint bevelRight;
     private final Paint bevelBottom;
     
-    private final boolean hasBubble;
+    private final AccentType accentType;
     
     private static final Paint BUBBLE_PAINT1 = new Color(0xee,0xee,0xee);
     private static final Paint BUBBLE_PAINT2 = new Color(0xed,0xed,0xed);
@@ -35,16 +35,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
     
     public BorderPainter(int arcWidth, int arcHeight, Paint border, 
             Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
-            Paint bevelRight, Paint bevelBottom) {
-        
-        this(arcWidth, arcHeight, border, 
-            bevelLeft, bevelTop1, bevelTop2, 
-            bevelRight, bevelBottom, true);
-    }
-    
-    public BorderPainter(int arcWidth, int arcHeight, Paint border, 
-            Paint bevelLeft, Paint bevelTop1, Paint bevelTop2, 
-            Paint bevelRight, Paint bevelBottom, boolean hasBubble) {
+            Paint bevelRight, Paint bevelBottom, AccentType accentType) {
         
         this.arcWidth = arcWidth;
         this.arcHeight = arcHeight;
@@ -55,7 +46,7 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         this.bevelRight = bevelRight;
         this.bevelBottom = bevelBottom;
         
-        this.hasBubble = hasBubble;
+        this.accentType = accentType;
         
         this.setCacheable(true);
     }
@@ -82,22 +73,31 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         g.setPaint(PaintUtils.resizeGradient(this.bevelRight, 0, height-singleArcHeight+1));
         g.drawLine(width-3,singleArcHeight-1,width-3,height-singleArcHeight);
                 
-        // Draw the bottom accent bubble or shadow
-        g.setClip(0, singleArcHeight, width, height);
-        g.setPaint(this.hasBubble ? BUBBLE_PAINT3 : SHADOW_PAINT3);
-        g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
-        g.setPaint(this.hasBubble ? BUBBLE_PAINT2 : SHADOW_PAINT2);        
-        g.drawLine(0,singleArcHeight,0,height/2);
-        g.drawLine(width-1,singleArcHeight,width-1,height/2);
-        g.setPaint(this.hasBubble ? BUBBLE_PAINT1 : SHADOW_PAINT1);
-        g.drawLine(0,height/2,0,height-singleArcHeight);
-        g.drawLine(width-1,height/2,width-1,height-singleArcHeight);
+        
+        if (this.accentType != AccentType.NONE) {
+            // Draw the bottom accent bubble or shadow
+            boolean hasBubble = this.accentType == AccentType.BUBBLE;        
+        
+            g.setClip(0, singleArcHeight, width, height);
+            g.setPaint(hasBubble ? BUBBLE_PAINT3 : SHADOW_PAINT3);
+            g.drawRoundRect(0, 0, width-1, height-1, this.arcWidth, this.arcHeight);
+            g.setPaint(hasBubble ? BUBBLE_PAINT2 : SHADOW_PAINT2);        
+            g.drawLine(0,singleArcHeight,0,height/2);
+            g.drawLine(width-1,singleArcHeight,width-1,height/2);
+            g.setPaint(hasBubble ? BUBBLE_PAINT1 : SHADOW_PAINT1);
+            g.drawLine(0,height/2,0,height-singleArcHeight);
+            g.drawLine(width-1,height/2,width-1,height-singleArcHeight);
+        }
          
         g.setClip(0, 0, width, height);
         
         // Draw final border
         g.setPaint(PaintUtils.resizeGradient(this.border, 0, height));
         g.drawRoundRect(1, 0, width-3, height-2, this.arcWidth, this.arcHeight);
+    }
+    
+    public enum AccentType {
+        SHADOW, BUBBLE, NONE
     }
 
 }

@@ -18,6 +18,7 @@ import org.limewire.core.settings.SearchSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -79,7 +80,7 @@ public class SearchBar extends JXPanel {
         this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
         this.comboBox.setName("SearchBar.comboBox");
                 
-        this.searchField = new PromptTextField(I18n.tr("Search"), true);
+        this.searchField = new PromptTextField(I18n.tr("Search"), AccentType.BUBBLE);
         this.searchField.setName("SearchBar.searchField");
         
         this.searchButton = new IconButton();

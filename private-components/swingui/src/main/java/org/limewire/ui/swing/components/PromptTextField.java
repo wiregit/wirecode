@@ -19,6 +19,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.painter.BorderPainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class PromptTextField extends JTextField implements FocusListener {
@@ -42,15 +43,15 @@ public class PromptTextField extends JTextField implements FocusListener {
      * Controls the visibility of the faint white accent bubble
      *  that is painted under components in some areas. 
      */
-    private boolean borderBubbleVisible = false;
+    private AccentType accentType = AccentType.SHADOW;
     
     
     public PromptTextField() {
         this.init();
     }
     
-    public PromptTextField(boolean borderBubbleVisible) {
-        this.borderBubbleVisible = borderBubbleVisible;
+    public PromptTextField(AccentType accentType) {
+        this.accentType = accentType;
 
         this.init();
     }
@@ -61,9 +62,9 @@ public class PromptTextField extends JTextField implements FocusListener {
         this.init();
     }
     
-    public PromptTextField(String promptText, boolean borderBubbleVisible) {
+    public PromptTextField(String promptText, AccentType accentType) {
         this.promptText = promptText;
-        this.borderBubbleVisible = true;
+        this.accentType = accentType;
     
         init();
     }
@@ -100,17 +101,6 @@ public class PromptTextField extends JTextField implements FocusListener {
         return this.promptText;
     }
     
-    /**
-     * Controls visibility of the white accent bubble painted
-     *  under some components.
-     */
-    public void setBorderBubbleVisible(boolean visible) {
-        this.borderBubbleVisible = visible;
-        
-        System.out.println(visible);
-        
-        this.backgroundPainter = createBackgroundPainter();
-    }
     
     /**
      * Repaints this component when focus is gained
@@ -208,7 +198,7 @@ public class PromptTextField extends JTextField implements FocusListener {
         
         compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
                 this.borderColour,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
-                this.bevelRight,  this.bevelBottom, this.borderBubbleVisible));
+                this.bevelRight,  this.bevelBottom, this.accentType));
         compoundPainter.setCacheable(true);
         
         return compoundPainter;

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
@@ -35,31 +36,42 @@ public class DarkButtonPainter extends ButtonPainter {
     @Resource private Color clickBevelRightGradientBottom = PainterUtils.TRASPARENT;
     @Resource private Color clickBevelBottom = PainterUtils.TRASPARENT;
     
+    @Resource private Color disabledGradientTop = PainterUtils.TRASPARENT;
+    @Resource private Color disabledGradientBottom = PainterUtils.TRASPARENT;
+    @Resource private Color disabledBorderGradientTop = PainterUtils.TRASPARENT;
+    @Resource private Color disabledBorderGradientBottom = PainterUtils.TRASPARENT;
     
     
     public DarkButtonPainter() {
         GuiUtils.assignResources(this);
         
-        GradientPaint normalGradientRight = new GradientPaint(0,0, this.normalBevelRightGradientTop, 
+        GradientPaint normalRightGradient = new GradientPaint(0,0, this.normalBevelRightGradientTop, 
                 0, 1, this.normalBevelRightGradientBottom, false);
         
-        GradientPaint hoveredGradientRight = new GradientPaint(0,0, this.highlightBevelRightGradientTop, 
+        GradientPaint hoveredRightGradient = new GradientPaint(0,0, this.highlightBevelRightGradientTop, 
                 0, 1, this.highlightBevelRightGradientBottom, false);
         
-        GradientPaint clickedGradientRight = new GradientPaint(0,0, this.clickBevelRightGradientTop, 
+        GradientPaint clickedRightGradient = new GradientPaint(0,0, this.clickBevelRightGradientTop, 
                 0, 1, this.clickBevelRightGradientBottom, false);
+        
+        GradientPaint disabledBorderGradient = new GradientPaint(0,0, this.disabledBorderGradientTop, 
+                0, 1, this.disabledBorderGradientBottom, false);
         
         this.normalPainter = createPainter(this.normalGradientTop, this.normalGradientBottom,
                 this.border, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT,
-                normalGradientRight, this.normalBevelBottom, this.arcWidth, this.arcHeight, false);
+                normalRightGradient, this.normalBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
                 this.border,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                hoveredGradientRight, this.highlightBevelBottom, this.arcWidth, this.arcHeight, false);
+                hoveredRightGradient, this.highlightBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
                 this.border,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                clickedGradientRight, this.clickBevelBottom, this.arcWidth, this.arcHeight, false);
+                clickedRightGradient, this.clickBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
+        
+        this.disabledPainter = createPainter(this.disabledGradientTop, this.disabledGradientBottom,
+                disabledBorderGradient,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
+                PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, this.arcWidth, this.arcHeight, AccentType.NONE);
         
         this.setCacheable(false);
     }

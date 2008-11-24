@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
@@ -35,15 +36,15 @@ public class LightButtonPainter extends ButtonPainter {
         
         this.normalPainter = createPainter(this.backgroundGradientTop, this.backgroundGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, AccentType.BUBBLE);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT,  this.bevelTop1,  this.bevelTop2, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, AccentType.BUBBLE);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
                 this.borderColour,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, true);
+                gradientRight, this.bevelBottom, this.arcWidth, this.arcHeight, AccentType.BUBBLE);
         
         this.setCacheable(false);
     }
