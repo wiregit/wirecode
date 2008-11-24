@@ -146,12 +146,12 @@ public class ChatFriendImpl extends AbstractBean implements ChatFriend {
 
     @Override
     public boolean isSignedInToLimewire() {
-        Presence availPresence = getBestPresence();
-        if (availPresence == null) {
-            return false;
-        }
-        LimewireFeature feature = (LimewireFeature)availPresence.getFeature(LimewireFeature.ID);
-        return feature != null;
+        for (Presence presence : user.getPresences().values()) {
+            if (presence.getFeature(LimewireFeature.ID) != null) {
+                return true;
+            }
+         }
+        return false;
     }
 
     @Override

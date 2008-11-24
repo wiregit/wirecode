@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -41,7 +43,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final AddressFactory addressFactory;
     private final Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
     private final XMPPAuthenticator authenticator;
-    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+    private final EventMulticaster<FeatureEvent> featureSupport;
     private final List<XMPPConnectionImpl> connections;
     
     private AddressEvent lastAddressEvent;
@@ -53,14 +55,14 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
             Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
-            ListenerSupport<FriendPresenceEvent> presenceSupport) {
+            EventMulticaster<FeatureEvent> featureSupport) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
-        this.presenceSupport = presenceSupport;
+        this.featureSupport = featureSupport;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
         this.multipleConnectionsAllowed = false;
     }
@@ -111,7 +113,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
                 rosterBroadcaster.get(), fileOfferBroadcaster.get(),
                 libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                addressFactory, authenticator, presenceSupport);
+                addressFactory, authenticator, featureSupport);
         connection.initialize();
         // Give the new connection the latest information about our IP address
         // and firewall status

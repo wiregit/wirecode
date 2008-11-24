@@ -53,6 +53,9 @@ import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
+import org.limewire.core.api.friend.feature.features.LimewireFeature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -109,6 +112,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final ShareListManager shareListManager;
     private final IconManager iconManager;
     private final LibraryNavigator libraryNavigator;
+    private JXButton libraryButton;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
     private final ResultDownloader downloader;
@@ -119,7 +123,9 @@ public class ConversationPane extends JPanel implements Displayable {
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
-                            @Named("available") ListenerSupport<FriendEvent> friendSupport, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+                            @Named("available") ListenerSupport<FriendEvent> friendSupport,
+                            SaveLocationExceptionHandler saveLocationExceptionHandler,
+                            ListenerSupport<FeatureEvent> featureSupport) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.remoteFileItemFactory = remoteFileItemFactory;
@@ -177,6 +183,16 @@ public class ConversationPane extends JPanel implements Displayable {
                 }
             }
         });
+
+        featureSupport.addListener(new EventListener<FeatureEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FeatureEvent event) {
+                if (event.getSource().getFriend().getId().equals(friendId)) {
+                    handleFeatureUpdate(event);
+                }
+            }
+        });
     }
 
     @RuntimeTopicEventSubscriber(methodName="getMessageReceivedTopicName")
@@ -221,12 +237,27 @@ public class ConversationPane extends JPanel implements Displayable {
         }
     }
 
+    private void handleFeatureUpdate(FeatureEvent featureEvent) {
+        FeatureEvent.Type featureEventType = featureEvent.getType();
+        Feature feature = featureEvent.getData();
+
+        if (feature.getID().equals(LimewireFeature.ID)) {
+            if (featureEventType == FeatureEvent.Type.ADDED) {
+                libraryButton.setEnabled(true);
+            } else if (featureEventType == FeatureEvent.Type.REMOVED) {
+                libraryButton.setEnabled(false);
+            }
+        }
+    }
+
     public void closeChat() {
         try {
             writer.setChatState(ChatState.gone);
         } catch (XMPPException e) {
             LOG.error("Could not set chat state while closing the conversation", e);
         }
+
+        // TODO: remove listeners
     }
 
     public void destroy() {
@@ -285,7 +316,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private JPanel footerPanel(MessageWriter writer, ChatFriend chatFriend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
-        JXButton libraryButton = new JXButton(new LibraryAction());
+        libraryButton = new JXButton(new LibraryAction());
         if (!chatFriend.isSignedInToLimewire()) {
             libraryButton.setEnabled(false);
             libraryButton.setToolTipText(I18n.tr(DISABLED_LIBRARY_TOOLTIP, chatFriend.getName()));
@@ -304,6 +335,7 @@ public class ConversationPane extends JPanel implements Displayable {
     @Override
     public void handleDisplay() {
         editor.repaint();
+        libraryButton.repaint();
         inputPanel.handleDisplay();
     }
 

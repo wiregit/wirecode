@@ -22,6 +22,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
 public class AddressIQListener implements PacketListener {
@@ -31,24 +32,24 @@ public class AddressIQListener implements PacketListener {
     private volatile Address address;
     private final AddressFactory factory; 
     private final Map<String, Address> pendingAddresses;
-    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
-    private final EventListener<FriendPresenceEvent> presenceListener;
+    private final ListenerSupport<FeatureEvent> featureSupport;
+    private final EventListener<FeatureEvent> featureListener;
 
     public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
                              Address address,
-                             ListenerSupport<FriendPresenceEvent> presenceSupport) {
+                             ListenerSupport<FeatureEvent> featureSupport) {
         this.connection = connection;
         this.factory = factory;
         this.address = address;
         this.pendingAddresses = new HashMap<String, Address>();
-        this.presenceSupport = presenceSupport;
-        this.presenceListener = new PresenceListener();
-        presenceSupport.addListener(presenceListener);
+        this.featureSupport = featureSupport;
+        this.featureListener = new FeatureListener();
+        featureSupport.addListener(featureListener);
     }
     
     public void dispose() {
-        presenceSupport.removeListener(presenceListener);
+        featureSupport.removeListener(featureListener);
     }
 
     public void processPacket(Packet packet) {
@@ -114,36 +115,33 @@ public class AddressIQListener implements PacketListener {
         queryResult.setType(IQ.Type.SET);
         connection.sendPacket(queryResult);
     }
-    
-    private class PresenceListener implements EventListener<FriendPresenceEvent> {
-        @Override
-        public void handleEvent(final FriendPresenceEvent presenceEvent) {
-            switch(presenceEvent.getType()) {
-            case ADDED:
-                presenceEvent.getSource().getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {
-                    @BlockingEvent
-                    public void handleEvent(FeatureEvent featureEvent) {
-                        if(featureEvent.getType() == FeatureEvent.Type.ADDED
-                                && featureEvent.getData().getID().equals(LimewireFeature.ID)) {
-                            String jid = presenceEvent.getSource().getPresenceId();
-                            synchronized (AddressIQListener.this) {
-                                if(address != null) {
-                                    sendAddress(address, jid);
-                                }
-                                if(pendingAddresses.containsKey(jid)) {
-                                    LOG.debugf("updating address on presence {0} to {1}", jid, address);
-                                    presenceEvent.getSource().addFeature(new AddressFeature(pendingAddresses.remove(jid)));    
-                                }
+
+    private class FeatureListener implements EventListener<FeatureEvent> {
+
+        @BlockingEvent
+        public void handleEvent(FeatureEvent featureEvent) {
+            FriendPresence presence = featureEvent.getSource();
+            String jid = presence.getPresenceId();
+
+            switch(featureEvent.getType()) {
+                case ADDED:
+                    if (featureEvent.getData().getID().equals(LimewireFeature.ID)) {
+                        synchronized (AddressIQListener.this) {
+                            if (address != null) {
+                                sendAddress(address, jid);
+                            }
+                            if (pendingAddresses.containsKey(jid)) {
+                                LOG.debugf("updating address on presence {0} to {1}", jid, address);
+                                presence.addFeature(new AddressFeature(pendingAddresses.remove(jid)));
                             }
                         }
                     }
-                });
-                break;
-            case REMOVED:
-                synchronized (AddressIQListener.this) {
-                    pendingAddresses.remove(presenceEvent.getSource().getPresenceId());    
-                }
-                break;
+                    break;
+                case REMOVED:
+                    synchronized (AddressIQListener.this) {
+                        pendingAddresses.remove(jid);
+                    }
+                    break;
             }
         }
     }

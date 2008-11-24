@@ -14,6 +14,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.listener.EventListenerList;
 import org.limewire.ui.swing.friends.Message.Type;
@@ -32,11 +33,13 @@ public class ChatPanelHarness {
                 final MockLibraryManager libraryManager = new MockLibraryManager();
                 EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
                 final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
+                final EventListenerList<FeatureEvent> featureSupport = new EventListenerList<FeatureEvent>();
+                final 
                 FriendsPane friendsPane = new FriendsPane(icons, libraryManager, null, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {
-                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), null, null, null, friendSupport, null);
+                        return new ConversationPane(writer, chatFriend, loggedInID, libraryManager, new IconManagerStub(), null, null, null, friendSupport, null, featureSupport);
                     }
                 }, icons, friendsPane, new TopPanel(icons, null)));
                 

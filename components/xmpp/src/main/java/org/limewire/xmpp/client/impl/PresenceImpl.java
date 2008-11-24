@@ -8,13 +8,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.io.Address;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
+import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 
 class PresenceImpl implements Presence {
 
@@ -24,19 +29,20 @@ class PresenceImpl implements Presence {
     private final org.jivesoftware.smack.packet.Presence presence;
     private final User user;
     private Map<URI, Feature> features;
-    private EventListenerList<FeatureEvent> featureListeners;
+    private final EventMulticaster<FeatureEvent> featureListeners;
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
-                 User user) {
+                 User user, EventMulticaster<FeatureEvent> featureSupport) {
         this.presence = presence;
         this.user = user;
         features = new ConcurrentHashMap<URI, Feature>();
-        featureListeners = new EventListenerList<FeatureEvent>();
+        this.featureListeners = featureSupport;
     }
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
                  PresenceImpl currentPresence) {
-        this(presence, currentPresence.getUser());
+        this.presence = presence;
+        this.user = currentPresence.user;
         this.features = currentPresence.features;
         this.featureListeners = currentPresence.featureListeners;
     }

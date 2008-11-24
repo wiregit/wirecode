@@ -22,6 +22,7 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
@@ -31,22 +32,22 @@ public class AuthTokenIQListener implements PacketListener {
     private final XMPPConnectionImpl connection;
     private final XMPPAuthenticator authenticator;
     private final Map<String, byte []> pendingAuthTokens;
-    private final ListenerSupport<FriendPresenceEvent> presenceSupport;
-    private final EventListener<FriendPresenceEvent> presenceListener;
+    private final ListenerSupport<FeatureEvent> featureSupport;
+    private final EventListener<FeatureEvent> featureListener;
 
     public AuthTokenIQListener(XMPPConnectionImpl connection,
                                XMPPAuthenticator authenticator,
-                               ListenerSupport<FriendPresenceEvent> presenceSupport) {
+                               ListenerSupport<FeatureEvent> featureSupport) {
         this.connection = connection;
         this.authenticator = authenticator;
         this.pendingAuthTokens = new HashMap<String, byte[]>();
-        this.presenceSupport = presenceSupport;
-        this.presenceListener = new PresenceListener();
-        presenceSupport.addListener(presenceListener);
+        this.featureSupport = featureSupport;
+        this.featureListener = new FeatureListener();
+        featureSupport.addListener(featureListener);
     }
     
     public void dispose() {
-        presenceSupport.removeListener(presenceListener);
+        featureSupport.removeListener(featureListener);
     }
 
     public void processPacket(Packet packet) {
@@ -100,41 +101,38 @@ public class AuthTokenIQListener implements PacketListener {
             }
         };
     }
-    
-    private class PresenceListener implements EventListener<FriendPresenceEvent> {
-        @Override
-        public void handleEvent(final FriendPresenceEvent presenceEvent) {
-            switch(presenceEvent.getType()) {
-            case ADDED:
-                presenceEvent.getSource().getFeatureListenerSupport().addListener(new EventListener<FeatureEvent>() {                    
-                    @BlockingEvent
-                    public void handleEvent(FeatureEvent featureEvent) {
-                        if(featureEvent.getType() == FeatureEvent.Type.ADDED
-                                && featureEvent.getData().getID().equals(LimewireFeature.ID)) {
-                            synchronized (AuthTokenIQListener.this) {
-                                String jid = presenceEvent.getSource().getPresenceId();
-                                sendResult(presenceEvent.getSource());
-                                if(pendingAuthTokens.containsKey(jid)) {
-                                    byte [] authToken = pendingAuthTokens.remove(jid);
-                                    if(LOG.isDebugEnabled()) {
-                                        try {
-                                            LOG.debug("updating auth token on presence " + jid + " to " + new String(Base64.encodeBase64(authToken), "UTF-8"));
-                                        } catch (UnsupportedEncodingException e) {
-                                            LOG.error(e.getMessage(), e);
-                                        }
+
+    private class FeatureListener implements EventListener<FeatureEvent> {
+
+        @BlockingEvent
+        public void handleEvent(FeatureEvent featureEvent) {
+            FriendPresence presence = featureEvent.getSource();
+            String jid = presence.getPresenceId();
+
+            switch(featureEvent.getType()) {
+                case ADDED:
+                    if (featureEvent.getData().getID().equals(LimewireFeature.ID)) {
+                        synchronized (AuthTokenIQListener.this) {
+                            sendResult(presence);
+                            if (pendingAuthTokens.containsKey(jid)) {
+                                byte[] authToken = pendingAuthTokens.remove(jid);
+                                if (LOG.isDebugEnabled()) {
+                                    try {
+                                        LOG.debug("updating auth token on presence " + jid + " to " + new String(Base64.encodeBase64(authToken), "UTF-8"));
+                                    } catch (UnsupportedEncodingException e) {
+                                        LOG.error(e.getMessage(), e);
                                     }
-                                    presenceEvent.getSource().addFeature(new AuthTokenFeature(authToken));
                                 }
+                                presence.addFeature(new AuthTokenFeature(authToken));
                             }
                         }
                     }
-                });
-                break;
-            case REMOVED:
-                synchronized (AuthTokenIQListener.this) {
-                    pendingAuthTokens.remove(presenceEvent.getSource().getPresenceId());    
-                }
-                break;
+                    break;
+                case REMOVED:
+                    synchronized (AuthTokenIQListener.this) {
+                        pendingAuthTokens.remove(jid);
+                    }
+                    break;
             }
         }
     }

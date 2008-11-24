@@ -50,9 +50,9 @@ public class XMPPAddressResolver implements AddressResolver {
         
     }
     
-    @Inject void register(SocketsManager socketsManager, ListenerSupport<FriendPresenceEvent> presenceSupport) {
+    @Inject void register(SocketsManager socketsManager, ListenerSupport<FeatureEvent> featureSupport) {
         socketsManager.registerResolver(this);
-        presenceSupport.addListener(new PresenceHandler());
+        featureSupport.addListener(connectivyFeatureListener);
     }
     
     @Override
@@ -129,22 +129,7 @@ public class XMPPAddressResolver implements AddressResolver {
             observer.resolved(((AddressFeature)resolvedPresence.getFeature(AddressFeature.ID)).getFeature());
         }
     }
-    
-    private class PresenceHandler implements EventListener<FriendPresenceEvent> {
-        @Override
-        public void handleEvent(FriendPresenceEvent event) {
-            FriendPresence presence = event.getSource();
-            switch(event.getType()) {
-            case ADDED:
-                presence.getFeatureListenerSupport().addListener(connectivyFeatureListener);
-                break;
-            case REMOVED:
-                presence.getFeatureListenerSupport().removeListener(connectivyFeatureListener);
-                break;
-            }
-        }
-    }
-    
+
     private class ConnectivyFeatureListener implements EventListener<FeatureEvent> {
         @Override
         public void handleEvent(FeatureEvent event) {

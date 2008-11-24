@@ -6,6 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.friend.FriendEvent;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.impl.library.MockLibraryManager;
 import org.limewire.listener.EventListenerList;
 import org.limewire.ui.swing.friends.Message.Type;
@@ -50,7 +51,7 @@ public class ConversationPaneHarness {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        ConversationPane pane = new ConversationPane(writer, friend, "me", new MockLibraryManager(), iconManager, null, null, null, new EventListenerList<FriendEvent>(), null);
+                        ConversationPane pane = new ConversationPane(writer, friend, "me", new MockLibraryManager(), iconManager, null, null, null, new EventListenerList<FriendEvent>(), null, new EventListenerList<FeatureEvent>());
                         frame.add(pane);
                         
                         for(int i = 0; i < 10; i++) {
