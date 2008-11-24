@@ -9,7 +9,8 @@ import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.friends.FriendsPane;
+import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
+import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 
@@ -24,16 +25,20 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
     private final ShareListManager shareListManager;
 
-    private final FriendsPane friendsPane;
+    private final ChatFramePanel friendsPanel;
+    private final ChatFriendListPane friendsPane;
 
     private final LibraryNavigator libraryNavigator;
 
     @Inject
     public RemoteHostActionsImpl(RemoteLibraryManager remoteLibraryManager,
-            ShareListManager shareListManager, FriendsPane friendsPane, LibraryNavigator libraryNavigator, Navigator navigator) {
+            ShareListManager shareListManager, ChatFriendListPane friendsPane,
+            ChatFramePanel friendsPanel,
+            LibraryNavigator libraryNavigator, Navigator navigator) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
+        this.friendsPanel = friendsPanel;
         this.libraryNavigator = libraryNavigator;
     }
 
@@ -41,6 +46,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void chatWith(RemoteHost person) {
         LOG.debugf("chatWith: {0}", person.getRenderName());
         Friend friend = person.getFriendPresence().getFriend();
+        friendsPanel.setChatPanelVisible(true);
         friendsPane.fireConversationStarted(friend);
 
         // TODO make sure the input box for chat gets focus, the code is

@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +34,6 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
-import org.limewire.ui.swing.library.sharing.AllFriendsList;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -47,6 +46,7 @@ import org.limewire.ui.swing.util.PropertiableHeadings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
 public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFileItem> {
@@ -56,7 +56,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
     private final MetaDataManager metaDataManager;
-    private final AllFriendsList allFriends;
+    private final Collection<Friend> allFriends;
     private final ShareListManager shareListManager;
     private final Provider<LibraryNavigator> libraryNavigator; // provider to workaround circular ref
 
@@ -64,7 +64,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager,
             CategoryIconManager categoryIconManager, IconManager iconManager,
             PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
-            MetaDataManager metaDataManager, AllFriendsList allFriends, 
+            MetaDataManager metaDataManager, @Named("known") Collection<Friend> allFriends, 
             ShareListManager shareListManager,
             Provider<LibraryNavigator> libraryNavigator) {
         this.thumbnailManager = thumbnailManager;
@@ -81,7 +81,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
     @Override
     public Properties<LocalFileItem> newProperties() {
         return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, 
-                propertiableHeadings, magnetLinkFactory, metaDataManager, allFriends.getAllFriends(),
+                propertiableHeadings, magnetLinkFactory, metaDataManager, allFriends,
                 shareListManager, libraryNavigator.get());
     }
 
@@ -92,7 +92,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final IconManager iconManager;
         private final MetaDataManager metaDataManager;
         private final Map<FilePropertyKey, Object> changedProps = new HashMap<FilePropertyKey, Object>();
-        private final List<SharingTarget> allFriends;
+        private final Collection<Friend> allFriends;
         private final ShareListManager shareListManager;
         private final LibraryNavigator libraryNavigator;
         private final JPanel sharing = new JPanel();
@@ -106,7 +106,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private LocalFileItemProperties(ThumbnailManager thumbnailManager,
                 CategoryIconManager categoryIconManager, IconManager iconManager,
                 PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
-                MetaDataManager metaDataManager, List<SharingTarget> allFriends,
+                MetaDataManager metaDataManager, Collection<Friend> allFriends,
                 ShareListManager shareListManager, LibraryNavigator libraryNavigator) {
             super(propertiableHeadings, magnetLinkFactory);
             this.libraryNavigator = libraryNavigator;
@@ -243,10 +243,10 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         
         private List<Friend> getSharedWithList(LocalFileItem fileItem) {
             List<Friend> sharedWith = new ArrayList<Friend>();
-            for(SharingTarget friend : allFriends) {       
-                boolean isShared = shareListManager.getOrCreateFriendShareList(friend.getFriend()).getSwingModel().contains(fileItem);
+            for(Friend friend : allFriends) {       
+                boolean isShared = shareListManager.getOrCreateFriendShareList(friend).contains(fileItem.getFile());
                 if (isShared) {
-                    sharedWith.add(friend.getFriend());
+                    sharedWith.add(friend);
                 }
             }
             return sharedWith;

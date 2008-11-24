@@ -24,6 +24,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -45,15 +46,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.SignoffEvent;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -61,7 +60,6 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -95,10 +93,9 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
      * list of shared friends
      */
     private EventList<SharingTarget> shareFriendList;
-    /**
-     * list of all friends
-     */
-    private List<SharingTarget> allFriends;
+    
+    /** list of all friends */
+    private Collection<Friend> allFriends;
 
     private JScrollPane shareScroll;
 
@@ -158,7 +155,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     private AWTEventListener eventListener;
     
     
-    public LibrarySharePanel(List<SharingTarget> allFriends) {
+    public LibrarySharePanel(Collection<Friend> allFriends) {
         //TODO clean up constructor
         GuiUtils.assignResources(this);
         
@@ -185,7 +182,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         
         shareLabel = new JLabel(I18n.tr("Currently sharing with"));
         
-        shareFriendList = GlazedListsFactory.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        shareFriendList = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
        
         shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
@@ -219,7 +216,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             }
         };
         
-        noShareFriendList = GlazedLists.threadSafeList(GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator()));
+        noShareFriendList = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
       //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         final TextMatcherEditor<SharingTarget>textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
@@ -342,12 +339,8 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
 
         gbc.gridy++;
         mainPanel.add(bottomLabel, gbc);
-        
-        
                 
-        add(mainPanel);
-
-        EventAnnotationProcessor.subscribe(this);   
+        add(mainPanel);   
         
         setKeyStrokes(this);
         setKeyStrokes(mainPanel);
@@ -533,16 +526,6 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
        // adjustPainter();
     }
     
-     
-    
-    @EventSubscriber
-    public void handleSignoff(SignoffEvent event) {
-        shareFriendList.clear();
-        noShareFriendList.clear();
-        allFriends.clear();
-    }
-    
-    
     public boolean contains(Component c) {
         for (; c != null; c = c.getParent()) {
             if (c == this || c == comboPopup) {
@@ -569,8 +552,8 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
             loadFriend(SharingTarget.GNUTELLA_SHARE);
         }
         
-        for (SharingTarget friend : allFriends) {
-            loadFriend(friend);
+        for (Friend friend : allFriends) {
+            loadFriend(new SharingTarget(friend));
         }
     }
     

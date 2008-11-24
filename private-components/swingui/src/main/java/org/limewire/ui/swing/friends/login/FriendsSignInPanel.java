@@ -4,11 +4,12 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.lifecycle.Service;
@@ -17,11 +18,9 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperLinkButton;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
-import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -31,13 +30,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FriendsSignInPanel extends JXPanel {
+public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
     private final HyperLinkButton shareLabel;
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
     private final XMPPService xmppService;
     private final XMPPAccountConfigurationManager accountManager;
+    
+    private long lastFailedTime = -1;
     
     @Inject
     FriendsSignInPanel(LoginPanel loginPanel,
@@ -47,19 +48,17 @@ public class FriendsSignInPanel extends JXPanel {
         this.loggedInPanel = loggedInPanel;
         this.loginPanel = loginPanel;
         this.xmppService = xmppService;
-        this.accountManager = accountManager;
-        EventAnnotationProcessor.subscribe(this);
-        
+        this.accountManager = accountManager;        
         setLayout(new VerticalLayout(0));
         
-        shareLabel = new HyperLinkButton(I18n.tr("Share files with your friends!"), new AbstractAction() {
+        shareLabel = new HyperLinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                shareLabel.setVisible(false);
                 FriendsSignInPanel.this.loginPanel.setVisible(true);
             }
         });
         shareLabel.setMouseOverColor(Color.BLUE);
-        FontUtils.changeSize(shareLabel, -1);
         add(shareLabel);
         add(loginPanel);
         add(loggedInPanel);
@@ -76,6 +75,53 @@ public class FriendsSignInPanel extends JXPanel {
             loginPanel.setVisible(false);
             loggedInPanel.setVisible(false);
         }
+        
+        loginPanel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                if(!FriendsSignInPanel.this.loggedInPanel.isVisible()) {
+                    shareLabel.setVisible(true);
+                }
+            }
+        });
+    }
+    
+    @Override
+    public boolean isSignedIn() {
+        return xmppService.isLoggedIn();
+    }
+    
+    @Override
+    public void signIn() {        
+        if(!xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
+            XMPPAccountConfiguration config = accountManager.getAutoLoginConfig();
+            if(config == null) {
+                shareLabel.setVisible(false);
+                loginPanel.setVisible(true);
+                loggedInPanel.setVisible(false);
+            } else {
+                autoLogin(config);
+            }
+        }
+    }
+    
+    @Override
+    public void signOut(final boolean switchUser) {
+        BackgroundExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                xmppService.logout();
+                if(switchUser) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            accountManager.setAutoLoginConfig(null);
+                            signIn();
+                        }
+                    });
+                }
+            }
+        });
     }
     
     private void connecting(XMPPConnectionConfiguration config) {
@@ -94,19 +140,31 @@ public class FriendsSignInPanel extends JXPanel {
     
     private void disconnected(Exception reason) {
         XMPPAccountConfiguration config = accountManager.getAutoLoginConfig();
+        long now = System.currentTimeMillis();
+        boolean ignore = false;
         
         if(reason == null && config != null) {
-            loggedInPanel.setVisible(true);
             shareLabel.setVisible(false);
             loginPanel.setVisible(false);
+            loggedInPanel.setVisible(true);
         } else {
-            loggedInPanel.setVisible(false);
-            shareLabel.setVisible(true);
-            loginPanel.setVisible(reason != null);
+            if(reason == null && loginPanel.isVisible() && now-lastFailedTime<500) {
+                // Ignore failures with no reason if a failure with a reason came
+                // in shortly ago.  This is necessary because we get two
+                // disconnection events from smack on a failed login.
+                ignore = true;
+            } else {
+                shareLabel.setVisible(reason == null);
+                loginPanel.setVisible(reason != null);
+                loggedInPanel.setVisible(false);
+            }
         }
         
-        loginPanel.disconnected(reason);
-        loggedInPanel.disconnected(reason, config);   
+        if(!ignore) {
+            lastFailedTime = now;
+            loginPanel.disconnected(reason);
+            loggedInPanel.disconnected(reason, config);
+        }
     }
     
     private void autoLogin(XMPPAccountConfiguration config) {
@@ -169,21 +227,5 @@ public class FriendsSignInPanel extends JXPanel {
                 }
             }
         });
-    }
-    
-    @EventSubscriber
-    public void handleAppear(DisplayFriendsToggleEvent event) {       
-        if(event.getVisible() == null | Boolean.TRUE.equals(event.getVisible())) {
-            if(!xmppService.isLoggedIn() && !xmppService.isLoggingIn()) {
-                XMPPAccountConfiguration config = accountManager.getAutoLoginConfig();
-                if(config == null) {
-                    shareLabel.setVisible(true);
-                    loginPanel.setVisible(true);
-                    loggedInPanel.setVisible(false);
-                } else {
-                    autoLogin(config);
-                }
-            }
-        }
     }
 }

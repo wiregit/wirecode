@@ -1,5 +1,11 @@
 package org.limewire.friend.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.listener.EventBroadcaster;
@@ -21,6 +27,7 @@ class FriendListListeners {
     private final EventBroadcaster<FriendEvent> knownBroadcaster;
     private final EventBroadcaster<FriendEvent> availableBroadcaster;
     private final EventBroadcaster<FriendPresenceEvent> friendPresenceBroadcaster;
+    private final Map<String, Friend> knownFriends = new ConcurrentHashMap<String, Friend>();
     
     @Inject
     FriendListListeners(@Named("known") EventBroadcaster<FriendEvent> knownBroadcaster,
@@ -61,7 +68,7 @@ class FriendListListeners {
         });
     }
     
-    private void addKnownFriend(User user) {
+    private void addKnownFriend(User user) {        
         user.addPresenceListener(new EventListener<PresenceEvent>() {
             @Override
             public void handleEvent(PresenceEvent event) {
@@ -82,10 +89,14 @@ class FriendListListeners {
                 }
             }
         });
+        
+        knownFriends.put(user.getId(), user);        
         knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.ADDED));
     }
     
     private void removeKnownFriend(User user, boolean delete) {
+        knownFriends.remove(user.getId());
+        
         if(delete) {
             knownBroadcaster.broadcast(new FriendEvent(user, FriendEvent.Type.DELETE));
         }
@@ -108,6 +119,10 @@ class FriendListListeners {
             availableBroadcaster.broadcast(new FriendEvent(presence.getFriend(), FriendEvent.Type.REMOVED));
         }
         friendPresenceBroadcaster.broadcast(new FriendPresenceEvent(presence, FriendPresenceEvent.Type.REMOVED));
+    }
+
+    Collection<Friend> getKnownFriends() {
+        return Collections.unmodifiableCollection(knownFriends.values());        
     }
 
 }

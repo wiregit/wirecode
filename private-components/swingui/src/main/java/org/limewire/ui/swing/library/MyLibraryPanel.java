@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,7 +34,6 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
-import org.limewire.ui.swing.library.sharing.AllFriendsList;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
 import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
@@ -56,9 +56,10 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 
 class MyLibraryPanel extends LibraryPanel {
-    private AllFriendsList allFriendsList;
+    private Collection<Friend> allFriends;
     private ShareListManager shareListManager;
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
@@ -72,12 +73,12 @@ class MyLibraryPanel extends LibraryPanel {
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
-                          AllFriendsList allFriendsList,
+                          @Named("known") Collection<Friend> allFriends,
                           LimeHeaderBarFactory headerBarFactory){
         super(null, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
-        this.allFriendsList = allFriendsList;
+        this.allFriends = allFriends;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;
        
@@ -90,7 +91,7 @@ class MyLibraryPanel extends LibraryPanel {
 
     @Override
     public void loadHeader() {
-        shareAllPanel = new LibrarySharePanel(allFriendsList.getAllFriends());
+        shareAllPanel = new LibrarySharePanel(allFriends);
         shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
     }
 
@@ -111,7 +112,7 @@ class MyLibraryPanel extends LibraryPanel {
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {
         
         //TODO: can this be a singleton??? 
-        final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriendsList.getAllFriends());
+        final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriends);
         addDisposable(sharePanel);
         
         sharePanel.setShareModel(new FileShareModel(shareListManager));

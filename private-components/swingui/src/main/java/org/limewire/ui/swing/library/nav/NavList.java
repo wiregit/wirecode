@@ -202,6 +202,7 @@ class NavList extends JXPanel {
         panel.setParentList(null);
         navPanels.remove(panel);
         panelContainer.remove(panel);
+        panelContainer.validate();
         checkVisibility();
     }
     

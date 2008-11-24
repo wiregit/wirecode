@@ -1,166 +1,67 @@
 package org.limewire.ui.swing.statusbar;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.Icon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.friends.AvailableOption;
-import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
-import org.limewire.ui.swing.friends.DndOption;
-import org.limewire.ui.swing.friends.FriendsUtil;
-import org.limewire.ui.swing.friends.IconLibrary;
-import org.limewire.ui.swing.friends.SelfAvailabilityUpdateEvent;
-import org.limewire.ui.swing.friends.SignoffAction;
-import org.limewire.ui.swing.friends.SignoffEvent;
-import org.limewire.ui.swing.friends.XMPPConnectionEstablishedEvent;
+import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-// Note: this should not be public, but needs to be for EventBus to work properly.
-public class FriendStatusPanel implements UnseenMessageListener {
+class FriendStatusPanel {
 
-    private final IconLibrary icons;
     private final JXButton friendsButton;
-    private final JMenu statusMenu;
-    private final ButtonGroup availabilityButtonGroup;
-    private final JCheckBoxMenuItem availablePopupItem;
-    private final JCheckBoxMenuItem dndPopupItem;
-    private final UnseenMessageFlasher flasher;
     
     private Component mainComponent;
     
-    @Inject FriendStatusPanel(IconLibrary icons) {
-        this.icons = icons;
-        
-        JMenuBar menuBar = new JMenuBar();
+    @Inject FriendStatusPanel(final FriendActions friendActions, final ChatFramePanel friendsPanel) {
         Color whiteBackground = Color.WHITE;
-        menuBar.setBackground(whiteBackground);
-        menuBar.setOpaque(true);
-        menuBar.setBorderPainted(false);
         JPanel menuPanel = new JPanel(new BorderLayout());
         menuPanel.setBorder(BorderFactory.createLineBorder(new Color(159, 159, 159)));
         menuPanel.setOpaque(true);
         menuPanel.setMinimumSize(new Dimension(0, 20));
         menuPanel.setMaximumSize(new Dimension(150, 20));
-        menuPanel.add(menuBar, BorderLayout.WEST);
         menuPanel.setBackground(whiteBackground);
         
-        statusMenu = new JMenu();
-        statusMenu.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        statusMenu.setOpaque(true);
-        statusMenu.setEnabled(false);
-        statusMenu.setIcon(icons.getEndChat());
-        statusMenu.setBackground(whiteBackground);
-        statusMenu.setBorderPainted(false);
-        menuBar.add(statusMenu);
-        friendsButton = new JXButton(new FriendsAction(I18n.tr("Chat")));
+        friendsButton = new JXButton(new AbstractAction(I18n.tr("Chat")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!friendActions.isSignedIn()) {
+                    friendActions.signIn();
+                } else {
+                    friendsPanel.toggleVisibility();
+                }
+            }
+        });
         friendsButton.setBackgroundPainter(new RectanglePainter<JXButton>(whiteBackground, whiteBackground));
         menuPanel.add(friendsButton, BorderLayout.EAST);
         
-        statusMenu.add(new SignoffAction());
-        statusMenu.addSeparator();
-        availablePopupItem = new JCheckBoxMenuItem(new AvailableOption());
-        statusMenu.add(availablePopupItem);
-        dndPopupItem = new JCheckBoxMenuItem(new DndOption());
-        statusMenu.add(dndPopupItem);
-        //Set the menu location so that the popup will appear up instead of the default down for menus
-        statusMenu.setMenuLocation(0, (statusMenu.getPopupMenu().getPreferredSize().height * -1));
-        availabilityButtonGroup = new ButtonGroup();
-        availabilityButtonGroup.add(availablePopupItem);
-        availabilityButtonGroup.add(dndPopupItem);
-        
-        updateStatus(I18n.tr("Chat"), icons.getEndChat(), I18n.tr("Offline"));
-        
-        this.flasher = new UnseenMessageFlasher(friendsButton);
+        friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(friendsButton));       
         
         mainComponent = menuPanel;
-        
-        EventAnnotationProcessor.subscribe(this);
     }
     
     Component getComponent() {
         return mainComponent;
     }
     
-    @EventSubscriber
-    public void handleSigninEvent(XMPPConnectionEstablishedEvent event) {
-        updateStatus(I18n.tr("Chat"), FriendsUtil.getIcon(Mode.available, icons), I18n.tr(Mode.available.toString()));
-        statusMenu.setEnabled(true);
-    }
-    
-    
-    private void updateStatus(String buttonText, Icon icon, String status) {
-        friendsButton.setText(buttonText);
-        statusMenu.setIcon(icon);
-        statusMenu.setToolTipText(tr("{0} - click to set status", status));
-    }
-    
-    @EventSubscriber
-    public void handleSignoffEvent(SignoffEvent event) {
-        updateStatus(I18n.tr("Chat"), icons.getEndChat(), I18n.tr("Offline"));
-        statusMenu.setEnabled(false);
-    }
-    
-    @EventSubscriber
-    public void handleStatusChange(SelfAvailabilityUpdateEvent event) {
-        Mode newMode = event.getNewMode();
-        updateStatus(friendsButton.getText(), FriendsUtil.getIcon(newMode, icons), I18n.tr(newMode.toString()));
-        ButtonModel model = newMode == Mode.available ? availablePopupItem.getModel() :
-                            (newMode == Mode.dnd) ? dndPopupItem.getModel() : null;
-        if (model != null) {
-            availabilityButtonGroup.setSelected(model, true);
-        }
-    }
-
-    private class FriendsAction extends AbstractAction {
-        public FriendsAction(String title) {
-            super(title);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            new DisplayFriendsToggleEvent().publish();
-        }
-    }
-
-    @Override
-    public void clearUnseenMessages() {
-        flasher.reset();
-    }
-
-    @Override
-    public void unseenMessagesReceived() {
-        flasher.flash();
-    }
-    
-    private static class UnseenMessageFlasher {
+    private static class UnseenMessageFlasher implements UnseenMessageListener {
         private static Painter<JXButton> BLACK_BACKGROUND_PAINTER = new RectanglePainter<JXButton>(Color.BLACK, Color.BLACK);
         private boolean hasFlashed;
         private final JXButton flashingButton;
@@ -173,6 +74,17 @@ public class FriendStatusPanel implements UnseenMessageListener {
             
             this.originalBackgroundPainter = flashingButton.getBackgroundPainter();
         }
+        
+        @Override
+        public void clearUnseenMessages() {
+            reset();
+        }
+
+        @Override
+        public void unseenMessagesReceived() {
+            flash();
+        }
+        
 
         public void flash() {
             if (!hasFlashed) {

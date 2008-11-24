@@ -31,9 +31,9 @@ public class FileMenu extends JMenu {
 
     @Inject
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
-            LibraryManager libraryManager, final MainPanel mainPanel,
+            LibraryManager libraryManager, MainPanel mainPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
-            SearchHandler searchHandler, final AudioPlayer audioPlayer) {
+            SearchHandler searchHandler, AudioPlayer audioPlayer, SignInOutAction signInOutAction) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(new OpenFileAction(navigator, I18n.tr("&Open File"), downloadListManager, mainPanel,
@@ -45,7 +45,7 @@ public class FileMenu extends JMenu {
         add(new AddFileAction(I18n.tr("Add File To Library"), mainPanel, libraryManager));
         add(new AddFolderAction(I18n.tr("Add Folder To Library"), libraryManager, mainPanel));
         addSeparator();
-        add(new SignInOutAction());
+        add(signInOutAction);
         addSeparator();
         add(new AbstractAction(I18n.tr("E&xit")) {
             @Override

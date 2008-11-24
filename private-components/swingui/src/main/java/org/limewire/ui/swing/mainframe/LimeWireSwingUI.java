@@ -14,6 +14,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
+import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.player.PlayerPanel;
@@ -34,7 +35,7 @@ public class LimeWireSwingUI extends JPanel {
     public LimeWireSwingUI(
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
-            SearchHandler searchHandler, FriendsPanel friendsPanel,
+            SearchHandler searchHandler, ChatFramePanel friendsPanel,
             TrayNotifier trayNotifier, AudioPlayer player,
             LimeMenuBar limeMenuBar, DownloadSummaryPanel downloadSummaryPanel) {
     	GuiUtils.assignResources(this);

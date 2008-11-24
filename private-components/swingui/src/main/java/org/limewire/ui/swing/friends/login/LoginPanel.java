@@ -27,13 +27,13 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.components.ActionLabel;
-import org.limewire.ui.swing.friends.XMPPEventHandler;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -44,6 +44,8 @@ import com.google.inject.Singleton;
 @Singleton
 class LoginPanel extends JXPanel {
 
+    // private static final Log LOG = LogFactory.getLog(LoginPanel.class);
+    
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
@@ -56,16 +58,14 @@ class LoginPanel extends JXPanel {
     private JCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
     private JButton signInButton;
-    private final XMPPEventHandler xmppEventHandler;
     private final XMPPAccountConfigurationManager accountManager;
+    private final XMPPService xmppService;
     private final SignInAction signinAction = new SignInAction();
-    // private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 
     @Inject
-    LoginPanel(XMPPEventHandler xmppEventHandler,
-            XMPPAccountConfigurationManager accountManager) {
-        this.xmppEventHandler = xmppEventHandler;
+    LoginPanel(XMPPAccountConfigurationManager accountManager, XMPPService xmppService) {
         this.accountManager = accountManager;
+        this.xmppService = xmppService;
         GuiUtils.assignResources(this);
         initComponents();
     }
@@ -193,7 +193,7 @@ class LoginPanel extends JXPanel {
         authFailedLabel.setVisible(false);
         BackgroundExecutorService.execute(new Runnable() {
             public void run() {
-                xmppEventHandler.login(config);
+                xmppService.login(config);
             }
         });            
     }

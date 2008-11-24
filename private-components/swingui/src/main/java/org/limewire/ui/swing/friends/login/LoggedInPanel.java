@@ -17,12 +17,9 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
-import org.limewire.ui.swing.friends.DisplayFriendsToggleEvent;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
-import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 
@@ -36,18 +33,17 @@ class LoggedInPanel extends JXPanel {
     private final JButton switchUserButton;
     private final LimeComboBox optionsBox;
     private final LimeComboBox signoutBox;
-    private final XMPPService xmppService;
     private final XMPPAccountConfigurationManager accountManager;
-    private XMPPConnectionConfiguration config;
+    private final FriendActions friendActions;
     
     @Inject
     LoggedInPanel(LimeComboBoxFactory comboFactory,
-                  XMPPService xmppService,
-                  XMPPAccountConfigurationManager accountManager) {
+                  XMPPAccountConfigurationManager accountManager,
+                  FriendActions friendActions) {
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
         
-        this.xmppService = xmppService;
         this.accountManager = accountManager;
+        this.friendActions = friendActions;
         optionsBox = comboFactory.createMiniComboBox();
         signoutBox = comboFactory.createMiniComboBox();
         statusMenuLabel = new JLabel();        
@@ -102,37 +98,20 @@ class LoggedInPanel extends JXPanel {
         signoutBox.addAction(new AbstractAction(I18n.tr("Switch user")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                accountManager.setAutoLoginConfig(null);
-                BackgroundExecutorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        xmppService.logout();
-                    }
-                });
+                friendActions.signOut(true);
             }
         });
         signoutBox.addAction(new AbstractAction(I18n.tr("Sign out")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                BackgroundExecutorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        xmppService.logout();
-                    }
-                });
+                friendActions.signOut(false);
             }
         });
         
         signInButton.setAction(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final XMPPConnectionConfiguration loginConfig = config;
-                BackgroundExecutorService.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        xmppService.login(loginConfig);
-                    }
-                });
+                friendActions.signIn();
             }
         });
         
@@ -140,7 +119,7 @@ class LoggedInPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 accountManager.setAutoLoginConfig(null);
-                new DisplayFriendsToggleEvent(true).publish();
+                friendActions.signIn();
             }
         });
         
@@ -164,7 +143,6 @@ class LoggedInPanel extends JXPanel {
     }
     
     private void setConfig(XMPPConnectionConfiguration config) {
-        this.config = config;
         if(config != null) {
             currentUser.setText(config.getUsername());
             statusMenuLabel.setText(I18n.tr("Set {0} status", config.getLabel()));
