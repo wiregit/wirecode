@@ -8,6 +8,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
 class SearchHighlightUtil {
+    private static final Pattern FIND_SPACES = Pattern.compile(" ");
     private static final Log LOG = LogFactory.getLog(SearchHighlightUtil.class);
 
     private SearchHighlightUtil() {
@@ -24,7 +25,8 @@ class SearchHighlightUtil {
         
         StringBuilder bldr = new StringBuilder();
         int index = 0;
-        Matcher matcher = Pattern.compile("\\b(" + Matcher.quoteReplacement(search.replaceAll(" ", "|")) + ")", Pattern.CASE_INSENSITIVE).matcher(content);
+        String scrubbedSearch = FIND_SPACES.matcher(search).replaceAll("|");
+        Matcher matcher = Pattern.compile("\\b(" + Matcher.quoteReplacement(scrubbedSearch) + ")", Pattern.CASE_INSENSITIVE).matcher(content);
         index = 0;
         while (matcher.find()) {
             MatchResult result = matcher.toMatchResult();
@@ -40,7 +42,7 @@ class SearchHighlightUtil {
 
         if (bldr.length() > 0) {
             bldr.append(content.substring(index));
-            return "<html>" + bldr.toString() + "</html>";
+            return bldr.toString();
         }
         return content;
     }

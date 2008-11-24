@@ -16,6 +16,8 @@ import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
 public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
+    private static final String OPEN_HTML = "<html>";
+    private static final String CLOSE_HTML = "</html>";
     private static final String EMPTY_STRING = "";
     private final Log LOG = LogFactory.getLog(getClass());
     private final PropertyKeyComparator AUDIO_COMPARATOR = 
@@ -77,6 +79,9 @@ public class ListViewRowHeightRuleImpl implements ListViewRowHeightRule {
             }
         }
         
+        if (subheading.length() > 0) {
+            subheading = OPEN_HTML + subheading + CLOSE_HTML;
+        }
         return new RowDisplayResultImpl(config, heading, propertyMatch, subheading, vsr.isSpam(), vsr.getDownloadState());
     }
 

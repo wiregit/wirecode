@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdesktop.beans.AbstractBean;
 import org.limewire.core.api.Category;
@@ -25,6 +27,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
+    private static final Pattern findHTMLTags = Pattern.compile("[<][/]?[\\w]*[>]");
 
     private final Log LOG = LogFactory.getLog(getClass());
 
@@ -51,6 +54,10 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     private boolean preExistingDownload = false;
     
     private Double relevance = null;
+    
+    private String cachedHeading;
+    
+    private String cachedSubHeading;
 
     public SearchResultAdapter(List<SearchResult> sourceValue, PropertiableHeadings propertiableHeadings) {
         this.coreResults = sourceValue;
@@ -271,12 +278,35 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
 
     @Override
     public String getHeading() {
-        return propertiableHeadings.getHeading(this);
+        if (cachedHeading == null) {
+            cachedHeading =  sanitize(propertiableHeadings.getHeading(this));
+        }
+        return cachedHeading;
+    }
+    
+    /**
+     * This method checks for HTML encoding in the content of the supplied string.
+     * If found, the encoding is stripped from the string and this result is marked as
+     * spam.  
+     * @param input
+     * @return The stripped string is returned (or the same string if no HTML encoding
+     * is found).
+     */
+    private String sanitize(String input) {
+        Matcher matcher = findHTMLTags.matcher(input);
+        if (matcher.find()) {
+            setSpam(true);
+            return matcher.replaceAll("");
+        }
+        return input;
     }
 
     @Override
     public String getSubHeading() {
-        return propertiableHeadings.getSubHeading(this);
+        if (cachedSubHeading == null) {
+            cachedSubHeading = sanitize(propertiableHeadings.getSubHeading(this));
+        }
+        return cachedSubHeading;
     }
 
     @Override

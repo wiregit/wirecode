@@ -39,14 +39,6 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
         assertEquals(expected, bldr.getHeadingDocument(NIGHT_LIFE, BasicDownloadState.DOWNLOADED, false, false));
     }
 
-    public void testFileInLibraryHeadingWhenInputStringNeedsExistingHTMLTagsStrippedDocument() {
-        String expected = 
-            bldr.documentStartHTML + "<span class=\"title\">Night life</span> is in <a href=\"#library\">Your Library</a>" + DOCUMENT_END;
-        String input = "<html>" + NIGHT_LIFE + "</html>";
-        assertEquals(expected, bldr.getHeadingDocument(input, BasicDownloadState.LIBRARY, false, false));
-        assertEquals(expected, bldr.getHeadingDocument(input, BasicDownloadState.DOWNLOADED, false, false));
-    }
-    
     public void testHandleSpam() {
         String expected = 
             bldr.documentStartHTML + "<span class=\"title\">Night life</span> is Spam" + DOCUMENT_END;

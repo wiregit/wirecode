@@ -4,17 +4,22 @@ import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 public class MockPropertiableHeadings implements PropertiableHeadings {
+    public String heading;
+    public String subheading;
 
+
+    public int getHeadingCalledCount;
     @Override
     public String getHeading(PropertiableFile propertiable) {
-        // TODO Auto-generated method stub
-        return null;
+        getHeadingCalledCount++;
+        return heading;
     }
 
+    public int getSubHeadingCalledCount;
     @Override
     public String getSubHeading(PropertiableFile propertiable) {
-        // TODO Auto-generated method stub
-        return null;
+        getSubHeadingCalledCount++;
+        return subheading;
     }
 
 }

@@ -18,16 +18,16 @@ public class SearchHighlightUtilTest extends TestCase {
     }
     
     public void testMatchOneWordSearch() {
-        assertEquals("<html>i like <b>foo</b>d</html>", highlight("foo", "i like food"));
+        assertEquals("i like <b>foo</b>d", highlight("foo", "i like food"));
     }
     
     public void testMatchTwoWordSearch() {
-        assertEquals("<html>i like the <b>foo</b>d <b>bar</b> in the mall</html>", 
+        assertEquals("i like the <b>foo</b>d <b>bar</b> in the mall", 
                 highlight("foo bar", "i like the food bar in the mall"));
     }
 
     public void testMatchCaseInsensitively() {
-        assertEquals("<html>i like the <b>foo</b>d <b>bar</b> in the mall</html>", 
+        assertEquals("i like the <b>foo</b>d <b>bar</b> in the mall", 
                 highlight("FoO bAr", "i like the food bar in the mall"));
     }
     
@@ -37,7 +37,7 @@ public class SearchHighlightUtilTest extends TestCase {
     }
     
     public void testMultipleSearchMatchesAndOneExclusion() {
-        assertEquals("<html><b>foo</b> <b>foo</b>ey ooff <b>hoo</b>faa</html>", 
+        assertEquals("<b>foo</b> <b>foo</b>ey ooff <b>hoo</b>faa", 
                 highlight("foo faa hoo", "foo fooey ooff hoofaa"));
     }
 }

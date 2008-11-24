@@ -66,6 +66,18 @@ public class ListViewRowHeightRuleTest extends TestCase {
         assertStuff(BasicDownloadState.NOT_STARTED, "foo", HeadingAndSubheading, false, true);
         assertStuff(BasicDownloadState.NOT_STARTED, "baz", HeadingAndSubheading, false, true);
     }
+    
+    public void testHeadingNotWrappedInHTMLButSubheadingIs() {
+        mock.setDownloadState(BasicDownloadState.NOT_STARTED);
+        mock.setSubHeading("bar");
+        mock.setDownloadState(BasicDownloadState.NOT_STARTED);
+        RowDisplayResult result = rule.getDisplayResult(mock, "foo");
+        //Only subheading is explicitly wrapped in HTML tags by the listviewrowheightrule.
+        //The heading is wrapped in tags elsewhere later in the processing chain but subheading
+        //is more simple and is wrapped here.
+        assertEquals("<b>Foo</b>", result.getHeading());
+        assertEquals("<html>bar</html>", result.getSubheading());
+    }
 
     public void testHeadingSubHeadingAndMetadata() {
         mock.setHeading("bar");
