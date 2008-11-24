@@ -37,7 +37,7 @@ public class ItunesDownloadListener implements EventListener<DownloadStatusEvent
             File saveFile = downloader.getSaveFile();
             if(saveFile != null) {
                 if (iTunesSettings.ITUNES_SUPPORT_ENABLED.getValue()) {
-                    //itunesMediator.addSong(saveFile);
+                    itunesMediator.addSong(saveFile);
                 }
             }
         }
