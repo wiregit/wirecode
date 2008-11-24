@@ -60,6 +60,9 @@ public class RecentDownloadListener implements EventListener<DownloadStatusEvent
         }
     }
 
+    /**
+     * Orders files from least to most recent.
+     */
     private class FileDateComparator implements Comparator<File> {
         @Override
         public int compare(File o1, File o2) {

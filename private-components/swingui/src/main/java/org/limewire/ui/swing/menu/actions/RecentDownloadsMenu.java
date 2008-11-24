@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.Action;
@@ -70,9 +71,9 @@ public class RecentDownloadsMenu extends JMenu {
         synchronized (DownloadSettings.RECENT_DOWNLOADS) {
             files = new ArrayList<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
         }
-        
-        Collections.sort(files);
-        
+
+        Collections.sort(files, new FileDateComparator());
+
         if (files.size() > 0) {
             for (final File file : files) {
                 addRecentDownloadAction(file);
@@ -112,5 +113,15 @@ public class RecentDownloadsMenu extends JMenu {
                 }
             }
         });
+    }
+
+    /**
+     * Orders files from most to least recent.
+     */
+    private class FileDateComparator implements Comparator<File> {
+        @Override
+        public int compare(File o1, File o2) {
+            return -1 * Long.valueOf(o1.lastModified()).compareTo(Long.valueOf(o2.lastModified()));
+        }
     }
 }
