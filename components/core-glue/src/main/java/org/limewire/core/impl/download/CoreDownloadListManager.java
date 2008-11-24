@@ -23,12 +23,13 @@ import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.core.impl.download.listener.ItunesDownloadListenerFactory;
+import org.limewire.core.impl.download.listener.RecentDownloadListener;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.magnet.MagnetLinkImpl;
 import org.limewire.core.impl.search.CoreSearch;
 import org.limewire.core.impl.search.MediaTypeConverter;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
-import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -70,6 +71,7 @@ public class CoreDownloadListManager implements DownloadListManager {
 	private final QueueTimeCalculator queueTimeCalculator;
     private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
+    private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
     
     private static final int PERIOD = 1000;
     
@@ -79,11 +81,12 @@ public class CoreDownloadListManager implements DownloadListManager {
 	public CoreDownloadListManager(DownloadManager downloadManager,
             DownloadListenerList listenerList, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor,
-            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager) {
+            RemoteFileDescFactory remoteFileDescFactory, ActivityCallback activityCallback, SpamManager spamManager, ItunesDownloadListenerFactory itunesDownloadListenerFactory) {
 	    this.downloadManager = downloadManager;
 	    this.remoteFileDescFactory = remoteFileDescFactory;
 	    this.activityCallback = activityCallback;
         this.spamManager = spamManager;
+        this.itunesDownloadListenerFactory = itunesDownloadListenerFactory;
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedListsFactory.threadSafeList(
 	            GlazedListsFactory.observableElementList(new BasicEventList<DownloadItem>(), downloadConnector));
@@ -263,6 +266,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             downloader.setAttribute(DOWNLOAD_ITEM, item, false);
             downloader.addListener(new TorrentListener(downloader));
             downloader.addListener(new RecentDownloadListener(downloader));
+            downloader.addListener(itunesDownloadListenerFactory.createListener(downloader));
             list.add(item);
             urnMap.put(item.getUrn(), item);
         }
@@ -327,35 +331,6 @@ public class CoreDownloadListManager implements DownloadListManager {
                                 downloadManager.downloadTorrent(saveFile, overwrite);
                             }
                         }, sle, false);
-                    }
-                }
-            }
-        }
-        
-        
-        /**
-         * Listens for the completion of downloads, adding completed downloads to the DownloadSettings.RECENT_DOWNLOADS list.
-         */
-        private class RecentDownloadListener implements EventListener<DownloadStatusEvent> {
-            private final Downloader downloader;
-            public RecentDownloadListener(Downloader downloader) {
-                this.downloader = Objects.nonNull(downloader, "downloader");
-                if(downloader.getState() == DownloadStatus.COMPLETE) {
-                    if(downloader instanceof CoreDownloader) {
-                        handleEvent(new DownloadStatusEvent((CoreDownloader)downloader, DownloadStatus.COMPLETE));
-                    }
-                }
-            }
-            @Override
-            public void handleEvent(DownloadStatusEvent event) {
-                //TODO don't do anything for torrent downloads?
-                DownloadStatus downloadStatus = event.getType();
-                if(DownloadStatus.COMPLETE == downloadStatus) {
-                    File saveFile = downloader.getSaveFile();
-                    if(saveFile != null) {
-                        if(DownloadSettings.REMEMBER_RECENT_DOWNLOADS.getValue()) {
-                            DownloadSettings.RECENT_DOWNLOADS.add(saveFile);
-                        }
                     }
                 }
             }
