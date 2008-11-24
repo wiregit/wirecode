@@ -49,13 +49,7 @@ public class AddressToken extends Token {
             throw new IllegalStateException("must initialize IPFilter after deserializing.");
         
         int logDistance = ipFilter.get().logMinDistanceTo(new IP(address));
-        // Constants 1600 and 3.3 chosen such that:
-        // Same /24 subnet as a banned IP results in a rating of 0.07
-        // Same /16 subnet as a banned IP results in a rating of 0.01
-        if(logDistance == 32)
-            rating = 0; // Whitelisted
-        else
-            rating = (float) (1600 * Math.pow(1+logDistance, -3.3));
+        rating = 1 - (logDistance / 32f); // Between 0 and 1
         ratingInitialized = true;
     }
     

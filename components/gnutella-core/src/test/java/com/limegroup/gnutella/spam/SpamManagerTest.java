@@ -33,6 +33,8 @@ public class SpamManagerTest extends LimeTestCase {
     private static final String addr2 = "2.2.2.2";
     private static final String addr3 = "3.3.3.3";
     private static final String addr4 = "4.4.4.4";
+    private static final String blacklistAddress = "5.5.5.5";
+    private static final String blacklistRange = "5.*.*.*";
     
     /** ports */
     private static final int port1 = 1, port2 = 2, port3 = 3, port4 = 4;
@@ -76,6 +78,8 @@ public class SpamManagerTest extends LimeTestCase {
         SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f);
         String[] whitelist = new String[] {addr1, addr2, addr3, addr4}; 
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(whitelist);
+        String[] blacklist = new String[] {blacklistRange};
+        FilterSettings.HOSTILE_IPS.setValue(blacklist);
         
         urn1 = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         urn2 = URN.createSHA1Urn("urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB");
@@ -351,6 +355,18 @@ public class SpamManagerTest extends LimeTestCase {
         RemoteFileDesc unrelated = createRFD(privateAddress, port2, mushroom, null, urn2, size2);
         assertFalse(unrelated.isSpam());
         assertEquals(0f, unrelated.getSpamRating());
+    }
+    
+    public void testBlacklistAffects() throws Exception {
+        // A result arrives from a whitelisted address - not spam
+        RemoteFileDesc white = createRFD(addr1, port1, badger, null, urn1, size1);
+        assertFalse(white.isSpam());
+        assertEquals(0f, white.getSpamRating());
+        
+        // An identical result arrives from a blacklisted address - spam
+        RemoteFileDesc black = createRFD(blacklistAddress, port1, badger, null, urn1, size1);
+        assertTrue(black.isSpam());
+        assertEquals(1f, black.getSpamRating());
     }
 
     private RemoteFileDesc createRFD(String addr, int port,
