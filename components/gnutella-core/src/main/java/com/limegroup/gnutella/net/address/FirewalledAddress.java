@@ -34,8 +34,7 @@ public class FirewalledAddress implements Address {
         this.fwtVersion = fwtVersion;
         if (fwtVersion > 0) {
             if (!NetworkUtils.isValidIpPort(publicAddress)) {
-                // TODO fberger comment in after alpha release
-//                throw new IllegalArgumentException("inconsistent firewalled address: " + this);
+                throw new IllegalArgumentException("inconsistent firewalled address: " + this);
             }
         }
     }
