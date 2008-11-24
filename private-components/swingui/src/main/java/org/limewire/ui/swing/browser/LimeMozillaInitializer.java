@@ -72,6 +72,7 @@ public class LimeMozillaInitializer {
     }
 
     private static void installFlashLinux(File xulInstallPath) {
+        //TODO move logic to .deb? or prompt before doing, this can be a security risk
         File pluginsDir = new File(xulInstallPath, "/xulrunner/plugins");
 
         if (OSUtils.isLinux()) {
