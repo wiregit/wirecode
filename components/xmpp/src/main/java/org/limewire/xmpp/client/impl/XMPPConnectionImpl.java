@@ -147,7 +147,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     public void logout() {
         synchronized (this) {
-            if(isLoggedIn()) {
+            if(connection != null) {
                 if (LOG.isInfoEnabled())
                     LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
                 connection.disconnect();

@@ -125,6 +125,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             connection.login();
         } catch(XMPPException e) {
             connections.remove(connection);
+            connection.logout();
             LOG.error(e.getMessage(), e);
             connectionBroadcaster.get().broadcast(new XMPPConnectionEvent(connection, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
         }
