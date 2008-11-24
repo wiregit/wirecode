@@ -49,7 +49,7 @@ public class RecentDownloadListener implements EventListener<DownloadStatusEvent
                             files = new ArrayList<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
                         }
                         files.add(saveFile);
-                        Collections.sort(files, new FileDateComparator());
+                        Collections.sort(files, new FileDateLeastToMostRecentComparator());
                         while(files.size() > MAX_TRACKED_DOWNLOADS) {
                             files.remove(0);
                         }
@@ -63,7 +63,7 @@ public class RecentDownloadListener implements EventListener<DownloadStatusEvent
     /**
      * Orders files from least to most recent.
      */
-    private class FileDateComparator implements Comparator<File> {
+    private class FileDateLeastToMostRecentComparator implements Comparator<File> {
         @Override
         public int compare(File o1, File o2) {
             return Long.valueOf(o1.lastModified()).compareTo(Long.valueOf(o2.lastModified()));

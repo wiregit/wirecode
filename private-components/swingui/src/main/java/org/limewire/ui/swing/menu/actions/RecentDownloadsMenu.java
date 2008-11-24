@@ -72,7 +72,7 @@ public class RecentDownloadsMenu extends JMenu {
             files = new ArrayList<File>(DownloadSettings.RECENT_DOWNLOADS.getValue());
         }
 
-        Collections.sort(files, new FileDateComparator());
+        Collections.sort(files, new FileDateMostToLeastRecentComparator());
 
         if (files.size() > 0) {
             for (final File file : files) {
@@ -118,7 +118,7 @@ public class RecentDownloadsMenu extends JMenu {
     /**
      * Orders files from most to least recent.
      */
-    private class FileDateComparator implements Comparator<File> {
+    private class FileDateMostToLeastRecentComparator implements Comparator<File> {
         @Override
         public int compare(File o1, File o2) {
             return -1 * Long.valueOf(o1.lastModified()).compareTo(Long.valueOf(o2.lastModified()));
