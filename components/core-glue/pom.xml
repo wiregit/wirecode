@@ -55,5 +55,20 @@
 	      <artifactId>mozilla-glue</artifactId>
 	      <version>mozswing1.9-06242008</version>
 	 </dependency>
+	 <dependency>
+	      <groupId>mozilla</groupId>
+	      <artifactId>mozilla-glue</artifactId>
+	      <version>mozswing1.9-06242008</version>
+	 </dependency>
+	 <dependency> 
+      <groupId>net.sf.jacob-project</groupId> 
+      <artifactId>jacob</artifactId>
+      <version>1.14.1</version>
+    </dependency>
+	 <dependency>
+      <groupId>iTunes</groupId>
+      <artifactId>iTunes</artifactId>
+      <version>0.0.1</version>
+    </dependency>
   </dependencies>
 </project>
