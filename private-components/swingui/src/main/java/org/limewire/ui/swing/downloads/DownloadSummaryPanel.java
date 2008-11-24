@@ -296,7 +296,7 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
 	    @Resource private Icon resumeIconDown;
 
 		public DownloadSummaryPanelRendererEditor() {
-            setLayout(new MigLayout("ins 0, gap 0! 0!, novisualpadding"));
+            setLayout(new MigLayout("ins 0, nogrid, gap 0! 0!, novisualpadding"));
 			GuiUtils.assignResources(this);
 			
 			statusLabel = new JLabel();			
@@ -335,12 +335,11 @@ public class DownloadSummaryPanel extends JXPanel implements VisibleComponent {
             buttons = new JButton[]{pauseButton, resumeButton, launchButton, shareButton, tryAgainButton, removeButton};
                         
 			setOpaque(false);
-			
-			add(nameLabel, "wrap");
-			add(progressBar, "hidemode 3, pushx");
-            add(statusLabel, "hidemode 3, pushx");
+			add(nameLabel, "bottom, left, gapleft 15, gapright 15, gapbottom 6, wrap");
+			add(progressBar, "top, left, gapleft 15, gapright 2, hidemode 3");
+            add(statusLabel, "top, left, gapleft 15, gapright 2, hidemode 3");
             for(JButton button : buttons){
-                add(button, "hidemode 3");
+                add(button, "hidemode 3, gapright 15");
             }
 			
 //	        GridBagConstraints gbc = new GridBagConstraints();
