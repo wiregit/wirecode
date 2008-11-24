@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-17 11:30-0500\n"
+"POT-Creation-Date: 2008-11-24 11:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -146,45 +146,45 @@ msgstr ""
 msgid "Developing LimeWire costs real money. Get PRO."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:50
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:51
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:52
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:53
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:54
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:55
 msgid ""
 "LimeWire was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:56
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:57
 msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:60
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:61
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:62
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:63
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:64
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:65
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
@@ -192,7 +192,7 @@ msgid ""
 "Save Folder."
 msgstr ""
 
-#: components/io/src/main/java/org/limewire/io/IOUtils.java:66
+#: components/io/src/main/java/org/limewire/io/IOUtils.java:67
 msgid ""
 "LimeWire was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
@@ -221,6 +221,7 @@ msgstr ""
 msgid "Away"
 msgstr ""
 
+#. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:35
 msgid "Away for a while"
 msgstr ""
@@ -314,7 +315,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:129
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:133
 msgid "Network Management"
 msgstr ""
 
@@ -355,16 +356,6 @@ msgstr ""
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
-msgstr ""
-
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:168
-#, java-format
-msgid "You have already downloaded {0}"
-msgstr ""
-
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:173
-#, java-format
-msgid "You are already downloading this file to {0}"
 msgstr ""
 
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:32
@@ -436,7 +427,7 @@ msgstr ""
 msgid "Spam Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1004
+#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1007
 msgid "Update Checks"
 msgstr ""
 
@@ -641,14 +632,14 @@ msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:36
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:501
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:503
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:39
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:506
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:508
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
@@ -2578,27 +2569,27 @@ msgstr ""
 msgid "Get LimeWire PRO Later"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:284
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:286
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:489
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:491
 #, java-format
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:588
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:590
 msgid ""
 "<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
 "b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
 "limewire.com</a> and download the newest official version of LimeWire.</html>"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:607
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:609
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a Microsoft patch is required or a firewall is "
@@ -2607,7 +2598,7 @@ msgid ""
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:620
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:622
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a firewall is blocking access. To continue using "
