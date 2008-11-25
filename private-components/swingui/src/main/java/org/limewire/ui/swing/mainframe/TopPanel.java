@@ -10,7 +10,6 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -136,10 +135,6 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setHighlightPainter(null);
         searchList.setTabInsets(new Insets(0,10,3,10));
                 
-        // TODO: there is a strange bug that forces the tab list under the bottom
-        //        of the component so this is necessary for now.
-        searchList.setBorder(BorderFactory.createEmptyBorder(0,0,2,0));
-        
         setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
         add(homeButton);
         add(storeButton);
