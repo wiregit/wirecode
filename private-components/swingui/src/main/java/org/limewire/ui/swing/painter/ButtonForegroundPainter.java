@@ -9,10 +9,26 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.ui.swing.components.LimeComboBox;
 
+/**
+ * Painter to be used to extend general font and icon behaviour to all
+ *  custom drawn buttons.  Should only be accessed through it's factory
+ *  to avoid resource duplication.  
+ *  
+ *  NOTE: Will not respect icon alignment
+ */
 public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
 
-    private final Paint pressedForeground = null;
-    private final Paint hoverForeground = null;
+    private final Paint pressedForeground;
+    private final Paint hoverForeground;
+    
+    ButtonForegroundPainter() {
+        this(null, null);
+    }
+        
+    ButtonForegroundPainter(Paint pressedForeground, Paint hoverForeground) {
+        this.pressedForeground = pressedForeground;
+        this.hoverForeground = hoverForeground;        
+    }
     
     @Override
     protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
