@@ -18,6 +18,7 @@ import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.support.MockSupportModule;
 import org.limewire.core.impl.xmpp.MockXmppModule;
+import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.AbstractModule;
 
@@ -28,6 +29,7 @@ public class MockModule extends AbstractModule {
         bind(Application.class).to(MockApplication.class);
         bind(GnutellaConnectionManager.class).to(MockConnectionManagerImpl.class);
         bind(GuiCallbackService.class).to(MockGuiCallbackService.class);
+        bind(ServiceRegistry.class).to(MockServiceRegistry.class);
 
         install(new MockLifeCycleModule());
         install(new MockDaapModule());

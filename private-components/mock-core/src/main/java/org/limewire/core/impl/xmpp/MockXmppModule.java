@@ -1,5 +1,9 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
@@ -23,8 +27,7 @@ public class MockXmppModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(XMPPService.class).to(MockXmppService.class);
-        //FIXME: Commented out until build configuration that would allow XMPPConnectionConfigurationMock can be sorted out.
-//        bind(XMPPConnectionConfiguration.class).to(XMPPConnectionConfigurationMock.class);
+        
         EventMulticaster<RosterEvent> rosterMulticaster = new EventMulticasterImpl<RosterEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);
         bind(new TypeLiteral<ListenerSupport<RosterEvent>>(){}).toInstance(rosterMulticaster);
@@ -53,6 +56,8 @@ public class MockXmppModule extends AbstractModule {
         bind(new TypeLiteral<ListenerSupport<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
         bind(XMPPResourceFactory.class).to(MockXmppResourceFactory.class);
+        
+        bind(new TypeLiteral<Collection<Friend>>(){}).annotatedWith(Names.named("known")).toInstance(new ArrayList<Friend>());
     }
 
 }
