@@ -22,15 +22,15 @@ class PresenceImpl implements Presence {
 
     private final org.jivesoftware.smack.packet.Presence presence;
     private final User user;
-    private Map<URI, Feature> features;
-    private final EventBroadcaster<FeatureEvent> featureListeners;
+    private final Map<URI, Feature> features;
+    private final EventBroadcaster<FeatureEvent> featureBroadcaster;
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
                  User user, EventBroadcaster<FeatureEvent> featureSupport) {
         this.presence = presence;
         this.user = user;
-        features = new ConcurrentHashMap<URI, Feature>();
-        this.featureListeners = featureSupport;
+        this.features = new ConcurrentHashMap<URI, Feature>();
+        this.featureBroadcaster = featureSupport;
     }
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
@@ -38,7 +38,7 @@ class PresenceImpl implements Presence {
         this.presence = presence;
         this.user = currentPresence.user;
         this.features = currentPresence.features;
-        this.featureListeners = currentPresence.featureListeners;
+        this.featureBroadcaster = currentPresence.featureBroadcaster;
     }
 
     @Override
@@ -112,14 +112,14 @@ class PresenceImpl implements Presence {
     @Override
     public void addFeature(Feature feature) {
         features.put(feature.getID(), feature);
-        featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.ADDED, feature));
+        featureBroadcaster.broadcast(new FeatureEvent(this, FeatureEvent.Type.ADDED, feature));
     }
 
     @Override
     public void removeFeature(URI id) {
         Feature feature = features.remove(id);
         if(feature != null) {
-            featureListeners.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
+            featureBroadcaster.broadcast(new FeatureEvent(this, FeatureEvent.Type.REMOVED, feature));
         }
     }
 }
