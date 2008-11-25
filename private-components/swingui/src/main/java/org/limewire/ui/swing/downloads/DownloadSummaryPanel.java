@@ -40,6 +40,7 @@ import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
 import org.limewire.ui.swing.downloads.table.DownloadPopupHandler;
+import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableCell;
 import org.limewire.ui.swing.downloads.table.DownloadTableEditor;
 import org.limewire.ui.swing.downloads.table.DownloadTableRenderer;
@@ -89,7 +90,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     private AbstractDownloadTable table;
 
 	private JLabel header;
-	private JButton moreButton;
+	private JXHyperlink moreButton;
 	private EventList<DownloadItem> allList;
     private RangeList<DownloadItem> chokeList;    
 
@@ -102,10 +103,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Resource private Font itemFont; 
     @Resource private Color fontColor; 
     @Resource private Icon downloadIcon;
-  //  @Resource private Icon downloadCompletedIcon;
+    @Resource private Icon downloadCompletedIcon;
     @Resource private Icon minimizeIcon;
     @Resource private Icon minimizeIconHover;
     @Resource private Icon minimizeIconDown;
+    @Resource private int panelHeight;
 
 
     
@@ -147,7 +149,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		DownloadSummaryPanelRendererEditor rendererPanel = new DownloadSummaryPanelRendererEditor();
 		DownloadTableRenderer renderer = new DownloadTableRenderer(rendererPanel);
 		table.setDefaultRenderer(DownloadItem.class, renderer);
-        table.setRowHeight(45);
+        table.setRowHeight(panelHeight);
         
 
         final DownloadSummaryPanelRendererEditor editorPanel = new DownloadSummaryPanelRendererEditor();
@@ -212,7 +214,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
         moreButton = new JXHyperlink();
         moreButton.setText(I18n.tr("<HTML><U><B>See all</B> {0}</U></HTML>", "   "));
-        moreButton.setForeground(blueForeground);
+        moreButton.setUnclickedColor(blueForeground);
+        moreButton.setClickedColor(blueForeground);
         moreButton.setFont(seeAllFont);
         
         MouseListener navMouseListener = createDownloadNavListener();
@@ -226,21 +229,43 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 forceInvisibility(true);
             }
         });
+        
+        initializeDownloadCompleteListener();
 
         setLayout(new MigLayout("nocache, ins 0, gap 0! 0!, novisualpadding"));
         
         
         add(header, "gapleft 8, aligny 50%");
-        add(tableScroll, "gapleft 12, aligny 50%, growx, push");
+        add(tableScroll, "gapleft 12, aligny 50%, growx, growy, push");
         add(moreButton, "aligny 50%");
         add(minimizeButton, "aligny 0%, alignx 100%");
 		
 		updateTitle();
 		addListeners();
 		
-		setMinimumSize(new Dimension(0, 50));
+		setMinimumSize(new Dimension(0, panelHeight));
 	}
 
+    private void initializeDownloadCompleteListener(){
+        EventList<DownloadItem> completeDownloads = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.DONE));
+        completeDownloads.addListEventListener(new ListEventListener<DownloadItem>(){
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+                allList.getReadWriteLock().readLock().lock();
+                try {
+                    while(listChanges.nextBlock()) {
+                        if(listChanges.getType() == ListEvent.INSERT){
+                            //only change icon if MainDownloadPanel is not showing
+                            if (!navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).isSelected()) {
+                                header.setIcon(downloadCompletedIcon);
+                            }
+                          }
+                    }
+                } finally {
+                    allList.getReadWriteLock().readLock().unlock();
+                }
+            }});
+    }
 
     private MouseListener createDownloadNavListener() {
         final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
@@ -259,6 +284,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             @Override
             public void itemSelected(boolean selected) {
                 setVisibility(!selected);
+                header.setIcon(downloadIcon);
             }
         });
         return navMouseListener;
@@ -314,12 +340,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         private final JLabel statusLabel;
 	    private final JButton pauseButton;
 	    private final JButton resumeButton; 
-        private final JButton launchButton; 
-        private final JButton shareButton;
-        private final JButton tryAgainButton;
-        private final JButton removeButton;
-	    
-	    private final JButton[] buttons;
+        private final JXHyperlink launchButton; 
+        private final JXHyperlink shareButton;
+        private final JXHyperlink tryAgainButton;
+        private final JXHyperlink removeButton;
+
+        private final JButton[] linkButtons;
+        private final JButton[] buttons;
 		
 	    @Resource private Icon pauseIcon;
 	    @Resource private Icon pauseIconHover;
@@ -352,14 +379,16 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             launchButton = new JXHyperlink();
             launchButton.setText(I18n.tr("Launch"));
             launchButton.setFont(itemFont);
-            launchButton.setForeground(blueForeground);
+            launchButton.setUnclickedColor(blueForeground);
+            launchButton.setClickedColor(blueForeground);
             launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
             FontUtils.bold(launchButton);
             FontUtils.underline(launchButton);
             
             shareButton = new JXHyperlink();
             shareButton.setText(I18n.tr("Share"));
-            shareButton.setForeground(blueForeground);
+            shareButton.setUnclickedColor(blueForeground);
+            shareButton.setClickedColor(blueForeground);
             //shareButton.setActionCommand(DownloadActionHandler.SHARE_COMMAND);
             FontUtils.underline(shareButton);
             FontUtils.bold(shareButton);
@@ -367,7 +396,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             tryAgainButton = new JXHyperlink();
             tryAgainButton.setText(I18n.tr("Try again"));
             tryAgainButton.setFont(itemFont);
-            tryAgainButton.setForeground(blueForeground);
+            tryAgainButton.setUnclickedColor(blueForeground);
+            tryAgainButton.setClickedColor(blueForeground);
             tryAgainButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
             FontUtils.bold(tryAgainButton);
             FontUtils.underline(tryAgainButton);
@@ -375,24 +405,29 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             removeButton = new JXHyperlink();
             removeButton.setText(I18n.tr("Remove"));
             removeButton.setFont(itemFont);
-            tryAgainButton.setForeground(blueForeground);
+            removeButton.setUnclickedColor(blueForeground);
+            removeButton.setClickedColor(blueForeground);
             removeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
             FontUtils.bold(removeButton);
             FontUtils.underline(removeButton);
-            
-            buttons = new JButton[]{pauseButton, resumeButton, launchButton, shareButton, tryAgainButton, removeButton};
+
+            linkButtons = new JButton[]{launchButton, shareButton, tryAgainButton, removeButton};
+            buttons = new JButton[]{pauseButton, resumeButton};
                         
 			setOpaque(false);
 
-            setLayout(new MigLayout("fill, ins 0, nogrid, gap 0! 0!, novisualpadding"));
-            
-			add(nameLabel, /*"gapbottom 6,*/"bottom, left, gapleft 15, gapright 15, wrap");
-			add(progressBar, "top, left, gapleft 15, gapright 2, hidemode 3");
-            add(statusLabel, "top, left, gapleft 15, gapright 2, hidemode 3");
+            setLayout(new MigLayout("fill, ins 0 0 0 0 , nogrid, gap 0! 0!, novisualpadding"));
+          
+            add(nameLabel, "bottom, left, gapleft 15, gapright 15, wrap");
+			add(progressBar, "top, left,gapleft 15, gapright 2, gaptop 6, hidemode 3");
+            add(statusLabel, "top, left, gapleft 15, gapright 2, gaptop 6, hidemode 3");
+            for(JButton button : linkButtons){
+                add(button, "top, hidemode 3, gaptop 6, gapright 15");
+            }            
+
             for(JButton button : buttons){
-                add(button, "top, hidemode 3, gapright 15");
+                add(button, "top, hidemode 3, gaptop 4, gapright 15");
             }
-            
 		}
 		
 
@@ -400,7 +435,10 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         public void update(DownloadItem item){
             nameLabel.setText(item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
-            if (progressBar.isVisible()) { }
+            if (progressBar.isVisible()) { 
+                progressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
+                progressBar.setEnabled(item.getState() == DownloadState.DOWNLOADING);
+            }
             
             pauseButton.setVisible(item.getState() == DownloadState.DOWNLOADING);
             resumeButton.setVisible(item.getState() == DownloadState.PAUSED);
@@ -435,23 +473,23 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             case ERROR:         
                 return I18n.tr("Unable to download: ");            
             case LOCAL_QUEUED:
-                long queueTime = item.getRemainingQueueTime();
-                if(queueTime == DownloadItem.UNKNOWN_TIME){
-                    return I18n.tr("Queued - remaining time unknown");                
-                } else {
-                    return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
-                }
+                return getQueueTime(item.getRemainingQueueTime());                
             case REMOTE_QUEUED:
-                if(item.getQueuePosition() == -1){
-                    return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(item.getRemainingQueueTime()));
-                }
-                return I18n.trn("Queued - {0} person ahead of you for this file",
-                        "Queued - {0} people ahead of you for this file",
-                        item.getQueuePosition(), item.getQueuePosition());
+                if(item.getQueuePosition() == -1 || item.getQueuePosition() == Integer.MAX_VALUE){
+                    return getQueueTime(item.getRemainingQueueTime());
+                } 
+                return I18n.tr("Queued - #{0} in line", item.getQueuePosition());
             default:
                 throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
+            }            
+        }
+        
+        private String getQueueTime(long queueTime){
+            if(queueTime == DownloadItem.UNKNOWN_TIME){
+                return I18n.tr("Queued - remaining time unknown");                
+            } else {
+                return I18n.tr("Queued - Starting in {0}", CommonUtils.seconds2time(queueTime));
             }
-            
         }
 
 
@@ -463,6 +501,10 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
         @Override
         public void setEditorListener(ActionListener editorListener) {
+            for (JButton button : linkButtons){
+                button.addActionListener(editorListener);
+            }
+            
             for (JButton button : buttons){
                 button.addActionListener(editorListener);
             }

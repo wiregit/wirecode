@@ -450,15 +450,10 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
                     GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
                     item.getPercentComplete());
         case LOCAL_QUEUED:
-            long queueTime = item.getRemainingQueueTime();
-            if(queueTime == DownloadItem.UNKNOWN_TIME){
-                return I18n.tr("Queued - remaining time unknown");                
-            } else {
-                return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
-            }
+            return getQueueTimeMessage(item.getRemainingQueueTime());
         case REMOTE_QUEUED:
-            if(item.getQueuePosition() == -1){
-                return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(item.getRemainingQueueTime()));
+            if(item.getQueuePosition() == -1 || item.getQueuePosition() == Integer.MAX_VALUE){
+                return getQueueTimeMessage(item.getRemainingQueueTime());
             }
             return I18n.trn("Queued - {0} person ahead of you for this file",
                     "Queued - {0} people ahead of you for this file",
@@ -467,6 +462,14 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
         }
         
+    }
+    
+    private String getQueueTimeMessage(long queueTime){
+        if(queueTime == DownloadItem.UNKNOWN_TIME){
+            return I18n.tr("Queued - remaining time unknown");                
+        } else {
+            return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
+        }
     }
 
     @Override

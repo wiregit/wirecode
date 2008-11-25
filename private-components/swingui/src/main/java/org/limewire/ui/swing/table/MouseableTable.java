@@ -3,6 +3,7 @@ package org.limewire.ui.swing.table;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -341,8 +342,9 @@ public class MouseableTable extends StripedJXTable {
 
     //clears mouseover color
     private void maybeCancelEditing() {
+        Point mousePosition = getMousePosition();
         if (getCellEditor() != null && 
-                (getMousePosition() == null || rowAtPoint(getMousePosition()) == -1 || columnAtPoint(getMousePosition()) == -1)){
+                (mousePosition == null || rowAtPoint(mousePosition) == -1 || columnAtPoint(mousePosition) == -1)){
             getCellEditor().cancelCellEditing();
         } 
     }
