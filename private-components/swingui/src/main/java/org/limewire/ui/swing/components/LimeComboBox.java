@@ -5,8 +5,6 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -32,7 +29,6 @@ import javax.swing.event.PopupMenuListener;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FontUtils;
-import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.util.Objects;
 
 /** A combobox rendered in the LimeWire 5.0 style. */
@@ -47,11 +43,6 @@ public class LimeComboBox extends JXButton {
     /** Listeners that will be notified when a new item is selected. */
     private final List<SelectionListener> selectionListeners 
         = new ArrayList<SelectionListener>();
-    
-    /** The color to render the text when the combobox is pressed. */
-    private Color pressedTextColour  = null;
-    /** The color to render the text when the combobox is rolled over. */
-    private Color rolloverTextColour = null;
     
     /** True if you've supplied a custom menu via {@link #overrideMenu(JPopupMenu)} */
     private boolean customMenu = false;
@@ -244,14 +235,7 @@ public class LimeComboBox extends JXButton {
             }
         });
     }
-    
-    /** Sets the colors of the text when the button is rolled over, pressed, and normal. */
-    public void setForegrounds(Color regular, Color hover, Color down) {
-        setForeground(regular);
-        setRolloverForeground(hover);
-        setPressedForeground(down);
-    }
-    
+        
     /** Sets the icons of the combobox when the button is rolled over, pressed, and normal. */
     public void setIcons(Icon regular, Icon hover, Icon down) {
         setIcon(regular);
@@ -278,35 +262,7 @@ public class LimeComboBox extends JXButton {
             return icon;
         }
     }
-    
-    /** Sets the rollover foreground color of the text. */
-    public void setRolloverForeground(Color colour) {
-        rolloverTextColour = colour;
-    }
-    
-    /** Retrieves the current rollover text foreground. */
-    public Color getRolloverForeground() {
-        if (rolloverTextColour == null)  {
-            return getForeground();
-        } else {
-            return rolloverTextColour;
-        }
-    }
-    
-    /** Sets the new foreground color for text when the combobox is pressed. */
-    public void setPressedForeground(Color colour) {
-        pressedTextColour = colour;
-    }
-    
-    /** Gets the text foreground color when the combobox is pressed. */
-    public Color getPressedForeground() {
-        if (pressedTextColour == null)  {
-            return getForeground();
-        } else {
-            return pressedTextColour;
-        }
-    }
-    
+        
     @Override
     public boolean isOpaque() {
         return false;
@@ -320,66 +276,6 @@ public class LimeComboBox extends JXButton {
     }
     
     
-    
-    // TODO: use ButtonForegroundPainters
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;        
-
-        if (getBackgroundPainter() != null) {
-            Object origHints = g2.getRenderingHints();
-            getBackgroundPainter().paint(g2, this, getWidth(), getHeight());  
-            g2.setRenderingHints((Map<?, ?>) origHints);
-        }
-        
-        g2.setFont(getFont());
-        
-        int ix1 = 0;
-        int ix2 = 0;
-        int iy2 = 0;
-        
-        if (getBorder() != null) {
-            Insets insets = getBorder().getBorderInsets(this);
-            ix1 = insets.left;
-            ix2 = insets.right;
-            iy2 = insets.bottom;
-        }
-        
-        int y = getHeight() - getHeight()/2 + g.getFontMetrics().getAscent()/2 - iy2;
-        
-        Icon icon = getIcon();
-                
-        if (getModel().isPressed()) {
-            icon = getPressedIcon();
-            g2.setColor(getPressedForeground());
-        }
-        else if (getModel().isRollover()) {
-            icon = getRolloverIcon();
-            g2.setColor(getRolloverForeground());
-        }
-        else {
-            g2.setColor(getForeground());
-        }
-            
-        if (getText() != null) {
-            PainterUtils.drawSmoothString(g2, getText(), ix1,  y);
-            
-            if (icon != null) {
-                icon.paintIcon(this, g2, getWidth() - ix2 + 3, 
-                        getHeight()/2 - icon.getIconHeight()/2);
-            }
-        } else {
-            if (selectedAction != null) {
-                PainterUtils.drawSmoothString(g2, (String)selectedAction.getValue(Action.NAME), ix1, 
-                        y);
-            }
-            
-            if (icon != null) {                
-                icon.paintIcon(this, g2, getWidth() - ix2 + icon.getIconWidth(), 
-                        getHeight()/2 - icon.getIconHeight()/2);
-            }
-        }
-    }
     
     /**
      * Sets whether or not clicking the combobox forces the menu to display.

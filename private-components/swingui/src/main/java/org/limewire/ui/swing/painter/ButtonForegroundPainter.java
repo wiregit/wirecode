@@ -21,13 +21,29 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     private final Paint pressedForeground;
     private final Paint hoverForeground;
     
+    /**
+     * Creates a button foreground painter that does not
+     *  change it's font colour based on mouse state.
+     *  
+     *  NOTE: This should not be used as a shortcut to creating
+     *          buttons since it will ignore the default app style
+     *          -- instead use the factory
+     */
     ButtonForegroundPainter() {
         this(null, null);
     }
-        
-    ButtonForegroundPainter(Paint pressedForeground, Paint hoverForeground) {
+       
+    /** 
+     * Can be used to create a foreground painter with unique pressed and hover font colours
+     *  and a right aligned icon.  
+     *  
+     *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
+     */
+    public ButtonForegroundPainter(Paint pressedForeground, Paint hoverForeground) {
         this.pressedForeground = pressedForeground;
-        this.hoverForeground = hoverForeground;        
+        this.hoverForeground = hoverForeground;
+        
+        setCacheable(false);
     }
     
     @Override
@@ -49,7 +65,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             foreground = hoverForeground;
         }
         else {
-            icon = object.getRolloverIcon();
+            icon = object.getIcon();
         }
             
         if (foreground == null) {

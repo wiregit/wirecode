@@ -12,6 +12,7 @@ import javax.swing.Icon;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
+import org.limewire.ui.swing.painter.ButtonForegroundPainter;
 import org.limewire.ui.swing.painter.DarkButtonPainter;
 import org.limewire.ui.swing.painter.LightButtonPainter;
 import org.limewire.ui.swing.painter.PopupButtonPainter;
@@ -75,6 +76,10 @@ public class LimeComboBoxFactory {
     public LimeComboBox createDarkFullComboBox(List<Action> items) {
         LimeComboBox box = new LimeComboBox(items);
         
+        // TODO: migrate to factory and start using correct colours
+        ButtonForegroundPainter foregroundPainter = new ButtonForegroundPainter(null,null);
+        
+        box.setForegroundPainter(foregroundPainter);
         box.setBackgroundPainter(this.darkButtonPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         box.setIcon(this.darkFullIcon);
@@ -87,7 +92,11 @@ public class LimeComboBoxFactory {
     public LimeComboBox createLightFullComboBox(List<Action> items) {
         
         LimeComboBox box = new LimeComboBox(items);
+    
+        // TODO: migrate to factory and start using correct colours
+        ButtonForegroundPainter foregroundPainter = new ButtonForegroundPainter(null,null);
         
+        box.setForegroundPainter(foregroundPainter);
         box.setBackgroundPainter(this.lightButtonPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         box.setIcon(this.lightFullIcon);
@@ -112,11 +121,16 @@ public class LimeComboBoxFactory {
     }
     
     public void decorateMiniComboBox(LimeComboBox box, String promptText) {
+        
+        // TODO: migrate colours to factory
+        ButtonForegroundPainter foregroundPainter 
+            = new ButtonForegroundPainter(this.miniHoverTextColour, this.miniDownTextColour);
+        
         box.setBackgroundPainter(popupButtonPainter);
+        box.setForegroundPainter(foregroundPainter);
         box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
+        box.setForeground(miniRegTextColour);
         box.setFont(this.miniTextFont);
-        box.setForegrounds(this.miniRegTextColour, 
-                this.miniHoverTextColour, this.miniDownTextColour);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
         box.setText(promptText);
         box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
