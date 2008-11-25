@@ -3,6 +3,7 @@ package org.limewire.ui.swing.painter;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
+import javax.swing.Action;
 import javax.swing.Icon;
 
 import org.jdesktop.swingx.JXButton;
@@ -89,7 +90,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             LimeComboBox box = (LimeComboBox) object;
             
             if (box.getSelectedAction() != null) {
-                g.drawString(box.getSelectedAction().getValue("Name").toString(), object.getInsets().left, 
+                g.drawString((String)box.getSelectedAction().getValue(Action.NAME), object.getInsets().left, 
                         textBaseline);
             }
             
