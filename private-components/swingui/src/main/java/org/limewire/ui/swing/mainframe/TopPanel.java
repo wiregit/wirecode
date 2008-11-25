@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -18,6 +19,7 @@ import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchListener;
@@ -44,6 +46,7 @@ import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.VisibilityListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,17 +61,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
     private final NavItem homeNav;
     
+    @Resource private Icon libraryCollapseIcon;
+    @Resource private Icon libraryExpandIcon;
+    
     @Inject
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
                     final FriendAutoCompleters friendLibraries,
                     HomePanel homePanel,
                     final StorePanel storePanel,
-                    LeftPanel leftPanel,
+                    final LeftPanel leftPanel,
                     SearchBar searchBar,
                     FancyTabListFactory fancyTabListFactory,
-                    BarPainterFactory barPainterFactory) {
-        
+                    BarPainterFactory barPainterFactory) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;        
@@ -76,19 +81,19 @@ class TopPanel extends JXPanel implements SearchNavigator {
         
         this.navigator = navigator;
         
-        setName("TopPanel");
+        setName("WireframeTop");
         
         setBackgroundPainter(barPainterFactory.createTopBarPainter());
         
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
-        homeButton.setName("TopPanel.homeButton");
+        homeButton.setName("WireframeTop.homeButton");
         homeButton.setText(I18n.tr("Home"));
         homeButton.setIconTextGap(1);
         
         NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
         JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
-        storeButton.setName("TopPanel.storeButton");
+        storeButton.setName("WireframeTop.storeButton");
         storeButton.setText(I18n.tr("Store"));
         storeButton.setIconTextGap(1);
         storeButton.addActionListener(new ActionListener() {
@@ -98,14 +103,29 @@ class TopPanel extends JXPanel implements SearchNavigator {
             }
         });
         
-        JButton libraryButton = new IconButton();
-        libraryButton.setName("TopPanel.libraryButton");
+        final JButton libraryButton = new IconButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                leftPanel.toggleVisibility();
+            }
+        });
+        libraryButton.setName("WireframeTop.libraryButton");
         libraryButton.setText(I18n.tr("Libraries"));
         libraryButton.setIconTextGap(1);
-        libraryButton.addActionListener(new LibraryAction(leftPanel));
+        leftPanel.addVisibilityListener(new VisibilityListener() {
+            @Override
+            public void visibilityChanged(boolean visible) {
+                if(!visible) {
+                    libraryButton.setIcon(libraryExpandIcon);
+                } else {
+                    libraryButton.setIcon(libraryCollapseIcon);
+                }
+            }
+        });
+        libraryButton.setIcon(libraryCollapseIcon);
         
         searchList = fancyTabListFactory.create();
-        searchList.setName("TopPanel.SearchList");
+        searchList.setName("WireframeTop.SearchList");
         searchList.setMaxVisibleTabs(3);
         searchList.setMaxTotalTabs(10);
         searchList.setCloseAllText(I18n.tr("Close all searches"));
@@ -294,18 +314,5 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     public void goHome() {
         homeNav.select();
-    }
-    
-    private class LibraryAction implements ActionListener {
-        private LeftPanel panel;
-        
-        public LibraryAction(LeftPanel panel) {
-            this.panel = panel;
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            panel.toggleVisibility();
-        }
     }
 }
