@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Paint;
@@ -105,6 +106,21 @@ public class BorderPainter<X> extends AbstractPainter<X> {
         // Draw final border
         g.setPaint(PaintUtils.resizeGradient(this.border, 0, height));
         g.drawRoundRect(1+ix1, 0, width-3-ix1-ix2, height-2, this.arcWidth, this.arcHeight);
+        
+        // Cap the left border if it is not rounded on the left        
+        if (ix1 < 0) {
+            g.drawLine(0, 1, 0, height-2);
+        }
+
+        // Cap the right border if it is not rounded on the right        
+        if (ix2 < 0) {
+            GradientPaint spanGradient 
+            = new GradientPaint(0,1, PainterUtils.getColour(this.bevelTop1), 
+                    0, height-3, PainterUtils.getColour(this.bevelBottom), false);
+            
+            g.setPaint(spanGradient);
+            g.drawLine(width-1, 2, width-1, height-3);
+        }
     }
     
     public enum AccentType {

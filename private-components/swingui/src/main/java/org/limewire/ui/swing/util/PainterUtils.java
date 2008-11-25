@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -66,5 +68,26 @@ public class PainterUtils {
         
         return new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
         
+    }
+    
+    /**
+     * Simplifies a paint to a colour.  If the paint is already a colour
+     * then simply cast.  If it is a gradient then return the second point.
+     * If unknown then return transparent. 
+     * 
+     * Note: In future may consider returning null, however right now
+     *        transparent allows us to leverage null colours possibly
+     *        from empty props.
+     */
+    public static Color getColour(Paint paint) {
+        if (paint instanceof Color) {
+            return (Color) paint;
+        }
+        
+        if (paint instanceof GradientPaint) {
+            return ((GradientPaint) paint).getColor2();
+        }
+        
+        return null;
     }
 }

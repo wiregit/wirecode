@@ -164,6 +164,7 @@ public class SortAndFilterPanel extends JXPanel {
         listViewToggleButton.setBorderPainted(false);
         listViewToggleButton.setPaintBorderInsets(true);
         listViewToggleButton.setContentAreaFilled(false);
+        listViewToggleButton.setFocusPainted(false);
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -183,6 +184,7 @@ public class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setBorderPainted(false);
         tableViewToggleButton.setPaintBorderInsets(true);
         tableViewToggleButton.setContentAreaFilled(false);
+        tableViewToggleButton.setFocusPainted(false);
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
