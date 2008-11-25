@@ -56,11 +56,6 @@
 			<version>0.9.4</version>
 		</dependency>
 		<dependency>
-	        <groupId>jgoodies</groupId>
-	        <artifactId>forms</artifactId>
-	        <version>1.0.4</version>
-	    </dependency>
-		<dependency>
 			<groupId>org.jdesktop</groupId>
 			<artifactId>appframework</artifactId>
 			<version>1.0.3</version>
