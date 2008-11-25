@@ -18,6 +18,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -31,6 +32,9 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
@@ -228,9 +232,10 @@ class MyLibraryPanel extends LibraryPanel {
         
         private JButton button;
         private JButton shareButton;
+        private JLabel collectionLabel;
         
         public MySelectionPanel(Action action, Action shareAction, Category category) {
-            super(new MigLayout("insets 0, fill"));
+            super(new MigLayout("insets 0, fill, hidemode 3"));
 
             GuiUtils.assignResources(this);
 
@@ -264,10 +269,46 @@ class MyLibraryPanel extends LibraryPanel {
                 shareButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 FontUtils.underline(shareButton);
                 shareButton.setName("my name yo");
-                add(shareButton);
+                add(shareButton, "wrap");
+                
+                collectionLabel = new JLabel();
+                collectionLabel.setVisible(false);
+                setLabelText(0);
+                add(collectionLabel, "span 2, gapleft 10");
+                
+                //TODO: there should be a better way of adding listeners here
+                if(category == Category.AUDIO) {
+                    setLabelText(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);
+                    LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.addSettingListener(new SettingListener(){
+                        @Override
+                        public void settingChanged(SettingEvent evt) {
+                            setLabelText(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);
+                        }
+                     });
+                } else if(category == Category.VIDEO) {
+                    setLabelText(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);
+                    LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.addSettingListener(new SettingListener(){
+                        @Override
+                        public void settingChanged(SettingEvent evt) {
+                            setLabelText(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);
+                        }
+                     });
+                } else if(category == Category.IMAGE) { 
+                    setLabelText(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);
+                    LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.addSettingListener(new SettingListener(){
+                        @Override
+                        public void settingChanged(SettingEvent evt) {
+                            setLabelText(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);
+                        }
+                     });
+                }
             }
         
             addNavigation(button);
+        }
+        
+        private void setLabelText(int numSharedCollections) {
+            collectionLabel.setText(I18n.tr("Collections shared: {0}", numSharedCollections));
         }
         
         @Override
@@ -275,13 +316,17 @@ class MyLibraryPanel extends LibraryPanel {
             if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
                 setBackground(selectedBackground);
                 button.setForeground(selectedTextColor);
-                if(shareButton != null)
+                if(shareButton != null) {
                     shareButton.setVisible(true);
+                    collectionLabel.setVisible(true);
+                }
             } else {
                 setBackground(nonSelectedBackground);
                 button.setForeground(textColor);
-                if(shareButton != null)
+                if(shareButton != null) {
                     shareButton.setVisible(false);
+                    collectionLabel.setVisible(false);
+                }
             }
             super.paintComponent(g);
         }

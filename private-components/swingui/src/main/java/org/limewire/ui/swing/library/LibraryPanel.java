@@ -53,7 +53,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private final List<Category> categoryOrder = new ArrayList<Category>();
     private final List<Disposable> disposableList = new ArrayList<Disposable>();
     
-    private final JPanel cardPanel = new JPanel();
+    protected final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     
     private ButtonItem currentItem = null;
@@ -67,7 +67,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     private final Prev prev = new Prev();
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
-        setLayout(new MigLayout("fill, gap 0, insets 0 0 0 0", "[125!][]", "[][]"));
+        setLayout(new MigLayout("fill, gap 0, insets 0", "[][grow]", "[][grow]"));
 
         cardPanel.setLayout(cardLayout);
         
@@ -78,7 +78,11 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         createSelectionPanel();
         
         add(headerPanel, "span, growx, wrap");
-        add(selectionPanel, "growy");
+        addMainPanels();
+    }
+    
+    protected void addMainPanels() {
+        add(selectionPanel, "growy, width 125!");
         add(cardPanel, "grow");
     }
     

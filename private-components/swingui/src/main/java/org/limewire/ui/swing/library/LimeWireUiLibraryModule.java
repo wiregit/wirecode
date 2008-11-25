@@ -23,6 +23,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         
         bind(FriendLibraryFactory.class).toProvider(
                 FactoryProvider.newFactory(FriendLibraryFactory.class, FriendLibraryPanel.class));
+        bind(EmptyLibraryFactory.class).toProvider(
+                FactoryProvider.newFactory(EmptyLibraryFactory.class, EmptyLibraryPanel.class));
         bind(FriendLibraryMediatorFactory.class).toProvider(
                 FactoryProvider.newFactory(FriendLibraryMediatorFactory.class, FriendLibraryMediator.class));
         bind(MyLibraryFactory.class).toProvider(

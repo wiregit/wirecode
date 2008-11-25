@@ -1,10 +1,5 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -15,6 +10,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -24,71 +20,75 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class FriendLibraryMediator extends BaseLibraryMediator {
 
+    private final EmptyLibraryFactory emptyFactory;
     private final FriendLibraryFactory factory;
     private final SharingLibraryFactory sharingFactory;
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
+
     private final Friend friend;
     private boolean setLibraryPanel;
     
     @AssistedInject
-    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory,  
+    public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
             SharingLibraryFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager) {
         this.factory = factory;
         this.friend = friend;        
         this.sharingFactory = sharingFactory;
+        this.emptyFactory = emptyFactory;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
-        setLibraryCard(new EmptyPanel(false));
+        
+        setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new OffLineMessageComponent()));
     }
     
     public void createLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             setLibraryPanel = false;
-            setLibraryCard(new EmptyPanel(true));
+            setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new ConnectionErrorComponent()));
             showLibraryCard();
             break;
         case LOADED:
         case LOADING:
             if(!setLibraryPanel) {
                 setLibraryPanel = true;
-                JComponent component = factory.createFriendLibrary(friend, eventList, this);
-                setLibraryCard(component);
+                setLibraryCard(factory.createFriendLibrary(friend, eventList, this));
                 showLibraryCard();
             }
             break;
         }
     }        
     
-    private class EmptyPanel extends JPanel implements Disposable {        
-        public EmptyPanel(boolean failed) {
-            setLayout(new MigLayout("fill, wrap, gap 0"));
-            if(!friend.isAnonymous() && !failed) {
-                add(new JLabel(I18n.tr("{0} is not logged on through LimeWire.", friend.getRenderName())), "alignx 50%, aligny bottom");
-            } else {
-                if(failed) {                    
-                    add(new JLabel(I18n.tr("Cannot browse {0}.", friend.getRenderName())), "alignx 50%, aligny bottom");
-                } else {
-                    add(new JLabel(I18n.tr("Attempting to browse {0}.", friend.getRenderName())), "alignx 50%, aligny bottom");
-                }
-            }
+    /**
+     * Message to display when a friend is offline
+     */
+    private class OffLineMessageComponent extends JPanel {
+        public OffLineMessageComponent() {
+            setLayout(new MigLayout());
             
-   	        if (!friend.isAnonymous()) {
-                JButton button = new JButton(I18n.tr("View Files I'm Sharing with {0}", friend.getRenderName()));
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        FriendLibraryMediator.this.showSharingCard();
-                    }
-                });
-
-                add(button, "alignx 50%, gaptop 15, aligny top");
-            }
+            JLabel label = new JLabel(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
+            FontUtils.bold(label);
+            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getRenderName()));
+          
+            add(label, "wrap");
+            add(secondLabel, "gaptop 10");
         }
-
-        @Override
-        public void dispose() {
+    }
+    
+    /**
+     * Message to display when a friend is on LW but couldn't perform a browse
+     */
+    private class ConnectionErrorComponent extends JPanel {
+        public ConnectionErrorComponent() {
+            setLayout(new MigLayout());
+            
+            JLabel label = new JLabel(I18n.tr("{0} is on LimeWire but there were problems viewing their library", friend.getRenderName()));
+            FontUtils.bold(label);
+            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getRenderName()));
+          
+            add(label, "wrap");
+            add(secondLabel, "gaptop 10");
         }
     }
 

@@ -55,6 +55,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -354,19 +355,31 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
      */
     private class LockedUI extends LockableUI {
         private JXPanel panel;
+        private JPanel messagePanel;
         private JLabel label;
+        private JLabel minLabel;
         
         public LockedUI(String category, LayerEffect... lockedEffects) {
             super(lockedEffects);
-            label = new JLabel(I18n.tr("Sharing all {0} files in My Library including any new {0} files added", category));
-            label.setBackground(new Color(209,247,144));
-            label.setOpaque(true);
-            label.setBorder(BorderFactory.createEmptyBorder(15,15,15,15));
+            
+            messagePanel = new JPanel(new MigLayout("insets 5, gapy 10, wrap, alignx 50%"));
+            messagePanel.setBackground(new Color(209,247,144));
+            
+            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, friend.getRenderName()));
+            FontUtils.setSize(label, 12);
+            FontUtils.bold(label);
+            
+            minLabel = new JLabel(I18n.tr("Sharing your {0} collection automatically shares new {1} files added to your Library", category, category.toLowerCase()));
+            FontUtils.setSize(minLabel, 10);
             
             panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));
             panel.setBackground(new Color(147,170,209,80));
             panel.setVisible(false);
-            panel.add(label);
+            
+            messagePanel.add(label, "alignx 50%");
+            messagePanel.add(minLabel, "alignx 50%");
+            
+            panel.add(messagePanel);
         }
         
         @SuppressWarnings("unchecked")
