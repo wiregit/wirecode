@@ -11,7 +11,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 /**
  * Background painter for a gradient button. 
  */
-public class DarkButtonPainter extends ButtonPainter {
+public class DarkButtonBackgroundPainter extends ButtonBackgroundPainter {
         
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -42,11 +42,11 @@ public class DarkButtonPainter extends ButtonPainter {
     @Resource private Color disabledBorderGradientBottom = PainterUtils.TRASPARENT;
     
     
-    public DarkButtonPainter() {
+    public DarkButtonBackgroundPainter() {
         this(DrawMode.FULLY_ROUNDED);
     }
     
-    public DarkButtonPainter(DrawMode mode) {
+    public DarkButtonBackgroundPainter(DrawMode mode) {
         GuiUtils.assignResources(this);
         
         this.drawMode = mode;

@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
  */
 
 @Singleton
-public class PopupButtonPainter extends AbstractPainter<JXButton> {
+public class PopupButtonBackgroundPainter extends AbstractPainter<JXButton> {
     
     @Resource
     private int arcWidth;
@@ -24,7 +24,7 @@ public class PopupButtonPainter extends AbstractPainter<JXButton> {
     @Resource
     private Color backgroundRollover;
     
-    public PopupButtonPainter() {
+    public PopupButtonBackgroundPainter() {
         GuiUtils.assignResources(this);
         
         this.setAntialiasing(true);

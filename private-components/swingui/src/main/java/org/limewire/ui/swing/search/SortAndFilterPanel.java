@@ -38,11 +38,11 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
-import org.limewire.ui.swing.painter.DarkButtonPainter;
-import org.limewire.ui.swing.painter.ButtonPainter.DrawMode;
+import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingDelegateComparator;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.CommonUtils;
 
@@ -62,6 +62,8 @@ import com.google.inject.Inject;
  */
 public class SortAndFilterPanel extends JXPanel {
 
+    private final ButtonDecorator buttonDecorator;
+    
     private final String COMPANY = tr("Company");
     private final String PLATFORM = tr("Platform");
     private final String TYPE = tr("Type");
@@ -103,8 +105,10 @@ public class SortAndFilterPanel extends JXPanel {
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory) {
+    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, ButtonDecorator buttonDecorator) {
         GuiUtils.assignResources(this);
+        
+        this.buttonDecorator = buttonDecorator;
         
         this.populateActionList();
         
@@ -155,16 +159,12 @@ public class SortAndFilterPanel extends JXPanel {
     private void configureViewButtons() {
         final SortAndFilterPanel outerThis = this;
 
+        buttonDecorator.decorateDarkFullImageButton(listViewToggleButton, DrawMode.LEFT_ROUNDED);
         listViewToggleButton.setIcon(listViewIcon);
         listViewToggleButton.setPressedIcon(listViewIcon);
-        listViewToggleButton.setMargin(new Insets(0, 10, 0, 6));
-        listViewToggleButton.setOpaque(false);
         listViewToggleButton.setToolTipText(tr("List view"));
-        listViewToggleButton.setBackgroundPainter(new DarkButtonPainter(DrawMode.LEFT_ROUNDED));
-        listViewToggleButton.setBorderPainted(false);
-        listViewToggleButton.setPaintBorderInsets(true);
-        listViewToggleButton.setContentAreaFilled(false);
-        listViewToggleButton.setFocusPainted(false);
+        listViewToggleButton.setMargin(new Insets(0, 10, 0, 6));
+
         listViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {
@@ -175,16 +175,12 @@ public class SortAndFilterPanel extends JXPanel {
             }
         });
 
+        buttonDecorator.decorateDarkFullImageButton(tableViewToggleButton, DrawMode.RIGHT_ROUNDED);
         tableViewToggleButton.setIcon(tableViewIcon);
         tableViewToggleButton.setPressedIcon(tableViewIcon);
         tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
-        tableViewToggleButton.setOpaque(false);
-        tableViewToggleButton.setToolTipText(tr("Table view"));
-        tableViewToggleButton.setBackgroundPainter(new DarkButtonPainter(DrawMode.RIGHT_ROUNDED));
-        tableViewToggleButton.setBorderPainted(false);
-        tableViewToggleButton.setPaintBorderInsets(true);
-        tableViewToggleButton.setContentAreaFilled(false);
-        tableViewToggleButton.setFocusPainted(false);
+
+        
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent event) {

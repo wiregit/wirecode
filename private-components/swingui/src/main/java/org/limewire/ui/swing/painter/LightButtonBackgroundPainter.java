@@ -11,7 +11,7 @@ import org.limewire.ui.swing.util.PainterUtils;
 /**
  * Background painter for a gradient button. 
  */
-public class LightButtonPainter extends ButtonPainter {
+public class LightButtonBackgroundPainter extends ButtonBackgroundPainter {
         
     @Resource private int arcWidth;
     @Resource private int arcHeight;
@@ -28,7 +28,7 @@ public class LightButtonPainter extends ButtonPainter {
     @Resource private Color bevelRightGradientBottom;
     @Resource private Color bevelBottom;
     
-    public LightButtonPainter() {
+    public LightButtonBackgroundPainter() {
         GuiUtils.assignResources(this);
                 
         GradientPaint gradientRight = new GradientPaint(0,0, this.bevelRightGradientTop, 

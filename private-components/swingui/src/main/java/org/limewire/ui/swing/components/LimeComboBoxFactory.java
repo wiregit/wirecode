@@ -1,21 +1,13 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.util.List;
 
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.painter.Painter;
-import org.limewire.ui.swing.painter.ButtonForegroundPainter;
-import org.limewire.ui.swing.painter.DarkButtonPainter;
-import org.limewire.ui.swing.painter.LightButtonPainter;
-import org.limewire.ui.swing.painter.PopupButtonPainter;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -24,49 +16,19 @@ import com.google.inject.Singleton;
 @Singleton
 public class LimeComboBoxFactory {
     
-    @Resource
-    private Font  miniTextFont;
-    @Resource
-    private Color miniRegTextColour;
-    @Resource 
-    private Color miniHoverTextColour;
-    @Resource
-    private Color miniDownTextColour;
-    @Resource
-    private Icon  miniRegIcon;
-    @Resource
-    private Icon  miniHoverIcon;
-    @Resource
-    private Icon  miniDownIcon;
+    private final ButtonDecorator buttonDecorator;
     
-    @Resource
-    private Font  lightFullTextFont;
-    @Resource
-    private Color lightFullTextColour;
-    @Resource
-    private Icon  lightFullIcon;
-    
-    @Resource
-    private Font  darkFullTextFont;
-    @Resource
-    private Color darkFullTextColour;
-    @Resource
-    private Icon  darkFullIcon;
-    
-    
-    private final Painter<JXButton> darkButtonPainter;
-    private final Painter<JXButton> lightButtonPainter;
-    private final Painter<JXButton> popupButtonPainter;
+    @Resource private Icon  miniRegIcon;
+    @Resource private Icon  miniHoverIcon;
+    @Resource private Icon  miniDownIcon;
+    @Resource private Icon  lightFullIcon;
+    @Resource private Icon  darkFullIcon;
     
     @Inject
-    LimeComboBoxFactory(DarkButtonPainter darkButtonPainter, 
-            LightButtonPainter lightButtonPainter,
-            PopupButtonPainter popupButtonPainter) {
-        GuiUtils.assignResources(this);    
+    LimeComboBoxFactory(ButtonDecorator buttonDecorator) {
+        GuiUtils.assignResources(this);  
         
-        this.darkButtonPainter = darkButtonPainter;
-        this.lightButtonPainter = lightButtonPainter;
-        this.popupButtonPainter = popupButtonPainter;
+        this.buttonDecorator = buttonDecorator;        
     }
     
     public LimeComboBox createDarkFullComboBox() {
@@ -75,34 +37,15 @@ public class LimeComboBoxFactory {
     
     public LimeComboBox createDarkFullComboBox(List<Action> items) {
         LimeComboBox box = new LimeComboBox(items);
-        
-        // TODO: migrate to factory and start using correct colours
-        ButtonForegroundPainter foregroundPainter = new ButtonForegroundPainter(null,null);
-        
-        box.setForegroundPainter(foregroundPainter);
-        box.setBackgroundPainter(this.darkButtonPainter);
-        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        buttonDecorator.decorateDarkFullButton(box);
         box.setIcon(this.darkFullIcon);
-        box.setFont(this.darkFullTextFont);
-        box.setForeground(this.darkFullTextColour);
-        
         return box;
     }
     
     public LimeComboBox createLightFullComboBox(List<Action> items) {
-        
         LimeComboBox box = new LimeComboBox(items);
-    
-        // TODO: migrate to factory and start using correct colours
-        ButtonForegroundPainter foregroundPainter = new ButtonForegroundPainter(null,null);
-        
-        box.setForegroundPainter(foregroundPainter);
-        box.setBackgroundPainter(this.lightButtonPainter);
-        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        buttonDecorator.decorateLightFullButton(box);
         box.setIcon(this.lightFullIcon);
-        box.setFont(this.lightFullTextFont);
-        box.setForeground(this.lightFullTextColour);
-        
         return box;
     }
     
@@ -111,30 +54,15 @@ public class LimeComboBoxFactory {
     }
     
     public LimeComboBox createMiniComboBox(String promptText, List<Action> items) {
-    
         LimeComboBox box = new LimeComboBox(items);
-        
         this.decorateMiniComboBox(box, promptText);
-        
         return box;
-        
     }
     
     public void decorateMiniComboBox(LimeComboBox box, String promptText) {
-        
-        // TODO: migrate colours to factory
-        ButtonForegroundPainter foregroundPainter 
-            = new ButtonForegroundPainter(this.miniHoverTextColour, this.miniDownTextColour);
-        
-        box.setBackgroundPainter(popupButtonPainter);
-        box.setForegroundPainter(foregroundPainter);
-        box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
-        box.setForeground(miniRegTextColour);
-        box.setFont(this.miniTextFont);
+        buttonDecorator.decorateMiniButton(box);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
         box.setText(promptText);
         box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
-    
-    
 }

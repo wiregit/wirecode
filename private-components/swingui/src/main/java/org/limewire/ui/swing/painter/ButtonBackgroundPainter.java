@@ -18,7 +18,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 /**
  * Background painter for a gradient button. 
  */
-public abstract class ButtonPainter extends AbstractPainter<JXButton> {
+public abstract class ButtonBackgroundPainter extends AbstractPainter<JXButton> {
     
     protected DrawMode drawMode = DrawMode.FULLY_ROUNDED;
     

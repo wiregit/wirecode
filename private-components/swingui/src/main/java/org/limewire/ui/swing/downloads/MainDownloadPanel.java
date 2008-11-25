@@ -25,7 +25,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
-import org.limewire.ui.swing.painter.DarkButtonPainter;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -40,6 +40,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class MainDownloadPanel extends JPanel {
 	
+    private final ButtonDecorator buttonDecorator;
+    
     public static final String NAME = "MainDownloadPanel";
 	private final CardLayout cardLayout;
 	private final JPanel cardPanel;
@@ -91,9 +93,13 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator, AudioPlayer player,
-	        LimeHeaderBarFactory headerBarFactory) {
+	        LimeHeaderBarFactory headerBarFactory,
+	        ButtonDecorator buttonDecorator) {
+	    
 	    
 		this.downloadMediator = downloadMediator;
+		this.buttonDecorator = buttonDecorator;
+		
 		setLayout(new BorderLayout());
 		
         resumeAction.setEnabled(false);
@@ -162,11 +168,10 @@ public class MainDownloadPanel extends JPanel {
 	    clearFinishedButton = new JXButton(clearAction);
 	    categoriseCheckBox = new JCheckBox(categorizeAction);
 
-	    clearFinishedButton.setBackgroundPainter(new DarkButtonPainter());
-	    clearFinishedButton.setOpaque(false);
-	    clearFinishedButton.setForeground(Color.WHITE);
-	    clearFinishedButton.setFont(new Font("Arial", Font.PLAIN, 10));
-	    clearFinishedButton.setBorderPainted(false);
+	    
+	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
+	    
+	    // TODO: spec 
 	    clearFinishedButton.setPreferredSize(
 	            new Dimension((int)clearFinishedButton.getPreferredSize().getWidth(), 21));
 
