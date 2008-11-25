@@ -14,7 +14,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,134 +26,179 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.PainterUtils;
+import org.limewire.util.Objects;
 
+/** A combobox rendered in the LimeWire 5.0 style. */
 public class LimeComboBox extends JXButton {
     
+    /** The list of actions that the combobox is going to render as items. */
     private final List<Action> actions;
-    private Action             selectedAction;
 
+    /** The currently selected item. */
+    private Action selectedAction;
+
+    /** Listeners that will be notified when a new item is selected. */
     private final List<SelectionListener> selectionListeners 
-        = new LinkedList<SelectionListener>();
+        = new ArrayList<SelectionListener>();
     
+    /** The color to render the text when the combobox is pressed. */
     private Color pressedTextColour  = null;
+    /** The color to render the text when the combobox is rolled over. */
     private Color rolloverTextColour = null;
     
-    private boolean isMenuOverrided = false;
-    private boolean isMenuUpdated = false;
+    /** True if you've supplied a custom menu via {@link #overrideMenu(JPopupMenu)} */
+    private boolean customMenu = false;
     
+    /** True if the menu has been updated since the last addition of an action. */
+    private boolean menuDirty = false;
+    
+    /** The menu, lazily created. */
     private JPopupMenu menu = null;
+    
+    /** The cursor to display when the mouse is over the combobox. */
     private Cursor mouseOverCursor = Cursor.getDefaultCursor();
     
-    private UpdateHandler updateHandler = null;
+    /** True if the menu is visible. */
+    private boolean menuVisible = false;
     
-    LimeComboBox(List<Action> actions) {        
-        this.setText(null);
+    /** The time that the menu became invisible, to allow toggling of on/off. */
+    private long menuInvizTime = -1;
+    
+    /** True if clicking will always force visibility. */
+    private boolean clickForcesVisible = false;
+    
+    /** Constructs a new combobox with the given actions. */
+    LimeComboBox(List<Action> newActions) {        
+        setText(null);
+        actions = new ArrayList<Action>();
+        addActions(newActions);
         
-        this.actions = new LinkedList<Action>();
-        this.addActions(actions);
-        
-        if (!this.actions.isEmpty())
-            this.selectedAction = actions.get(0);
-        else
-            this.selectedAction = null;
-
-        
-        this.initModel();
+        if (!actions.isEmpty()) {
+            selectedAction = actions.get(0);
+        } else {
+            selectedAction = null;
+        }        
+        initModel();
     }
 
+    /** Sets the combobox to always display the given popupmenu. */
     public void overrideMenu(JPopupMenu menu) {
-        this.isMenuOverrided = true;
         this.menu = menu;
-        this.initMenu();
+        customMenu = true;
+        initMenu();
     }
 
-    public void  addActions(List<Action> actions) {
-        if (actions == null) return;
-        
-        this.isMenuUpdated = false;
-        
-        this.actions.addAll(actions);
-        
-        if (this.selectedAction == null)
-            this.selectedAction = actions.get(0);
-
-        this.updateSize();
-        
-        if (this.menu == null) 
-            this.createPopupMenu();
-    }
-    
-    public void  addAction(Action action) {
-        if (action == null)  throw new IllegalArgumentException("Null Action added");
-        
-        this.isMenuUpdated = false;
-        
-        this.actions.add(action);
-        
-        if (this.selectedAction == null)
-            this.selectedAction = actions.get(0);
-        
-        this.updateSize();
-        
-        if (this.menu == null) 
-            this.createPopupMenu();
-    }
-    
-    public void  removeAllActions() {
-        this.isMenuUpdated = false;
-        
-        this.actions.clear();
-        
-        this.selectedAction = null;
-    }
-    
-    public void  removeAction(Action action) {
-        this.isMenuUpdated = false;
-        
-        this.actions.remove(action);
-        
-        if (action == this.selectedAction) {
-            this.selectedAction = null;
+    /**
+     * Adds the given actions to the combobox.  The actions will
+     * be rendered as items that can be chosen.
+     * 
+     * This method has no effect if the popupmenu is overriden. 
+     */
+    public void addActions(List<Action> newActions) {
+        if (newActions == null) {
+            return;
+        }
+        menuDirty = true;
+        actions.addAll(newActions);
+        if (selectedAction == null) {
+            selectedAction = actions.get(0);
+        }
+        updateSize();
+        if (menu == null) {
+            createPopupMenu();
         }
     }
     
-    public void setSelectedAction(Action action) {
-        
+    /** 
+     * Adds a single action to the combobox.
+     *
+     * This method has no effect if the popupmenu is overriden.
+     */
+    public void addAction(Action action) {
+        actions.add(Objects.nonNull(action, "action"));
+        menuDirty = true;
+        if (selectedAction == null) {
+            selectedAction = actions.get(0);
+        }
+        updateSize();
+        if (menu == null) {
+            createPopupMenu();
+        }
+    }
+
+    /** 
+     * Removes all actions & any selected action.
+     * 
+     * This method has no effect if the popupmenu is overriden.
+     */
+    public void removeAllActions() {
+        menuDirty = true;
+        actions.clear();
+        selectedAction = null;
+    }
+    
+    /**
+     * Removes the specific action.  If it was the selected one, selection is lost. 
+     *  
+     * This method has no effect if the popupmenu is overriden.
+     */
+    public void removeAction(Action action) {
+        menuDirty = true;
+        actions.remove(action);
+        if (action == selectedAction) {
+            selectedAction = null;
+        }
+    }
+
+    /** 
+     * Selects the specific action.
+     * 
+     * This method has no effect if the popupmenu is overriden. 
+     */
+    public void setSelectedAction(Action action) {        
         // Make sure the selected action is in the list
-        if (!this.actions.contains(action))  return;
-        
-        this.selectedAction = action;
-        
-        this.isMenuUpdated = false;
+        if (actions.contains(action)) {
+            selectedAction = action;        
+            menuDirty = true;
+        }        
     }
     
+    /**
+     * Returns the selected action.
+     * 
+     * This method has no effect if the popupmenu is overriden.
+     */
     public Action getSelectedAction() {
-        return this.selectedAction;
+        return selectedAction;
     }
     
     
+    /** Sets the text this will display as the prompt. */
     @Override
     public void setText(String promptText) {
-        super.setText(promptText);
-        
-        if (promptText != null)        
-            this.updateSize();
+        super.setText(promptText);        
+        if (promptText != null) {
+            updateSize();
+        }
     }
 
+    /** Sets the cursor that will be shown when the button is hovered-over. */
     public void setMouseOverCursor(Cursor cursor) {
-        this.mouseOverCursor = cursor;
-    }
-    
-    public void addUpdateHandler(UpdateHandler updateHandler) {
-        this.updateHandler = updateHandler;        
+        mouseOverCursor = cursor;
     }
 
-    
+    /**
+     * Adds a listener to be notified when the selection changes.
+     * 
+     * This method has no effect if the popupmenu is overriden.
+     */
     public void addSelectionListener(SelectionListener listener) {
         selectionListeners.add(listener);
     }
@@ -199,58 +244,67 @@ public class LimeComboBox extends JXButton {
             }
         });
     }
-
     
+    /** Sets the colors of the text when the button is rolled over, pressed, and normal. */
     public void setForegrounds(Color regular, Color hover, Color down) {
-        this.setForeground(regular);
-        this.setRolloverForeground(hover);
-        this.setPressedForeground(down);
+        setForeground(regular);
+        setRolloverForeground(hover);
+        setPressedForeground(down);
     }
     
+    /** Sets the icons of the combobox when the button is rolled over, pressed, and normal. */
     public void setIcons(Icon regular, Icon hover, Icon down) {
-        this.setIcon(regular);
-        this.setRolloverIcon(hover);
-        this.setPressedIcon(down);
+        setIcon(regular);
+        setRolloverIcon(hover);
+        setPressedIcon(down);
     }
     
     @Override
     public Icon getRolloverIcon() {
         Icon icon = super.getRolloverIcon();
-        if (icon== null) 
-            return this.getIcon();
-        else
+        if (icon == null) {
+            return getIcon();
+        } else {
             return icon;
+        }
     }
     
     @Override
     public Icon getPressedIcon() {
         Icon icon = super.getPressedIcon();
-        if (icon== null) 
-            return this.getIcon();
-        else
+        if (icon == null) {
+            return getIcon();
+        } else {
             return icon;
+        }
     }
     
+    /** Sets the rollover foreground color of the text. */
     public void setRolloverForeground(Color colour) {
-        this.rolloverTextColour = colour;
+        rolloverTextColour = colour;
     }
     
+    /** Retrieves the current rollover text foreground. */
     public Color getRolloverForeground() {
-        if (this.rolloverTextColour == null) 
-            return this.getForeground();
-        else
-            return this.rolloverTextColour;
+        if (rolloverTextColour == null)  {
+            return getForeground();
+        } else {
+            return rolloverTextColour;
+        }
     }
     
+    /** Sets the new foreground color for text when the combobox is pressed. */
     public void setPressedForeground(Color colour) {
-        this.pressedTextColour = colour;
+        pressedTextColour = colour;
     }
     
+    /** Gets the text foreground color when the combobox is pressed. */
     public Color getPressedForeground() {
-        if (this.pressedTextColour == null) 
-            return this.getForeground();
-        else
-            return this.pressedTextColour;
+        if (pressedTextColour == null)  {
+            return getForeground();
+        } else {
+            return pressedTextColour;
+        }
     }
     
     @Override
@@ -262,7 +316,7 @@ public class LimeComboBox extends JXButton {
     @Override
     public void setFont(Font f) {
         super.setFont(f);
-        this.updateSize();
+        updateSize();
     }
     
     
@@ -270,248 +324,226 @@ public class LimeComboBox extends JXButton {
     // TODO: use ButtonForegroundPainters
     @Override
     protected void paintComponent(Graphics g) {
-
         Graphics2D g2 = (Graphics2D) g;        
 
-        if (this.getBackgroundPainter() != null) {
+        if (getBackgroundPainter() != null) {
             Object origHints = g2.getRenderingHints();
-            this.getBackgroundPainter().paint(g2, this, this.getWidth(), this.getHeight());  
+            getBackgroundPainter().paint(g2, this, getWidth(), getHeight());  
             g2.setRenderingHints((Map<?, ?>) origHints);
         }
         
-        g2.setFont(this.getFont());
+        g2.setFont(getFont());
         
         int ix1 = 0;
         int ix2 = 0;
         int iy2 = 0;
         
-        if (this.getBorder() != null) {
-            Insets insets = this.getBorder().getBorderInsets(this);
+        if (getBorder() != null) {
+            Insets insets = getBorder().getBorderInsets(this);
             ix1 = insets.left;
             ix2 = insets.right;
             iy2 = insets.bottom;
         }
         
-        int y = this.getHeight() - this.getHeight()/2 + g.getFontMetrics().getAscent()/2 - iy2;
+        int y = getHeight() - getHeight()/2 + g.getFontMetrics().getAscent()/2 - iy2;
         
-        Icon icon = this.getIcon();
+        Icon icon = getIcon();
                 
-        if (this.getModel().isPressed()) {
-            icon = this.getPressedIcon();
-            g2.setColor(this.getPressedForeground());
+        if (getModel().isPressed()) {
+            icon = getPressedIcon();
+            g2.setColor(getPressedForeground());
         }
-        else if (this.getModel().isRollover()) {
-            icon = this.getRolloverIcon();
-            g2.setColor(this.getRolloverForeground());
+        else if (getModel().isRollover()) {
+            icon = getRolloverIcon();
+            g2.setColor(getRolloverForeground());
         }
         else {
-            g2.setColor(this.getForeground());
+            g2.setColor(getForeground());
         }
             
-        if (this.getText() != null) {
-            PainterUtils.drawSmoothString(g2, this.getText(), ix1,  
-                    y);
+        if (getText() != null) {
+            PainterUtils.drawSmoothString(g2, getText(), ix1,  y);
             
             if (icon != null) {
-                icon.paintIcon(this, g2, this.getWidth() - ix2 + 3, 
-                        this.getHeight()/2 - icon.getIconHeight()/2);
+                icon.paintIcon(this, g2, getWidth() - ix2 + 3, 
+                        getHeight()/2 - icon.getIconHeight()/2);
             }
         } else {
-            if (this.selectedAction != null) {
-                PainterUtils.drawSmoothString(g2, this.selectedAction.getValue("Name").toString(), ix1, 
+            if (selectedAction != null) {
+                PainterUtils.drawSmoothString(g2, (String)selectedAction.getValue(Action.NAME), ix1, 
                         y);
             }
             
-            if (icon != null) {
-                
-                icon.paintIcon(this, g2, this.getWidth() - ix2 + icon.getIconWidth(), 
-                        this.getHeight()/2 - icon.getIconHeight()/2);
+            if (icon != null) {                
+                icon.paintIcon(this, g2, getWidth() - ix2 + icon.getIconWidth(), 
+                        getHeight()/2 - icon.getIconHeight()/2);
             }
         }
-
+    }
+    
+    /**
+     * Sets whether or not clicking the combobox forces the menu to display.
+     * Normally clicking it would cause a visible menu to disappear.
+     * If this is true, clicking will always force the menu to appear.
+     * This is useful for renderers such as in tables.
+     */
+    public void setClickForcesVisible(boolean clickForcesVisible) {
+        this.clickForcesVisible = clickForcesVisible;
     }
 
     private void initModel() {
-        this.setModel(this.getModel());
-        
-        this.addMouseListener(new MouseAdapter() {
-            private boolean hide = false;
-            
+        setModel(getModel());        
+        addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                setCursor(mouseOverCursor);
-                
-                if (menu == null)  return;
-                
-                if (menu.isVisible()) this.hide = true;                
+                setCursor(mouseOverCursor);     
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 setCursor(Cursor.getDefaultCursor());
-                
-                this.hide = false;      
             }
             
             @Override
             public void mousePressed(MouseEvent e) {
-                
-                if (menu == null)  return;
-                
-                if (this.hide) {
-                    this.hide = false;
-                    return;
+                if (menu != null) {
+                    // If the menu is visible or this is the click that
+                    // caused it to become invisible, go with inviz.
+                    if(!clickForcesVisible && (menuVisible || System.currentTimeMillis() == menuInvizTime)) {
+                        menu.setVisible(false);
+                    } else {
+                        menu.show((Component) e.getSource(), 0, getHeight()-1);
+                    }
                 }
-                
-                updateMenu();
-                        
-                if (getText() == null)
-                    menu.setPreferredSize(new Dimension(getWidth(), 
-                            (int) menu.getPreferredSize().getHeight()));
-                
-                menu.show((Component) e.getSource(), 0, getHeight()-1);
-                
-                this.hide = true;
             }
         });
     }
 
     private void createPopupMenu() {
-        this.menu = new JPopupMenu();
-        this.initMenu();
+        menu = new JPopupMenu();
+        initMenu();
     }
     
-    private void updateSize() {
-        
-        if (this.getText() == null && (this.actions == null || this.actions.isEmpty()))
+    private void updateSize() {        
+        if (getText() == null && (actions == null || actions.isEmpty())) {
             return;
+        }
         
-        Rectangle2D labelRect = null;
-                
-        if (this.getText() != null && !this.getText().isEmpty()) {
-            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.getText());
-        } 
-        else {
-            labelRect = FontUtils.getLongestTextArea(this.getFont(), this.actions.toArray());
-        }    
-        
+        Rectangle2D labelRect = null;                
+        if (getText() != null && !getText().isEmpty()) {
+            labelRect = FontUtils.getLongestTextArea(getFont(), getText());
+        } else {
+            labelRect = FontUtils.getLongestTextArea(getFont(), actions.toArray());
+        }
+
         int ix1 = 0;
         int ix2 = 0;
         int iy1 = 0;
         int iy2 = 0;
-        
-        if (this.getBorder() != null) {
-            Insets insets = this.getBorder().getBorderInsets(this);
+
+        if (getBorder() != null) {
+            Insets insets = getBorder().getBorderInsets(this);
             ix1 = insets.left;
             ix2 = insets.right;
             iy1 = insets.top;
             iy2 = insets.bottom;
         }
 
-        this.setMinimumSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
-                (int)labelRect.getHeight()+iy1+iy2));
-        
-        int height = (int)this.getPreferredSize().getHeight();
-        if (height < this.getMinimumSize().getHeight()) height = (int)this.getMinimumSize().getHeight();
-        
-        this.setPreferredSize(new Dimension((int)labelRect.getWidth() + ix1 + ix2, 
-                height));
-        
-        this.setSize(this.getPreferredSize());
-                
-        this.revalidate();
-        this.repaint();
+        setMinimumSize(
+           new Dimension((int) labelRect.getWidth() + ix1 + ix2,
+                         (int) labelRect.getHeight() + iy1 + iy2));
 
+        int height = (int)getPreferredSize().getHeight();
+        if (height < getMinimumSize().getHeight()) { 
+            height = (int)getMinimumSize().getHeight();
+        }
+
+        setPreferredSize(new Dimension((int) labelRect.getWidth() + ix1 + ix2, height));
+        setSize(getPreferredSize());
+        revalidate();
+        repaint();
     }
     
     private void updateMenu() {
-
-        if (this.isMenuOverrided) {
-
-            if (this.updateHandler == null) {
-                return;
+        if (!customMenu && menuDirty) {
+            menuDirty = false;        
+            menu.removeAll();        
+            for ( Action action : actions ) {        
+                Action compoundAction = action;            
+                // Wrap the action if this combo box has room for selection
+                if (getText() == null) {
+                    compoundAction = new SelectionActionWrapper(compoundAction);
+                }                
+                JMenuItem menuItem = new JMenuItem(compoundAction);
+                menuItem.setBackground(Color.WHITE);
+                menuItem.setForeground(Color.BLACK);
+                menuItem.setFont(getFont());                
+                menuItem.setBorder(BorderFactory.createEmptyBorder(0,1,0,0));                
+                menu.add(menuItem);
             }
-
-            // Notify that the overrided menu
-            // is ready to be updated
-            this.updateHandler.fireUpdate();
-
-            return;
         }
-
-        if (this.isMenuUpdated) {
-            return;
-        }
-        this.isMenuUpdated = true;
-        
-        this.menu.removeAll();
-        
-        for ( Action action : this.actions ) {
-        
-            Action compoundAction = action;
-            
-            // Wrap the action if this combo box has room for selection
-            if (this.getText() == null)
-                compoundAction = new SelectionActionWrapper(compoundAction);
-            
-            JMenuItem menuItem = new JMenuItem(compoundAction);
-            menuItem.setBackground(Color.WHITE);
-            menuItem.setForeground(Color.BLACK);
-            menuItem.setFont(this.getFont());
-            
-            menuItem.setBorder(BorderFactory.createEmptyBorder(0,1,0,0));
-            
-            this.menu.add(menuItem);
-        }
-
     }
     
     private void initMenu() {
-        this.menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
-        this.menu.setBackground(Color.WHITE);
-        this.menu.setForeground(Color.BLACK);
-        this.menu.setFont(this.getFont());
+        menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
+        menu.setBackground(Color.WHITE);
+        menu.setForeground(Color.BLACK);
+        menu.setFont(getFont());
+        menu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                menuVisible = false;
+                menuInvizTime = System.currentTimeMillis();
+            }
+            
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                menuVisible = false;
+                menuInvizTime = System.currentTimeMillis();
+            }
+            
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                menuVisible = true;
+                updateMenu();
+                if (getText() == null) {
+                    menu.setPreferredSize(new Dimension(getWidth(), 
+                            (int) menu.getPreferredSize().getHeight()));
+                }                
+            }
+        });
     }
     
 
-    
+    /** A listener that's notified when the selection in the combobox changes. */
     public interface SelectionListener {
+        /** Notification that the given action is now selected. */
         public void selectionChanged(Action item);
     }
     
-    public interface UpdateHandler {
-        public void fireUpdate();
-    }
-    
-    // Wraps an action to provide selection listening for the combo box
-    
+    // Wraps an action to provide selection listening for the combo box    
     private class SelectionActionWrapper extends AbstractAction {
+        private final Action delegate;
         
-
-        private final Action wrappedAction;
-        
-        public SelectionActionWrapper(Action actionToWrap) {
-            this.wrappedAction = actionToWrap;
+        public SelectionActionWrapper(Action delegate) {
+            this.delegate = delegate;
         }
         
         @Override 
         public Object getValue(String s) {
-            return this.wrappedAction.getValue(s);
+            return delegate.getValue(s);
         }
         
         @Override
         public void actionPerformed(ActionEvent e) {
-
             // Change selection in parent combo box
-            selectedAction = this.wrappedAction;
-
+            selectedAction = delegate;
             // Fire the parent listeners
-            for ( SelectionListener listener : selectionListeners )
-                listener.selectionChanged(wrappedAction);
-            
+            for ( SelectionListener listener : selectionListeners ) {
+                listener.selectionChanged(delegate);
+            }            
             // Call original action
-            this.wrappedAction.actionPerformed(e);   
-            
+            delegate.actionPerformed(e);
             repaint();
         }
         

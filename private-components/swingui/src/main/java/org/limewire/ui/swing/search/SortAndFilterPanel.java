@@ -243,10 +243,6 @@ public class SortAndFilterPanel extends JXPanel {
 
     public EventList<VisualSearchResult> getFilteredAndSortedList(
         EventList<VisualSearchResult> simpleList, final RowSelectionPreserver preserver) {
-
-        // Create a list that is filtered by a text field.
-        
-
         // Created a SortedList that doesn't have a Comparator yet.
         final SortedList<VisualSearchResult> sortedList =
             GlazedListsFactory.sortedList(simpleList, getRelevanceComparator());
@@ -257,11 +253,9 @@ public class SortAndFilterPanel extends JXPanel {
         SelectionListener listener = new SelectionListener() {
             @Override
             public void selectionChanged(Action action) {
-                String item = action.getValue("Name").toString();
-                if (!repopulatingCombo
-                    && !item.equals(sortBy)) { // changing sort order
-                    Comparator<VisualSearchResult> comparator =
-                        getComparator(item);
+                String item = (String)action.getValue(Action.NAME);
+                if (!repopulatingCombo && !item.equals(sortBy)) { // changing sort order
+                    Comparator<VisualSearchResult> comparator =getComparator(item);
                     preserver.beforeUpdateEvent();
                     sortedList.setComparator(comparator);
                     preserver.afterUpdateEvent();

@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,24 +19,27 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
-import org.limewire.ui.swing.components.LimeComboBox.UpdateHandler;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.util.Objects;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class SearchResultFromWidget extends JPanel implements UpdateHandler {
+public class SearchResultFromWidget extends JPanel {
 
     private final LimeComboBox comboBox;
     private final JPopupMenu comboBoxMenu;
     
     private final RemoteHostActions fromActions;
-    private List<RemoteHost> people;
+    
+    private List<RemoteHost> people = Collections.emptyList();
+    private List<RemoteHost> poppedUpPeople = Collections.emptyList();
     
     @AssistedInject
     SearchResultFromWidget(LimeComboBoxFactory comboBoxFactory, @Assisted RemoteHostActions fromActions) {
@@ -44,7 +48,28 @@ public class SearchResultFromWidget extends JPanel implements UpdateHandler {
         this.comboBox = comboBoxFactory.createMiniComboBox();
         this.comboBoxMenu = new JPopupMenu();
         this.comboBox.overrideMenu(this.comboBoxMenu);
-        this.comboBox.addUpdateHandler(this);
+        comboBoxMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                if(!poppedUpPeople.equals(people)) {
+                    comboBox.setClickForcesVisible(true);
+                }
+            }
+            
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                if(!poppedUpPeople.equals(people)) {
+                    comboBox.setClickForcesVisible(true);
+                }
+            }
+            
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+                comboBox.setClickForcesVisible(false);
+                poppedUpPeople = people;
+                updateMenus();
+            }
+        });
         
         this.layoutComponents();
         this.setOpaque(false);
@@ -114,12 +139,11 @@ public class SearchResultFromWidget extends JPanel implements UpdateHandler {
         return item;
     }
     
-    private void updateMenus() {
-        
-        this.comboBoxMenu.removeAll();
-        
-        if (people.size() == 0)
+    private void updateMenus() {        
+        this.comboBoxMenu.removeAll();        
+        if (people.size() == 0) {
             return; // menu has no items
+        }
 
         if (people.size() == 1) {
             RemoteHost person = people.get(0);
@@ -157,10 +181,5 @@ public class SearchResultFromWidget extends JPanel implements UpdateHandler {
                 }
             }
         }
-    }
-
-    @Override
-    public void fireUpdate() {
-        this.updateMenus();
     }
 }

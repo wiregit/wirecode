@@ -15,6 +15,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -33,7 +35,7 @@ public class FancyTabMoreButton extends LimeComboBox {
         this.overrideMenu(menu);
 
         MoreListener listener = new MoreListener(tabs);
-        this.addUpdateHandler(listener);
+        menu.addPopupMenuListener(listener);
     }
     
     private JComponent createMenuItemFor(
@@ -128,7 +130,7 @@ public class FancyTabMoreButton extends LimeComboBox {
         }
     }
     
-    private class MoreListener implements UpdateHandler {
+    private class MoreListener implements PopupMenuListener {
         private final List<FancyTab> tabs;
         
         public MoreListener(List<FancyTab> tabs) {
@@ -136,11 +138,16 @@ public class FancyTabMoreButton extends LimeComboBox {
         }
         
         @Override
-        public void fireUpdate() {
-            menu.removeAll();
-            
+        public void popupMenuCanceled(PopupMenuEvent e) {}
+        
+        @Override
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+        
+        @Override
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            menu.removeAll();            
             for (FancyTab tab : tabs) {
-                    menu.add(createMenuItemFor(menu, tab));
+                menu.add(createMenuItemFor(menu, tab));
             }
         }
     }

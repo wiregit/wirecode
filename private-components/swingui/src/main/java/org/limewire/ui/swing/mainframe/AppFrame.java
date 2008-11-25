@@ -76,6 +76,8 @@ public class AppFrame extends SingleFrameApplication {
         // we must disable all lightweight popups.
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+        // Necessary to allow popups to behave normally.
+        UIManager.put("PopupMenu.consumeEventOnClose", false);
 
         Injector localInjector = createInjector();
 
