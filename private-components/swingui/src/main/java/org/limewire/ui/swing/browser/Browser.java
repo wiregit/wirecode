@@ -109,14 +109,24 @@ public class Browser extends MozillaPanel {
     public void pageLoadStarted() {
         lastRequestFailed = false;
         if(loadStatus == VisibilityMode.DEFAULT) {
-            loadingPane.setCollapsed(false);
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    loadingPane.setCollapsed(false);
+                }
+            });
         }
     }
 
     public void pageLoadStopped(boolean failed) {
         lastRequestFailed = failed;
         if(loadStatus == VisibilityMode.DEFAULT) {
-            loadingPane.setCollapsed(true);
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    loadingPane.setCollapsed(true);
+                }
+            });
         }
     }
     
