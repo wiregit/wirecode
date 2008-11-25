@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.dnd;
 
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -10,6 +10,7 @@ import javax.swing.TransferHandler;
 
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.util.DNDUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventSelectionModel;
@@ -26,7 +27,7 @@ public class MyLibraryTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+        return DNDUtils.containsFileFlavors(info);
     }
 
     @Override
@@ -34,7 +35,6 @@ public class MyLibraryTransferHandler extends TransferHandler {
         return COPY;
     }
 
-    @SuppressWarnings("unchecked")
     public boolean importData(TransferHandler.TransferSupport info) {
         if (!info.isDrop()) {
             return false;
@@ -44,7 +44,7 @@ public class MyLibraryTransferHandler extends TransferHandler {
         Transferable t = info.getTransferable();
         final List<File> fileList;
         try {
-            fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+            fileList = Arrays.asList(DNDUtils.getFiles(t));
         } catch (Exception e) {
             return false;
         }

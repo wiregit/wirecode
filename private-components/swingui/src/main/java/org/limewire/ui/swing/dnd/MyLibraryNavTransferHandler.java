@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.dnd;
 
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.TransferHandler;
@@ -14,6 +14,7 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 public class MyLibraryNavTransferHandler extends TransferHandler {
@@ -33,7 +34,7 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
 
     public boolean canImport(TransferHandler.TransferSupport info) {
         return info.isDataFlavorSupported(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR)
-                || info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+                || DNDUtils.containsFileFlavors(info);
     }
 
     @Override
@@ -70,7 +71,7 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
             Transferable t = info.getTransferable();
             final List<File> fileList;
             try {
-                fileList = getLocalTransferData(t);
+                fileList = Arrays.asList(DNDUtils.getFiles(t));
             } catch (Exception e) {
                 return false;
             }
@@ -90,11 +91,5 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
             throws UnsupportedFlavorException, IOException {
         return (List<RemoteFileItem>) t
                 .getTransferData(RemoteFileTransferable.REMOTE_FILE_DATA_FLAVOR);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<File> getLocalTransferData(Transferable t) throws UnsupportedFlavorException,
-            IOException {
-        return (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
     }
 }

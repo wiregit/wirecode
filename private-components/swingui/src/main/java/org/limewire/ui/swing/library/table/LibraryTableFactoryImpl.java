@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.library.table;
 
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.DropMode;
@@ -41,6 +41,7 @@ import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -317,10 +318,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
         @Override
         public boolean canImport(TransferHandler.TransferSupport info) {
-            return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+            return DNDUtils.containsFileFlavors(info);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public boolean importData(TransferHandler.TransferSupport info) {
             if (!info.isDrop()) {
@@ -331,7 +331,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
             final List<File> fileList;
             try {
-                fileList = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+                fileList = Arrays.asList(DNDUtils.getFiles(t));
             } catch (Exception e) {
                 return false;
             }
