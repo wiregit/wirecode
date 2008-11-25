@@ -56,12 +56,13 @@ public class ButtonDecorator {
         
         button.setContentAreaFilled(false);
         button.setPaintBorderInsets(true);
-
     }
     
     public void decorateDarkFullButton(JXButton button, DrawMode mode) {
         decorateDarkFullButton(button, painterFactory.createDarkFullButtonForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode));
+        
+        button.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
     }
     
     private void decorateDarkFullButton(JXButton button,
@@ -72,7 +73,6 @@ public class ButtonDecorator {
         
         decorateGeneral(button);
         
-        button.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         button.setForeground(darkFullTextForeground);
         button.setFont(darkFullTextFont);
     }
