@@ -95,16 +95,16 @@ public class FirewallOptionPanel extends OptionPanel {
         
         @Override
         void applyOptions() {
-            int currentPort = Integer.parseInt(portField.getText());
-            if(currentPort != port) {
+            int newPort = Integer.parseInt(portField.getText());
+            if(newPort != port) {
                 try {
-                    NetworkSettings.PORT.setValue(port);
-                    networkManager.setListeningPort(port);
-                    port = currentPort;
+                    NetworkSettings.PORT.setValue(newPort);
+                    networkManager.setListeningPort(newPort);
+                    port = newPort;
                     networkManager.portChanged();
                 } catch(IOException ioe) {
                     FocusJOptionPane.showMessageDialog(FirewallOptionPanel.this, 
-                            I18n.tr("The port chosen {0}, is already in use.", currentPort),
+                            I18n.tr("The port chosen {0}, is already in use.", newPort),
                             I18n.tr("Network Port Error"),
                             JOptionPane.ERROR_MESSAGE);
                     NetworkSettings.PORT.setValue(port);
@@ -112,7 +112,7 @@ public class FirewallOptionPanel extends OptionPanel {
                 } catch(IllegalArgumentException iae) {
                     //TODO: this should be enforced by the textbox
                     FocusJOptionPane.showMessageDialog(FirewallOptionPanel.this, 
-                            I18n.tr("The port chosen {0}, must be between 1 and 65535", currentPort),
+                            I18n.tr("The port chosen {0}, must be between 1 and 65535", newPort),
                             I18n.tr("Network Port Error"),
                             JOptionPane.ERROR_MESSAGE);
                     portField.setText(Integer.toString(port));
