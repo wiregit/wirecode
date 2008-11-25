@@ -166,7 +166,14 @@ public class PromptTextField extends JTextField implements FocusListener {
                 // Find the carat position
                 try {
                     r = object.modelToView(dot);
-                } catch (BadLocationException e) { return; }
+                } catch (BadLocationException e) { 
+                    // Carat location could not be found 
+                    //  therefore do not attempt to print
+                    //  the prompt text since 
+                    //  it will not match properly with
+                    //  the text position
+                    return; 
+                }
                 
                 int x = r.x;
                 int y = r.y + r.height - 3;
