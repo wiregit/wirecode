@@ -1,8 +1,13 @@
 package org.limewire.ui.swing.browser;
 
+import java.awt.BorderLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import org.jdesktop.swingx.HorizontalLayout;
+import org.jdesktop.swingx.JXBusyLabel;
+import org.jdesktop.swingx.JXCollapsiblePane;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.mozilla.browser.MozillaExecutor;
 import org.mozilla.browser.MozillaPanel;
@@ -24,18 +29,46 @@ public class Browser extends MozillaPanel {
     private final Listener listener = new Listener();
     
     private volatile boolean lastRequestFailed = true;
+    
+    private final VisibilityMode loadStatus;
+    
+    private JXCollapsiblePane loadingPane;
 
     public Browser() {
         super();
+        loadStatus = VisibilityMode.FORCED_HIDDEN;
     }
 
     public Browser(boolean attachNewBrowserOnCreation, VisibilityMode toolbarVisMode,
             VisibilityMode statusbarVisMode) {
         super(null, attachNewBrowserOnCreation, toolbarVisMode, statusbarVisMode);
+        loadStatus = VisibilityMode.FORCED_HIDDEN;
     }
 
     public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode) {
         super(toolbarVisMode, statusbarVisMode);
+        loadStatus = VisibilityMode.FORCED_HIDDEN;
+    }
+    
+    public Browser(VisibilityMode toolbarVisMode, VisibilityMode statusbarVisMode, VisibilityMode loadingMode) {
+        super(toolbarVisMode, statusbarVisMode);
+        this.loadStatus = loadingMode;
+    }
+    
+    @Override
+    protected void createChrome() {
+        super.createChrome();
+        loadingPane = new JXCollapsiblePane();
+        
+        if(loadStatus != VisibilityMode.FORCED_HIDDEN) {
+            loadingPane.setLayout(new HorizontalLayout());
+            JXBusyLabel busyLabel = new JXBusyLabel();
+            busyLabel.setBusy(true);
+            busyLabel.setText(I18n.tr("Loading..."));
+            loadingPane.add(busyLabel);
+            add(loadingPane, BorderLayout.SOUTH);
+            loadingPane.setCollapsed(true);
+        }
     }
     
     /** Returns true if the last request is currently in progress or succeeded. */
@@ -72,6 +105,21 @@ public class Browser extends MozillaPanel {
             }
         });
     }
+    
+    public void pageLoadStarted() {
+        lastRequestFailed = false;
+        if(loadStatus == VisibilityMode.DEFAULT) {
+            loadingPane.setCollapsed(false);
+        }
+    }
+
+    public void pageLoadStopped(boolean failed) {
+        lastRequestFailed = failed;
+        if(loadStatus == VisibilityMode.DEFAULT) {
+            loadingPane.setCollapsed(true);
+        }
+    }
+    
 
     private class VisibilityListener extends ComponentAdapter {
         @Override
@@ -104,16 +152,6 @@ public class Browser extends MozillaPanel {
     }
 
     private class Listener implements nsIWebProgressListener {
-        
-        public void started() {
-            lastRequestFailed = false;
-        }
-
-        public void stopped(nsIRequest aRequest,
-                            long aStatus) {
-            lastRequestFailed = aStatus != 0;
-        }
-        
         @Override
         public void onLocationChange(nsIWebProgress webProgress, nsIRequest request, nsIURI location) {
         }
@@ -133,12 +171,12 @@ public class Browser extends MozillaPanel {
                 long status) {
             if ((stateFlags & nsIWebProgressListener.STATE_IS_NETWORK) != 0
                     && (stateFlags & nsIWebProgressListener.STATE_START) != 0) {
-                started();
+                pageLoadStarted();
             }
 
             if ((stateFlags & nsIWebProgressListener.STATE_IS_NETWORK) != 0
                     && (stateFlags & nsIWebProgressListener.STATE_STOP) != 0) {
-                stopped(request, status);
+                pageLoadStopped(status != 0);
             }
         }
 

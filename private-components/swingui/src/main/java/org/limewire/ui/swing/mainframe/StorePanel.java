@@ -25,7 +25,7 @@ public class StorePanel extends JPanel {
     @Inject
     public StorePanel(Application application) {
         this.application = application;
-        browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
+        browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
 
         setLayout(new GridBagLayout());
 
