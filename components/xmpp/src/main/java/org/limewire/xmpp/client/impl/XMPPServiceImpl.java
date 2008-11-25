@@ -102,14 +102,24 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     @Override
     public XMPPConnection login(XMPPConnectionConfiguration configuration) throws XMPPException {
+        return login(configuration, false);
+    }
+
+    public XMPPConnection login(XMPPConnectionConfiguration configuration, boolean isReconnect) throws XMPPException {
         synchronized (this) {
             if(!multipleConnectionsAllowed) {
                 XMPPConnection activeConnection = getActiveConnection();
-                if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
-                    return activeConnection;
+                if(isReconnect) {
+                    if(activeConnection != null) {
+                        return activeConnection;
+                    }
                 } else {
-                    logout();
-                }
+                    if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
+                        return activeConnection;
+                    } else {
+                        logout();
+                    }    
+                }                
             }
             
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
@@ -198,27 +208,27 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         @BlockingEvent
         public void handleEvent(XMPPConnectionEvent event) {
             if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED && event.getData() != null) {
+                XMPPConnection connection = event.getSource();
+                XMPPConnectionConfiguration configuration = connection.getConfiguration();
                 synchronized (XMPPServiceImpl.this) {
-                    XMPPConnection connection = event.getSource();
-                    XMPPConnectionConfiguration configuration = connection.getConfiguration();
                     connections.remove(connection);
-                    connection = null;
-                    long sleepTime = 10000;
-                    while(connection == null) {
-                        try {
-                            LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
-                            connection = login(configuration);
-                        } catch (XMPPException e) {
-                        }
-                        try {
-                            Thread.sleep(sleepTime);
-                        } catch (InterruptedException e) {
-                            
-                        }
-//                        if(sleepTime < (Long.MAX_VALUE / 2)) {
-//                            sleepTime *= 2;
-//                        }
+                }
+                connection = null;
+                long sleepTime = 10000;
+                while(connection == null) {
+                    try {
+                        LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
+                        connection = login(configuration, true);
+                    } catch (XMPPException e) {
                     }
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        
+                    }
+//                  if(sleepTime < (Long.MAX_VALUE / 2)) {
+//                      sleepTime *= 2;
+//                  }
                 }
             }
         }
