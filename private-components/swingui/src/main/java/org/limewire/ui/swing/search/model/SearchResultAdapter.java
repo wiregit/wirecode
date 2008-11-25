@@ -27,7 +27,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
 class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
-    private static final Pattern findHTMLTags = Pattern.compile("[<][/]?[\\w]*[>]");
+    private static final Pattern FIND_HTML_MARKUP = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
 
     private final Log LOG = LogFactory.getLog(getClass());
 
@@ -293,7 +293,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
      * is found).
      */
     private String sanitize(String input) {
-        Matcher matcher = findHTMLTags.matcher(input);
+        Matcher matcher = FIND_HTML_MARKUP.matcher(input);
         if (matcher.find()) {
             setSpam(true);
             return matcher.replaceAll("");

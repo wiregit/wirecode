@@ -39,6 +39,14 @@ public class SearchResultAdapterTest extends TestCase {
         
         assertEquals("foo", adapter.getHeading());
         assertTrue(adapter.isSpam());
+        
+    }
+    
+    public void testHeadingWithAnyMarkupIsAutomaticallySanitizedAndMarkedAsSpam() {
+        propertiableHeadings.heading = "<html><a href=\"http://www.booya.com/&?foo:#23432-heynow\">foo</a></html>";
+        
+        assertEquals("foo", adapter.getHeading());
+        assertTrue(adapter.isSpam());
     }
 
     public void testSubHeadingWithHTMLIsAutomaticallySanitizedAndMarkedAsSpam() {
