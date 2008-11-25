@@ -22,7 +22,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.CustomCheckBox;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
@@ -161,7 +160,7 @@ public class MainDownloadPanel extends JPanel {
 	    pauseAllButton = new JButton(pauseAction);	
 	    resumeAllButton = new JButton(resumeAction);
 	    clearFinishedButton = new JXButton(clearAction);
-	    categoriseCheckBox = new CustomCheckBox(categorizeAction);
+	    categoriseCheckBox = new JCheckBox(categorizeAction);
 
 	    clearFinishedButton.setBackgroundPainter(new DarkButtonPainter());
 	    clearFinishedButton.setOpaque(false);
