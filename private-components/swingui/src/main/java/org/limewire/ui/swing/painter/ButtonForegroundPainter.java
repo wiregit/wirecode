@@ -21,6 +21,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
 
     private final Paint pressedForeground;
     private final Paint hoverForeground;
+    private final Paint disabledForeground;
     
     /**
      * Creates a button foreground painter that does not
@@ -31,7 +32,7 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *          -- instead use the factory
      */
     ButtonForegroundPainter() {
-        this(null, null);
+        this(null, null, null);
     }
        
     /** 
@@ -40,9 +41,10 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
      *  
      *  NOTE: Will ignore default app style.  Use the factory if regular behaviour is desired.
      */
-    public ButtonForegroundPainter(Paint pressedForeground, Paint hoverForeground) {
+    public ButtonForegroundPainter(Paint hoverForeground, Paint pressedForeground, Paint disabledForeground) {
         this.pressedForeground = pressedForeground;
         this.hoverForeground = hoverForeground;
+        this.disabledForeground = disabledForeground;
         
         setCacheable(false);
     }
@@ -50,14 +52,16 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
     @Override
     protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
         
-        int textBaseline = object.getHeight() - object.getHeight()/2 
-                + g.getFontMetrics().getAscent()/2 
-                - object.getInsets().top;
+        int textBaseline = (object.getHeight()-3)/2 
+                + g.getFontMetrics().getAscent()/2;
         
         Icon icon = null;
         Paint foreground = null;
-                
-        if (object.getModel().isPressed()) {
+         
+        if (!object.isEnabled()) {
+            foreground = disabledForeground;
+        }
+        else if (object.getModel().isPressed()) {
             icon = object.getPressedIcon();
             foreground = pressedForeground; 
         }

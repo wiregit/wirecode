@@ -17,6 +17,7 @@ public class ButtonPainterFactory {
     
     @Resource private Color darkFullHoverTextForeground;
     @Resource private Color darkFullDownTextForeground;
+    @Resource private Color darkFullDisabledTextForeground;
     
     @Inject
     ButtonPainterFactory() {
@@ -24,7 +25,7 @@ public class ButtonPainterFactory {
     }
     
     public ButtonForegroundPainter createMiniButtonForegroundPainter() {
-        return new ButtonForegroundPainter(miniHoverTextForeground, miniDownTextForeground);
+        return new ButtonForegroundPainter(miniHoverTextForeground, miniDownTextForeground, Color.GRAY);
     }
     
     public ButtonForegroundPainter createLightFullButtonForegroundPainter() {
@@ -32,7 +33,8 @@ public class ButtonPainterFactory {
     }
     
     public ButtonForegroundPainter createDarkFullButtonForegroundPainter() {
-        return new ButtonForegroundPainter(darkFullHoverTextForeground, darkFullDownTextForeground);
+        return new ButtonForegroundPainter(darkFullHoverTextForeground, darkFullDownTextForeground, 
+                darkFullDisabledTextForeground);
     }
 
     public PopupButtonBackgroundPainter createMiniButtonBackgroundPainter() {

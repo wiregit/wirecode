@@ -4,6 +4,7 @@ import java.awt.Cursor;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
@@ -39,6 +40,7 @@ public class LimeComboBoxFactory {
         LimeComboBox box = new LimeComboBox(items);
         buttonDecorator.decorateDarkFullButton(box);
         box.setIcon(this.darkFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         return box;
     }
     
@@ -46,6 +48,7 @@ public class LimeComboBoxFactory {
         LimeComboBox box = new LimeComboBox(items);
         buttonDecorator.decorateLightFullButton(box);
         box.setIcon(this.lightFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         return box;
     }
     
@@ -62,6 +65,7 @@ public class LimeComboBoxFactory {
     public void decorateMiniComboBox(LimeComboBox box, String promptText) {
         buttonDecorator.decorateMiniButton(box);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         box.setText(promptText);
         box.setMouseOverCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }

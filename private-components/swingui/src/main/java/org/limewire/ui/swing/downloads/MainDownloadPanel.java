@@ -3,7 +3,6 @@ package org.limewire.ui.swing.downloads;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -171,10 +170,6 @@ public class MainDownloadPanel extends JPanel {
 	    
 	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
 	    
-	    // TODO: spec 
-	    clearFinishedButton.setPreferredSize(
-	            new Dimension((int)clearFinishedButton.getPreferredSize().getWidth(), 21));
-
 	    categoriseCheckBox.setOpaque(false);
 	    categoriseCheckBox.setForeground(Color.WHITE);
 	    FontUtils.changeStyle(categoriseCheckBox, Font.PLAIN);

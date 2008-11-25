@@ -1,9 +1,8 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
-
-import javax.swing.BorderFactory;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -27,6 +26,7 @@ public class ButtonDecorator {
     
     @Resource private Font  darkFullTextFont;
     @Resource private Color darkFullTextForeground;
+    @Resource private int   darkFullDefaultHeight;
     
     @Inject
     ButtonDecorator(ButtonPainterFactory painterFactory) {
@@ -41,7 +41,6 @@ public class ButtonDecorator {
         
         decorateGeneral(button);
         
-        button.setBorder(BorderFactory.createEmptyBorder(2,6,2,15));
         button.setForeground(miniTextForeground);
         button.setFont(miniTextFont);
     }
@@ -61,8 +60,6 @@ public class ButtonDecorator {
     public void decorateDarkFullButton(JXButton button, DrawMode mode) {
         decorateDarkFullButton(button, painterFactory.createDarkFullButtonForegroundPainter(), 
                 painterFactory.createDarkFullButtonBackgroundPainter(mode));
-        
-        button.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
     }
     
     private void decorateDarkFullButton(JXButton button,
@@ -75,6 +72,12 @@ public class ButtonDecorator {
         
         button.setForeground(darkFullTextForeground);
         button.setFont(darkFullTextFont);
+        
+        button.setMaximumSize(new Dimension(100, darkFullDefaultHeight));
+        button.setMinimumSize(new Dimension(10, darkFullDefaultHeight));
+        button.setPreferredSize(new Dimension((int)button.getPreferredSize().getWidth(), 
+                        darkFullDefaultHeight));
+        button.setSize(button.getPreferredSize());
     }
     
     public void decorateLightFullButton(JXButton button) {
@@ -83,7 +86,6 @@ public class ButtonDecorator {
 
         decorateGeneral(button);
         
-        button.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         button.setForeground(lightFullTextForeground);
         button.setFont(lightFullTextFont);
     }
