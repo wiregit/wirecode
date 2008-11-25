@@ -68,7 +68,11 @@ public class FilePropertyKeyPopulator {
         // Insert nothing if value is null|empty.
         if (value != null && !value.toString().isEmpty()) {
             if (value instanceof String) {
-                value = I18NConvert.instance().compose((String) value);
+                if (FilePropertyKey.isLong(property)) {
+                    value = CommonUtils.parseLongNoException((String)value);
+                } else {
+                    value = I18NConvert.instance().compose((String) value);
+                }
             }
             map.put(property, value);
         }

@@ -28,6 +28,7 @@ public enum FilePropertyKey {
     
     private final static Collection<FilePropertyKey> indexableKeys = new HashSet<FilePropertyKey>(); 
     private final static Collection<FilePropertyKey> editableKeys = new HashSet<FilePropertyKey>(); 
+    private final static Collection<FilePropertyKey> longKeys = new HashSet<FilePropertyKey>(); 
 
     
     static {
@@ -53,12 +54,25 @@ public enum FilePropertyKey {
         editableKeys.add(YEAR);
     };
     
+    static {
+        longKeys.add(LENGTH);
+        longKeys.add(YEAR);
+        longKeys.add(WIDTH);  
+        longKeys.add(TRACK_NUMBER);
+        longKeys.add(BITRATE);
+        longKeys.add(FILE_SIZE);
+    };
+    
     public static Collection<FilePropertyKey> getIndexableKeys() {
         return indexableKeys;
     }
     
     public static Collection<FilePropertyKey> getEditableKeys() {
         return editableKeys;
+    }
+    
+    public static boolean isLong(FilePropertyKey key){
+        return longKeys.contains(key);
     }
 }
 

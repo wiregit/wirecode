@@ -19,8 +19,8 @@ public class TimeRenderer extends DefaultLibraryRenderer {
             boolean isSelected, boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        if (value != null) {
-            setText(CommonUtils.seconds2time(Long.valueOf((String)value))); 
+        if (value != null && value instanceof Long) {
+            setText(CommonUtils.seconds2time((Long)value)); 
         }
         return this;
     }
