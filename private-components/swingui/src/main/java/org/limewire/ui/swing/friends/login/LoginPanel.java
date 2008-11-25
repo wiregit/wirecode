@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.login;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -22,8 +20,6 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.components.ActionLabel;
@@ -32,11 +28,15 @@ import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -182,6 +182,7 @@ class LoginPanel extends JXPanel {
         usernameField.setEnabled(isEnabled);
         passwordField.setEnabled(isEnabled);
         autoLoginCheckBox.setEnabled(isEnabled);
+        serviceComboBox.setEnabled(isEnabled);
     }
 
     void connected(XMPPConnectionConfiguration config) {
@@ -193,7 +194,11 @@ class LoginPanel extends JXPanel {
         authFailedLabel.setVisible(false);
         BackgroundExecutorService.execute(new Runnable() {
             public void run() {
-                xmppService.login(config);
+                try {
+                    xmppService.login(config);
+                } catch (XMPPException e) {
+                    
+                }
             }
         });            
     }

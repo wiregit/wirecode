@@ -11,7 +11,7 @@ public interface XMPPService {
      * Attempts to log in a connection using the specified configuration.
      * Any existing connections will be logged out first.
      */
-    public void login(XMPPConnectionConfiguration configuration);
+    public XMPPConnection login(XMPPConnectionConfiguration configuration) throws XMPPException;
 
     /**
      * Logs out any existing connections.

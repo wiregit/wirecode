@@ -11,6 +11,7 @@ import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
@@ -19,18 +20,18 @@ import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
-import org.limewire.listener.EventRebroadcaster;
 import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -75,6 +76,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final XMPPAuthenticator authenticator;
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventMulticaster<FeatureEvent> featureSupport;
+    private final SmackConnectionListener smackConnectionListener;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -96,6 +98,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         this.rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
         this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
         this.featureSupport = featureSupport;
+        smackConnectionListener = new SmackConnectionListener();
     }
 
     public void setMode(Presence.Mode mode) {
@@ -118,6 +121,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         loggingIn.set(true);
         synchronized (this) {
             try {
+                org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
                 connection = new org.jivesoftware.smack.XMPPConnection(getConnectionConfig(configuration));
                 connection.addRosterListener(new RosterListenerImpl(connection));
@@ -131,6 +135,11 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 LOG.info("logged in.");
                 connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {
+                connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+                if(connection != null && connection.isConnected()) {
+                    connection.disconnect();
+                }
+                org.jivesoftware.smack.XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
                 throw new XMPPException(e);
             } finally {
                 loggingIn.set(false);
@@ -145,22 +154,14 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     public void logout() {
         synchronized (this) {
-            if(connection != null) {
-                if (LOG.isInfoEnabled())
-                    LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
-                try {
-                    connection.disconnect();
-                } catch (NullPointerException npe) {
-                    // FIXME: this is a workaround
-                }
-                addressIQListener.dispose();
-                authTokenIQListener.dispose();
-                addressIQListener = null;
-                fileTransferIQListener = null;
-                authTokenIQListener = null;
+            if(connection != null && connection.isAuthenticated()) {
+                LOG.infof("disconnecting from {0} at {1}:{2} ...", configuration.getServiceName(), configuration.getHost(), configuration.getPort());
+                connection.disconnect();
                 synchronized (users) {
                     users.clear();
                 }
+                XMPPConnection.removeConnectionCreationListener(smackConnectionListener);
+                connection = null;
                 LOG.info("disconnected.");
             }
         }
@@ -174,61 +175,6 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return new ConnectionConfiguration(configuration.getHost(),
                                            configuration.getPort(),
                                            configuration.getServiceName());
-    }
-
-    public void initialize() {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("adding connection listener for "+ toString());
-        }
-
-        org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
-            public void connectionCreated(final org.jivesoftware.smack.XMPPConnection connection) {
-                if(XMPPConnectionImpl.this.connection != connection) {
-                    return;
-                }
-
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("connection created for "+ connection.toString());
-                }
-                connection.addConnectionListener(new SmackConnectionListener());
-
-                synchronized (ProviderManager.getInstance()) {
-                    if(ProviderManager.getInstance().getIQProvider("address", "jabber:iq:lw-address") == null) {
-                        ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
-                    }
-                    if(ProviderManager.getInstance().getIQProvider("file-transfer", "jabber:iq:lw-file-transfer") == null) {
-                        ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
-                    }
-                    if(ProviderManager.getInstance().getIQProvider("auth-token", "jabber:iq:lw-auth-token") == null) {
-                        ProviderManager.getInstance().addIQProvider("auth-token", "jabber:iq:lw-auth-token", new AuthTokenIQProvider());
-                    }
-                    if(ProviderManager.getInstance().getIQProvider("library-changed", "jabber:iq:lw-lib-change") == null) {
-                        ProviderManager.getInstance().addIQProvider("library-changed", "jabber:iq:lw-lib-change", LibraryChangedIQ.getIQProvider());
-                    }
-                }
-
-                ChatStateManager.getInstance(connection);
-                ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
-
-                synchronized (XMPPConnectionImpl.this) {
-                    Address address = null;
-                    if(lastEvent != null) {
-                        address = lastEvent.getSource();
-                    }
-                    addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, featureSupport);
-                }
-                connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
-
-                fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);
-                connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
-
-                authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, authenticator, featureSupport);
-                connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
-
-                libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
-                connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
-            }
-        });
     }
 
     private class RosterListenerImpl implements org.jivesoftware.smack.RosterListener {
@@ -478,30 +424,83 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return connection.getUser();
     }
     
-    private class SmackConnectionListener implements ConnectionListener {
+    private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
+
+        @Override
+        public void connectionCreated(XMPPConnection connection) {
+            if(XMPPConnectionImpl.this.connection != connection) {
+                return;
+            }
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("connection created for "+ connection.toString());
+            }
+            connection.addConnectionListener(this);
+
+            synchronized (ProviderManager.getInstance()) {
+                if(ProviderManager.getInstance().getIQProvider("address", "jabber:iq:lw-address") == null) {
+                    ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
+                }
+                if(ProviderManager.getInstance().getIQProvider("file-transfer", "jabber:iq:lw-file-transfer") == null) {
+                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
+                }
+                if(ProviderManager.getInstance().getIQProvider("auth-token", "jabber:iq:lw-auth-token") == null) {
+                    ProviderManager.getInstance().addIQProvider("auth-token", "jabber:iq:lw-auth-token", new AuthTokenIQProvider());
+                }
+                if(ProviderManager.getInstance().getIQProvider("library-changed", "jabber:iq:lw-lib-change") == null) {
+                    ProviderManager.getInstance().addIQProvider("library-changed", "jabber:iq:lw-lib-change", LibraryChangedIQ.getIQProvider());
+                }
+            }
+
+            ChatStateManager.getInstance(connection);
+            ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
+
+            synchronized (XMPPConnectionImpl.this) {
+                Address address = null;
+                if(lastEvent != null) {
+                    address = lastEvent.getSource();
+                }
+                addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, featureSupport);
+            }
+            connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
+
+            fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);
+            connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());  
+
+            authTokenIQListener = new AuthTokenIQListener(XMPPConnectionImpl.this, authenticator, featureSupport);
+            connection.addPacketListener(authTokenIQListener, authTokenIQListener.getPacketFilter());
+
+            libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
+            connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
+        }
+
         @Override
         public void connectionClosed() {
+            cleanup();
             connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
+            cleanup();
             connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
         }
 
         @Override
         public void reconnectingIn(int seconds) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING));
         }
 
         @Override
         public void reconnectionFailed(Exception e) {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.RECONNECTING_FAILED, e));
         }
 
         @Override
         public void reconnectionSuccessful() {
-            connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.CONNECTED));
+        }
+        
+        private void cleanup() {
+            addressIQListener.dispose();
+            authTokenIQListener.dispose();
         }
     }
 }

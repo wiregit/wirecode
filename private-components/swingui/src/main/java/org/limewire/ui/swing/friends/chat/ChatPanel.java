@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -13,8 +11,8 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.limewire.core.settings.FriendSettings;
@@ -24,6 +22,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -76,8 +75,10 @@ public class ChatPanel extends JPanel implements Displayable {
                 switch(event.getType()) {
                 case CONNECTED:
                     handleSignon();
+                    break;
                 case DISCONNECTED:
                     handleSignoff();
+                    break;
                 }
             }
         });

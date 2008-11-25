@@ -7,7 +7,8 @@ import org.limewire.xmpp.api.client.XMPPService;
 class MockXmppService implements XMPPService {
 
     @Override
-    public void login(XMPPConnectionConfiguration configuration) {
+    public XMPPConnection login(XMPPConnectionConfiguration configuration) {
+        return null;
     }
 
     @Override

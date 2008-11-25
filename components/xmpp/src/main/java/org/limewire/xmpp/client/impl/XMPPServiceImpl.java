@@ -7,10 +7,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -40,7 +41,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
     private final AddressFactory addressFactory;
-    private final Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster;
+    private final Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster;
     private final XMPPAuthenticator authenticator;
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final List<XMPPConnectionImpl> connections;
@@ -52,7 +53,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
             Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
-            Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
+            Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
             EventMulticaster<FeatureEvent> featureSupport) {
         this.rosterBroadcaster = rosterBroadcaster;
@@ -64,6 +65,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.featureSupport = featureSupport;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
         this.multipleConnectionsAllowed = false;
+        this.connectionBroadcaster.get().addListener(new ReconnectionManager());
     }
 
     @Inject
@@ -99,34 +101,32 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     @Override
-    public void login(XMPPConnectionConfiguration configuration) {
-        if(!multipleConnectionsAllowed) {
-            XMPPConnection activeConnection = getActiveConnection();
-            if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
-                return; // We're already logging in with this connection.
-            } else {
-                logout();
+    public XMPPConnection login(XMPPConnectionConfiguration configuration) throws XMPPException {
+        synchronized (this) {
+            if(!multipleConnectionsAllowed) {
+                XMPPConnection activeConnection = getActiveConnection();
+                if(activeConnection != null && activeConnection.getConfiguration().equals(configuration)) {
+                    return activeConnection;
+                } else {
+                    logout();
+                }
             }
-        }
-        
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
-                rosterBroadcaster.get(), fileOfferBroadcaster.get(),
-                libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                addressFactory, authenticator, featureSupport);
-        connection.initialize();
-        // Give the new connection the latest information about our IP address
-        // and firewall status
-        if(lastAddressEvent != null) {
-            connection.handleEvent(lastAddressEvent);
-        }
-        try {
-            connections.add(connection);
-            connection.login();
-        } catch(XMPPException e) {
-            connections.remove(connection);
-            connection.logout();
-            LOG.error(e.getMessage(), e);
-            connectionBroadcaster.get().broadcast(new XMPPConnectionEvent(connection, XMPPConnectionEvent.Type.CONNECT_FAILED, e));
+            
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
+                    rosterBroadcaster.get(), fileOfferBroadcaster.get(),
+                    libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
+                    addressFactory, authenticator, featureSupport);
+            if(lastAddressEvent != null) {
+                connection.handleEvent(lastAddressEvent);
+            }
+            try {            
+                connection.login();
+                connections.add(connection);
+                return connection;
+            } catch(XMPPException e) {
+                LOG.debug(e.getMessage(), e);
+                throw new XMPPException(e);
+            }
         }
     }
     
@@ -191,5 +191,36 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     // Only for testing
     List<? extends XMPPConnection> getConnections() {
         return Collections.unmodifiableList(connections);
-    }    
+    } 
+    
+    private class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
+        @Override
+        @BlockingEvent
+        public void handleEvent(XMPPConnectionEvent event) {
+            if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED && event.getData() != null) {
+                synchronized (XMPPServiceImpl.this) {
+                    XMPPConnection connection = event.getSource();
+                    XMPPConnectionConfiguration configuration = connection.getConfiguration();
+                    connections.remove(connection);
+                    connection = null;
+                    long sleepTime = 10000;
+                    while(connection == null) {
+                        try {
+                            LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
+                            connection = login(configuration);
+                        } catch (XMPPException e) {
+                        }
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (InterruptedException e) {
+                            
+                        }
+//                        if(sleepTime < (Long.MAX_VALUE / 2)) {
+//                            sleepTime *= 2;
+//                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.login;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
@@ -22,6 +20,7 @@ import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -218,8 +217,6 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 case CONNECTED:
                     connected(event.getSource().getConfiguration());
                     break;
-                case RECONNECTING:
-                case RECONNECTING_FAILED:
                 case DISCONNECTED:
                 case CONNECT_FAILED:
                     disconnected(event.getData());

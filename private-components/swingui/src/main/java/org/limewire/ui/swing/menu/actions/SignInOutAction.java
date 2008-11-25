@@ -38,8 +38,6 @@ public class SignInOutAction extends AbstractAction {
                     break;                    
                 case CONNECT_FAILED:
                 case DISCONNECTED:
-                case RECONNECTING:
-                case RECONNECTING_FAILED:
                     putValue(Action.NAME, SIGN_INTO_FRIENDS_TEXT);
                     break;
                 }
