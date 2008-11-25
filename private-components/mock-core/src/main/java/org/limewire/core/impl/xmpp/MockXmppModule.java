@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.listener.EventBroadcaster;
@@ -46,6 +47,7 @@ public class MockXmppModule extends AbstractModule {
         EventMulticaster<FriendEvent> knownMulticaster = new EventMulticasterImpl<FriendEvent>();
         EventMulticaster<FriendEvent> availMulticaster = new EventMulticasterImpl<FriendEvent>();
         EventMulticaster<FriendPresenceEvent> presenceMulticaster = new EventMulticasterImpl<FriendPresenceEvent>();
+        EventMulticaster<FeatureEvent> featureMulticaster = new EventMulticasterImpl<FeatureEvent>();
         
         bind(new TypeLiteral<ListenerSupport<FriendEvent>>(){}).annotatedWith(Names.named("known")).toInstance(knownMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FriendEvent>>(){}).annotatedWith(Names.named("known")).toInstance(knownMulticaster);
@@ -55,6 +57,10 @@ public class MockXmppModule extends AbstractModule {
         
         bind(new TypeLiteral<ListenerSupport<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FriendPresenceEvent>>(){}).toInstance(presenceMulticaster);
+        
+        bind(new TypeLiteral<ListenerSupport<FeatureEvent>>(){}).toInstance(featureMulticaster);
+        bind(new TypeLiteral<EventMulticaster<FeatureEvent>>(){}).toInstance(featureMulticaster);
+        
         bind(XMPPResourceFactory.class).to(MockXmppResourceFactory.class);
         
         bind(new TypeLiteral<Collection<Friend>>(){}).annotatedWith(Names.named("known")).toInstance(new ArrayList<Friend>());
