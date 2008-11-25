@@ -97,8 +97,8 @@ class LoginPanel extends JXPanel {
             }
         });
         serviceComboBox.setRenderer(new Renderer());
-        usernameField = new JTextField(18);
-        passwordField = new JPasswordField(18);
+        usernameField = new JTextField();
+        passwordField = new JPasswordField();
 
         passwordField.setAction(signinAction);
 
@@ -121,12 +121,12 @@ class LoginPanel extends JXPanel {
 
         setLayout(new MigLayout("gap 0, fill"));
         add(hideButton, "alignx right, wrap");
-        add(new JLabel(tr("Using")), "alignx left, split");
+        add(new JLabel(tr("Using")), "alignx left, wrap");
         add(serviceComboBox, "wmin 0, wrap");
         add(new JLabel(tr("Username")), "alignx left, wrap");
-        add(usernameField, "alignx left, wmin 0, wrap");
+        add(usernameField, "alignx left, grow, wmin 0, wrap");
         add(new JLabel(tr("Password")), "alignx left, wrap");
-        add(passwordField, "alignx left, wmin 0, wrap");
+        add(passwordField, "alignx left, grow, wmin 0, wrap");
         add(autoLoginCheckBox, "gaptop 2, alignx left, wmin 0, wrap");
         add(authFailedLabel, "alignx left, wmin 0, hidemode 3, wrap");
         add(signInButton, "gaptop 2, alignx left, wmin 0");

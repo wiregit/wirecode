@@ -105,6 +105,9 @@ class NavList extends JXPanel {
         if(panel != null) {
             collapsablePanels.setCollapsed(false);
             collapsablePanels.scrollRectToVisible(panel.getBounds());
+            if(panel == navPanels.get(0)) {
+                scrollRectToVisible(titleLabel.getBounds());
+            }
         }
         return panel;
         

@@ -57,6 +57,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 FriendsSignInPanel.this.loginPanel.setVisible(true);
             }
         });
+        shareLabel.setForegroundColor(Color.BLUE);
         shareLabel.setMouseOverColor(Color.BLUE);
         add(shareLabel);
         add(loginPanel);

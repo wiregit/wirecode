@@ -35,12 +35,13 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-class NavPanel extends JXPanel {
+public class NavPanel extends JXPanel {
     
     @Resource private Icon removeLibraryIcon;
     @Resource private Icon removeLibraryHoverIcon;
     
     @Resource private Color selectedBackground;
+    
     @Resource private Font selectedTextFont;
     @Resource private Color selectedTextColor;
     @Resource private Font failedTextFont;
@@ -51,7 +52,7 @@ class NavPanel extends JXPanel {
     private final FriendLibraryMediator libraryPanel;
     
     private final Friend friend;
-    private final CategoryLabel categoryLabel;
+    private final ActionLabel categoryLabel;
     private final JXBusyLabel statusIcon;
     private final Action action;
     
@@ -74,8 +75,12 @@ class NavPanel extends JXPanel {
         this.libraryPanel = libraryPanel;
         this.remoteLibraryManager = remoteLibraryManager;        
         
-        categoryLabel = new CategoryLabel(action);
-        categoryLabel.setText(friend.getRenderName());  
+        categoryLabel = new ActionLabel(action, false);
+        categoryLabel.setFont(textFont);
+        categoryLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
+        categoryLabel.setMinimumSize(new Dimension(0, 20));
+        categoryLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, 20));
+        categoryLabel.setText(friend.getRenderName());
         statusIcon = new JXBusyLabel(new Dimension(12, 12));
         statusIcon.setOpaque(false);
         
@@ -86,11 +91,58 @@ class NavPanel extends JXPanel {
         action.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals(Action.SELECTED_KEY) && Boolean.TRUE.equals(evt.getNewValue())) {
-                    requestFocus();
+                if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                    if(Boolean.TRUE.equals(evt.getNewValue())) {
+                        requestFocus();
+                        setBackground(selectedBackground);
+                        categoryLabel.setForeground(selectedTextColor);
+                        categoryLabel.setFont(selectedTextFont);
+                        setOpaque(true);
+                    } else {
+                        setBackground(null);
+                        categoryLabel.setForeground(textColor);
+                        categoryLabel.setFont(textFont);
+                        setOpaque(false);
+                    }
                 }
             }
         });
+    }
+    
+    Action getAction() {
+        return action;
+    }
+    
+    public void setPanelIcon(Icon icon) {
+        categoryLabel.setIcon(icon);
+    }
+    
+    public void setPanelFont(Font font) {
+        this.textFont = font;
+        if(!Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+            categoryLabel.setFont(font);
+        }
+    }
+    
+    public void setSelectedFont(Font font) {
+        this.selectedTextFont = font;
+        if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+            categoryLabel.setFont(font);
+        }
+    }
+    
+    public void setFontColor(Color color) {
+        this.textColor = color;
+        if(!Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+            categoryLabel.setForeground(color);
+        }
+    }
+    
+    public void setSelectedFontColor(Color color) {
+        this.selectedTextColor = color;
+        if(Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY))) {
+            categoryLabel.setForeground(color);
+        }    
     }
     
     NavList getParentList() {
@@ -197,34 +249,5 @@ class NavPanel extends JXPanel {
     
     public Friend getFriend() {
         return friend;
-    }
-    
-    private class CategoryLabel extends ActionLabel {
-        public CategoryLabel(Action action) {
-            super(action, false);
-            
-            setFont(textFont);
-            setForeground(textColor);
-            setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
-            setMinimumSize(new Dimension(0, 20));
-            setMaximumSize(new Dimension(Short.MAX_VALUE, 20));
-            
-            getAction().addPropertyChangeListener(new PropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
-                        if(evt.getNewValue().equals(Boolean.TRUE)) {
-                            setBackground(selectedBackground);
-                            setForeground(selectedTextColor);
-                            setFont(selectedTextFont);
-                            setOpaque(true);
-                        } else {
-                            setOpaque(false);
-                            setForeground(textColor);
-                            setFont(textFont);
-                        }
-                    }
-                }
-            });
-        }
     }
 }
