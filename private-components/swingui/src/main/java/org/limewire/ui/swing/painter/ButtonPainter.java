@@ -52,6 +52,12 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
             shiftX2 = 0;
             break;
             
+        case UNROUNDED :
+            
+            shiftX1 = -arcWidth-2;
+            shiftX2 = -arcWidth-2;
+            break;
+            
         }
         
         painter.setRounded(true);
@@ -97,7 +103,16 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
         }        
     }
     
+    
+    /**
+     * For creating buttons with different edge rounding properties
+     * 
+     *   Examples :     
+     * 
+     *       ( LEFT_ROUNDED |   | UNROUNDED |   | RIGHT_ROUNDED ) 
+     */
+    
     public enum DrawMode {
-        FULLY_ROUNDED, RIGHT_ROUNDED, LEFT_ROUNDED 
+        FULLY_ROUNDED, RIGHT_ROUNDED, LEFT_ROUNDED, UNROUNDED 
     }
 }
