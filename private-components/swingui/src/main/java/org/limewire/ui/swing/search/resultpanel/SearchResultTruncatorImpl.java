@@ -12,7 +12,7 @@ public class SearchResultTruncatorImpl implements SearchResultTruncator {
     private static final String CLOSE_TAG = "</b>";
     private static final String ELLIPSIS = "...";
     private static final int ELLIPSIS_SHRINK_INCREMENT = ELLIPSIS.length() + 1;
-    private final Pattern findHTMLMinusBoldTags = Pattern.compile("[<][/]?[\\w&&[^b]]*[>]");
+    private final Pattern findHTMLMinusBoldTags = Pattern.compile("[<][/]?[\\w =\":#&&[^b]]*[>]");
     private final Pattern findMultipleWhitespaceChars = Pattern.compile("[\\s]++");
     private final Pattern findWhitespaceMinusSpaceChars = Pattern.compile("[\\s&&[^ ]]");
 

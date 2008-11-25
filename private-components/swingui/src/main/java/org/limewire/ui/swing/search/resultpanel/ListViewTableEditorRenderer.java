@@ -454,28 +454,43 @@ implements TableCellEditor, TableCellRenderer {
         fromWidget.setPeople(vsr.getSources());
     }
 
-    private void populateHeading(RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
+    private void populateHeading(final RowDisplayResult result, BasicDownloadState downloadState, boolean isMouseOver) {
         int width = heading.getVisibleRect().width;
         //Width is zero the first time editorpane is rendered - use a wide default (roughly width of left column)
         width = width == 0 ? LEFT_COLUMN_WIDTH : width;
         //Make the visible rect seem a little smaller than usual to trigger a more hungry truncation
         //otherwise the JEditorPane word-wrapping logic kicks in and the edge word just disappears
-        int fudgeFactorPixelWidth = width - 10;
-        String headingText = truncator.truncateHeading(result.getHeading(), fudgeFactorPixelWidth, headingFontWidthResolver);
-        this.heading.setText(headingBuilder.getHeadingDocument(headingText, downloadState, isMouseOver, result.isSpam()));
+        final int fudgeFactorPixelWidth = width - 10;
+        SearchHeading searchHeading = new SearchHeading() {
+            @Override
+            public String getText() {
+                return truncator.truncateHeading(result.getHeading(), fudgeFactorPixelWidth, headingFontWidthResolver);
+            }
+
+            @Override
+            public String getText(String adjoiningFragment) {
+                int adjoiningTextPixelWidth = headingFontWidthResolver.getPixelWidth(adjoiningFragment);
+                return truncator.truncateHeading(result.getHeading(), 
+                        fudgeFactorPixelWidth - adjoiningTextPixelWidth, headingFontWidthResolver);
+            }
+        };
+        this.heading.setText(headingBuilder.getHeadingDocument(searchHeading, downloadState, isMouseOver, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
     
     private class HeadingFontWidthResolver implements FontWidthResolver {
         private static final String EMPTY_STRING = "";
-        private final Pattern findBoldTags = Pattern.compile("[<][/]?[b][>]");
+        //finds <b>foo</b> or <a href="#foo"> or {1} patterns
+        //**NOTE** This does not account for all HTML sanitizing, just for HTML
+        //**NOTE** that would have been added by search result display code
+        private final Pattern findHTMLTagsOrReplacementTokens = Pattern.compile("([<][/]?[\\w =\"#]*[>])|([{][\\d]*[}])");
         
         @Override
         public int getPixelWidth(String text) {
             HTMLEditorKit editorKit = (HTMLEditorKit) heading.getEditorKit();
             StyleSheet css = editorKit.getStyleSheet();
             FontMetrics fontMetrics = css.getFontMetrics(headingFont);
-            text = findBoldTags.matcher(text).replaceAll(EMPTY_STRING);
+            text = findHTMLTagsOrReplacementTokens.matcher(text).replaceAll(EMPTY_STRING);
             return fontMetrics.stringWidth(text);
         }
     }

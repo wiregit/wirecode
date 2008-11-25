@@ -37,22 +37,24 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                 headingColor, headingFont.getSize());
     }
 
-    public String getHeadingDocument(String heading, BasicDownloadState downloadState, boolean mouseOver, boolean isSpam) {
+    public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean mouseOver, boolean isSpam) {
         StringBuilder bldr = new StringBuilder();
         bldr.append(documentStartHTML);
         if (isSpam) {
-            bldr.append(tr("{0} is Spam", wrapHeading(heading, false)));
+            bldr.append(tr("{0} is Spam", wrapHeading(heading.getText(), false)));
         } else {
             switch(downloadState) {
             case DOWNLOADING:
-                bldr.append(tr("You are <a href=\"#downloading\">downloading</a> {0}", wrapHeading(heading, false)));
+                String downloadMessage = "You are <a href=\"#downloading\">downloading</a> {0}";
+                    bldr.append(tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false)));
                 break;
             case NOT_STARTED:
-                bldr.append(wrapHeading(heading, mouseOver));
+                bldr.append(wrapHeading(heading.getText(), mouseOver));
                 break;
             case DOWNLOADED:
             case LIBRARY:
-                String content = tr("{0} is in <a href=\"#library\">Your Library</a>", wrapHeading(heading, false));
+                String message = "{0} is in <a href=\"#library\">Your Library</a>";
+                    String content = tr(message, wrapHeading(heading.getText(message), false));
                 bldr.append(content);
                 break;
             }
