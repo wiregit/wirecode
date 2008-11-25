@@ -409,7 +409,7 @@ public class LimeComboBox extends JXButton {
                 if (menu != null) {
                     // If the menu is visible or this is the click that
                     // caused it to become invisible, go with inviz.
-                    if(!clickForcesVisible && (menuVisible || System.currentTimeMillis() == menuInvizTime)) {
+                    if(!clickForcesVisible && (menuVisible || System.currentTimeMillis() - menuInvizTime <= 10f)) {
                         menu.setVisible(false);
                     } else {
                         menu.show((Component) e.getSource(), 0, getHeight()-1);
