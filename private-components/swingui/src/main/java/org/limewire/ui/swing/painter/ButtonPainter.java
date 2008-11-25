@@ -41,7 +41,7 @@ public abstract class ButtonPainter extends AbstractPainter<JXButton> {
         switch (this.drawMode) {
         
         case LEFT_ROUNDED :
-            System.out.println("hi");
+
             shiftX1 = 0;
             shiftX2 = -arcWidth+2;
             break;
