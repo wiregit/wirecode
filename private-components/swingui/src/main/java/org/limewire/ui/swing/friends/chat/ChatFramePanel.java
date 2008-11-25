@@ -124,7 +124,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     @Override
     public void toggleVisibility() {
         boolean shouldDisplay = !isVisible();
-        setChatPanelVisible(shouldDisplay);        
+        setVisibility(shouldDisplay);
     }
     
     public void setChatPanelVisible(boolean shouldDisplay) {
@@ -256,5 +256,11 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     @Override
     public void removeVisibilityListener(VisibilityListener listener) {
         visibilityListenerList.removeVisibilityListener(listener);
+    }
+
+    @Override
+    public void setVisibility(boolean visible) {
+        setChatPanelVisible(visible);
+        visibilityListenerList.visibilityChanged(visible);
     }
 }

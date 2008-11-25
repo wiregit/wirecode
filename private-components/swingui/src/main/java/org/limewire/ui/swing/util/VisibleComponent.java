@@ -1,6 +1,10 @@
 package org.limewire.ui.swing.util;
 
 public interface VisibleComponent {
+    /**
+     * Sets the visibility of this component.
+     */
+    void setVisibility(boolean visible);
 
     /**
      * Toggles the visibility of this component.

@@ -49,9 +49,7 @@ public class LeftPanel extends JXCollapsiblePane implements VisibleComponent {
     }
 
     public void toggleVisibility() {
-        boolean visibility = isCollapsed();
-        setCollapsed(!visibility);
-        visibilityListenerList.visibilityChanged(visibility);
+        setVisibility(!isCollapsed());
     }
 
     @Override
@@ -63,5 +61,11 @@ public class LeftPanel extends JXCollapsiblePane implements VisibleComponent {
     @Override
     public void removeVisibilityListener(VisibilityListener listener) {
         visibilityListenerList.removeVisibilityListener(listener);
+    }
+
+    @Override
+    public void setVisibility(boolean visible) {
+        setCollapsed(visible);
+        visibilityListenerList.visibilityChanged(visible);
     }
 }

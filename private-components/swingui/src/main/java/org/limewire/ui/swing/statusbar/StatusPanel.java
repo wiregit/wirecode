@@ -33,7 +33,7 @@ public class StatusPanel extends JXPanel {
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
             FriendStatusPanel friendStatusPanel, 
             ConnectionStatusPanel connectionStatus, SharedFileCountPanel sharedFileCountPanel,
-            BarPainterFactory barPainterFactory) {
+            BarPainterFactory barPainterFactory, MinimizedDownloadSummaryPanel minDownloadPanel) {
         
         GuiUtils.assignResources(this);
         
@@ -52,8 +52,11 @@ public class StatusPanel extends JXPanel {
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
         miniPlayerPanel.setVisible(false);
         
+        minDownloadPanel.setVisible(false);
+        
         add(connectionStatus, "growy, gapafter 4");
         add(sharedFileCountPanel, "growy");
+        add(minDownloadPanel, "growy, gapafter 4, hidemode 3");
         add(miniPlayerPanel, "");
         
         add(new JLabel(), "gapafter push, growx");
