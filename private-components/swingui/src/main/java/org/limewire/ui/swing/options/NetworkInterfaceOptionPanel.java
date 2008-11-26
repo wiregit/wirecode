@@ -15,7 +15,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -67,8 +66,8 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
         
-        limewireChooseRadioButton = new JRadioButton();
-        meChooseRadioButton = new JRadioButton();
+        limewireChooseRadioButton = new JRadioButton(I18n.tr("Let LimeWire choose my network interface (Recommended)"));
+        meChooseRadioButton = new JRadioButton(I18n.tr("Let me choose a specific network interface"));
         
         buttonGroup = new ButtonGroup();
         buttonGroup.add(limewireChooseRadioButton);
@@ -81,11 +80,9 @@ public class NetworkInterfaceOptionPanel extends OptionPanel {
         
         meChooseRadioButton.addItemListener(new RadioListener(scrollPane, meChooseRadioButton));
 
-        p.add(limewireChooseRadioButton);
-        p.add(new JLabel(I18n.tr("Let LimeWire choose my network interface (Recommended)")), "wrap");
+        p.add(limewireChooseRadioButton, "wrap");
         
-        p.add(meChooseRadioButton);
-        p.add(new JLabel(I18n.tr("Let me choose a specific network interface")), "push, wrap");
+        p.add(meChooseRadioButton, "wrap");
         
         p.add(scrollPane, "grow, span");
         

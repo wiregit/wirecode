@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -48,28 +47,24 @@ public class PerformanceOptionPanel extends OptionPanel {
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout());
         
-        disableUltraPeerCheckBox = new JCheckBox();
-        disableMojitoCheckBox = new JCheckBox();
-        disableTLS = new JCheckBox();
-        disableOutOfBandSearchCheckBox = new JCheckBox();
+        disableUltraPeerCheckBox = new JCheckBox(I18n.tr("Disable Ultrapeer capabilities"));
+        disableMojitoCheckBox = new JCheckBox(I18n.tr("Disable connecting to the Mojito DHT"));
+        disableTLS = new JCheckBox(I18n.tr("Disable TLS capabilities"));
+        disableOutOfBandSearchCheckBox = new JCheckBox(I18n.tr("Disable Out-of-band searching"));
 
         p.add(new MultiLineLabel(firstMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
         
-        p.add(disableUltraPeerCheckBox, "gapleft 25, split");
-        p.add(new JLabel(I18n.tr("Disable Ultrapeer capabilities")), "wrap");
+        p.add(disableUltraPeerCheckBox, "gapleft 25, split, wrap");
         
-        p.add(disableMojitoCheckBox, "gapleft 25, split");
-        p.add(new JLabel(I18n.tr("Disable connecting to the Mojito DHT")), "wrap");
+        p.add(disableMojitoCheckBox, "gapleft 25, split, wrap");
         
         p.add(new MultiLineLabel(secondMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "gaptop 18, wrap");
         
-        p.add(disableTLS, "gapleft 25, split");
-        p.add(new JLabel(I18n.tr("Disable TLS capabilities")), "wrap");
+        p.add(disableTLS, "gapleft 25, split, wrap");
         
         p.add(new MultiLineLabel(thirdMultiLineLabel, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "gaptop 18, wrap");
         
-        p.add(disableOutOfBandSearchCheckBox, "gapleft 25, split");
-        p.add(new JLabel(I18n.tr("Disable Out-of-band searching")), "wrap");
+        p.add(disableOutOfBandSearchCheckBox, "gapleft 25, split, wrap");
         
         return p;
     }

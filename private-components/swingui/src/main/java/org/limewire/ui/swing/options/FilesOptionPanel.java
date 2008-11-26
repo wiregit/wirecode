@@ -266,13 +266,12 @@ public class FilesOptionPanel extends OptionPanel {
 
         private JCheckBox shareWithITunesCheckBox;
         private JCheckBox requirePassWordCheckBox;
-        private JLabel passwordLabel;
         private JPasswordField passwordField;
         
         public ITunesPanel() {
             super(I18n.tr("iTunes"));
             
-            shareWithITunesCheckBox = new JCheckBox();
+            shareWithITunesCheckBox = new JCheckBox(I18n.tr("Share the audio section of my LimeWire on my local network using iTunes"));
             shareWithITunesCheckBox.setContentAreaFilled(false);
             shareWithITunesCheckBox.addItemListener(new ItemListener(){
                 @Override
@@ -280,7 +279,7 @@ public class FilesOptionPanel extends OptionPanel {
                     setPasswordVisible(shareWithITunesCheckBox.isSelected());
                 }
             });
-            requirePassWordCheckBox = new JCheckBox();
+            requirePassWordCheckBox = new JCheckBox(I18n.tr("Require password"));
             requirePassWordCheckBox.setContentAreaFilled(false);
             requirePassWordCheckBox.addItemListener(new ItemListener(){
                 @Override
@@ -291,13 +290,9 @@ public class FilesOptionPanel extends OptionPanel {
             passwordField = new JPasswordField(30);
             passwordField.setEnabled(false);
             
-            passwordLabel = new JLabel(I18n.tr("Require password"));
-            
-            add(shareWithITunesCheckBox, "split");
-            add(new JLabel(I18n.tr("Share the audio section of my LimeWire on my local network using iTunes")), "wrap");
+            add(shareWithITunesCheckBox, "split, wrap");
             
             add(requirePassWordCheckBox, "gapleft 25, split");
-            add(passwordLabel);
             add(passwordField);
             
             setPasswordVisible(false);
@@ -386,7 +381,6 @@ public class FilesOptionPanel extends OptionPanel {
         
         private void setPasswordVisible(boolean value) {
             requirePassWordCheckBox.setVisible(value);
-            passwordLabel.setVisible(value);
             passwordField.setVisible(value);
         }
     }

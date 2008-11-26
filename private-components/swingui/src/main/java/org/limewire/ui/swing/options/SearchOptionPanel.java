@@ -70,16 +70,11 @@ public class SearchOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("By default, search for")), "split");
             add(defaultSearchSpinner, "wrap");
 
-            add(searchTabNumberCheckBox, "split 4");
-            add(new JLabel(I18n.tr("Remember my most recent searches")), "push");
+            add(searchTabNumberCheckBox, "split 4, push");
 
             add(clearNowButton, "wrap, alignx right");
 
-            groupSimilarResults = new JCheckBox();
-            groupSimilarResults.setContentAreaFilled(false);
-
             add(groupSimilarResults, "split 4");
-            add(new JLabel(I18n.tr("Group similar search results")), "wrap");
         }
 
         private void createComponents() {
@@ -90,8 +85,11 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            searchTabNumberCheckBox = new JCheckBox();
+            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my most recent searches"));
             searchTabNumberCheckBox.setContentAreaFilled(false);
+            
+            groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results"));
+            groupSimilarResults.setContentAreaFilled(false);
 
             clearNowButton = new JButton(I18n.tr("Clear Now"));
             clearNowButton.setBorderPainted(false);

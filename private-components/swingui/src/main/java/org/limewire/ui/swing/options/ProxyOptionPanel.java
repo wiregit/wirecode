@@ -58,13 +58,13 @@ public class ProxyOptionPanel extends OptionPanel {
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
         
-        noProxyRadioButton = new JRadioButton();
+        noProxyRadioButton = new JRadioButton(I18n.tr("No Proxy"));
         noProxyRadioButton.addItemListener(new ProxyButtonListener());
-        socksV4RadionButton = new JRadioButton();
+        socksV4RadionButton = new JRadioButton(I18n.tr("Socks v4"));
         socksV4RadionButton.addItemListener(new ProxyButtonListener());
-        socksV5RadioButton = new JRadioButton();
+        socksV5RadioButton = new JRadioButton(I18n.tr("Socks v5"));
         socksV5RadioButton.addItemListener(new ProxyButtonListener());
-        httpRadioButton = new JRadioButton();
+        httpRadioButton = new JRadioButton(I18n.tr("HTTP"));
         httpRadioButton.addItemListener(new ProxyButtonListener());
         
         buttonGroup = new ButtonGroup();
@@ -86,17 +86,13 @@ public class ProxyOptionPanel extends OptionPanel {
         userNameLabel = new JLabel(I18n.tr("Username:"));
         passwordLabel = new JLabel(I18n.tr("Password:"));
         
-        p.add(noProxyRadioButton, "split");
-        p.add(new JLabel(I18n.tr("No Proxy")), "wrap");
+        p.add(noProxyRadioButton, "split, wrap");
         
-        p.add(socksV4RadionButton, "split");
-        p.add(new JLabel(I18n.tr("Socks v4")), "wrap");
+        p.add(socksV4RadionButton, "split, wrap");
         
-        p.add(socksV5RadioButton, "split");
-        p.add(new JLabel(I18n.tr("Socks v5")), "wrap");
+        p.add(socksV5RadioButton, "split, wrap");
         
-        p.add(httpRadioButton, "split");
-        p.add(new JLabel(I18n.tr("HTTP")), "wrap");
+        p.add(httpRadioButton, "split, wrap");
         
         p.add(proxyLabel, "split");
         p.add(proxyTextField, "gap unrelated");

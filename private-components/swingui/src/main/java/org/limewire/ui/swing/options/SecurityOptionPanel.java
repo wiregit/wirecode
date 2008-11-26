@@ -163,7 +163,7 @@ public class SecurityOptionPanel extends OptionPanel {
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
-            adultContentCheckBox = new JCheckBox();
+            adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content"));
             adultContentCheckBox.setContentAreaFilled(false);
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
@@ -171,8 +171,7 @@ public class SecurityOptionPanel extends OptionPanel {
             
             add(new JLabel(I18n.tr("In search results...")), "wrap");
             
-            add(adultContentCheckBox, "split, gapleft 20");
-            add(new JLabel(I18n.tr("Don't show adult content")), "wrap");
+            add(adultContentCheckBox, "split, gapleft 20, wrap");
             
             add(filterKeywordsButton);
         }

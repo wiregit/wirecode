@@ -101,7 +101,7 @@ public class FilteringOptionPanel extends OptionPanel {
             addressTextField = new JTextField(26);
             addButton = new JButton(I18n.tr("Add Address"));
             filterTable = new FilteringTable();
-            backListCheckBox = new JCheckBox();
+            backListCheckBox = new JCheckBox(I18n.tr("Use LimeWire's blacklist to protect you from harmful people"));
             addButton.addActionListener(new AddAction(addressTextField, filterTable));
             
             add(new JLabel(I18n.tr("Block contact with specific people by adding their IP address")), "span, growx, wrap");
@@ -109,7 +109,6 @@ public class FilteringOptionPanel extends OptionPanel {
             add(addButton, "wrap");
             add(new JScrollPane(filterTable), "growx, span 2, wrap");
             add(backListCheckBox, "span, split");
-            add(new JLabel(I18n.tr("Use LimeWire's blacklist to protect you from harmful people")));
         }
         
         @Override

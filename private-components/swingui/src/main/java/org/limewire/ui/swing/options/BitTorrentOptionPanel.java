@@ -40,8 +40,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
     
     private JLabel maxUploadLabel;
     private JLabel minUploadLabel;
-    private JLabel safeBoxLabel;
-    private JLabel experimentLabel;
     
     @Inject
     public BitTorrentOptionPanel() {
@@ -55,14 +53,14 @@ public class BitTorrentOptionPanel extends OptionPanel {
         p.setBorder(BorderFactory.createTitledBorder(""));
         p.setLayout(new MigLayout("gapy 10"));
         
-        limewireControl = new JRadioButton();
+        limewireControl = new JRadioButton(I18n.tr("Let LimeWire manage my BitTorrent settings (Recommended)"));
         limewireControl.addItemListener(new ItemListener(){
             @Override
             public void itemStateChanged(ItemEvent e) {
                 updateState(!limewireControl.isSelected());
             }
         });
-        myControl = new JRadioButton();
+        myControl = new JRadioButton(I18n.tr("Let me manage my BitTorrent settings"));
         myControl.addItemListener(new ItemListener(){
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -73,8 +71,6 @@ public class BitTorrentOptionPanel extends OptionPanel {
                 
                 maxUploadLabel.setVisible(myControl.isSelected());
                 minUploadLabel.setVisible(myControl.isSelected());
-                safeBoxLabel.setVisible(myControl.isSelected());
-                experimentLabel.setVisible(myControl.isSelected());
             }
         });
         
@@ -86,34 +82,26 @@ public class BitTorrentOptionPanel extends OptionPanel {
         maxUploadSpinner.setVisible(false);
         minUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN, MIN, MAX, 1));
         minUploadSpinner.setVisible(false);
-        safeChunkCheckBox = new JCheckBox();
+        safeChunkCheckBox = new JCheckBox(I18n.tr("Safe chunk verification"));
         safeChunkCheckBox.setVisible(false);
-        experimentCheckBox = new JCheckBox();
+        experimentCheckBox = new JCheckBox(I18n.tr("Experimental disk access"));
         experimentCheckBox.setVisible(false);
         
         maxUploadLabel = new JLabel(I18n.tr("Max uploads per torrent"));
         maxUploadLabel.setVisible(false);
         minUploadLabel = new JLabel(I18n.tr("Min uploads per torrent"));
         minUploadLabel.setVisible(false);
-        safeBoxLabel = new JLabel(I18n.tr("Safe chunk verification"));
-        safeBoxLabel.setVisible(false);
-        experimentLabel = new JLabel(I18n.tr("Experimental disk access"));
-        experimentLabel.setVisible(false);
 
-        p.add(limewireControl);        
-        p.add(new JLabel(I18n.tr("Let LimeWire manage my BitTorrent settings (Recommended)")), "wrap");
-        
-        p.add(myControl);        
-        p.add(new JLabel(I18n.tr("Let me manage my BitTorrent settings")), "wrap");
+        p.add(limewireControl, "wrap");        
+        p.add(myControl, "wrap");        
 
-        p.add(maxUploadLabel, "skip 1, gapleft 20, split");
+
+        p.add(maxUploadLabel, "gapleft 35, split");
         p.add(maxUploadSpinner, "wrap");
-        p.add(minUploadLabel, "skip 1, gapleft 20, split");
+        p.add(minUploadLabel, "gapleft 35, split");
         p.add(minUploadSpinner, "wrap");
-        p.add(safeChunkCheckBox, "skip 1, gapleft 20, split");
-        p.add(safeBoxLabel, "wrap");
-        p.add(experimentCheckBox, "skip 1, gapleft 20, split");
-        p.add(experimentLabel);
+        p.add(safeChunkCheckBox, "gapleft 35, split, wrap");
+        p.add(experimentCheckBox, "gapleft 35, split, wrap");
         
         return p;
     }

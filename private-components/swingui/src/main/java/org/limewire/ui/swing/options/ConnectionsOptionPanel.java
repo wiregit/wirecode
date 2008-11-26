@@ -99,20 +99,18 @@ public class ConnectionsOptionPanel extends OptionPanel {
             
             buttonGroup = new ButtonGroup();
             
-            broadBandButton = new JRadioButton();
+            broadBandButton = new JRadioButton(I18n.tr("Broadband"));
             broadBandButton.setContentAreaFilled(false);
-            dialupButton = new JRadioButton();
+            dialupButton = new JRadioButton(I18n.tr("Dial-up"));
             dialupButton.setContentAreaFilled(false);
             
             buttonGroup.add(broadBandButton);
             buttonGroup.add(dialupButton);
             
             add(new JLabel(I18n.tr("Set your connection speed")), "push");
-            add(broadBandButton);
-            add(new JLabel(I18n.tr("Broadband")),"wrap");
+            add(broadBandButton, "wrap");
 
             add(dialupButton, "skip 1");
-            add(new JLabel(I18n.tr("Dial-up")));
         }
         
         @Override
@@ -158,7 +156,7 @@ public class ConnectionsOptionPanel extends OptionPanel {
             super(I18n.tr("Downloads"));
             
             maxDownloadSpinner = new JSpinner(new SpinnerNumberModel(MIN_DOWNLOADS, MIN_DOWNLOADS, MAX_DOWNLOADS, 1));
-            limitBandWidthCheckBox = new JCheckBox();
+            limitBandWidthCheckBox = new JCheckBox(I18n.tr("Limit your download bandwidth"));
             limitBandWidthCheckBox.setContentAreaFilled(false);
             bandWidthLabel = new JLabel();
             bandWidthLabel.setVisible(false);
@@ -174,7 +172,6 @@ public class ConnectionsOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("downloads at once")), "wrap");
             
             add(limitBandWidthCheckBox, "aligny 50%, split");
-            add(new JLabel(I18n.tr("Limit your download bandwidth")), "aligny 50%");
             add(bandWidthSlider, "aligny 50%");
             add(bandWidthLabel, "aligny 50%");
         }
@@ -219,9 +216,9 @@ public class ConnectionsOptionPanel extends OptionPanel {
             super(I18n.tr("Uploads"));
             
             maxUploadSpinner = new JSpinner(new SpinnerNumberModel(MIN_UPLOADS, MIN_UPLOADS, MAX_UPLOADS, 1));
-            uploadBandwidthCheckBox = new JCheckBox();
+            uploadBandwidthCheckBox = new JCheckBox(I18n.tr("Limit your upload bandwidth"));
             uploadBandwidthCheckBox.setContentAreaFilled(false);
-            clearUploadCheckBox = new JCheckBox();
+            clearUploadCheckBox = new JCheckBox(I18n.tr("Clear uploads from list when finished"));
             clearUploadCheckBox.setContentAreaFilled(false);
             bandWidthLabel = new JLabel();
             bandWidthLabel.setVisible(false);
@@ -237,12 +234,10 @@ public class ConnectionsOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("uploads at once")), "wrap");
             
             add(uploadBandwidthCheckBox, "aligny 50%, split");
-            add(new JLabel(I18n.tr("Limit your upload bandwidth")), "aligny 50%, split");
             add(bandWidthSlider, "aligny 50%, split");
             add(bandWidthLabel, "aligny 50%, wrap");
             
             add(clearUploadCheckBox, "split");
-            add(new JLabel(I18n.tr("Clear uploads from list when finished")));
         }
         
         @Override

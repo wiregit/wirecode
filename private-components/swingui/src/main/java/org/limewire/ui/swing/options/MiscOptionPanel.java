@@ -80,16 +80,13 @@ public class MiscOptionPanel extends OptionPanel {
         public NotificationsPanel() {
             super(I18n.tr("Notifications"));
 
-            showNotificationsCheckBox = new JCheckBox();
+            showNotificationsCheckBox = new JCheckBox(I18n.tr("Show popup system notifications"));
             showNotificationsCheckBox.setContentAreaFilled(false);
-            playNotificationsCheckBox = new JCheckBox();
+            playNotificationsCheckBox = new JCheckBox(I18n.tr("Play notification sounds"));
             playNotificationsCheckBox.setContentAreaFilled(false);
 
-            add(showNotificationsCheckBox);
-            add(new JLabel(I18n.tr("Show popup system notifications")), "wrap");
-
-            add(playNotificationsCheckBox);
-            add(new JLabel(I18n.tr("Play notification sounds")), "wrap");
+            add(showNotificationsCheckBox, "wrap");
+            add(playNotificationsCheckBox, "wrap");
         }
 
         @Override
@@ -121,7 +118,7 @@ public class MiscOptionPanel extends OptionPanel {
         public FriendsChatPanel() {
             super(I18n.tr("Friends and Chat"));
 
-            autoLoginCheckBox = new JCheckBox();            
+            autoLoginCheckBox = new JCheckBox(I18n.tr("Sign in when LimeWire starts"));            
             autoLoginCheckBox.setContentAreaFilled(false);
             autoLoginCheckBox.addItemListener(new ItemListener(){
                 @Override
@@ -145,8 +142,7 @@ public class MiscOptionPanel extends OptionPanel {
             usernameField = new JTextField(18);
             passwordField = new JPasswordField(18);
 
-            add(autoLoginCheckBox, "split");
-            add(new JLabel(I18n.tr("Sign in when LimeWire starts")), "wrap");
+            add(autoLoginCheckBox, "split, wrap");
 
             add(new JLabel(I18n.tr("Sign in using")), "gapleft 25, split");
             add(serviceComboBox, "wrap");

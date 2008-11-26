@@ -20,7 +20,7 @@ public class WarningMessagesOptionPanel extends OptionPanel {
         setLayout(new MigLayout("gapy 10"));
         
         cancelAction.setOptionPanel(this);
-        licensedMaterialCheckBox = new JCheckBox();
+        licensedMaterialCheckBox = new JCheckBox(I18n.tr("Warn me when downloading a file without a license"));
         licensedMaterialCheckBox.setContentAreaFilled(false);
         
         okButton = new JButton(okAction);
@@ -28,8 +28,7 @@ public class WarningMessagesOptionPanel extends OptionPanel {
         
         add(new JLabel(I18n.tr("Choose which warning messages you'd like to see:")), "span 2, wrap");
         
-        add(licensedMaterialCheckBox, "gapleft 25, gapbottom 25,split");
-        add(new JLabel(I18n.tr("Warn me when downloading a file without a license")), "gapbottom 25, wrap");
+        add(licensedMaterialCheckBox, "gapleft 25, gapbottom 25, split, wrap");
         
         add(okButton, "split 2, span 2, alignx right");
         add(cancelButton);

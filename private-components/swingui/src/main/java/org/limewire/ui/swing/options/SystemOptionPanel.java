@@ -237,27 +237,24 @@ public class SystemOptionPanel extends OptionPanel {
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
 
-            runAtStartupCheckBox = new JCheckBox();
+            runAtStartupCheckBox = new JCheckBox(I18n.tr("Run LimeWire on System Startup"));
             runAtStartupCheckBox.setContentAreaFilled(false);
-            minimizeButton = new JRadioButton();
+            minimizeButton = new JRadioButton(I18n.tr("Minimize to system tray"));
             minimizeButton.setContentAreaFilled(false);
-            exitButton = new JRadioButton();
+            exitButton = new JRadioButton(I18n.tr("Exit program"));
             exitButton.setContentAreaFilled(false);
 
             buttonGroup = new ButtonGroup();
             buttonGroup.add(minimizeButton);
             buttonGroup.add(exitButton);
 
-            add(runAtStartupCheckBox, "split");
-            add(new JLabel(I18n.tr("Run LimeWire on System Startup")), "wrap");
+            add(runAtStartupCheckBox, "split, wrap");
 
             if (!OSUtils.isAnyMac()) {
                 add(new JLabel(I18n.tr("When I press X:")), "wrap");
 
-                add(minimizeButton, "gapleft 25, split");
-                add(new JLabel(I18n.tr("Minimize to system tray")), "gapafter 20");
+                add(minimizeButton, "gapleft 25, split, gapafter 20");
                 add(exitButton);
-                add(new JLabel(I18n.tr("Exit program")));
             }
         }
 
@@ -321,28 +318,20 @@ public class SystemOptionPanel extends OptionPanel {
 
         private JCheckBox bugMessageCheckBox;
 
-        private JLabel bugMessageLabel;
-
         public UpdatesBugsPanel() {
             super(I18n.tr("Updates and Bugs"));
 
-            betaCheckBox = new JCheckBox();
+            betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
             betaCheckBox.setContentAreaFilled(false);
-            bugCheckBox = new JCheckBox();
+            bugCheckBox = new JCheckBox(I18n.tr("Report bugs to LimeWire"));
             bugCheckBox.setContentAreaFilled(false);
 
-            bugMessageCheckBox = new JCheckBox();
+            bugMessageCheckBox = new JCheckBox(I18n.tr("Show me the bug report before sending it"));
             bugMessageCheckBox.setContentAreaFilled(false);
 
-            add(betaCheckBox, "split");
-            add(new JLabel(I18n.tr("Tell me about Beta updates")), "wrap");
-
-            add(bugCheckBox, "split");
-            add(new JLabel(I18n.tr("Report bugs to LimeWire")), "wrap");
-
-            add(bugMessageCheckBox, "split");
-            bugMessageLabel = new JLabel(I18n.tr("Show me the bug report before sending it"));
-            add(bugMessageLabel, "wrap");
+            add(betaCheckBox, "split, wrap");
+            add(bugCheckBox, "split, wrap");
+            add(bugMessageCheckBox, "split, wrap");
         }
 
         @Override

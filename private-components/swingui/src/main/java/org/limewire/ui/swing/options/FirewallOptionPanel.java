@@ -146,9 +146,9 @@ public class FirewallOptionPanel extends OptionPanel {
         public RouterConfigPanel() {
             super(I18n.tr("Router Configuration"));
             
-            plugAndPlayRadioButton = new JRadioButton();
-            portForwardRadioButton = new JRadioButton();
-            doNothingRadioButton = new JRadioButton();
+            plugAndPlayRadioButton = new JRadioButton(I18n.tr("Use Universal Plug n' Play (Recommended)"));
+            portForwardRadioButton = new JRadioButton(I18n.tr("Manual Port Forward:"));
+            doNothingRadioButton = new JRadioButton(I18n.tr("Do Nothing"));
             
             buttonGroup = new ButtonGroup();
             buttonGroup.add(plugAndPlayRadioButton);
@@ -162,16 +162,13 @@ public class FirewallOptionPanel extends OptionPanel {
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
-            add(plugAndPlayRadioButton, "split");
-            add(new JLabel(I18n.tr("Use Universal Plug n' Play (Recommended)")), "wrap");
+            add(plugAndPlayRadioButton, "split, wrap");
             
             add(portForwardRadioButton, "split");
-            add(new JLabel(I18n.tr("Manual Port Forward:")), "split");
             add(portTextField,"split");
             add(starLabel, "wrap");
             
             add(doNothingRadioButton, "split");
-            add(new JLabel(I18n.tr("Do Nothing")));
             
             portForwardRadioButton.addItemListener(new ItemListener(){
                 @Override

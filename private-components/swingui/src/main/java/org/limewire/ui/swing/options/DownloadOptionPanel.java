@@ -107,11 +107,10 @@ public class DownloadOptionPanel extends OptionPanel {
         public SharingDownloadsPanel() {
             super(I18n.tr("Sharing downloads"));
             
-            shareCompletedDownloadsCheckBox = new JCheckBox();
+            shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the LimeWire Network with the LimeWire Network"));
             shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
             
-            add(shareCompletedDownloadsCheckBox);
-            add(new JLabel(I18n.tr("Share files downloaded from the LimeWire Network with the LimeWire Network")), "wrap");
+            add(shareCompletedDownloadsCheckBox, "wrap");
         }
         
         @Override
@@ -143,24 +142,22 @@ public class DownloadOptionPanel extends OptionPanel {
         public SavingPanel() {
             super(I18n.tr("Saving"));
             
-            clearDownloadsCheckBox = new JCheckBox();
+            clearDownloadsCheckBox = new JCheckBox(I18n.tr("Clear downloads from list when finished"));
             clearDownloadsCheckBox.setContentAreaFilled(false);
             downloadSaveTextField = new JTextField();
             downloadSaveTextField.setEditable(false);
             downloadSaveTextField.setBackground(Color.WHITE);
             browseSaveLocationButton = new JButton(new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField));
-            autoRenameDuplicateFilesCheckBox = new JCheckBox();
+            autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
             
-            add(clearDownloadsCheckBox, "split 2");
-            add(new JLabel(I18n.tr("Clear downloads from list when finished")), "wrap");
+            add(clearDownloadsCheckBox, "split 2, wrap");
             
             add(new JLabel(I18n.tr("Save downloads to:")), "split 3");
             add(downloadSaveTextField, "span, growx, push");
             add(browseSaveLocationButton, "wrap");
             
             add(autoRenameDuplicateFilesCheckBox, "gapleft 25, split 2");
-            add(new JLabel(I18n.tr("If the file already exists, download it with a different name")));
         }
         
         @Override
@@ -231,11 +228,10 @@ public class DownloadOptionPanel extends OptionPanel {
         public ITunesPanel() {
             super(I18n.tr("iTunes"));
             
-            addToITunesCheckBox = new JCheckBox();
+            addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from LimeWire to my iTunes Library"));
             addToITunesCheckBox.setContentAreaFilled(false);
             
-            add(addToITunesCheckBox);
-            add(new JLabel(I18n.tr("Add audio files I downloaded from LimeWire to my iTunes Library")), "wrap");
+            add(addToITunesCheckBox, "wrap");
         }
         
         @Override
@@ -262,7 +258,7 @@ public class DownloadOptionPanel extends OptionPanel {
         public RecentDownloadsPanel() {
             super(I18n.tr("Recent downloads"));
             
-            rememberDownloadsCheckBox = new JCheckBox();
+            rememberDownloadsCheckBox = new JCheckBox(I18n.tr("Remember recent downloads"));
             rememberDownloadsCheckBox.setContentAreaFilled(false);
             
             clearButton = new JButton(I18n.tr("Clear Now"));
@@ -275,7 +271,6 @@ public class DownloadOptionPanel extends OptionPanel {
             });
             
             add(rememberDownloadsCheckBox);
-            add(new JLabel(I18n.tr("Remember recent downloads")));
             add(clearButton);
             
         }
