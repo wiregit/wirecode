@@ -9,6 +9,8 @@ import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
@@ -39,7 +41,6 @@ public class StorePanel extends JPanel {
             @Override
             public void componentShown(ComponentEvent e) {
                 if(!loadedOnce) {
-                    loadedOnce = true;
                     load("http://store.limewire.com/");
                 }
                 removeComponentListener(this);
@@ -55,7 +56,11 @@ public class StorePanel extends JPanel {
 
     public void load(String url) {
         loadedOnce = true;
-        url = application.getUniqueUrl(url) + "&isClient=true";
-        browser.load(url);
+        url = application.getUniqueUrl(url);
+        if(!MozillaInitialization.isInitialized()) {
+            NativeLaunchUtils.openURL(url);
+        } else {
+            browser.load(url + "&isClient=true");
+        }
     }
 }

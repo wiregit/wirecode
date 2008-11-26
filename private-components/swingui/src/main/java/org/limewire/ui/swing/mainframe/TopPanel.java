@@ -48,6 +48,7 @@ import org.limewire.ui.swing.search.SearchNavigator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityListener;
+import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -92,8 +93,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeButton.setText(I18n.tr("Home"));
         homeButton.setIconTextGap(1);
         
-        NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
-        JButton storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
+        JButton storeButton;
+        if(MozillaInitialization.isInitialized()) {
+            NavItem storeNav = navigator.createNavItem(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel);
+            storeButton = new IconButton(NavigatorUtils.getNavAction(storeNav));
+        } else {
+            storeButton = new IconButton();
+        }
         storeButton.setName("WireframeTop.storeButton");
         storeButton.setText(I18n.tr("Store"));
         storeButton.setIconTextGap(1);
@@ -148,6 +154,11 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(libraryButton, "gaptop 2, gapleft 8");
         add(searchBar, "gapleft 15");
         add(searchList, "gapleft 10, gaptop 3, growy");
+        
+        // Do not show store if mozilla failed to load.
+        if(!MozillaInitialization.isInitialized()) {
+            storeButton.setVisible(false);
+        }
     };
 
     @Override

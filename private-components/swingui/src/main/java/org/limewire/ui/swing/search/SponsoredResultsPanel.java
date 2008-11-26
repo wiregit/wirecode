@@ -19,6 +19,7 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -128,7 +129,10 @@ public class SponsoredResultsPanel extends JXPanel {
                 NativeLaunchUtils.openURL(result.getUrl());
             } else {
                 storePanel.load(result.getUrl());
-                navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
+                NavItem item = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
+                if(item != null) {
+                    item.select();
+                }
             }
         }
         

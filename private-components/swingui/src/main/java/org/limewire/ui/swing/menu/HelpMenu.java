@@ -41,7 +41,9 @@ class HelpMenu extends JMenu {
             public void actionPerformed(ActionEvent e) {
                 storePanel.load("http://www.store.limewire.com/store/app/pages/help/Help/");
                 NavItem storeNav = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
-                storeNav.select();
+                if(storeNav != null) {
+                    storeNav.select();
+                }
             }
         });
 
