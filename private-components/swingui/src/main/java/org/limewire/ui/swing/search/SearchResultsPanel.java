@@ -33,6 +33,8 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
+import org.limewire.ui.swing.components.LimeHeaderBar;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -49,6 +51,8 @@ import com.google.inject.assistedinject.AssistedInject;
 public class SearchResultsPanel extends JXPanel {
     private final Log LOG = LogFactory.getLog(getClass());
        
+    private final LimeHeaderBarFactory headerBarFactory;
+    
     /**
      * This is the subpanel that appears in the upper-left corner
      * of each search results tab.  It displays the numbers of results
@@ -79,8 +83,6 @@ public class SearchResultsPanel extends JXPanel {
     private JLabel messageLabel;
     private JPanel messagePanel;
     
-    @Resource private Color toolbarTopGradientColor;
-    @Resource private Color toolbarBottomGradientColor;
     @Resource private Color tabHighlightTopGradientColor;
     @Resource private Color tabHighlightBottomGradientColor;
     @Resource private Color tabSelectionTopGradientColor;
@@ -103,18 +105,12 @@ public class SearchResultsPanel extends JXPanel {
             SearchTabItemsFactory searchTabItemsFactory,
             SponsoredResultsPanel sponsoredResultsPanel,
             final SortAndFilterPanel sortAndFilterPanel,
-            RowSelectionPreserver preserver) {        
+            RowSelectionPreserver preserver,
+            LimeHeaderBarFactory headerBarFactory) {        
 
         GuiUtils.assignResources(this);
         
-        RectanglePainter gradientPainter = new RectanglePainter();
-        gradientPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, toolbarTopGradientColor, 
-                                                       50.0f, 33.0f, toolbarBottomGradientColor));
-        gradientPainter.setBorderPaint(null);
-        gradientPainter.setBorderWidth(0.0f);
-        setBackgroundPainter(gradientPainter);
-        
-        sortAndFilterPanel.setBackgroundPainter(gradientPainter);
+        this.headerBarFactory = headerBarFactory; 
         
         this.sponsoredResultsPanel = sponsoredResultsPanel;
         sponsoredResultsPanel.setVisible(false);
@@ -219,7 +215,7 @@ public class SearchResultsPanel extends JXPanel {
     private void layoutComponents() {
         MigLayout layout = new MigLayout(
                 "hidemode 2, insets 0 0 0 0, gap 0!",
-                "[grow][grow]",
+                "[grow]",
                 "[][][grow]");
         
         setLayout(layout);
@@ -239,8 +235,10 @@ public class SearchResultsPanel extends JXPanel {
         searchTab.setSelectionPainter(createTabSelectionPainter());
         searchTab.setTabTextSelectedColor(tabSelectionTextColor);
         
-        add(searchTab, "growy");
-        add(sortAndFilterPanel, "wrap, align right");
+
+        LimeHeaderBar header = headerBarFactory.createBasic(searchTab);
+        sortAndFilterPanel.layoutComponents(header);
+        add(header, "wrap");
         
         add(messagePanel, "span, growx");
         add(scrollPane, "span, grow");
@@ -248,7 +246,6 @@ public class SearchResultsPanel extends JXPanel {
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
         
-
         scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
         scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin 140, pad 8 8 8 0");
         scrollPane.setViewportView(scrollablePanel);

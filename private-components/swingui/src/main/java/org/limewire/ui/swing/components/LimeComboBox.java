@@ -345,17 +345,18 @@ public class LimeComboBox extends JXButton {
             iy2 = insets.bottom;
         }
 
-        setMinimumSize(
-           new Dimension((int) labelRect.getWidth() + ix1 + ix2,
-                         (int) labelRect.getHeight() + iy1 + iy2));
-
-        int height = (int)getPreferredSize().getHeight();
+        int height = (int) labelRect.getHeight() + iy1 + iy2;
+        int width = (int) labelRect.getWidth() + ix1 + ix2;
+        
         if (height < getMinimumSize().getHeight()) { 
             height = (int)getMinimumSize().getHeight();
         }
-
-        setPreferredSize(new Dimension((int) labelRect.getWidth() + ix1 + ix2, height));
-        setSize(getPreferredSize());
+        
+        setMinimumSize(new Dimension(width, height));
+        setMaximumSize(new Dimension(200, 100));
+        setPreferredSize(new Dimension(width, height));
+        setSize(new Dimension(width, height));
+                
         revalidate();
         repaint();
     }

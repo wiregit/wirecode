@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 
@@ -24,6 +25,12 @@ public class LimeHeaderBarFactory {
         GuiUtils.assignResources(this);
         
         this.painterFactory = painterFactory;
+    }
+    
+    public LimeHeaderBar createBasic(Component comp) {
+        LimeHeaderBar bar = new LimeHeaderBar(comp);
+        decorateBasic(bar);
+        return bar;        
     }
     
     public LimeHeaderBar createBasic(String text) {

@@ -4,7 +4,6 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -21,12 +20,12 @@ import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.search.SearchCategory;
@@ -36,6 +35,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
+import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
@@ -60,7 +60,7 @@ import com.google.inject.Inject;
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
  */
-public class SortAndFilterPanel extends JXPanel {
+public class SortAndFilterPanel {
 
     private final ButtonDecorator buttonDecorator;
     
@@ -105,7 +105,9 @@ public class SortAndFilterPanel extends JXPanel {
     private boolean repopulatingCombo;
 
     @Inject
-    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory, ButtonDecorator buttonDecorator) {
+    SortAndFilterPanel(LimeComboBoxFactory comboBoxFactory,
+            ButtonDecorator buttonDecorator, LimeHeaderBarFactory headerBarFactory) {
+        
         GuiUtils.assignResources(this);
         
         this.buttonDecorator = buttonDecorator;
@@ -113,19 +115,11 @@ public class SortAndFilterPanel extends JXPanel {
         this.populateActionList();
         
         this.sortCombo = comboBoxFactory.createDarkFullComboBox();
-        
-        // TODO: Resources and bar conversion
-        this.setMinimumSize(new Dimension(10, 34));
-        this.setMaximumSize(new Dimension(10000, 34));
-        this.sortCombo.setPreferredSize(new Dimension(5, 22));
-        this.sortCombo.setMinimumSize(this.sortCombo.getPreferredSize());
-        this.sortCombo.setMaximumSize(new Dimension(1000,22));
-        
+
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
-        layoutComponents();
     }
 
     private void populateActionList() {
@@ -179,7 +173,6 @@ public class SortAndFilterPanel extends JXPanel {
         tableViewToggleButton.setIcon(tableViewIcon);
         tableViewToggleButton.setPressedIcon(tableViewIcon);
         tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
-
         
         tableViewToggleButton.addItemListener(new ItemListener() {
             @Override
@@ -459,21 +452,21 @@ public class SortAndFilterPanel extends JXPanel {
         return ascending ? compareToNull(c1, c2, nullsFirst) : compareToNull(c2, c1, nullsFirst);
     }
     
-    private void layoutComponents() {
-        setLayout(new GridBagLayout());
+    public void layoutComponents(JPanel panel) {
+        panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.insets = new Insets(3, 2, 2, 10); // top, left, bottom, right
-        add(filterBox, gbc);
+        panel.add(filterBox, gbc);
 
         gbc.insets.right = 5;
-        add(sortLabel, gbc);
+        panel.add(sortLabel, gbc);
 
-        add(sortCombo, gbc);
+        panel.add(sortCombo, gbc);
         
         gbc.insets.left = gbc.insets.right = 0;
-        add(listViewToggleButton, gbc);
-        add(tableViewToggleButton, gbc);
+        panel.add(listViewToggleButton, gbc);
+        panel.add(tableViewToggleButton, gbc);
     }
 
     public void clearFilterBox() {

@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 
 import org.jdesktop.application.Resource;
@@ -26,7 +25,6 @@ public class ButtonDecorator {
     
     @Resource private Font  darkFullTextFont;
     @Resource private Color darkFullTextForeground;
-    @Resource private int   darkFullDefaultHeight;
     
     @Inject
     ButtonDecorator(ButtonPainterFactory painterFactory) {
@@ -72,12 +70,6 @@ public class ButtonDecorator {
         
         button.setForeground(darkFullTextForeground);
         button.setFont(darkFullTextFont);
-        
-        button.setMaximumSize(new Dimension(100, darkFullDefaultHeight));
-        button.setMinimumSize(new Dimension(10, darkFullDefaultHeight));
-        button.setPreferredSize(new Dimension((int)button.getPreferredSize().getWidth(), 
-                        darkFullDefaultHeight));
-        button.setSize(button.getPreferredSize());
     }
     
     public void decorateLightFullButton(JXButton button) {
