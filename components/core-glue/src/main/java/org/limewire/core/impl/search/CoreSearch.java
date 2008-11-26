@@ -131,7 +131,6 @@ public class CoreSearch implements Search {
                 public void process(PromotionMessageContainer result) {
                     SponsoredResultTarget target = result.getOptions().isOpenInStoreTab() ?
                         SponsoredResultTarget.STORE  : SponsoredResultTarget.EXTERNAL;
-                    // TODO: what are we doing with sponsored results?
                     CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(
                             stripURL(result.getURL()), result.getDescription(),
                             stripURL(result.getURL()), result.getURL(),

@@ -14,7 +14,11 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.Scrollable;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -196,7 +200,6 @@ public class SearchResultsPanel extends JXPanel {
         if (resultHeader == null) {
             // If no headers, use nothing special.
             scrollPane.setColumnHeaderView(null);
-            sponsoredResultsPanel.setTitleVisible(true);
         } else if (!sponsoredResultsPanel.isVisible()) {
             // If sponsored results aren't visible, just use the actual header.
             scrollPane.setColumnHeaderView(resultHeader);
@@ -204,12 +207,29 @@ public class SearchResultsPanel extends JXPanel {
             // Otherwise, create a combined panel that has both sponsored results & header.
             JXPanel headerPanel = new JXPanel();
             // Make sure this syncs with the layout for the results & sponsored results!
-            headerPanel.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
+            headerPanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
             headerPanel.add(resultHeader, "grow, push, alignx left, aligny top");
-            headerPanel.add(sponsoredResultsPanel.createTitleLabel(), "aligny top, alignx right");
+            
+            DefaultTableColumnModel model = new DefaultTableColumnModel();
+            TableColumn column = new TableColumn();
+            model.addColumn(column);
+            JTableHeader header = new JTableHeader(model);
+            header.setReorderingAllowed(false);
+            header.setResizingAllowed(false);
+            header.setTable(new JTable());
+            int width = sponsoredResultsPanel.getPreferredSize().width;
+            int height = resultHeader.getPreferredSize().height;
+            column.setWidth(width);
+            Dimension dimension = new Dimension(width, height);
+            header.setPreferredSize(dimension);
+            header.setMaximumSize(dimension);
+            header.setMinimumSize(dimension);
+            
+            headerPanel.add(header, "aligny top, alignx right");
             scrollPane.setColumnHeaderView(headerPanel);
-            sponsoredResultsPanel.setTitleVisible(false);
         }
+        
+        scrollPane.validate();
     }
         
     private void layoutComponents() {
@@ -244,7 +264,7 @@ public class SearchResultsPanel extends JXPanel {
         add(scrollPane, "span, grow");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
-        scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0!, insets 0 0 0 0", "[]", "[grow][]"));
+        scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
         
         scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
         scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin 140, pad 8 8 8 0");
@@ -269,7 +289,12 @@ public class SearchResultsPanel extends JXPanel {
             if(scrollable == null) {
                 return super.getPreferredScrollableViewportSize();
             } else {
-                return new Dimension(super.getPreferredSize().width, ((JComponent)scrollable).getPreferredSize().height);
+                int width = super.getPreferredSize().width;
+                int height = ((JComponent)scrollable).getPreferredSize().height;
+                if(sponsoredResultsPanel.isVisible()) {
+                    height = Math.max(height, sponsoredResultsPanel.getPreferredSize().height);
+                }
+                return new Dimension(width, height);
             }
         }
 

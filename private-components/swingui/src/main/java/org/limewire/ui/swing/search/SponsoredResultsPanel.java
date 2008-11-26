@@ -1,29 +1,28 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXHyperlink;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
@@ -33,54 +32,35 @@ public class SponsoredResultsPanel extends JXPanel {
     private final Navigator navigator;
     private final StorePanel storePanel;
 
-    @Resource
-    private Color linkColor;
-
-    @Resource
-    private Color visibleUrlColor;
-    
-    @Resource
-    private Font headingFont;
-    
-    @Resource 
-    private Font bodyFont;
-    
-    private JLabel title;
-
+    @Resource private int textWidth;
+    @Resource private int areaWidth;
+    @Resource private Color headingColor;
+    @Resource private Color bodyColor;
+    @Resource private Color urlColor;
+    @Resource private Font headingFont;
+    @Resource private Font bodyFont;
+    @Resource private Font urlFont;
     
     @Inject
     public SponsoredResultsPanel(Navigator navigator, StorePanel storePanel) {
         GuiUtils.assignResources(this);
         this.navigator = navigator;
         this.storePanel = storePanel;
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        
-        title = createTitleLabel();
-        add(title, gbc);
+        setLayout(new VerticalLayout(10));
+        setMaximumSize(new Dimension(areaWidth, Short.MAX_VALUE));
+        setMinimumSize(new Dimension(areaWidth, Short.MAX_VALUE));
     }
     
-    void setTitleVisible(boolean visible) {
-        title.setVisible(visible);
-    }
-    
-    JLabel createTitleLabel() {
-        JLabel title = new JLabel(I18n.tr("Sponsored Results"));
-        title.setFont(headingFont);
-        FontUtils.bold(title);
-        return title;
+    @Override
+    public Dimension getPreferredSize() {
+        Dimension d = super.getPreferredSize();
+        d.width = areaWidth;
+        return d;
     }
    
 
     public void addEntry(SponsoredResult result){
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        gbc.insets.top = 10; // leave space above each entry that follow
-        gbc.insets.left = 5; // indent entries a little
-        add(new SponsoredResultView(result), gbc);
+        add(new SponsoredResultView(result));
     }
         
     private class SponsoredResultView extends JPanel {
@@ -91,19 +71,21 @@ public class SponsoredResultsPanel extends JXPanel {
          super(new VerticalLayout());
             this.result = result;
             
-            JXHyperlink link = new JXHyperlink();
-            link.setUnclickedColor(linkColor);
-            link.setText("<HTML><U>" + result.getTitle() + "</U></HTML>");
-            link.setFont(bodyFont);
-            link.addActionListener(new SponsoredResultListener(result));
+            MultiLineLabel link = new MultiLineLabel("<html><u>"+result.getTitle()+"</u><html>", textWidth);
+            link.setForeground(headingColor);
+            link.setFont(headingFont);
+            link.addMouseListener(new ActionHandListener(new SponsoredResultListener(result)));
+            link.setBorder(BorderFactory.createEmptyBorder());
             
-            JTextArea textArea = new JTextArea(result.getText());
-            textArea.setEditable(false);
+            MultiLineLabel textArea = new MultiLineLabel(result.getText(), textWidth);
+            textArea.setForeground(bodyColor);
             textArea.setFont(bodyFont);
+            textArea.setBorder(BorderFactory.createEmptyBorder());
             
-            JLabel urlLabel = new JLabel(result.getVisibleUrl());
-            urlLabel.setForeground(visibleUrlColor);
-            urlLabel.setFont(bodyFont);
+            JLabel urlLabel = new JXLabel(result.getVisibleUrl());
+            urlLabel.setForeground(urlColor);
+            urlLabel.setFont(urlFont);
+            urlLabel.setBorder(BorderFactory.createEmptyBorder());
             
             add(link);
             add(textArea);
@@ -117,12 +99,13 @@ public class SponsoredResultsPanel extends JXPanel {
         
     }
     
-    private class SponsoredResultListener implements ActionListener{
-
-        private SponsoredResult result;
+    private class SponsoredResultListener implements ActionListener {
+        private final SponsoredResult result;
+        
         public SponsoredResultListener(SponsoredResult result){
             this.result = result;
         }
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             if (result.getTarget() == SponsoredResultTarget.EXTERNAL) {
@@ -135,7 +118,6 @@ public class SponsoredResultsPanel extends JXPanel {
                 }
             }
         }
-        
     }
     
 }

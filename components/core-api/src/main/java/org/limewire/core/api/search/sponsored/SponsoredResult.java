@@ -3,14 +3,14 @@ package org.limewire.core.api.search.sponsored;
 
 public interface SponsoredResult {
 
-    public abstract String getTitle();
+    String getTitle();
 
-    public abstract String getVisibleUrl();
+    String getVisibleUrl();
 
-    public abstract String getUrl();
+    String getUrl();
 
-    public abstract SponsoredResultTarget getTarget();
+    SponsoredResultTarget getTarget();
 
-    public abstract String getText();
+    String getText();
 
 }

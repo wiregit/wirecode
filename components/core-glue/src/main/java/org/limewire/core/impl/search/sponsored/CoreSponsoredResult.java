@@ -5,17 +5,11 @@ import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 
 public class CoreSponsoredResult implements SponsoredResult {
 
-   
-
-    private String text;
-
-    private SponsoredResultTarget target;
-
-    private String title;
-
-    private String navUrl;
-
-    private String visibleUrl;
+    private final String text;
+    private final SponsoredResultTarget target;
+    private final String title;
+    private final String navUrl;
+    private final String visibleUrl;
 
     /**
      * @param title title of the ad
