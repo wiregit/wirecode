@@ -1,13 +1,17 @@
 package org.limewire.ui.swing.table;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.FileUtils;
 
@@ -15,37 +19,62 @@ import org.limewire.util.FileUtils;
  * Renders a table cell with a string and the system icon representing that
  * file type.
  */
-public class IconLabelRenderer extends DefaultTableCellRenderer {
+public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
 
     IconManager iconManager;
+    JLabel label;
     
     public IconLabelRenderer(IconManager iconManager) {
+        super(new BorderLayout());
         this.iconManager = iconManager;
         
-        setIconTextGap(5);
+        label = new JLabel();        
+        label.setIconTextGap(5);
+        
+        add(label);
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         
-        FileItem item = (FileItem) value;
-        
-        if(table.getSelectedRow() == row) {
+        if (table.getSelectedRow() == row) {
             this.setBackground(table.getSelectionBackground());
             this.setForeground(table.getSelectionForeground());
-        }
-        else {
+        } else {
             this.setBackground(table.getBackground());
             this.setForeground(table.getForeground());
         }
         
-        if (item instanceof RemoteFileItem){
-            setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(item.getFileName())));
+        if (value instanceof FileItem) {
+            
+            FileItem item = (FileItem) value;
+
+            if (item instanceof RemoteFileItem) {
+                label.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(item
+                        .getFileName())));
+            } else {
+                label.setIcon(iconManager.getIconForFile(((LocalFileItem) item).getFile()));
+            }
+            label.setText(item.getName());
+            
+        } else if (value instanceof VisualSearchResult){
+            
+            VisualSearchResult vsr = (VisualSearchResult)value;
+
+            label.setText(vsr.getHeading());
+            label.setIcon(iconManager.getIconForExtension(vsr.getFileExtension()));
+//
+//            Font font = label.getFont().deriveFont(Font.PLAIN);
+//            label.setFont(font);
+//
+//            label.setOpaque(false);
+
+
+            setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
         } else {
-            setIcon(iconManager.getIconForFile(((LocalFileItem)item).getFile()));
+            throw new IllegalArgumentException(value + " must be a FileItem or VisualSearchResult");
         }
-        setText(item.getName());
         
         return this;
     }

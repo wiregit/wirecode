@@ -94,4 +94,9 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public boolean isEditable(VisualSearchResult vsr, int column) {
         return column == FROM_INDEX;
     }
+    
+    @Override
+    public int getNameColumn() {
+        return NAME_INDEX;
+    }
 }

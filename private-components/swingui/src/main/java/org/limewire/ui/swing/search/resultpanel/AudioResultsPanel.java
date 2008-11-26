@@ -14,6 +14,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.QualityRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
@@ -36,11 +37,11 @@ public class AudioResultsPanel extends BaseResultPanel {
         PropertiesFactory<VisualSearchResult> properties,
         ListViewRowHeightRule rowHeightRule, 
         SaveLocationExceptionHandler saveLocationExceptionHandler,
-        SearchResultFromWidgetFactory searchResultFromWidget) {
+        SearchResultFromWidgetFactory searchResultFromWidget, IconManager iconManager) {
         
         super(listViewEditorRendererFactory, eventList, new AudioTableFormat(), downloadListManager,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, saveLocationExceptionHandler,
-            searchResultFromWidget);
+            searchResultFromWidget, iconManager);
     }
     
     @Override

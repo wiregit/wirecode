@@ -43,7 +43,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
         this.vsr = vsr;
 
         switch (index) {
-            case NAME_INDEX: return getIconLabel(vsr);
+            case NAME_INDEX: return vsr;
             case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
             case FROM_INDEX: return vsr;
@@ -68,5 +68,10 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public boolean isEditable(VisualSearchResult vsr, int column) {
         return column == FROM_INDEX;
+    }
+
+    @Override
+    public int getNameColumn() {
+        return NAME_INDEX;
     }
 }

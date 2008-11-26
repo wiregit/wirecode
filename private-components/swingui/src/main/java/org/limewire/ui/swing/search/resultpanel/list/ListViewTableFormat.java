@@ -46,4 +46,10 @@ public class ListViewTableFormat extends ResultsTableFormat<VisualSearchResult> 
     public boolean isEditable(VisualSearchResult vsr, int column) {
         return column == 1;
     }
+    
+    @Override
+    public int getNameColumn() {
+        //no name column here
+        return -1;
+    }
 }

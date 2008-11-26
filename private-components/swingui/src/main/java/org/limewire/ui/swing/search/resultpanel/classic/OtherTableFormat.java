@@ -46,7 +46,7 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
         String fileExtension = vsr.getFileExtension();
 
         switch (index) {
-            case NAME_INDEX: return getIconLabel(vsr);
+            case NAME_INDEX: return vsr;
             case EXTENSION_INDEX: return fileExtension;
             case TYPE_INDEX: return vsr.getCategory();
             case SIZE_INDEX: return vsr.getSize();
@@ -72,5 +72,10 @@ public class OtherTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public boolean isEditable(VisualSearchResult vsr, int column) {
         return column == FROM_INDEX;
+    }
+    
+    @Override
+    public int getNameColumn() {
+        return NAME_INDEX;
     }
 }

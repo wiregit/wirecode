@@ -47,7 +47,9 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
+import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
@@ -80,6 +82,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private final SearchResultFromWidgetFactory factory;
     private final RemoteHostActions remoteHostActions;
+    private IconManager iconManager;
     
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
@@ -91,7 +94,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
             SaveLocationExceptionHandler saveLocationExceptionHandler,
-            SearchResultFromWidgetFactory fromWidgetFactory) {
+            SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
@@ -100,6 +103,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.search = search;
         this.remoteHostActions = remoteHostActions;
         this.factory = fromWidgetFactory;
+        this.iconManager = iconManager;
         
         setLayout(layout);
                 
@@ -281,8 +285,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
         CalendarTableCellRenderer calendarRenderer =
             new CalendarTableCellRenderer();
-        ComponentTableCellRenderer componentRenderer =
-            new ComponentTableCellRenderer();
+        IconLabelRenderer iconLabelRenderer =
+            new IconLabelRenderer(iconManager);
         StringTableCellRenderer stringRenderer =
             new StringTableCellRenderer();
 
@@ -296,8 +300,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 setCellRenderer(i, stringRenderer);
             } else if (clazz == Calendar.class) {
                 setCellRenderer(i, calendarRenderer);
-            } else if (clazz == Component.class) {
-                setCellRenderer(i, componentRenderer);
+            } else if (i == tableFormat.getNameColumn()) {
+                setCellRenderer(i, iconLabelRenderer);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
                 setCellRenderer(i, new FromTableCellRenderer(factory.create(remoteHostActions)));
             }

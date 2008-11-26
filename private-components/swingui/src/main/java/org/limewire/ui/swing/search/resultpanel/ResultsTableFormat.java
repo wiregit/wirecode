@@ -1,30 +1,20 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.util.Comparator;
 
-import javax.swing.Icon;
-import javax.swing.JLabel;
-
-import org.jdesktop.swingx.JXLabel;
-import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
-import org.limewire.ui.swing.util.IconManager;
 
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
-import com.google.inject.Inject;
 
 /**
  * This class is the base class for each of the TableFormat classes
  * that describe the various table views of search results.
  */
 public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
-    private IconManager iconManager;
+
     protected VisualSearchResult vsr;
     private int lastVisibleColumnIndex;
 
@@ -42,35 +32,6 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         return null;
     }
 
-    protected Component getIconLabel(VisualSearchResult vsr) {
-        String ext = vsr.getFileExtension();
-        Icon icon = iconManager.getIconForExtension(ext);
-
-        final String name = vsr.getHeading();
-
-        JXLabel label = new JXLabel(name, icon, JLabel.LEFT);
-
-        Font font = label.getFont().deriveFont(Font.PLAIN);
-        label.setFont(font);
-
-        label.setOpaque(false);
-
-        JXPanel panel = new JXPanel(new FlowLayout(FlowLayout.LEFT)){
-            @Override
-            public String toString() {
-                //this is kind of hacky but inside the glazed list tables
-                //toString is being used to sort with the Component column type
-                //we could potentially try overriding the column comparator as well,
-                // I initially tried that and it didn't work
-                return name;
-            }
-        };
-        panel.add(label);
-
-        panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
-
-        return panel;
-    }
 
     /**
      * Gets the initial column width of the column with a given index.
@@ -108,6 +69,8 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         Object value = vsr.getProperty(key);
         return value == null ? "?" : value.toString();
     }
+    
+    abstract public int getNameColumn();
 
     abstract public boolean isEditable(VisualSearchResult vsr, int column);// {
 //        return false;
@@ -120,8 +83,4 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         return vsr;
     }
 
-    @Inject
-    public void setIconManager(IconManager iconManager) {
-        this.iconManager = iconManager;
-    }
 }
