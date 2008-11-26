@@ -15,7 +15,6 @@ import javax.swing.JToggleButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
@@ -25,6 +24,7 @@ import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.PropertyUtils;
 
 public class PlayRendererEditor extends TableRendererEditor implements AudioPlayerListener{
 
@@ -107,11 +107,8 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     private File update(Object value){
         if(value instanceof LocalFileItem){
             LocalFileItem item = (LocalFileItem)value;
-            
-            if(item.getProperty(FilePropertyKey.TITLE) == null)
-                label.setText(item.getName());
-            else
-                label.setText((String)item.getProperty(FilePropertyKey.TITLE));      
+               
+            label.setText(PropertyUtils.getTitle(item));
             
             if(item.isIncomplete()){
                 playButton.setVisible(false);

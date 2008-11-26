@@ -47,6 +47,8 @@ public class ImageCellRenderer extends ImageLabel implements ListCellRenderer {
         else
             setText("");
         
+        setToolTipText(item.getFileName());
+        
         if(isSelected)
             this.setBorder(selectedBorder);
         else 

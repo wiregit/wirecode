@@ -54,6 +54,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -184,7 +185,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
         
         shareFriendList = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
        
-        shareTable = new ToolTipTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
+        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){
