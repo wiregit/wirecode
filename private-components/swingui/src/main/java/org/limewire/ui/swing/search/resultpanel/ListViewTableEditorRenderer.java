@@ -464,14 +464,27 @@ implements TableCellEditor, TableCellRenderer {
         SearchHeading searchHeading = new SearchHeading() {
             @Override
             public String getText() {
-                return truncator.truncateHeading(result.getHeading(), fudgeFactorPixelWidth, headingFontWidthResolver);
+                String headingText = result.getHeading();
+                String truncatedHeading = truncator.truncateHeading(headingText, fudgeFactorPixelWidth, headingFontWidthResolver);
+                handleHeadingTooltip(headingText, truncatedHeading);
+                return truncatedHeading;
+            }
+
+            /**
+             * Sets a tooltip for the heading field only if the text has been truncated. 
+             */
+            private void handleHeadingTooltip(String headingText, String truncatedHeading) {
+                heading.setToolTipText(headingText.equals(truncatedHeading) ? null : HTML + headingText + CLOSING_HTML_TAG);
             }
 
             @Override
             public String getText(String adjoiningFragment) {
                 int adjoiningTextPixelWidth = headingFontWidthResolver.getPixelWidth(adjoiningFragment);
-                return truncator.truncateHeading(result.getHeading(), 
+                String headingText = result.getHeading();
+                String truncatedHeading = truncator.truncateHeading(headingText, 
                         fudgeFactorPixelWidth - adjoiningTextPixelWidth, headingFontWidthResolver);
+                handleHeadingTooltip(headingText, truncatedHeading);
+                return truncatedHeading;
             }
         };
         this.heading.setText(headingBuilder.getHeadingDocument(searchHeading, downloadState, isMouseOver, result.isSpam()));
