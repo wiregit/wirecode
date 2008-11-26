@@ -63,7 +63,6 @@ public class ActionButtonPanel extends JXPanel {
     private JToggleButton spamButton;
     private int height;
     private VisualSearchResult vsr;
-    private int currentRow;
 
     public ActionButtonPanel(DownloadHandler downloadHandler, final JTable table) {
         GuiUtils.assignResources(this);
@@ -129,7 +128,7 @@ public class ActionButtonPanel extends JXPanel {
     }
     
     public void startDownload() {
-        downloadHandler.download(vsr, currentRow);
+        downloadHandler.download(vsr);
         setDownloadingDisplay(vsr);
     }
     
@@ -220,9 +219,8 @@ public class ActionButtonPanel extends JXPanel {
         addButtonsToPanel();
     }
     
-    public void prepareForDisplay(VisualSearchResult vsr, int row) {
+    public void prepareForDisplay(VisualSearchResult vsr) {
         this.vsr = vsr;
-        this.currentRow = row;
         
         boolean spam = vsr.isSpam();
         setAlpha(spam ? 0.2f : 1.0f);

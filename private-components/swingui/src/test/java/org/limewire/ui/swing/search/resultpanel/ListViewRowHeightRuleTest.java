@@ -1,13 +1,14 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.*;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.*;
 import junit.framework.TestCase;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.MockVisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRuleImpl;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 
 public class ListViewRowHeightRuleTest extends TestCase {
 

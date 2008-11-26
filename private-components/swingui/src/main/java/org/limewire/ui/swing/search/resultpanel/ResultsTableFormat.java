@@ -26,26 +26,16 @@ import com.google.inject.Inject;
 public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
     private IconManager iconManager;
     protected VisualSearchResult vsr;
-    protected int actionColumnIndex;
     private int lastVisibleColumnIndex;
 
-    ResultsTableFormat(int actionColumnIndex, int lastVisibleColumnIndex, String...columnNames) {
+    protected ResultsTableFormat(int lastVisibleColumnIndex, String...columnNames) {
         super(columnNames);
-        this.actionColumnIndex = actionColumnIndex;
         this.lastVisibleColumnIndex = lastVisibleColumnIndex;
     }
 
-    /**
-     * Gets the index for the column that contains the three "action" buttons.
-     * @return the column index
-     */
-    public int getActionColumnIndex() {
-        return actionColumnIndex;
-    }
-
+    @Override
     public Class getColumnClass(int index) {
-        return index == actionColumnIndex ?
-            VisualSearchResult.class : String.class;
+        return String.class;
     }
 
     public Comparator getColumnComparator(int index) {
@@ -119,9 +109,10 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         return value == null ? "?" : value.toString();
     }
 
-    public boolean isEditable(VisualSearchResult vsr, int index) {
-        return index == actionColumnIndex;
-    }
+    abstract public boolean isEditable(VisualSearchResult vsr, int column);// {
+//        return false;
+//        return index == actionColumnIndex;
+//    }
 
     public VisualSearchResult setColumnValue(
         VisualSearchResult vsr, Object value, int index) {

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.list;
 
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-class SearchHighlightUtil {
+public class SearchHighlightUtil {
     private static final Pattern FIND_SPACES = Pattern.compile(" ");
     private static final Log LOG = LogFactory.getLog(SearchHighlightUtil.class);
 

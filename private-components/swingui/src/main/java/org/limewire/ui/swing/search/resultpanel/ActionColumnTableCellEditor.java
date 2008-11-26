@@ -20,9 +20,7 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  * 
  * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ActionColumnTableCellEditor
-extends AbstractCellEditor
-implements TableCellEditor, TableCellRenderer {
+public class ActionColumnTableCellEditor extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
         
     private final DownloadHandler downloadHandler;
     private ActionButtonPanel panel;
@@ -64,7 +62,7 @@ implements TableCellEditor, TableCellRenderer {
         ActionButtonPanel panel = getPanel(table);
         vsr = (VisualSearchResult) value;
         
-        panel.prepareForDisplay(vsr, row);
+        panel.prepareForDisplay(vsr);
         
         return panel;
     }

@@ -9,6 +9,9 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.classic.OtherTableFormat;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -31,11 +34,12 @@ public class OtherResultsPanel extends BaseResultPanel {
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
         PropertiesFactory<VisualSearchResult> properties,
         ListViewRowHeightRule rowHeightRule, 
-        SaveLocationExceptionHandler saveLocationExceptionHandler) {
+        SaveLocationExceptionHandler saveLocationExceptionHandler,
+        SearchResultFromWidgetFactory searchResultFromWidget) {
         
         super(listViewEditorRendererFactory, eventList, tableFormat, downloadListManager,
-            search, searchInfo, preserver, navigator, fromActions, properties, rowHeightRule, saveLocationExceptionHandler);
-        
+            search, searchInfo, preserver, navigator, fromActions, properties, rowHeightRule, 
+            saveLocationExceptionHandler, searchResultFromWidget);
     }
     
     @Override

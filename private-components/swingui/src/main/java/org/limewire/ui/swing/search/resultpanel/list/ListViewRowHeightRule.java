@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.list;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 

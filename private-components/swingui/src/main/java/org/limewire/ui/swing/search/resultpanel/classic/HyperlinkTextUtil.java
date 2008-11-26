@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.classic;
 
 public class HyperlinkTextUtil {
 

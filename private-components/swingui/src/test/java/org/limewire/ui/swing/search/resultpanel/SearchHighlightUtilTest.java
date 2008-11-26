@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel;
 
-import static org.limewire.ui.swing.search.resultpanel.SearchHighlightUtil.highlight;
+import static org.limewire.ui.swing.search.resultpanel.list.SearchHighlightUtil.highlight;
 import junit.framework.TestCase;
 
 public class SearchHighlightUtilTest extends TestCase {

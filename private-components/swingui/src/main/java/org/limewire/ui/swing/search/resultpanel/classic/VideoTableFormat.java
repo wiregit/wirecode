@@ -1,9 +1,10 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.classic;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 
 /**
  * This class specifies the content of a table that contains
@@ -11,13 +12,13 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public static final int NAME_INDEX = 0;
-    public static final int EXTENSION_INDEX = 1;
-    public static final int LENGTH_INDEX = 2;
-    public static final int YEAR_INDEX = 3;
-    public static final int QUALITY_INDEX = 4;
-    public static final int ACTION_INDEX = 5;
-    public static final int NUM_SOURCES_INDEX = 6;
+    public static final int NUM_SOURCES_INDEX = 0;
+    public static final int NAME_INDEX = 1;
+    public static final int EXTENSION_INDEX = 2;
+    public static final int LENGTH_INDEX = 3;
+    public static final int YEAR_INDEX = 4;
+    public static final int QUALITY_INDEX = 5;
+    public static final int FROM_INDEX = 6;
     public static final int RATING_INDEX = 7;
     public static final int COMMENTS_INDEX = 8;
     public static final int HEIGHT_INDEX = 9;
@@ -25,10 +26,19 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int SIZE_INDEX = 11;
 
     public VideoTableFormat() {
-        super(ACTION_INDEX, ACTION_INDEX,
-                tr("Name"), tr("Extension"), tr("Length"), tr("Year"), tr("Quality"), "",
-                tr("People with File"), tr("Rating"),
-                tr("Comments"), tr("Height"), tr("Width"), tr("Size"));
+        super(FROM_INDEX,
+                tr("People with File"), 
+                tr("Name"), 
+                tr("Extension"), 
+                tr("Length"), 
+                tr("Year"), 
+                tr("Quality"), 
+                tr("From"),
+                tr("Rating"),
+                tr("Comments"), 
+                tr("Height"), 
+                tr("Width"), 
+                tr("Size"));
     }
 
     @Override
@@ -39,6 +49,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             index == RATING_INDEX ? Integer.class :
             index == WIDTH_INDEX ? Integer.class :
             index == YEAR_INDEX ? Integer.class :
+            index == FROM_INDEX ? VisualSearchResult.class :
             super.getColumnClass(index);
     }
 
@@ -54,7 +65,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
             case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
-            case ACTION_INDEX: return vsr;
+            case FROM_INDEX: return vsr;
             case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case RATING_INDEX: return getProperty(FilePropertyKey.RATING);
             case COMMENTS_INDEX: return getProperty(FilePropertyKey.COMMENTS);
@@ -68,13 +79,19 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
+            case NUM_SOURCES_INDEX: return 100;
             case NAME_INDEX: return 400;
             case EXTENSION_INDEX: return 60;
             case LENGTH_INDEX: return 60;
             case YEAR_INDEX: return 60;
             case QUALITY_INDEX: return 60;
-            case ACTION_INDEX: return 100;
+            case FROM_INDEX: return 200;
             default: return 100;
         }
+    }
+
+    @Override
+    public boolean isEditable(VisualSearchResult vsr, int column) {
+        return column == FROM_INDEX;
     }
 }

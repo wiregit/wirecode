@@ -1,22 +1,21 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.list;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 
 /**
  * This class specifies the content of a single-column table
  * that displays the list view of search results.
- * @author R. Mark Volkmann, Object Computing, Inc.
  */
-public class ListViewTableFormat
-extends ResultsTableFormat<VisualSearchResult> {
+public class ListViewTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
 //    static final int ACTIONS_WIDTH = 140;
 
     public ListViewTableFormat() {
 //        super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));
-        super(2, 1, tr("not used"), tr("also not used"));
+        super(1, tr("not used"), tr("also not used"));
     }
 
     @Override
@@ -41,5 +40,10 @@ extends ResultsTableFormat<VisualSearchResult> {
 //            return ACTIONS_WIDTH;
 //        }
         return index == 0 ? 400 : 170;
+    }
+
+    @Override
+    public boolean isEditable(VisualSearchResult vsr, int column) {
+        return column == 1;
     }
 }

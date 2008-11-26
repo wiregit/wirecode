@@ -24,13 +24,12 @@ public class SearchResultMenu extends JPopupMenu {
 
     public SearchResultMenu(final DownloadHandler downloadHandler,
         final VisualSearchResult vsr,
-        final int row,
         final RemoteHostActions fromActions,
         final PropertiesFactory<VisualSearchResult> propertiesFactory) {
 
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
-                downloadHandler.download(vsr, row);
+                downloadHandler.download(vsr);
             }
         });
 

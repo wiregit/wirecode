@@ -37,7 +37,15 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.resultpanel.classic.CalendarTableCellRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
+import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.StringTableCellRenderer;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -70,6 +78,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     
     private Scrollable visibileComponent;
     
+    private final SearchResultFromWidgetFactory factory;
+    private final RemoteHostActions remoteHostActions;
+    
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
@@ -79,18 +90,21 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             RowSelectionPreserver preserver,
             Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
-            SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            SaveLocationExceptionHandler saveLocationExceptionHandler,
+            SearchResultFromWidgetFactory fromWidgetFactory) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.baseEventList = eventList;
         this.downloadListManager = downloadListManager;
         this.search = search;
+        this.remoteHostActions = remoteHostActions;
+        this.factory = fromWidgetFactory;
         
         setLayout(layout);
                 
         configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties, rowHeightRule);
-        configureTable(eventList, tableFormat, navigator);
+        configureTable(eventList, tableFormat, navigator, remoteHostActions, properties);
  
         add(resultsList, SearchViewType.LIST.name());
         add(resultsTable, SearchViewType.TABLE.name());
@@ -217,14 +231,14 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             @Override
             public void mousePressed(MouseEvent e) {
                 // If a right-click has occurred ...
-                if (e.getButton() == 3) {
+                if (SwingUtilities.isRightMouseButton(e)) {
                     // Get the VisualSearchResult that was selected.
                     int row = resultsList.rowAtPoint(e.getPoint());
                     VisualSearchResult vsr = maxSizedList.get(row);
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, row, remoteHostActions, properties);
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, remoteHostActions, properties);
                     searchResultMenu.show(component, e.getX(), e.getY());
                 }
             }
@@ -232,9 +246,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
-        final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator) {
+        final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator, RemoteHostActions remoteHostActions,
+        PropertiesFactory<VisualSearchResult> properties) {
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
-
+        
         resultsTable.setEventList(eventList);
         resultsTable.setTableFormat(tableFormat);
         
@@ -242,18 +257,15 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             
         setupCellRenderers(tableFormat);
 
-        resultsTable.setDefaultEditor(
-            VisualSearchResult.class, new ActionColumnTableCellEditor(this));
-
-        // Don't allow sorting on the "Actions" column
-        int columnIndex = tableFormat.getActionColumnIndex();
-        resultsTable.getColumnExt(columnIndex).setSortable(false);
+        resultsTable.setDefaultEditor(VisualSearchResult.class, new FromTableCellRenderer(factory.create(remoteHostActions)));
+        
+        resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, remoteHostActions, properties));
+        resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this));
 
         // Set default width of all visible columns.
         int lastVisibleColumnIndex = tableFormat.getLastVisibleColumnIndex();
         for (int i = 0; i <= lastVisibleColumnIndex; i++) {
-            resultsTable.setColumnWidth(
-                i, tableFormat.getInitialColumnWidth(i));
+            resultsTable.setColumnWidth(i, tableFormat.getInitialColumnWidth(i));
         }
 
         // Make some columns invisible by default.
@@ -287,7 +299,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             } else if (clazz == Component.class) {
                 setCellRenderer(i, componentRenderer);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                setCellRenderer(i, new ActionColumnTableCellEditor(this));
+                setCellRenderer(i, new FromTableCellRenderer(factory.create(remoteHostActions)));
             }
         }
     }
@@ -298,40 +310,40 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         tc.setCellRenderer(cellRenderer);
     }
 
-    public void download(final VisualSearchResult vsr, final int row) {
-            try {
-                // TODO: Need to go through some of the rigor that
-                // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-                // went through.. checking for conflicts, etc.
-                DownloadItem di = downloadListManager.addDownload(
-                    search, vsr.getCoreSearchResults());
-                di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                 
-                vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-            } catch (final SaveLocationException sle) {
-                if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
-                    List<DownloadItem> downloads = downloadListManager.getSwingThreadSafeDownloads();
-                    // TODO instead of iterating through loop, it would be
-                    // nice to lookup download by urn potentially.
-                    for (DownloadItem downloadItem : downloads) {
-                        if (vsr.getUrn().equals(downloadItem.getUrn())) {
-                            downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                            break;
-                        }
+    public void download(final VisualSearchResult vsr) {
+        try {
+            // TODO: Need to go through some of the rigor that
+            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
+            // went through.. checking for conflicts, etc.
+            DownloadItem di = downloadListManager.addDownload(
+                search, vsr.getCoreSearchResults());
+            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+             
+            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+        } catch (final SaveLocationException sle) {
+            if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
+                List<DownloadItem> downloads = downloadListManager.getSwingThreadSafeDownloads();
+                // TODO instead of iterating through loop, it would be
+                // nice to lookup download by urn potentially.
+                for (DownloadItem downloadItem : downloads) {
+                    if (vsr.getUrn().equals(downloadItem.getUrn())) {
+                        downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                        vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                        break;
                     }
-                } else {
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
-                        @Override
-                        public void download(File saveFile, boolean overwrite)
-                                throws SaveLocationException {
-                            DownloadItem di = downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
-                            di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                            vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                        }
-                    }, sle, true);
                 }
+            } else {
+                saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                    @Override
+                    public void download(File saveFile, boolean overwrite)
+                            throws SaveLocationException {
+                        DownloadItem di = downloadListManager.addDownload(search, vsr.getCoreSearchResults(), saveFile, overwrite);
+                        di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                        vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
+                    }
+                }, sle, true);
             }
+        }
     }
     
     public EventList<VisualSearchResult> getResultsEventList() {
@@ -360,7 +372,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                 TableModel tm = resultsList.getModel();
                 VisualSearchResult vsr =
                     (VisualSearchResult) tm.getValueAt(row, 0);
-                download(vsr, row);
+                download(vsr);
             }
         }
     }

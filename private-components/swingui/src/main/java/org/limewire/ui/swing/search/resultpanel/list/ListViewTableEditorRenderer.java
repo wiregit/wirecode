@@ -1,6 +1,6 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.list;
 
-import static org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
+import static org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig.HeadingSubHeadingAndMetadata;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
@@ -26,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -49,10 +50,19 @@ import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.PropertyMatch;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayConfig;
-import org.limewire.ui.swing.search.resultpanel.ListViewRowHeightRule.RowDisplayResult;
+import org.limewire.ui.swing.search.resultpanel.ActionButtonPanel;
+import org.limewire.ui.swing.search.resultpanel.ActionColumnTableCellEditor;
+import org.limewire.ui.swing.search.resultpanel.DownloadHandler;
+import org.limewire.ui.swing.search.resultpanel.SearchHeading;
+import org.limewire.ui.swing.search.resultpanel.SearchHeadingDocumentBuilder;
+import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
+import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
+import org.limewire.ui.swing.search.resultpanel.SearchResultMenu;
+import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator;
 import org.limewire.ui.swing.search.resultpanel.SearchResultTruncator.FontWidthResolver;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.PropertyMatch;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayConfig;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -63,9 +73,7 @@ import com.google.inject.assistedinject.AssistedInject;
  * This class is responsible for rendering an individual SearchResult
  * in "List View".
  */
-public class ListViewTableEditorRenderer
-extends AbstractCellEditor
-implements TableCellEditor, TableCellRenderer {
+public class ListViewTableEditorRenderer extends AbstractCellEditor implements TableCellEditor, TableCellRenderer {
 
     private static final int LEFT_COLUMN_WIDTH = 450;
 
@@ -193,6 +201,7 @@ implements TableCellEditor, TableCellRenderer {
         optionsButton.setIcon(optionsUpIcon);
         optionsButton.setBorderPainted(false);
         optionsButton.setContentAreaFilled(false);
+        optionsButton.setFocusPainted(false);
         
         fromWidget = fromWidgetFactory.create(remoteHostActions);
        
@@ -221,11 +230,11 @@ implements TableCellEditor, TableCellRenderer {
         itemIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if(e.getButton() == MouseEvent.BUTTON1) {
+                if(SwingUtilities.isLeftMouseButton(e)) {
                     actionButtonPanel.startDownload();
                     table.editingStopped(new ChangeEvent(table));
-                } else if(e.getButton() == MouseEvent.BUTTON3) {
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
+                } else if(SwingUtilities.isRightMouseButton(e)) {
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, remoteHostActions, properties);
                     searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                 } 
             }
@@ -234,8 +243,8 @@ implements TableCellEditor, TableCellRenderer {
         heading.addMouseListener( new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if(e.getButton() == MouseEvent.BUTTON3) {
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, currentRow, remoteHostActions, properties);
+                if(SwingUtilities.isRightMouseButton(e)) {
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, remoteHostActions, properties);
                     searchResultMenu.show(heading, e.getX(), e.getY());
                 }
             }

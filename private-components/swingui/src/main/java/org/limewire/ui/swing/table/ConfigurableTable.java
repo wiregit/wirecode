@@ -109,6 +109,10 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
         tableModel = new EventTableModel<E>(eventList, tableFormat);
         setModel(tableModel);
     }
+    
+    public EventTableModel<E> getEventTableModel() {
+        return tableModel;
+    }
 
     /**
      * This is overridden to prevent a java.lang.IllegalStateException

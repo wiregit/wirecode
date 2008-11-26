@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search.resultpanel;
+package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
