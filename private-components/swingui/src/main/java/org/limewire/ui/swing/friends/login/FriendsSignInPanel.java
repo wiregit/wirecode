@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends.login;
 
-import java.awt.Color;
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -20,7 +21,6 @@ import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -57,8 +57,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 FriendsSignInPanel.this.loginPanel.setVisible(true);
             }
         });
-        shareLabel.setForegroundColor(Color.BLUE);
-        shareLabel.setMouseOverColor(Color.BLUE);
+        shareLabel.setName("FriendsSignIn.ShareLabel");
         add(shareLabel);
         add(loginPanel);
         add(loggedInPanel);

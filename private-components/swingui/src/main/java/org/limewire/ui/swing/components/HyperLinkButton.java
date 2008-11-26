@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -28,40 +29,40 @@ public class HyperLinkButton extends JButton implements MouseListener {
     }
 
     public HyperLinkButton(String text) {
-        this.text = text;
-        FontUtils.underline(this);
-        updateLabel(text);
-        
-        setBorder(null);
-        setContentAreaFilled(false);
-        setFocusable(false);
-        setOpaque(false);
-        addMouseListener(this);
+        initialize(text);
     }
     
     public HyperLinkButton(String text, Action action) {
         super(action);
-
-        this.text = text;
-        FontUtils.underline(this);
-        updateLabel(text);
-        
+        initialize(text);
+    }
+    
+    private void initialize(String text) {
+        setText(text);        
         setBorder(null);
         setContentAreaFilled(false);
         setFocusable(false);
         addMouseListener(this);
+        FontUtils.underline(this);
+    }
+    
+    public void setFont(Font font) {
+        super.setFont(font);
+        if(!FontUtils.isUnderlined(this)) {
+            FontUtils.underline(this);
+        }
     }
     
     public void setMouseOverColor(Color color) {
         this.mouseOverColor = color;
     }
     
-    public void setForegroundColor(Color color) {
+    public void setForeground(Color color) {
         super.setForeground(color);
         this.foregroundColor = color;
     }        
     
-    public void updateLabel(String text) {
+    public void setText(String text) {
         this.text = text;
         super.setText(text);
     }
@@ -69,7 +70,7 @@ public class HyperLinkButton extends JButton implements MouseListener {
     @Override
     public void setAction(Action a) {
         super.setAction(a);
-        updateLabel(text);
+        setText(text);
     }
     
     @Override

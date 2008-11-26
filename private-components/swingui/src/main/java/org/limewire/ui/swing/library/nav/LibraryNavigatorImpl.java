@@ -73,8 +73,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final MyLibraryMediator myLibraryMediator;
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
-    private final NavPanelFactory navPanelFactory;
-    
+    private final NavPanelFactory navPanelFactory;    
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,

@@ -41,7 +41,7 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
 
 		//need to set these values in super even though they've been
 		//injected
-        setForegroundColor(numberedForeGroundColor);
+        setForeground(numberedForeGroundColor);
         setMouseOverColor(mouseOverColor);
         setDisabledColor(disabledColor);
         FontUtils.setSize(this, fontSize);
@@ -75,7 +75,7 @@ public class NumberedHyperLinkButton extends HyperLinkButton {
     }
     
     @Override
-    public void updateLabel(String text) {
+    public void setText(String text) {
         this.text = text;
         super.setText(text + "(" + displayNumber + ")");
     }

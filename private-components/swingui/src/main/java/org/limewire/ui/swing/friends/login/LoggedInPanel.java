@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.friends.login;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -13,11 +12,12 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
@@ -34,12 +34,14 @@ class LoggedInPanel extends JXPanel {
     private final LimeComboBox optionsBox;
     private final LimeComboBox signoutBox;
     private final XMPPAccountConfigurationManager accountManager;
-    private final FriendActions friendActions;
+    private final FriendActions friendActions;    
     
     @Inject
     LoggedInPanel(LimeComboBoxFactory comboFactory,
                   XMPPAccountConfigurationManager accountManager,
-                  FriendActions friendActions) {
+                  FriendActions friendActions,
+                  BarPainterFactory barPainterFactory) {
+        GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
         
         this.accountManager = accountManager;
@@ -50,7 +52,8 @@ class LoggedInPanel extends JXPanel {
         currentUser = new JLabel();
         loggingInLabel = new JLabel(I18n.tr("Logging in..."));
         signInButton = new HyperLinkButton(I18n.tr("Sign In"));
-        switchUserButton = new HyperLinkButton(I18n.tr("Switch User"));
+        switchUserButton = new HyperLinkButton(I18n.tr("Switch User"));        
+        setBackgroundPainter(barPainterFactory.createTopBarPainter()); 
         
         initComponents();
     }
@@ -138,8 +141,6 @@ class LoggedInPanel extends JXPanel {
         signInButton.setVisible(false);
         switchUserButton.setVisible(false);
         loggingInLabel.setVisible(false);
-        
-        setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
     }
     
     private void setConfig(XMPPConnectionConfiguration config) {
