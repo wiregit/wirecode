@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.mainframe;
 
+import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,6 +29,7 @@ import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
@@ -134,13 +136,18 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setSelectionPainter(new SearchTabSelectionPainter());
         searchList.setHighlightPainter(null);
         searchList.setTabInsets(new Insets(0,10,3,10));
-                
+
+        Line line = Line.createVerticalLine(Color.GRAY);
+        Line lineShadow = Line.createVerticalLine(Color.WHITE);
+        
         setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
-        add(homeButton);
-        add(storeButton);
-        add(libraryButton);
-        add(searchBar, "gapleft 30, gapright 10");
-        add(searchList, "gapleft 0, gaptop 3, growy");
+        add(homeButton, "gaptop 2");
+        add(storeButton, "gaptop 2");
+        add(line, "growy, gapleft 5, gaptop 4, gapbottom 3");
+        add(lineShadow, "growy, gaptop 4, gapbottom 3");
+        add(libraryButton, "gaptop 2, gapleft 8");
+        add(searchBar, "gapleft 15");
+        add(searchList, "gapleft 10, gaptop 3, growy");
     };
 
     @Override
