@@ -173,7 +173,6 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 allLists[i].getActionMap().put(NavKeys.MOVE_UP, new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-		                LibraryNavigatorImpl.this.myLibraryMediator.showLibraryCard();
                         allFriends.select();
                     }
                 });

@@ -9,10 +9,13 @@ import java.awt.GridBagLayout;
 import java.io.IOException;
 
 import javax.swing.JEditorPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -41,6 +44,14 @@ public class HomePanel extends JXPanel {
             add(browser, gbc);
         } else {
             JEditorPane editor = new JEditorPane();
+            editor.addHyperlinkListener(new HyperlinkListener() {
+                @Override
+                public void hyperlinkUpdate(HyperlinkEvent e) {
+                    if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                        NativeLaunchUtils.openURL(e.getURL().toExternalForm());
+                    }
+                }
+            });
             editor.setEditable(false);
             try {
                 editor.setPage(application.getUniqueUrl("http://www.limewire.com/client_startup/?html32=true"));
