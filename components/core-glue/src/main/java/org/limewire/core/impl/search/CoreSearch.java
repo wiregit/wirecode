@@ -19,6 +19,7 @@ import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
 import org.limewire.core.impl.library.FriendSearcher;
 import org.limewire.core.impl.search.sponsored.CoreSponsoredResult;
+import org.limewire.core.settings.PromotionSettings;
 import org.limewire.io.IpPort;
 import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionSearcher.PromotionSearchResultsCallback;
@@ -125,7 +126,7 @@ public class CoreSearch implements Search {
             }
         });        
         
-        if (initial) {            
+        if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
                 public void process(PromotionMessageContainer result) {
