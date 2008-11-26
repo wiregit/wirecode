@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -196,6 +197,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
                         }
                         resultsList.setIgnoreRepaints(false);
                         if (setRowSize) {
+                            if (resultsList.isEditing()) {
+                                resultsList.editingCanceled(new ChangeEvent(resultsList));
+                            }
                             resultsList.updateViewSizeSequence();
                             resultsList.resizeAndRepaint();
                         }
