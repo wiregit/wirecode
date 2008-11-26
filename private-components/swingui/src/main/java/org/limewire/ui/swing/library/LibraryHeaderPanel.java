@@ -5,32 +5,25 @@ import java.awt.Font;
 
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.components.LimeHeadingLabel;
 import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class LibraryHeaderPanel extends JXPanel {
-    
-    @Resource
-    private Color fontColor;
     @Resource
     private Font headerFont;
-//    @Resource
-//    private Font buttonFont;
-//    @Resource
-//    private int height;
 
-    private JLabel titleLabel;
+    private JXLabel titleLabel;
 
     private PromptTextField filterField;
 
@@ -56,9 +49,10 @@ public class LibraryHeaderPanel extends JXPanel {
         else
             title = getSharingTitle();
         
-        titleLabel = new LimeHeadingLabel(title);
-        titleLabel.setForeground(fontColor);
+        titleLabel = new JXLabel(title);
+        titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(headerFont);
+        titleLabel.setForegroundPainter(new TextShadowPainter());
 
         filterField = new PromptTextField();
         filterField.setPromptText(I18n.tr("Filter"));
