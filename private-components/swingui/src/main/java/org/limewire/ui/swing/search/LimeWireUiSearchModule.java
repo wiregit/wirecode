@@ -33,12 +33,15 @@ import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryProvider;
+import com.google.inject.name.Names;
 
 public class LimeWireUiSearchModule extends AbstractModule {
     
     @Override
     protected void configure() {
         bind(SearchHandler.class).to(SearchHandlerImpl.class);
+        bind(SearchHandler.class).annotatedWith(Names.named("p2p://")).to(P2PLinkSearchHandler.class);
+        bind(SearchHandler.class).annotatedWith(Names.named("text")).to(TextSearchHandlerImpl.class);
         bind(RowSelectionPreserver.class).to(RowSelectionPreserverImpl.class);
         bind(SimilarResultsDetectorFactory.class).to(SimilarResultsDetectorFactoryImpl.class);
         
