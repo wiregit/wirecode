@@ -29,6 +29,9 @@ public class SearchResultTruncatorImpl implements SearchResultTruncator {
                truncated = replaceAll(findWhitespaceMinusSpaceChars, truncated, EMPTY_STRING);
         
         do {
+            if (truncated.length() < ELLIPSIS_SHRINK_INCREMENT) {
+                break;
+            }
             if (getEndEdge(truncated) >= (truncated.length() - (truncated.contains(ELLIPSIS) ? ELLIPSIS.length() : 0))) {
                 truncated = ELLIPSIS + truncated.substring(ELLIPSIS_SHRINK_INCREMENT);
             } else if (getLeadEdge(truncated) >= 0) {
@@ -49,6 +52,7 @@ public class SearchResultTruncatorImpl implements SearchResultTruncator {
     }
 
     private int getEndEdge(String headingText) {
-        return headingText.indexOf(CLOSE_TAG) + CLOSE_TAG.length();
+        int closeIndex = headingText.indexOf(CLOSE_TAG);
+        return closeIndex == -1 ? 0 : closeIndex + CLOSE_TAG.length();
     }
 }

@@ -76,6 +76,22 @@ public class SearchResultTruncatorTest extends TestCase {
         result = "<HTML>I work for the department of redundancy department</HTML>";
         assertEquals(expected, trunc.truncateHeading(result, 22, mockResolver));
     }
+
+    public void testCantTruncateSmallTextWhenThePixelWidthIsTooSmall() {
+        String result = "Im";
+        String expected = "Im";
+        mockResolver.satisfactoryWidth = 1;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 1, mockResolver));
+    }
+    
+    public void testTruncateSmallText() {
+        String result = "I'm a foo";
+        String expected = "I...";
+        mockResolver.satisfactoryWidth = 4;
+        mockResolver.satisfactoryString = expected;
+        assertEquals(expected, trunc.truncateHeading(result, 4, mockResolver));
+    }
     
     private static class MockFontWidthResolver implements FontWidthResolver {
         int width;
