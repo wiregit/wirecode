@@ -150,7 +150,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         add(homeButton, "gaptop 2");
         add(storeButton, "gaptop 2");
         add(line, "growy, gapleft 5, gaptop 4, gapbottom 3");
-        add(lineShadow, "growy, gaptop 4, gapbottom 2");
+        add(lineShadow, "growy, gaptop 4, gapbottom 3");
         add(libraryButton, "gaptop 2, gapleft 8");
         
 
