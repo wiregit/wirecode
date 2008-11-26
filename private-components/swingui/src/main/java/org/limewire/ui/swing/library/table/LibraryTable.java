@@ -20,7 +20,6 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
-import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.download.DownLoadAction;
@@ -90,16 +89,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                     showHeaderPopupMenu(e.getPoint());
                 }
             }
-        });
-        
-        //hack to fix LWC-2030 - JXTable's built in filtering seems to cause problems when using 
-        //GlazedLists filtering and EventSelectionModel
-        setFilters(new FilterPipeline() {
-            @Override
-            protected void fireContentsChanged() {
-                repaint();
-            }
-        });
+        });       
+
     }
     
     public void showHeaderPopupMenu(Point p) {

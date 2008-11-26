@@ -21,6 +21,7 @@ import javax.swing.table.TableModel;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.PropertyUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -210,6 +211,16 @@ public class MouseableTable extends StripedJXTable {
             }
 
 		});
+		
+        //hack to fix LWC-2030 - JXTable's built in filtering seems to cause problems when using 
+        //GlazedLists filtering and EventSelectionModel
+        setFilters(new FilterPipeline() {
+            @Override
+            protected void fireContentsChanged() {
+                repaint();
+            }
+        });
+        
 	}
     //Don't set the cell value when editing is cancelled
 	@Override
