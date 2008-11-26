@@ -1,5 +1,6 @@
 package org.limewire.core.api;
 
+/** Contains methods relating to the overall application. */
 public interface Application {
     
     /**
@@ -9,7 +10,7 @@ public interface Application {
     String getUniqueUrl(String baseUrl);
     
     /** Returns true if the application is in a 'testing' version. */
-    public boolean isTestingVersion();
+    boolean isTestingVersion();
     
     /**
      * Starts the core services of the application.
@@ -20,6 +21,9 @@ public interface Application {
      * Stops the core services of the application.
      */
     void stopCore();
+    
+    /** Returns the version of the program. */
+    String getVersion();
     
 
 }

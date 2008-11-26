@@ -26,6 +26,10 @@ public class MockApplication implements Application {
     public boolean isTestingVersion() {
         // TODO Auto-generated method stub
         return true;
-    }
+    }    
     
+    @Override
+    public String getVersion() {
+        return "0.0.1";
+    }
 }

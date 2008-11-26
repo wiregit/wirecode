@@ -40,5 +40,10 @@ class ApplicationImpl implements Application {
         return LimeWireUtils.isTestingVersion();
     }
     
+    @Override
+    public String getVersion() {
+        return LimeWireUtils.getLimeWireVersion();
+    }
+    
 
 }

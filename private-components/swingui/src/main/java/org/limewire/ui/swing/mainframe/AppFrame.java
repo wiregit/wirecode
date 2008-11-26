@@ -31,6 +31,8 @@ import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.wizard.SetupWizard;
+import org.mozilla.browser.MozillaInitialization;
+import org.mozilla.browser.MozillaInitialization.InitStatus;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -57,6 +59,8 @@ public class AppFrame extends SingleFrameApplication {
     private Color bgColor;
     @Resource
     private Color glassPaneColor;
+    
+    private Application application;
 
     public static boolean isStarted() {
         return started;
@@ -74,12 +78,16 @@ public class AppFrame extends SingleFrameApplication {
         
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
-        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+        if(MozillaInitialization.getStatus() != InitStatus.FAILED) {
+            JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+            ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
+        }
+        
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
 
         Injector localInjector = createInjector();
+        this.application = localInjector.getInstance(Application.class);
 
         LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
@@ -122,6 +130,11 @@ public class AppFrame extends SingleFrameApplication {
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
         }
+    }
+    
+    @Action
+    public void showAboutWindow() {
+        new AboutWindow(getMainFrame(), application).showDialog();
     }
     
     @Action

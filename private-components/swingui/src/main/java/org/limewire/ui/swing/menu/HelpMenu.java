@@ -9,6 +9,7 @@ import javax.swing.JMenu;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -27,7 +28,9 @@ class HelpMenu extends JMenu {
 
     @Inject
     public HelpMenu(Application application, final IconManager iconManager,
-            final TrayNotifier trayNotifier, final Navigator navigator, final StorePanel storePanel) {
+            final TrayNotifier trayNotifier, final Navigator navigator, 
+            final StorePanel storePanel,
+            final AppFrame appFrame) {
         super(I18n.tr("Help"));
 
         add(new AbstractAction(I18n.tr("Using LimeWire...")) {
@@ -65,7 +68,7 @@ class HelpMenu extends JMenu {
         add(new AbstractAction(I18n.tr("About LimeWire")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me.");
+                appFrame.showAboutWindow();
             }
         });
 

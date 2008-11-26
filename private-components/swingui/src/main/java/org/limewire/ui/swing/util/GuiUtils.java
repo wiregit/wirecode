@@ -1,18 +1,34 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
+import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.ComponentUI;
 
 import org.apache.commons.logging.Log;
@@ -364,5 +380,86 @@ public class GuiUtils {
         } else {
            return I18n.tr("Excellent Quality");
         }
+    }
+    
+    /** Returns a listener that opens hyperlinks in a browser. */
+    public static HyperlinkListener getHyperlinkListener() {
+        return new HyperlinkListener() {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e) {
+                if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    URL url = e.getURL();
+                    if(url != null) {
+                        NativeLaunchUtils.openURL(url.toExternalForm());
+                    }
+                }
+            }
+        };
+    }
+    
+    /** Returns the ESC action. */
+    public static Action getDisposeAction() {
+        return new AbstractAction() {
+            public void actionPerformed(ActionEvent ae) {
+                Window parent;
+                if(ae.getSource() instanceof Window)
+                    parent = (Window)ae.getSource();
+                else
+                    parent = SwingUtilities.getWindowAncestor((Component)ae.getSource());
+
+                if(parent != null)
+                    parent.dispatchEvent(new WindowEvent(parent, WindowEvent.WINDOW_CLOSING));
+            }
+        };
+    }
+    
+    /**
+     * Adds a hide action to a JDialog.
+     */
+    public static void addHideAction(JDialog jd) {
+        addHideAction((JComponent)jd.getContentPane());
+    }
+    
+    /**
+     * Adds an action to hide a window / dialog.
+     *
+     * On OSX, this is done by typing 'Command-W'.
+     * On all other platforms, this is done by hitting 'ESC'.
+     */
+    public static void addHideAction(JComponent jc) {
+        InputMap map = jc.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        map.put(getHideKeystroke(), "limewire.hideWindow");
+        jc.getActionMap().put("limewire.hideWindow", getDisposeAction());
+    }
+    
+    /**
+     * Gets the keystroke for hiding a window according to the platform.
+     */
+    public static KeyStroke getHideKeystroke() {
+        if(OSUtils.isMacOSX()) {
+            return KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                            Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+        } else {
+            return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+        }
+    }
+    
+    /**
+     * Returns the point for the placing the specified component on the
+     * center of the screen.
+     *
+     * @param comp the <tt>Component</tt> to use for getting the relative
+     *             center point
+     * @return the <tt>Point</tt> for centering the specified
+     *         <tt>Component</tt> on the screen
+     */
+    public static Point getScreenCenterPoint(Component comp) {
+        Dimension dimension = comp.getSize();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int appWidth = Math.min(screenSize.width, dimension.width);
+        // compare against a little bit less than the screen size,
+        // as the screen size includes the taskbar
+        int appHeight = Math.min(screenSize.height - 40, dimension.height);
+        return new Point((screenSize.width - appWidth) / 2, (screenSize.height - appHeight) / 2);
     }
 }
