@@ -18,6 +18,9 @@ public class BarPainterFactory {
 
     @Resource private Color headerBarGradientTop;
     @Resource private Color headerBarGradientBottom;
+    
+    // TODO: Talk to Anthony about where this is visable and not
+    //        possibly make new painter creation function
     @Resource private Color headerBarBorderTop1;
 
     @Resource private Color topBarGradientTop;
@@ -46,7 +49,7 @@ public class BarPainterFactory {
     public GenericBarPainter<LimeHeaderBar> createHeaderBarPainter() {
         return new GenericBarPainter<LimeHeaderBar>(
             new GradientPaint(0,0,this.headerBarGradientTop,0,1,this.headerBarGradientBottom), 
-            this.headerBarBorderTop1, PainterUtils.TRASPARENT, 
+            PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
             PainterUtils.TRASPARENT, PainterUtils.TRASPARENT);
     }
     

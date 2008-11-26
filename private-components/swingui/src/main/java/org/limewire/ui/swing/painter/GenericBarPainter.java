@@ -45,7 +45,7 @@ public class GenericBarPainter<X> extends AbstractPainter<X> {
         
         //paint the gradient
         g.setPaint(this.gradient);
-        g.fillRect(0, 1, width, height-1);
+        g.fillRect(0, 0, width, height-1);
 
         // paint the top borders
         g.setPaint(this.topBorder1);
