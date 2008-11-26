@@ -37,6 +37,10 @@ public class BarPainterFactory {
     @Inject
     BarPainterFactory() {
         GuiUtils.assignResources(this);
+        
+        if (OSUtils.isAnyMac()) {
+            this.topBarBorderTop1 = PainterUtils.TRASPARENT;
+        }
     }
     
     public GenericBarPainter<LimeHeaderBar> createHeaderBarPainter() {
@@ -55,11 +59,6 @@ public class BarPainterFactory {
     }
     
     public GenericBarPainter<JXPanel> createTopBarPainter() {
-        
-        if (OSUtils.isAnyMac()) {
-            this.topBarBorderTop1 = PainterUtils.TRASPARENT;
-        }
-        
         return new GenericBarPainter<JXPanel>(
             new GradientPaint(0,0,this.topBarGradientTop,0,1,this.topBarGradientBottom), 
             this.topBarBorderTop1, PainterUtils.TRASPARENT, 
