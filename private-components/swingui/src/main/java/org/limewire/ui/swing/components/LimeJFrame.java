@@ -2,15 +2,9 @@ package org.limewire.ui.swing.components;
 
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
-import java.io.File;
-import java.net.URI;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
-import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.SystemUtils;
 
 
@@ -19,8 +13,7 @@ import org.limewire.util.SystemUtils;
  */
 public class LimeJFrame extends JFrame {
     
-    @Resource private Icon limeIcon;
-    @Resource private String limeFrameIconLocation;
+    private final LimeIconInfo iconInfo = new LimeIconInfo();
     
     public LimeJFrame() throws HeadlessException {
         super();
@@ -43,16 +36,13 @@ public class LimeJFrame extends JFrame {
     }
 
     private void initialize() {
-        GuiUtils.assignResources(this);
-        setIconImage(((ImageIcon)limeIcon).getImage());
+        setIconImage(iconInfo.getImage());
     }
 
     // Overrides addNotify() to change to a platform specific icon right afterwards.
     @Override
 	public void addNotify() {
 		super.addNotify();
-
-		// Replace the Swing icon with a prettier platform-specific one
-		SystemUtils.setWindowIcon(this, new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile());
+		SystemUtils.setWindowIcon(this, iconInfo.getIconFile());
 	}
 }

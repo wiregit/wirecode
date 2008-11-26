@@ -17,6 +17,7 @@ import org.limewire.core.api.download.DownLoadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.util.FileUtils;
@@ -96,7 +97,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     private void createOverwriteDialogue(final File saveFile, final DownLoadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir) {
 
-        final JDialog dialog = new JDialog();
+        final JDialog dialog = new LimeJDialog();
         dialog.setLocationRelativeTo(mainPanel);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 

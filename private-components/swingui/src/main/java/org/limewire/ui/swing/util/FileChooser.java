@@ -16,6 +16,7 @@ import javax.swing.filechooser.FileFilter;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -204,7 +205,7 @@ public final class FileChooser {
                     dialog = MacUtils.getFolderDialog(null);
                 }
                 else
-                    dialog = new FileDialog(new JFrame(), "");
+                    dialog = new FileDialog(new LimeJFrame(), "");
                 
                 dialog.setTitle(I18n.tr(titleKey));
                 if(filter != null) {

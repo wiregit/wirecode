@@ -12,7 +12,6 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -30,11 +29,12 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.StringUtils;
 
-public abstract class Dialog extends JDialog {
+public abstract class Dialog extends LimeJDialog {
 
     private static final String AUTHOR = "Author";
     private static final String COMPANY = "Company";

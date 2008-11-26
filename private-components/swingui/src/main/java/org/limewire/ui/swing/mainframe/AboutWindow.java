@@ -24,6 +24,7 @@ import javax.swing.WindowConstants;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.ScrollingTextPane;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -42,7 +43,7 @@ class AboutWindow {
 	 * Constructs the elements of the about window.
 	 */
 	AboutWindow(JFrame frame, Application application) {
-	    dialog = new JDialog(frame);
+	    dialog = new LimeJDialog(frame);
 	    
         if (!OSUtils.isMacOSX()) {
             dialog.setModal(true);

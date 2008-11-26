@@ -16,6 +16,7 @@ import javax.swing.border.LineBorder;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -99,7 +100,7 @@ public class Wizard extends JPanel{
     public void showDialogIfNeeded(Frame owner){
         if (getPageCount() > 0) {
             setCurrentPage(0);
-            dialog = new JDialog(owner, true);
+            dialog = new LimeJDialog(owner, true);
             dialog.setUndecorated(true);
             dialog.add(this);
             dialog.pack();

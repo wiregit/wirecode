@@ -125,9 +125,9 @@ public class FocusJOptionPane {
         JDialog dialog;
         Window window = FocusJOptionPane.getWindowForComponent(parent);
         if (window instanceof Frame) {
-            dialog = new JDialog((Frame)window, title, true);   
+            dialog = new LimeJDialog((Frame)window, title, true);   
         } else {
-            dialog = new JDialog((Dialog)window, title, true);
+            dialog = new LimeJDialog((Dialog)window, title, true);
         }
         
         Container frameContentPane = dialog.getContentPane();

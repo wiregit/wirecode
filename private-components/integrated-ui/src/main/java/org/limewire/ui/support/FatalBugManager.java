@@ -25,6 +25,7 @@ import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
 import org.limewire.core.api.support.SessionInfo;
 import org.limewire.core.impl.support.LocalClientInfoImpl;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 
 import com.google.inject.Inject;
@@ -77,7 +78,7 @@ public final class FatalBugManager {
      * Reviews the bug.
      */
     public static void reviewBug(final LocalClientInfo info) {
-        final JDialog DIALOG = new JDialog();
+        final JDialog DIALOG = new LimeJDialog();
         DIALOG.setTitle("Fatal Error");
 		final Dimension DIALOG_DIMENSION = new Dimension(100, 300);
 		DIALOG.setSize(DIALOG_DIMENSION);

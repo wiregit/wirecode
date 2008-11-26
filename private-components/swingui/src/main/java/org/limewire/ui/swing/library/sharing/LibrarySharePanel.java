@@ -52,6 +52,7 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -395,7 +396,7 @@ public class LibrarySharePanel extends JXPanel implements PropertyChangeListener
     }
     
     private void createDialog(JComponent component){
-        dialog = new JDialog((Window)component.getTopLevelAncestor());
+        dialog = new LimeJDialog((Window)component.getTopLevelAncestor());
         dialog.setUndecorated(true);
         dialog.addWindowListener(new WindowAdapter() {
             @Override

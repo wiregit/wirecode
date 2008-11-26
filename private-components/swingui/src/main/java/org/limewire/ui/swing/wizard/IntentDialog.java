@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -15,13 +14,14 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.SystemUtils;
 
-public class IntentDialog extends JDialog {
+public class IntentDialog extends LimeJDialog {
 
     private final String title = I18n.tr("LimeWire 5 - Some legal stff");
     private final String heading  = I18n.tr("State your intent");

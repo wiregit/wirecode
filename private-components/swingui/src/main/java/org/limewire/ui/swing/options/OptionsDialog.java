@@ -15,13 +15,13 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.TabAction;
@@ -34,7 +34,7 @@ import com.google.inject.Provider;
 /**
  * Main Dialog for the Options
  */
-public class OptionsDialog extends JDialog implements OptionsTabNavigator {
+public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     @Resource
     private Color headerColor;

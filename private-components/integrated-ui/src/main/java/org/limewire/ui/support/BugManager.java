@@ -48,6 +48,7 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -382,7 +383,7 @@ public final class BugManager {
     private void reviewBug(final LocalClientInfo info) {
         _dialogsShowing++;
         
-		final JDialog DIALOG = new JDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
+		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
 		final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
 		DIALOG.setSize(DIALOG_DIMENSION);
 		
@@ -565,7 +566,7 @@ public final class BugManager {
     private void servletSendFailed(final LocalClientInfo info) {
         _dialogsShowing++;
 
-		final JDialog DIALOG = new JDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
+		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
 		final Dimension DIALOG_DIMENSION = new Dimension(350, 300);
 		final Dimension ERROR_DIMENSION = new Dimension(300, 200);
 		DIALOG.setSize(DIALOG_DIMENSION);

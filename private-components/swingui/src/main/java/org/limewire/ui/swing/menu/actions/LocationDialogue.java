@@ -9,17 +9,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.URIUtils;
 
-class LocationDialogue extends JDialog {
+class LocationDialogue extends LimeJDialog {
     private JButton openButton = null;
 
     private JTextField urlField = null;
