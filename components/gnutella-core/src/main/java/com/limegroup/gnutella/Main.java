@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.Vector;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -289,7 +289,7 @@ public class Main {
         public String translate(String s) { return s;}
 
         @Override
-        public void handleSaveLocationException(DownLoadAction downLoadAction,
+        public void handleSaveLocationException(DownloadAction downLoadAction,
                 SaveLocationException sle, boolean supportsNewSaveDir) {
             
         }

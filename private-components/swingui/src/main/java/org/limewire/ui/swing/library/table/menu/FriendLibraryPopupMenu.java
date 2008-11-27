@@ -9,7 +9,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.MagnetLinkFactory;
@@ -76,7 +76,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                         try {
                             downloadListManager.addFriendDownload(fileItem);
                         } catch (SaveLocationException e) {
-                            saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                            saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                                 @Override
                                 public void download(File saveFile, boolean overwrite)
                                         throws SaveLocationException {

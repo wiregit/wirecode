@@ -44,7 +44,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.ResultDownloader;
@@ -379,7 +379,7 @@ public class ConversationPane extends JPanel implements Displayable {
                 } catch(SaveLocationException sle) {
                     final RemoteFileItem remoteFileItem = file;
                     final MessageFileOffer messageFileOffer = msgWithfileOffer;
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {

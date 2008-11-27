@@ -2,7 +2,7 @@ package org.limewire.ui.swing.callback;
 
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -19,7 +19,7 @@ public class GuiCallbackImpl implements GuiCallback {
     }
 
     @Override
-    public void handleSaveLocationException(DownLoadAction downLoadAction,
+    public void handleSaveLocationException(DownloadAction downLoadAction,
             SaveLocationException sle, boolean supportsNewSaveDir) {
         saveLocationExceptionHandler.handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);
     }

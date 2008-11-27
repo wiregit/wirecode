@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import junit.framework.Test;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.http.httpclient.LimeHttpClient;
@@ -576,7 +576,7 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void handleSaveLocationException(DownLoadAction downLoadAction,
+            public void handleSaveLocationException(DownloadAction downLoadAction,
                     SaveLocationException sle, boolean supportsNewSaveDir) {
                 
             }

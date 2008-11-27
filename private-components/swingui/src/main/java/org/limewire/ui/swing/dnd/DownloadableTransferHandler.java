@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.swing.TransferHandler;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -53,7 +53,7 @@ public class DownloadableTransferHandler extends TransferHandler{
                     try {
                         downloadListManager.addFriendDownload(file);
                     } catch (SaveLocationException e) {
-                        saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                        saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                             @Override
                             public void download(File saveFile, boolean overwrite)
                                     throws SaveLocationException {

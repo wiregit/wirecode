@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
@@ -323,7 +323,7 @@ public class CoreDownloadListManager implements DownloadListManager {
                             }
                         }
                     } catch (SaveLocationException sle) {
-                        activityCallback.handleSaveLocationException(new DownLoadAction() {
+                        activityCallback.handleSaveLocationException(new DownloadAction() {
                             @Override
                             public void download(File saveFile, boolean overwrite)
                                     throws SaveLocationException {

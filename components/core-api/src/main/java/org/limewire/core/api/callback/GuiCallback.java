@@ -1,6 +1,6 @@
 package org.limewire.core.api.callback;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 
 /**
@@ -9,6 +9,6 @@ import org.limewire.core.api.download.SaveLocationException;
  */
 public interface GuiCallback {
 
-    void handleSaveLocationException(DownLoadAction downLoadAction, SaveLocationException sle, boolean supportsNewSaveDir);
+    void handleSaveLocationException(DownloadAction downLoadAction, SaveLocationException sle, boolean supportsNewSaveDir);
 
 }

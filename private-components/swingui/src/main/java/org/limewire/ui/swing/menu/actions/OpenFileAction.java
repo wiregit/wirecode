@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -69,7 +69,7 @@ public class OpenFileAction extends AbstractAction {
                     navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
                             SimpleNavSelectable.create(item));
                 } catch (SaveLocationException sle) {
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {

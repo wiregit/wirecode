@@ -9,7 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.core.api.callback.GuiCallback;
 import org.limewire.core.api.callback.GuiCallbackService;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
@@ -165,7 +165,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         try {
             downloadManager.downloadTorrent(torrentFile, false);
         } catch (SaveLocationException e) {
-            handleSaveLocationException(new DownLoadAction() {
+            handleSaveLocationException(new DownloadAction() {
               @Override
                 public void download(File saveFile, boolean overwrite) throws SaveLocationException {
                       downloadManager.downloadTorrent(saveFile, overwrite);
@@ -263,7 +263,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void handleSaveLocationException(DownLoadAction downLoadAction,
+    public void handleSaveLocationException(DownloadAction downLoadAction,
             SaveLocationException sle, boolean supportsNewSaveDir) {
         if(guiCallback != null) {
             guiCallback.handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);

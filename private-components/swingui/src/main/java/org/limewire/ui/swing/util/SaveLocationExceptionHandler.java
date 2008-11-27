@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.util;
 
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 
 public interface SaveLocationExceptionHandler {
@@ -10,6 +10,6 @@ public interface SaveLocationExceptionHandler {
      * exception. To try downloading again using the supplied downloadAction, or
      * to popup a dialogue to try and save the download in a new location.
      */
-    public void handleSaveLocationException(final DownLoadAction downLoadAction,
+    public void handleSaveLocationException(final DownloadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir);
 }

@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URI;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -96,7 +96,7 @@ public class OpenLinkAction extends AbstractAction {
                     navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
                             SimpleNavSelectable.create(item));
                 } catch (SaveLocationException sle) {
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
@@ -115,7 +115,7 @@ public class OpenLinkAction extends AbstractAction {
                 try {
                     downloadListManager.addDownload(magnet, null, false);
                 } catch (SaveLocationException e1) {
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {

@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.ByteReader;
@@ -163,7 +163,7 @@ public class ExternalControl {
 			    ErrorService.error(il);
 			}
 			catch (SaveLocationException sle) {
-			    activityCallback.get().handleSaveLocationException(new DownLoadAction() {
+			    activityCallback.get().handleSaveLocationException(new DownloadAction() {
 			        @Override
 			        public void download(File saveFile, boolean overwrite)
 			                throws SaveLocationException {

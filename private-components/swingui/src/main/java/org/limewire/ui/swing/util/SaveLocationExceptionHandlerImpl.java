@@ -13,7 +13,7 @@ import javax.swing.JToggleButton;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.DownloadSettings;
@@ -37,7 +37,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         this.saveLocationManager = saveLocationManager;
     }
     
-    public void handleSaveLocationException(final DownLoadAction downLoadAction,
+    public void handleSaveLocationException(final DownloadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir) {
 
         if (sle.getErrorCode() == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
@@ -86,7 +86,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
     }
 
-    private void download(final DownLoadAction downLoadAction, final boolean supportNewSaveDir, File saveFile, boolean overwrite) {
+    private void download(final DownloadAction downLoadAction, final boolean supportNewSaveDir, File saveFile, boolean overwrite) {
         try {
             downLoadAction.download(saveFile, overwrite);
         } catch (SaveLocationException e1) {
@@ -94,7 +94,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         }
     }
 
-    private void createOverwriteDialogue(final File saveFile, final DownLoadAction downLoadAction,
+    private void createOverwriteDialogue(final File saveFile, final DownloadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir) {
 
         final JDialog dialog = new LimeJDialog();

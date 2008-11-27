@@ -22,7 +22,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.limewire.core.api.download.DownLoadAction;
+import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
@@ -125,7 +125,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     }
     
     public void enableDownloading(DownloadListManager downloadListManager, LibraryFileList fileList){
-        DownloadAction downloadAction = new DownloadAction(I18n.tr("download"), downloadListManager, this);
+        LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
@@ -182,9 +182,9 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     }
     
     private class LibraryDownloadDoubleClickHandler implements TableDoubleClickHandler {
-        private DownloadAction action;
+        private LibraryDownloadAction action;
 
-        public LibraryDownloadDoubleClickHandler(DownloadAction action) {
+        public LibraryDownloadDoubleClickHandler(LibraryDownloadAction action) {
             this.action = action;
         }
 
@@ -194,11 +194,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         }
     }
 
-    private class DownloadAction extends AbstractAction {
+    private class LibraryDownloadAction extends AbstractAction {
         private DownloadListManager downloadListManager;
         private LibraryTable table;
         
-        public DownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
+        public LibraryDownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
             super(text);
             this.downloadListManager = downloadListManager;
             this.table = table;
@@ -218,7 +218,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                    editor.cancelCellEditing();
                 }
             } catch (SaveLocationException e) {
-                saveLocationExceptionHandler.handleSaveLocationException(new DownLoadAction() {
+                saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                     @Override
                     public void download(File saveFile, boolean overwrite)
                             throws SaveLocationException {
