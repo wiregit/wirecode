@@ -117,11 +117,14 @@ public class MouseableTable extends StripedJXTable {
 
 	
 	protected void initialize() {	
-		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
+		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);        
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
-
+		
+		// See http://sites.google.com/site/glazedlists/documentation/swingx		
+		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
+		setSortable(false); // Breaks horribly with glazedlists unless it's explicitly set up.
+		
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
 		setHighlighters(colors.getEvenHighLighter(), 
 		                colors.getOddHighLighter(),
@@ -210,17 +213,6 @@ public class MouseableTable extends StripedJXTable {
             }
 
 		});
-		
-        // hack to fix LWC-2030 - JXTable's built in filtering seems to
-        // cause problems when using
-        // GlazedLists filtering and EventSelectionModel
-// This is causing search results to break -- it doesn't show all the results past a certain #.
-//        setFilters(new FilterPipeline() {
-//            @Override
-//            protected void fireContentsChanged() {
-//                repaint();
-//            }
-//        });		
 	}
 	
     //Don't set the cell value when editing is cancelled
