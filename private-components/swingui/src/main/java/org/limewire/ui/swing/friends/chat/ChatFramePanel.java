@@ -158,10 +158,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
         if (!isVisible()) {
             LOG.debug("Got an unseen message...");
             unseenMessageListener.unseenMessagesReceived();
-            JFrame frame = GuiUtils.getMainFrame();
-            if (frame != null) {
-                frame.setTitle(getNoticeForMessage(event));
-            }
         }
         
         if (event.getMessage().getType() != Message.Type.Sent && !windowStateListener.isWindowMainFocus()) {
