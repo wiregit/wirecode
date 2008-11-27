@@ -10,6 +10,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -21,6 +23,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.PropertyUtils;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -68,8 +71,51 @@ public class MouseableTable extends StripedJXTable {
 	public void setColumnDoubleClickHandler(TableColumnDoubleClickHandler columnDoubleClickHandler) {
         this.columnDoubleClickHandler = columnDoubleClickHandler;
     }
-	   
-	   
+
+    @Override
+    public String getToolTipText(MouseEvent event) {
+        int row = rowAtPoint(event.getPoint());
+        int col = columnAtPoint(event.getPoint());
+        if (row > -1 && col > -1) {
+            Object value = getValueAt(row, col);
+            JComponent renderer = getRendererComponent(row, col, value);
+
+            if (value != null && isClipped(renderer, col)) {
+                String toolTip = renderer.getToolTipText();
+
+                if (toolTip != null) {
+                    return toolTip;
+                } else if (renderer instanceof JLabel) {
+                    // works for DefaultTableCellRenderer
+                    return ((JLabel) renderer).getText();
+                }
+
+                return PropertyUtils.getToolTipText(value);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks if the renderer fits in the column.
+     * 
+     * @param row the view index of the row
+     * @param col the view index of the column
+     * @return true if the column width is less than the preferred width of the
+     *         renderer
+     */
+    private boolean isClipped(JComponent renderer, int col) {
+        return renderer.getPreferredSize().width > getColumnModel().getColumn(col).getWidth();
+    }
+
+    private JComponent getRendererComponent(int row, int col, Object value) {
+        TableCellRenderer tcr = getCellRenderer(row, col);
+        return (JComponent) tcr.getTableCellRendererComponent(this, value, false, false, row, col);
+    }
+	      
+
+	
 	protected void initialize() {	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -164,7 +210,19 @@ public class MouseableTable extends StripedJXTable {
             }
 
 		});
+		
+        // hack to fix LWC-2030 - JXTable's built in filtering seems to
+        // cause problems when using
+        // GlazedLists filtering and EventSelectionModel
+// This is causing search results to break -- it doesn't show all the results past a certain #.
+//        setFilters(new FilterPipeline() {
+//            @Override
+//            protected void fireContentsChanged() {
+//                repaint();
+//            }
+//        });		
 	}
+	
     //Don't set the cell value when editing is cancelled
 	@Override
     public void editingStopped(ChangeEvent e) {
