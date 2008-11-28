@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.mainframe;
 
 public interface UnseenMessageListener {
-    void unseenMessagesReceived();
+    void messageReceivedFrom(String senderId, boolean chatIsVisible);
+    
+    void conversationSelected(String chatId);
     
     void clearUnseenMessages();
 }

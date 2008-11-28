@@ -6,6 +6,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -29,7 +31,7 @@ class FriendStatusPanel {
     private final JXButton friendsButton;
     
     private Component mainComponent;
-    
+
     @Inject FriendStatusPanel(final FriendActions friendActions, final ChatFramePanel friendsPanel) {
         Color whiteBackground = Color.WHITE;
         JPanel menuPanel = new JPanel(new BorderLayout());
@@ -67,12 +69,14 @@ class FriendStatusPanel {
         private final JXButton flashingButton;
         private final Color originalForeground;
         private final Painter<JXButton> originalBackgroundPainter;
+        private final Set<String> unseenSenderIds = new HashSet<String>();
+        private final String originalButtonText;
         
         public UnseenMessageFlasher(JXButton flashingButton) {
             this.flashingButton = flashingButton;
             this.originalForeground = flashingButton.getForeground();
-            
             this.originalBackgroundPainter = flashingButton.getBackgroundPainter();
+            this.originalButtonText = flashingButton.getText();
         }
         
         @Override
@@ -81,10 +85,25 @@ class FriendStatusPanel {
         }
 
         @Override
-        public void unseenMessagesReceived() {
-            flash();
+        public void messageReceivedFrom(String senderId, boolean chatIsVisible) {
+            unseenSenderIds.add(senderId);
+            if (!chatIsVisible) {
+                flash();
+            }
+            
+            updateButtonText();
         }
-        
+
+        private void updateButtonText() {
+            int unseenMessageSenderCount = unseenSenderIds.size();
+            flashingButton.setText(originalButtonText + (unseenMessageSenderCount > 0 ? " (" + unseenMessageSenderCount + ")" : ""));
+        }
+            
+        @Override
+        public void conversationSelected(String chatId) {
+            unseenSenderIds.remove(chatId);
+            updateButtonText();
+        }
 
         public void flash() {
             if (!hasFlashed) {
@@ -120,5 +139,4 @@ class FriendStatusPanel {
             hasFlashed = false;
         }
     }
-    
 }

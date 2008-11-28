@@ -11,26 +11,21 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
-import org.limewire.core.settings.FriendSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-/**
- *
- */
 @Singleton
 public class ChatPanel extends JPanel implements Displayable {
     private static final Log LOG = LogFactory.getLog(ChatPanel.class);
@@ -96,43 +91,7 @@ public class ChatPanel extends JPanel implements Displayable {
     }
 
     private String getMessagesPaneText() {
-        boolean isSharingWithFriends = friendsPanel.isSharingFilesWithFriends();
-        boolean hasFriendsOnLimeWire = friendsPanel.hasFriendsOnLimeWire();
-        boolean hasLoggedInMoreThan3Times = FriendSettings.NUM_LOGINS.getValue() > 3;
-        LOG.debugf("isSharingWithFriends: {0} hasFriendsOnLimeWire: {1} hasLoggedInMoreThan3Times: {2} totalNumberOfLogins: {3}",
-                isSharingWithFriends, hasFriendsOnLimeWire, hasLoggedInMoreThan3Times, FriendSettings.NUM_LOGINS.getValue());
-        if (isSharingWithFriends && hasFriendsOnLimeWire && hasLoggedInMoreThan3Times) {
-            return getRecentUpdatesText();
-        } else {
-            StringBuilder bldr = new StringBuilder();
-            bldr.append("<html>")
-            .append("<head>")
-            .append("<style>")
-            .append("body { margin-left: 10px;}")
-            .append("h2 { margin-bottom: 25px;}")
-            .append("ul { margin-left: 10px;}")
-            .append("li { margin-bottom: 15px;}")
-            .append("</style>")
-            .append("</head>")
-            .append("<body>")
-            .append("<h2>").append(tr("Now What?")).append("</h2>")
-            .append("<ul>");
-            if (!isSharingWithFriends) {
-                // {0} and {1} are surrounding html tags to make 'here' a  link
-                bldr.append("<li>").append(tr("Share files in your Library with your friends")).append("</li>");
-            }
-            
-            if (!hasFriendsOnLimeWire) {
-                bldr.append("<li>").append(tr("Chat with your friends about getting the new LimeWire")).append("</li>");
-            }
-            if (!hasLoggedInMoreThan3Times) {
-                bldr.append("<li>").append(tr("Search and download from your friends")).append("</li>");
-            }
-            bldr.append("</ul>")
-            .append("</body>")
-            .append("</html>");
-            return bldr.toString();
-        }
+        return getRecentUpdatesText();
     }
     
     private String getRecentUpdatesText() {

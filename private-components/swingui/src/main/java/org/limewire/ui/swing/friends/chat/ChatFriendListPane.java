@@ -71,6 +71,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.ItemNotifyable;
 import org.limewire.ui.swing.action.PopupDecider;
 import org.limewire.ui.swing.action.PopupUtil;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
@@ -162,6 +163,8 @@ public class ChatFriendListPane extends JPanel {
                 handlePresenceEvent(event);
             }
         });
+        
+        EventAnnotationProcessor.subscribe(this);
     }
     
     @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
@@ -634,7 +637,7 @@ public class ChatFriendListPane extends JPanel {
             timer.stop();
         }
         
-        public Icon getIcon() {
+        private Icon getIcon() {
             return flashCount % 2 == 0 ? icons.getUnviewedMessages() : icons.getChatting();
         }
     }

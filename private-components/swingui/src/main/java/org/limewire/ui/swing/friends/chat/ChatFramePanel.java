@@ -155,10 +155,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        if (!isVisible()) {
-            LOG.debug("Got an unseen message...");
-            unseenMessageListener.unseenMessagesReceived();
-        }
+        unseenMessageListener.messageReceivedFrom(event.getMessage().getFriendID(), isVisible());
         
         if (event.getMessage().getType() != Message.Type.Sent && !windowStateListener.isWindowMainFocus()) {
             LOG.debug("Sending a message to the tray notifier");
@@ -169,6 +166,13 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
                 ThreadExecutor.startThread(new WavSoundPlayer(soundURL.getFile()), "newmessage-sound");
             }
         } 
+    }
+    
+    @EventSubscriber
+    public void handleConversationSelected(ConversationSelectedEvent event) {
+        if (event.isLocallyInitiated()) {
+            unseenMessageListener.conversationSelected(event.getFriend().getID());
+        }
     }
 
     private String getNoticeForMessage(MessageReceivedEvent event) {
