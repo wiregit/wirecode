@@ -19,7 +19,12 @@ public class PushEndpointSerializer implements AddressSerializer {
     public PushEndpointSerializer(PushEndpointFactory pushEndpointFactory) {
         this.pushEndpointFactory = pushEndpointFactory;
     }
-    
+
+    @Override
+    public Address deserialize(String address) throws IOException {
+        throw new IOException();
+    }
+
     @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {
         String httpString = StringUtils.getUTF8String(serializedAddress);

@@ -203,6 +203,11 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     }
 
     @Override
+    public Address deserialize(String address) throws IOException {
+        throw new IOException();
+    }
+
+    @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {
         return createPushEndpoint(StringUtils.getUTF8String(serializedAddress));
     }

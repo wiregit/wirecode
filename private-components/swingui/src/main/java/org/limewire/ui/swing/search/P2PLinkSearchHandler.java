@@ -1,7 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import java.io.IOException;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,8 +15,9 @@ import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.io.Connectable;
+import org.limewire.io.Address;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.net.address.AddressFactory;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 
 import com.google.inject.Inject;
@@ -27,11 +28,14 @@ class P2PLinkSearchHandler implements SearchHandler {
     
     private final RemoteLibraryManager remoteLibraryManager;
     private final LibraryNavigator libraryNavigator;
-    
+    private final AddressFactory addressFactory;
+
     @Inject
-    P2PLinkSearchHandler(RemoteLibraryManager remoteLibraryManager, LibraryNavigator libraryNavigator) {
+    P2PLinkSearchHandler(RemoteLibraryManager remoteLibraryManager, LibraryNavigator libraryNavigator,
+                         AddressFactory addressFactory) {
         this.remoteLibraryManager = remoteLibraryManager;
         this.libraryNavigator = libraryNavigator;
+        this.addressFactory = addressFactory;
     }
     
     @Override
@@ -49,7 +53,7 @@ class P2PLinkSearchHandler implements SearchHandler {
     }
     
     private FriendPresence createFriendPresence(String info) {
-        return new SimpleFriendPresence(info);
+        return new SimpleFriendPresence(info, addressFactory);
     }
     
     private static class SimpleFriendPresence implements FriendPresence {
@@ -57,23 +61,19 @@ class P2PLinkSearchHandler implements SearchHandler {
         private final String name;
         private final Map<URI, Feature> features;
         
-        public SimpleFriendPresence(String info) {
-            if(info.indexOf(":") == -1) {
-                info += ":6346";
-            }
-            
-            Connectable connectable;
+        public SimpleFriendPresence(String info, AddressFactory addressFactory) {
+            Address address;
             try {
-                connectable = new ConnectableImpl(info, false);
-            } catch(UnknownHostException uhe) {
-                connectable = ConnectableImpl.INVALID_CONNECTABLE;
+                 address = addressFactory.deserialize(info);
+            } catch(IOException ioe) {
+                address = ConnectableImpl.INVALID_CONNECTABLE;
             }
             
             Map<URI, Feature> map = new HashMap<URI, Feature>();
-            map.put(AddressFeature.ID, new AddressFeature(connectable));
+            map.put(AddressFeature.ID, new AddressFeature(address));
             this.features = Collections.unmodifiableMap(map);
             this.id = info;
-            this.name = connectable.getAddress();
+            this.name = address.getAddressDescription();
         }
         
         @Override

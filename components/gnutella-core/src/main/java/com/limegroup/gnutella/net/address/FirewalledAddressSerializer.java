@@ -49,7 +49,12 @@ public class FirewalledAddressSerializer implements AddressSerializer {
     public String getAddressType() {
         return "firewalled-address";
     }
-    
+
+    @Override
+    public Address deserialize(String address) throws IOException {
+        throw new IOException();
+    }
+
     @Override
     public FirewalledAddress deserialize(byte[] serializedAddress) throws IOException {
         try {

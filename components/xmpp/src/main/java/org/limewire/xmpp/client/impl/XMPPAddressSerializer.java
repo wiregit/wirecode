@@ -31,6 +31,19 @@ public class XMPPAddressSerializer implements AddressSerializer {
     public String getAddressType() {
         return "xmpp-address";
     }
+
+    public Address deserialize(String address) throws IOException {
+        // TODO replace with a real email address parser
+        int atIndex = address.indexOf('@');
+        if(atIndex != -1 && atIndex != address.length() - 1) {
+            String host = address.substring(atIndex + 1);
+            int dotIndex = host.indexOf('.');
+            if(dotIndex != -1 && dotIndex != 0 && dotIndex != host.length() - 1) {
+                return new XMPPAddress(address);
+            }
+        }
+        throw new IOException();
+    }
     
     @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {

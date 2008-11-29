@@ -37,6 +37,13 @@ public class ConnectableSerializer implements AddressSerializer {
         ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress);
         return deserialize(in);
     }
+
+    public Address deserialize(String address) throws IOException {
+        if(address.indexOf(':') == -1) {
+            address += ":6346";
+        }
+        return NetworkUtils.parseIpPort(address, false);
+    }
     
     public Connectable deserialize(InputStream in) throws IOException {
         int hostPortLength = (IOUtils.readByte(in) == IP_V4 ? 4 : 16) + 2;

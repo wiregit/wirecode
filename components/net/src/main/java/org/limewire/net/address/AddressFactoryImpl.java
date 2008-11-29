@@ -65,4 +65,14 @@ public class AddressFactoryImpl implements AddressFactory {
         throw new IOException("unknown message type: " + type);
     }
 
+    @Override
+    public Address deserialize(String address) throws IOException {
+        for(AddressSerializer serializer : serializerTypeMap.values()) {
+            try {
+                return serializer.deserialize(address);
+            } catch (IOException ioe) {
+            }
+        }
+        throw new IOException();
+    }
 }
