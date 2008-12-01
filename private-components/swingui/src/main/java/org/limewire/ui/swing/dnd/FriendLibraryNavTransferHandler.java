@@ -25,8 +25,7 @@ public class FriendLibraryNavTransferHandler extends TransferHandler {
 
     @Override
     public boolean canImport(TransferHandler.TransferSupport info) {
-        return DNDUtils.containsFileFlavors(info)
-                || info.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
+        return DNDUtils.containsFileFlavors(info);
     }
 
     @Override
@@ -43,14 +42,7 @@ public class FriendLibraryNavTransferHandler extends TransferHandler {
             } catch(Throwable failed) {
                 return false;
             }
-        } else {// LocalFileTransferable
-            Transferable t = info.getTransferable();
-            try {
-                files = Arrays.asList((File[])t.getTransferData(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR));
-            } catch (Throwable failed) {
-                return false;
-            }
-        }
+        } 
         
         handleFiles(files);
         return true;
