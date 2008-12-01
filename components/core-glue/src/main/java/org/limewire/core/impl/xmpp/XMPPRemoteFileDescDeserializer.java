@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.client.impl.XMPPAddress;
+import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 
 import com.google.inject.Inject;

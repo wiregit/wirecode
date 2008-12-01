@@ -23,6 +23,7 @@ import org.limewire.net.address.AddressResolver;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

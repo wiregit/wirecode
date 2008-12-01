@@ -14,7 +14,7 @@ import org.limewire.io.Address;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.xmpp.api.client.FileMetaData;
-import org.limewire.xmpp.client.impl.XMPPAddress;
+import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

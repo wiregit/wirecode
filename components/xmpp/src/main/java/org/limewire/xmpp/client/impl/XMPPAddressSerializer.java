@@ -6,12 +6,13 @@ import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Serializes and deserializes {@link XMPPAddress} objects.
+ * Serializes and deserializes {@link org.limewire.xmpp.api.client.XMPPAddress} objects.
  */
 @Singleton
 public class XMPPAddressSerializer implements AddressSerializer {

@@ -28,7 +28,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
-import org.limewire.xmpp.client.impl.XMPPAddress;
+import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
