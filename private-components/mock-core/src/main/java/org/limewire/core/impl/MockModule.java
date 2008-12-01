@@ -19,6 +19,7 @@ import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.support.MockSupportModule;
 import org.limewire.core.impl.xmpp.MockXmppModule;
 import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.net.MockNetModule;
 
 import com.google.inject.AbstractModule;
 
@@ -44,6 +45,7 @@ public class MockModule extends AbstractModule {
         install(new MockXmppModule());
         install(new MockSupportModule());
         install(new MockMagnetModule());
+        install(new MockNetModule());
     }
 
 }
