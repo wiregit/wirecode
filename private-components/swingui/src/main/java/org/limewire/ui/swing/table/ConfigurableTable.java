@@ -46,6 +46,7 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
             // Remove the table header.
             setTableHeader(null);
         }
+        setShowHorizontalLines(false);
     }
 
     public EventList<E> getEventList() {

@@ -261,7 +261,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             
         setupCellRenderers(tableFormat);
 
-        resultsTable.setDefaultEditor(VisualSearchResult.class, new FromTableCellRenderer(factory.create(remoteHostActions)));
+        resultsTable.setDefaultEditor(VisualSearchResult.class, new FromTableCellRenderer(factory.create(remoteHostActions, true)));
         
         resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, remoteHostActions, properties));
         resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this));
@@ -303,7 +303,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             } else if (i == tableFormat.getNameColumn()) {
                 setCellRenderer(i, iconLabelRenderer);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                setCellRenderer(i, new FromTableCellRenderer(factory.create(remoteHostActions)));
+                setCellRenderer(i, new FromTableCellRenderer(factory.create(remoteHostActions, true)));
             }
         }
     }

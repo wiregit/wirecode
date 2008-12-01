@@ -21,7 +21,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  */
 public class OpaqueTableCellRenderer implements TableCellRenderer {
 
-    private static final int HGAP = 2;
+    private static final int HGAP = 4;
     private static final int VGAP = 5;
     
     private final JXPanel panel;

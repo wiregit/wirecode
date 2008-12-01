@@ -12,21 +12,20 @@ import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public static final int NUM_SOURCES_INDEX = 0;
+    public static final int FROM_INDEX = 0;
     public static final int NAME_INDEX = 1;
     public static final int EXTENSION_INDEX = 2;
     public static final int LENGTH_INDEX = 3;
     public static final int YEAR_INDEX = 4;
     public static final int QUALITY_INDEX = 5;
-    public static final int FROM_INDEX = 6;
-    public static final int RATING_INDEX = 7;
-    public static final int COMMENTS_INDEX = 8;
-    public static final int HEIGHT_INDEX = 9;
-    public static final int WIDTH_INDEX = 10;
-    public static final int SIZE_INDEX = 11;
+    public static final int RATING_INDEX = 6;
+    public static final int COMMENTS_INDEX = 7;
+    public static final int HEIGHT_INDEX = 8;
+    public static final int WIDTH_INDEX = 9;
+    public static final int SIZE_INDEX = 10;
 
     public VideoTableFormat() {
-        super(FROM_INDEX,
+        super(QUALITY_INDEX,
                 tr("People with File"), 
                 tr("Name"), 
                 tr("Extension"), 
@@ -45,7 +44,6 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public Class getColumnClass(int index) {
         return 
             index == HEIGHT_INDEX ? Integer.class :
-            index == NUM_SOURCES_INDEX ? Integer.class :
             index == RATING_INDEX ? Integer.class :
             index == WIDTH_INDEX ? Integer.class :
             index == YEAR_INDEX ? Integer.class :
@@ -66,7 +64,6 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
             case FROM_INDEX: return vsr;
-            case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case RATING_INDEX: return getProperty(FilePropertyKey.RATING);
             case COMMENTS_INDEX: return getProperty(FilePropertyKey.COMMENTS);
             case HEIGHT_INDEX: return getProperty(FilePropertyKey.HEIGHT);
@@ -79,13 +76,12 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case NUM_SOURCES_INDEX: return 100;
+            case FROM_INDEX: return 100;
             case NAME_INDEX: return 400;
             case EXTENSION_INDEX: return 60;
             case LENGTH_INDEX: return 60;
             case YEAR_INDEX: return 60;
             case QUALITY_INDEX: return 60;
-            case FROM_INDEX: return 200;
             default: return 100;
         }
     }

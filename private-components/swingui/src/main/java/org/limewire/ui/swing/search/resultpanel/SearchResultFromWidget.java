@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.resultpanel;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +13,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -41,10 +39,12 @@ public class SearchResultFromWidget extends JPanel {
     private List<RemoteHost> people = Collections.emptyList();
     private List<RemoteHost> poppedUpPeople = Collections.emptyList();
     
+    private final boolean isClassicView;
+    
     @AssistedInject
-    SearchResultFromWidget(LimeComboBoxFactory comboBoxFactory, @Assisted RemoteHostActions fromActions) {
+    SearchResultFromWidget(LimeComboBoxFactory comboBoxFactory, @Assisted RemoteHostActions fromActions, @Assisted boolean isClassicView) {
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
-        
+        this.isClassicView = isClassicView;
         this.comboBox = comboBoxFactory.createMiniComboBox();
         this.comboBoxMenu = new JPopupMenu();
         this.comboBox.overrideMenu(this.comboBoxMenu);
@@ -106,10 +106,6 @@ public class SearchResultFromWidget extends JPanel {
     private void layoutComponents() {
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
-        
-        JLabel fromLabel = new JLabel(tr("From"));
-        fromLabel.setFont(new Font("Arial", Font.BOLD, 10));
-        this.add(fromLabel, BorderLayout.WEST);
 
         add(this.comboBox, BorderLayout.EAST);
     }
@@ -121,8 +117,12 @@ public class SearchResultFromWidget extends JPanel {
     }
 
     private String getFromText() {
-        return people.size() == 0 ? tr("nobody") : people.size() == 1 ? people.get(0)
-                .getRenderName() : tr("{0} people", people.size());
+        if(people.size() == 0) 
+            return tr("nobody");
+        else if(isClassicView)
+            return tr("{0} people", people.size());
+        else
+            return tr("People");
     }
 
     private void assertParentProps(JComponent item) {
@@ -145,40 +145,25 @@ public class SearchResultFromWidget extends JPanel {
             return; // menu has no items
         }
 
-        if (people.size() == 1) {
-            RemoteHost person = people.get(0);
+        for (RemoteHost person : people) {
+            if (person.isBrowseHostEnabled() || person.isChatEnabled()
+                    || person.isSharingEnabled()) {
 
-            if (person.isChatEnabled()) {
-                this.comboBoxMenu.add(createItem(getChatAction(person)));
-            }
-            if (person.isBrowseHostEnabled()) {
-                this.comboBoxMenu.add(createItem(getLibraryAction(person)));
-            }
-            if (person.isSharingEnabled()) {
-                this.comboBoxMenu.add(createItem(getSharingAction(person)));
-            }
+                JMenu submenu = new JMenu(person.getRenderName());
+                assertParentProps(submenu);
 
-        } else {
-            for (RemoteHost person : people) {
-                if (person.isBrowseHostEnabled() || person.isChatEnabled()
-                        || person.isSharingEnabled()) {
-
-                    JMenu submenu = new JMenu(person.getRenderName());
-                    assertParentProps(submenu);
-
-                    if (person.isChatEnabled()) {
-                        submenu.add(createItem(getChatAction(person)));
-                    }
-
-                    if (person.isBrowseHostEnabled()) {
-                        submenu.add(createItem(getLibraryAction(person)));
-                    }
-
-                    if (person.isSharingEnabled()) {
-                        submenu.add(createItem(getSharingAction(person)));
-                    }
-                    this.comboBoxMenu.add(submenu);
+                if (person.isChatEnabled()) {
+                    submenu.add(createItem(getChatAction(person)));
                 }
+
+                if (person.isBrowseHostEnabled()) {
+                    submenu.add(createItem(getLibraryAction(person)));
+                }
+
+                if (person.isSharingEnabled()) {
+                    submenu.add(createItem(getSharingAction(person)));
+                }
+                this.comboBoxMenu.add(submenu);
             }
         }
     }

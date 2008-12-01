@@ -203,7 +203,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         optionsButton.setContentAreaFilled(false);
         optionsButton.setFocusPainted(false);
         
-        fromWidget = fromWidgetFactory.create(remoteHostActions);
+        fromWidget = fromWidgetFactory.create(remoteHostActions, false);
        
         makePanel(navigator, libraryNavigator, properties);
         

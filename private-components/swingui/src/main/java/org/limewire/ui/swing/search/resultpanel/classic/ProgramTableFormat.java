@@ -14,24 +14,22 @@ import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
  */
 public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public static final int NUM_SOURCES_INDEX = 0;
+    public static final int FROM_INDEX = 0;
     public static final int NAME_INDEX = 1;
     public static final int SIZE_INDEX = 2;
     public static final int PLATFORM_INDEX = 3;
     public static final int COMPANY_INDEX = 4;
-    public static final int FROM_INDEX = 5;
-    public static final int FILE_EXTENSION_INDEX = 6;
-    public static final int AUTHOR_INDEX = 7;
+    public static final int FILE_EXTENSION_INDEX = 5;
+    public static final int AUTHOR_INDEX = 6;
 
     
     public ProgramTableFormat() {
-        super(FROM_INDEX,
-                tr("People with File"), 
+        super(FILE_EXTENSION_INDEX,
+                tr("From"),
                 tr("Name"), 
                 tr("Size"), 
                 tr("Platform"), 
                 tr("Company"),
-                tr("From"),
                 tr("Extension"),
                 tr("Author"));
     }
@@ -39,7 +37,6 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Class getColumnClass(int index) {
         return index == NAME_INDEX ? Component.class :
-            index == NUM_SOURCES_INDEX ? Integer.class :
             index == SIZE_INDEX ? Integer.class :
             index == FROM_INDEX ? VisualSearchResult.class :
             super.getColumnClass(index);
@@ -58,7 +55,6 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case COMPANY_INDEX: return getProperty(FilePropertyKey.COMPANY);
             case FILE_EXTENSION_INDEX: return fileExtension;
             case FROM_INDEX: return vsr;
-            case NUM_SOURCES_INDEX: return vsr.getSources().size();
             case AUTHOR_INDEX: return getProperty(FilePropertyKey.AUTHOR);
             default: return null;
         }
@@ -67,11 +63,12 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
+            case FROM_INDEX: return 100;
             case NAME_INDEX: return 360;
             case SIZE_INDEX: return 80;
             case PLATFORM_INDEX: return 80;
             case COMPANY_INDEX: return 120;
-            case FROM_INDEX: return 200;
+            case FILE_EXTENSION_INDEX: return 60;
             default: return 100;
         }
     }
