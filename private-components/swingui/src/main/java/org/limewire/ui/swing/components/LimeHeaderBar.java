@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.components;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -10,6 +9,8 @@ import java.awt.LayoutManager;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
@@ -55,9 +56,9 @@ public class LimeHeaderBar extends JXPanel {
     private void init() {
         this.componentContainer.setOpaque(false);
         
-        super.setLayout(new BorderLayout());
-        super.add(this.titleComponent, BorderLayout.WEST);
-        super.add(this.componentContainer, BorderLayout.EAST);
+        super.setLayout(new MigLayout("insets 0,filly","[]push[]",""));
+        super.add(this.titleComponent, "growy");
+        super.add(this.componentContainer, "growy");
     }
     
     @Override

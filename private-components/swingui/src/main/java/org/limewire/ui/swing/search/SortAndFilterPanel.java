@@ -55,7 +55,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.Inject;
 
 /**
- * This class is a panel that contains components for filtering and sorting
+ * This class manages the UI components for filtering and sorting
  * search results.
  * 
  * @see org.limewire.ui.swing.search.SearchResultsPanel.
