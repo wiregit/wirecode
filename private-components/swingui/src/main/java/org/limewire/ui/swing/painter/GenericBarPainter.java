@@ -6,7 +6,11 @@ import java.awt.Paint;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.util.PaintUtils;
 
-// TODO: Use this and a common factory instead of defining 1000 random painters 
+/**
+ * Actuates background painting of "bars" such as header, status, and the top panel.
+ *  Generally should be managed by a factory storing the different paint values,
+ *  (in this case BarPainterFactory).
+ */
 public class GenericBarPainter<X> extends AbstractPainter<X> {
 
     private final Paint topBorder1;

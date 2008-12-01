@@ -53,7 +53,7 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel = new JLabel(I18n.tr("Logging in..."));
         signInButton = new HyperLinkButton(I18n.tr("Sign In"));
         switchUserButton = new HyperLinkButton(I18n.tr("Switch User"));        
-        setBackgroundPainter(barPainterFactory.createTopBarPainter()); 
+        setBackgroundPainter(barPainterFactory.createFriendsBarPainter()); 
         
         initComponents();
     }
