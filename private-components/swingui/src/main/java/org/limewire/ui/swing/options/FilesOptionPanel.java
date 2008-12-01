@@ -271,7 +271,7 @@ public class FilesOptionPanel extends OptionPanel {
         public ITunesPanel() {
             super(I18n.tr("iTunes"));
             
-            shareWithITunesCheckBox = new JCheckBox(I18n.tr("Share the audio section of my LimeWire on my local network using iTunes"));
+            shareWithITunesCheckBox = new JCheckBox(I18n.tr("Share the audio section of My Library on my local network using iTunes"));
             shareWithITunesCheckBox.setContentAreaFilled(false);
             shareWithITunesCheckBox.addItemListener(new ItemListener(){
                 @Override

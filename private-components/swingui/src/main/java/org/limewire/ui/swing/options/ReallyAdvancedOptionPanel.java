@@ -83,7 +83,7 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
         createPanel(FIREWALL);
         createList();
         
-        add(new JLabel(I18n.tr("We recommend you don't touch these unless you really know what you're doing")), "span 2, wrap");
+        add(new JLabel(I18n.tr("We recommend you don't touch these unless you really know what you're doing.")), "span 2, wrap");
         add(list, "growy");
         add(cardPanel, "grow");
         

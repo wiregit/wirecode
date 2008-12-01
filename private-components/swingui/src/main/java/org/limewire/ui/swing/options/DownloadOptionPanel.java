@@ -107,7 +107,7 @@ public class DownloadOptionPanel extends OptionPanel {
         public SharingDownloadsPanel() {
             super(I18n.tr("Sharing downloads"));
             
-            shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the LimeWire Network with the LimeWire Network"));
+            shareCompletedDownloadsCheckBox = new JCheckBox(I18n.tr("Share files downloaded from the P2P Network with the P2P Network"));
             shareCompletedDownloadsCheckBox.setContentAreaFilled(false);
             
             add(shareCompletedDownloadsCheckBox, "wrap");

@@ -128,7 +128,7 @@ public class SecurityOptionPanel extends OptionPanel {
             
             add(new JLabel(I18n.tr("For your safety, LimeWire disables you from:")),"wrap");
             add(new JLabel(I18n.tr("-Searching for and sharing Programs with anyone")), "gapleft 25, wrap");
-            add(new JLabel(I18n.tr("-Searching for and sharing Documents with the LimeWire Network")), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("-Searching for and sharing Documents with the P2P Network")), "gapleft 25, wrap");
             
             add(new JLabel("We strongly recommend you do not enable these settings"), "push");
             add(configureButton);

@@ -51,7 +51,7 @@ public class ToolsMenu extends JMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 libraryManagerOptionPanel = new LibraryManagerOptionPanel(new AbstractAction(I18n
-                        .tr("Ok")) {
+                        .tr("OK")) {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         libraryManagerOptionPanel.applyOptions();

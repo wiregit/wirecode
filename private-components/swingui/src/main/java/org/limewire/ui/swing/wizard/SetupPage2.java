@@ -34,19 +34,19 @@ import org.limewire.ui.swing.util.I18n;
 public class SetupPage2 extends WizardPage {
 
     private String line1 = I18n.tr("LimeWire is ready to fill your Library");
-    private String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files with the LimeWire Network or your friends.");
+    private String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files with the P2P Network and, or your friends.");
     
     private ButtonGroup buttonGroup;
     
     private JRadioButton autoButton;
-    private String autoText = I18n.tr("Automatically manage my Library");
-    private String autoExplanation = I18n.tr("Choose this option to have LimeWire automatically scan files into yourLibrary from My Documents and the Desktop.");
+    private String autoText = I18n.tr("Automatically manage My Library");
+    private String autoExplanation = I18n.tr("Choose this option to have LimeWire automatically scan files into your Library from My Documents and the Desktop.");
     private JRadioButton manualButton;
-    private String manualText = I18n.tr("Manually manage my Library");
+    private String manualText = I18n.tr("Manually manage My Library");
     private String manualExplanation = I18n.tr("Choose this option if you want to select which folders LimeWire scans into your Library.");
     
 
-    private String bottomText1 = I18n.tr("Scanning these folders into your Library will not automatically share your files");
+    private String bottomText1 = I18n.tr("Scanning these folders into your Library will not automatically share your files.");
     private String bottomText2 = I18n.tr("You can change these options later from Tools > Options");
     
     private LibraryManagerTreeTable treeTable;
