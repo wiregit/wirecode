@@ -37,6 +37,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     private static final String KEY_TERRITORIES = "T";
 
     private static final String KEY_DESCRIPTION = "D";
+    
+    private static final String KEY_TITLE = "t";
 
     private static final String KEY_URL = "U";
 
@@ -232,6 +234,14 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
 
     public String getDescription() {
         return get(KEY_DESCRIPTION);
+    }
+    
+    public void setTitle(String title) {
+        set(KEY_TITLE, title);
+    }
+
+    public String getTitle() {
+        return get(KEY_TITLE);
     }
 
     /**

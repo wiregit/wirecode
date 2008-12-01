@@ -132,9 +132,14 @@ public class CoreSearch implements Search {
                 public void process(PromotionMessageContainer result) {
                     SponsoredResultTarget target = result.getOptions().isOpenInStoreTab() ?
                         SponsoredResultTarget.STORE  : SponsoredResultTarget.EXTERNAL;
+                    String title = result.getTitle();
+                    String strippedUrl = stripURL(result.getURL());
+                    if(title == null) {
+                        title = strippedUrl;
+                    }
                     CoreSponsoredResult coreSponsoredResult = new CoreSponsoredResult(
-                            stripURL(result.getURL()), result.getDescription(),
-                            stripURL(result.getURL()), result.getURL(),
+                            title, result.getDescription(),
+                            strippedUrl, result.getURL(),
                             target);
                     handleSponsoredResults(coreSponsoredResult);
                 }
