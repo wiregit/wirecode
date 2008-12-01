@@ -31,6 +31,10 @@ public class ConnectRequestIQ extends IQ {
     private final int supportedfwtVersion;
     private final GUID clientGuid;
     
+    public static final String ELEMENT_NAME = "connect-request";
+    
+    public static final String NAME_SPACE = "jabber:iq:lw-connect-request";
+    
     /**
      * Only constructs valid connect request iqs, otherwise throws {@link IOException}. 
      */

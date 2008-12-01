@@ -32,6 +32,7 @@ import org.limewire.listener.EventRebroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
@@ -48,6 +49,9 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQListener;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
@@ -70,9 +74,12 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private volatile FileTransferIQListener fileTransferIQListener;
     private volatile AuthTokenIQListener authTokenIQListener;
     private volatile LibraryChangedIQListener libChangedIQListener;
+    private volatile ConnectRequestIQListener connectRequestIQListener;
     private volatile AddressEvent lastEvent;
     private final XMPPAuthenticator authenticator;
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
+
+    private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -80,13 +87,15 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster,
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
-                       ListenerSupport<FriendPresenceEvent> presenceSupport) {
+                       ListenerSupport<FriendPresenceEvent> presenceSupport,
+                       EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
+        this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.addListener(configuration.getRosterListener());
@@ -143,6 +152,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 addressIQListener = null;
                 fileTransferIQListener = null;
                 authTokenIQListener = null;
+                connectRequestIQListener = null;
                 synchronized (users) {
                     users.clear();
                 }                
@@ -190,6 +200,9 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(ProviderManager.getInstance().getIQProvider("library-changed", "jabber:iq:lw-lib-change") == null) {
                         ProviderManager.getInstance().addIQProvider("library-changed", "jabber:iq:lw-lib-change", LibraryChangedIQ.getIQProvider());
                     }
+                    if (ProviderManager.getInstance().getIQProvider(ConnectRequestIQ.ELEMENT_NAME, ConnectRequestIQ.NAME_SPACE) == null) {
+                        ProviderManager.getInstance().addIQProvider(ConnectRequestIQ.ELEMENT_NAME, ConnectRequestIQ.NAME_SPACE, new ConnectRequestIQProvider());
+                    }
                 }
                 
                 ChatStateManager.getInstance(connection);
@@ -212,6 +225,9 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
                 libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
                 connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
+                
+                connectRequestIQListener = new ConnectRequestIQListener(connectRequestEventBroadcaster);
+                connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
             }
         });
     }

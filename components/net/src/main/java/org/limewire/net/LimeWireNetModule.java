@@ -1,6 +1,8 @@
 package org.limewire.net;
 
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressFactoryImpl;
@@ -47,6 +49,9 @@ public class LimeWireNetModule extends AbstractModule {
         bind(ConnectableSerializer.class).asEagerSingleton();
         bind(new TypeLiteral<ListenerSupport<ConnectivityChangeEvent>>(){}).to(SocketsManager.class);
         bind(new TypeLiteral<EventBroadcaster<ConnectivityChangeEvent>>(){}).to(SocketsManagerImpl.class);
+        
+        EventMulticaster<ConnectRequestEvent> connectRequestEventMulticaster = new EventMulticasterImpl<ConnectRequestEvent>();
+        bind(new TypeLiteral<EventMulticaster<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);

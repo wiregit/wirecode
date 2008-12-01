@@ -11,6 +11,7 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.FileOfferEvent;
@@ -47,13 +48,16 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private LinkedList<XMPPConnectionImpl> connections;
     private boolean multipleConnectionsAllowed;
 
+    private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
+
     @Inject
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
             Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
             Provider<EventBroadcaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
-            ListenerSupport<FriendPresenceEvent> presenceSupport) {
+            ListenerSupport<FriendPresenceEvent> presenceSupport,
+            EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
@@ -61,6 +65,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.presenceSupport = presenceSupport;
+        this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         connections = new LinkedList<XMPPConnectionImpl>();
         multipleConnectionsAllowed = false;
     }
@@ -108,7 +113,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
                 rosterBroadcaster.get(), fileOfferBroadcaster.get(),
                 libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                addressFactory, authenticator, presenceSupport);
+                addressFactory, authenticator, presenceSupport, connectRequestEventBroadcaster);
         connection.initialize();
         // Give the new connection the latest information about our IP address
         // and firewall status

@@ -8,6 +8,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.net.ConnectRequestEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBSocket;
@@ -26,7 +29,7 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
  * Manages state for push upload requests.
  */
 @Singleton
-public final class PushManager {
+public final class PushManager implements EventListener<ConnectRequestEvent> {
     
     private static final Log LOG = LogFactory.getLog(PushManager.class);
 
@@ -49,11 +52,14 @@ public final class PushManager {
     public PushManager(Provider<SocketsManager> socketsManager,
             Provider<HTTPAcceptor> httpAcceptor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
-            Provider<NetworkManager> networkManager) {
+            Provider<NetworkManager> networkManager,
+            ListenerSupport<ConnectRequestEvent> connectRequestEventListenerSupport) {
         this.socketsManager = socketsManager;
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
         this.networkManager = networkManager;
+        // listenere is leaked, but both are singleton scope, so it's fine
+        connectRequestEventListenerSupport.addListener(this);
     }    
 
 	/**
@@ -225,5 +231,9 @@ public final class PushManager {
     }
     }
 
-
+    @Override
+    public void handleEvent(ConnectRequestEvent event) {
+        // can assume false for lan, since same NAT resolver would have spotted that and opened a direct connection
+        acceptPushUpload(event.getAddress(), event.getClientGuid(), false, event.getSupportedFWTVersion() > 0);
+    }
 }
