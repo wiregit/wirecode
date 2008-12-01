@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-24 11:30-0500\n"
+"POT-Creation-Date: 2008-12-01 11:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -632,14 +632,14 @@ msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:36
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:503
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:501
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:39
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:508
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:506
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
@@ -2569,27 +2569,27 @@ msgstr ""
 msgid "Get LimeWire PRO Later"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:286
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:284
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:491
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:489
 #, java-format
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:590
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:588
 msgid ""
 "<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
 "b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
 "limewire.com</a> and download the newest official version of LimeWire.</html>"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:609
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:607
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a Microsoft patch is required or a firewall is "
@@ -2598,7 +2598,7 @@ msgid ""
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:622
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:620
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a firewall is blocking access. To continue using "
