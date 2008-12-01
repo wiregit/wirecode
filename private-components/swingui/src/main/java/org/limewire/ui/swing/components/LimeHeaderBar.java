@@ -34,7 +34,6 @@ public class LimeHeaderBar extends JXPanel {
         GuiUtils.assignResources(this);
         
         JXLabel headerLabel = new JXLabel(title);
-        headerLabel.setForeground(Color.WHITE);
         headerLabel.setForegroundPainter(new TextShadowPainter());
         headerLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,2));
         
@@ -112,6 +111,16 @@ public class LimeHeaderBar extends JXPanel {
         }
         else {            
             this.titleComponent.setFont(font);
+        }
+    }
+    
+    @Override
+    public void setForeground(Color fg) {
+        if (this.titleComponent == null) {
+            super.setForeground(fg);
+        }
+        else {            
+            this.titleComponent.setForeground(fg);
         }
     }
     

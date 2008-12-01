@@ -4,32 +4,28 @@ import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.Action;
-import javax.swing.JButton;
 import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.painter.TextShadowPainter;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class LibraryHeaderPanel extends JXPanel {
-    @Resource
-    private Font headerFont;
-
     private JXLabel titleLabel;
 
     private PromptTextField filterField;
 
     private Friend friend;
     
-    private JButton shareButton;
+    private JXButton shareButton;
     
     /**
      * 
@@ -50,8 +46,6 @@ public class LibraryHeaderPanel extends JXPanel {
             title = getSharingTitle();
         
         titleLabel = new JXLabel(title);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(headerFont);
         titleLabel.setForegroundPainter(new TextShadowPainter());
 
         filterField = new PromptTextField();
@@ -65,11 +59,10 @@ public class LibraryHeaderPanel extends JXPanel {
         return filterField;
     }
     
-    public void enableButton(Action action) {
+    public void enableButton(Action action, ButtonDecorator buttonDecorator) {
         shareButton = new JXButton(action);
-        shareButton.setBorderPainted(false);
-        shareButton.setFocusPainted(false);
-        
+        buttonDecorator.decorateDarkFullButton(shareButton);
+                
         add(shareButton, "cell 1 0");
     }
     
@@ -79,5 +72,25 @@ public class LibraryHeaderPanel extends JXPanel {
     
     private String getSharingTitle() {
         return I18n.tr("Sharing with {0}", friend.getRenderName());
+    }
+    
+    @Override
+    public void setFont(Font font) {
+        if (titleLabel == null) {
+            super.setFont(font);
+        }
+        else {            
+            titleLabel.setFont(font);
+        }
+    }
+    
+    @Override
+    public void setForeground(Color fg) {
+        if (titleLabel == null) {
+            super.setForeground(fg);
+        }
+        else {            
+            titleLabel.setForeground(fg);
+        }
     }
 }

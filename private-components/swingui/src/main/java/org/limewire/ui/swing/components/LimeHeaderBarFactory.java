@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -30,13 +31,13 @@ public class LimeHeaderBarFactory {
     public LimeHeaderBar createBasic(Component comp) {
         LimeHeaderBar bar = new LimeHeaderBar(comp);
         decorateBasic(bar);
-        return bar;        
+        return bar;
     }
     
     public LimeHeaderBar createBasic(String text) {
         LimeHeaderBar bar = new LimeHeaderBar(text);
         this.decorateBasic(bar);
-        return bar;        
+        return bar;
     }
     
     public void decorateBasic(JXPanel bar) {
@@ -44,6 +45,7 @@ public class LimeHeaderBarFactory {
         bar.setMinimumSize(new Dimension(0, this.height));
         bar.setPreferredSize(new Dimension(3000, this.height));
         bar.setFont(this.headingFont);
+        bar.setForeground(Color.WHITE);
     }
     
     public void decorateSpecial(JXPanel bar) {
@@ -51,5 +53,6 @@ public class LimeHeaderBarFactory {
         bar.setMinimumSize(new Dimension(0, this.height));
         bar.setPreferredSize(new Dimension(3000, this.height));
         bar.setFont(this.headingFont);
+        bar.setForeground(Color.WHITE);
     }
 }

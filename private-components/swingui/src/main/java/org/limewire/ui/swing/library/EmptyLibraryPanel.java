@@ -12,6 +12,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.assistedinject.Assisted;
@@ -23,15 +24,19 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class EmptyLibraryPanel extends LibraryPanel {
 
-    private FriendLibraryMediator mediator;
+    private final ButtonDecorator buttonDecorator;
     
+    private final FriendLibraryMediator mediator;
+        
     @AssistedInject
     public EmptyLibraryPanel(@Assisted Friend friend,  
             @Assisted FriendLibraryMediator mediator, 
             @Assisted JComponent messageComponent,
-            LimeHeaderBarFactory headerBarFactory) {
+            LimeHeaderBarFactory headerBarFactory,
+            ButtonDecorator buttonDecorator) {
         super(friend, true, headerBarFactory);
 
+        this.buttonDecorator = buttonDecorator;        
         this.mediator = mediator;
 
         loadHeader();
@@ -42,7 +47,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
 
     @Override
     public void loadHeader() {
-        headerPanel.enableButton(new ViewSharedLibraryAction());
+        headerPanel.enableButton(new ViewSharedLibraryAction(), buttonDecorator);
     }
     
     private void createEmptyPanel(JComponent component) {

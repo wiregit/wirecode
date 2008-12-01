@@ -21,6 +21,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
 
@@ -33,11 +34,12 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class FriendLibraryPanel extends LibraryPanel {
 
-    private CategoryIconManager categoryIconManager;
-    private LibraryTableFactory tableFactory;
-    private DownloadListManager downloadListManager;
-    private LibraryManager libraryManager;
-    private FriendLibraryMediator mediator;
+    private final CategoryIconManager categoryIconManager;
+    private final LibraryTableFactory tableFactory;
+    private final DownloadListManager downloadListManager;
+    private final LibraryManager libraryManager;
+    private final FriendLibraryMediator mediator;
+    private final ButtonDecorator buttonDecorator;
     
     @AssistedInject
     public FriendLibraryPanel(@Assisted Friend friend,
@@ -47,7 +49,8 @@ public class FriendLibraryPanel extends LibraryPanel {
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
-                    LimeHeaderBarFactory headerBarFactory){
+                    LimeHeaderBarFactory headerBarFactory,
+                    ButtonDecorator buttonDecorator) {
         
         super(friend, true, headerBarFactory);
         
@@ -56,6 +59,8 @@ public class FriendLibraryPanel extends LibraryPanel {
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
         this.mediator = mediator;
+        this.buttonDecorator = buttonDecorator;
+        
 
         loadHeader();
         loadSelectionPanel();
@@ -68,7 +73,7 @@ public class FriendLibraryPanel extends LibraryPanel {
     public void loadHeader() {
         //don't show share button for browse hosts
         if(!friend.isAnonymous())
-            headerPanel.enableButton(new ViewSharedLibraryAction());
+            headerPanel.enableButton(new ViewSharedLibraryAction(), buttonDecorator);
     }
     
     @Override
