@@ -55,9 +55,9 @@ public class LimeHeaderBar extends JXPanel {
     private void init() {
         this.componentContainer.setOpaque(false);
         
-        super.setLayout(new MigLayout("insets 0,filly","[]push[]",""));
-        super.add(this.titleComponent, "growy");
-        super.add(this.componentContainer, "growy");
+        super.setLayout(new MigLayout("insets 0, filly, fillx, aligny center","[][]",""));
+        super.add(titleComponent, "growy, dock west");
+        super.add(componentContainer, "growy, growx, right");
     }
     
     @Override

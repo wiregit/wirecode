@@ -4,8 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -23,6 +22,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -114,7 +115,8 @@ public class SortAndFilterPanel {
         
         this.populateActionList();
         
-        this.sortCombo = comboBoxFactory.createDarkFullComboBox();
+        sortLabel.setForeground(Color.WHITE);
+        sortCombo = comboBoxFactory.createDarkFullComboBox();
 
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
@@ -453,20 +455,13 @@ public class SortAndFilterPanel {
     }
     
     public void layoutComponents(JPanel panel) {
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.insets = new Insets(3, 2, 2, 10); // top, left, bottom, right
-        panel.add(filterBox, gbc);
-
-        gbc.insets.right = 5;
-        panel.add(sortLabel, gbc);
-
-        panel.add(sortCombo, gbc);
+        panel.setLayout(new MigLayout("insets 0, filly, gapx 0", "push[][][][][]"));
         
-        gbc.insets.left = gbc.insets.right = 0;
-        panel.add(listViewToggleButton, gbc);
-        panel.add(tableViewToggleButton, gbc);
+        panel.add(filterBox, "gapafter 10");
+        panel.add(sortLabel, "gapafter 10");
+        panel.add(sortCombo, "gapafter 10");
+        panel.add(listViewToggleButton);
+        panel.add(tableViewToggleButton, "gapafter 10");
     }
 
     public void clearFilterBox() {

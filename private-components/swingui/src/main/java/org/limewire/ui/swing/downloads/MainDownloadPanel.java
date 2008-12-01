@@ -5,9 +5,6 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -15,6 +12,8 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -168,7 +167,6 @@ public class MainDownloadPanel extends JPanel {
 	    clearFinishedButton = new JXButton(clearAction);
 	    categoriseCheckBox = new LimeCheckBox(categorizeAction);
 
-	    
 	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
 	    
 	    categoriseCheckBox.setOpaque(false);
@@ -177,30 +175,14 @@ public class MainDownloadPanel extends JPanel {
 
 	    categorizeAction.setEnabled(true);
 
-	    GridBagConstraints gbc = new GridBagConstraints();
-
 	    JPanel buttonPanel = new JPanel(new FlowLayout());
 	    buttonPanel.setOpaque(false);
 	    buttonPanel.add(pauseAllButton);
 	    buttonPanel.add(resumeAllButton);
 
-	    this.settingsPanel.setLayout(new GridBagLayout());
-	    
-	    Insets insets = new Insets(5,5,5,5);
-	    
-	    gbc.insets = insets;
-	    gbc.fill = GridBagConstraints.VERTICAL;
-	    gbc.anchor = GridBagConstraints.NORTH;
-	    gbc.gridx = 0;
-	    gbc.gridy = 0;
-	    gbc.insets = insets;
-	    this.settingsPanel.add(categoriseCheckBox, gbc);
-
-	    gbc.anchor = GridBagConstraints.SOUTH;
-	    gbc.gridx++;
-	    gbc.gridy = 0;
-	    gbc.insets = insets;
-	    this.settingsPanel.add(clearFinishedButton, gbc);
+	    this.settingsPanel.setLayout(new MigLayout("insets 0, fillx, filly","push[][]"));
+	    this.settingsPanel.add(categoriseCheckBox);
+	    this.settingsPanel.add(clearFinishedButton, "gapafter 10");
 	}
 	
 	

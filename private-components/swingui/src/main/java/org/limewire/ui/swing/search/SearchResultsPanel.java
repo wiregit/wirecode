@@ -347,12 +347,13 @@ public class SearchResultsPanel extends JXPanel {
                 g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionTopGradientColor, 
                         20.0f, 33.0f, tabSelectionBottomGradientColor));
                 
-                g.fillRoundRect(4,5, width-1-6, height-9, 10,10);
+                g.fillRoundRect(4,0, width-1-6, height, 10,10);
                 
                 g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionBorderTopGradientColor, 
                         20.0f, 33.0f, tabSelectionBorderBottomGradientColor));
                 
-                g.drawRoundRect(4,5, width-1-6, height-9, 10,10);            }
+                g.drawRoundRect(4,0, width-1-6, height, 10,10);  
+           }
         };
         
         painter.setAntialiasing(true);
