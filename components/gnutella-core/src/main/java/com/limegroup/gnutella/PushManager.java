@@ -1,12 +1,12 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.Connectable;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -57,38 +57,31 @@ public final class PushManager {
     }    
 
 	/**
-	 * Accepts a new push upload.
-     * NON-BLOCKING: creates a new thread to transfer the file.
+	 * Accepts a new push upload asynchronously.
 	 * <p>
-     * The thread connects to the other side, waits for a GET/HEAD,
-     * and delegates to the UploaderManager.acceptUpload method with the
-     * socket it created.
      * Essentially, this is a reverse-Acceptor.
      * <p>
      * No file and index are needed since the GET/HEAD will include that
      * information.  Just put in our first file and filename to create a
      * well-formed.
-	 * @param host the ip address of the host to upload to
-	 * @param port the port over which the transfer will occur
-	 * @param guid the unique identifying client guid of the uploading client
+	 * @param address the connectable that will be connected to
+	 * @param guid the unique identifying client guid of the push-connecting client
      * @param lan whether or not this is a request over a local network (
      * (force the UploadManager to accept this request when it comes back)
      * @param isFWTransfer whether or not to use a UDP pipe to service this
      * upload.
 	 */
-	public void acceptPushUpload(final String host, 
-                                 final int port, 
-                                 final String guid,
+	public void acceptPushUpload(Connectable address,
+	                             final GUID guid,
                                  final boolean lan,
-                                 final boolean isFWTransfer,
-                                 final boolean tlsCapable) {
+                                 final boolean isFWTransfer) {
         if (LOG.isDebugEnabled())
-            LOG.debug("Accepting Push Upload from ip:" + host + " port:" + port + " FW:" + isFWTransfer);
+            LOG.debug("Accepting Push Upload from host:" + address  + " FW:" + isFWTransfer);
                                     
-        if( host == null )
+        if( address == null )
             throw new NullPointerException("null host");
-        if( !NetworkUtils.isValidPort(port) )
-            throw new IllegalArgumentException("invalid port: " + port);
+        if( !NetworkUtils.isValidIpPort(address) )
+            throw new IllegalArgumentException("invalid  ip port: " + address);
         if( guid == null )
             throw new NullPointerException("null guid");
         
@@ -96,24 +89,23 @@ public final class PushManager {
         // 1) hammering us, or 2) is actually firewalled.  1) is done above us
         // now, and 2) isn't as much an issue with the advent of connectback
         
-        PushData data = new PushData(host, port, guid, lan);
+        PushData data = new PushData(address, guid, lan);
         
         // If the transfer is to be done using FW-FW, then immediately start a new thread
         // which will connect using FWT.  Otherwise, do a non-blocking connect and have
         // the observer spawn the thread only if it succesfully connected.
         if(isFWTransfer) {
             if(LOG.isDebugEnabled())
-                LOG.debug("Adding push observer FW-FW to host: " + host + ":" + port);
+                LOG.debug("Adding push observer FW-FW to host: " + address);
             // TODO: should FW-FW connections also use TLS?
-            assert NetworkUtils.isValidAddress(host) : "invalid host for fwt request: " + host;
             NBSocket socket = udpSelectorProvider.get().openAcceptorSocketChannel().socket();
-            socket.connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT*2, new PushConnectObserver(data, true, httpAcceptor.get()));
+            socket.connect(address.getInetSocketAddress(), CONNECT_TIMEOUT*2, new PushConnectObserver(data, true, httpAcceptor.get()));
         } else {
             if (LOG.isDebugEnabled())
-                LOG.debug("Adding push observer to host: " + host + ":" + port);
+                LOG.debug("Adding push observer to host: " + address);
             try {
-                ConnectType type = tlsCapable && networkManager.get().isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
-                socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushConnectObserver(data, false, httpAcceptor.get()), type);
+                ConnectType type = address.isTLSCapable() && networkManager.get().isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
+                socketsManager.get().connect(address.getInetSocketAddress(), CONNECT_TIMEOUT, new PushConnectObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
             }
         }
@@ -121,14 +113,13 @@ public final class PushManager {
     
     /** A simple collection of Push information */
     private static class PushData {
-        private final String host;
-        private final int port;
-        private final String guid;
+        
+        private final Connectable address;
+        private final GUID guid;
         private final boolean lan;
         
-        PushData(String host, int port, String guid, boolean lan) {
-            this.host = host;
-            this.port = port;
+        PushData(Connectable address, GUID guid, boolean lan) {
+            this.address = address;
             this.guid = guid;
             this.lan = lan;
         }
@@ -136,14 +127,12 @@ public final class PushManager {
         public boolean isLan() {
             return lan;
         }
-        public String getGuid() {
+        public GUID getGuid() {
             return guid;
         }
-        public String getHost() {
-            return host;
-        }
-        public int getPort() {
-            return port;
+        
+        public Connectable getAddress() {
+            return address;
         }
     }
     
@@ -164,13 +153,13 @@ public final class PushManager {
         /** Increments the PUSH_FAILED stat and does nothing else. */
         public void shutdown() {
             if(LOG.isDebugEnabled())
-                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " failed");
+                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getAddress() + " failed");
         }
 
         /** Starts a new thread that'll do the pushing. */
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
-                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
+                LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getAddress() + " succeeded");
             ((NIOMultiplexor) socket).setWriteObserver(new GivLineWriter(socket, data, fwt, httpAcceptor));
         }
     }    
