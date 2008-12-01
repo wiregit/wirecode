@@ -37,9 +37,10 @@ import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchViewType;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.classic.CalendarTableCellRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ClassicDoubleClickHandler;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueCalendarRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueStringRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
@@ -48,7 +49,6 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
-import org.limewire.ui.swing.table.StringTableCellRenderer;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -283,12 +283,12 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
-        CalendarTableCellRenderer calendarRenderer =
-            new CalendarTableCellRenderer();
+        OpaqueCalendarRenderer calendarRenderer =
+            new OpaqueCalendarRenderer();
         IconLabelRenderer iconLabelRenderer =
             new IconLabelRenderer(iconManager);
-        StringTableCellRenderer stringRenderer =
-            new StringTableCellRenderer();
+        OpaqueStringRenderer stringRenderer =
+            new OpaqueStringRenderer();
 
         
         int columnCount = tableFormat.getColumnCount();

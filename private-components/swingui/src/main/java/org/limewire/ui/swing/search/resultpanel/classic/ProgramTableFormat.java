@@ -30,8 +30,8 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Name"), 
                 tr("Size"), 
                 tr("Platform"), 
+                tr("Company"),
                 tr("From"),
-                tr("Company"), 
                 tr("Extension"),
                 tr("Author"));
     }

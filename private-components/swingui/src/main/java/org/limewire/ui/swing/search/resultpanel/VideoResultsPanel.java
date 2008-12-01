@@ -8,12 +8,12 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueFileSizeRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueQualityRenderer;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueTimeRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.VideoTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
-import org.limewire.ui.swing.table.FileSizeRenderer;
-import org.limewire.ui.swing.table.QualityRenderer;
-import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -47,8 +47,8 @@ public class VideoResultsPanel extends BaseResultPanel {
     @Override
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         super.setupCellRenderers(tableFormat);
-        setCellRenderer(VideoTableFormat.SIZE_INDEX, new FileSizeRenderer());
-        setCellRenderer(VideoTableFormat.LENGTH_INDEX, new TimeRenderer());
-        setCellRenderer(VideoTableFormat.QUALITY_INDEX, new QualityRenderer());
+        setCellRenderer(VideoTableFormat.SIZE_INDEX, new OpaqueFileSizeRenderer());
+        setCellRenderer(VideoTableFormat.LENGTH_INDEX, new OpaqueTimeRenderer());
+        setCellRenderer(VideoTableFormat.QUALITY_INDEX, new OpaqueQualityRenderer());
     }
 }

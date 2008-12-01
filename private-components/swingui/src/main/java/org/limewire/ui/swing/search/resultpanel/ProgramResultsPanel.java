@@ -8,10 +8,10 @@ import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.classic.OpaqueFileSizeRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
-import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -45,6 +45,6 @@ public class ProgramResultsPanel extends BaseResultPanel {
     @Override
     protected void setupCellRenderers(ResultsTableFormat<VisualSearchResult> tableFormat) {
         super.setupCellRenderers(tableFormat);
-        setCellRenderer(ProgramTableFormat.SIZE_INDEX, new FileSizeRenderer());
+        setCellRenderer(ProgramTableFormat.SIZE_INDEX, new OpaqueFileSizeRenderer());
     }
 }

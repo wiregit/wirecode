@@ -1,33 +1,31 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 
-public class FromTableCellRenderer extends JPanel implements TableCellRenderer, TableCellEditor {
+public class FromTableCellRenderer extends OpaqueTableCellRenderer implements TableCellRenderer, TableCellEditor {
 
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
-    private SearchResultFromWidget fromWidget;
+    private final SearchResultFromWidget fromWidget;
     
     public FromTableCellRenderer(SearchResultFromWidget fromWidget) {
+        super(FlowLayout.LEFT);
+        
         this.fromWidget = fromWidget;
         
-        setLayout(new MigLayout("insets 0"));
-        
-        add(fromWidget, "aligny 50%, gapleft 10");
+        addComponent(fromWidget);
     }
     
     @Override
@@ -36,7 +34,8 @@ public class FromTableCellRenderer extends JPanel implements TableCellRenderer, 
         if (value != null) {
             fromWidget.setPeople(((VisualSearchResult)value).getSources());
         }
-        return this;
+        
+        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
 
     @Override
@@ -45,7 +44,8 @@ public class FromTableCellRenderer extends JPanel implements TableCellRenderer, 
         if (value != null) {
             fromWidget.setPeople(((VisualSearchResult)value).getSources());
         }
-        return this;
+        
+        return super.getTableCellRendererComponent(table, value, isSelected, true, row, column);
     }
 
     @Override
