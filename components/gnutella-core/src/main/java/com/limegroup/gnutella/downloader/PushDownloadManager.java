@@ -995,18 +995,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                         return false;
                     }
                 }
-                try {
-                    if (acceptedOrFailed.compareAndSet(false, true)) {
+                if (acceptedOrFailed.compareAndSet(false, true)) {
+                    try {
                         observer.handleConnect(socket);
-                    } else {
-                        IOUtils.close(socket);
-                        LOG.debug("push went through after timeout");
                         return true;
+                    } catch (IOException e) {
+                        IOUtils.close(socket);
                     }
-                } catch (IOException e) {
-                    IOUtils.close(socket);
                 }
-                return true;
+                // return false if not handled for whatever reason, maybe there
+                // is another handler, or PushDownloadManager just closes it
+                return false;
             }
             return false;
         }
