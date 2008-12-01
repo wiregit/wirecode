@@ -2,6 +2,7 @@ package org.limewire.core.impl.search.sponsored;
 
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.util.Objects;
 
 public class CoreSponsoredResult implements SponsoredResult {
 
@@ -20,11 +21,11 @@ public class CoreSponsoredResult implements SponsoredResult {
      *        LinkTarget.EXTERNAL to open in a native browser
      */
     public CoreSponsoredResult(String title, String text, String visibleUrl, String navUrl, SponsoredResultTarget target) {
-        this.title = title;
-        this.text = text;
-        this.visibleUrl = visibleUrl;
-        this.navUrl = navUrl;
-        this.target = target;
+        this.title = Objects.nonNull(title, "title").replace("|", "\n");
+        this.text = Objects.nonNull(text, "text").replace("|", "\n");
+        this.visibleUrl = Objects.nonNull(visibleUrl, "visibleUrl");
+        this.navUrl = Objects.nonNull(navUrl, "navUrl");
+        this.target = Objects.nonNull(target, "target");
     }
 
     /* (non-Javadoc)
