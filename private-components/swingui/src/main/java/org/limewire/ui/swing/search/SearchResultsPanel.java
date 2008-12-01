@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
@@ -340,23 +339,21 @@ public class SearchResultsPanel extends JXPanel {
     }
     
     private AbstractPainter<FancyTab> createTabSelectionPainter() {
-        AbstractPainter<FancyTab> painter = new AbstractPainter<FancyTab>() {
-
-            @Override
-            protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
-                g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionTopGradientColor, 
-                        20.0f, 33.0f, tabSelectionBottomGradientColor));
-                
-                g.fillRoundRect(4,0, width-1-6, height, 10,10);
-                
-                g.setPaint(new GradientPaint(20.0f, 0.0f, tabSelectionBorderTopGradientColor, 
-                        20.0f, 33.0f, tabSelectionBorderBottomGradientColor));
-                
-                g.drawRoundRect(4,0, width-1-6, height, 10,10);  
-           }
-        };
+        RectanglePainter<FancyTab> painter = new RectanglePainter<FancyTab>();
         
+        painter.setFillPaint(new GradientPaint(0, 0, tabSelectionTopGradientColor, 
+                0, 1, tabSelectionBottomGradientColor));
+        
+        painter.setBorderPaint(new GradientPaint(0, 0, tabSelectionBorderTopGradientColor, 
+                0, 1, tabSelectionBorderBottomGradientColor));
+        painter.setRoundHeight(10);
+        painter.setRoundWidth(10);
+        painter.setRounded(true);
+        painter.setPaintStretched(true);
+                
         painter.setAntialiasing(true);
+        painter.setCacheable(true);
+        
         return painter;
     }
 }
