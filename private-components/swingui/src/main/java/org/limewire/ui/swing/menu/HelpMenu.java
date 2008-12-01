@@ -11,8 +11,6 @@ import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.mainframe.StorePanel;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -39,16 +37,6 @@ class HelpMenu extends JMenu {
                 NativeLaunchUtils.openURL("http://www.limewire.com/support/");
             }
         });
-        add(new AbstractAction(I18n.tr("LimeWire Store help")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                storePanel.load("http://www.store.limewire.com/store/app/pages/help/Help/");
-                NavItem storeNav = navigator.getNavItem(NavCategory.LIMEWIRE, StorePanel.NAME);
-                if(storeNav != null) {
-                    storeNav.select();
-                }
-            }
-        });
 
         add(new AbstractAction(I18n.tr("FAQ...")) {
             @Override
@@ -57,13 +45,18 @@ class HelpMenu extends JMenu {
                         .openURL("http://wiki.limewire.org/index.php?title=Frequently_Asked_Questions");
             }
         });
-        addSeparator();
-        add(new AbstractAction(I18n.tr("Check for updates")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me.");
-            }
-        });
+        
+        if(!application.isProVersion()) {
+            addSeparator();
+            add(new AbstractAction(I18n.tr("Get personal tech support")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    NativeLaunchUtils
+                    .openURL("http://limewire.com/download/pro.php?ref=H");
+                }
+            });
+        }
+        
         addSeparator();
         add(new AbstractAction(I18n.tr("About LimeWire")) {
             @Override

@@ -44,6 +44,11 @@ class ApplicationImpl implements Application {
     public String getVersion() {
         return LimeWireUtils.getLimeWireVersion();
     }
+
+    @Override
+    public boolean isProVersion() {
+       return LimeWireUtils.isPro();
+    }
     
 
 }

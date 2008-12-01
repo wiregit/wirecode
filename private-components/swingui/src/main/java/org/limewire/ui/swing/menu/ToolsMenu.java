@@ -1,10 +1,8 @@
 package org.limewire.ui.swing.menu;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
-import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
@@ -15,14 +13,11 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
-import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.options.LibraryManagerOptionPanel;
 import org.limewire.ui.swing.options.OptionsDialog;
-import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -35,9 +30,6 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class ToolsMenu extends JMenu {
-    private LibraryManagerOptionPanel libraryManagerOptionPanel = null;
-
-    private JDialog libraryManagerDialogue = null;
 
     @Inject
     public ToolsMenu(final Provider<OptionsDialog> optionDialog, 
@@ -47,30 +39,6 @@ public class ToolsMenu extends JMenu {
 
         super(I18n.tr("Tools"));
 
-        add(new AbstractAction(I18n.tr("Library Manager")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                libraryManagerOptionPanel = new LibraryManagerOptionPanel(new AbstractAction(I18n
-                        .tr("OK")) {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        libraryManagerOptionPanel.applyOptions();
-                        libraryManagerDialogue.dispose();
-                    }
-                }, new CancelDialogAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        libraryManagerDialogue.dispose();
-                    }
-                }, libraryManager.getLibraryData());
-
-                libraryManagerOptionPanel.setPreferredSize(new Dimension(500, 500));
-                libraryManagerOptionPanel.initOptions();
-                libraryManagerDialogue = FocusJOptionPane.createDialog(I18n.tr("Library Manager"), ToolsMenu.this,
-                        libraryManagerOptionPanel);
-                libraryManagerDialogue.setVisible(true);
-            }
-        });
         add(new AbstractAction(I18n.tr("Downloads")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -97,7 +65,6 @@ public class ToolsMenu extends JMenu {
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
         add(new AbstractAction(I18n.tr("Advanced Tools")) {
-            // TODO wire in advanced tools panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
                 AdvancedToolsPanel advancedTools = advancedProvider.get();

@@ -16,7 +16,6 @@ import org.limewire.ui.swing.menu.actions.AddFolderAction;
 import org.limewire.ui.swing.menu.actions.OpenFileAction;
 import org.limewire.ui.swing.menu.actions.OpenLinkAction;
 import org.limewire.ui.swing.menu.actions.RecentDownloadsMenu;
-import org.limewire.ui.swing.menu.actions.SignInOutAction;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.I18n;
@@ -33,7 +32,7 @@ public class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager, MainPanel mainPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
-            SearchHandler searchHandler, AudioPlayer audioPlayer, SignInOutAction signInOutAction) {
+            SearchHandler searchHandler, AudioPlayer audioPlayer) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(new OpenFileAction(navigator, I18n.tr("&Open File"), downloadListManager, mainPanel,
@@ -44,8 +43,6 @@ public class FileMenu extends JMenu {
         addSeparator();
         add(new AddFileAction(I18n.tr("Add File To Library"), mainPanel, libraryManager));
         add(new AddFolderAction(I18n.tr("Add Folder To Library"), libraryManager, mainPanel));
-        addSeparator();
-        add(signInOutAction);
         addSeparator();
         add(new AbstractAction(I18n.tr("E&xit")) {
             @Override

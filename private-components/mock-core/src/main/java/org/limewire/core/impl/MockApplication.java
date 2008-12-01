@@ -32,4 +32,9 @@ public class MockApplication implements Application {
     public String getVersion() {
         return "0.0.1";
     }
+
+    @Override
+    public boolean isProVersion() {
+        return false;
+    }
 }
