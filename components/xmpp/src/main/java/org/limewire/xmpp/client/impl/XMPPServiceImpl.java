@@ -35,8 +35,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
-    public static final String LW_SERVICE_NS = "http://www.limewire.org/";
-
     private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;

@@ -12,12 +12,9 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureInitializer;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
-import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.listener.BlockingEvent;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.User;
@@ -30,22 +27,14 @@ public class AuthTokenIQListener implements PacketListener {
     private final XMPPConnectionImpl connection;
     private final XMPPAuthenticator authenticator;
     private final Map<String, byte []> pendingAuthTokens;
-    private final ListenerSupport<FeatureEvent> featureSupport;
-    private final EventListener<FeatureEvent> featureListener;
 
     public AuthTokenIQListener(XMPPConnectionImpl connection,
                                XMPPAuthenticator authenticator,
-                               ListenerSupport<FeatureEvent> featureSupport) {
+                               FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.authenticator = authenticator;
         this.pendingAuthTokens = new HashMap<String, byte[]>();
-        this.featureSupport = featureSupport;
-        this.featureListener = new FeatureListener();
-        featureSupport.addListener(featureListener);
-    }
-    
-    public void dispose() {
-        featureSupport.removeListener(featureListener);
+        new AuthTokenFeatureInitializer().register(featureRegistry);
     }
 
     public void processPacket(Packet packet) {
@@ -100,37 +89,27 @@ public class AuthTokenIQListener implements PacketListener {
         };
     }
 
-    private class FeatureListener implements EventListener<FeatureEvent> {
+    private class AuthTokenFeatureInitializer implements FeatureInitializer {
+        @Override
+        public void register(FeatureRegistry registry) {
+            registry.add(AuthTokenFeature.ID, this);
+        }
 
-        @BlockingEvent
-        public void handleEvent(FeatureEvent featureEvent) {
-            FriendPresence presence = featureEvent.getSource();
-            String jid = presence.getPresenceId();
-
-            switch(featureEvent.getType()) {
-                case ADDED:
-                    if (featureEvent.getData().getID().equals(LimewireFeature.ID)) {
-                        synchronized (AuthTokenIQListener.this) {
-                            sendResult(presence);
-                            if (pendingAuthTokens.containsKey(jid)) {
-                                byte[] authToken = pendingAuthTokens.remove(jid);
-                                if (LOG.isDebugEnabled()) {
-                                    try {
-                                        LOG.debug("updating auth token on presence " + jid + " to " + new String(Base64.encodeBase64(authToken), "UTF-8"));
-                                    } catch (UnsupportedEncodingException e) {
-                                        LOG.error(e.getMessage(), e);
-                                    }
-                                }
-                                presence.addFeature(new AuthTokenFeature(authToken));
-                            }
+        @Override
+        public void initializeFeature(FriendPresence friendPresence) {
+            synchronized (AuthTokenIQListener.this) {
+                sendResult(friendPresence);
+                if (pendingAuthTokens.containsKey(friendPresence.getPresenceId())) {
+                    byte[] authToken = pendingAuthTokens.remove(friendPresence.getPresenceId());
+                    if (LOG.isDebugEnabled()) {
+                        try {
+                            LOG.debug("updating auth token on presence " + friendPresence.getPresenceId() + " to " + new String(Base64.encodeBase64(authToken), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            LOG.error(e.getMessage(), e);
                         }
                     }
-                    break;
-                case REMOVED:
-                    synchronized (AuthTokenIQListener.this) {
-                        pendingAuthTokens.remove(jid);
-                    }
-                    break;
+                    friendPresence.addFeature(new AuthTokenFeature(authToken));
+                }
             }
         }
     }

@@ -9,13 +9,11 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.FeatureInitializer;
+import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
-import org.limewire.listener.BlockingEvent;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -30,24 +28,16 @@ public class AddressIQListener implements PacketListener {
     private volatile Address address;
     private final AddressFactory factory; 
     private final Map<String, Address> pendingAddresses;
-    private final ListenerSupport<FeatureEvent> featureSupport;
-    private final EventListener<FeatureEvent> featureListener;
 
     public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
                              Address address,
-                             ListenerSupport<FeatureEvent> featureSupport) {
+                             FeatureRegistry featureRegistry) {
         this.connection = connection;
         this.factory = factory;
         this.address = address;
         this.pendingAddresses = new HashMap<String, Address>();
-        this.featureSupport = featureSupport;
-        this.featureListener = new FeatureListener();
-        featureSupport.addListener(featureListener);
-    }
-    
-    public void dispose() {
-        featureSupport.removeListener(featureListener);
+        new AddressIQFeatureInitializer().register(featureRegistry);
     }
 
     public void processPacket(Packet packet) {
@@ -114,32 +104,22 @@ public class AddressIQListener implements PacketListener {
         connection.sendPacket(queryResult);
     }
 
-    private class FeatureListener implements EventListener<FeatureEvent> {
+    private class AddressIQFeatureInitializer implements FeatureInitializer {
+        @Override
+        public void register(FeatureRegistry registry) {
+            registry.add(AddressFeature.ID, this);
+        }
 
-        @BlockingEvent
-        public void handleEvent(FeatureEvent featureEvent) {
-            FriendPresence presence = featureEvent.getSource();
-            String jid = presence.getPresenceId();
-
-            switch(featureEvent.getType()) {
-                case ADDED:
-                    if (featureEvent.getData().getID().equals(LimewireFeature.ID)) {
-                        synchronized (AddressIQListener.this) {
-                            if (address != null) {
-                                sendAddress(address, jid);
-                            }
-                            if (pendingAddresses.containsKey(jid)) {
-                                LOG.debugf("updating address on presence {0} to {1}", jid, address);
-                                presence.addFeature(new AddressFeature(pendingAddresses.remove(jid)));
-                            }
-                        }
-                    }
-                    break;
-                case REMOVED:
-                    synchronized (AddressIQListener.this) {
-                        pendingAddresses.remove(jid);
-                    }
-                    break;
+        @Override
+        public void initializeFeature(FriendPresence friendPresence) {
+            synchronized (AddressIQListener.this) {
+                if (address != null) {
+                    sendAddress(address, friendPresence.getPresenceId());
+                }
+                if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
+                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
+                    friendPresence.addFeature(new AddressFeature(pendingAddresses.remove(friendPresence.getPresenceId())));
+                }
             }
         }
     }
