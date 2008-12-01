@@ -347,13 +347,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                 return false;
             }
 
-            @Override
-            public Downloader downloadFromFriend(RemoteFileDesc[] files,
-                    List<? extends RemoteFileDesc> alts, GUID queryGUID, boolean overwrite,
-                    File saveDir, String fileName) throws SaveLocationException {
-                return null;
-            }
-            
         },new NoOpSaveLocationManager(), new DefaultHttpExecutor(new Provider<LimeHttpClient>() {
            @Override
             public LimeHttpClient get() {

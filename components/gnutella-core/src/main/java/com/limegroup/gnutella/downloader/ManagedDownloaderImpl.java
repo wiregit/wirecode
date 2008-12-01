@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -41,12 +39,14 @@ import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
+import org.limewire.xmpp.client.impl.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -55,7 +55,6 @@ import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ShareSettingsOverride;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
@@ -457,7 +456,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private final ConnectivityChangeEventHandler connectivityChangeEventHandler = new ConnectivityChangeEventHandler();
 
-    private ShareSettingsOverride shareSettingsOverride = ShareSettingsOverride.DEFAULT;
+    private boolean isFriendDownload;
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -524,6 +523,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
         
+        isFriendDownload = isFriendDownload(rfds);
+        
         if (rfds.size() > 0) 
             initPropertiesMap(rfds.iterator().next());
 
@@ -531,7 +532,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (!hasDefaultFileName())
             setDefaultFileName(defaultFileName);
     }
-    
+
+    private boolean isFriendDownload(Collection<RemoteFileDesc> rfds) {
+        for(RemoteFileDesc rfd : rfds) {
+            if(!(rfd.getAddress() instanceof XMPPAddress)) {
+                // TODO Address.isAnonymous() instead?
+                return false;    
+            }
+        }
+        return true;
+    }
+
     public void setQueryGuid(GUID queryGuid) {
         this.originalQueryGUID = queryGuid;
     }
@@ -2160,7 +2171,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue() 
-		        && shareSettingsOverride != ShareSettingsOverride.NO_SHARE)
+		        && !isFriendDownload)
 		    fileManager.getGnutellaFileList().add(saveFile, getXMLDocuments());
 		else
 		    fileManager.getManagedFileList().add(saveFile, getXMLDocuments());
@@ -3141,11 +3152,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if(getIncompleteFile() != null) {
             incompleteFileManager.initEntry(getIncompleteFile(), gmem.getSavedBlocks(), getSha1Urn(), shouldPublishIFD());
         }
-    }
-    
-    @Override
-    public void setShareSettingsOverride(ShareSettingsOverride shareSettingsOverride){
-        this.shareSettingsOverride = shareSettingsOverride;
     }
     
     /** Returns true if this download's IFD should be published as sharable. */

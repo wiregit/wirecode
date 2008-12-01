@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.ShareSettingsOverride;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 /**Defines an interface for controlled downloads. */
@@ -70,5 +69,4 @@ public interface ManagedDownloader extends MeshHandler, CoreDownloader {
 
     public int getNumDownloaders();
 
-    public void setShareSettingsOverride(ShareSettingsOverride shareSettingsOverride);
 }

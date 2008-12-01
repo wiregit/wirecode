@@ -47,7 +47,7 @@ public interface ResultDownloader {
      *         file
      * 
      */
-    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException;
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException;
     
 
     /**
@@ -61,7 +61,7 @@ public interface ResultDownloader {
      *         file
      * 
      */
-    public DownloadItem addFriendDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;
+    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) throws SaveLocationException;
 
     
     

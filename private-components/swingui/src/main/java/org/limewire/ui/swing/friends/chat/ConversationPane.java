@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -51,11 +49,11 @@ import org.limewire.core.api.download.ResultDownloader;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.Feature;
+import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.FileOfferFeature;
 import org.limewire.core.api.friend.feature.features.FileOfferer;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
-import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -77,6 +75,7 @@ import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -373,7 +372,7 @@ public class ConversationPane extends JPanel implements Displayable {
                            msgWithfileOffer.getFileOffer());
                     // TODO: what if offered file not in map for any reason?
                     //       Also, when would we remove items from the map?
-                   dl = downloader.addFriendDownload(file);
+                   dl = downloader.addDownload(file);
                    // Track download states by adding listeners to dl item
                    addPropertyListener(dl, msgWithfileOffer);
                 } catch(SaveLocationException sle) {
@@ -383,7 +382,7 @@ public class ConversationPane extends JPanel implements Displayable {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            DownloadItem dl = downloader.addFriendDownload(remoteFileItem, saveFile, overwrite);
+                            DownloadItem dl = downloader.addDownload(remoteFileItem, saveFile, overwrite);
                             addPropertyListener(dl, messageFileOffer);
                         }
                     }, sle, true); 

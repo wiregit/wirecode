@@ -607,20 +607,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         downloader.addDownload(alts,false);
         
         return downloader;
-    }   
-    
-  //TODO:  this is a hack to prevent inadvertent sharing - download from friend does not autoshare with gnutella
-    public synchronized Downloader downloadFromFriend(RemoteFileDesc[] files,
-            List<? extends RemoteFileDesc> alts, GUID queryGUID, boolean overwrite, File saveDir,
-            String fileName) throws SaveLocationException {
-        ManagedDownloader downloader = (ManagedDownloader)download(files, alts, queryGUID, overwrite, saveDir, fileName);
-        downloader.setShareSettingsOverride(ShareSettingsOverride.NO_SHARE);
-        return downloader;
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.browser.MagnetOptions, boolean, java.io.File, java.lang.String)
-     */
+    * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.browser.MagnetOptions, boolean, java.io.File, java.lang.String)
+    */
     public synchronized Downloader download(MagnetOptions magnet,
             boolean overwrite,
             File saveDir,

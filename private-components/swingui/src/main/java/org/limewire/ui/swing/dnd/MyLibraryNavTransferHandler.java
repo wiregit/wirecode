@@ -56,13 +56,13 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
             
             for (final RemoteFileItem file : remoteFileList) {
                 try {
-                    downloadListManager.addFriendDownload(file);
+                    downloadListManager.addDownload(file);
                 } catch (SaveLocationException e) {
                     saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            downloadListManager.addFriendDownload(file, saveFile, overwrite);
+                            downloadListManager.addDownload(file, saveFile, overwrite);
                         }
                     }, e, true);
                 }

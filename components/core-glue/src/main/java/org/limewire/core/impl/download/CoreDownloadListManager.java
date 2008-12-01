@@ -38,11 +38,6 @@ import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -51,13 +46,18 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -144,17 +144,7 @@ public class CoreDownloadListManager implements DownloadListManager {
             File saveFile, boolean overwrite) throws SaveLocationException {
         // Train the spam filter even if the results weren't rated as spam
         spamManager.handleUserMarkedGood(searchResults);
-        File saveDir = null;
-        String fileName = null;
         
-        if(saveFile != null) {
-            if(saveFile.isDirectory()) {
-                saveDir = saveFile;
-            } else {
-                saveDir = saveFile.getParentFile();
-                fileName = saveFile.getName();
-            }
-        }
         
         RemoteFileDesc[] files;
         List<RemoteFileDesc> alts = new ArrayList<RemoteFileDesc>();
@@ -166,41 +156,13 @@ public class CoreDownloadListManager implements DownloadListManager {
         }
         
         Category category = searchResults.iterator().next().getCategory();
-        return createDownloader(files, alts, queryGUID, saveDir, fileName, overwrite, category, false);
+        return createDownloader(files, alts, queryGUID, saveFile, overwrite, category);
     }
 	
 	private DownloadItem createDownloader(RemoteFileDesc[] files, List<RemoteFileDesc> alts,
-            GUID queryGuid, File saveDir, String fileName, boolean overwrite, Category category, boolean isFriendDownload)
+                                          GUID queryGuid, File saveFile, boolean overwrite, Category category)
             throws SaveLocationException {
-
-        // determine per mediatype directory if saveLocation == null
-        // and only pass it through if directory is different from default
-        // save directory == !isDefault()
-        //if (saveDir == null &&) {
-            FileSetting fs = SharingSettings.getFileSettingForMediaType
-            (MediaTypeConverter.toMediaType(category));
-            if (!fs.isDefault()) {
-                saveDir = fs.getValue();
-            }
-       // }
-        Downloader downloader;
-        if (isFriendDownload) {
-            downloader = downloadManager.downloadFromFriend(files, alts, queryGuid, overwrite, saveDir, fileName);
-        } else {
-            downloader = downloadManager.download(files, alts, queryGuid, overwrite, saveDir, fileName);
-        }
-        // This should have been funneled through our addDownload callback method, which
-        // should have set the CoreDownloadItem.
-        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
-    }
-
-    @Override
-    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException {
-        return addFriendDownload(fileItem, null, false);
-    }
-    
-    @Override
-    public DownloadItem addFriendDownload(RemoteFileItem fileItem, File saveFile, boolean overwrite) throws SaveLocationException {
+        
         File saveDir = null;
         String fileName = null;
         
@@ -212,8 +174,32 @@ public class CoreDownloadListManager implements DownloadListManager {
                 fileName = saveFile.getName();
             }
         }
+
+        // determine per mediatype directory if saveLocation == null
+        // and only pass it through if directory is different from default
+        // save directory == !isDefault()
+        //if (saveDir == null &&) {
+            FileSetting fs = SharingSettings.getFileSettingForMediaType
+            (MediaTypeConverter.toMediaType(category));
+            if (!fs.isDefault()) {
+                saveDir = fs.getValue();
+            }
+       // }
+        Downloader downloader = downloadManager.download(files, alts, queryGuid, overwrite, saveDir, fileName);
+        // This should have been funneled through our addDownload callback method, which
+        // should have set the CoreDownloadItem.
+        return (DownloadItem)downloader.getAttribute(DOWNLOAD_ITEM);
+    }
+
+    @Override
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
+        return addDownload(fileItem, null, false);
+    }
+    
+    @Override
+    public DownloadItem addDownload(RemoteFileItem fileItem, File saveFile, boolean overwrite) throws SaveLocationException {
         return createDownloader(new RemoteFileDesc[] { ((CoreRemoteFileItem) fileItem).getRfd() },
-                RemoteFileDesc.EMPTY_LIST, null, saveDir, fileName, overwrite, fileItem.getCategory(), true);    
+                RemoteFileDesc.EMPTY_LIST, null, saveFile, overwrite, fileItem.getCategory());    
     }
 
 	private RemoteFileDesc[] createRfdsAndAltsFromSearchResults(

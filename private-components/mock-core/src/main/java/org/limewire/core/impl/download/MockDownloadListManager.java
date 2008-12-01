@@ -109,7 +109,7 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addFriendDownload(RemoteFileItem fileItem) throws SaveLocationException {
+    public DownloadItem addDownload(RemoteFileItem fileItem) throws SaveLocationException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -126,7 +126,7 @@ public class MockDownloadListManager implements DownloadListManager {
     }
 
     @Override
-    public DownloadItem addFriendDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
+    public DownloadItem addDownload(RemoteFileItem file, File saveFile, boolean overwrite) {
         return null;
     }
 

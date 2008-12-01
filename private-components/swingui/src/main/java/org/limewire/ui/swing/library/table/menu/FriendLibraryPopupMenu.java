@@ -74,13 +74,13 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
                 public void run() {
                     for (final RemoteFileItem fileItem : fileItemArray) {
                         try {
-                            downloadListManager.addFriendDownload(fileItem);
+                            downloadListManager.addDownload(fileItem);
                         } catch (SaveLocationException e) {
                             saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
                                 @Override
                                 public void download(File saveFile, boolean overwrite)
                                         throws SaveLocationException {
-                                    downloadListManager.addFriendDownload(fileItem, saveFile, overwrite);
+                                    downloadListManager.addDownload(fileItem, saveFile, overwrite);
                                 }
                             }, e, true);
                         }
