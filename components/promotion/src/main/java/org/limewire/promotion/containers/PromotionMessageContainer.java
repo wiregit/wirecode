@@ -39,6 +39,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     private static final String KEY_DESCRIPTION = "D";
     
     private static final String KEY_TITLE = "t";
+    
+    private static final String KEY_DISPLAY_URL = "u";
 
     private static final String KEY_URL = "U";
 
@@ -242,6 +244,14 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
 
     public String getTitle() {
         return get(KEY_TITLE);
+    }
+    
+    public void setDisplayUrl(String displayUrl) {
+        set(KEY_DISPLAY_URL, displayUrl);
+    }
+    
+    public String getDisplayUrl() {
+        return get(KEY_DISPLAY_URL);
     }
 
     /**
@@ -499,9 +509,11 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     /** Parses out the given key, or returns "" if the key is not present. */
     private String get(String key) {
         try {
-            if (!payload.hasKey(key))
+            if (!payload.hasKey(key)) {
                 return "";
-            return StringUtils.toUTF8String(payload.getBytes(key));
+            } else {
+                return StringUtils.toUTF8String(payload.getBytes(key));
+            }
         } catch (BadGGEPPropertyException ex) {
             throw new RuntimeException("GGEP exception parsing value." + ex.getMessage());
         }
