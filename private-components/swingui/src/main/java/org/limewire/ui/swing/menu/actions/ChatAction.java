@@ -18,22 +18,27 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
+/**
+ * Starts a chat with the selected user in the left panel if possible.
+ */
 public class ChatAction extends AbstractAction {
 
     private Friend friend;
+
     final ChatFriendListPane friendsPane;
+
     final ChatFramePanel friendsPanel;
+
     @Inject
     ChatAction(
-            @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport, ChatFriendListPane friendsPane,
-            ChatFramePanel friendsPanel) {
+            @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport,
+            ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
         super(I18n.tr("Chat"));
-        
+
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
-        
-        update();
-        
+
+        // listen for changes in the selected friend
         friendSelectListenerSupport.addListener(new EventListener<FriendSelectEvent>() {
             @Override
             public void handleEvent(final FriendSelectEvent event) {
@@ -45,22 +50,31 @@ public class ChatAction extends AbstractAction {
                 });
             }
         });
+
+        updateDisability();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(friend != null) {
+        if (friend != null) {
             friendsPanel.setChatPanelVisible(true);
             friendsPane.fireConversationStarted(friend);
         }
     }
 
-    public void setFriend(Friend friend) {
+    /**
+     * Sets a new firend for this action and calls updateDisability().
+     */
+    private void setFriend(Friend friend) {
         this.friend = friend;
-        update();
+        updateDisability();
     }
 
-    private void update() {
+    /**
+     * Enables or disables the action based on whether the new friend is a
+     * jabber user.
+     */
+    private void updateDisability() {
         if (friend == null || friend.isAnonymous() || !(friend instanceof User)) {
             setEnabled(false);
         } else {
