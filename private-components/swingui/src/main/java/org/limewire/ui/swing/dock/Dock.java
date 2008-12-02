@@ -9,9 +9,9 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 
 import org.limewire.service.ErrorService;
+import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.util.MacOSXUtils;
 
 /**
  * A utility class to modify the Dock Icon and request
