@@ -2,21 +2,24 @@ package org.limewire.ui.swing.menu;
 
 import javax.swing.JMenu;
 
-import org.limewire.listener.ListenerSupport;
-import org.limewire.ui.swing.library.nav.FriendSelectEvent;
 import org.limewire.ui.swing.menu.actions.ChatAction;
 import org.limewire.ui.swing.menu.actions.SignInOutAction;
+import org.limewire.ui.swing.menu.actions.StatusActions;
 import org.limewire.ui.swing.menu.actions.SwitchUserAction;
 import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 public class FriendMenu extends JMenu {
+    
+  
     @Inject
-    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport) {
+    public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, StatusActions statusActions) {
         super(I18n.tr("Friend"));
         add(chatAction);
+        addSeparator();
+        add(statusActions.getAvailableAction());
+        add(statusActions.getDnDAction());
         addSeparator();
         add(switchUserAction);
         add(signInOutAction);
