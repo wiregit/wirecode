@@ -6,6 +6,8 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
 import org.limewire.ui.swing.library.nav.FriendSelectEvent;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -19,12 +21,19 @@ import com.google.inject.name.Named;
 public class ChatAction extends AbstractAction {
 
     private Friend friend;
-
+    final ChatFriendListPane friendsPane;
+    final ChatFramePanel friendsPanel;
     @Inject
     ChatAction(
-            @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport) {
+            @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport, ChatFriendListPane friendsPane,
+            ChatFramePanel friendsPanel) {
         super(I18n.tr("Chat"));
+        
+        this.friendsPane = friendsPane;
+        this.friendsPanel = friendsPanel;
+        
         update();
+        
         friendSelectListenerSupport.addListener(new EventListener<FriendSelectEvent>() {
             @Override
             public void handleEvent(final FriendSelectEvent event) {
@@ -40,7 +49,10 @@ public class ChatAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println("Chat with: " + friend);
+        if(friend != null) {
+            friendsPanel.setChatPanelVisible(true);
+            friendsPane.fireConversationStarted(friend);
+        }
     }
 
     public void setFriend(Friend friend) {
