@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -61,7 +60,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     private JLabel fullTimeLabel;
    
     @Resource private Icon warningIcon;
-    @Resource private Icon downloadIcon;
     @Resource private int progressBarWidth;
     @Resource private Color titleLabelColour;
     @Resource private Color statusLabelColour;
@@ -145,9 +143,6 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel = new JLabel();
         fullStatusLabel.setFont(statusFontPlainFull);
         fullStatusLabel.setForeground(statusLabelColour);
-        fullStatusLabel.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        fullStatusLabel.setIconTextGap(0);
-        fullStatusLabel.setIcon(downloadIcon);
         fullStatusLabel.setPreferredSize(new Dimension(20, 20));
         
         fullProgressBar = progressBarFactory.create();
