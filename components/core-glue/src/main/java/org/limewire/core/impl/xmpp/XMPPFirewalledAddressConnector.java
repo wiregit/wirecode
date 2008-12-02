@@ -109,6 +109,7 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
             socket.connect(firewalledAddress.getPublicAddress().getInetSocketAddress(), 20000, new ConnectObserver() {
                 @Override
                 public void handleConnect(Socket socket) throws IOException {
+                    LOG.debugf("handling socket: {0}", socket);
                     socketProcessor.get().processSocket(socket, "GIV");
                 }
                 @Override

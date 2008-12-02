@@ -172,6 +172,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     @Override
     public void send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
+        LOG.debug("send connect request");
         XMPPConnectionImpl connection = connections.peek();
         if (connection == null) {
             return;
@@ -179,6 +180,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
         connectRequest.setTo(userId);
         connectRequest.setFrom(connection.getLocalJid());
+        LOG.debugf("sending request: {0}", connectRequest);
         connection.sendPacket(connectRequest);
     }    
 }
