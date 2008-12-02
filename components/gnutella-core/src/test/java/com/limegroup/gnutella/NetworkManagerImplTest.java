@@ -16,6 +16,7 @@ import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.FirewalledAddress;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.rudp.RUDPUtils;
 
@@ -23,7 +24,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class NetworkManagerImplTest extends LimeTestCase {

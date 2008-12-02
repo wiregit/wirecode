@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.net.address;
+package org.limewire.net.address;
 
 import java.util.Comparator;
 import java.util.Set;

@@ -16,6 +16,7 @@ import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
+import org.limewire.net.address.FirewalledAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

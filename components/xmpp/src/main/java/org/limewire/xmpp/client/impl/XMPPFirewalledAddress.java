@@ -1,10 +1,10 @@
 package org.limewire.xmpp.client.impl;
 
 import org.limewire.io.Address;
+import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 
 public class XMPPFirewalledAddress implements Address {
 

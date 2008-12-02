@@ -19,6 +19,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressConnector;
+import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
@@ -30,7 +31,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 
 @Singleton
 public class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
