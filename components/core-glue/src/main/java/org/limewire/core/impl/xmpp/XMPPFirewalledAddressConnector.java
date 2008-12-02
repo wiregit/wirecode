@@ -20,14 +20,18 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.net.address.FirewalledAddress;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
@@ -43,13 +47,21 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
     private final ScheduledExecutorService backgroundExecutor;
     private final List<PushedSocketConnectObserver> observers = new CopyOnWriteArrayList<PushedSocketConnectObserver>();
 
+    private final Provider<UDPSelectorProvider> udpSelectorProvider;
+
+    private final Provider<SocketProcessor> socketProcessor;
+
     @Inject
     public XMPPFirewalledAddressConnector(ConnectRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
-            NetworkManager networkManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+            NetworkManager networkManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            Provider<UDPSelectorProvider> udpSelectorProvider,
+            Provider<SocketProcessor> socketProcessor) {
         this.connectRequestSender = connectRequestSender;
         this.pushDownloadManager = pushDownloadManager;
         this.networkManager = networkManager;
         this.backgroundExecutor = backgroundExecutor;
+        this.udpSelectorProvider = udpSelectorProvider;
+        this.socketProcessor = socketProcessor;
     }
     
     @Inject 
@@ -86,10 +98,29 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
          * and checking for it in the call below, but this should only change the address wrt to port vs
          * udp port which are usually the same anyways.
          */
-        PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
+        final PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
         observers.add(pushedSocketObserver);
+        boolean isFWT = !networkManager.acceptedIncomingConnection(); 
         connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), publicAddress, clientGuid, 
-                networkManager.acceptedIncomingConnection() ? 0 : networkManager.supportsFWTVersion());
+                 isFWT ? networkManager.supportsFWTVersion() : 0);
+        if (isFWT) {
+            LOG.debug("Starting fwt communication");
+            AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
+            socket.connect(firewalledAddress.getPublicAddress().getInetSocketAddress(), 20000, new ConnectObserver() {
+                @Override
+                public void handleConnect(Socket socket) throws IOException {
+                    socketProcessor.get().processSocket(socket, "GIV");
+                }
+                @Override
+                public void handleIOException(IOException iox) {
+                    pushedSocketObserver.handleIOException(iox);
+                }
+                @Override
+                public void shutdown() {
+                    pushedSocketObserver.handleIOException(new IOException("shutdown"));
+                }
+            });
+        }
         scheduleExpirerFor(pushedSocketObserver, 30 * 1000);
     }
 
@@ -149,6 +180,13 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
             if (acceptedOrFailed.compareAndSet(false, true)) {
                 LOG.debug("throwing connect timeout");
                 observer.handleIOException(new ConnectException("connect request timed out"));
+            }
+        }
+        
+        public void handleIOException(IOException ie) {
+            LOG.debug("handling io exception", ie);
+            if (acceptedOrFailed.compareAndSet(false, true)) {
+                observer.handleIOException(ie);
             }
         }
     }
