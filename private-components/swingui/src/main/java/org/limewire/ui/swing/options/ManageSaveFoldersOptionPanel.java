@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -192,7 +191,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     private class DisplayTextField extends JTextField {
         public DisplayTextField() {
             setEditable(false);
-            setBackground(Color.WHITE);
+            //setBackground(Color.WHITE);
             setColumns(40);
         }
     }

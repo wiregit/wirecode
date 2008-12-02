@@ -196,6 +196,7 @@ public class FilesOptionPanel extends OptionPanel {
             storeOptionPanel.setPreferredSize(new Dimension(350, 140));
             
             storePathTextField = new JTextField(40);
+            storePathTextField.setEditable(false);
             browseStorePathButton = new JButton(new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField));
             configureNamingButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     storeOptionPanel,I18n.tr("LimeWire Store File Organization"),

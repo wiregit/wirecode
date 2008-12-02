@@ -144,13 +144,13 @@ public class MiscOptionPanel extends OptionPanel {
 
             add(autoLoginCheckBox, "split, wrap");
 
-            add(new JLabel(I18n.tr("Sign in using")), "gapleft 25, split");
+            add(new JLabel(I18n.tr("Using")), "gapleft 25, split");
             add(serviceComboBox, "wrap");
 
-            add(new JLabel(I18n.tr("Username")), "gapleft 25, split");
+            add(new JLabel(I18n.tr("Username:")), "gapleft 25, split");
             add(usernameField, "wrap");
 
-            add(new JLabel(I18n.tr("Password")), "gapleft 25, split");
+            add(new JLabel(I18n.tr("Password:")), "gapleft 25, split");
             add(passwordField);
 
             // If there's an auto-login configuration, select it

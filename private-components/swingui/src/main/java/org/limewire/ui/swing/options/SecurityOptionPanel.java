@@ -117,18 +117,18 @@ public class SecurityOptionPanel extends OptionPanel {
         private JButton configureButton;
         
         public UnsafeTypesPanel() {
-            super(I18n.tr("Unsafe types"));
+            super(I18n.tr("Unsafe Categories"));
             
           unsafeOptionPanel = new UnsafeTypeOptionPanel(new OKDialogAction());
           unsafeOptionPanel.setPreferredSize(new Dimension(550, 160));
             
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
-                    unsafeOptionPanel, I18n.tr("Configure"),
-                    I18n.tr("Configure"), I18n.tr("Configure Documents and Programs")));
+                    unsafeOptionPanel, I18n.tr("Unsafe Categories"),
+                    I18n.tr("Configure..."), I18n.tr("Configure unsafe categories")));
             
             add(new JLabel(I18n.tr("For your safety, LimeWire disables you from:")),"wrap");
             add(new JLabel(I18n.tr("-Searching for and sharing Programs with anyone")), "gapleft 25, wrap");
-            add(new JLabel(I18n.tr("-Searching for and sharing Documents with the P2P Network")), "gapleft 25, wrap");
+            add(new JLabel(I18n.tr("-Sharing Documents with the P2P Network")), "gapleft 25, wrap");
             
             add(new JLabel("We strongly recommend you do not enable these settings"), "push");
             add(configureButton);

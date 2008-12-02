@@ -88,7 +88,7 @@ public class SearchOptionPanel extends OptionPanel {
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my most recent searches"));
             searchTabNumberCheckBox.setContentAreaFilled(false);
             
-            groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results"));
+            groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
             groupSimilarResults.setContentAreaFilled(false);
 
             clearNowButton = new JButton(I18n.tr("Clear Now"));

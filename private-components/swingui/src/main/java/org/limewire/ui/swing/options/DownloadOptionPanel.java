@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.options;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -146,7 +145,7 @@ public class DownloadOptionPanel extends OptionPanel {
             clearDownloadsCheckBox.setContentAreaFilled(false);
             downloadSaveTextField = new JTextField();
             downloadSaveTextField.setEditable(false);
-            downloadSaveTextField.setBackground(Color.WHITE);
+            //downloadSaveTextField.setBackground(Color.WHITE);
             browseSaveLocationButton = new JButton(new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField));
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);

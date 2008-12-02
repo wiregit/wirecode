@@ -20,7 +20,7 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
         setLayout(new MigLayout("gapy 10"));
         
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Programs with the P2P Network and my friends"));
-        documentCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share Documents with the P2P Network"));
+        documentCheckBox = new JCheckBox(I18n.tr("Allow me to share Documents with the P2P Network"));
         okButton = new JButton(okButtonAction);
         
         add(new JLabel(I18n.tr("Enabling these settings makes you more prone to viruses and accidently sharing private documents:")), "span 2, wrap");
