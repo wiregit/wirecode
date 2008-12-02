@@ -80,6 +80,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final ListenerSupport<FriendPresenceEvent> presenceSupport;
 
     private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
+    private final XMPPAddressRegistry xmppAddressRegistry;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -88,7 +89,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
                        ListenerSupport<FriendPresenceEvent> presenceSupport,
-                       EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster) {
+                       EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
@@ -96,6 +97,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
+        this.xmppAddressRegistry = xmppAddressRegistry;
         this.rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
             this.rosterListeners.addListener(configuration.getRosterListener());
@@ -213,7 +215,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     if(lastEvent != null) {
                         address = lastEvent.getSource();
                     }
-                    addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, presenceSupport);     
+                    addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, presenceSupport, xmppAddressRegistry);     
                 }                                   
                 connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 

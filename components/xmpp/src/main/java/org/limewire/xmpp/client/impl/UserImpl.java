@@ -295,7 +295,7 @@ public class UserImpl implements User {
 
     /**
      * This class encapsulates the actual writing of messages in the smack API.
-     *
+     *                                                                                                    
      * The message writer must take into account which presence is the current
      * active presence and set the chat participant appropriately
      * (set to jid identifying the presence, or the user id if no active presence)

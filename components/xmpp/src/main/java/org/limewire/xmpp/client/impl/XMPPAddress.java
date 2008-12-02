@@ -43,4 +43,18 @@ public class XMPPAddress implements PermanentAddress {
     public String toString() {
         return org.limewire.util.StringUtils.toString(this);
     }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof XMPPAddress)) {
+            return false;
+        }
+        XMPPAddress other = (XMPPAddress)obj;
+        return this.id.equals(other.id);
+    }
 }
