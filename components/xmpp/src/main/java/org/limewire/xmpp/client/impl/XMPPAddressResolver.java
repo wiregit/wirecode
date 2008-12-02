@@ -44,10 +44,14 @@ public class XMPPAddressResolver implements AddressResolver {
     
     private final ConnectivyFeatureListener connectivyFeatureListener = new ConnectivyFeatureListener();
 
+    private final SocketsManager socketsManager;
+
     @Inject
-    public XMPPAddressResolver(XMPPService xmppService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster) {
+    public XMPPAddressResolver(XMPPService xmppService, EventBroadcaster<ConnectivityChangeEvent> connectivityEventBroadcaster,
+            SocketsManager socketsManager) {
         this.xmppService = xmppService;
         this.connectivityEventBroadcaster = connectivityEventBroadcaster;
+        this.socketsManager = socketsManager;
         
     }
     
@@ -129,10 +133,18 @@ public class XMPPAddressResolver implements AddressResolver {
         } else {
             Address resolvedAddress = ((AddressFeature)resolvedPresence.getFeature(AddressFeature.ID)).getFeature();
             if (resolvedAddress instanceof FirewalledAddress) {
-                // if it's a firewalled address, keep xmpp info around to send pushes over xmpp
-                resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+                // if it's a firewalled address, see if sockets manager can resolve if further, i.e.
+                // if SameNATResolver can take care of it
+                if (socketsManager.canResolve(resolvedAddress)) {
+                    socketsManager.resolve(resolvedAddress, observer);
+                } else {
+                    // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
+                    resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+                    observer.resolved(resolvedAddress);
+                }
+            } else {
+                observer.resolved(resolvedAddress);
             }
-            observer.resolved(resolvedAddress);
         }
     }
     
