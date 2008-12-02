@@ -2,6 +2,11 @@ package org.limewire.ui.swing.library.nav;
 
 import org.limewire.core.api.friend.Friend;
 
+/**
+ * Fired as friends are selected on the left panel. 
+ * People interested in this event can inject the. 
+ * @Named("friendSelection") ListenerSupport<FriendSelectEvent>
+ */
 public class FriendSelectEvent {
 
     private final Friend friend;
