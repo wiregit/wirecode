@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -11,11 +12,23 @@ import org.limewire.listener.SwingSafePropertyChangeSupport;
 public class MockUploadItem implements UploadItem {
     
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+    private UploadState state;
+    private String fileName;
+    private long fileSize;
+    private long amtUploaded;
+    private Category category;
+    
+    public MockUploadItem(UploadState state, String fileName, long fileSize, long amtUploaded, Category category){
+        this.state = state;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+        this.amtUploaded = amtUploaded;
+        this.category = category;
+    }
     
     @Override
     public void cancel() {
-        // TODO Auto-generated method stub
-
+        setState(UploadState.CANCELED);
     }
 
     @Override
@@ -26,26 +39,22 @@ public class MockUploadItem implements UploadItem {
 
     @Override
     public String getFileName() {
-        // TODO Auto-generated method stub
-        return null;
+        return fileName;
     }
 
     @Override
     public long getFileSize() {
-        // TODO Auto-generated method stub
-        return 0;
+        return fileSize;
     }
 
     @Override
     public UploadState getState() {
-        // TODO Auto-generated method stub
-        return null;
+        return state;
     }
 
     @Override
     public long getTotalAmountUploaded() {
-        // TODO Auto-generated method stub
-        return 0;
+        return amtUploaded;
     }
 
     @Override
@@ -56,6 +65,22 @@ public class MockUploadItem implements UploadItem {
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
+    }
+    
+    private void setState(UploadState newState){
+        UploadState oldState = state;
+        state = newState;
+        support.firePropertyChange("state", oldState, state);
+    }
+    
+    @Override
+    public Category getCategory(){
+        return category;
+    }
+
+    @Override
+    public String getHost() {
+        return "Carmine";
     }
 
 }

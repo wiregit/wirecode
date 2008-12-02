@@ -4,16 +4,20 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
+import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.Uploader;
 
-public class CoreUploadItem implements UploadItem {
+class CoreUploadItem implements UploadItem {
 
     private Uploader uploader;
-    
+
+    private boolean isStopped = false;
+
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
 
     public CoreUploadItem(Uploader uploader) {
@@ -23,6 +27,8 @@ public class CoreUploadItem implements UploadItem {
     @Override
     public void cancel() {
         uploader.stop();
+        isStopped = true;
+        fireDataChanged();
     }
 
     @Override
@@ -42,6 +48,10 @@ public class CoreUploadItem implements UploadItem {
 
     @Override
     public UploadState getState() {
+        if (isStopped) {
+            return UploadState.CANCELED;
+        }
+
         switch (uploader.getState()) {
         case COMPLETE:
             return UploadState.DONE;
@@ -69,7 +79,7 @@ public class CoreUploadItem implements UploadItem {
             return UploadState.UNABLE_TO_UPLOAD;
 
         }
-        
+
         throw new IllegalStateException("Unknown Upload status : " + uploader.getState());
     }
 
@@ -88,7 +98,7 @@ public class CoreUploadItem implements UploadItem {
 
     @Override
     public boolean equals(Object obj) {
-        //equal if Uploaders are equal
+        // equal if Uploaders are equal
         if (this == obj)
             return true;
         if (obj == null)
@@ -108,13 +118,23 @@ public class CoreUploadItem implements UploadItem {
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         support.addPropertyChangeListener(listener);
     }
-    
+
     @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener){
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
         support.removePropertyChangeListener(listener);
     }
-    
+
     void fireDataChanged() {
         support.firePropertyChange("state", null, getState());
+    }
+
+    @Override
+    public Category getCategory() {
+        return CategoryConverter.categoryForFile(getFile());
+    }
+
+    @Override
+    public String getHost() {
+        return uploader.getHost();
     }
 }

@@ -3,6 +3,8 @@ package org.limewire.core.api.upload;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 
+import org.limewire.core.api.Category;
+
 /**
  * A single upload
  */
@@ -42,4 +44,15 @@ public interface UploadItem {
     public void addPropertyChangeListener(PropertyChangeListener listener);
     
     public void removePropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * @return the <code>Category</code> of the File being uploaded
+     */
+    public Category getCategory();
+    
+    /**
+     * returns the string representation of the IP Address
+     * of the host being uploaded to.
+     */
+    public String getHost();
 }
