@@ -1,11 +1,10 @@
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Random;
 
-import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteUtils;
 
 

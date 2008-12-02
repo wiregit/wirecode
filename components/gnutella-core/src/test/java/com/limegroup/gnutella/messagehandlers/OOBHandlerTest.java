@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
@@ -20,7 +21,6 @@ import org.limewire.util.BaseTestCase;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;

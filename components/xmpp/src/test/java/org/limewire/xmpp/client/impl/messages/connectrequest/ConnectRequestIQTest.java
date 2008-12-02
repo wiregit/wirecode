@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.limegroup.gnutella.GUID;
 
 public class ConnectRequestIQTest extends BaseTestCase {
 

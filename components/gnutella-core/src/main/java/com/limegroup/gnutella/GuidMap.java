@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.io.GUID;
+
 /**
  * A map of one GUID to another.
  * This supports the ability to declare that the mapping should expire

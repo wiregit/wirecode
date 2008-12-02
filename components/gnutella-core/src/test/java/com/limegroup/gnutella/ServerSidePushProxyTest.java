@@ -13,6 +13,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 

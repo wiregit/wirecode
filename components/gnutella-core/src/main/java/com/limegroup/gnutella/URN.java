@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.security.SHA1;
 import org.limewire.util.Base32;

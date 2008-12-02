@@ -12,6 +12,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.Arrays;
 
+import org.limewire.io.GUID;
 import org.limewire.util.Base32;
 
 import junit.framework.Test;

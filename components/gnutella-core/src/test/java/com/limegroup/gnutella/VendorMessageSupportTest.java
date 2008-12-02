@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.util.Iterator;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.GUID;
 
 import junit.framework.Test;
 

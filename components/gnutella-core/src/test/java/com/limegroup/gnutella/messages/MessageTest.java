@@ -2,10 +2,11 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 
+import org.limewire.io.GUID;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.Message.Network;
 

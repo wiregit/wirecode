@@ -9,13 +9,13 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.GUID;
 
 public class AbstractPushProxiesValueTest extends BaseTestCase {
 

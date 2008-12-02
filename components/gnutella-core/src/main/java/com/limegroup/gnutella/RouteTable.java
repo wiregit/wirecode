@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.GUID;
 import org.limewire.util.Base32;
 
 import com.limegroup.gnutella.messages.QueryReply;

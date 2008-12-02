@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.util.LimeTestCase;
 
 import junit.framework.Test;

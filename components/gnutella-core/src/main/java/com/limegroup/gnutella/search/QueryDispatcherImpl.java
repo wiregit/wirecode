@@ -14,10 +14,10 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.GUID;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ReplyHandler;
 
 /**

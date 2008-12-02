@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
+import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.TLSManager;
@@ -126,4 +128,12 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
     
     public int supportsFWTVersion();
 
+    /**
+     * Returns the external, public address of this peer. Will return an 
+     * {@link NetworkUtils#isValidIpPort(org.limewire.io.IpPort) invalid}
+     * address if no address is known yet.
+     * <p>
+     * Will return the external address whether the peer is firewalled or not.
+     */
+    public Connectable getPublicAddress();
 }

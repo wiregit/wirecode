@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.MediaType;
@@ -11,7 +12,6 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;

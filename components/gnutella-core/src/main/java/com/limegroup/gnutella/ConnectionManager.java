@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionAcceptor;

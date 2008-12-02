@@ -15,6 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
@@ -34,7 +35,6 @@ import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;

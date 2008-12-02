@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.io.GUID;
 import org.limewire.util.MediaType;
 
 import junit.framework.Test;

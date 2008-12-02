@@ -8,6 +8,7 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.inject.Providers;
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;

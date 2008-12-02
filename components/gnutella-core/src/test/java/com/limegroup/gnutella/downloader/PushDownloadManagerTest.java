@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
@@ -34,7 +35,6 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;

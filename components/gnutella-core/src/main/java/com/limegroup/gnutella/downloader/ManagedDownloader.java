@@ -3,7 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.net.Socket;
 import java.util.Collection;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ShareSettingsOverride;
 import com.limegroup.gnutella.altlocs.AlternateLocation;

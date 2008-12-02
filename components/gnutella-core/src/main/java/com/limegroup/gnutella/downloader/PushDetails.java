@@ -2,7 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Arrays;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 
 class PushDetails {
     

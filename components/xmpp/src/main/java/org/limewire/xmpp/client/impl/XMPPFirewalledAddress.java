@@ -1,0 +1,37 @@
+package org.limewire.xmpp.client.impl;
+
+import org.limewire.io.Address;
+import org.limewire.util.Objects;
+import org.limewire.util.StringUtils;
+
+import com.limegroup.gnutella.net.address.FirewalledAddress;
+
+public class XMPPFirewalledAddress implements Address {
+
+    private final XMPPAddress xmppAddress;
+    private final FirewalledAddress resolvedAddress;
+
+    public XMPPFirewalledAddress(XMPPAddress xmppAddress, FirewalledAddress resolvedAddress) {
+        this.xmppAddress = Objects.nonNull(xmppAddress, "xmppAddress");
+        this.resolvedAddress = Objects.nonNull(resolvedAddress, "resolvedAddress");
+    }
+    
+    @Override
+    public String getAddressDescription() {
+        return xmppAddress.getAddressDescription();
+    }
+    
+    public XMPPAddress getXmppAddress() {
+        return xmppAddress;
+    }
+    
+    public FirewalledAddress getFirewalledAddress() {
+        return resolvedAddress;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
+
+}

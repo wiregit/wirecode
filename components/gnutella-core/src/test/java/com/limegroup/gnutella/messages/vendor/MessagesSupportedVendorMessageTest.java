@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.util.ByteUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.MessageFactory;

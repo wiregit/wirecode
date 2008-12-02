@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -58,7 +59,7 @@ public final class PushManager implements EventListener<ConnectRequestEvent> {
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
         this.networkManager = networkManager;
-        // listenere is leaked, but both are singleton scope, so it's fine
+        // listener is leaked, but both are singleton scope, so it's fine
         connectRequestEventListenerSupport.addListener(this);
     }    
 

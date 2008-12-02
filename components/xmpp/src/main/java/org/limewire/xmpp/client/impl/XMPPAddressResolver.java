@@ -27,6 +27,7 @@ import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.net.address.FirewalledAddress;
 
 /**
  * Resolves addresses of type {@link XMPPAddress} by looking up the full jabber id 
@@ -126,7 +127,12 @@ public class XMPPAddressResolver implements AddressResolver {
         if (resolvedPresence == null) {
             observer.handleIOException(new IOException("Could not be resolved"));
         } else {
-            observer.resolved(((AddressFeature)resolvedPresence.getFeature(AddressFeature.ID)).getFeature());
+            Address resolvedAddress = ((AddressFeature)resolvedPresence.getFeature(AddressFeature.ID)).getFeature();
+            if (resolvedAddress instanceof FirewalledAddress) {
+                // if it's a firewalled address, keep xmpp info around to send pushes over xmpp
+                resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+            }
+            observer.resolved(resolvedAddress);
         }
     }
     

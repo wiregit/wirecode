@@ -6,8 +6,8 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;

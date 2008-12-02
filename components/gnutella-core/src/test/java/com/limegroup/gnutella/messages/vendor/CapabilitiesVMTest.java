@@ -7,11 +7,11 @@ import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
+import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;

@@ -6,6 +6,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 
+import org.limewire.io.GUID;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;

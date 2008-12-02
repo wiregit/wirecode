@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.io.GUID;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 

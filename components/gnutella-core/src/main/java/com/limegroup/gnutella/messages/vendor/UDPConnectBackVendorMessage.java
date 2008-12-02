@@ -5,11 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".

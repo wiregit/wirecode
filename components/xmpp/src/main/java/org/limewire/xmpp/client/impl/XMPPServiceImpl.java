@@ -3,7 +3,11 @@ package org.limewire.xmpp.client.impl;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.IQ.Type;
 import org.limewire.core.api.friend.FriendPresenceEvent;
+import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
@@ -14,6 +18,7 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -23,6 +28,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPErrorListener;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,7 +36,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {
+public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent>, ConnectRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
@@ -161,5 +167,17 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     synchronized List<? extends XMPPConnection> getConnections() {
         // Return a copy in case we modify the list while the caller's using it
         return new LinkedList<XMPPConnectionImpl>(connections);
+    }
+
+    @Override
+    public void send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
+        XMPPConnectionImpl connection = connections.peek();
+        if (connection == null) {
+            return;
+        }
+        ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
+        connectRequest.setTo(userId);
+        connectRequest.setFrom(connection.getLocalJid());
+        connection.sendPacket(connectRequest);
     }    
 }

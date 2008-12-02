@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.PushEndpoint;
 
 /**

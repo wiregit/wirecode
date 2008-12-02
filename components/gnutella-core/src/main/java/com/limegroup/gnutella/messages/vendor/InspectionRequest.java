@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.GUID;
 
 public interface InspectionRequest extends VendorMessage.ControlMessage {
     

@@ -10,7 +10,10 @@ import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 
 /**
  * A Guice-module for binding all net related activity.

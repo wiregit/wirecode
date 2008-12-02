@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Set;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;

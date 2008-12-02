@@ -4,9 +4,9 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;

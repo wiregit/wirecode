@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;

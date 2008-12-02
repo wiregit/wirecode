@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.dht.db;
 
+import org.limewire.io.GUID;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 

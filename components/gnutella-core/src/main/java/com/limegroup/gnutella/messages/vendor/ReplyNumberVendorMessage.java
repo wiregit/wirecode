@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".

@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 
 import junit.framework.Test;
 

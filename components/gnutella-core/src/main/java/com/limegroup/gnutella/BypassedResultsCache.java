@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.limewire.io.GUID;
+
 import com.google.inject.Provider;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 

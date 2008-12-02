@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.collection.Buffer;
+import org.limewire.io.GUID;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;

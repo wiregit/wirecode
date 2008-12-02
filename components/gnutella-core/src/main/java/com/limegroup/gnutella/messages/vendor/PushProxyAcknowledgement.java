@@ -5,11 +5,11 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.ByteOrder;
 
+import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".

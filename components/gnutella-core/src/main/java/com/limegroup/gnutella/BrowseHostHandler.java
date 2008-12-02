@@ -27,6 +27,7 @@ import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
+import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.BlockingConnectObserver;

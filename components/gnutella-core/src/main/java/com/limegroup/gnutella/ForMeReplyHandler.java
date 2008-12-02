@@ -20,6 +20,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;

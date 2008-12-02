@@ -7,10 +7,10 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 
 /** Keeps track of who needs a push, and who should be notified of of success or failure. */

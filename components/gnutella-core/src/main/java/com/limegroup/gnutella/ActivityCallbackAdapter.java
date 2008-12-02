@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;

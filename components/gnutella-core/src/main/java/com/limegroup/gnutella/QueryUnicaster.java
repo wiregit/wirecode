@@ -20,6 +20,7 @@ import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.AddressSecurityToken;

@@ -5,10 +5,10 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.KUID;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.util.KUIDUtils;

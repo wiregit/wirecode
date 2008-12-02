@@ -1,8 +1,8 @@
 package org.limewire.net;
 
 import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 
-import com.limegroup.gnutella.GUID;
 
 public class ConnectRequestEvent {
 

@@ -17,6 +17,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;

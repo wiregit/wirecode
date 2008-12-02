@@ -10,12 +10,12 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.util.Objects;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;

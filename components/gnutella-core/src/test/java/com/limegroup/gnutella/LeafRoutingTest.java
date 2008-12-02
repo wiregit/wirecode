@@ -19,6 +19,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.TestUtils;
 

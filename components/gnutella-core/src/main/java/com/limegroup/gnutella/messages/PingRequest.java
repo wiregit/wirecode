@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
 
 public interface PingRequest extends Message {
 

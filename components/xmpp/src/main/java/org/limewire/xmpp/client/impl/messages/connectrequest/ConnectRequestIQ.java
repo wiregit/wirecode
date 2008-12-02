@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import org.apache.commons.codec.binary.Base64;
 import org.jivesoftware.smack.packet.IQ;
 import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.Objects;
@@ -13,7 +14,6 @@ import org.limewire.util.StringUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.limegroup.gnutella.GUID;
 
 /**
  * IQ to be send to request the other peer to open a connection to this peer.

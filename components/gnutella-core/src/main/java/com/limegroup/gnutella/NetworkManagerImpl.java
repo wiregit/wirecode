@@ -17,6 +17,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
@@ -338,6 +339,11 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
     
+    @Override
+    public Connectable getPublicAddress() {
+        return getPublicAddress(!acceptedIncomingConnection());
+    }
+    
     private Connectable getPrivateAddress() {
         byte[] privateAddress = getNonForcedAddress();
         try {
@@ -472,4 +478,5 @@ public class NetworkManagerImpl implements NetworkManager {
             FACTORY.createRemoteBooleanSetting("IGNORE_SSL_EXCEPTIONS", true, "TLS.ignoreException");
     
     }
+
 }

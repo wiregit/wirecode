@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.util.TestUtils;
 
 

@@ -25,6 +25,7 @@ import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.lifecycle.Service;

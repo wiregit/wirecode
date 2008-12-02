@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.limewire.io.GUID;
 import org.limewire.mojito.KUID;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 
 /**

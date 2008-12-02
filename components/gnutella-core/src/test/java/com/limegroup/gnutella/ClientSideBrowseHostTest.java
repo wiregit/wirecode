@@ -21,6 +21,7 @@ import junit.framework.Test;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.Base32;

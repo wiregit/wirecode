@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.NetworkSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.MojitoDHT;
@@ -19,7 +20,6 @@ import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ExtendedEndpoint;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
