@@ -61,6 +61,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
 
     private static final String NAME = "__@internal@__";
 
+    
     private final NavPanel myLibrary;
     private final NavPanel p2pNetwork;
     private final NavPanel allFriends;
@@ -73,7 +74,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final MyLibraryMediator myLibraryMediator;
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
-    private final NavPanelFactory navPanelFactory;    
+    private final NavPanelFactory navPanelFactory;
+    
+    private Friend selectedFriend = null;
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
@@ -388,7 +391,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             @Override
             public void itemSelected(boolean selected) {
                 if(selected) {
+                    selectedFriend = friend;
                     ensureFriendVisible(friend);
+                } else {
+                    selectedFriend = null;
                 }
             }
         });
@@ -455,5 +461,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         public Map<String, FriendPresence> getFriendPresences() {
             return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public Friend getSelectedFriend() {
+        if(selectedFriend instanceof FriendAdapter) {
+            return null;
+        }
+        return selectedFriend;
     }
 }

@@ -16,5 +16,12 @@ public interface LibraryNavigator {
     
     /** Selects a specific item in your library. */
     void selectInLibrary(URN urn, Category category);
+    
+    /**
+     * Returns the selected friend in the library. 
+     * Will return null if no friend is selected, 
+     * or the friend is not a jabber user. 
+     */
+    Friend getSelectedFriend();
 
 }

@@ -2,16 +2,19 @@ package org.limewire.ui.swing.menu.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.JComponent;
+
 import org.limewire.core.api.friend.Friend;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
-import org.limewire.ui.swing.library.nav.FriendSelectEvent;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.nav.NavCategory;
+import org.limewire.ui.swing.nav.NavItem;
+import org.limewire.ui.swing.nav.NavSelectable;
+import org.limewire.ui.swing.nav.NavigationListener;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.api.client.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,24 +32,29 @@ public class ChatAction extends AbstractAction {
     final ChatFramePanel friendsPanel;
 
     @Inject
-    ChatAction(
-            ListenerSupport<FriendSelectEvent> friendSelectListenerSupport,
-            ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
+    ChatAction(ChatFriendListPane friendsPane, ChatFramePanel friendsPanel, final LibraryNavigator libraryNavigator, Navigator navigator) {
         super(I18n.tr("Chat"));
 
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
 
         // listen for changes in the selected friend
-        friendSelectListenerSupport.addListener(new EventListener<FriendSelectEvent>() {
+        navigator.addNavigationListener(new NavigationListener() {
+
             @Override
-            public void handleEvent(final FriendSelectEvent event) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        setFriend(event.getSelectedFriend());
-                    }
-                });
+            public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
+            }
+
+            @Override
+            public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
+            }
+
+            @Override
+            public void itemSelected(NavCategory category, NavItem navItem,
+                    NavSelectable selectable, JComponent panel) {
+                if(category == NavCategory.LIBRARY) {
+                    setFriend(libraryNavigator.getSelectedFriend());
+                }
             }
         });
 
@@ -74,7 +82,7 @@ public class ChatAction extends AbstractAction {
      * jabber user.
      */
     private void updateDisability() {
-        if (friend == null || friend.isAnonymous() || !(friend instanceof User)) {
+        if (friend == null || friend.isAnonymous()) {
             setEnabled(false);
         } else {
             setEnabled(true);
