@@ -49,8 +49,8 @@ class LoginPanel extends JXPanel {
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
-    private static final String AUTHENTICATION_ERROR = tr("Invalid username/password."); // See spec
-    private static final String NETWORK_ERROR = tr("Network error. Please try again later.");
+    private static final String AUTHENTICATION_ERROR = tr("Incorrect password.");
+    private static final String NETWORK_ERROR = tr("Network error.");
 
     private JComboBox serviceComboBox;
     private JTextField usernameField;
@@ -88,7 +88,7 @@ class LoginPanel extends JXPanel {
     private void initComponents() {
         serviceComboBox = new JComboBox();
         for(String label : accountManager.getLabels()) {
-            serviceComboBox.addItem(label); // FIXME: icons?
+            serviceComboBox.addItem(label);
         }
         serviceComboBox.addItemListener(new ItemListener() {
             @Override
@@ -153,27 +153,18 @@ class LoginPanel extends JXPanel {
             passwordField.setText("");
             autoLoginCheckBox.setSelected(false);
         }
-        authFailedLabel.setVisible(false);
     }
 
     void disconnected(Exception reason) {
         setSignInComponentsEnabled(true);
         populateInputs();
-        if(reason != null) {
-            loginFailed(reason);
-        } else {
-            authFailedLabel.setVisible(false);
-        }
-    }
-
-    private void loginFailed(Exception reason) {
-        authFailedLabel.setVisible(true);
-        if (reason.getMessage().contains("authentication failed")) {
+        if(reason.getMessage().contains("auth")) {
             authFailedLabel.setText(AUTHENTICATION_ERROR);
             passwordField.setText("");
         } else {
             authFailedLabel.setText(NETWORK_ERROR);
         }
+        authFailedLabel.setVisible(true);
     }
 
     private void setSignInComponentsEnabled(boolean isEnabled) {

@@ -168,15 +168,6 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel.setVisible(false);
     }
 
-    void disconnected(Exception reason, XMPPConnectionConfiguration config) {
-        setConfig(config);
-        optionsBox.setVisible(false);
-        signoutBox.setVisible(false);
-        signInButton.setVisible(true);
-        switchUserButton.setVisible(true);
-        loggingInLabel.setVisible(false);
-    }
-
     void connecting(XMPPConnectionConfiguration config) {
         autoLogin(config);
     }

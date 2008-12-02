@@ -131,7 +131,7 @@ public class MiscOptionPanel extends OptionPanel {
 
             serviceComboBox = new JComboBox();
             for(String label : accountManager.getLabels())
-                serviceComboBox.addItem(label); // FIXME: icons?
+                serviceComboBox.addItem(label);
             serviceComboBox.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent e) {

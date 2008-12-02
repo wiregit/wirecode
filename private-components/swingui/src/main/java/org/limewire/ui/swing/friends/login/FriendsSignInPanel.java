@@ -37,8 +37,6 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     private final XMPPService xmppService;
     private final XMPPAccountConfigurationManager accountManager;
     
-    private long lastFailedTime = -1;
-    
     @Inject
     FriendsSignInPanel(LoginPanel loginPanel,
                        LoggedInPanel loggedInPanel,
@@ -110,15 +108,9 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
             @Override
             public void run() {
                 xmppService.logout();
-                if(switchUser) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            accountManager.setAutoLoginConfig(null);
-                            signIn();
-                        }
-                    });
-                }
+                shareLabel.setVisible(!switchUser);
+                loginPanel.setVisible(switchUser);
+                loggedInPanel.setVisible(false);
             }
         });
     }
@@ -138,32 +130,10 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     }
     
     private void disconnected(Exception reason) {
-        XMPPAccountConfiguration config = accountManager.getAutoLoginConfig();
-        long now = System.currentTimeMillis();
-        boolean ignore = false;
-        
-        if(reason == null && config != null) {
-            shareLabel.setVisible(false);
-            loginPanel.setVisible(false);
-            loggedInPanel.setVisible(true);
-        } else {
-            if(reason == null && loginPanel.isVisible() && now-lastFailedTime<500) {
-                // Ignore failures with no reason if a failure with a reason came
-                // in shortly ago.  This is necessary because we get two
-                // disconnection events from smack on a failed login.
-                ignore = true;
-            } else {
-                shareLabel.setVisible(reason == null);
-                loginPanel.setVisible(reason != null);
-                loggedInPanel.setVisible(false);
-            }
-        }
-        
-        if(!ignore) {
-            lastFailedTime = now;
-            loginPanel.disconnected(reason);
-            loggedInPanel.disconnected(reason, config);
-        }
+        loginPanel.disconnected(reason);
+        shareLabel.setVisible(false);
+        loginPanel.setVisible(true);
+        loggedInPanel.setVisible(false);
     }
     
     private void autoLogin(XMPPAccountConfiguration config) {
@@ -219,7 +189,12 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                     break;
                 case DISCONNECTED:
                 case CONNECT_FAILED:
-                    disconnected(event.getData());
+                    // Ignore duplicate events caused by authentication
+                    // errors and events caused by deliberately signing
+                    // out or switching user
+                    Exception reason = event.getData();
+                    if(reason != null)
+                        disconnected(reason);
                     break;
                 }
             }
