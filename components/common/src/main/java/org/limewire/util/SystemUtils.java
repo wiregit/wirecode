@@ -36,9 +36,7 @@ public class SystemUtils {
                 }
             } else if (OSUtils.isMacOSX()) {
                 if(OSUtils.isMacOSX105()) {
-                    System.loadLibrary("SystemUtilitiesLeopard");
-                } else { 
-                    System.loadLibrary("SystemUtilitiesTiger");
+                    System.loadLibrary("SystemUtilities");
                 }
             }
             

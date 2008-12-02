@@ -138,7 +138,7 @@
 		F95A28D20DCBA50900468CF3 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		F95A29A20DCBB0A300468CF3 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F95A29C00DCBB65400468CF3 /* System.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = System.framework; path = /System/Library/Frameworks/System.framework; sourceTree = "<absolute>"; };
-		F95A29DC0DCBB90D00468CF3 /* libSystemUtilitiesLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSystemUtilitiesLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
+		F95A29DC0DCBB90D00468CF3 /* libSystemUtilities.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSystemUtilities.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9657FAD0DA1454100F02016 /* Dockjnilib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Dockjnilib.m; sourceTree = "<group>"; };
 		F9657FAE0DA1454100F02016 /* GURLjnilib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GURLjnilib.c; sourceTree = "<group>"; };
 		F9657FB50DA1462300F02016 /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
@@ -280,7 +280,7 @@
 				F9980CC40DAD38FB005E88C9 /* libGrowlTiger.jnilib */,
 				F96C68CA0DCEAECA006A4F2B /* libGrowl.jnilib */,
 				F9B18DB90DB3F14400F89148 /* libSystemUtilitiesTiger.jnilib */,
-				F95A29DC0DCBB90D00468CF3 /* libSystemUtilitiesLeopard.jnilib */,
+				F95A29DC0DCBB90D00468CF3 /* libSystemUtilities.jnilib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -416,7 +416,7 @@
 			);
 			name = "SystemUtilities Leopard";
 			productName = GURL;
-			productReference = F95A29DC0DCBB90D00468CF3 /* libSystemUtilitiesLeopard.jnilib */;
+			productReference = F95A29DC0DCBB90D00468CF3 /* libSystemUtilities.jnilib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		F96581080DA1764500F02016 /* Dock */ = {
@@ -794,9 +794,10 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = SystemUtilitiesLeopard;
+				PRODUCT_NAME = SystemUtilities;
 				SDKROOT = macosx10.5;
 				USER_HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

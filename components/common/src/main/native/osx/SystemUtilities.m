@@ -47,14 +47,9 @@ JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setFileWriteable
 
 
 JNIEXPORT jlong JNICALL Java_org_limewire_util_SystemUtils_idleTime
-  (JNIEnv *env, jclass clazz) {
-    double idleTime = CGSSecondsSinceLastInputEvent(-1);
-        
-    //On MDD Powermacs, the above function will return a large value when the machine is active (-1?).
-    //Here we check for that value and correctly return a 0 idle time.
-    if(idleTime >= 18446744000.0) idleTime = 0.0; //18446744073.0
-
-    return (jlong)idleTime*1000;
+  (JNIEnv *env, jclass clazz) {  
+	CFTimeInterval timeInterval = CGEventSourceSecondsSinceLastEventType (kCGEventSourceStateCombinedSessionState, kCGAnyInputEventType);
+	return (jlong)(1000.0 * timeInterval);    
 }
 
 JNIEXPORT jint JNICALL Java_org_limewire_util_SystemUtils_setOpenFileLimit0
