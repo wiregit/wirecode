@@ -167,7 +167,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         allFriends.getActionMap().put(NavKeys.MOVE_UP, p2pNetwork.getAction());
         allFriends.getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(allLists[0], true));
         for(int i = 0; i < allLists.length; i++) {
-            // Move up action goes to My Library if first
+            // Move up action goes to all friends if first
             if(i == 0) {
                 allLists[i].getActionMap().put(NavKeys.MOVE_UP, new AbstractAction() {
                     @Override

@@ -84,23 +84,14 @@ class MyLibraryPanel extends LibraryPanel {
         this.shareListManager = shareListManager;
         this.allFriends = allFriends;
         this.tableFactory = tableFactory;
-        this.categoryIconManager = categoryIconManager;
-       
-        loadHeader();
-        loadSelectionPanel();
+        this.categoryIconManager = categoryIconManager;       
+
+        setHeaderTitle(I18n.tr("My Library"));
+        shareAllPanel = new LibrarySharePanel(allFriends);
+        shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
         createMyCategories(eventList);
         
         selectFirst();
-    }
-
-    @Override
-    public void loadHeader() {
-        shareAllPanel = new LibrarySharePanel(allFriends);
-        shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
-    }
-
-    @Override
-    public void loadSelectionPanel() {
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {

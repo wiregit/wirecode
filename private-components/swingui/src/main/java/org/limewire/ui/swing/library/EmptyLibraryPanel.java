@@ -23,8 +23,6 @@ import com.google.inject.assistedinject.AssistedInject;
  * JXLayer disabling the main component
  */
 public class EmptyLibraryPanel extends LibraryPanel {
-
-    private final ButtonDecorator buttonDecorator;
     
     private final FriendLibraryMediator mediator;
         
@@ -35,19 +33,12 @@ public class EmptyLibraryPanel extends LibraryPanel {
             LimeHeaderBarFactory headerBarFactory,
             ButtonDecorator buttonDecorator) {
         super(friend, true, headerBarFactory);
-
-        this.buttonDecorator = buttonDecorator;        
+  
         this.mediator = mediator;
 
-        loadHeader();
-        loadSelectionPanel();
+        addShareButton(new ViewSharedLibraryAction(), buttonDecorator);
 
         createEmptyPanel(messageComponent);
-    }
-
-    @Override
-    public void loadHeader() {
-        enableButton(new ViewSharedLibraryAction(), buttonDecorator);
     }
     
     private void createEmptyPanel(JComponent component) {
@@ -62,15 +53,11 @@ public class EmptyLibraryPanel extends LibraryPanel {
     protected void addMainPanels() {
     }
 
-    @Override
-    public void loadSelectionPanel() {
-    }
-
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", friend.getRenderName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", friend.getRenderName()));
+            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getRenderName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getRenderName()));
         }
         
         @Override

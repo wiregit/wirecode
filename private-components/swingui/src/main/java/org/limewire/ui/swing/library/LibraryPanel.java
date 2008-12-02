@@ -29,11 +29,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.util.ButtonDecorator;
@@ -51,27 +51,26 @@ import ca.odell.glazedlists.event.ListEventListener;
  * added to change the view of the library category on the right/main
  * panel
  */
-public abstract class LibraryPanel extends JPanel implements Disposable {
+public class LibraryPanel extends JPanel implements Disposable {
     
     private final Map<Category, ButtonItem> categoryTables = new HashMap<Category, ButtonItem>();
     private final List<Category> categoryOrder = new ArrayList<Category>();
     private final List<Disposable> disposableList = new ArrayList<Disposable>();
     
-    protected final JPanel cardPanel = new JPanel();
+    private final JPanel cardPanel = new JPanel();
     private final CardLayout cardLayout = new CardLayout();
     
     private ButtonItem currentItem = null;
 
-    protected final JPanel selectionPanel = new JPanel();
-    protected final Friend friend;
-    protected JXPanel headerPanel;    
+    private final JPanel selectionPanel = new JPanel();
+    private final Friend friend;
+    private final LimeHeaderBar headerPanel;    
     
     private final boolean isLibraryPanel;
     private final Next next = new Next();
     private final Prev prev = new Prev();
-    
-    private final PromptTextField filterField;
-    private JXButton shareButton;
+
+    private final PromptTextField filterField;        
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
         setLayout(new MigLayout("fill, gap 0, insets 0", "[][grow]", "[][grow]"));
@@ -79,14 +78,30 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         cardPanel.setLayout(cardLayout);
         
         this.friend = friend;
-        this.isLibraryPanel = isLibraryPanel;
+        this.isLibraryPanel = isLibraryPanel;        
+        this.filterField = new PromptTextField(I18n.tr("Filter"));
         
-        filterField = new PromptTextField(I18n.tr("Filter"));
-        createHeader(headerBarFactory);
+		String renderName = friend == null ? "Unknown" : friend.getRenderName();
+        if(isLibraryPanel) {
+            headerPanel = headerBarFactory.createBasic(I18n.tr("{0}'s Library", renderName));
+        } else {
+            headerPanel = headerBarFactory.createSpecial(I18n.tr("Sharing with {0}", renderName));
+        }
+        headerPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, filly", "[]push[]", ""));
+        headerPanel.add(filterField, "cell 1 0, right, gapafter 10");
+        
         createSelectionPanel();
         
         add(headerPanel, "span, growx, wrap");
         addMainPanels();
+    }
+    
+    protected Friend getFriend() {
+        return friend;
+    }
+    
+    protected void setHeaderTitle(String title) {
+        headerPanel.setText(title);
     }
     
     protected void addMainPanels() {
@@ -94,32 +109,17 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    private void createHeader(LimeHeaderBarFactory headerBarFactory) {
-        if (isLibraryPanel) {
-            headerPanel = headerBarFactory.createBasic(getTitle(friend));
-        } 
-        else {
-            headerPanel = headerBarFactory.createSpecial(getSharingTitle(friend));
-        }        
-        headerPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, filly", "[]push[]", ""));
-        headerPanel.add(filterField, "cell 1 0, right, gapafter 10");     
-    }
-    
-    public void enableButton(Action action, ButtonDecorator buttonDecorator) {
-        shareButton = new JXButton(action);
+    protected void addShareButton(Action action, ButtonDecorator buttonDecorator) {
+        JXButton shareButton = new JXButton(action);
         buttonDecorator.decorateDarkFullButton(shareButton);
         headerPanel.add(shareButton, "cell 0 0, left");
     }
-    
-    public abstract void loadHeader();
     
     public void createSelectionPanel() {
         selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap", "[125!]", ""));
     }
     
-    public abstract void loadSelectionPanel();
-    
-    public void select(Category id) {        
+    protected void select(Category id) {        
         if(currentItem != null)
             currentItem.fireSelected(false);
         
@@ -129,11 +129,11 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         cardLayout.show(cardPanel, id.name());
     }
     
-    public void selectFirst() {
+    protected void selectFirst() {
         select(categoryOrder.get(0));
     }
     
-    public JTextComponent getFilterTextField() {
+    protected JTextComponent getFilterTextField() {
         return filterField;
     }
     
@@ -391,13 +391,4 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
             return button;
         }
     }    
-    
-    
-    private static String getTitle(Friend friend) {
-        return (friend == null) ? I18n.tr("My Library") : I18n.tr("{0}'s Library", friend.getRenderName());
-    }
-    
-    private static String getSharingTitle(Friend friend) {
-        return I18n.tr("Sharing with {0}", friend.getRenderName());
-    }
 }

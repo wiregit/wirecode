@@ -13,7 +13,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -75,10 +75,9 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
     private final CategoryIconManager categoryIconManager;
     private final BaseLibraryMediator basePanel;
     private final FriendFileList friendFileList;
-    private final ButtonDecorator buttonDecorator;
     
-    private final Map<Category, LockableUI> locked = new HashMap<Category, LockableUI>();
-    private final Map<Category, SharingSelectionPanel> listeners = new HashMap<Category, SharingSelectionPanel>();
+    private final Map<Category, LockableUI> locked = new EnumMap<Category, LockableUI>(Category.class);
+    private final Map<Category, SharingSelectionPanel> listeners = new EnumMap<Category, SharingSelectionPanel>(Category.class);
     
     @AssistedInject
     public SharingLibraryPanel( @Assisted BaseLibraryMediator basePanel,
@@ -96,24 +95,13 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         this.tableFactory = tableFactory;
         this.basePanel = basePanel;
         this.friendFileList = friendFileList;
-        this.buttonDecorator = buttonDecorator;
         
         this.friendFileList.addPropertyChangeListener(this);
         
-        loadHeader();
-        loadSelectionPanel();
+        addShareButton(new BackToLibraryAction(), buttonDecorator);
         createMyCategories(eventList, friend, friendFileList);
         
         selectFirst();
-    }
-        
-    @Override
-    public void loadHeader() {
-        enableButton(new BackToLibraryAction(), buttonDecorator);
-    }
-    
-    @Override
-    public void loadSelectionPanel() {
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList, Friend friend, LocalFileList friendFileList) {
@@ -369,7 +357,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
             messagePanel = new JPanel(new MigLayout("insets 5, gapy 10, wrap, alignx 50%"));
             messagePanel.setBackground(new Color(209,247,144));
             
-            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, friend.getRenderName()));
+            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, getFriend().getRenderName()));
             FontUtils.setSize(label, 12);
             FontUtils.bold(label);
             

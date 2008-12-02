@@ -229,7 +229,7 @@ public class NavPanel extends JXPanel {
     }
     
     public void updateLibrary(EventList<RemoteFileItem> eventList, LibraryState state) {
-        libraryPanel.createLibraryPanel(eventList, state);
+        libraryPanel.showLibraryPanel(eventList, state);
     }
 
     public boolean hasSelection() {

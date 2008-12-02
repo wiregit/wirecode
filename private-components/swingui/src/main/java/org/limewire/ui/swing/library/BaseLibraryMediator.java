@@ -19,7 +19,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
     private CardLayout cardLayout;
 
     private JComponent libraryComponent = null;
-    protected JComponent sharingComponent = null;
+    private JComponent sharingComponent = null;
     
     public BaseLibraryMediator() {
         cardLayout = new CardLayout();
@@ -27,7 +27,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
         setLayout(cardLayout);
     }
     
-    public void setLibraryCard(JComponent panel) {
+    protected void setLibraryCard(JComponent panel) {
         if(libraryComponent != null) {
             ((Disposable)libraryComponent).dispose();
             remove(libraryComponent);
@@ -37,7 +37,11 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
         add(panel, LIBRRY_CARD);
     }
     
-    public void setSharingCard(JComponent panel) {
+    protected boolean isSharingCardSet() {
+        return sharingComponent != null;
+    }
+    
+    protected void setSharingCard(JComponent panel) {
         if(sharingComponent != null) {
             ((Disposable)sharingComponent).dispose();
             remove(sharingComponent);
@@ -52,7 +56,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
         cardLayout.show(this, LIBRRY_CARD);
     }
     
-    public void showSharingCard() {
+    protected void showSharingCard() {
         cardLayout.show(this, SHARING_CARD);
     }
 

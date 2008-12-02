@@ -39,7 +39,6 @@ public class FriendLibraryPanel extends LibraryPanel {
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
     private final FriendLibraryMediator mediator;
-    private final ButtonDecorator buttonDecorator;
     
     @AssistedInject
     public FriendLibraryPanel(@Assisted Friend friend,
@@ -58,26 +57,15 @@ public class FriendLibraryPanel extends LibraryPanel {
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
-        this.mediator = mediator;
-        this.buttonDecorator = buttonDecorator;
-        
+        this.mediator = mediator;        
 
-        loadHeader();
-        loadSelectionPanel();
+        //don't show share button for browse hosts
+        if(!friend.isAnonymous()) {
+            addShareButton(new ViewSharedLibraryAction(), buttonDecorator);
+        }
         createMyCategories(eventList, friend);   
         
         selectFirst();
-    }
-
-    @Override
-    public void loadHeader() {
-        //don't show share button for browse hosts
-        if(!friend.isAnonymous())
-            enableButton(new ViewSharedLibraryAction(), buttonDecorator);
-    }
-    
-    @Override
-    public void loadSelectionPanel() {
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<RemoteFileItem> eventList, Friend friend) {       
@@ -115,8 +103,8 @@ public class FriendLibraryPanel extends LibraryPanel {
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", friend.getRenderName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", friend.getRenderName()));
+            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getRenderName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getRenderName()));
         }
         
         @Override

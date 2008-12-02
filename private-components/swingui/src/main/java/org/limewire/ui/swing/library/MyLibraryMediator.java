@@ -17,7 +17,6 @@ public class MyLibraryMediator extends BaseLibraryMediator {
     
     @Inject
     public MyLibraryMediator(MyLibraryFactory factory) {
-        super();
         this.factory = factory;
     }
     

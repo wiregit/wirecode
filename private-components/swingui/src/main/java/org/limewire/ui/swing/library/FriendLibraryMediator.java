@@ -42,7 +42,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
         setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new OffLineMessageComponent()));
     }
     
-    public void createLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
+    public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             setLibraryPanel = false;
@@ -94,7 +94,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
 
     @Override
     public void showSharingCard() {
-        if(sharingComponent == null) {
+        if(!isSharingCardSet()) {
             setSharingCard(sharingFactory.createSharingLibrary(this, friend, 
                     libraryManager.getLibraryManagedList().getSwingModel(),
                     shareListManager.getOrCreateFriendShareList(friend)));
