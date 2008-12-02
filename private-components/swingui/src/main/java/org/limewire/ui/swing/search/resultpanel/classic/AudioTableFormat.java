@@ -57,7 +57,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
         switch (index) {
             case FROM_INDEX: return vsr;
-            case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
+            case NAME_INDEX: return (getProperty(FilePropertyKey.TITLE) == null) ? getProperty(FilePropertyKey.NAME) : getProperty(FilePropertyKey.TITLE);
             case ARTIST_INDEX: return getProperty(FilePropertyKey.AUTHOR);
             case ALBUM_INDEX: return getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
