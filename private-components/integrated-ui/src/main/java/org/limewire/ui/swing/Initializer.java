@@ -34,6 +34,7 @@ import org.limewire.ui.swing.components.SplashWindow;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LocaleUtils;
+import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.wizard.IntentDialog;
 import org.limewire.util.CommonUtils;
@@ -54,7 +55,6 @@ import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.browser.ExternalControl;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
-import com.limegroup.gnutella.util.MacOSXUtils;
 
 /** Initializes (creates, starts, & displays) the LimeWire Core & UI. */
 public final class Initializer {

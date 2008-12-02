@@ -29,6 +29,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		ACB6479E0EE597D300D111F8 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ACB6479D0EE597D300D111F8 /* Growl.framework */; };
 		F95A28C10DCBA48F00468CF3 /* GURLjnilib.c in Sources */ = {isa = PBXBuildFile; fileRef = F9657FAE0DA1454100F02016 /* GURLjnilib.c */; };
 		F95A28C30DCBA48F00468CF3 /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9657FB50DA1462300F02016 /* JavaVM.framework */; };
 		F95A29A30DCBB0A300468CF3 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F95A29A20DCBB0A300468CF3 /* ApplicationServices.framework */; };
@@ -62,8 +63,6 @@
 		F9AE53EB0DAC02D000122CBF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9AE53EA0DAC02D000122CBF /* Foundation.framework */; };
 		F9B18DB40DB3F14400F89148 /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9657FB50DA1462300F02016 /* JavaVM.framework */; };
 		F9B18DBA0DB3F17500F89148 /* SystemUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B18DAD0DB3F13B00F89148 /* SystemUtilities.m */; };
-		F9C0A9770E0176AB00DFE913 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C0A9760E0176AB00DFE913 /* Growl.framework */; };
-		F9C0A9780E0176AB00DFE913 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C0A9760E0176AB00DFE913 /* Growl.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -133,6 +132,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		ACB6479D0EE597D300D111F8 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = ../../../../../../lib/native/osx/Growl.framework; sourceTree = SOURCE_ROOT; };
 		D2AAC0630554660B00DB518D /* libGURLTiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGURLTiger.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F95A28C80DCBA48F00468CF3 /* libGURLLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGURLLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F95A28D20DCBA50900468CF3 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
@@ -141,12 +141,11 @@
 		F95A29DC0DCBB90D00468CF3 /* libSystemUtilitiesLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSystemUtilitiesLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9657FAD0DA1454100F02016 /* Dockjnilib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Dockjnilib.m; sourceTree = "<group>"; };
 		F9657FAE0DA1454100F02016 /* GURLjnilib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = GURLjnilib.c; sourceTree = "<group>"; };
-		F9657FB40DA1462300F02016 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		F9657FB50DA1462300F02016 /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = /System/Library/Frameworks/JavaVM.framework; sourceTree = "<absolute>"; };
 		F965808F0DA1466600F02016 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		F96581130DA1764500F02016 /* libDock.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libDock.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F96C68AF0DCEAD97006A4F2B /* libMacOSXUtilsLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libMacOSXUtilsLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
-		F96C68CA0DCEAECA006A4F2B /* libGrowlLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGrowlLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
+		F96C68CA0DCEAECA006A4F2B /* libGrowl.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGrowl.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9980CC40DAD38FB005E88C9 /* libGrowlTiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGrowlTiger.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9980CCA0DAD3A8E005E88C9 /* Growl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Growl.m; sourceTree = "<group>"; };
 		F9AE53E50DAC00B500122CBF /* libMacOSXUtilsTiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libMacOSXUtilsTiger.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -154,7 +153,6 @@
 		F9AE53EA0DAC02D000122CBF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		F9B18DAD0DB3F13B00F89148 /* SystemUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SystemUtilities.m; sourceTree = "<group>"; };
 		F9B18DB90DB3F14400F89148 /* libSystemUtilitiesTiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSystemUtilitiesTiger.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
-		F9C0A9760E0176AB00DFE913 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = ../../../../../../lib/native/osx/Growl.framework; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,7 +210,7 @@
 				F96C68C30DCEAECA006A4F2B /* JavaVM.framework in Frameworks */,
 				F96C68C40DCEAECA006A4F2B /* Cocoa.framework in Frameworks */,
 				F96C68C50DCEAECA006A4F2B /* Foundation.framework in Frameworks */,
-				F9C0A9780E0176AB00DFE913 /* Growl.framework in Frameworks */,
+				ACB6479E0EE597D300D111F8 /* Growl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,7 +221,6 @@
 				F9980CBE0DAD38FB005E88C9 /* JavaVM.framework in Frameworks */,
 				F9980CBF0DAD38FB005E88C9 /* Cocoa.framework in Frameworks */,
 				F9980CC00DAD38FB005E88C9 /* Foundation.framework in Frameworks */,
-				F9C0A9770E0176AB00DFE913 /* Growl.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,7 +278,7 @@
 				F9AE53E50DAC00B500122CBF /* libMacOSXUtilsTiger.jnilib */,
 				F96C68AF0DCEAD97006A4F2B /* libMacOSXUtilsLeopard.jnilib */,
 				F9980CC40DAD38FB005E88C9 /* libGrowlTiger.jnilib */,
-				F96C68CA0DCEAECA006A4F2B /* libGrowlLeopard.jnilib */,
+				F96C68CA0DCEAECA006A4F2B /* libGrowl.jnilib */,
 				F9B18DB90DB3F14400F89148 /* libSystemUtilitiesTiger.jnilib */,
 				F95A29DC0DCBB90D00468CF3 /* libSystemUtilitiesLeopard.jnilib */,
 			);
@@ -291,9 +288,8 @@
 		F9657FBE0DA1462800F02016 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F9C0A9760E0176AB00DFE913 /* Growl.framework */,
+				ACB6479D0EE597D300D111F8 /* Growl.framework */,
 				F95A29A20DCBB0A300468CF3 /* ApplicationServices.framework */,
-				F9657FB40DA1462300F02016 /* Carbon.framework */,
 				F965808F0DA1466600F02016 /* Cocoa.framework */,
 				F95A28D20DCBA50900468CF3 /* CoreServices.framework */,
 				F9AE53EA0DAC02D000122CBF /* Foundation.framework */,
@@ -471,7 +467,7 @@
 			);
 			name = "Growl Leopard";
 			productName = GURL;
-			productReference = F96C68CA0DCEAECA006A4F2B /* libGrowlLeopard.jnilib */;
+			productReference = F96C68CA0DCEAECA006A4F2B /* libGrowl.jnilib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		F9980CB90DAD38FB005E88C9 /* Growl Tiger */ = {
@@ -891,8 +887,9 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = Dock;
+				PRODUCT_NAME = Growl;
 				USER_HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -910,11 +907,16 @@
 					"\\\"$(SRCROOT)/../../../Shared/Xcode/Deployment\\\"",
 					"\"$(SRCROOT)/../../../../../../lib/native/osx\"",
 				);
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
 				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = GrowlLeopard;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				PRODUCT_NAME = Growl;
 				SDKROOT = macosx10.5;
 				USER_HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				VALID_ARCHS = x86_64;
+				WARNING_CFLAGS = "";
 			};
 			name = Release;
 		};

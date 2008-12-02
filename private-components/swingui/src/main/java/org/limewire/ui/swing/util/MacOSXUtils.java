@@ -17,15 +17,7 @@ public class MacOSXUtils {
     static {
         if (OSUtils.isMacOSX105()) {
             try {
-                System.loadLibrary("MacOSXUtilsLeopard");
-            }
-            catch (UnsatisfiedLinkError err) {
-                ErrorService.error(err);
-            }
-        }
-        else if (OSUtils.isAnyMac()) {
-            try {
-                System.loadLibrary("MacOSXUtilsTiger");
+                System.loadLibrary("MacOSXUtils");
             }
             catch (UnsatisfiedLinkError err) {
                 ErrorService.error(err);

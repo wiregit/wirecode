@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-#define OS_NATIVE(func) Java_com_limegroup_gnutella_util_MacOSXUtils_##func
+#define OS_NATIVE(func) Java_org_limewire_ui_swing_util_MacOSXUtils_##func
 
 JNIEXPORT jstring JNICALL OS_NATIVE(GetCurrentFullUserName)
 	(JNIEnv *env, jobject clazz)
