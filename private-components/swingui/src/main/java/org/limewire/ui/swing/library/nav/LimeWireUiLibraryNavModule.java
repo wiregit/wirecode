@@ -7,17 +7,17 @@ import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
+import com.google.inject.assistedinject.FactoryProvider;
 
 public class LimeWireUiLibraryNavModule extends AbstractModule {
     
     @Override
     protected void configure() {
         EventMulticaster<FriendSelectEvent> friendSelectionMulticaster = new EventMulticasterImpl<FriendSelectEvent>();
-        bind(new TypeLiteral<ListenerSupport<FriendSelectEvent>>(){}).annotatedWith(Names.named("friendSelection")).toInstance(friendSelectionMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<FriendSelectEvent>>(){}).annotatedWith(Names.named("friendSelection")).toInstance(friendSelectionMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FriendSelectEvent>>(){}).toInstance(friendSelectionMulticaster);
+        bind(new TypeLiteral<EventBroadcaster<FriendSelectEvent>>(){}).toInstance(friendSelectionMulticaster);
        
-        bind(NavPanelFactory.class).to(NavPanelFactoryImpl.class);
+        bind(NavPanelFactory.class).toProvider(FactoryProvider.newFactory(NavPanelFactory.class, NavPanel.class));
         bind(LibraryNavigator.class).to(LibraryNavigatorImpl.class);
     }
 }

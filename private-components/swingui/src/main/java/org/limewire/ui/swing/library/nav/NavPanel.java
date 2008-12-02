@@ -31,6 +31,9 @@ import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import ca.odell.glazedlists.EventList;
 
 public class NavPanel extends JXPanel {
@@ -57,9 +60,10 @@ public class NavPanel extends JXPanel {
     private NavList parentList;
     private MouseListener removeListener;
     
-    NavPanel(Action action,
-            Friend friend,
-            FriendLibraryMediator libraryPanel,
+    @AssistedInject
+    NavPanel(@Assisted Action action,
+             @Assisted Friend friend,
+             @Assisted FriendLibraryMediator libraryPanel,
             RemoteLibraryManager remoteLibraryManager, final EventBroadcaster<FriendSelectEvent> friendSelectBroadcaster) {
         super(new MigLayout("insets 0, gap 0, fill"));
         

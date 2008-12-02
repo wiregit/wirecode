@@ -15,7 +15,6 @@ import org.limewire.xmpp.api.client.User;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 /**
@@ -31,7 +30,7 @@ public class ChatAction extends AbstractAction {
 
     @Inject
     ChatAction(
-            @Named("friendSelection") ListenerSupport<FriendSelectEvent> friendSelectListenerSupport,
+            ListenerSupport<FriendSelectEvent> friendSelectListenerSupport,
             ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
         super(I18n.tr("Chat"));
 
