@@ -82,7 +82,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         this.isLibraryPanel = isLibraryPanel;
         
         filterField = new PromptTextField(I18n.tr("Filter"));
-        createHeader(friend, isLibraryPanel, headerBarFactory);
+        createHeader(headerBarFactory);
         createSelectionPanel();
         
         add(headerPanel, "span, growx, wrap");
@@ -94,7 +94,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    public void createHeader(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {
+    private void createHeader(LimeHeaderBarFactory headerBarFactory) {
         if (isLibraryPanel) {
             headerPanel = headerBarFactory.createBasic(getTitle(friend));
         } 
