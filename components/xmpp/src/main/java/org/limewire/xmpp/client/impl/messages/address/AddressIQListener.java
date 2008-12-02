@@ -64,7 +64,7 @@ public class AddressIQListener implements PacketListener {
                     presence.addFeature(new AddressFeature(iq.getAddress()));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
-                    pendingAddresses.put(iq.getFrom(), address);
+                    pendingAddresses.put(iq.getFrom(), iq.getAddress());
                 }
             }
         }
@@ -117,8 +117,9 @@ public class AddressIQListener implements PacketListener {
                     sendAddress(address, friendPresence.getPresenceId());
                 }
                 if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
-                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
-                    friendPresence.addFeature(new AddressFeature(pendingAddresses.remove(friendPresence.getPresenceId())));
+                    Address pendingAddress = pendingAddresses.remove(friendPresence.getPresenceId());
+                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), pendingAddress);
+                    friendPresence.addFeature(new AddressFeature(pendingAddress));
                 }
             }
         }
