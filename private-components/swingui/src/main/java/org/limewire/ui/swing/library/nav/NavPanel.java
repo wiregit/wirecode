@@ -25,15 +25,13 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import ca.odell.glazedlists.EventList;
-
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
 
 public class NavPanel extends JXPanel {
     
@@ -59,11 +57,10 @@ public class NavPanel extends JXPanel {
     private NavList parentList;
     private MouseListener removeListener;
     
-    @AssistedInject
-    NavPanel(@Assisted Action action,
-            @Assisted Friend friend,
-            @Assisted FriendLibraryMediator libraryPanel,
-            RemoteLibraryManager remoteLibraryManager) {
+    NavPanel(Action action,
+            Friend friend,
+            FriendLibraryMediator libraryPanel,
+            RemoteLibraryManager remoteLibraryManager, final EventBroadcaster<FriendSelectEvent> friendSelectBroadcaster) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         GuiUtils.assignResources(this);
@@ -103,6 +100,18 @@ public class NavPanel extends JXPanel {
                         categoryLabel.setForeground(textColor);
                         categoryLabel.setFont(textFont);
                         setOpaque(false);
+                    }
+                }
+            }
+        });
+        
+        action. addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                if (evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                    if (evt.getNewValue().equals(Boolean.TRUE)) {
+                        friendSelectBroadcaster.broadcast(new FriendSelectEvent(NavPanel.this.friend));
+                    } else {
+                        friendSelectBroadcaster.broadcast(new FriendSelectEvent(null));
                     }
                 }
             }
