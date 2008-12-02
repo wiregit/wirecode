@@ -21,5 +21,20 @@ public class SearchCategoryUtils {
              
         }
     }
+    
+    public static String getOptionsName(SearchCategory category) {
+        switch(category) {
+        case ALL:      return I18n.tr("All files");
+        case AUDIO:    return I18n.tr("Only audio"); 
+        case DOCUMENT: return I18n.tr("Only documents"); 
+        case IMAGE:    return I18n.tr("Only images"); 
+        case PROGRAM:  return I18n.tr("Only programs"); 
+        case VIDEO:    return I18n.tr("Only videos"); 
+        case OTHER: 
+        default:
+            return I18n.tr("Other");
+             
+        }
+    }
 
 }

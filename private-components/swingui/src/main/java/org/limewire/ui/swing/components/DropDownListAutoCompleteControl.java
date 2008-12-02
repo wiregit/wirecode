@@ -37,7 +37,6 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.collection.StringTrieSet;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.core.settings.UISettings;
 import org.limewire.util.OSUtils;
 
 
@@ -63,6 +62,11 @@ public class DropDownListAutoCompleteControl {
 
     /** Whether or not we tried to show a popup while this wasn't showing */
     protected boolean showPending;
+    
+    /**
+     * Whether or not this control should try to autocomplete input.
+     */
+    private boolean autoComplete = true;
     
     /** Installs a dropdown list for autocompletion on the given text field. */
     public static DropDownListAutoCompleteControl install(JTextField textField) {
@@ -122,17 +126,17 @@ public class DropDownListAutoCompleteControl {
     * @param val True or false.
     */
     public void setAutoComplete(boolean val) {
-        UISettings.AUTOCOMPLETE_ENABLED.setValue(val);
+        this.autoComplete = val;
     }
     
     /**
     * Gets whether the component is currently performing autocomplete lookups as
-    * keystrokes are performed. Looks up the value in UISettings.
+    * keystrokes are performed. 
     *
     * @return True or false.
     */
     public boolean getAutoComplete() {
-        return UISettings.AUTOCOMPLETE_ENABLED.getValue();
+        return autoComplete;
     }
 
     /**
@@ -165,21 +169,23 @@ public class DropDownListAutoCompleteControl {
      */
     public void autoCompleteInput() {
         // Shove this into an invokeLater to force us seeing the proper text.
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                String input = textField.getText();
-                if (input != null && input.length() > 0) {
-                    Iterator<String> it = dict.get().iterator(input);
-                    if (it.hasNext())
-                        showPopup(it);
-                    else
+        if(getAutoComplete()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    String input = textField.getText();
+                    if (input != null && input.length() > 0) {
+                        Iterator<String> it = dict.get().iterator(input);
+                        if (it.hasNext())
+                            showPopup(it);
+                        else
+                            hidePopup();
+                    } else {
                         hidePopup();
-                } else {
-                    hidePopup();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     
     protected String lookup(String s) {

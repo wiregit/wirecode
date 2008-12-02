@@ -1,15 +1,20 @@
 package org.limewire.ui.swing.options;
 
+import java.awt.Component;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SearchSettingListener;
 
@@ -57,6 +62,8 @@ public class SearchOptionPanel extends OptionPanel {
         private JComboBox defaultSearchSpinner;
 
         private JCheckBox searchTabNumberCheckBox;
+        
+        private JCheckBox suggestFriendFiles;
 
         private JCheckBox groupSimilarResults;
 
@@ -64,12 +71,14 @@ public class SearchOptionPanel extends OptionPanel {
 
         public SearchBarPanel() {
             super(I18n.tr("Searching"));
-
+            setLayout(new MigLayout("", "", "[][][]30[]"));
             createComponents();
 
             add(new JLabel(I18n.tr("By default, search for")), "split");
             add(defaultSearchSpinner, "wrap");
 
+            add(suggestFriendFiles, "split 4, wrap");
+            
             add(searchTabNumberCheckBox, "split 4, push");
 
             add(clearNowButton, "wrap, alignx right");
@@ -79,12 +88,16 @@ public class SearchOptionPanel extends OptionPanel {
 
         private void createComponents() {
             defaultSearchSpinner = new JComboBox(SearchCategory.values());
+            defaultSearchSpinner.setRenderer(new CategoryCellRenderer());
             defaultSearchSpinner.removeItem(SearchCategory.OTHER);
 
             LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SearchSettingListener(
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
+            suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends when signed on"));
+            suggestFriendFiles.setContentAreaFilled(false);
+            
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my most recent searches"));
             searchTabNumberCheckBox.setContentAreaFilled(false);
             
@@ -92,6 +105,7 @@ public class SearchOptionPanel extends OptionPanel {
             groupSimilarResults.setContentAreaFilled(false);
 
             clearNowButton = new JButton(I18n.tr("Clear Now"));
+            //TODO this button should do something
             clearNowButton.setBorderPainted(false);
         }
 
@@ -99,6 +113,9 @@ public class SearchOptionPanel extends OptionPanel {
         void applyOptions() {
             SearchSettings.DEFAULT_SEARCH_CATEGORY_ID
                     .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
+            
+            SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestFriendFiles.isSelected());
+            
             SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox
                     .isSelected());
             SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
@@ -108,6 +125,7 @@ public class SearchOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner
                     .getSelectedItem()).getId()
+                    || SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue() != suggestFriendFiles.isSelected()
                     || SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue() != searchTabNumberCheckBox
                             .isSelected()
                     || groupSimilarResults.isSelected() != SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED
@@ -118,6 +136,7 @@ public class SearchOptionPanel extends OptionPanel {
         public void initOptions() {
             defaultSearchSpinner.setSelectedItem(SearchCategory
                     .forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
+            suggestFriendFiles.setSelected(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
             // TODO: this setting isn't linked to anything
             searchTabNumberCheckBox.setSelected(SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR
                     .getValue());
@@ -125,4 +144,23 @@ public class SearchOptionPanel extends OptionPanel {
                     .setSelected(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
         }
     }
+    
+    private class CategoryCellRenderer extends JLabel implements ListCellRenderer {
+        public CategoryCellRenderer() {
+            setOpaque(true);
+        }
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus)
+        {
+            SearchCategory category = (SearchCategory)value;
+            setText(SearchCategoryUtils.getOptionsName(category));
+           
+            return this;
+        }
+    }
+
 }

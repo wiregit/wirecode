@@ -24,6 +24,7 @@ import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -91,6 +92,19 @@ public class SearchBar extends JXPanel {
         
         this.dropDownListAutoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, 
                 friendLibraries.getDictionary(this.categoryToSearch));
+        this.dropDownListAutoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
+        SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.addSettingListener(new SettingListener() {
+
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        dropDownListAutoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
+                    }
+                });
+            }
+        });
         
         if (actionToSelect != null)
             this.comboBox.setSelectedAction(actionToSelect);
