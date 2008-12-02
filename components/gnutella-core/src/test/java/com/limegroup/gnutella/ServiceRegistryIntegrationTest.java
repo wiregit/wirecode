@@ -82,7 +82,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "DAAP", "",
         "Metadata Loader", "",
         "What's New Manager", "",
-        "LimeWire Network Keyword Library", ""};
+        "P2P Network Keyword Library", ""};
         
         List<String> missing = new ArrayList<String>();
         

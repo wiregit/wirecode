@@ -65,7 +65,7 @@ public class SharingTarget {
 
         @Override
         public String getName() {
-            return I18n.tr("LimeWire Network");
+            return I18n.tr("P2P Network");
         }
         
         @Override

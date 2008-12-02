@@ -130,7 +130,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
     };
     
 
-   private Action gnutellaUnshareAction = new AbstractAction(I18n.tr("Unshare with LimeWire Network")) {
+   private Action gnutellaUnshareAction = new AbstractAction(I18n.tr("Unshare with P2P Network")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
@@ -143,7 +143,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         }
     };
 
-    private Action gnutellaShareAction = new AbstractAction(I18n.tr("Share with LimeWire Network")) {
+    private Action gnutellaShareAction = new AbstractAction(I18n.tr("Share with P2P Network")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();

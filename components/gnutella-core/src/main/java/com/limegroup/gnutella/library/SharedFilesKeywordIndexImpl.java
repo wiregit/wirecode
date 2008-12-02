@@ -103,7 +103,7 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         registry.register(new Service() {
             @Override
             public String getServiceName() {
-                return "LimeWire Network Keyword Library";
+                return "P2P Network Keyword Library";
             }
             @Override
             public void initialize() {

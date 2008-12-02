@@ -82,7 +82,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     }
 
     private void initializeCategory(Category category){
-        gnutellaShareItem = new JCheckBoxMenuItem(I18n.tr("Share with LimeWire Network"));
+        gnutellaShareItem = new JCheckBoxMenuItem(I18n.tr("Share with P2P Network"));
         gnutellaShareItem.addItemListener(gnutellaShareListener);
         
         friendSubMenu = new JMenu(I18n.tr("Share with Friends"));
