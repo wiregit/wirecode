@@ -10,10 +10,7 @@ import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 
 /**
  * A Guice-module for binding all net related activity.
@@ -55,6 +52,8 @@ public class LimeWireNetModule extends AbstractModule {
         
         EventMulticaster<ConnectRequestEvent> connectRequestEventMulticaster = new EventMulticasterImpl<ConnectRequestEvent>();
         bind(new TypeLiteral<EventMulticaster<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
+        bind(new TypeLiteral<EventBroadcaster<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
+        bind(new TypeLiteral<ListenerSupport<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);
