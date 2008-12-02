@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
-import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
@@ -16,6 +16,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
+import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -202,32 +203,44 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     } 
     
     private class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
+        
+        private volatile boolean connected;
+        
         @Override
-        @BlockingEvent
         public void handleEvent(XMPPConnectionEvent event) {
-            if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED && event.getData() != null) {
-                XMPPConnection connection = event.getSource();
-                XMPPConnectionConfiguration configuration = connection.getConfiguration();
-                synchronized (XMPPServiceImpl.this) {
-                    connections.remove(connection);
-                }
-                connection = null;
-                long sleepTime = 10000;
-                while(connection == null) {
-                    try {
-                        LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
-                        connection = login(configuration, true);
-                    } catch (XMPPException e) {
+            if(event.getType() == XMPPConnectionEvent.Type.CONNECTED) {
+                connected = true;   
+            } else if(event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
+                if(event.getData() != null && connected) {
+                    XMPPConnection connection = event.getSource();
+                    final XMPPConnectionConfiguration configuration = connection.getConfiguration();
+                    synchronized (XMPPServiceImpl.this) {
+                        connections.remove(connection);
                     }
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        
-                    }
-//                  if(sleepTime < (Long.MAX_VALUE / 2)) {
-//                      sleepTime *= 2;
-//                  }
+                    Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
+                        @Override
+                        public void run() {
+                            long sleepTime = 10000;
+                            XMPPConnection newConnection = null;
+                            while(newConnection == null) {
+                                try {
+                                    LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
+                                    newConnection = login(configuration, true);
+                                } catch (XMPPException e) {
+                                }
+                                try {
+                                    Thread.sleep(sleepTime);
+                                } catch (InterruptedException e) {                                    
+                                }
+            //                  if(sleepTime < (Long.MAX_VALUE / 2)) {
+            //                      sleepTime *= 2;
+            //                  }
+                            }
+                        }
+                    }), "xmpp-reconnection-manager");
+                    t.start();
                 }
+                connected = false;
             }
         }
     }
