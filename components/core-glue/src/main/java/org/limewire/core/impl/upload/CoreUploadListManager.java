@@ -1,9 +1,9 @@
 package org.limewire.core.impl.upload;
 
 import java.awt.EventQueue;
-import java.util.EnumSet;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +16,6 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,8 +39,8 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
 
         ObservableElementList.Connector<UploadItem> uploadConnector = GlazedLists.beanConnector(UploadItem.class);
         
-        uploadItems = GlazedListsFactory.threadSafeList(GlazedListsFactory.filterList(GlazedListsFactory.observableElementList(
-                new BasicEventList<UploadItem>(),uploadConnector), new UploadStateExcluder(UploadState.CANCELED))) ;
+        uploadItems = GlazedListsFactory.threadSafeList(GlazedListsFactory.observableElementList(
+                new BasicEventList<UploadItem>(),uploadConnector)) ;
 
         uploadListenerList.addUploadListener(this);
         
@@ -73,7 +72,9 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     @Override
     public void uploadAdded(Uploader uploader) {
         if (uploader.getState() != UploadStatus.BROWSE_HOST) {
-            uploadItems.add(new CoreUploadItem(uploader));
+            UploadItem item = new CoreUploadItem(uploader);
+            uploadItems.add(item);
+            item.addPropertyChangeListener(new UploadPropertyListener(item));
         }
     }
 
@@ -97,22 +98,18 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         }
     }
     
-    private static class UploadStateExcluder implements Matcher<UploadItem> {
+    private class UploadPropertyListener implements PropertyChangeListener {
+        private UploadItem item;
 
-        private final Set<UploadState> uploadStates;
-
-        public UploadStateExcluder(UploadState first, UploadState... rest) {
-            uploadStates = EnumSet.of(first, rest);
+        public UploadPropertyListener(UploadItem item){
+            this.item = item;
         }
-
         @Override
-        public boolean matches(UploadItem item) {
-            if (item == null)
-                return false;
-
-            return !uploadStates.contains(item.getState());
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (item.getState() == UploadState.CANCELED) {
+                uploadItems.remove(item);
+            }
         }
-
     }
 
 }

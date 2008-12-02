@@ -137,4 +137,14 @@ class CoreUploadItem implements UploadItem {
     public String getHost() {
         return uploader.getHost();
     }
+    
+    @Override
+    public String toString(){
+        return "CoreUploadItem: " + getFileName() + ", " + getState() + ", " + getHost();
+    }
+
+    @Override
+    public int getQueuePosition() {
+        return uploader.getQueuePosition();
+    }
 }

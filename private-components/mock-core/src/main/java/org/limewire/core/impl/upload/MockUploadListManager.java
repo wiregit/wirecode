@@ -1,5 +1,7 @@
 package org.limewire.core.impl.upload;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -22,12 +24,18 @@ public class MockUploadListManager implements UploadListManager {
         uploadItems = GlazedListsFactory.swingThreadProxyEventList(GlazedListsFactory
                 .observableElementList(new BasicEventList<UploadItem>(), uploadConnector));
         
-        uploadItems.add(new MockUploadItem(UploadState.DONE, "File.mp3", 30000, 150, Category.AUDIO));
-        uploadItems.add(new MockUploadItem(UploadState.UPLOADING, "File.avi", 30000, 150, Category.VIDEO));
-        uploadItems.add(new MockUploadItem(UploadState.UPLOADING, "File2mp3", 30000, 150, Category.AUDIO));
-        uploadItems.add(new MockUploadItem(UploadState.DONE, "File3.exe", 30000, 150, Category.PROGRAM));
-        uploadItems.add(new MockUploadItem(UploadState.UPLOADING, "File3.doc", 30000, 150, Category.DOCUMENT));
-
+        addUpload(UploadState.DONE, "File.mp3", 30000, 15000, Category.AUDIO);
+        addUpload(UploadState.UPLOADING, "File.avi", 3000, 150, Category.VIDEO);
+        addUpload(UploadState.UPLOADING, "File2mp3", 30000, 25544, Category.AUDIO);
+        addUpload(UploadState.DONE, "File3.exe", 300, 150, Category.PROGRAM);
+        addUpload(UploadState.UPLOADING, "File3.doc", 300, 15, Category.DOCUMENT);
+        
+    }
+    
+    private void addUpload(UploadState state, String fileName, long fileSize, long amtUploaded, Category category) {
+        UploadItem item = new MockUploadItem(state, fileName, fileSize, amtUploaded, category);
+        uploadItems.add(item);
+        item.addPropertyChangeListener(new UploadPropertyListener(item));
     }
 
     @Override
@@ -38,6 +46,20 @@ public class MockUploadListManager implements UploadListManager {
     @Override
     public List<UploadItem> getUploadItems() {
         return uploadItems;
+    }
+    
+    private class UploadPropertyListener implements PropertyChangeListener {
+        private UploadItem item;
+
+        public UploadPropertyListener(UploadItem item){
+            this.item = item;
+        }
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (item.getState() == UploadState.CANCELED) {
+                uploadItems.remove(item);
+            }
+        }
     }
 
 }

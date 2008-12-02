@@ -82,5 +82,15 @@ public class MockUploadItem implements UploadItem {
     public String getHost() {
         return "Carmine";
     }
+    
+    @Override
+    public String toString(){
+        return "CoreUploadItem: " + getFileName() + ", " + getState() + ", " + getHost();
+    }
+
+    @Override
+    public int getQueuePosition() {
+        return 2;
+    }
 
 }

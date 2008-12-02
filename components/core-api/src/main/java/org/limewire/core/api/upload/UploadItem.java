@@ -55,4 +55,9 @@ public interface UploadItem {
      * of the host being uploaded to.
      */
     public String getHost();
+    
+    /**
+     * Returns the current queue position if queued.
+     */
+    public int getQueuePosition();
 }
