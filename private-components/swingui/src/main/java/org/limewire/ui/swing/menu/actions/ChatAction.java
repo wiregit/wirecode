@@ -19,25 +19,36 @@ import org.limewire.ui.swing.util.I18n;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-@Singleton
 /**
  * Starts a chat with the selected user in the left panel if possible.
  */
+@Singleton
 public class ChatAction extends AbstractAction {
 
     private Friend friend;
-
-    final ChatFriendListPane friendsPane;
-
-    final ChatFramePanel friendsPanel;
+    private final ChatFriendListPane friendsPane;
+    private final ChatFramePanel friendsPanel;
 
     @Inject
-    ChatAction(ChatFriendListPane friendsPane, ChatFramePanel friendsPanel, final LibraryNavigator libraryNavigator, Navigator navigator) {
+    ChatAction(ChatFriendListPane friendsPane, ChatFramePanel friendsPanel) {
         super(I18n.tr("Chat"));
-
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
+        updateDisability();
 
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Friend friend = getFriend();
+        if (friend != null) {
+            friendsPanel.setChatPanelVisible(true);
+            friendsPane.fireConversationStarted(friend);
+        }
+    }
+
+    @Inject
+    void register(Navigator navigator, final LibraryNavigator libraryNavigator) {
         // listen for changes in the selected friend
         navigator.addNavigationListener(new NavigationListener() {
 
@@ -52,27 +63,17 @@ public class ChatAction extends AbstractAction {
             @Override
             public void itemSelected(NavCategory category, NavItem navItem,
                     NavSelectable selectable, JComponent panel) {
-                if(category == NavCategory.LIBRARY) {
+                if (category == NavCategory.LIBRARY) {
                     setFriend(libraryNavigator.getSelectedFriend());
                 }
             }
         });
-
-        updateDisability();
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (friend != null) {
-            friendsPanel.setChatPanelVisible(true);
-            friendsPane.fireConversationStarted(friend);
-        }
     }
 
     /**
-     * Sets a new firend for this action and calls updateDisability().
+     * Sets a new friend for this action and calls updateDisability().
      */
-    private void setFriend(Friend friend) {
+    protected void setFriend(Friend friend) {
         this.friend = friend;
         updateDisability();
     }
@@ -81,11 +82,15 @@ public class ChatAction extends AbstractAction {
      * Enables or disables the action based on whether the new friend is a
      * jabber user.
      */
-    private void updateDisability() {
+    protected void updateDisability() {
         if (friend == null || friend.isAnonymous()) {
             setEnabled(false);
         } else {
             setEnabled(true);
         }
+    }
+
+    protected Friend getFriend() {
+        return friend;
     }
 }

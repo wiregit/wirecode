@@ -3,6 +3,8 @@ package org.limewire.ui.swing.menu;
 import javax.swing.JMenu;
 
 import org.limewire.ui.swing.menu.actions.ChatAction;
+import org.limewire.ui.swing.menu.actions.FriendDownloadAction;
+import org.limewire.ui.swing.menu.actions.FriendShareAction;
 import org.limewire.ui.swing.menu.actions.SignInOutAction;
 import org.limewire.ui.swing.menu.actions.StatusActions;
 import org.limewire.ui.swing.menu.actions.SwitchUserAction;
@@ -17,6 +19,8 @@ public class FriendMenu extends JMenu {
     public FriendMenu(SwitchUserAction switchUserAction, SignInOutAction signInOutAction, ChatAction chatAction, StatusActions statusActions) {
         super(I18n.tr("Friend"));
         add(chatAction);
+        add(new FriendDownloadAction());
+        add(new FriendShareAction());
         addSeparator();
         add(statusActions.getAvailableAction());
         add(statusActions.getDnDAction());
