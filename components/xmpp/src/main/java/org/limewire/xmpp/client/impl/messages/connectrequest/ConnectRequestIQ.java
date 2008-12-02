@@ -126,4 +126,9 @@ public class ConnectRequestIQ extends IQ {
     public GUID getClientGuid() {
         return clientGuid;
     }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
+    }
 }
