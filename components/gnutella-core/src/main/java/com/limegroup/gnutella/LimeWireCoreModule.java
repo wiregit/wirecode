@@ -174,7 +174,6 @@ import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 import com.limegroup.gnutella.simpp.LimeWireSimppModule;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
-import com.limegroup.gnutella.statistics.UptimeStatTimerTest;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
@@ -386,7 +385,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FirewalledAddressSerializer.class).asEagerSingleton();
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();
-        bind(UptimeStatTimerTest.class);
     }
     
     
