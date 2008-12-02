@@ -73,11 +73,13 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
 
     @Override
     public void connect(Address address, ConnectObserver observer) {
+        LOG.debug("connecting");
         XMPPFirewalledAddress xmppFirewalledAddress = (XMPPFirewalledAddress)address;
         FirewalledAddress firewalledAddress = xmppFirewalledAddress.getFirewalledAddress();
         GUID clientGuid = firewalledAddress.getClientGuid();
         Connectable publicAddress = networkManager.getPublicAddress();
         if (!NetworkUtils.isValidIpPort(publicAddress)) {
+            LOG.debugf("not a valid public address yet: {0}", publicAddress);
             observer.handleIOException(new ConnectException("no valid address yet: " + publicAddress));
         }
         /* there's a slight race condition, if a connection was just accepted between getting the address
@@ -131,6 +133,7 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
                 }
                 if (acceptedOrFailed.compareAndSet(false, true)) {
                     try {
+                        LOG.debugf("handling connect from: {0}", socket);
                         observer.handleConnect(socket);
                     } catch (IOException ie) {
                         IOUtils.close(socket);
@@ -142,7 +145,9 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
         }
         
         public void handleTimeout() {
+            LOG.debug("handling timeout");
             if (acceptedOrFailed.compareAndSet(false, true)) {
+                LOG.debug("throwing connect timeout");
                 observer.handleIOException(new ConnectException("connect request timed out"));
             }
         }
