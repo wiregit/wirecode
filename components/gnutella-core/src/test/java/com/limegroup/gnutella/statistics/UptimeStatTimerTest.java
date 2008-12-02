@@ -1,23 +1,28 @@
-package com.limegroup.gnutella.gui;
+package com.limegroup.gnutella.statistics;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.lifecycle.LifeCycleEvent;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.listener.EventListener;
 import org.limewire.setting.StringArraySetting;
 
+import com.limegroup.gnutella.util.LimeTestCase;
 
-public class RefreshTimerTest extends GUIBaseTestCase {
 
-    public RefreshTimerTest(String name) {
+public class UptimeStatTimerTest extends LimeTestCase {
+
+    public UptimeStatTimerTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(RefreshTimerTest.class);
+        return buildTestSuite(UptimeStatTimerTest.class);
     }
     
     public void testUpdateUptimeHistory() {
-        RefreshTimer refreshTimer = new RefreshTimer();
+        UptimeStatTimer refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
         StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
         assertEquals(new String[0], uptimeHistory.getValue());
         
@@ -36,12 +41,12 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         assertEquals(new String[] { "20" }, uptimeHistory.getValue());
         
         // new first time update, should append
-        refreshTimer = new RefreshTimer();
+        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "20", "10" }, uptimeHistory.getValue());
         
         // new first time update should shift array
-        refreshTimer = new RefreshTimer();
+        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "10", "10" }, uptimeHistory.getValue());
         
@@ -50,7 +55,7 @@ public class RefreshTimerTest extends GUIBaseTestCase {
         assertEquals(new String[] { "10", "30" }, uptimeHistory.getValue());
         
         // go back to shorter history length
-        refreshTimer = new RefreshTimer();
+        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
         refreshTimer.updateUptimeHistory(10, 10, 1);
         assertEquals(new String[] { "10" }, uptimeHistory.getValue());
                 
@@ -63,7 +68,7 @@ public class RefreshTimerTest extends GUIBaseTestCase {
     }
 
     public void testUpdateUptimeHistoryWithFirstUptimeGreaterThanInterval() {
-       RefreshTimer refreshTimer = new RefreshTimer();
+       UptimeStatTimer refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
        StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
        assertEquals(new String[0], uptimeHistory.getValue());
       
@@ -72,6 +77,35 @@ public class RefreshTimerTest extends GUIBaseTestCase {
        
        refreshTimer.updateUptimeHistory(30, 10, 2);
        assertEquals(new String[] { "30" }, uptimeHistory.getValue());
+    }
+    
+    private class NoOpLifeCycleManager implements LifeCycleManager {
+
+        @Override
+        public void addListener(EventListener<LifeCycleEvent> listener) {
+            
+        }
+
+        @Override
+        public boolean isLoaded() {
+            return false;
+        }
+
+        @Override
+        public boolean isShutdown() {
+            return false;
+        }
+
+        @Override
+        public boolean isStarted() {
+            return false;
+        }
+
+        @Override
+        public boolean removeListener(EventListener<LifeCycleEvent> listener) {
+            return false;
+        }
+        
     }
    
 }
