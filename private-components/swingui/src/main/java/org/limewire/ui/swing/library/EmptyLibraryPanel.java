@@ -47,7 +47,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
 
     @Override
     public void loadHeader() {
-        headerPanel.enableButton(new ViewSharedLibraryAction(), buttonDecorator);
+        enableButton(new ViewSharedLibraryAction(), buttonDecorator);
     }
     
     private void createEmptyPanel(JComponent component) {

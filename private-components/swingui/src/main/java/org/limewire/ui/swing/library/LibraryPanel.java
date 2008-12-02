@@ -28,11 +28,15 @@ import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -60,11 +64,14 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
 
     protected final JPanel selectionPanel = new JPanel();
     protected final Friend friend;
-    protected LibraryHeaderPanel headerPanel;    
+    protected JXPanel headerPanel;    
     
     private final boolean isLibraryPanel;
     private final Next next = new Next();
     private final Prev prev = new Prev();
+    
+    private final PromptTextField filterField;
+    private JXButton shareButton;
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
         setLayout(new MigLayout("fill, gap 0, insets 0", "[][grow]", "[][grow]"));
@@ -74,6 +81,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         this.friend = friend;
         this.isLibraryPanel = isLibraryPanel;
         
+        filterField = new PromptTextField(I18n.tr("Filter"));
         createHeader(friend, isLibraryPanel, headerBarFactory);
         createSelectionPanel();
         
@@ -86,16 +94,21 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    public void createHeader(Friend friend, boolean isLibraryPanel, 
-            LimeHeaderBarFactory headerBarFactory) {
-        
-        headerPanel = new LibraryHeaderPanel(friend, isLibraryPanel);
+    public void createHeader(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {
         if (isLibraryPanel) {
-            headerBarFactory.decorateBasic(headerPanel);
+            headerPanel = headerBarFactory.createBasic(getTitle(friend));
         } 
         else {
-            headerBarFactory.decorateSpecial(headerPanel);
-        }
+            headerPanel = headerBarFactory.createSpecial(getSharingTitle(friend));
+        }        
+        headerPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, filly", "[]push[]", ""));
+        headerPanel.add(filterField, "cell 1 0, right, gapafter 10");     
+    }
+    
+    public void enableButton(Action action, ButtonDecorator buttonDecorator) {
+        shareButton = new JXButton(action);
+        buttonDecorator.decorateDarkFullButton(shareButton);
+        headerPanel.add(shareButton, "cell 0 0, left");
     }
     
     public abstract void loadHeader();
@@ -121,7 +134,7 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
     }
     
     public JTextComponent getFilterTextField() {
-        return headerPanel.getFilterTextField();
+        return filterField;
     }
     
     protected void addDisposable(Disposable disposable) {
@@ -378,4 +391,13 @@ public abstract class LibraryPanel extends JPanel implements Disposable {
             return button;
         }
     }    
+    
+    
+    private static String getTitle(Friend friend) {
+        return (friend == null) ? I18n.tr("My Library") : I18n.tr("{0}'s Library", friend.getRenderName());
+    }
+    
+    private static String getSharingTitle(Friend friend) {
+        return I18n.tr("Sharing with {0}", friend.getRenderName());
+    }
 }

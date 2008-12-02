@@ -23,14 +23,9 @@ public class LimeHeaderBar extends JXPanel {
     private final Component titleComponent;
     private final JPanel componentContainer;
     
-    @Resource private int defaultCompHeight = 20;
-    
-    public LimeHeaderBar() {
-        this("");
-    }
+    @Resource private int defaultCompHeight;
     
     public LimeHeaderBar(String title) {
-       
         GuiUtils.assignResources(this);
         
         JXLabel headerLabel = new JXLabel(title);
@@ -45,6 +40,8 @@ public class LimeHeaderBar extends JXPanel {
     
     public LimeHeaderBar(Component titleComponent) {
         GuiUtils.assignResources(this);
+        
+        System.out.println("none-"+defaultCompHeight);
         
         this.titleComponent = titleComponent;
         this.componentContainer = new JPanel();

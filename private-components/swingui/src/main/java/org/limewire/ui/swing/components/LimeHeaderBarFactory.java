@@ -39,7 +39,13 @@ public class LimeHeaderBarFactory {
         this.decorateBasic(bar);
         return bar;
     }
-    
+
+    public LimeHeaderBar createSpecial(String text) {
+        LimeHeaderBar bar = new LimeHeaderBar(text);
+        this.decorateSpecial(bar);
+        return bar;
+    }
+        
     public void decorateBasic(JXPanel bar) {
         bar.setBackgroundPainter(this.painterFactory.createHeaderBarPainter());
         bar.setMinimumSize(new Dimension(0, this.height));

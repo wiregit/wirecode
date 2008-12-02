@@ -109,7 +109,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         
     @Override
     public void loadHeader() {
-        headerPanel.enableButton(new BackToLibraryAction(), buttonDecorator);
+        enableButton(new BackToLibraryAction(), buttonDecorator);
     }
     
     @Override
