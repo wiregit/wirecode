@@ -21,6 +21,7 @@ import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.upload.UploadPanel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -35,7 +36,7 @@ public class ToolsMenu extends JMenu {
     public ToolsMenu(final Provider<OptionsDialog> optionDialog, 
             final Provider<AdvancedToolsPanel> advancedProvider,
             final Navigator navigator,
-            SearchHandler searchHandler, final LibraryManager libraryManager) {
+            SearchHandler searchHandler, final LibraryManager libraryManager, final UploadPanel uploadPanel) {
 
         super(I18n.tr("Tools"));
 
@@ -47,11 +48,13 @@ public class ToolsMenu extends JMenu {
                 navItem.select();
             }
         });
+        navigator.createNavItem(NavCategory.UPLOAD, UploadPanel.NAME, uploadPanel);
         add(new AbstractAction(I18n.tr("Uploads")) {
             // TODO wire in Uploads panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me.");
+                NavItem navItem = navigator.getNavItem(NavCategory.UPLOAD, UploadPanel.NAME);
+                navItem.select();
             }
         });
         addSeparator();

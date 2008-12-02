@@ -15,6 +15,8 @@ import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
+import org.limewire.core.impl.upload.UploadListener;
+import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Inject;
@@ -33,11 +35,13 @@ import com.limegroup.gnutella.version.UpdateInformation;
 
 @Singleton
 class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
-        DownloadListenerList, GuiCallbackService {
+        DownloadListenerList, UploadListenerList, GuiCallbackService {
 
     private final SortedMap<byte[], List<QueryReplyListener>> queryReplyListeners;
 
     private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
+    
+    private final List<UploadListener> uploadListeners = new CopyOnWriteArrayList<UploadListener>();
 
     private final DownloadManager downloadManager;
     
@@ -97,11 +101,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     }
 
-    @Override
-    public void addUpload(Uploader u) {
-        // TODO Auto-generated method stub
-
-    }
     
     @Override
     public void chatErrorMessage(InstantMessenger chatter, String str) {
@@ -192,9 +191,17 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
+    public void addUpload(Uploader u) {
+        for (UploadListener listener : uploadListeners) {
+            listener.uploadAdded(u);
+        }
+    }
+    
+    @Override
     public void removeUpload(Uploader u) {
-        // TODO Auto-generated method stub
-
+        for (UploadListener listener : uploadListeners) {
+            listener.uploadRemoved(u);
+        }
     }
 
     @Override
@@ -270,6 +277,16 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         } else {
             throw new UnsupportedOperationException("TODO notify user");
         }
+    }
+
+    @Override
+    public void addUploadListener(UploadListener listener) {
+        uploadListeners.add(listener);
+    }
+
+    @Override
+    public void removeUploadListener(UploadListener listener) {
+        uploadListeners.remove(listener);
     }
     
 }

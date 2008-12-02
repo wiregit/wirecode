@@ -23,6 +23,8 @@ import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.spam.CoreGlueSpamModule;
 import org.limewire.core.impl.support.CoreGlueSupportModule;
+import org.limewire.core.impl.upload.CoreGlueUploadModule;
+import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.core.impl.xmpp.CoreGlueXMPPModule;
 
 import com.google.inject.AbstractModule;
@@ -36,6 +38,7 @@ public class CoreGlueModule extends AbstractModule {
         bind(GuiCallbackService.class).to(GlueActivityCallback.class);
         bind(QueryReplyListenerList.class).to(GlueActivityCallback.class);
         bind(DownloadListenerList.class).to(GlueActivityCallback.class);
+        bind(UploadListenerList.class).to(GlueActivityCallback.class);
         bind(Application.class).to(ApplicationImpl.class);
         bind(LifeCycleManager.class).to(LifeCycleManagerImpl.class);
         bind(GnutellaConnectionManager.class).to(GnutellaConnectionManagerImpl.class);
@@ -54,6 +57,7 @@ public class CoreGlueModule extends AbstractModule {
         install(new CoreGluePlayerModule());
         install(new CoreGlueMozillaModule());
         install(new CoreGlueSupportModule());
+        install(new CoreGlueUploadModule());
     }
 
 }

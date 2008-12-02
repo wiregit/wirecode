@@ -17,6 +17,7 @@ import org.limewire.core.impl.player.MockPlayerModule;
 import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.core.impl.spam.MockSpamModule;
 import org.limewire.core.impl.support.MockSupportModule;
+import org.limewire.core.impl.upload.MockUploadModule;
 import org.limewire.core.impl.xmpp.MockXmppModule;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.MockNetModule;
@@ -46,6 +47,7 @@ public class MockModule extends AbstractModule {
         install(new MockSupportModule());
         install(new MockMagnetModule());
         install(new MockNetModule());
+        install(new MockUploadModule());
     }
 
 }
