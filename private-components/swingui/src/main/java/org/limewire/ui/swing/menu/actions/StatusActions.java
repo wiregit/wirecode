@@ -17,6 +17,10 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Provides JMenuItems to be used for setting available or disabled status for
+ * the users. These items are backed by a button group and JCheckBoxMenuItems
+ */
 @Singleton
 public class StatusActions {
     private final JCheckBoxMenuItem available;
@@ -30,12 +34,14 @@ public class StatusActions {
 
             }
         });
+        available.setEnabled(false);
         dnd = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Do Not Disturb")) {
             @Override
             public void actionPerformed(ActionEvent e) {
 
             }
         });
+        dnd.setEnabled(false);
         ButtonGroup group = new ButtonGroup();
         group.add(available);
         group.add(dnd);
