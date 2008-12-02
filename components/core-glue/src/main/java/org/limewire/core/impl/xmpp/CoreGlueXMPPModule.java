@@ -16,5 +16,7 @@ public class CoreGlueXMPPModule extends AbstractModule {
         bind(CoreGlueXMPPService.class);
         bind(PasswordManager.class).to(PasswordManagerImpl.class);
         bind(XMPPResourceFactory.class).to(XMPPResourceFactoryImpl.class);
+        
+        bind(XMPPFirewalledAddressConnector.class).asEagerSingleton();
     }
 }
