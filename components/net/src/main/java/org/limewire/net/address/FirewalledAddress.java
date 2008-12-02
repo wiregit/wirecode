@@ -7,7 +7,6 @@ import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
