@@ -2,12 +2,12 @@ package org.limewire.ui.swing.options;
 
 import java.awt.Component;
 
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.ListCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -145,7 +145,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
     }
     
-    private class CategoryCellRenderer extends JLabel implements ListCellRenderer {
+    private class CategoryCellRenderer extends DefaultListCellRenderer {
         public CategoryCellRenderer() {
             setOpaque(true);
         }
@@ -156,6 +156,7 @@ public class SearchOptionPanel extends OptionPanel {
             boolean isSelected,
             boolean cellHasFocus)
         {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             SearchCategory category = (SearchCategory)value;
             setText(SearchCategoryUtils.getOptionsName(category));
            
