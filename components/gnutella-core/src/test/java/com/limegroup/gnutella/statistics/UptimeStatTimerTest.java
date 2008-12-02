@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.statistics;
 
+import java.util.concurrent.ScheduledExecutorService;
+
 import junit.framework.Test;
 
-import org.limewire.core.api.lifecycle.LifeCycleEvent;
-import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.listener.EventListener;
 import org.limewire.setting.StringArraySetting;
 
+import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
@@ -22,7 +22,9 @@ public class UptimeStatTimerTest extends LimeTestCase {
     }
     
     public void testUpdateUptimeHistory() {
-        UptimeStatTimer refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
+        ScheduledExecutorService service = new ScheduledExecutorServiceStub();
+        
+        UptimeStatTimer refreshTimer = new UptimeStatTimer(service);
         StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
         assertEquals(new String[0], uptimeHistory.getValue());
         
@@ -41,12 +43,12 @@ public class UptimeStatTimerTest extends LimeTestCase {
         assertEquals(new String[] { "20" }, uptimeHistory.getValue());
         
         // new first time update, should append
-        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
+        refreshTimer = new UptimeStatTimer(service);
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "20", "10" }, uptimeHistory.getValue());
         
         // new first time update should shift array
-        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
+        refreshTimer = new UptimeStatTimer(service);
         refreshTimer.updateUptimeHistory(10, 10, 2);
         assertEquals(new String[] { "10", "10" }, uptimeHistory.getValue());
         
@@ -55,7 +57,7 @@ public class UptimeStatTimerTest extends LimeTestCase {
         assertEquals(new String[] { "10", "30" }, uptimeHistory.getValue());
         
         // go back to shorter history length
-        refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
+        refreshTimer = new UptimeStatTimer(service);
         refreshTimer.updateUptimeHistory(10, 10, 1);
         assertEquals(new String[] { "10" }, uptimeHistory.getValue());
                 
@@ -68,44 +70,17 @@ public class UptimeStatTimerTest extends LimeTestCase {
     }
 
     public void testUpdateUptimeHistoryWithFirstUptimeGreaterThanInterval() {
-       UptimeStatTimer refreshTimer = new UptimeStatTimer(new NoOpLifeCycleManager());
-       StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
-       assertEquals(new String[0], uptimeHistory.getValue());
-      
-       refreshTimer.updateUptimeHistory(20, 10, 2);
-       assertEquals(new String[] { "20" }, uptimeHistory.getValue());
-       
-       refreshTimer.updateUptimeHistory(30, 10, 2);
-       assertEquals(new String[] { "30" }, uptimeHistory.getValue());
-    }
-    
-    private class NoOpLifeCycleManager implements LifeCycleManager {
+        ScheduledExecutorService service = new ScheduledExecutorServiceStub();
 
-        @Override
-        public void addListener(EventListener<LifeCycleEvent> listener) {
-            
-        }
+        UptimeStatTimer refreshTimer = new UptimeStatTimer(service);
+        StringArraySetting uptimeHistory = ApplicationSettings.LAST_N_UPTIMES;
+        assertEquals(new String[0], uptimeHistory.getValue());
 
-        @Override
-        public boolean isLoaded() {
-            return false;
-        }
+        refreshTimer.updateUptimeHistory(20, 10, 2);
+        assertEquals(new String[] { "20" }, uptimeHistory.getValue());
 
-        @Override
-        public boolean isShutdown() {
-            return false;
-        }
-
-        @Override
-        public boolean isStarted() {
-            return false;
-        }
-
-        @Override
-        public boolean removeListener(EventListener<LifeCycleEvent> listener) {
-            return false;
-        }
-        
+        refreshTimer.updateUptimeHistory(30, 10, 2);
+        assertEquals(new String[] { "30" }, uptimeHistory.getValue());
     }
    
 }

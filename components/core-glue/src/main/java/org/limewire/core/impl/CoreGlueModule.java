@@ -29,7 +29,6 @@ import org.limewire.core.impl.xmpp.CoreGlueXMPPModule;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.statistics.UptimeStatTimer;
 
 public class CoreGlueModule extends AbstractModule {
     
@@ -45,7 +44,6 @@ public class CoreGlueModule extends AbstractModule {
         bind(GnutellaConnectionManager.class).to(GnutellaConnectionManagerImpl.class);
         bind(MagnetFactory.class).to(MagnetFactoryImpl.class);
         bind(ItunesMediator.class).to(ItunesMediatorImpl.class);
-        bind(UptimeStatTimer.class);
         
         install(new CoreGlueSpamModule());
         install(new CoreGlueDaapModule());

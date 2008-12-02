@@ -1,46 +1,28 @@
 package com.limegroup.gnutella.statistics;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.Timer;
-
-import org.limewire.core.api.lifecycle.LifeCycleEvent;
-import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.settings.ApplicationSettings;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
-import org.limewire.listener.EventListener;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * This class handles the timer that updates uptime statistics.
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 @Singleton
-public final class UptimeStatTimer implements EventListener<LifeCycleEvent>  {
+final class UptimeStatTimer implements Service {
 
-    /**
-     * The interval between statistics updates in milliseconds.
-     */
-    private final int UPDATE_TIME = 1000;
-
-    /**
-     * The interval between statistics updates in seconds for convenience and
-     * added efficiency..
-     */
-    private final int UPDATE_TIME_IN_SECONDS = UPDATE_TIME / 1000;
-
-    /**
-     * variable for timer that updates the stats.
-     */
-    private Timer _timer;
-
-    /**
-     * Current uptime in seconds.
-     */
+    /** Current uptime in seconds. */
     @InspectablePrimitive("currentUptime")
     private static volatile long currentUptime = 0;
 
@@ -54,48 +36,66 @@ public final class UptimeStatTimer implements EventListener<LifeCycleEvent>  {
      * The number of uptimes to remember.
      */
     private static final int LAST_N_UPTIMES = 20;
+    
+    private volatile long lastUpdateTime = -1;
+    private volatile ScheduledFuture<?> future;
 
-    private final AtomicBoolean firstUtimeUpdate = new AtomicBoolean(true);
-
-    /**
-     * Creates the timer and the ActionListener associated with it.
-     */
-    @Inject
-    public UptimeStatTimer(LifeCycleManager lifeCycleManager) {
-        ActionListener refreshStats = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+    private final AtomicBoolean firstUtimeUpdate = new AtomicBoolean(true);    
+    private final ScheduledExecutorService backgroundExecutor;
+    
+    @Inject UptimeStatTimer(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+        this.backgroundExecutor = backgroundExecutor;
+    }
+    
+    @Inject void register(ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    @Override
+    public String getServiceName() {
+        return I18nMarker.marktr("Uptime Statistics");
+    }
+    @Override
+    public void initialize() {
+    }
+    
+    @Override
+    public void start() {
+        lastUpdateTime = System.currentTimeMillis();
+        this.future = backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
                 refreshStats();
             }
-        };
-
-        _timer = new Timer(UPDATE_TIME, refreshStats);
-        
-        if(lifeCycleManager.isStarted()) {
-            startTimer();
-        } else {
-            lifeCycleManager.addListener(this);
-        }
+        }, 1, 1, TimeUnit.SECONDS);
     }
-
-    /**
-     * Starts the timer that updates the statistics.
-     */
-    private void startTimer() {
-        _timer.start();
+    
+    @Override
+    public void stop() {
+        Future future = this.future;
+        if(future != null) {
+            future.cancel(false);
+            this.future = null;
+        }
     }
 
     /**
      * Refreshes all of uptime statistics.
      */
     private void refreshStats() {
-        currentUptime += UPDATE_TIME_IN_SECONDS;
-
-        int totalUptime = ApplicationSettings.TOTAL_UPTIME.getValue() + UPDATE_TIME_IN_SECONDS;
-        ApplicationSettings.TOTAL_UPTIME.setValue(totalUptime);
-        ApplicationSettings.AVERAGE_UPTIME.setValue(totalUptime
-                / ApplicationSettings.SESSIONS.getValue());
-
-        updateUptimeHistory(currentUptime, UPTIME_HISTORY_SNAPSHOT_INTERVAL, LAST_N_UPTIMES);
+        long now = System.currentTimeMillis();
+        long elapsed = (now - lastUpdateTime) / 1000;
+        if(elapsed > 0) {
+            currentUptime += elapsed;
+    
+            long totalUptime = ApplicationSettings.TOTAL_UPTIME.getValue() + elapsed;
+            ApplicationSettings.TOTAL_UPTIME.setValue(totalUptime);
+            ApplicationSettings.AVERAGE_UPTIME.setValue(totalUptime / ApplicationSettings.SESSIONS.getValue());
+    
+            updateUptimeHistory(currentUptime, UPTIME_HISTORY_SNAPSHOT_INTERVAL, LAST_N_UPTIMES);
+        }
+        
+        lastUpdateTime = now;
     }
 
     /**
@@ -135,12 +135,5 @@ public final class UptimeStatTimer implements EventListener<LifeCycleEvent>  {
                 }
             }
         }
-    }
-
-    @Override
-    public void handleEvent(LifeCycleEvent event) {
-       if(LifeCycleEvent.STARTED == event) {
-           startTimer();
-       }
     }
 }

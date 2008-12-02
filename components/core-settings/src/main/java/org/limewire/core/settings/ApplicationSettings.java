@@ -29,8 +29,8 @@ public class ApplicationSettings extends LimeProps {
      * The average time this user leaves the application running.
      */
     @InspectablePrimitive("average application uptime")
-    public static final IntSetting AVERAGE_UPTIME =
-        FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 0);
+    public static final LongSetting AVERAGE_UPTIME =
+        FACTORY.createExpirableLongSetting("AVERAGE_UPTIME", 0);
     
     @InspectablePrimitive("last n application uptimes")
     public static final StringArraySetting LAST_N_UPTIMES =
@@ -40,8 +40,8 @@ public class ApplicationSettings extends LimeProps {
 	 * The total time this user has used the application.
 	 */    
     @InspectablePrimitive("total application uptime")
-    public static final IntSetting TOTAL_UPTIME =
-        FACTORY.createIntSetting("TOTAL_UPTIME", 0);
+    public static final LongSetting TOTAL_UPTIME =
+        FACTORY.createLongSetting("TOTAL_UPTIME", 0);
     
     /**
      * The average time this user is connected to the network per session (in seconds).
