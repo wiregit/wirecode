@@ -33,15 +33,17 @@
 extern "C" {
 #endif
 	
-#define OS_NATIVE(func) Java_com_limegroup_gnutella_gui_notify_Growl_##func
+#define OS_NATIVE(func) Java_org_limewire_ui_swing_tray_Growl_##func
 
 JNIEXPORT void JNICALL OS_NATIVE(RegisterGrowl) (JNIEnv *env, jobject obj)
 {
+	//printf("just called RegisterGrowl");
 	[GrowlApplicationBridge setGrowlDelegate:[[Growl alloc] init]];
 }
 
 JNIEXPORT void JNICALL OS_NATIVE(SendNotification) (JNIEnv *env, jobject obj, jstring message)
 {
+	//printf("just called SendNotification");
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	const char *messageCStr = (*env)->GetStringUTFChars(env, message, NULL);
 	NSString *messageNSStr = [NSString stringWithCString:messageCStr];

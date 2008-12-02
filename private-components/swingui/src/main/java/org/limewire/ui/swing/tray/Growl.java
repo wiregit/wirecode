@@ -1,24 +1,14 @@
 package org.limewire.ui.swing.tray;
 
 import org.limewire.service.ErrorService;
-import org.limewire.util.OSUtils;
 
 class Growl {
     
     static {
-        if (OSUtils.isMacOSX105()) {
-            try {
-                System.loadLibrary("GrowlLeopard");
-            } catch (UnsatisfiedLinkError err) {
-                ErrorService.error(err);
-            }
-        }
-        else if (OSUtils.isAnyMac()) {
-            try {
-                System.loadLibrary("GrowlTiger");
-            } catch (UnsatisfiedLinkError err) {
-                ErrorService.error(err);
-            }
+        try {
+            System.loadLibrary("Growl");
+        } catch (UnsatisfiedLinkError err) {
+            ErrorService.error(err);
         }
     }
     
