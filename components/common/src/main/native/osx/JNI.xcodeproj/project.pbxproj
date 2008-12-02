@@ -831,6 +831,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = Dock;
 				USER_HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

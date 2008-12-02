@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-#define OS_NATIVE(func) Java_com_limegroup_gnutella_gui_dock_Dock_##func
+#define OS_NATIVE(func) Java_org_limewire_ui_swing_dock_Dock_##func
 
 @interface Dock : NSObject
 + (NSImage *)limeWireIconAtPath:(NSString *)appPath;
