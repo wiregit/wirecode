@@ -78,7 +78,7 @@ public class AddressIQListener implements PacketListener {
                 if(presence != null) {
                     LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), iq.getAddress());
                     addressRegistry.put(new XMPPAddress(presence.getPresenceId()), iq.getAddress());
-                    presence.addFeature(new AddressFeature(iq.getAddress()));
+                    presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
                     pendingAddresses.put(iq.getFrom(), address);
@@ -140,7 +140,7 @@ public class AddressIQListener implements PacketListener {
                                     LOG.debugf("updating address on presence {0} to {1}", jid, address);
                                     Address pendingAddress = pendingAddresses.remove(jid);
                                     addressRegistry.put(new XMPPAddress(jid), pendingAddress);
-                                    presenceEvent.getSource().addFeature(new AddressFeature(pendingAddress));    
+                                    presenceEvent.getSource().addFeature(new AddressFeature(new XMPPAddress(jid)));    
                                 }
                             }
                         }
