@@ -45,7 +45,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         this.loggedInPanel = loggedInPanel;
         this.loginPanel = loginPanel;
         this.xmppService = xmppService;
-        this.accountManager = accountManager;        
+        this.accountManager = accountManager;
         setLayout(new VerticalLayout(0));
         
         shareLabel = new HyperLinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
@@ -108,9 +108,14 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
             @Override
             public void run() {
                 xmppService.logout();
-                shareLabel.setVisible(!switchUser);
-                loginPanel.setVisible(switchUser);
-                loggedInPanel.setVisible(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        shareLabel.setVisible(!switchUser);
+                        loginPanel.setVisible(switchUser);
+                        loggedInPanel.setVisible(false);                        
+                    }
+                });
             }
         });
     }

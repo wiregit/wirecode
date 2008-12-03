@@ -64,7 +64,7 @@ class LoggedInPanel extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
-                
+                throw new RuntimeException("Implement me");
             }
         });
         optionsMenu.addSeparator();

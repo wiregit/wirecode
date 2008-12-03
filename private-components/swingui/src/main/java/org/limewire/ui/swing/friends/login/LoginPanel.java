@@ -188,7 +188,7 @@ class LoginPanel extends JXPanel {
                 try {
                     xmppService.login(config);
                 } catch (XMPPException e) {
-                    
+                    // Ignored
                 }
             }
         });            

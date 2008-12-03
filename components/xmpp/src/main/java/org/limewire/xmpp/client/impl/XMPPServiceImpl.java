@@ -227,14 +227,13 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                                     LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
                                     newConnection = login(configuration, true);
                                 } catch (XMPPException e) {
+                                    // Ignored
                                 }
                                 try {
                                     Thread.sleep(sleepTime);
-                                } catch (InterruptedException e) {                                    
+                                } catch (InterruptedException e) {
+                                    // Ignored
                                 }
-            //                  if(sleepTime < (Long.MAX_VALUE / 2)) {
-            //                      sleepTime *= 2;
-            //                  }
                             }
                         }
                     }), "xmpp-reconnection-manager");
