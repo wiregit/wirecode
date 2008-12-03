@@ -421,7 +421,6 @@ public class LimeWireCoreModule extends AbstractModule {
         @Override
         protected ScheduledThreadPoolExecutor createObject() {
             ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("ScheduledThread"));
-            stpe.allowCoreThreadTimeOut(true);
             return stpe;
         }
     }    
