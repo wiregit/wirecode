@@ -405,12 +405,12 @@ public final class Initializer {
     private void runExternalChecks(LimeWireCore limeWireCore, String[] args) {        
         ExternalControl externalControl = limeWireCore.getExternalControl();
         stopwatch.resetAndLog("Get externalControl");
-//        if(OSUtils.isMacOSX()) {
-//            GURLHandler.getInstance().enable(externalControl);
-//            stopwatch.resetAndLog("Enable GURL");
-//            MacEventHandler.instance().enable(externalControl, this);
-//            stopwatch.resetAndLog("Enable macEventHandler");
-//        }
+        if(OSUtils.isMacOSX()) {
+            GURLHandler.getInstance().enable(externalControl);
+            stopwatch.resetAndLog("Enable GURL");
+            MacEventHandler.instance().enable(externalControl, this);
+            stopwatch.resetAndLog("Enable macEventHandler");
+        }
         
         // Test for preexisting LimeWire and pass it a magnet URL if one
         // has been passed in.

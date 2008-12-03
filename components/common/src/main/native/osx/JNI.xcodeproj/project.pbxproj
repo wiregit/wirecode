@@ -134,7 +134,7 @@
 /* Begin PBXFileReference section */
 		ACB6479D0EE597D300D111F8 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = ../../../../../../lib/native/osx/Growl.framework; sourceTree = SOURCE_ROOT; };
 		D2AAC0630554660B00DB518D /* libGURLTiger.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGURLTiger.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
-		F95A28C80DCBA48F00468CF3 /* libGURLLeopard.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGURLLeopard.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
+		F95A28C80DCBA48F00468CF3 /* libGURL.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libGURL.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F95A28D20DCBA50900468CF3 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		F95A29A20DCBB0A300468CF3 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		F95A29C00DCBB65400468CF3 /* System.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = System.framework; path = /System/Library/Frameworks/System.framework; sourceTree = "<absolute>"; };
@@ -273,7 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				D2AAC0630554660B00DB518D /* libGURLTiger.jnilib */,
-				F95A28C80DCBA48F00468CF3 /* libGURLLeopard.jnilib */,
+				F95A28C80DCBA48F00468CF3 /* libGURL.jnilib */,
 				F96581130DA1764500F02016 /* libDock.jnilib */,
 				F9AE53E50DAC00B500122CBF /* libMacOSXUtilsTiger.jnilib */,
 				F96C68AF0DCEAD97006A4F2B /* libMacOSXUtilsLeopard.jnilib */,
@@ -399,7 +399,7 @@
 			);
 			name = "GURL Leopard";
 			productName = GURL;
-			productReference = F95A28C80DCBA48F00468CF3 /* libGURLLeopard.jnilib */;
+			productReference = F95A28C80DCBA48F00468CF3 /* libGURL.jnilib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		F95A29D10DCBB90D00468CF3 /* SystemUtilities Leopard */ = {
@@ -760,7 +760,7 @@
 				EXECUTABLE_PREFIX = lib;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = GURLLeopard;
+				PRODUCT_NAME = GURL;
 				SDKROOT = macosx10.5;
 				USER_HEADER_SEARCH_PATHS = /System/Library/Frameworks/JavaVM.framework/Headers;
 			};
