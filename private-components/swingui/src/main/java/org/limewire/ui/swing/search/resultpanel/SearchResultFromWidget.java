@@ -119,10 +119,17 @@ public class SearchResultFromWidget extends JPanel {
     private String getFromText() {
         if(people.size() == 0) 
             return tr("nobody");
-        else if(isClassicView)
-            return tr("{0} people", people.size());
-        else
-            return tr("People");
+        else if(isClassicView) {
+            if(people.size() == 1)
+                return tr("{0} person", people.size());
+            else
+                return tr("{0} people", people.size());
+        } else {
+            if(people.size() == 1)
+                return tr("Person");
+            else
+                return tr("People");
+        }
     }
 
     private void assertParentProps(JComponent item) {
