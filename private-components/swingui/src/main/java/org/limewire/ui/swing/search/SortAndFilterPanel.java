@@ -5,6 +5,7 @@ import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -86,6 +87,8 @@ public class SortAndFilterPanel {
 
     @Resource private Icon listViewIcon;
     @Resource private Icon tableViewIcon;
+    
+    @Resource private Font sortLabelFont;
 
     private final LimeComboBox sortCombo;
     
@@ -115,6 +118,7 @@ public class SortAndFilterPanel {
         
         this.populateActionList();
         
+        sortLabel.setFont(sortLabelFont);
         sortLabel.setForeground(Color.WHITE);
         sortCombo = comboBoxFactory.createDarkFullComboBox();
 

@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.LayoutManager;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -30,7 +29,6 @@ public class LimeHeaderBar extends JXPanel {
         
         JXLabel headerLabel = new JXLabel(title);
         headerLabel.setForegroundPainter(new TextShadowPainter());
-        headerLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,2));
         
         this.titleComponent = headerLabel;
         this.componentContainer = new JPanel();
@@ -51,7 +49,7 @@ public class LimeHeaderBar extends JXPanel {
         this.componentContainer.setOpaque(false);
         
         super.setLayout(new MigLayout("insets 0, fill, aligny center","[][]",""));
-        super.add(titleComponent, "growy, dock west");
+        super.add(titleComponent, "growy, dock west, gapbefore 10");
         super.add(componentContainer, "grow, right");
     }
     

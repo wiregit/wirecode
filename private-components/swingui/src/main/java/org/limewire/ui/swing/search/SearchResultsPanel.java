@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GradientPaint;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
@@ -243,7 +244,8 @@ public class SearchResultsPanel extends JXPanel {
         RectanglePainter tabHighlight = new RectanglePainter();
         tabHighlight.setFillPaint(new GradientPaint(20.0f, 0.0f, tabHighlightTopGradientColor, 
                                                     20.0f, 33.0f, tabHighlightBottomGradientColor));
-        
+
+        tabHighlight.setInsets(new Insets(0,0,1,0));
         tabHighlight.setBorderPaint(null);
         
         FancyTabList searchTab = searchTabItems.getSearchTab();
@@ -254,7 +256,6 @@ public class SearchResultsPanel extends JXPanel {
         searchTab.setSelectionPainter(createTabSelectionPainter());
         searchTab.setTabTextSelectedColor(tabSelectionTextColor);
         
-
         LimeHeaderBar header = headerBarFactory.createBasic(searchTab);
         sortAndFilterPanel.layoutComponents(header);
         add(header, "wrap");
@@ -343,13 +344,14 @@ public class SearchResultsPanel extends JXPanel {
         
         painter.setFillPaint(new GradientPaint(0, 0, tabSelectionTopGradientColor, 
                 0, 1, tabSelectionBottomGradientColor));
-        
         painter.setBorderPaint(new GradientPaint(0, 0, tabSelectionBorderTopGradientColor, 
                 0, 1, tabSelectionBorderBottomGradientColor));
+        
         painter.setRoundHeight(10);
         painter.setRoundWidth(10);
         painter.setRounded(true);
         painter.setPaintStretched(true);
+        painter.setInsets(new Insets(4,0,4,0));
                 
         painter.setAntialiasing(true);
         painter.setCacheable(true);
