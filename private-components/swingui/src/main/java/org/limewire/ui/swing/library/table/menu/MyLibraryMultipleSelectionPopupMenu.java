@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.Action;
@@ -12,6 +13,7 @@ import javax.swing.JSeparator;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -185,7 +187,9 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
             final LocalFileItem[] fileItemArray = createFileItemArray();            
             for (LocalFileItem fileItem : fileItemArray) {
                 if (!fileItem.isIncomplete()) {
-                    shareListManager.getFriendShareList(friend).addFile(fileItem.getFile());
+                    FriendFileList friendFileList = shareListManager.getOrCreateFriendShareList(friend);
+                    File file = fileItem.getFile();
+                    friendFileList.addFile(file);
                 }
             }
             repaintComponent.repaint();      
