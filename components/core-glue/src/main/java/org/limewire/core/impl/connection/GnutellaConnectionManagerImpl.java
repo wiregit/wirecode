@@ -2,43 +2,88 @@ package org.limewire.core.impl.connection;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.connection.ConnectionItem;
 import org.limewire.core.api.connection.ConnectionLifecycleEventType;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.Objects;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ * An implementation of GnutellaConnectionManager for the live core.  This is 
+ * defined as a Guice singleton, which means Guice will create the instance
+ * when the binding is defined.
+ */
 @Singleton
-public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager {
+public class GnutellaConnectionManagerImpl 
+    implements GnutellaConnectionManager, ConnectionLifecycleListener {
 
     /** The number of messages a connection must have sent before we consider it stable. */
     private static final int STABLE_THRESHOLD = 5;
     
     private final ConnectionManager connectionManager;
     private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
+    private final ConnectionServices connectionServices;
+    private final RemoteLibraryManager remoteLibraryManager;
+
+    /** Mapping of connections to ConnectionItem instances. */
+    private final Map<RoutedConnection, ConnectionItem> connectionMap;
+    
+    /** List of ConnectionItem instances. */
+    private final EventList<ConnectionItem> connectionItemList;
     
     private volatile long lastIdleTime;
     private volatile ConnectionStrength currentStrength = ConnectionStrength.DISCONNECTED;
-    
     private volatile ConnectionLifecycleEventType lastStrengthRelatedEvent;
 
+    /**
+     * Constructs the live implementation of GnutellaConnectionManager using 
+     * the specified connection and library services.
+     */
     @Inject
-    public GnutellaConnectionManagerImpl(com.limegroup.gnutella.ConnectionManager connectionManager) {
+    public GnutellaConnectionManagerImpl(
+            ConnectionManager connectionManager,
+            ConnectionServices connectionServices,
+            RemoteLibraryManager remoteLibraryManager) {
+        
         this.connectionManager = Objects.nonNull(connectionManager, "connectionManager");
+        this.connectionServices = connectionServices;
+        this.remoteLibraryManager = remoteLibraryManager;
+
+        // Create map of connection items.
+        connectionMap = new HashMap<RoutedConnection, ConnectionItem>();
+        
+        // Create list of connection items as thread safe list.
+        connectionItemList = GlazedListsFactory.threadSafeList(
+                new BasicEventList<ConnectionItem>());
+        
+        // Add listener for connection events. 
+        connectionManager.addEventListener(this);
     }
     
     @Inject void register(ServiceRegistry registry, final @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
@@ -174,6 +219,7 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
         return strength;
     }
 
+    @Override
     public boolean isUltrapeer() {
         return connectionManager.isSupernode();
     }
@@ -197,5 +243,105 @@ public class GnutellaConnectionManagerImpl implements GnutellaConnectionManager 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
+    }
+
+    /**
+     * Returns the list of connections.  An application should NOT assume that 
+     * the returned list is Swing-compatible; Swing is suppported by wrapping
+     * the resulting list via a call to <code>
+     * GlazedListsFactory.swingThreadProxyEventList()</code>.
+     */
+    @Override
+    public EventList<ConnectionItem> getConnectionList() {
+        return connectionItemList;
+    }
+    
+    /**
+     * Scans the specified connection host for shared files.  This 
+     * implementation displays the files as a remote library.
+     */
+    @Override
+    public void browseHost(ConnectionItem item) {
+        // Get FriendPresence for connection.  
+        FriendPresence hostPresence = item.getFriendPresence();
+
+        // Display library for connection.
+        remoteLibraryManager.addPresenceLibrary(hostPresence);
+    }
+
+    /**
+     * Removes the specified connection from the list.
+     */
+    @Override
+    public void removeConnection(ConnectionItem item) {
+        if (item instanceof CoreConnectionItem) {
+            RoutedConnection connection = ((CoreConnectionItem) item).getRoutedConnection();
+            connectionServices.removeConnection(connection);
+        }
+    }
+
+    /**
+     * Attempts to establish a connection to the specified host and port.
+     */
+    @Override
+    public void tryConnection(String hostname, int portnum, boolean useTLS) {
+        connectionServices.connectToHostAsynchronously(hostname, portnum,
+                useTLS ? ConnectType.TLS : ConnectType.PLAIN);
+    }
+
+    /**
+     * Handles connection lifecycle events fired by the ConnectionManager.
+     */
+    @Override
+    public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+        // Get connection.
+        RoutedConnection c = evt.getConnection();
+        if (c != null) {
+            if (evt.isConnectionInitializingEvent()) {
+                // Add new connection.
+                addConnection(c);
+
+            } else if (evt.isConnectionInitializedEvent()) {
+                // Update status when connection is fully initialized.
+                updateConnection(c);
+
+            } else if (evt.isConnectionClosedEvent()) {
+                // Remove connection when closed.
+                removeConnection(c);
+            }
+        }
+    }
+    
+    /**
+     * Adds the specified connection to the list.
+     */
+    private void addConnection(RoutedConnection connection) {
+        ConnectionItem connectionItem = connectionMap.get(connection);
+        if (connectionItem == null) {
+            connectionItem = new CoreConnectionItem(connection);
+            connectionMap.put(connection, connectionItem);
+            connectionItemList.add(connectionItem);
+        }
+    }
+    
+    /**
+     * Updates the specified connection in the list.
+     */
+    private void updateConnection(RoutedConnection connection) {
+        ConnectionItem connectionItem = connectionMap.get(connection);
+        if (connectionItem != null) {
+            connectionItem.update();
+        }
+    }
+    
+    /**
+     * Removes the specified connection from the list.
+     */
+    private void removeConnection(RoutedConnection connection) {
+        ConnectionItem connectionItem = connectionMap.get(connection);
+        if (connectionItem != null) {
+            connectionItemList.remove(connectionItem);
+            connectionMap.remove(connection);
+        }
     }
 }
