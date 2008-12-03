@@ -24,11 +24,11 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.MultiIterable;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
+import org.limewire.io.GUID;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.Uploader.UploadStatus;

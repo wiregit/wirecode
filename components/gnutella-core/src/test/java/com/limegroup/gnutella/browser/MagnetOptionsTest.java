@@ -10,10 +10,10 @@ import java.util.Locale;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
 

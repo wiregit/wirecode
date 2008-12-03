@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;

@@ -26,6 +26,7 @@ import org.jmock.Mockery;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DHTSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;

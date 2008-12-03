@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.filters;
 
 import junit.framework.Test;
+
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 import org.jmock.Expectations;

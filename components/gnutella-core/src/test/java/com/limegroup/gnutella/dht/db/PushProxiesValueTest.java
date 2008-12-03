@@ -5,13 +5,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.routing.Version;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTTestCase;
 

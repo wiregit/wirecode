@@ -19,6 +19,8 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPAddress;
+import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
 public class AddressIQListener implements PacketListener {
@@ -26,16 +28,19 @@ public class AddressIQListener implements PacketListener {
 
     private final XMPPConnectionImpl connection;
     private volatile Address address;
+    private final XMPPAddressRegistry addressRegistry;
     private final AddressFactory factory; 
     private final Map<String, Address> pendingAddresses;
 
     public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
                              Address address,
-                             FeatureRegistry featureRegistry) {
+                             FeatureRegistry featureRegistry,
+                             XMPPAddressRegistry addressRegistry) {
         this.connection = connection;
         this.factory = factory;
         this.address = address;
+        this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
         new AddressIQFeatureInitializer().register(featureRegistry);
     }
@@ -61,7 +66,8 @@ public class AddressIQListener implements PacketListener {
                 FriendPresence presence = user.getFriendPresences().get(iq.getFrom());
                 if(presence != null) {
                     LOG.debugf("updating address on presence {0} to {1}", presence.getPresenceId(), iq.getAddress());
-                    presence.addFeature(new AddressFeature(iq.getAddress()));
+                    addressRegistry.put(new XMPPAddress(presence.getPresenceId()), iq.getAddress());
+                    presence.addFeature(new AddressFeature(new XMPPAddress(presence.getPresenceId())));
                 } else {
                     LOG.debugf("address {0} for presence {1} is pending", iq.getAddress(), iq.getFrom());
                     pendingAddresses.put(iq.getFrom(), iq.getAddress());
@@ -117,9 +123,10 @@ public class AddressIQListener implements PacketListener {
                     sendAddress(address, friendPresence.getPresenceId());
                 }
                 if (pendingAddresses.containsKey(friendPresence.getPresenceId())) {
+                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), address);
                     Address pendingAddress = pendingAddresses.remove(friendPresence.getPresenceId());
-                    LOG.debugf("updating address on presence {0} to {1}", friendPresence.getPresenceId(), pendingAddress);
-                    friendPresence.addFeature(new AddressFeature(pendingAddress));
+                    addressRegistry.put(new XMPPAddress(friendPresence.getPresenceId()), pendingAddress);
+                    friendPresence.addFeature(new AddressFeature(new XMPPAddress(friendPresence.getPresenceId()))); 
                 }
             }
         }

@@ -18,12 +18,12 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Decorator;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;

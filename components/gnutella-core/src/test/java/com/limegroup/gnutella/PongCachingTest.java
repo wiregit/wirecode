@@ -12,6 +12,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.PingPongSettings;
 import org.limewire.core.settings.UltrapeerSettings;
+import org.limewire.io.GUID;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;

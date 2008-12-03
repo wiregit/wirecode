@@ -16,6 +16,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOServerSocket;
 import org.limewire.nio.observer.AcceptObserver;
@@ -23,7 +24,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.StubGnetConnectObserver;
 import com.limegroup.gnutella.URN;

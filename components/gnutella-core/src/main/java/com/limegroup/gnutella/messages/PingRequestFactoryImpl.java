@@ -4,12 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.GUID;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ConnectionServices;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.Message.Network;
 

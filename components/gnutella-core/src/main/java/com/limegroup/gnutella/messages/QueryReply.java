@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 
 public interface QueryReply extends Message, SecureMessage {

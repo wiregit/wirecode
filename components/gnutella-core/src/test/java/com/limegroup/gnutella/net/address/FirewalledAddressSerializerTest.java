@@ -10,10 +10,12 @@ import junit.framework.Test;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.net.address.ConnectableSerializer;
+import org.limewire.net.address.FirewalledAddress;
+import org.limewire.net.address.FirewalledAddressSerializer;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.GGEPKeys;
 
 public class FirewalledAddressSerializerTest extends BaseTestCase {

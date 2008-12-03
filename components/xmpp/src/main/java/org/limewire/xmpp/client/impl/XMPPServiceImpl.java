@@ -6,6 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.io.Connectable;
+import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventBroadcaster;
@@ -14,9 +16,11 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.net.ConnectRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
+import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -25,6 +29,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -32,7 +37,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {
+public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent>, ConnectRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
@@ -48,13 +53,18 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private AddressEvent lastAddressEvent;
     private boolean multipleConnectionsAllowed;
 
+    private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
+    private final XMPPAddressRegistry xmppAddressRegistry;
+
     @Inject
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
             Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
             Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
-            EventMulticaster<FeatureEvent> featureSupport) {
+            EventMulticaster<FeatureEvent> featureSupport,
+            EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster,
+            XMPPAddressRegistry xmppAddressRegistry) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
@@ -62,6 +72,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
         this.featureSupport = featureSupport;
+        this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
+        this.xmppAddressRegistry = xmppAddressRegistry;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
         this.multipleConnectionsAllowed = false;
         this.connectionBroadcaster.get().addListener(new ReconnectionManager());
@@ -124,7 +136,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
                     rosterBroadcaster.get(), fileOfferBroadcaster.get(),
                     libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                    addressFactory, authenticator, featureSupport);
+                    addressFactory, authenticator, featureSupport, connectRequestEventBroadcaster, xmppAddressRegistry);
             if(lastAddressEvent != null) {
                 connection.handleEvent(lastAddressEvent);
             }
@@ -170,7 +182,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     }
 
     @Override
-    public XMPPConnection getActiveConnection() {
+    public XMPPConnectionImpl getActiveConnection() {
         if(connections.isEmpty()) {
             return null;
         } else {
@@ -201,6 +213,20 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     List<? extends XMPPConnection> getConnections() {
         return Collections.unmodifiableList(connections);
     } 
+    
+    @Override
+    public void send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
+        LOG.debug("send connect request");
+        XMPPConnectionImpl connection = getActiveConnection();
+        if (connection == null) {
+            return;
+        }
+        ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
+        connectRequest.setTo(userId);
+        connectRequest.setFrom(connection.getLocalJid());
+        LOG.debugf("sending request: {0}", connectRequest);
+        connection.sendPacket(connectRequest);
+    }
     
     private class ReconnectionManager implements EventListener<XMPPConnectionEvent> {
         

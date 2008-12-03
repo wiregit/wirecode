@@ -12,6 +12,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.BlockingAddressResolutionObserver;
+import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.stubs.NetworkManagerStub;

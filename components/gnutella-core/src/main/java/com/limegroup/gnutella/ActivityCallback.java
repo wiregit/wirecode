@@ -6,6 +6,7 @@ import java.util.Set;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.browser.MagnetOptions;

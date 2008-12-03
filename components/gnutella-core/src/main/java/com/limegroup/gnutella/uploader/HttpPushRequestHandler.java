@@ -17,11 +17,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.http.HTTPHeaderName;

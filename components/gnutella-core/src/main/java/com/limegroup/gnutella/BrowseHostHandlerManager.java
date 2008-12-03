@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import org.limewire.io.Address;
+import org.limewire.io.GUID;
 
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;

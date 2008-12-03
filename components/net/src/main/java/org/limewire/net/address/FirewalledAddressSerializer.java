@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.net.address;
+package org.limewire.net.address;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,14 +9,10 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.Connectable;
 import org.limewire.io.GGEP;
-import org.limewire.net.address.AddressFactory;
-import org.limewire.net.address.AddressSerializer;
-import org.limewire.net.address.ConnectableSerializer;
+import org.limewire.io.GUID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.GGEPKeys;
 
 @Singleton
 public class FirewalledAddressSerializer implements AddressSerializer {
@@ -24,7 +20,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
     static final String PUBLIC_ADDRESS = "PU";
     static final String PRIVATEADDRESS = "PR";
     static final String PROXIES = "PX";
-    static final String FWT_VERSION = GGEPKeys.GGEP_HEADER_FW_TRANS;
+    static final String FWT_VERSION = "FW"; // same as com.limegroup.gnutella.messages.GGEPKeys
     static final String GUID = "GU";
     
     private final ConnectableSerializer serializer;
@@ -49,12 +45,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
     public String getAddressType() {
         return "firewalled-address";
     }
-
-    @Override
-    public Address deserialize(String address) throws IOException {
-        throw new IOException();
-    }
-
+    
     @Override
     public FirewalledAddress deserialize(byte[] serializedAddress) throws IOException {
         try {
@@ -84,4 +75,8 @@ public class FirewalledAddressSerializer implements AddressSerializer {
         return ggep.toByteArray();
     }
 
+    @Override
+    public Address deserialize(String address) throws IOException {
+        throw new IOException();
+    }
 }

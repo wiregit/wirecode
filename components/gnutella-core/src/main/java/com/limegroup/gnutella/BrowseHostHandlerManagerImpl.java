@@ -18,6 +18,7 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
+import org.limewire.io.GUID;
 import org.limewire.core.api.friend.FriendPresence;
 
 import com.google.inject.Inject;

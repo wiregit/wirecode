@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import org.limewire.io.GUID;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
 

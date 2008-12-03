@@ -9,9 +9,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.GUID;
 
 import com.limegroup.gnutella.ConnectionManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.connection.RoutedConnection;

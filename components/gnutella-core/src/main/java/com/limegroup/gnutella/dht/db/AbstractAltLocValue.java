@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.dht.db;
 
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.GUID;
 
 /**
  * An implementation of DHTValue for for Gnutella Alternate Locations

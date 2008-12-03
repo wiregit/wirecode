@@ -58,6 +58,4 @@ public interface XMPPConnection {
      * date with changes.
      */
     public Collection<User> getUsers();
-
-    
 }

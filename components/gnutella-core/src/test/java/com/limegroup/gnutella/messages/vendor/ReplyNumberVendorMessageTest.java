@@ -3,11 +3,11 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;

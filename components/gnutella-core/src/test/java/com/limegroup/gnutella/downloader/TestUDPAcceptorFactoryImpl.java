@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.downloader;
 
+import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 

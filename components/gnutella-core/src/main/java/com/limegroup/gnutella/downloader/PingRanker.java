@@ -19,9 +19,9 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.DualIterator;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.io.Address;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;

@@ -7,9 +7,9 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.io.GUID;
 import org.limewire.util.MediaType;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.limewire.io.GUID;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;

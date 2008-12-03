@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
 

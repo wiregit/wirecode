@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.limewire.collection.IntSet;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.GUID;
 import org.limewire.security.SecurityToken;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 

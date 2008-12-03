@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.util.Random;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.GUID;
 
 import junit.framework.Test;
 

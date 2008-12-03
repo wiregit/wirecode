@@ -19,11 +19,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.limewire.io.GUID;
 import org.limewire.util.FileUtils;
 import org.limewire.util.URIUtils;
 
 import com.limegroup.gnutella.FileDetails;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.URLDecoder;

@@ -5,7 +5,7 @@
  */
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
 
 public class UDPCrawlerPong extends AbstractVendorMessage {
 	

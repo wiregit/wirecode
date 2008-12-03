@@ -1,9 +1,11 @@
-package com.limegroup.gnutella;
+package org.limewire.io;
 
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import org.limewire.io.GUID;
+import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteUtils;
 
 
@@ -13,7 +15,7 @@ import junit.framework.Test;
  * Unit tests for GUID.
  */
 @SuppressWarnings("unchecked")
-public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
+public class GUIDTest extends BaseTestCase {
     private byte[] bytes;
     private byte[] b1;
     private byte[] b2;

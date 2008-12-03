@@ -22,6 +22,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
 

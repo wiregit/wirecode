@@ -25,12 +25,12 @@ import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.CategoryConverter;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.xml.LimeXMLDocument;

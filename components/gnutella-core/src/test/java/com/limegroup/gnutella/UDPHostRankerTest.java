@@ -16,6 +16,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Injector;

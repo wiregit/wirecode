@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.ReplyHandler;
 
 public interface QueryDispatcher extends Runnable {

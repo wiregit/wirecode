@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import org.limewire.io.GUID;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;

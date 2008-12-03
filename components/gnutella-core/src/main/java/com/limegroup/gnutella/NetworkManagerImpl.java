@@ -17,6 +17,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
@@ -24,6 +25,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
@@ -41,7 +43,6 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
-import com.limegroup.gnutella.net.address.FirewalledAddress;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
@@ -338,6 +339,11 @@ public class NetworkManagerImpl implements NetworkManager {
         }
     }
     
+    @Override
+    public Connectable getPublicAddress() {
+        return getPublicAddress(!acceptedIncomingConnection());
+    }
+    
     private Connectable getPrivateAddress() {
         byte[] privateAddress = getNonForcedAddress();
         try {
@@ -472,4 +478,5 @@ public class NetworkManagerImpl implements NetworkManager {
             FACTORY.createRemoteBooleanSetting("IGNORE_SSL_EXCEPTIONS", true, "TLS.ignoreException");
     
     }
+
 }

@@ -3,9 +3,10 @@ package com.limegroup.gnutella.filters;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.limewire.io.GUID;
+
 import com.google.inject.Singleton;
 
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 

@@ -3,7 +3,8 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.DataUtils;
 

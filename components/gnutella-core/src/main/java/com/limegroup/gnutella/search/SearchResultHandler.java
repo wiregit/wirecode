@@ -2,7 +2,8 @@ package com.limegroup.gnutella.search;
 
 import java.util.List;
 
-import com.limegroup.gnutella.GUID;
+import org.limewire.io.GUID;
+
 import com.limegroup.gnutella.filters.response.ResponseFilter;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;

@@ -14,6 +14,7 @@ import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.io.GUID;
 import org.limewire.net.TLSManager;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;

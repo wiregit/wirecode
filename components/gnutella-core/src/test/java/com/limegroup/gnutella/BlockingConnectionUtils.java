@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.io.GUID;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BaseTestCase;
 

@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -24,7 +25,6 @@ import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Injector;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;

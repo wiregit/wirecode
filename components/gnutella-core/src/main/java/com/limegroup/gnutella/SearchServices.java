@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.io.GUID;
 import org.limewire.util.MediaType;
 
 public interface SearchServices {

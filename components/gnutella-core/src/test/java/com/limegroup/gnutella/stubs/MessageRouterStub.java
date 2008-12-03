@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.io.GUID;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.GuidMapManager;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.MessageDispatcher;

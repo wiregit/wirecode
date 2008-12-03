@@ -20,6 +20,7 @@ import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.NetworkInstanceUtils;

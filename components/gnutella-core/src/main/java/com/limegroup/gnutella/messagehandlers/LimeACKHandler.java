@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.MessageSettings;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.GUID;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
 
@@ -18,7 +19,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;

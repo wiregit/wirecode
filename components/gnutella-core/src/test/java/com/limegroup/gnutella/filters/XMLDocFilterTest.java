@@ -7,11 +7,11 @@ import java.util.Collections;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ForMeReplyHandler;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;

@@ -45,6 +45,7 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.core.settings.UploadSettings;
 import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.io.GUID;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -54,7 +55,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.HTTPUploadManager;
 import com.limegroup.gnutella.LifecycleManager;

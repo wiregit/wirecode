@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.core.settings.ConnectionSettings;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;

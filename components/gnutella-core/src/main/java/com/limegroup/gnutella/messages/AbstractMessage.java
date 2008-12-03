@@ -3,9 +3,9 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.GUID;
 import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.GUID;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses

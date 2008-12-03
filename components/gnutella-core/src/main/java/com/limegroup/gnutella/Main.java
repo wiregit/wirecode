@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.net.SocketsManager.ConnectType;
 
@@ -20,8 +21,8 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * The command-line UI for the Gnutella servent.

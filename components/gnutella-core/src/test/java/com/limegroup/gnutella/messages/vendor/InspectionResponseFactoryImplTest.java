@@ -13,6 +13,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.inspection.Inspector;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.util.CommonUtils;
 
 import junit.framework.Test;
@@ -21,7 +22,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.bittorrent.bencoding.Token;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.FECUtils;
 import com.limegroup.gnutella.util.LimeTestCase;

@@ -7,12 +7,12 @@ import java.nio.ByteOrder;
 
 import junit.framework.Test;
 
+import org.limewire.io.GUID;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;

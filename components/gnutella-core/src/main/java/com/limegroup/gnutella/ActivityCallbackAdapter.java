@@ -5,14 +5,15 @@ import java.util.Set;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * Provides a default implementation of <code>ActivityCallback</code> where

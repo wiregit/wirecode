@@ -5,6 +5,7 @@ import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.io.GUID;
 import org.limewire.util.DebugRunnable;
 import org.limewire.util.MediaType;
 import org.limewire.util.I18NConvert;

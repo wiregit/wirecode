@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.io.ByteReader;
+import org.limewire.io.GUID;
 import org.limewire.util.FileUtils;
 
 import junit.framework.Test;

@@ -18,6 +18,9 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UploadSettings;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
@@ -251,7 +254,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         }
             
         byte[] ip = pushRequest.getIP();
-        String h = NetworkUtils.ip2string(ip);
+        String host = NetworkUtils.ip2string(ip);
 
         // check whether we serviced this push request already
     	GUID guid = new GUID(pushRequest.getGUID());
@@ -261,10 +264,10 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     	}
 
        // make sure the guy isn't hammering us
-        AtomicInteger i = PUSH_REQUESTS.get(h);
+        AtomicInteger i = PUSH_REQUESTS.get(host);
         if(i == null) {
             i = new AtomicInteger(1);
-            PUSH_REQUESTS.put(h, i);
+            PUSH_REQUESTS.put(host, i);
         } else {
             i.addAndGet(1);
             // if we're over the max push requests for this host, exit.
@@ -282,18 +285,21 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
 
         int port = pushRequest.getPort();
         // if invalid port, exit
-        if (!NetworkUtils.isValidPort(port) ) {
-            LOG.debug("invalid port");
+        if (!NetworkUtils.isValidAddressAndPort(host, port) ) {
+            LOG.debug("invalid host or port");
             return;
         }
         
-        String req_guid_hexstring =
-            (new GUID(pushRequest.getClientGUID())).toString();
-
-        pushManager.get().acceptPushUpload(h, port, req_guid_hexstring,
-                             pushRequest.isMulticast(), // force accept
-                             pushRequest.isFirewallTransferPush(),
-                             pushRequest.isTLSCapable());
+        
+        try {
+            Connectable address = new ConnectableImpl(host, port, pushRequest.isTLSCapable());
+            pushManager.get().acceptPushUpload(address,
+                    new GUID(pushRequest.getGUID()),
+                    pushRequest.isMulticast(), // force accept
+                    pushRequest.isFirewallTransferPush());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
 	}
 	
 	public boolean isOpen() {

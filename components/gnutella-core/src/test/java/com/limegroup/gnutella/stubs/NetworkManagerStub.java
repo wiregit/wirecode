@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
@@ -14,7 +18,6 @@ import org.limewire.net.address.AddressEvent;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 
 @Singleton
@@ -260,6 +263,15 @@ public class NetworkManagerStub implements NetworkManager {
 
     @Override
     public void newPushProxies(Set<Connectable> pushProxies) {
+    }
+
+    @Override
+    public Connectable getPublicAddress() {
+        try {
+            return new ConnectableImpl(NetworkUtils.ip2string(getExternalAddress()), getPort(), isIncomingTLSEnabled());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
