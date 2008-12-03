@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
+import org.limewire.core.api.friend.feature.features.ConnectRequestFeature;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
@@ -236,6 +237,9 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         }
         Presence presence = user.getPresences().get(userId);
         if (presence == null) {
+            return false;
+        }
+        if (presence.getFeature(ConnectRequestFeature.ID) == null) {
             return false;
         }
         ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);

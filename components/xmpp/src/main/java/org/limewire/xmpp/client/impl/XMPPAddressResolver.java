@@ -10,6 +10,7 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
+import org.limewire.core.api.friend.feature.features.ConnectRequestFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
@@ -65,9 +66,11 @@ public class XMPPAddressResolver implements AddressResolver {
     public boolean canResolve(Address address) {
         if (address instanceof XMPPAddress) {
             XMPPAddress friendIdAddress = (XMPPAddress)address;
-            boolean canResolve = getPresence(friendIdAddress) != null;
-            LOG.debugf("could/could not resolve {0}: {1}", address, canResolve);
-            return canResolve;
+            FriendPresence presence = getPresence(friendIdAddress);
+            if (presence == null) {
+                return false;
+            }
+            return presence.hasFeatures(AddressFeature.ID);
         }
         return false;
     }
@@ -138,9 +141,11 @@ public class XMPPAddressResolver implements AddressResolver {
                 // if SameNATResolver can take care of it
                 if (socketsManager.canResolve(resolvedAddress)) {
                     socketsManager.resolve(resolvedAddress, observer);
-                } else {
+                } else if (resolvedPresence.getFeature(ConnectRequestFeature.ID) != null) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
                     resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+                    observer.resolved(resolvedAddress);
+                } else {
                     observer.resolved(resolvedAddress);
                 }
             } else {
