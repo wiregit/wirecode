@@ -239,7 +239,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         if (presence == null) {
             return false;
         }
-        if (presence.getFeature(ConnectRequestFeature.ID) == null) {
+        if (!presence.hasFeatures(ConnectRequestFeature.ID)) {
             return false;
         }
         ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
