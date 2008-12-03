@@ -87,12 +87,12 @@ public class LibraryPanel extends JPanel implements Disposable {
         } else {
             headerPanel = headerBarFactory.createSpecial(I18n.tr("Sharing with {0}", renderName));
         }
-        headerPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, filly", "[]push[]", ""));
-        headerPanel.add(filterField, "cell 1 0, right, gapafter 10");
+        headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
+        headerPanel.add(filterField, "cell 1 0, gapafter 10");
         
         createSelectionPanel();
         
-        add(headerPanel, "span, growx, wrap");
+        add(headerPanel, "span, grow, wrap");
         addMainPanels();
     }
     
@@ -112,7 +112,7 @@ public class LibraryPanel extends JPanel implements Disposable {
     protected void addShareButton(Action action, ButtonDecorator buttonDecorator) {
         JXButton shareButton = new JXButton(action);
         buttonDecorator.decorateDarkFullButton(shareButton);
-        headerPanel.add(shareButton, "cell 0 0, left");
+        headerPanel.add(shareButton, "cell 0 0, push");
     }
     
     protected void addHeaderComponent(JComponent player, Object constraints) {

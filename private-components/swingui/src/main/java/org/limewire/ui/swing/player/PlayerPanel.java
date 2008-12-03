@@ -24,7 +24,6 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.IconButton;
-import org.limewire.ui.swing.components.MediaSlider;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -61,12 +60,6 @@ public class PlayerPanel extends JXPanel {
     private Icon pauseIconPressed;
     @Resource
     private Icon pauseIconRollover;
-    @Resource
-    private Icon closeIcon;
-    @Resource
-    private Icon closeIconPressed;
-    @Resource
-    private Icon closeIconRollover;
 
     @Resource
     private Icon volume0Icon;
@@ -76,19 +69,6 @@ public class PlayerPanel extends JXPanel {
     private Icon volume2Icon;
     @Resource
     private Icon volume3Icon;
-    
-
-    @Resource
-    private ImageIcon volumeTrackLeftIcon;
-    @Resource
-    private ImageIcon volumeTrackCenterIcon;
-    @Resource
-    private ImageIcon volumeTrackRightIcon;
-    @Resource
-    private ImageIcon volumeThumbUpIcon;
-    @Resource
-    private ImageIcon volumeThumbDownIcon;
-    
 
     @Resource
     private ImageIcon progressTrackLeftIcon;
@@ -110,7 +90,6 @@ public class PlayerPanel extends JXPanel {
     private JButton playButton;
     private JButton pauseButton;
     private JButton forwardButton;
-    private JButton closeButton;
     private JSlider volumeSlider;
     private SongProgressBar progressSlider;
     private JPanel statusPanel;
@@ -135,7 +114,6 @@ public class PlayerPanel extends JXPanel {
     private static final String BACK = "BACK";
     private static final String PLAY = "PLAY";
     private static final String PAUSE = "PAUSE";
-    private static final String CLOSE = "CLOSE";
     private static final String FORWARD = "FORWARD";
 
     public PlayerPanel(AudioPlayer player) {
@@ -143,7 +121,7 @@ public class PlayerPanel extends JXPanel {
 
         GuiUtils.assignResources(this);
         
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("insets 0, gap 0, filly, alignx center"));
         setOpaque(false);
         
         ActionListener playerListener = new ButtonListener();
@@ -165,25 +143,12 @@ public class PlayerPanel extends JXPanel {
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
 
-        closeButton = new IconButton(closeIcon, closeIconRollover, closeIconPressed);
-        closeButton.addActionListener(playerListener);
-        closeButton.setActionCommand(CLOSE);
-
-        volumeSlider = new MediaSlider(volumeTrackLeftIcon, volumeTrackCenterIcon,
-                volumeTrackRightIcon, volumeThumbUpIcon, volumeThumbDownIcon);
-        volumeSlider.setMinimum(MIN_VOLUME);
-        volumeSlider.setMaximum(MAX_VOLUME);
-        volumeSlider.addChangeListener(new VolumeListener());
-
         progressSlider = new SongProgressBar(progressTrackLeftIcon, progressTrackCenterIcon,
                 progressTrackRightIcon, progressThumbUpIcon, progressThumbDownIcon, progressIcon);
         progressSlider.addChangeListener(new AudioProgressListener());
         progressSlider.setMaximum(500);
         
-        volumeLabel = new JLabel(volume1Icon);    
-
-        
-        statusPanel = new JPanel(new MigLayout("wrap 1"));
+        statusPanel = new JPanel(new MigLayout());
         statusPanel.setBackground(statusBackgroundColor);
         
         titleLabel = new JLabel("Sample Audio Title");
@@ -194,26 +159,21 @@ public class PlayerPanel extends JXPanel {
         statusPanel.add(titleLabel);
         statusPanel.add(artistLabel);
         statusPanel.add(albumLabel);
+        statusPanel.add(progressSlider, "dock south");
+        statusPanel.setBackground(Color.GRAY);
         
         int buttonWidth = backButton.getPreferredSize().width + 
         playButton.getPreferredSize().width + forwardButton.getPreferredSize().width; 
-        
-        
+                
         Dimension statusSize = new Dimension(buttonWidth, statusPanel.getPreferredSize().height);
         statusPanel.setPreferredSize(statusSize);
 
-        Dimension volSize = new Dimension(buttonWidth - volumeLabel.getPreferredSize().width,
-                volumeSlider.getPreferredSize().height);
-        volumeSlider.setPreferredSize(volSize);
-       
-        add(backButton, "split 3, gapleft 2px,");
+        add(backButton);
         add(pauseButton, "hidemode 3");
         add(playButton, "hidemode 3");
         add(forwardButton);
-        add(statusPanel, "spany 2, spanx 3, grow, gapright 5px, wrap");
-        add(volumeSlider, "split 2");
-        add(volumeLabel, "wrap, gapleft 0px");
-        add(progressSlider, "dock south, gaptop 5px, gapbottom 5px");
+        add(statusPanel, "gapbottom 2");
+                
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      

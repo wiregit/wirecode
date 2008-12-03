@@ -100,9 +100,10 @@ class MyLibraryPanel extends LibraryPanel {
         
         selectFirst();
         
-        addHeaderComponent(playerPanel, "cell 0 0, growy, gapbefore 5, gaptop 2, , gapbottom 2");
-        playerPanel.setMaximumSize(new Dimension((int)playerPanel.getMaximumSize().getWidth(), 999));
-        playerPanel.setPreferredSize(new Dimension((int)playerPanel.getPreferredSize().getWidth(), 999));
+        addHeaderComponent(playerPanel, "cell 0 0, grow");
+        playerPanel.setMaximumSize(new Dimension(999,999));
+        playerPanel.setPreferredSize(new Dimension(999,999));
+        
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {
