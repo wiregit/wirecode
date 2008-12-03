@@ -12,16 +12,6 @@ public abstract class AbstractTabItem implements TabItem {
 
     /** List of listeners that are notified when the selected state changes. */
     private final List<TabItemListener> listeners = new ArrayList<TabItemListener>();
-    
-    /** Identifier for this item. */
-    private final String id;
-
-    /**
-     * Constructs an AbstractTabItem with the specified identifier.
-     */
-    protected AbstractTabItem(String id) {
-        this.id = id;
-    }
 
     /** 
      * Adds a listener that is notified when the selected state changes.
@@ -43,9 +33,7 @@ public abstract class AbstractTabItem implements TabItem {
      * Returns the identifier of the tab item.
      */
     @Override
-    public String getId() {
-        return this.id;
-    }
+    public abstract String getId();
 
     /**
      * Returns true if this tab item is currently selected.
