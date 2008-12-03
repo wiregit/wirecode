@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -101,6 +102,11 @@ public class AppFrame extends SingleFrameApplication {
         
         ui.goHome();
         ui.focusOnSearch();
+        
+        // TODO: Capture size of program before it exited 
+        //       and set to prior size.  JDesktop should be
+        //       doing this for us, but it's doing it wrong.
+        getMainFrame().setSize(new Dimension(1024, 768));
 
         started = true;
     }
@@ -198,8 +204,7 @@ public class AppFrame extends SingleFrameApplication {
     
     public static void removeApplicationLifecycleListener(ApplicationLifecycleListener listener) {
         lifecycleListeners.remove(listener);
-    }
-    
+    }    
     
     private static class ShutdownListener implements ExitListener {
         private final Application application;
