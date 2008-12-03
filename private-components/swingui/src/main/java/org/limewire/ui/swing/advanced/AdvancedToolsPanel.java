@@ -11,9 +11,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
@@ -30,7 +28,6 @@ import javax.swing.KeyStroke;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -42,18 +39,29 @@ import com.google.inject.Singleton;
 
 /**
  * Main content panel for the Advanced Tools window.  The window is displayed
- * by calling the <code>display(String)</code> method. 
+ * by calling the <code>display(TabId)</code> method. 
  */
 @Singleton
 public class AdvancedToolsPanel extends JPanel {
+    /** Defines the tab identifiers for the window. */
+    public enum TabId {
+        CONNECTIONS(I18n.tr("Connections")), 
+        LOGGING(I18n.tr("Logging")), 
+        CONSOLE(I18n.tr("Console"));
+        
+        private final String name;
+        
+        TabId(String name) {
+            this.name = name;
+        }
+        
+        public String toString() {
+            return name;
+        }
+    }
+    
     /** Identifier for Advanced Tools window. */
-    private static final String WINDOW_TITLE = I18nMarker.marktr("Advanced Tools");
-    /** Identifier for Connections tab. */
-    public static final String CONNECTIONS = I18nMarker.marktr("Connections");
-    /** Identifier for Logging tab. */
-    public static final String LOGGING = I18nMarker.marktr("Logging");
-    /** Identifier for Console tab. */
-    public static final String CONSOLE = I18nMarker.marktr("Console");
+    private static final String WINDOW_TITLE = I18n.tr("Advanced Tools");
 
     @Resource
     private Color headerColor;
@@ -71,16 +79,13 @@ public class AdvancedToolsPanel extends JPanel {
     /** Currently selected tab item. */
     private AdvancedTabItem selectedItem;
     /** Map containing tab items. */
-    private Map<String, AdvancedTabItem> tabItemMap = new HashMap<String, AdvancedTabItem>();
+    private Map<TabId, AdvancedTabItem> tabItemMap = new EnumMap<TabId, AdvancedTabItem>(TabId.class);
     /** Map containing tab panels created. */
-    private Map<String, JPanel> tabPanelMap = new HashMap<String, JPanel>();
-    /** List of tab identifiers. */
-    private List<String> tabIdList = new ArrayList<String>();
+    private Map<TabId, TabPanel> tabPanelMap = new EnumMap<TabId, TabPanel>(TabId.class);
     /** Window used to display the panel. */
     private Window window;
     
     private JPanel headerPanel;
-    
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
@@ -100,9 +105,9 @@ public class AdvancedToolsPanel extends JPanel {
         initComponents();
         
         // Add tabs to dialog.
-        addTab(CONNECTIONS, connectionsPanel);
-        addTab(LOGGING, loggingPanel);
-        addTab(CONSOLE, consolePanel);
+        addTab(TabId.CONNECTIONS, connectionsPanel);
+        addTab(TabId.LOGGING, loggingPanel);
+        addTab(TabId.CONSOLE, consolePanel);
     }
     
     /**
@@ -127,17 +132,13 @@ public class AdvancedToolsPanel extends JPanel {
     }
 
     /**
-     * Adds a tab to the dialog using the specified identifier and panel
-     * provider.  The identifier should be marked for translation by a prior
-     * call to I18nMarker.marktr(). 
+     * Adds a tab to the dialog using the specified tab identifier and panel
+     * provider. 
      */
-    private void addTab(String id, Provider<? extends JPanel> provider) {
+    private void addTab(TabId tabId, Provider<? extends TabPanel> provider) {
         // Create tab item and add to map.
-        AdvancedTabItem tabItem = new AdvancedTabItem(id, provider);
-        this.tabItemMap.put(id, tabItem);
-        
-        // Add tab identifier to list.
-        this.tabIdList.add(id);
+        AdvancedTabItem tabItem = new AdvancedTabItem(tabId, provider);
+        tabItemMap.put(tabId, tabItem);
         
         // Add button to header.
         headerPanel.add(createButton(tabItem));
@@ -146,9 +147,8 @@ public class AdvancedToolsPanel extends JPanel {
     /**
      * Creates a tab button for the specified tab item.
      */
-    private JButton createButton(TabItem tabItem) {
-        // Create the tab button.  The TabAction instance translates the tab 
-        // item identifier into an I18N display name.
+    private JButton createButton(AdvancedTabItem tabItem) {
+        // Create the tab button.
         TabButton button = new TabButton(new TabAction(tabItem, null));
         
         // Add inputs and action to select previous tab.
@@ -167,21 +167,27 @@ public class AdvancedToolsPanel extends JPanel {
 
         return button;
     }
-
+    
     /**
      * Displays this panel in a modeless window.
-     * @param tabId identifier for initial tab, either CONNECTIONS, LOGGING, or
-     *  CONSOLE
+     * @param tabId identifier for initial tab, one of TabId.CONNECTIONS, 
+     *  LOGGING, or CONSOLE
      */
-    public void display(String tabId) {
+    public void display(TabId tabId) {
         if (this.window == null) {
             // Create modeless window.
-            JFrame frame = new LimeJFrame(I18n.tr(WINDOW_TITLE));
+            JFrame frame = new LimeJFrame(WINDOW_TITLE);
 
             // Set window properties. 
             frame.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-            frame.setPreferredSize(new Dimension(800, 600));
             frame.setResizable(true);
+
+            // Set preferred size based on main frame.
+            Dimension mainSize = GuiUtils.getMainFrame().getSize();
+            Dimension prefSize = new Dimension(
+                    Math.max(mainSize.width - 60, 800),
+                    Math.max(mainSize.height - 60, 600));
+            frame.setPreferredSize(prefSize);
             
             // Add listener to handle system menu close action.
             frame.addWindowListener(new WindowAdapter() {
@@ -197,13 +203,13 @@ public class AdvancedToolsPanel extends JPanel {
             frame.setContentPane(this);
             frame.pack();
 
-            // Set window position.
+            // Set window position centered on main frame.
             frame.setLocationRelativeTo(GuiUtils.getMainFrame());
             
             // Save window reference.
             this.window = frame;
 
-            // Select default tab.
+            // Select initial tab.
             select(tabId);
         }
 
@@ -217,6 +223,14 @@ public class AdvancedToolsPanel extends JPanel {
      */
     public void disposeWindow() {
         if (this.window != null) {
+            // Stop tab panels.
+            for (TabId tabId : TabId.values()) {
+                TabPanel tabPanel = tabPanelMap.get(tabId);
+                if (tabPanel != null) {
+                    tabPanel.stop();
+                }
+            }
+            
             // Remove window listener from main GUI frame.
             GuiUtils.getMainFrame().removeWindowListener(this.mainFrameListener);
             
@@ -251,28 +265,32 @@ public class AdvancedToolsPanel extends JPanel {
      * Selects the tab item with the specified identifier.
      * @param tabId the identifier of the tab
      */
-    private void select(String tabId) {
+    private void select(TabId tabId) {
         // De-select current item.
         if (selectedItem != null) {
             selectedItem.fireSelected(false);
         }
         
-        // Get selected item.
+        // Get new selected item.
         selectedItem = tabItemMap.get(tabId);
 
-        // Lazily create tab panel and add to dialog.  
-        if(!tabPanelMap.containsKey(tabId)) {
-            JPanel panel = selectedItem.getTabPanel();
-            panel.setBackground(backgroundColor);
-            tabPanelMap.put(tabId, panel);
-            cardPanel.add(panel, tabId);
+        // Get tab panel - lazily create if necessary.
+        TabPanel tabPanel = tabPanelMap.get(tabId);
+        if (tabPanel == null) {
+            tabPanel = selectedItem.getTabPanel();
+            tabPanel.setBackground(backgroundColor);
+            tabPanelMap.put(tabId, tabPanel);
+            cardPanel.add(tabPanel, tabId.toString());
         }
         
-        // Select new item.
+        // Start refresh updates in tab.
+        tabPanel.start();
+        
+        // Fire event to select tab.
         selectedItem.fireSelected(true);
 
         // Display selected tab panel.
-        cardLayout.show(cardPanel, tabId);
+        cardLayout.show(cardPanel, tabId.toString());
     }
 
     /**
@@ -280,10 +298,11 @@ public class AdvancedToolsPanel extends JPanel {
      */
     private void selectNext() {
         // Find the selected tab, and select the next one.
-        for (int i = 0; i < tabIdList.size(); i++) {
-            if (tabIdList.get(i).equals(selectedItem.getId())) {
-                int nextTab = (i + 1) % tabIdList.size();
-                select(tabIdList.get(nextTab));
+        TabId[] tabIds = TabId.values();
+        for (int i = 0; i < tabIds.length; i++) {
+            if (tabIds[i].equals(selectedItem.getTabId())) {
+                int nextTab = (i + 1) % tabIds.length;
+                select(tabIds[nextTab]);
                 break;
             }
         }
@@ -294,10 +313,11 @@ public class AdvancedToolsPanel extends JPanel {
      */
     private void selectPrev() {
         // Find the selected tab, and select the previous one.
-        for (int i = 0; i < tabIdList.size(); i++) {
-            if (tabIdList.get(i).equals(selectedItem.getId())) {
-                int prevTab = ((i == 0) ?  tabIdList.size() : i) - 1;
-                select(tabIdList.get(prevTab));
+        TabId[] tabIds = TabId.values();
+        for (int i = 0; i < tabIds.length; i++) {
+            if (tabIds[i].equals(selectedItem.getTabId())) {
+                int prevTab = ((i == 0) ?  tabIds.length : i) - 1;
+                select(tabIds[prevTab]);
                 break;
             }
         }
@@ -307,24 +327,34 @@ public class AdvancedToolsPanel extends JPanel {
      * A TabItem for the Advanced Tools dialog. 
      */
     private class AdvancedTabItem extends AbstractTabItem {
-        
-        private final Provider<? extends JPanel> provider;
+
+        private final TabId tabId;
+        private final Provider<? extends TabPanel> provider;
 
         /**
-         * Constructs a tab item using the specified identifier and panel 
+         * Constructs a tab item using the specified tab identifier and panel 
          * provider.
          */
-        public AdvancedTabItem(String id, Provider<? extends JPanel> provider) {
-            super(id);
+        public AdvancedTabItem(TabId tabId, Provider<? extends TabPanel> provider) {
+            this.tabId = tabId;
             this.provider = provider;
         }
 
         @Override
+        public String getId() {
+            return tabId.toString();
+        }
+
+        @Override
         public void select() {
-            AdvancedToolsPanel.this.select(getId());
+            AdvancedToolsPanel.this.select(tabId);
         }
         
-        public JPanel getTabPanel() {
+        public TabId getTabId() {
+            return tabId;
+        }
+
+        public TabPanel getTabPanel() {
             return this.provider.get();
         }
     }
@@ -334,16 +364,20 @@ public class AdvancedToolsPanel extends JPanel {
      * value when its associated tab item is selected or de-selected.
      */
     private class TabAction extends AbstractAction {
-
+        
+        private TabId tabId;
+        
         /**
-         * Constructs a TabAction with the specified TabItem and icon.  The
-         * value returned by tabItem.getId() must be marked for translation.
+         * Constructs a TabAction with the specified <code>AdvancedTabItem
+         * </code> and icon.  The Action.NAME value is set to the translated 
+         * string for the tab.
          */
-        public TabAction(TabItem tabItem, Icon icon) {
-            super(I18n.tr(tabItem.getId()), icon);
+        public TabAction(AdvancedTabItem tabItem, Icon icon) {
+            super(tabItem.getTabId().toString(), icon);
             
-            // Store identifier as action command.
-            putValue(Action.ACTION_COMMAND_KEY, tabItem.getId());
+            // Store tab identifier and action command.
+            tabId = tabItem.getTabId();
+            putValue(Action.ACTION_COMMAND_KEY, tabItem.getTabId().toString());
 
             // Install listener to change state when tab item is selected. 
             tabItem.addTabItemListener(new TabItemListener() {
@@ -356,7 +390,7 @@ public class AdvancedToolsPanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            select((String) getValue(Action.ACTION_COMMAND_KEY));
+            select(tabId);
         }
     }
 
