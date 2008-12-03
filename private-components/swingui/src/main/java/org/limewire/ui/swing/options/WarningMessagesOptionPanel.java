@@ -8,14 +8,14 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
+import org.limewire.ui.swing.search.resultpanel.LicenseWarningDownloadPreprocessor;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.Constants;
 
 public class WarningMessagesOptionPanel extends OptionPanel {
 
     // backwards compatibility
-    private static final int SKIP_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SKIP_WARNING_VALUE;
-    private static final int SHOW_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SHOW_WARNING_VALUE;
+    private static final int SKIP_WARNING_VALUE = LicenseWarningDownloadPreprocessor.SKIP_WARNING_VALUE;
+    private static final int SHOW_WARNING_VALUE = LicenseWarningDownloadPreprocessor.SHOW_WARNING_VALUE;
 
     private JCheckBox licensedMaterialCheckBox;
     private JButton okButton;

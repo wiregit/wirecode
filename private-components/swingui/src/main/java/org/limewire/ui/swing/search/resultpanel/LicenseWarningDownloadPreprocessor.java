@@ -13,7 +13,6 @@ import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.util.Constants;
 
 /**
  * Check settings and if applicable warn user using dialog if downloading unlicensed file.
@@ -22,8 +21,9 @@ import org.limewire.util.Constants;
  */
 public class LicenseWarningDownloadPreprocessor implements DownloadPreprocessor {
 
-    public static final int SKIP_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SKIP_WARNING_VALUE;
-    public static final int SHOW_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SHOW_WARNING_VALUE;
+    // backward compatbility
+    public static final int SKIP_WARNING_VALUE = 101;
+    public static final int SHOW_WARNING_VALUE = 0;
 
     public boolean execute(VisualSearchResult vsr) {
         return hasConfirmedLicenseWarningIfNecessary(vsr);

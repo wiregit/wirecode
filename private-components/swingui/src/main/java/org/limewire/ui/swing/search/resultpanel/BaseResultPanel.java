@@ -323,11 +323,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
     public void download(final VisualSearchResult vsr) {
         try {
-            // TODO: Need to go through some of the rigor that
-            // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
-            // went through.. checking for conflicts, etc.
-            // perhaps using a DownloadPreprocessor
-
             // execute the download preprocessors
             for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
                 boolean shouldDownload = preprocessor.execute(vsr);
