@@ -17,6 +17,7 @@ import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
@@ -28,6 +29,11 @@ import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
+import org.limewire.ui.swing.event.AboutDisplayEvent;
+import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.event.ExitApplicationEvent;
+import org.limewire.ui.swing.event.OptionsDisplayEvent;
+import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.wizard.SetupWizard;
@@ -61,6 +67,7 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private Application application;
     @Inject private LimeWireSwingUI ui;
     @Inject private SetupWizard setupWizard;
+    @Inject private OptionsDialog options;
 
     public static boolean isStarted() {
         return started;
@@ -130,14 +137,34 @@ public class AppFrame extends SingleFrameApplication {
             glassPane.setVisible(false);
         }
         
+        EventAnnotationProcessor.subscribe(this);
+        
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
         }
     }
     
+    @EventSubscriber
+    public void handleShowAboutWindow(AboutDisplayEvent event) {
+        new AboutWindow(getMainFrame(), application).showDialog();
+    }
+    
+    @EventSubscriber
+    public void handleShowOptionsDialog(OptionsDisplayEvent event) {
+        if (!options.isVisible()) {
+            options.setLocationRelativeTo(GuiUtils.getMainFrame());
+            options.setVisible(true);
+        }
+    }
+    
+    @EventSubscriber
+    public void handleExitApplication(ExitApplicationEvent event) {
+        exit();
+    }
+    
     @Action
     public void showAboutWindow() { // DO NOT CHANGE THIS METHOD NAME!  
-        new AboutWindow(getMainFrame(), application).showDialog();
+        handleShowAboutWindow(null);
     }
     
     @Action

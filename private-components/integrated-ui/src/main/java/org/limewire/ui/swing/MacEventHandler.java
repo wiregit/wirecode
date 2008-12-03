@@ -4,11 +4,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import org.limewire.ui.swing.Initializer;
-
 import net.roydesign.event.ApplicationEvent;
 import net.roydesign.mac.MRJAdapter;
 
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
+import org.limewire.ui.swing.event.AboutDisplayEvent;
+import org.limewire.ui.swing.event.ExitApplicationEvent;
+import org.limewire.ui.swing.event.OptionsDisplayEvent;
+
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.browser.ExternalControl;
 
 /**
@@ -33,13 +38,15 @@ public class MacEventHandler {
     private volatile boolean enabled;
     private volatile ExternalControl externalControl = null;
     private volatile Initializer initializer = null;
+    private volatile DownloadManager downloadManager = null;
+    private volatile LifeCycleManager lifecycleManager = null;
     
     /** Creates a new instance of MacEventHandler */
     private MacEventHandler() {
         
         MRJAdapter.addAboutListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                handleAbout();
+                new AboutDisplayEvent().publish();
             }
         });
         
@@ -63,10 +70,13 @@ public class MacEventHandler {
         });
     } 
     
-    public void enable(ExternalControl externalControl, Initializer initializer) {
+    public void enable(ExternalControl externalControl, Initializer initializer, 
+            DownloadManager downloadManager, LifeCycleManager lifecycleManager) {
         this.externalControl = externalControl;
         this.initializer = initializer;
         this.enabled = true;
+        this.downloadManager = downloadManager;
+        this.lifecycleManager = lifecycleManager;
         if(lastFileOpened != null)
             runFileOpen(lastFileOpened);
     }
@@ -79,31 +89,13 @@ public class MacEventHandler {
         
         MRJAdapter.addPreferencesListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                handlePreferences();
+                new OptionsDisplayEvent().publish();
             }
         });
     }
     
-    /**
-    * This responds to the selection of the about option by displaying the
-    * about window to the user.  On OSX, this runs in a new ManagedThread to handle
-    * the possibility that event processing can become blocked if launched
-    * in the calling thread.
-    */
-    private void handleAbout() {      
-//        GUIMediator.showAboutWindow();
-    }
-    
-    /**
-    * This method responds to a quit event by closing the application in
-    * the whichever method the user has configured (closing after completed
-    * file transfers by default).  On OSX, this runs in a new ManagedThread to handle
-    * the possibility that event processing can become blocked if launched
-    * in the calling thread.
-    */
     private void handleQuit() {
-//        GUIMediator.applyWindowSettings();
-//        GUIMediator.close(false);
+        new ExitApplicationEvent().publish();
     }
     
     /**
@@ -122,10 +114,15 @@ public class MacEventHandler {
         if (filename.endsWith("limestart")) {
             initializer.setStartup();
         } else if (filename.endsWith("torrent")) {
-//            if (!GUIMediator.isConstructed() || !GuiCoreMediator.getLifecycleManager().isStarted())
+            if (!lifecycleManager.isStarted()) {
                 externalControl.enqueueControlRequest(file.getAbsolutePath());
-//            else
-//                GUIMediator.instance().openTorrent(file);
+            } else {
+                try {
+                    downloadManager.downloadTorrent(file, false);
+                } catch (SaveLocationException e) {
+                    e.printStackTrace();
+                }
+            }
         } else {
 //            PackagedMediaFileLauncher.launchFile(filename, false);
         }
@@ -133,9 +130,5 @@ public class MacEventHandler {
     
     private void handleReopen() {
 //        GUIMediator.handleReopen();
-    }
-    
-    private void handlePreferences() {
-//        GUIMediator.instance().setOptionsVisible(true);
     }
 }

@@ -14,16 +14,16 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
+import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.upload.UploadPanel;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -33,8 +33,7 @@ import com.google.inject.Singleton;
 public class ToolsMenu extends JMenu {
 
     @Inject
-    public ToolsMenu(final Provider<OptionsDialog> optionDialog, 
-            final Provider<AdvancedToolsPanel> advancedProvider,
+    public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider,
             final Navigator navigator,
             SearchHandler searchHandler, final LibraryManager libraryManager, final UploadPanel uploadPanel) {
 
@@ -74,17 +73,15 @@ public class ToolsMenu extends JMenu {
                 advancedTools.display(AdvancedToolsPanel.TabId.CONNECTIONS);
             }
         });
-        addSeparator();
-        add(new AbstractAction(I18n.tr("Options")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                OptionsDialog options = optionDialog.get();
-                if (!options.isVisible()) {
-                    options.setLocationRelativeTo(GuiUtils.getMainFrame());
-                    options.setVisible(true);
+        if (!OSUtils.isMacOSX()) {
+            addSeparator();
+            add(new AbstractAction(I18n.tr("Options")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new OptionsDisplayEvent().publish();
                 }
-            }
-        });
+            });
+        }
     }
 
     private JMenu createWhatsNewSubmenu(final SearchHandler searchHandler) {

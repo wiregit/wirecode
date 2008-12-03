@@ -9,7 +9,7 @@ import javax.swing.JMenu;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.tray.Notification;
@@ -17,6 +17,7 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,8 +28,7 @@ class HelpMenu extends JMenu {
     @Inject
     public HelpMenu(Application application, final IconManager iconManager,
             final TrayNotifier trayNotifier, final Navigator navigator, 
-            final StorePanel storePanel,
-            final AppFrame appFrame) {
+            final StorePanel storePanel) {
         super(I18n.tr("Help"));
 
         add(new AbstractAction(I18n.tr("Using LimeWire...")) {
@@ -57,13 +57,15 @@ class HelpMenu extends JMenu {
             });
         }
         
-        addSeparator();
-        add(new AbstractAction(I18n.tr("About LimeWire")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                appFrame.showAboutWindow();
-            }
-        });
+        if (!OSUtils.isMacOSX()) {
+            addSeparator();
+            add(new AbstractAction(I18n.tr("About LimeWire")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new AboutDisplayEvent().publish();
+                }
+            });
+        }
 
         if (application.isTestingVersion()) {
             addSeparator();

@@ -4,12 +4,12 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.JMenu;
 
-import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.menu.actions.AddFileAction;
 import org.limewire.ui.swing.menu.actions.AddFolderAction;
@@ -20,6 +20,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,12 +44,14 @@ public class FileMenu extends JMenu {
         addSeparator();
         add(new AddFileAction(I18n.tr("Add File To Library"), mainPanel, libraryManager));
         add(new AddFolderAction(I18n.tr("Add Folder To Library"), libraryManager, mainPanel));
-        addSeparator();
-        add(new AbstractAction(I18n.tr("E&xit")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Application.getInstance().exit(e);
-            }
-        });
+        if (!OSUtils.isMacOSX()) {
+            addSeparator();
+            add(new AbstractAction(I18n.tr("E&xit")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    new ExitApplicationEvent().publish();
+                }
+            });
+        }
     }
 }

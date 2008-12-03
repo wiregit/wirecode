@@ -21,6 +21,7 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
+import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
@@ -51,6 +52,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActiveLimeWireCheck;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
@@ -119,7 +121,7 @@ public final class Initializer {
         validateEarlyCore(limeWireCore);
         
         // Validate any arguments or properties outside of the LW environment.
-        runExternalChecks(limeWireCore, args);
+        runExternalChecks(limeWireCore, args, injector);
 
         // Starts some system monitoring for deadlocks.
         DeadlockSupport.startDeadlockMonitoring();
@@ -147,6 +149,8 @@ public final class Initializer {
         // Load the UI, system tray & notification handlers,
         // and hide the splash screen & display the UI.
         loadUI();
+        
+        enablePreferences();
         
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
@@ -367,13 +371,14 @@ public final class Initializer {
      * ensuring that multiple LimeWire's can't run at once,
      * and processing any arguments that were passed to LimeWire.
      */ 
-    private void runExternalChecks(LimeWireCore limeWireCore, String[] args) {        
+    private void runExternalChecks(LimeWireCore limeWireCore, String[] args, Injector injector) {        
         ExternalControl externalControl = limeWireCore.getExternalControl();
         stopwatch.resetAndLog("Get externalControl");
         if(OSUtils.isMacOSX()) {
             GURLHandler.getInstance().enable(externalControl);
             stopwatch.resetAndLog("Enable GURL");
-            MacEventHandler.instance().enable(externalControl, this);
+            MacEventHandler.instance().enable(externalControl, this, injector.getInstance(DownloadManager.class), 
+                    injector.getInstance(LifeCycleManager.class));
             stopwatch.resetAndLog("Enable macEventHandler");
         }
         
@@ -507,6 +512,12 @@ public final class Initializer {
             }
         });
     }  
+    
+    private void enablePreferences() {        
+        if (OSUtils.isMacOSX()) {
+            MacEventHandler.instance().enablePreferences();
+        }
+    }
     
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */
     private void loadLateTasksForUI() {
