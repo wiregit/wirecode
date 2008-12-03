@@ -115,8 +115,8 @@ public class LibraryPanel extends JPanel implements Disposable {
         headerPanel.add(shareButton, "cell 0 0, left");
     }
     
-    protected void addLeftComponent(JComponent player) {
-        headerPanel.add(player, "cell 0 0, left");
+    protected void addHeaderComponent(JComponent player, Object constraints) {
+        headerPanel.add(player, constraints);
     }
     
     public void createSelectionPanel() {

@@ -1,10 +1,7 @@
 package org.limewire.ui.swing.player;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
@@ -107,8 +104,6 @@ public class PlayerPanel extends JXPanel {
     private ImageIcon progressIcon;
     
     @Resource
-    private Color backgroundColor;
-    @Resource
     private Color statusBackgroundColor;
     
     private JButton backButton;
@@ -120,8 +115,6 @@ public class PlayerPanel extends JXPanel {
     private SongProgressBar progressSlider;
     private JPanel statusPanel;
     private JLabel volumeLabel;
-    //necessary to show component on top of heavyweight browser
-    private Panel heavyPanel;
     
     private JLabel titleLabel;
     private JLabel artistLabel;
@@ -147,14 +140,11 @@ public class PlayerPanel extends JXPanel {
 
     public PlayerPanel(AudioPlayer player) {
         this.player = player;
-        
-        setLayout(new BorderLayout());
-        
-        heavyPanel = new Panel(new MigLayout());
-        add(heavyPanel);
+
         GuiUtils.assignResources(this);
         
-        heavyPanel.setBackground(backgroundColor);
+        setLayout(new MigLayout());
+        setOpaque(false);
         
         ActionListener playerListener = new ButtonListener();
 
@@ -196,10 +186,10 @@ public class PlayerPanel extends JXPanel {
         statusPanel = new JPanel(new MigLayout("wrap 1"));
         statusPanel.setBackground(statusBackgroundColor);
         
-        titleLabel = new JLabel("Clean Yofgdfur Room");
+        titleLabel = new JLabel("Sample Audio Title");
         FontUtils.bold(titleLabel);
-        artistLabel = new JLabel("The Your Moms");
-        albumLabel = new JLabel("The New Jersey Album");
+        artistLabel = new JLabel("Placeholder Arist");
+        albumLabel = new JLabel("Collection");
 
         statusPanel.add(titleLabel);
         statusPanel.add(artistLabel);
@@ -216,18 +206,14 @@ public class PlayerPanel extends JXPanel {
                 volumeSlider.getPreferredSize().height);
         volumeSlider.setPreferredSize(volSize);
        
-        JPanel closePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        closePanel.setBackground(new Color(64,64,64));
-        closePanel.add(closeButton);
-        heavyPanel.add(closePanel, "dock north, gapbottom 5px");
-        heavyPanel.add(backButton, "split 3, gapleft 2px,");
-        heavyPanel.add(pauseButton, "hidemode 3");
-        heavyPanel.add(playButton, "hidemode 3");
-        heavyPanel.add(forwardButton);
-        heavyPanel.add(statusPanel, "spany 2, spanx 3, grow, gapright 5px, wrap");
-        heavyPanel.add(volumeSlider, "split 2");
-        heavyPanel.add(volumeLabel, "wrap, gapleft 0px");
-        heavyPanel.add(progressSlider, "dock south, gaptop 5px, gapbottom 5px");
+        add(backButton, "split 3, gapleft 2px,");
+        add(pauseButton, "hidemode 3");
+        add(playButton, "hidemode 3");
+        add(forwardButton);
+        add(statusPanel, "spany 2, spanx 3, grow, gapright 5px, wrap");
+        add(volumeSlider, "split 2");
+        add(volumeLabel, "wrap, gapleft 0px");
+        add(progressSlider, "dock south, gaptop 5px, gapbottom 5px");
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      
