@@ -13,6 +13,8 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.impl.download.DownloadListener;
 import org.limewire.core.impl.download.DownloadListenerList;
+import org.limewire.core.impl.monitor.IncomingSearchListener;
+import org.limewire.core.impl.monitor.IncomingSearchListenerList;
 import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.upload.UploadListener;
@@ -33,15 +35,22 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.version.UpdateInformation;
 
+/**
+ * An implementation of the UI callback to handle notifications about 
+ * asynchronous backend events.
+ */
 @Singleton
 class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
-        DownloadListenerList, UploadListenerList, GuiCallbackService {
+        DownloadListenerList, UploadListenerList, 
+        IncomingSearchListenerList, GuiCallbackService {
 
     private final SortedMap<byte[], List<QueryReplyListener>> queryReplyListeners;
 
     private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
     
     private final List<UploadListener> uploadListeners = new CopyOnWriteArrayList<UploadListener>();
+
+    private final List<IncomingSearchListener> monitorListeners = new CopyOnWriteArrayList<IncomingSearchListener>();
 
     private final DownloadManager downloadManager;
     
@@ -120,8 +129,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-//        System.out.println("Lifecycle event: " + evt);
-        // TODO Auto-generated method stub
+        // Does nothing.
     }
 
     @Override
@@ -149,8 +157,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void handleQueryString(String query) {
-        // TODO Auto-generated method stub
-
+        for (IncomingSearchListener listener : monitorListeners) {
+            listener.handleQueryString(query);
+        }
     }
 
     @Override
@@ -287,6 +296,16 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     @Override
     public void removeUploadListener(UploadListener listener) {
         uploadListeners.remove(listener);
+    }
+
+    @Override
+    public void addIncomingSearchListener(IncomingSearchListener listener) {
+        monitorListeners.add(listener);
+    }
+
+    @Override
+    public void removeIncomingSearchListener(IncomingSearchListener listener) {
+        monitorListeners.remove(listener);
     }
     
 }
