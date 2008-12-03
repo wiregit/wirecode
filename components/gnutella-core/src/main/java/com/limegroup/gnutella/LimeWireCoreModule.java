@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
@@ -361,6 +362,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         
+        bindAll(Names.named("fastExecutor"), ScheduledExecutorService.class, FastExecutorProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("unlimitedExecutor"), ListeningExecutorService.class, UnlimitedExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledListeningExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class, ScheduledExecutorService.class);
         bindAll(Names.named("dhtExecutor"), ListeningExecutorService.class, DHTExecutorProvider.class, Executor.class, ExecutorService.class);
@@ -413,6 +415,16 @@ public class LimeWireCoreModule extends AbstractModule {
             return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
         }
     }
+    
+    @Singleton
+    private static class FastExecutorProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+        @Override
+        protected ScheduledThreadPoolExecutor createObject() {
+            ScheduledThreadPoolExecutor stpe = new ScheduledThreadPoolExecutor(1, ExecutorsHelper.daemonThreadFactory("ScheduledThread"));
+            stpe.allowCoreThreadTimeOut(true);
+            return stpe;
+        }
+    }    
     
     @Singleton
     private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledListeningExecutorService> {
