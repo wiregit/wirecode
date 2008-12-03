@@ -3,7 +3,6 @@ package org.limewire.ui.swing.advanced;
 import java.awt.BorderLayout;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import org.limewire.ui.swing.util.LogUtils;
 
@@ -12,7 +11,7 @@ import com.google.inject.Inject;
 /**
  * An Advanced Tools tab panel that displays the console.
  */
-public class ConsolePanel extends JPanel {
+public class ConsolePanel extends TabPanel {
     
     private BorderLayout panelLayout = new BorderLayout();
     private JLabel naLabel = new JLabel();
@@ -44,5 +43,14 @@ public class ConsolePanel extends JPanel {
             add(naLabel, BorderLayout.CENTER);
         }
     }
-    
+
+    @Override
+    public void start() {
+        // Do nothing.
+    }
+
+    @Override
+    public void stop() {
+        // Do nothing.
+    }
 }

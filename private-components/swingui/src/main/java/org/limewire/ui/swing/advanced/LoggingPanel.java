@@ -3,14 +3,13 @@ package org.limewire.ui.swing.advanced;
 import java.awt.BorderLayout;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import com.google.inject.Inject;
 
 /**
  * An Advanced Tools tab panel that displays log messages.
  */
-public class LoggingPanel extends JPanel {
+public class LoggingPanel extends TabPanel {
     
     private BorderLayout panelLayout = new BorderLayout();
     private JLabel todoLabel = new JLabel();
@@ -35,4 +34,13 @@ public class LoggingPanel extends JPanel {
         add(todoLabel, BorderLayout.CENTER);
     }
 
+    @Override
+    public void start() {
+        // Do nothing.
+    }
+
+    @Override
+    public void stop() {
+        // Do nothing.
+    }
 }
