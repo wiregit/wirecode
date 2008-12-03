@@ -130,7 +130,7 @@ public class AppFrame extends SingleFrameApplication {
     }
     
     @Action
-    public void showAboutWindow() {
+    public void showAboutWindow() { // DO NOT CHANGE THIS METHOD NAME!  
         new AboutWindow(getMainFrame(), application).showDialog();
     }
     
