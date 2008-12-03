@@ -9,6 +9,7 @@ import javax.swing.Action;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -18,7 +19,9 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.CommonUtils;
 
 public class UploadTableRendererEditor extends TableRendererEditor {
     
@@ -30,6 +33,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JXButton cancelButton;
     private UploadItem editItem;
     private JProgressBar progressBar;
+    private JLabel timeLabel;
     
     private final Action cancelAction = new AbstractAction(I18n.tr("Cancel")) {
         @Override
@@ -40,12 +44,16 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     };
     
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
-        setLayout(new MigLayout("debug, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        setLayout(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         this.categoryIconManager = categoryIconManager;
         
         nameLabel = new JLabel("Name");
         statusLabel = new JLabel("Status");
         cancelButton = new JXButton(cancelAction);  
+        
+
+        timeLabel = new JLabel("Time");
+        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         
         progressBar = progressBarFactory.create();
         Dimension size = new Dimension(400, 16);
@@ -54,9 +62,10 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         progressBar.setMaximumSize(size);
         
         add(nameLabel, "aligny bottom");
-        add(cancelButton, "alignx right, aligny 50%, spany 3, wrap");
+        add(cancelButton, "alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "hidemode 3, wrap");
-        add(statusLabel, "aligny top,");
+        add(statusLabel, "aligny top, split 2");
+        add(timeLabel, "push, aligny top, alignx right");
     }
 
     @Override
@@ -77,16 +86,40 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private void update(UploadItem item){
         nameLabel.setText(item.getFileName());
         nameLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
-        statusLabel.setText(item.toString());
+        statusLabel.setText(getMessage(item));
         
         progressBar.setVisible(item.getState() == UploadState.UPLOADING);
         if (progressBar.isVisible()) { 
             progressBar.setValue((int)(100 * item.getTotalAmountUploaded()/item.getFileSize()));
         }
+        
+        if (item.getRemainingUploadTime() > Long.MAX_VALUE-1000) {
+            timeLabel.setVisible(false);
+        }
+        else {
+            timeLabel.setText(CommonUtils.seconds2time(item.getRemainingUploadTime()));
+            timeLabel.setVisible(item.getState() == UploadState.UPLOADING);
+        }
     }
     
     private void cancelUpload() {
         editItem.cancel();
+    }
+    
+    private String getMessage(UploadItem item){
+        switch (item.getState()){
+        case DONE:
+            return I18n.tr("Done uploading");
+        case UPLOADING:
+            return I18n.tr("Uploading - {0} of {1}({2}) to {3}", GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
+                    GuiUtils.toUnitbytes(item.getFileSize()), 
+                    GuiUtils.rate2speed(item.getUploadSpeed()), item.getHost());
+        case QUEUED:
+            return I18n.trn("Waiting - {0} file needs to finish before upload can begin", "Waiting - {0} files need to finish before upload can begin", item.getQueuePosition());
+        case UNABLE_TO_UPLOAD:
+            return I18n.tr("Unable to upload");        
+        }
+        throw new IllegalArgumentException("Unknown UploadState " + item.getState());
     }
 
 }

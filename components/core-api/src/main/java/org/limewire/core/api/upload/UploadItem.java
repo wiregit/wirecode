@@ -60,4 +60,8 @@ public interface UploadItem {
      * Returns the current queue position if queued.
      */
     public int getQueuePosition();
+
+    public long getRemainingUploadTime();
+
+    float getUploadSpeed();
 }

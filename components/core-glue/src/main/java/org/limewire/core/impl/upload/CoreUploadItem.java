@@ -10,6 +10,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import com.limegroup.gnutella.CategoryConverter;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 
 class CoreUploadItem implements UploadItem {
@@ -19,6 +20,8 @@ class CoreUploadItem implements UploadItem {
     private boolean isStopped = false;
 
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+    
+    public final static long UNKNOWN_TIME = Long.MAX_VALUE;
 
     public CoreUploadItem(Uploader uploader) {
         this.uploader = uploader;
@@ -146,5 +149,26 @@ class CoreUploadItem implements UploadItem {
     @Override
     public int getQueuePosition() {
         return uploader.getQueuePosition();
+    }
+    
+    @Override
+    public float getUploadSpeed() {
+        try {
+            return uploader.getMeasuredBandwidth();
+        } catch (InsufficientDataException e) {
+            return 0;
+        }
+    }
+    
+    @Override
+    public long getRemainingUploadTime() {
+        double remaining = (getFileSize() - getTotalAmountUploaded()) / 1024.0;
+        float speed = getUploadSpeed();
+        if (speed > 0) {
+            return (long) (remaining / speed);
+        } else {
+            return UNKNOWN_TIME;
+        }
+
     }
 }

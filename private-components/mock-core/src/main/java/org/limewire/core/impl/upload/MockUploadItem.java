@@ -93,4 +93,14 @@ public class MockUploadItem implements UploadItem {
         return 2;
     }
 
+    @Override
+    public long getRemainingUploadTime() {
+        return 999;
+    }
+
+    @Override
+    public float getUploadSpeed() {
+        return 64;
+    }
+
 }
