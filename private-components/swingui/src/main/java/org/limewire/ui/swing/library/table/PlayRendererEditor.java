@@ -85,7 +85,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
         label = new JLabel();
         
         add(playButton);
-        add(label, "growx");
+        add(label, "growx, wmin 10");
         
         player.addAudioPlayerListener(this);
     }
