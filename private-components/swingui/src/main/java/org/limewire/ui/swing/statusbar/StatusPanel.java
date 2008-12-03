@@ -50,7 +50,7 @@ public class StatusPanel extends JXPanel {
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
         
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
-        miniPlayerPanel.setVisible(false);
+        miniPlayerPanel.setVisible(true);
         
         minDownloadPanel.setVisible(false);
         

@@ -33,6 +33,7 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -45,6 +46,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -67,8 +69,11 @@ class MyLibraryPanel extends LibraryPanel {
     private ShareListManager shareListManager;
     private LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
-
+    private final PlayerPanel playerPanel;
+    
     private LibrarySharePanel shareAllPanel = null;
+    
+    private final CategorySelectionCallback categorySelectionCallback;
     
     @AssistedInject
     public MyLibraryPanel(  @Assisted Friend friend,
@@ -78,20 +83,33 @@ class MyLibraryPanel extends LibraryPanel {
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
                           @Named("known") Collection<Friend> allFriends,
-                          LimeHeaderBarFactory headerBarFactory){
+                          LimeHeaderBarFactory headerBarFactory,
+                          AudioPlayer player){
         super(null, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriends = allFriends;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
+        this.playerPanel = new PlayerPanel(player);
 
+        this.categorySelectionCallback = new CategorySelectionCallback() {
+            @Override
+            public void call(Category category, boolean state) {
+                if (category == Category.AUDIO) {
+                    playerPanel.setVisible(state);
+                }
+            }
+        };
+        
         setHeaderTitle(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);
         shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
         createMyCategories(eventList);
         
         selectFirst();
+        
+        addLeftComponent(playerPanel);
     }
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {
@@ -99,7 +117,7 @@ class MyLibraryPanel extends LibraryPanel {
         for(Category category : Category.getCategoriesInOrder()) {
             FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             createButton(categoryIconManager.getIcon(category), category, 
-                    createMyCategoryAction(category, filtered), filtered);
+                    createMyCategoryAction(category, filtered), filtered, categorySelectionCallback);
         }
         return categories;
     }

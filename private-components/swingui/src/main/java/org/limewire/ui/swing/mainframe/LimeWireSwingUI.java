@@ -17,7 +17,6 @@ import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -75,9 +74,6 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new PanelResizer(friendsPanel));
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
-        PlayerPanel playerPanel = new PlayerPanel(player);
-        layeredPane.add(playerPanel, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(playerPanel));
         add(layeredPane, gbc);
                 
         JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);

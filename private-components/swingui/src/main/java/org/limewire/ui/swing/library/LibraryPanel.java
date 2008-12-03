@@ -115,6 +115,10 @@ public class LibraryPanel extends JPanel implements Disposable {
         headerPanel.add(shareButton, "cell 0 0, left");
     }
     
+    protected void addLeftComponent(JComponent player) {
+        headerPanel.add(player, "cell 0 0, left");
+    }
+    
     public void createSelectionPanel() {
         selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap", "[125!]", ""));
     }
@@ -141,18 +145,21 @@ public class LibraryPanel extends JPanel implements Disposable {
         disposableList.add(disposable);
     }
     
-    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredList) {
-        return createButton(icon, category, component, null, filteredList);
+    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, 
+            JComponent component, FilterList<T> filteredList, CategorySelectionCallback callback) {
+        return createButton(icon, category, component, null, filteredList, callback);
     }
     
-    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+    protected <T extends FileItem> JComponent createButton(Icon icon, Category category, 
+            JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList,
+            CategorySelectionCallback callback) {
         cardPanel.add(component, category.name());
         
         ButtonItem item = new ButtonItemImpl(category);
         categoryTables.put(category, item);
         categoryOrder.add(category);
         
-        Action action = new SelectionAction(icon, category, item);
+        Action action = new SelectionAction(icon, category, item, callback);
         JComponent button = createSelectionButton(action, category);
         
         // If you only want to show the #s for the sharing panel -- make this false.
@@ -223,7 +230,7 @@ public class LibraryPanel extends JPanel implements Disposable {
     
     private class SelectionAction extends AbstractAction {
         
-        public SelectionAction(Icon icon, Category category, ButtonItem buttonItem) {
+        public SelectionAction(Icon icon, Category category, ButtonItem buttonItem, final CategorySelectionCallback callback) {
             super(I18n.tr(category.toString()), icon);
             
             putValue("limewire.category", category);
@@ -232,6 +239,10 @@ public class LibraryPanel extends JPanel implements Disposable {
                 @Override
                 public void itemSelect(boolean selected) {
                     putValue(SELECTED_KEY, selected);
+                    
+                    if (callback != null) {
+                        callback.call((Category)getValue("limewire.category"), selected);
+                    }
                 }
             });
         }
@@ -240,6 +251,10 @@ public class LibraryPanel extends JPanel implements Disposable {
         public void actionPerformed(ActionEvent e) {
             select((Category)getValue("limewire.category"));
         }
+    }
+    
+    protected interface CategorySelectionCallback {
+        public void call(Category category, boolean state);
     }
     
     private interface ButtonItem {

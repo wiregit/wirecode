@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Panel;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
@@ -21,23 +20,19 @@ import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXCollapsiblePane;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.MediaSlider;
-import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.event.PanelDisplayedEvent;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
-
-public class PlayerPanel extends JXCollapsiblePane implements Resizable {
+public class PlayerPanel extends JXPanel {
 
     private static final int MIN_VOLUME = 0;
     private static final int MAX_VOLUME = 100;
@@ -151,9 +146,8 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
     private static final String FORWARD = "FORWARD";
 
     public PlayerPanel(AudioPlayer player) {
-        super(Direction.UP);
         this.player = player;
-        setCollapsed(true);
+        
         setLayout(new BorderLayout());
         
         heavyPanel = new Panel(new MigLayout());
@@ -202,7 +196,7 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         statusPanel = new JPanel(new MigLayout("wrap 1"));
         statusPanel.setBackground(statusBackgroundColor);
         
-        titleLabel = new JLabel("Clean Your Room");
+        titleLabel = new JLabel("Clean Yofgdfur Room");
         FontUtils.bold(titleLabel);
         artistLabel = new JLabel("The Your Moms");
         albumLabel = new JLabel("The New Jersey Album");
@@ -237,34 +231,8 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      
-      
     }
-    
-    @EventSubscriber
-    public void handleDisplayEvent(DisplayPlayerEvent event) {
-        if (isCollapsed()) {
-            resetBounds();
-        }
-        // toggle
-        setCollapsed(!isCollapsed());
-        heavyPanel.setVisible(!isCollapsed());    
-        
-        if (!isCollapsed()){
-            new PanelDisplayedEvent(this).publish();
-        }
-    }
-    
-    /**
-     * Hides PlayerPanel when another panel is shown in the same layer.
-     */
-    @EventSubscriber
-    public void handleOtherPanelDisplayed(PanelDisplayedEvent event){
-        if(event.getDisplayedPanel() != this){
-            setCollapsed(true);
-            heavyPanel.setVisible(false);
-        }
-    }
-    
+
     private class ButtonListener implements ActionListener {
 
         @Override
@@ -275,29 +243,10 @@ public class PlayerPanel extends JXCollapsiblePane implements Resizable {
                 player.pause();
             } else if (e.getActionCommand() == FORWARD) {
             } else if (e.getActionCommand() == BACK) {
-            } else if (e.getActionCommand() == CLOSE) {
-                setCollapsed(true); 
-            }
-            
-        }
-        
-    }
-    
-    private void resetBounds() {
-        Rectangle parentBounds = getParent().getBounds();
-        Dimension childPreferredSize = heavyPanel.getPreferredSize();
-        int w = (int) childPreferredSize.getWidth();
-        int h = (int) childPreferredSize.getHeight();
-        setBounds(parentBounds.width - w, parentBounds.height - h, w, h);
-    }
-
-    @Override
-    public void resize() {
-        if (!isCollapsed()) {
-            resetBounds();
+            }            
         }
     }
-    
+  
     private class AudioProgressListener implements ChangeListener {
         @Override
         public void stateChanged(ChangeEvent e) {            

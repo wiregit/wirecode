@@ -74,7 +74,7 @@ public class FriendLibraryPanel extends LibraryPanel {
             FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             JComponent component = createMyCategoryAction(category, filtered, friend);
             if(component != null) {
-                createButton(categoryIconManager.getIcon(category), category, component, filtered);                
+                createButton(categoryIconManager.getIcon(category), category, component, filtered, null);                
             }
         }
         return categories;
