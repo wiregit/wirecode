@@ -17,6 +17,9 @@ public class ConnectRequestIQProvider implements IQProvider {
     public IQ parseIQ(XmlPullParser parser) throws Exception {
         try {
             return new ConnectRequestIQ(parser);
+        } catch (RuntimeException re) {
+            LOG.debug("runtime", re);
+            throw re;
         } catch (IOException ie) {
             LOG.debug("io", ie);
             throw ie;
