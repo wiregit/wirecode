@@ -71,7 +71,7 @@ public class ToolsMenu extends JMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AdvancedToolsPanel advancedTools = advancedProvider.get();
-                advancedTools.display(AdvancedToolsPanel.CONSOLE);
+                advancedTools.display(AdvancedToolsPanel.TabId.CONNECTIONS);
             }
         });
         addSeparator();
