@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.impl.library.CoreRemoteFileItem;
@@ -38,14 +39,14 @@ public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presence,
                fileMetaData);
         RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDesc,
-                new XMPPAddress(presence.getPresenceId())), IpPort.EMPTY_SET);
+                (XMPPAddress)((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature()), IpPort.EMPTY_SET);
         remoteFileDescAdapter.setFriendPresence(presence);
         return new CoreRemoteFileItem(remoteFileDescAdapter);
     }
     
     private RemoteFileDesc createRfdFromChatResult(FriendPresence presence, FileMetaData fileMeta)
             throws SaveLocationException, InvalidDataException {
-        Address address = new XMPPAddress(presence.getPresenceId());
+        Address address = ((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature();
         byte[] clientGuid = DataUtils.EMPTY_GUID;
         
         Set<String> urnsAsString = fileMeta.getURNsAsString();

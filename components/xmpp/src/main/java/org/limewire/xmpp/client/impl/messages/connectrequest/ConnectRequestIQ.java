@@ -8,8 +8,6 @@ import org.jivesoftware.smack.packet.IQ;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
@@ -29,7 +27,7 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public class ConnectRequestIQ extends IQ {
 
-    private final Log LOG = LogFactory.getLog(ConnectRequestIQ.class);
+    // private final Log LOG = LogFactory.getLog(ConnectRequestIQ.class);
     
     private final Connectable address;
     private final int supportedfwtVersion;
@@ -48,7 +46,6 @@ public class ConnectRequestIQ extends IQ {
        int fwtVersion = -1;
        Connectable connectable = null;
        for (; eventType != XmlPullParser.END_DOCUMENT; eventType = parser.next()) {
-           LOG.debugf("eventType {0}, parser name", eventType, parser.getName());
            if (eventType == XmlPullParser.START_TAG) {
                if (parser.getName().equals("connect-request")) {
                    String value = parser.getAttributeValue(null, "client-guid");
