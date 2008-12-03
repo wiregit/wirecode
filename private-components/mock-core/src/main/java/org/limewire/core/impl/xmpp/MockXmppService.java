@@ -3,6 +3,7 @@ package org.limewire.core.impl.xmpp;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 class MockXmppService implements XMPPService {
 
@@ -28,5 +29,10 @@ class MockXmppService implements XMPPService {
     @Override
     public XMPPConnection getActiveConnection() {
         return null;
+    }
+
+    @Override
+    public void setMode(Mode mode) {
+        
     }
 }

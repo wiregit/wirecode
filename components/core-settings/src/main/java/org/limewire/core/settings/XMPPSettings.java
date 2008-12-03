@@ -1,6 +1,6 @@
-package org.limewire.ui.swing.friends.settings;
+package org.limewire.core.settings;
 
-import org.limewire.core.settings.LimeProps;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringSetSetting;
 import org.limewire.setting.StringSetting;
 
@@ -26,4 +26,11 @@ public class XMPPSettings extends LimeProps {
 
     public static final StringSetting XMPP_AUTO_LOGIN =
         (StringSetting)FACTORY.createStringSetting("XMPP_AUTO_LOGIN", "").setPrivate(true);
+    
+    /**
+     * This setting tracks whether or not the user should be in do not disturb mode. 
+     * It should be remembered across xmpp sessions.
+     */
+    public static final BooleanSetting XMPP_DO_NOT_DISTURB =
+        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_DO_NOT_DISTURB", false).setPrivate(true);
 }

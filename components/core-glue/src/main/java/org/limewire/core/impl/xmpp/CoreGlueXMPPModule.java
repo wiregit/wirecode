@@ -3,9 +3,12 @@ package org.limewire.core.impl.xmpp;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.inject.AbstractModule;
+import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.PasswordManager;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
 import org.limewire.xmpp.client.impl.PasswordManagerImpl;
+
+import com.limegroup.gnutella.settings.SettingsBackedJabberSettings;
 
 public class CoreGlueXMPPModule extends AbstractModule {
     protected void configure() {
@@ -18,5 +21,6 @@ public class CoreGlueXMPPModule extends AbstractModule {
         bind(XMPPResourceFactory.class).to(XMPPResourceFactoryImpl.class);
         
         bind(XMPPFirewalledAddressConnector.class).asEagerSingleton();
+        bind(JabberSettings.class).to(SettingsBackedJabberSettings.class);
     }
 }

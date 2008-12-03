@@ -3,7 +3,6 @@ package org.limewire.ui.swing.friends.login;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -12,6 +11,7 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
@@ -40,7 +40,7 @@ class LoggedInPanel extends JXPanel {
     LoggedInPanel(LimeComboBoxFactory comboFactory,
                   XMPPAccountConfigurationManager accountManager,
                   FriendActions friendActions,
-                  BarPainterFactory barPainterFactory) {
+                  BarPainterFactory barPainterFactory, StatusActions statusActions) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
         
@@ -55,10 +55,10 @@ class LoggedInPanel extends JXPanel {
         switchUserButton = new HyperLinkButton(I18n.tr("Switch User"));        
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter()); 
         
-        initComponents();
+        initComponents(statusActions);
     }
     
-    private void initComponents() {
+    private void initComponents(final StatusActions statusActions) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
         optionsMenu.add(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
@@ -77,23 +77,8 @@ class LoggedInPanel extends JXPanel {
         }));
         optionsMenu.addSeparator();
         optionsMenu.add(statusMenuLabel);
-        JCheckBoxMenuItem available = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Available")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-            }
-        });
-        JCheckBoxMenuItem dnd = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Do Not Disturb")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-            }
-        });
-        ButtonGroup group = new ButtonGroup();
-        group.add(available);
-        group.add(dnd);
-        optionsMenu.add(available);
-        optionsMenu.add(dnd);
+        optionsMenu.add(statusActions.getAvailableAction());
+        optionsMenu.add(statusActions.getDnDAction());
         optionsBox.overrideMenu(optionsMenu);
         optionsBox.setText(I18n.tr("Options"));
         

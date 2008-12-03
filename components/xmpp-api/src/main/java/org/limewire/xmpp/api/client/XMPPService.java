@@ -1,5 +1,8 @@
 package org.limewire.xmpp.api.client;
 
+import org.limewire.xmpp.api.client.Presence.Mode;
+
+
 
 /**
  * Describes an interface for managing XMPP connections. Only one connection
@@ -30,4 +33,9 @@ public interface XMPPService {
     
     /** Returns true if any connections are currently logging in. */
     public boolean isLoggingIn();
+    
+    /**
+     * Sets the Mode for all of known the XMPP connections. 
+     */
+    void setMode(Mode mode);
 }

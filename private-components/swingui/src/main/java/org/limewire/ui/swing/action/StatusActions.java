@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.menu.actions;
+package org.limewire.ui.swing.action;
 
 import java.awt.event.ActionEvent;
 
@@ -7,30 +7,38 @@ import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
+import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.xmpp.api.client.XMPPService;
+
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 /**
  * Provides JMenuItems to be used for setting available or disabled status for
  * the users. These items are backed by a button group and JCheckBoxMenuItems
  */
-@Singleton
 public class StatusActions {
     private final JCheckBoxMenuItem available;
 
     private final JCheckBoxMenuItem dnd;
 
-    public StatusActions() {
+    @Inject
+    public StatusActions(final XMPPService xmppService) {
         available = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Available")) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                xmppService.setMode(Mode.available);
+                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
 
             }
         });
@@ -38,13 +46,33 @@ public class StatusActions {
         dnd = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Do Not Disturb")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                xmppService.setMode(Mode.dnd);
+                XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(true);
             }
         });
         dnd.setEnabled(false);
         ButtonGroup group = new ButtonGroup();
         group.add(available);
         group.add(dnd);
+
+        updateSelection();
+
+        XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateSelection();
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateSelection() {
+        available.setSelected(!XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
+        dnd.setSelected(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
     }
 
     @Inject

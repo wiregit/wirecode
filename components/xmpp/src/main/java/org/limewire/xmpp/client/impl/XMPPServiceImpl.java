@@ -23,6 +23,7 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
+import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -32,6 +33,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
 
 import com.google.inject.Inject;
@@ -58,6 +60,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
+    private final JabberSettings jabberSettings;
 
     @Inject
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
@@ -67,7 +70,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
             EventMulticaster<FeatureEvent> featureSupport,
             EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster,
-            XMPPAddressRegistry xmppAddressRegistry) {
+            XMPPAddressRegistry xmppAddressRegistry, JabberSettings jabberSettings) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
@@ -77,6 +80,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.featureSupport = featureSupport;
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.xmppAddressRegistry = xmppAddressRegistry;
+        this.jabberSettings = jabberSettings;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
         this.multipleConnectionsAllowed = false;
         this.connectionBroadcaster.get().addListener(new ReconnectionManager());
@@ -145,6 +149,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             }
             try {            
                 connection.login();
+                //maintain the last set login state available or do not disturb
+                connection.setMode(jabberSettings.isDoNotDisturbSet() ? Presence.Mode.dnd : Presence.Mode.available);
                 connections.add(connection);
                 return connection;
             } catch(XMPPException e) {
@@ -279,6 +285,13 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                 }
                 connected = false;
             }
+        }
+    }
+
+    @Override
+    public void setMode(Mode mode) {
+        for(XMPPConnection connection : connections) {
+            connection.setMode(mode);
         }
     }
 }
