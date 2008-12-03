@@ -11,6 +11,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -69,18 +71,22 @@ public class PlayerPanel extends JXPanel {
     @Resource
     private ImageIcon progressIcon;
         
-    private JButton backButton;
-    private JButton playButton;
-    private JButton pauseButton;
-    private JButton forwardButton;
-    private SongProgressBar progressSlider;
-    private JPanel statusPanel;
+    private final JButton backButton;
+    private final JButton playButton;
+    private final JButton pauseButton;
+    private final JButton forwardButton;
+    private final SongProgressBar progressSlider;
+    private final JPanel statusPanel;
+    private final JButton volumeButton;
     
-    private JLabel titleLabel;
-    private JLabel artistLabel;
-    private JLabel albumLabel;
+    private final JPopupMenu volumeControlPopup;
+    private final JSlider volumeSlider; 
     
-    private AudioPlayer player;
+    private final JLabel titleLabel;
+    private final JLabel artistLabel;
+    private final JLabel albumLabel;
+    
+    private final AudioPlayer player;
     
     /**
      * length of the current audio in seconds
@@ -96,13 +102,14 @@ public class PlayerPanel extends JXPanel {
     private static final String PLAY = "PLAY";
     private static final String PAUSE = "PAUSE";
     private static final String FORWARD = "FORWARD";
+    private static final String VOLUME = "VOLUME";
 
     public PlayerPanel(AudioPlayer player) {
         this.player = player;
 
         GuiUtils.assignResources(this);
         
-        setLayout(new MigLayout("insets 0, gap 0, filly, alignx center"));
+        setLayout(new MigLayout("insets 0, gap 4, filly, alignx center"));
         setOpaque(false);
         
         ActionListener playerListener = new ButtonListener();
@@ -123,6 +130,10 @@ public class PlayerPanel extends JXPanel {
         forwardButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
+        
+        volumeButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
+        volumeButton.addActionListener(playerListener);
+        volumeButton.setActionCommand(VOLUME);
 
         progressSlider = new SongProgressBar(progressTrackLeftIcon, progressTrackCenterIcon,
                 progressTrackRightIcon, progressThumbUpIcon, progressThumbDownIcon, progressIcon);
@@ -153,10 +164,21 @@ public class PlayerPanel extends JXPanel {
         add(playButton, "hidemode 3");
         add(forwardButton);
         add(statusPanel, "gapbottom 2");
+        add(volumeButton);
                 
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      
+        
+        volumeControlPopup = new JPopupMenu();
+        volumeSlider = new JSlider(0,100);
+        initVolumeControl();        
+    }
+    
+    private void initVolumeControl() {
+        volumeSlider.addChangeListener(new VolumeListener());
+        volumeSlider.setOrientation(JSlider.VERTICAL);
+        volumeControlPopup.add(volumeSlider);
     }
 
     private class ButtonListener implements ActionListener {
@@ -169,7 +191,9 @@ public class PlayerPanel extends JXPanel {
                 player.pause();
             } else if (e.getActionCommand() == FORWARD) {
             } else if (e.getActionCommand() == BACK) {
-            }            
+            } else if (e.getActionCommand() == VOLUME) {
+                volumeControlPopup.show(volumeButton, 0, 0);
+            }
         }
     }
   
@@ -183,23 +207,14 @@ public class PlayerPanel extends JXPanel {
         }
     }
 
-    /*
+    
     private class VolumeListener implements ChangeListener {
         @Override
         public void stateChanged(ChangeEvent e) {
-            if (volumeSlider.getValue() > .66 * MAX_VOLUME){
-                volumeLabel.setIcon(volume3Icon);
-            } else if (volumeSlider.getValue() > .33 * MAX_VOLUME){
-                volumeLabel.setIcon(volume2Icon);
-            } else if (volumeSlider.getValue() > MIN_VOLUME){
-                volumeLabel.setIcon(volume1Icon);                
-            } else {//Volume is MIN_VOLUME
-                volumeLabel.setIcon(volume0Icon);                
-            }
-            player.setVolume((double)volumeSlider.getValue() / MAX_VOLUME);
+            player.setVolume((double)volumeSlider.getValue() / 100);
         }
     }
-    */
+    
     
     private class PlayerListener implements AudioPlayerListener{
        
