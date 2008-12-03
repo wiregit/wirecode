@@ -33,7 +33,7 @@ public class ProxyOptionPanel extends OptionPanel {
     private ButtonGroup buttonGroup;
     
     private JTextField proxyTextField;
-    private JTextField portTextField;
+    private NumericTextField portTextField;
     
     private JCheckBox authenticationCheckBox;
     private JTextField userNameTextField;
@@ -74,7 +74,7 @@ public class ProxyOptionPanel extends OptionPanel {
         buttonGroup.add(httpRadioButton);
         
         proxyTextField = new JTextField(15);
-        portTextField = new NumericTextField(5, 5);
+        portTextField = new NumericTextField(5, 1, 0xFFFF);
         authenticationCheckBox = new JCheckBox();
         authenticationCheckBox.addItemListener(new ProxyButtonListener());
         userNameTextField = new JTextField(15);
@@ -121,7 +121,7 @@ public class ProxyOptionPanel extends OptionPanel {
         else if (httpRadioButton.isSelected())
             connectionMethod = ConnectionSettings.C_HTTP_PROXY;
 
-        final int proxyPort = Integer.parseInt(portTextField.getText());
+        final int proxyPort = portTextField.getValue();
         final String proxy = proxyTextField.getText();
 
         ConnectionSettings.PROXY_PORT.setValue(proxyPort);
@@ -135,7 +135,7 @@ public class ProxyOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        if(ConnectionSettings.PROXY_PORT.getValue() != Integer.parseInt(portTextField.getText()))
+        if(ConnectionSettings.PROXY_PORT.getValue() != portTextField.getValue())
             return true;
         if(!ConnectionSettings.PROXY_HOST.getValue().equals(proxyTextField.getText()))
             return true;
@@ -175,7 +175,7 @@ public class ProxyOptionPanel extends OptionPanel {
         httpRadioButton.setSelected(connectionMethod == ConnectionSettings.C_HTTP_PROXY);
         
         proxyTextField.setText(proxy);
-        portTextField.setText(Integer.toString(proxyPort));
+        portTextField.setValue(proxyPort);
         
         //authentication
         authenticationCheckBox.setSelected(ConnectionSettings.PROXY_AUTHENTICATE.getValue());

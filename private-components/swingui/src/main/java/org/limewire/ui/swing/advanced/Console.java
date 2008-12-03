@@ -212,7 +212,7 @@ public class Console extends JPanel {
         
         // Create text field for numeric value.
         delayTxt = new NumericTextField(3);
-        delayTxt.setText("0");
+        delayTxt.setValue(0);
         delayTxt.setHorizontalAlignment(JTextField.RIGHT);
         delayTxt.setMinimumSize(new Dimension(50, 23));
         delayTxt.addActionListener(new ActionListener() {
@@ -683,7 +683,7 @@ public class Console extends JPanel {
      */
     public void setDelay() {
         try {
-            delay = Integer.parseInt(delayTxt.getText());
+            delay = delayTxt.getValue();
         } catch (NumberFormatException ex) {
             delay = 0;
         }

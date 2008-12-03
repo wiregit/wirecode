@@ -3,25 +3,20 @@ package org.limewire.ui.swing.options;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.IOException;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 
+import com.google.inject.Inject;
 import net.miginfocom.swing.MigLayout;
-
 import org.limewire.core.api.network.NetworkManager;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
-import org.limewire.io.NetworkUtils;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.NumericTextField;
 import org.limewire.ui.swing.util.I18n;
-
-import com.google.inject.Inject;
 
 /**
  * Firewall Option Panel
@@ -78,14 +73,14 @@ public class FirewallOptionPanel extends OptionPanel {
     private class ListeningPortPanel extends OptionPanel {
 
         private final String description = I18n.tr("You can set the local network port that listens for incoming connections. This port may be changed in case of conflict with another program or if a specific port number is required for direct incoming connections by your firewall.");
-        private JTextField portField;
+        private NumericTextField portField;
         
         private int port;
         
         public ListeningPortPanel() {
             super(I18n.tr("Listening Port"));
             
-            portField = new NumericTextField(5, 5);
+            portField = new NumericTextField(5, 1, 0xFFFF);
             
             add(new MultiLineLabel(description, ReallyAdvancedOptionPanel.MULTI_LINE_LABEL_WIDTH), "wrap");
             
@@ -108,27 +103,20 @@ public class FirewallOptionPanel extends OptionPanel {
                             I18n.tr("Network Port Error"),
                             JOptionPane.ERROR_MESSAGE);
                     NetworkSettings.PORT.setValue(port);
-                    portField.setText(Integer.toString(port));
-                } catch(IllegalArgumentException iae) {
-                    //TODO: this should be enforced by the textbox
-                    FocusJOptionPane.showMessageDialog(FirewallOptionPanel.this, 
-                            I18n.tr("The port chosen {0}, must be between 1 and 65535", newPort),
-                            I18n.tr("Network Port Error"),
-                            JOptionPane.ERROR_MESSAGE);
-                    portField.setText(Integer.toString(port));
+                    portField.setValue(port);
                 }
             }
         }
 
         @Override
         boolean hasChanged() {
-            return NetworkSettings.PORT.getValue() != Integer.parseInt(portField.getText());
+            return NetworkSettings.PORT.getValue() != portField.getValue();
         }
 
         @Override
         public void initOptions() {
             port = NetworkSettings.PORT.getValue();
-            portField.setText(Integer.toString(port));
+            portField.setValue(port);
         }
     }
     
@@ -137,7 +125,7 @@ public class FirewallOptionPanel extends OptionPanel {
         private final String description = I18n.tr("Using Universal Plug n' Play, LimeWire can automatically configure your router or firewall for optimal performance. If your router does not support Universal Plug n' Play, LimeWire can be set to advertise an external port manually.");
         private final JRadioButton plugAndPlayRadioButton;
         private final JRadioButton portForwardRadioButton;
-        private final JTextField portTextField;
+        private final NumericTextField portTextField;
         private final JLabel starLabel;
         private final JRadioButton doNothingRadioButton;
         
@@ -155,7 +143,7 @@ public class FirewallOptionPanel extends OptionPanel {
             buttonGroup.add(portForwardRadioButton);
             buttonGroup.add(doNothingRadioButton);
             
-            portTextField = new NumericTextField(5, 5);
+            portTextField = new NumericTextField(5, 1, 0xFFFF);
             starLabel = new JLabel(I18n.tr("* You must also configure your router"));
             starLabel.setVisible(false);
             
@@ -196,12 +184,7 @@ public class FirewallOptionPanel extends OptionPanel {
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
                 ConnectionSettings.DISABLE_UPNP.setValue(true);
             } else { // PORT.isSelected()
-                int forcedPort = Integer.parseInt(portTextField.getText());
-                if(!NetworkUtils.isValidPort(forcedPort)) {
-                    //TODO: display error message
-//                    GUIMediator.showError(I18n.tr("You must enter a port between 1 and 65535 when manually forcing your port."));
-//                    throw new IOException("bad port: "+forcedPort);
-                }
+                int forcedPort = portTextField.getValue();
                 
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
@@ -233,7 +216,7 @@ public class FirewallOptionPanel extends OptionPanel {
                 if (!plugAndPlayRadioButton.isSelected()) 
                     return true;
             }
-            return portForwardRadioButton.isSelected() && Integer.parseInt(portTextField.getText()) != ConnectionSettings.FORCED_PORT.getValue();
+            return portForwardRadioButton.isSelected() && portTextField.getValue() != ConnectionSettings.FORCED_PORT.getValue();
         }
 
         @Override
@@ -245,7 +228,7 @@ public class FirewallOptionPanel extends OptionPanel {
             else
                 plugAndPlayRadioButton.setSelected(true);
                       
-            portTextField.setText(Integer.toString(ConnectionSettings.FORCED_PORT.getValue()));
+            portTextField.setValue(ConnectionSettings.FORCED_PORT.getValue());
             
             updateTextField();
         }

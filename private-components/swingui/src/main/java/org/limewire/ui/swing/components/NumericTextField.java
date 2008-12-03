@@ -11,43 +11,56 @@ import javax.swing.text.DocumentFilter;
 /**
  * A JTextField component that only accepts integer values as input. Any other
  * input will not be added and a system beep will be issued. Additionally, 
- * a max number of columns can be set. This will not allow values of more
- * than X places to be entered.
+ * a min and max number can be set.
  */
 public class NumericTextField extends JTextField {
 
-    private int maxColumns;
-    
     /**
      * Create a Textfield with a specified number of columns displayed.
      */
     public NumericTextField(int columns) {
-        this(columns, Integer.MAX_VALUE);
+        this(columns, 0, Integer.MAX_VALUE);
     }
 
     /**
      * Create a Textfield with a specified number of columns displayed,
-     * and a maximum number of columns to be entered.
+     * and minimum and maximum integer values which will be accepted.
      */
-    public NumericTextField(int columns, int maxColumns) {
+    public NumericTextField(int columns, int minValue, int maxValue) {
         super(columns);
-        addFilter();
-        
-        this.maxColumns = maxColumns;
+        addIntegerWithMaxValueFilter(minValue, maxValue);
     }
 
-    private void addFilter() {
-        ((AbstractDocument) this.getDocument()).setDocumentFilter(new NumericDocumentFilter());
+    public int getValue() {
+        return Integer.parseInt(getText());   // TODO: who deals with NumberFormatException?  The caller, or this class
     }
+
+    public void setValue(int value) {
+        setText(String.valueOf(value));
+    }
+
+    private void addIntegerWithMaxValueFilter(int minValue, int maxValue) {
+        ((AbstractDocument) this.getDocument()).setDocumentFilter(new NumericDocumentFilter(minValue, maxValue));
+    }
+
 
     class NumericDocumentFilter extends DocumentFilter {
+
+        private final int maxValue;
+        private final int minValue;
+
+        NumericDocumentFilter(int minValue, int maxValue) {
+            this.minValue = minValue;
+            this.maxValue = maxValue;    
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
                 throws BadLocationException {
 
             if (string == null)
                 return;
-            if (isStringNumeric(string) && offset + string.length() < maxColumns) {
+            if (isValidValue(string, offset, 0)) {
                 super.insertString(fb, offset, string, attr);
             } else {
                 Toolkit.getDefaultToolkit().beep();
@@ -59,7 +72,7 @@ public class NumericTextField extends JTextField {
                 throws BadLocationException {
             if (text == null)
                 return;
-            if (isStringNumeric(text) && offset < maxColumns) {
+            if (isValidValue(text, offset, length)) {
                 super.replace(fb, offset, length, text, attrs);
             } else {
                 Toolkit.getDefaultToolkit().beep();
@@ -73,6 +86,18 @@ public class NumericTextField extends JTextField {
                 return false;
             }
             return true;
+        }
+
+        private boolean isValidValue(String text, int offset, int length) {
+            String currentValue = getText();
+            String newValue = currentValue.substring(0, offset) + text + currentValue.substring(offset+length);
+
+            if (isStringNumeric(newValue) &&
+                    Integer.parseInt(newValue) >= minValue &&
+                    Integer.parseInt(newValue) <= maxValue) {
+                return true;
+            }
+            return false;
         }
     }
 }

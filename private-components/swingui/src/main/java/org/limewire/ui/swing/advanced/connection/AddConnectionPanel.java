@@ -40,7 +40,7 @@ public class AddConnectionPanel extends JPanel {
     private JLabel hostLabel = new JLabel();
     private JLabel portLabel = new JLabel();
     private JTextField hostTextField = new JTextField(20);
-    private JTextField portTextField = new NumericTextField(4);
+    private NumericTextField portTextField = new NumericTextField(4, 1, 0xFFFF);
     private JCheckBox tlsCheckBox = new JCheckBox();
     private JButton addButton = new JButton();
     
@@ -68,7 +68,7 @@ public class AddConnectionPanel extends JPanel {
         portLabel.setText(I18n.tr("Port"));
         portTextField.setMinimumSize(new Dimension(60, 21));
         portTextField.setPreferredSize(new Dimension(60, 21));
-        portTextField.setText("6346");
+        portTextField.setValue(6346);
         portTextField.addActionListener(addAction);
 
         // Install auto-complete list on host field.
@@ -111,14 +111,12 @@ public class AddConnectionPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             String hostnamestr = hostTextField.getText();
-            String portstr = portTextField.getText();
 
             // Look for the port in the host.
             int idx = hostnamestr.lastIndexOf(':');
             // If it exists, rewrite the host & port.
             if (idx != -1) {
                 portTextField.setText(hostnamestr.substring(idx + 1));
-                portstr = portTextField.getText();
                 hostTextField.setText(hostnamestr.substring(0, idx));
                 hostnamestr = hostTextField.getText();
             }
@@ -126,18 +124,18 @@ public class AddConnectionPanel extends JPanel {
             // Convert port number to int.
             int portnum = -1;
             try {
-                portnum = Integer.parseInt(portstr);
+                portnum = portTextField.getValue();
             } catch (NumberFormatException ee) {
                 portnum = 6346;
             }
-            
+
             // Verify port number is valid.
             if (!NetworkUtils.isValidPort(portnum)) {
                 portnum = 6346;
             }
 
             // Update port number.
-            portTextField.setText(String.valueOf(portnum));
+            portTextField.setValue(portnum);
 
             if (hostnamestr.trim().length() > 0) {
                 // Establish connection to host and port.
