@@ -48,45 +48,27 @@ public class PlayerPanel extends JXPanel {
     @Resource private Color bevelRight;
     @Resource private Color bevelBottom;
     
-    @Resource
-    private Icon backIcon;
-    @Resource
-    private Icon backIconPressed;
-    @Resource
-    private Icon backIconRollover; 
+    @Resource private Icon backIcon;
+    @Resource private Icon backIconPressed;
+    @Resource private Icon backIconRollover; 
     
-    @Resource
-    private Icon forwardIcon;
-    @Resource
-    private Icon forwardIconPressed;
-    @Resource
-    private Icon forwardIconRollover;
+    @Resource private Icon forwardIcon;
+    @Resource private Icon forwardIconPressed;
+    @Resource private Icon forwardIconRollover;
     
-    @Resource
-    private Icon playIcon;
-    @Resource
-    private Icon playIconPressed;
-    @Resource
-    private Icon playIconRollover;
+    @Resource private Icon playIcon;
+    @Resource private Icon playIconPressed;
+    @Resource private Icon playIconRollover;
 
-    @Resource
-    private Icon pauseIcon;
-    @Resource
-    private Icon pauseIconPressed;
-    @Resource
-    private Icon pauseIconRollover;
-    @Resource
-    private ImageIcon progressTrackLeftIcon;
-    @Resource
-    private ImageIcon progressTrackCenterIcon;
-    @Resource
-    private ImageIcon progressTrackRightIcon;
-    @Resource
-    private ImageIcon progressThumbUpIcon;
-    @Resource
-    private ImageIcon progressThumbDownIcon;
-    @Resource
-    private ImageIcon progressIcon;
+    @Resource private Icon pauseIcon;
+    @Resource private Icon pauseIconPressed;
+    @Resource private Icon pauseIconRollover;
+    @Resource private ImageIcon progressTrackLeftIcon;
+    @Resource private ImageIcon progressTrackCenterIcon;
+    @Resource private ImageIcon progressTrackRightIcon;
+    @Resource private ImageIcon progressThumbUpIcon;
+    @Resource private ImageIcon progressThumbDownIcon;
+    @Resource private ImageIcon progressIcon;
         
     private final JButton backButton;
     private final JButton playButton;
@@ -100,7 +82,6 @@ public class PlayerPanel extends JXPanel {
     private final JSlider volumeSlider; 
     
     private final JLabel titleLabel;
-    private final JLabel artistLabel;
     
     private final AudioPlayer player;
     
@@ -162,16 +143,13 @@ public class PlayerPanel extends JXPanel {
         
         statusPanel = new JPanel(new MigLayout());
         
-        JLabel dashLabel = new JLabel("-");
-        dashLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        titleLabel = new JLabel("Sample Audio Title");
+        titleLabel = new JLabel("Sample Media Author - Sample Audio Title");
         titleLabel.setFont(new Font("Arial", Font.PLAIN, 10));
-        artistLabel = new JLabel("Placeholder Arist");
-        artistLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        titleLabel.setMaximumSize(new Dimension(206, (int)titleLabel.getMaximumSize().getHeight()));
+        titleLabel.setMinimumSize(new Dimension(206, (int)titleLabel.getMinimumSize().getHeight()));
+        titleLabel.setPreferredSize(new Dimension(206, (int)titleLabel.getPreferredSize().getHeight()));
+        titleLabel.setSize(new Dimension(206, (int)titleLabel.getSize().getHeight()));
         
-        
-        statusPanel.add(artistLabel);
-        statusPanel.add(dashLabel);
         statusPanel.add(titleLabel);
         statusPanel.add(progressSlider, "dock south");
         statusPanel.setOpaque(false);
@@ -256,11 +234,9 @@ public class PlayerPanel extends JXPanel {
 
         @Override
         public void songOpened(Map<String, Object> properties) {
-           titleLabel.setText((String)properties.get("title"));
-           artistLabel.setText((String)properties.get("author"));
+           titleLabel.setText((String)properties.get("author") + " - " + (String)properties.get("title"));
            durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000*1000);
            progressSlider.setMaximum(durationSecs);
-           
            byteLength = (Integer)properties.get("audio.length.bytes");
         }
 
@@ -278,7 +254,7 @@ public class PlayerPanel extends JXPanel {
     }
     
     
-  private Painter<JTextField> createStatusBackgroundPainter() {
+    private Painter<JTextField> createStatusBackgroundPainter() {
         
         CompoundPainter<JTextField> compoundPainter = new CompoundPainter<JTextField>();
         
