@@ -84,6 +84,9 @@ public class ConnectRequestIQ extends IQ {
                        throw new IOException("invalid address: " + connectable);
                    }
                }
+           } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("connect-request")) {
+               // exit loop when we see end tag for connect-request
+               break;
            }
        }
        if (guid == null || fwtVersion == -1 || connectable == null) {
