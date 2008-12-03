@@ -127,6 +127,7 @@ public class XMPPAddressResolver implements AddressResolver {
             if(address != null && authTokenFeature != null) {
                 return presence;
             }
+            LOG.debugf("address is {0}, token features is {1}", address, authTokenFeature);
         }
         return null;
     }
