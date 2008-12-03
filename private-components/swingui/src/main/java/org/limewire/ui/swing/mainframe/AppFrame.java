@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventObject;
@@ -19,7 +20,9 @@ import javax.swing.plaf.ColorUIResource;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Action;
+import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.Resource;
+import org.jdesktop.application.SessionStorage;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
@@ -72,16 +75,27 @@ public class AppFrame extends SingleFrameApplication {
     public static boolean isStarted() {
         return started;
     }
-
+    
+    /**
+     * JDesktop's built-in storage isn't what we want -- don't use it.
+     * There's issues with it restoring sizes/position if you closed
+     * while minimized or other weirdness.  Unfortunately, changing
+     * it is package-private.
+     */
+    private void changeSessionStorage(ApplicationContext ctx, SessionStorage storage) {
+        try {
+            Method m = ctx.getClass().getDeclaredMethod("setSessionStorage", SessionStorage.class);
+            m.setAccessible(true);
+            m.invoke(ctx, storage);
+        } catch(Throwable oops) {}
+    }
+    
     @Override
-    protected void startup() {
+    protected void initialize(String[] args) {
+        changeSessionStorage(getContext(), new NullSessionStorage(getContext()));
+        
         GuiUtils.assignResources(this);        
         initColors();
-        
-        String title = getContext().getResourceMap().getString("Application.title");
-        JFrame frame = new LimeJFrame(title);
-        frame.setName("mainFrame");
-        getMainView().setFrame(frame);
         
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
@@ -92,6 +106,14 @@ public class AppFrame extends SingleFrameApplication {
         
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
+    }
+
+    @Override
+    protected void startup() {        
+        String title = getContext().getResourceMap().getString("Application.title");
+        JFrame frame = new LimeJFrame(title);
+        frame.setName("mainFrame");
+        getMainView().setFrame(frame);
 
         // Create the Injector for the UI.
         assert ui == null;
@@ -102,20 +124,30 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setJMenuBar(ui.getMenuBar());
         
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
-        addExitListener(new ShutdownListener(getMainFrame(), application));        
-
+        addExitListener(new ShutdownListener(getMainFrame(), application));
+        
+        // We set the size here to avoid flickering, 
+        // because JDesktop sets visibile to true immediately.
+        setWindowPosition(getMainFrame());
+        
         show(ui);      
         restoreView();
         
         ui.goHome();
         ui.focusOnSearch();
         
-        // TODO: Capture size of program before it exited 
-        //       and set to prior size.  JDesktop should be
-        //       doing this for us, but it's doing it wrong.
-        getMainFrame().setSize(new Dimension(1024, 768));
+        // We have to reset the window position in order to 
+        // ensure visible components are given the right size.
+        setWindowPosition(getMainFrame());
 
         started = true;
+    }
+    
+    // TODO: Use prior positioning.
+    private void setWindowPosition(JFrame frame) {
+        frame.setSize(new Dimension(1024, 768));
+        frame.setLocationRelativeTo(null);
+        frame.validate();
     }
     
     @Override
