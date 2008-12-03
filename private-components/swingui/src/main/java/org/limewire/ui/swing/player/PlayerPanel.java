@@ -11,7 +11,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -29,9 +28,6 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class PlayerPanel extends JXPanel {
-
-    private static final int MIN_VOLUME = 0;
-    private static final int MAX_VOLUME = 100;
 
     @Resource
     private Icon backIcon;
@@ -60,16 +56,6 @@ public class PlayerPanel extends JXPanel {
     private Icon pauseIconPressed;
     @Resource
     private Icon pauseIconRollover;
-
-    @Resource
-    private Icon volume0Icon;
-    @Resource
-    private Icon volume1Icon;
-    @Resource
-    private Icon volume2Icon;
-    @Resource
-    private Icon volume3Icon;
-
     @Resource
     private ImageIcon progressTrackLeftIcon;
     @Resource
@@ -82,18 +68,13 @@ public class PlayerPanel extends JXPanel {
     private ImageIcon progressThumbDownIcon;
     @Resource
     private ImageIcon progressIcon;
-    
-    @Resource
-    private Color statusBackgroundColor;
-    
+        
     private JButton backButton;
     private JButton playButton;
     private JButton pauseButton;
     private JButton forwardButton;
-    private JSlider volumeSlider;
     private SongProgressBar progressSlider;
     private JPanel statusPanel;
-    private JLabel volumeLabel;
     
     private JLabel titleLabel;
     private JLabel artistLabel;
@@ -149,7 +130,6 @@ public class PlayerPanel extends JXPanel {
         progressSlider.setMaximum(500);
         
         statusPanel = new JPanel(new MigLayout());
-        statusPanel.setBackground(statusBackgroundColor);
         
         titleLabel = new JLabel("Sample Audio Title");
         FontUtils.bold(titleLabel);
@@ -203,6 +183,7 @@ public class PlayerPanel extends JXPanel {
         }
     }
 
+    /*
     private class VolumeListener implements ChangeListener {
         @Override
         public void stateChanged(ChangeEvent e) {
@@ -218,6 +199,7 @@ public class PlayerPanel extends JXPanel {
             player.setVolume((double)volumeSlider.getValue() / MAX_VOLUME);
         }
     }
+    */
     
     private class PlayerListener implements AudioPlayerListener{
        
