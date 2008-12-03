@@ -2,6 +2,8 @@ package org.limewire.ui.swing.player;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
@@ -13,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -20,17 +23,31 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.CompoundPainter;
+import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.painter.BorderPainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
 public class PlayerPanel extends JXPanel {
 
+    @Resource private int arcWidth;
+    @Resource private int arcHeight;
+    @Resource private Color innerBorder;
+    @Resource private Color innerBackground;
+    @Resource private Color bevelLeft;
+    @Resource private Color bevelTop1;
+    @Resource private Color bevelTop2;
+    @Resource private Color bevelRight;
+    @Resource private Color bevelBottom;
+    
     @Resource
     private Icon backIcon;
     @Resource
@@ -84,7 +101,6 @@ public class PlayerPanel extends JXPanel {
     
     private final JLabel titleLabel;
     private final JLabel artistLabel;
-    private final JLabel albumLabel;
     
     private final AudioPlayer player;
     
@@ -109,7 +125,7 @@ public class PlayerPanel extends JXPanel {
 
         GuiUtils.assignResources(this);
         
-        setLayout(new MigLayout("insets 0, gap 4, filly, alignx center"));
+        setLayout(new MigLayout("insets 0, filly, alignx center"));
         setOpaque(false);
         
         ActionListener playerListener = new ButtonListener();
@@ -139,19 +155,26 @@ public class PlayerPanel extends JXPanel {
                 progressTrackRightIcon, progressThumbUpIcon, progressThumbDownIcon, progressIcon);
         progressSlider.addChangeListener(new AudioProgressListener());
         progressSlider.setMaximum(500);
+        progressSlider.setMaximumSize(new Dimension(206, 4));
+        progressSlider.setMinimumSize(new Dimension(206, 4));
+        progressSlider.setPreferredSize(new Dimension(206, 4));
+        progressSlider.setSize(new Dimension(206, 4));
         
         statusPanel = new JPanel(new MigLayout());
         
+        JLabel dashLabel = new JLabel("-");
+        dashLabel.setFont(new Font("Arial", Font.PLAIN, 10));
         titleLabel = new JLabel("Sample Audio Title");
-        FontUtils.bold(titleLabel);
+        titleLabel.setFont(new Font("Arial", Font.PLAIN, 10));
         artistLabel = new JLabel("Placeholder Arist");
-        albumLabel = new JLabel("Collection");
-
-        statusPanel.add(titleLabel);
+        artistLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        
+        
         statusPanel.add(artistLabel);
-        statusPanel.add(albumLabel);
+        statusPanel.add(dashLabel);
+        statusPanel.add(titleLabel);
         statusPanel.add(progressSlider, "dock south");
-        statusPanel.setBackground(Color.GRAY);
+        statusPanel.setOpaque(false);
         
         int buttonWidth = backButton.getPreferredSize().width + 
         playButton.getPreferredSize().width + forwardButton.getPreferredSize().width; 
@@ -159,13 +182,19 @@ public class PlayerPanel extends JXPanel {
         Dimension statusSize = new Dimension(buttonWidth, statusPanel.getPreferredSize().height);
         statusPanel.setPreferredSize(statusSize);
 
-        add(backButton);
-        add(pauseButton, "hidemode 3");
-        add(playButton, "hidemode 3");
-        add(forwardButton);
-        add(statusPanel, "gapbottom 2");
-        add(volumeButton);
+        JXPanel innerPanel = new JXPanel(new MigLayout("insets 0 8 0 8, filly, gap 4, alignx center"));
+        innerPanel.setOpaque(false);
+        innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
+        
+        innerPanel.add(backButton);
+        innerPanel.add(pauseButton, "hidemode 3");
+        innerPanel.add(playButton, "hidemode 3");
+        innerPanel.add(forwardButton);
+        innerPanel.add(statusPanel, "gapbottom 2");
+        innerPanel.add(volumeButton);
                 
+        add(innerPanel, "gaptop 2, gapbottom 2");
+        
         EventAnnotationProcessor.subscribe(this);
 
         player.addAudioPlayerListener(new PlayerListener());      
@@ -229,9 +258,7 @@ public class PlayerPanel extends JXPanel {
         public void songOpened(Map<String, Object> properties) {
            titleLabel.setText((String)properties.get("title"));
            artistLabel.setText((String)properties.get("author"));
-           albumLabel.setText((String)properties.get("album"));
-           //"duration" is in microseconds
-           durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
+           durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000*1000);
            progressSlider.setMaximum(durationSecs);
            
            byteLength = (Integer)properties.get("audio.length.bytes");
@@ -248,5 +275,31 @@ public class PlayerPanel extends JXPanel {
             }            
         }
         
+    }
+    
+    
+  private Painter<JTextField> createStatusBackgroundPainter() {
+        
+        CompoundPainter<JTextField> compoundPainter = new CompoundPainter<JTextField>();
+        
+        RectanglePainter<JTextField> painter = new RectanglePainter<JTextField>();
+        
+        painter.setRounded(true);
+        painter.setFillPaint(innerBackground);
+        painter.setRoundWidth(this.arcWidth);
+        painter.setRoundHeight(this.arcHeight);
+        painter.setInsets(new Insets(2,2,2,2));
+        painter.setBorderPaint(null);
+        painter.setFillVertical(true);
+        painter.setFillHorizontal(true);
+        painter.setAntialiasing(true);
+        painter.setCacheable(true);
+        
+        compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
+                this.innerBorder, this.bevelLeft, this.bevelTop1, this.bevelTop2, 
+                this.bevelRight,  this.bevelBottom, AccentType.SHADOW));
+        compoundPainter.setCacheable(true);
+        
+        return compoundPainter;
     }
 }
