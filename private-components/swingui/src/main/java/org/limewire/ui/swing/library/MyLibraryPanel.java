@@ -4,8 +4,8 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -38,6 +38,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.CategoryShareModel;
@@ -222,7 +223,7 @@ class MyLibraryPanel extends LibraryPanel {
         public ShareAllAction(Category category) {
             this.category = category;
             
-            putValue(Action.NAME, I18n.tr("Share"));
+            putValue(Action.NAME, I18n.tr("share"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share collection"));
         }
         
@@ -241,10 +242,12 @@ class MyLibraryPanel extends LibraryPanel {
         @Resource Color nonSelectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
-        @Resource Color linkColor;
+        @Resource Font shareButtonFont;
+        @Resource Color shareForegroundColor;
+        @Resource Color shareMouseOverColor;
         
         private JButton button;
-        private JButton shareButton;
+        private HyperLinkButton shareButton;
         private JLabel collectionLabel;
         
         public MySelectionPanel(Action action, Action shareAction, Category category) {
@@ -271,17 +274,17 @@ class MyLibraryPanel extends LibraryPanel {
             
             // only add a share category button if its an audio/video/image category
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-                shareButton = new JButton(shareAction);
+                shareButton = new HyperLinkButton(null, shareAction);
                 shareButton.setContentAreaFilled(false);
                 shareButton.setBorderPainted(false);
                 shareButton.setFocusPainted(false);
                 shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
                 shareButton.setOpaque(false);
-                shareButton.setForeground(linkColor);
                 shareButton.setVisible(false);
-                shareButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 FontUtils.underline(shareButton);
-                shareButton.setName("my name yo");
+                shareButton.setFont(shareButtonFont);
+                shareButton.setForeground(shareForegroundColor);
+                shareButton.setMouseOverColor(shareMouseOverColor);
                 add(shareButton, "wrap");
                 
                 collectionLabel = new JLabel();

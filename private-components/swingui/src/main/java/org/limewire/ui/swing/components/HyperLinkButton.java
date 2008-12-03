@@ -38,7 +38,8 @@ public class HyperLinkButton extends JButton implements MouseListener {
     }
     
     private void initialize(String text) {
-        setText(text);        
+        if(text != null)
+            setText(text);        
         setBorder(null);
         setContentAreaFilled(false);
         setFocusable(false);
