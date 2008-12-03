@@ -73,8 +73,6 @@ class MyLibraryPanel extends LibraryPanel {
     
     private LibrarySharePanel shareAllPanel = null;
     
-    private final CategorySelectionCallback categorySelectionCallback;
-    
     @AssistedInject
     public MyLibraryPanel(  @Assisted Friend friend,
                             @Assisted EventList<LocalFileItem> eventList,
@@ -92,15 +90,6 @@ class MyLibraryPanel extends LibraryPanel {
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
         this.playerPanel = new PlayerPanel(player);
-
-        this.categorySelectionCallback = new CategorySelectionCallback() {
-            @Override
-            public void call(Category category, boolean state) {
-                if (category == Category.AUDIO) {
-                    playerPanel.setVisible(state);
-                }
-            }
-        };
         
         setHeaderTitle(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);
@@ -114,10 +103,22 @@ class MyLibraryPanel extends LibraryPanel {
     
     private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {
         Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
+        
         for(Category category : Category.getCategoriesInOrder()) {
+        
+            CategorySelectionCallback callback = null;
+            if (category == Category.AUDIO) {
+                callback = new CategorySelectionCallback() {
+                    @Override
+                    public void call(Category category, boolean state) {
+                        playerPanel.setVisible(state);
+                    }
+                };
+            }
+            
             FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             createButton(categoryIconManager.getIcon(category), category, 
-                    createMyCategoryAction(category, filtered), filtered, categorySelectionCallback);
+                    createMyCategoryAction(category, filtered), filtered, callback);
         }
         return categories;
     }

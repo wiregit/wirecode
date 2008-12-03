@@ -253,6 +253,10 @@ public class LibraryPanel extends JPanel implements Disposable {
         }
     }
     
+    /**
+     * Allows a category creator to define a method to notify back any selection
+     *  events on this category 
+     */
     protected interface CategorySelectionCallback {
         public void call(Category category, boolean state);
     }
