@@ -6,6 +6,11 @@ import org.limewire.io.Address;
 
 import com.google.inject.Singleton;
 
+/**
+ * Maintains the currently known addresse for each {@link XMPPAddress}.
+ * 
+ * Used for address resolution.
+ */
 @Singleton
 public class XMPPAddressRegistry {
     

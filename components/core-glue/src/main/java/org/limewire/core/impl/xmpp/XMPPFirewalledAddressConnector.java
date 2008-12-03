@@ -36,6 +36,9 @@ import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 
+/**
+ * Connects an {@link XMPPFirewalledAddress} and tries to get a socket for it.
+ */
 @Singleton
 public class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
 
@@ -110,6 +113,8 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
                 @Override
                 public void handleConnect(Socket socket) throws IOException {
                     LOG.debugf("handling socket: {0}", socket);
+                    // have to route connected socket through socket processor and PushDownloadManager
+                    // so parsing of the GIV line is taken care of
                     socketProcessor.get().processSocket(socket, "GIV");
                 }
                 @Override
@@ -145,6 +150,10 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
         return false;
     }
 
+    /**
+     * Keeps connection state around and notifies the original {@link ConnectObserver}
+     * of failures or success, ensuring that only one event is reported to it.
+     */
     static class PushedSocketConnectObserver {
 
         private final FirewalledAddress firewalledAddress;
@@ -178,10 +187,7 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
         
         public void handleTimeout() {
             LOG.debug("handling timeout");
-            if (acceptedOrFailed.compareAndSet(false, true)) {
-                LOG.debug("throwing connect timeout");
-                observer.handleIOException(new ConnectException("connect request timed out"));
-            }
+            handleIOException(new ConnectException("connect request timed out"));
         }
         
         public void handleIOException(IOException ie) {

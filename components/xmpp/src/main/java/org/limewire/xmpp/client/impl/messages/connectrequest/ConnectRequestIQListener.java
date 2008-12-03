@@ -8,6 +8,10 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectRequestEvent;
 
+/**
+ * Listens for {@link ConnectRequestIQ connect request iqs} and fires
+ * a {@link ConnectRequestEvent}.
+ */
 public class ConnectRequestIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(ConnectRequestIQListener.class);

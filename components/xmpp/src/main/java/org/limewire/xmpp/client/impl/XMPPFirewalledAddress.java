@@ -5,7 +5,10 @@ import org.limewire.net.address.FirewalledAddress;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
 
-
+/**
+ * A composite of {@link XMPPAddress} and {@link FirewalledAddress} to
+ * allow connect requests to be sent over xmpp. 
+ */
 public class XMPPFirewalledAddress implements Address {
 
     private final XMPPAddress xmppAddress;

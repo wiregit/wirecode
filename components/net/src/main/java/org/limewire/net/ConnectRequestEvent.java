@@ -2,8 +2,11 @@ package org.limewire.net;
 
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
+import org.limewire.util.Objects;
 
-
+/**
+ * Event that an external connect request has arrived.
+ */
 public class ConnectRequestEvent {
 
     private final Connectable address;
@@ -11,8 +14,8 @@ public class ConnectRequestEvent {
     private final int supportedFWTVersion;
 
     public ConnectRequestEvent(Connectable address, GUID clientGuid, int supportedFWTVersion) {
-        this.address = address;
-        this.clientGuid = clientGuid;
+        this.address = Objects.nonNull(address, "address");
+        this.clientGuid = Objects.nonNull(clientGuid, "clientGuid");
         this.supportedFWTVersion = supportedFWTVersion;
     }
     
