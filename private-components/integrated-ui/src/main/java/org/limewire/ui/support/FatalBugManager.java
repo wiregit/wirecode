@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -20,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
@@ -54,14 +56,28 @@ public final class FatalBugManager {
 	        
         bug.printStackTrace();
         
-        LocalClientInfo info;
+        final LocalClientInfo info;
         if(localClientInfoFactory != null) {
             info = localClientInfoFactory.createLocalClientInfo(bug, Thread.currentThread().getName(), null, true);
         } else {
             info = new LocalClientInfoImpl(bug, Thread.currentThread().getName(), null, true, new FatalSessionInfo());
         }
         
-        reviewBug(info);
+        if(!SwingUtilities.isEventDispatchThread()) {
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    public void run() {
+                        reviewBug(info);                    
+                    }
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            reviewBug(info);
+        }
     }
     
     private static String warning() {
@@ -120,7 +136,7 @@ public final class FatalBugManager {
         });
         JScrollPane userCommentsScrollPane = new JScrollPane(userCommentsTextArea);
         userCommentsScrollPane.setBorder(BorderFactory.createEtchedBorder());
-        userCommentsScrollPane.setPreferredSize( new Dimension(400, 80) ); 
+        userCommentsScrollPane.setPreferredSize( new Dimension(300, 80) ); 
 
         JPanel buttonPanel = new JPanel();
         JButton sendButton = new JButton("Send");

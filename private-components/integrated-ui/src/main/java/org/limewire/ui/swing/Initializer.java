@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +29,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
+import org.limewire.ui.support.FatalBugManager;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.SplashWindow;
@@ -106,15 +108,11 @@ public final class Initializer {
         
         // Various startup tasks...
         setupCallbacksAndListeners();     
-        validateStartup(args);        
-
+        validateStartup(args);
         
         // Creates LimeWire itself.
-     //   LimeWireUI limewireGUI = createLimeWire(); 
         LimeWireCore limeWireCore = createLimeWire();
         Injector injector = limeWireCore.getInjector();
-        
-        LimeMozillaOverrides mozillaOverrides = injector.getInstance(LimeMozillaOverrides.class);
        
         // Various tasks that can be done after core is glued & started.
         glueCore(limeWireCore);        
@@ -130,10 +128,6 @@ public final class Initializer {
         // Installs properties.
         installProperties();
         
-        // Construct the SetupManager, which may or may not be shown.
-//        final SetupManager setupManager = new SetupManager(limeWireCore.getFirewallService());
-//        stopwatch.resetAndLog("construct SetupManager");
-        
         // show nifty alpha info
 //        showAlphaInfo();
         
@@ -144,23 +138,22 @@ public final class Initializer {
         //assuming not showing splash screen if there are program arguments
         switchSplashes(awtSplash, splashImage);
         
-        startEarlyCore(/*setupManager,*/ limeWireCore);
+        startEarlyCore(limeWireCore);
         
         // Initialize early UI components, display the setup manager (if necessary),
         // and ensure the save directory is valid.
-        initializeEarlyUI(mozillaOverrides);
-    //    startSetupManager();
-        validateSaveDirectory();
+        initializeEarlyUI(injector.getInstance(LimeMozillaOverrides.class));
         
         // Load the UI, system tray & notification handlers,
         // and hide the splash screen & display the UI.
         loadUI();
-        loadTrayAndNotifications();
-        hideSplashAndShowUI();
         
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
-        installListenersForUI(limeWireCore);
+
+        //TODO: What should we do about these warnings?
+//      SettingsWarningManager.checkTemporaryDirectoryUsage();
+//      SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
         // Start the core & run any queued control requests, and load DAAP.
         startCore(limeWireCore);
@@ -198,11 +191,8 @@ public final class Initializer {
     
     /** shows legal stuff and exits if the user does not agree */
     private void confirmIntent() {
-
         File versionFile = new File(CommonUtils.getUserSettingsDir(), "versions.props");
-
-        Properties properties = new Properties();
-        
+        Properties properties = new Properties();        
         FileInputStream inputStream = null;
         try {
             inputStream = new FileInputStream(versionFile);
@@ -244,25 +234,6 @@ public final class Initializer {
      * (Because it sets the preference directory in CommonUtils.)
      */
     private void preinit() {
-        // Before anything, set a default L&F, so that
-        // if an error occurs, we can display the error
-        // message with the right L&F.
-        SwingUtils.invokeLater(new Runnable() {
-            public void run() {
-                String name = UIManager.getSystemLookAndFeelClassName();
-                
-                if(OSUtils.isLinux()) {
-                    //mozswing on linux is not compatible with the gtklook and feel in jvms less than 1.7
-                    //forcing cross platform look and feel for linux.
-                    name = UIManager.getCrossPlatformLookAndFeelClassName();
-                }
-           
-                try {
-                    UIManager.setLookAndFeel(name);
-                } catch(Throwable ignored) {}
-            }
-        });
-        
         // Make sure the settings directory is set.
         try {
             LimeCoreGlue.preinstall();
@@ -270,6 +241,23 @@ public final class Initializer {
         } catch(InstallFailedException ife) {
             failPreferencesPermissions();
         }
+
+        // Before anything, set a default L&F, so that
+        // if an error occurs, we can display the error
+        // message with the right L&F.
+        SwingUtils.invokeLater(new Runnable() {
+            public void run() {
+                String name = UIManager.getSystemLookAndFeelClassName();                
+                if(OSUtils.isLinux()) {
+                    //mozswing on linux is not compatible with the gtklook and feel in jvms less than 1.7
+                    //forcing cross platform look and feel for linux.
+                    name = UIManager.getCrossPlatformLookAndFeelClassName();
+                }           
+                try {
+                    UIManager.setLookAndFeel(name);
+                } catch(Throwable ignored) {}
+            }
+        });        
     }
     
     /** Installs all callbacks & listeners. */
@@ -288,6 +276,7 @@ public final class Initializer {
         stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages
+// TODO: We really need to update this.
 //        org.limewire.service.MessageService.setCallback(new MessageHandler());
 //        stopwatch.resetAndLog("MessageHandler install");
         
@@ -314,12 +303,6 @@ public final class Initializer {
         // check if this version has expired.
         if (System.currentTimeMillis() > EXPIRATION_DATE) 
             failExpired();
-        
-        // If this is a request to launch a pmf then just do it and exit.
-//        if ( args.length >= 2 && "-pmf".equals(args[0]) ) {
-//            PackagedMediaFileLauncher.launchFile(args[1], false); 
-//            System.exit(0);
-//        }
         
         // Yield so any other events can be run to determine
         // startup status, but only if we're going to possibly
@@ -367,23 +350,6 @@ public final class Initializer {
     private void glueCore(LimeWireCore limeWireCore) {
         limeWireCore.getLimeCoreGlue().install();
         stopwatch.resetAndLog("Install core glue");
-
-// TODO: Do we want to update the UI (which is visible at this point) ?
-//        ServiceRegistry registry = limeWireCore.getServiceRegistry();
-//        registry.addListener(new ServiceRegistryListener() {
-//            public void initializing(final Service service) {}
-//            
-//            public void starting(final Service service) {
-//                SwingUtilities.invokeLater(new Runnable() {
-//                    public void run() {
-//                        splashRef.get().setStatusText(I18n.tr("Starting {0}", I18n.tr(service.getServiceName())));
-//                    }
-//                });
-//            }
-//            
-//            public void stopping(final Service service) {}
-//        });
-//        stopwatch.resetAndLog("add service registry listener");
     }
     
     /** Tasks that can be done after core is created, before it's started. */
@@ -393,8 +359,7 @@ public final class Initializer {
             failInternetBlocked();
         }
         stopwatch.resetAndLog("Check for NIO dispatcher");
-    }
-    
+    }    
 
     /**
      * Initializes any code that is dependent on external controls.
@@ -443,12 +408,12 @@ public final class Initializer {
     }
     
     /** Starts any early core-related functionality. */
-    private void startEarlyCore(/*SetupManager setupManager, */LimeWireCore limeWireCore) {        
+    private void startEarlyCore(LimeWireCore limeWireCore) {        
         // Add this running program to the Windows Firewall Exceptions list
         boolean inFirewallException = limeWireCore.getFirewallService().addToFirewall();
         stopwatch.resetAndLog("add firewall exception");
         
-        if(!inFirewallException /*&& !setupManager.shouldShowFirewallWindow()*/) {
+        if(!inFirewallException) {
             limeWireCore.getLifecycleManager().loadBackgroundTasks();
             stopwatch.resetAndLog("load background tasks");
         }
@@ -518,132 +483,37 @@ public final class Initializer {
         stopwatch.resetAndLog("return from evt queue");
     }
     
-//    /** Starts the SetupManager, if necessary. */
-//    private void startSetupManager() {
-//        final SetupManager setupManager = new SetupManager(limeWireCore.getFirewallService());
-//        // Run through the initialization sequence -- this must always be
-//        // called before GUIMediator constructs the LibraryTree!
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                stopwatch.resetAndLog("event evt queue");
-//                // Then create the setup manager if needed.
-//                setupManager.createIfNeeded();     
-//                stopwatch.resetAndLog("create setupManager if needed");
-//            }
-//        });
-//        stopwatch.resetAndLog("return from evt queue");
-//    }
-    
-    /** Ensures the save directory is valid. */
-    private void validateSaveDirectory() {        
-//        // Make sure the save directory is valid.
-//        SaveDirectoryHandler.validateSaveDirectoryAndPromptForNewOne();
-//        stopwatch.resetAndLog("check save directory validity");
-    }
-    
     /** Loads the UI. */
     private void loadUI() {
         splashRef.get().setStatusText(I18n.tr("Loading User Interface..."));
         stopwatch.resetAndLog("update splash for UI");
         
+        DefaultErrorCatcher.storeCaughtBugs();
         Application.launch(AppFrame.class, new String[0]);
         
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
                 splashRef.get().dispose();
+                List<Throwable> caughtBugs = DefaultErrorCatcher.getAndResetStoredBugs();
                 if(!AppFrame.isStarted()) {
-                    System.exit(1);
+                    // Report the last bug that caused us to fail.
+                    assert caughtBugs.size() > 0;
+                    FatalBugManager.handleFatalBug(caughtBugs.get(caughtBugs.size()-1));
+                } else {
+                    for(Throwable throwable : caughtBugs) {
+                        ErrorService.error(throwable, "Startup Error");
+                    }
                 }
             }
         });
-//
-//        // To prevent deadlocks, the GUI must be constructed in the Swing thread.
-//        // (Except on OS X, which is strange.)
-//        if (OSUtils.isMacOSX()) {
-//            GUIMediator.instance();
-//            stopwatch.resetAndLog("OSX GUIMediator instance");
-//        } else {
-//            GUIMediator.safeInvokeAndWait(new Runnable() {
-//                public void run() {
-//                    stopwatch.resetAndLog("enter evt queue");
-//                    GUIMediator.instance();
-//                    stopwatch.resetAndLog("GUImediator instance");
-//                }
-//            });
-//            stopwatch.resetAndLog("return from evt queue");
-//        }
-//        
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading Core Components..."));
-//        stopwatch.resetAndLog("update splash for core");
-    }
-    
-    /** Loads the system tray & other notifications. */
-    private void loadTrayAndNotifications() {        
-//        // Create the user desktop notifier object.
-//        // This must be done before the GUI is made visible,
-//        // otherwise the user can close it and not see the
-//        // tray icon.
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//                public void run() {
-//                    stopwatch.resetAndLog("enter evt queue");
-//                    
-//                    NotifyUserProxy.instance();
-//                    stopwatch.resetAndLog("NotifYUserProxy instance");
-//                    
-//                    if (!ApplicationSettings.DISPLAY_TRAY_ICON.getValue())
-//                        NotifyUserProxy.instance().hideTrayIcon();
-//                    
-//                    SettingsWarningManager.checkTemporaryDirectoryUsage();
-//                    SettingsWarningManager.checkSettingsLoadSaveFailure();
-//                    
-//                    stopwatch.resetAndLog("end notify runner");
-//                }
-//        });
-//        stopwatch.resetAndLog("return from evt queue");
-    }
-    
-    /** Hides the splash screen and sets the UI for allowing viz. */
-    private void hideSplashAndShowUI() {        
-//        // Hide the splash screen and recycle its memory.
-//        if(!isStartup) {
-//            SplashWindow.instance().dispose();
-//            stopwatch.resetAndLog("hide splash");
-//        }
-//        
-//        GUIMediator.allowVisibility();
-//        stopwatch.resetAndLog("allow viz");
-//        
-//        // Make the GUI visible.
-//        if(!isStartup) {
-//            GUIMediator.setAppVisible(true);
-//            stopwatch.resetAndLog("set app visible TRUE");
-//        } else {
-//            GUIMediator.startupHidden();
-//            stopwatch.resetAndLog("start hidden");
-//        }
-    }
+    }  
     
     /** Runs any late UI tasks, such as initializing Icons, I18n support. */
-    private void loadLateTasksForUI() {        
-//        // Initialize IconManager.
-//        GUIMediator.setSplashScreenString(I18n.tr("Loading Icons..."));
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                IconManager.instance();
-//            }
-//        });
-//        stopwatch.resetAndLog("IconManager instance");
-//
+    private void loadLateTasksForUI() {
         // Touch the I18N stuff to ensure it loads properly.
         splashRef.get().setStatusText(I18n.tr("Loading Internationalization Support..."));
         I18NConvert.instance();
         stopwatch.resetAndLog("I18nConvert instance");
-    }
-    
-    /** Sets up any listeners for the UI. */
-    private void installListenersForUI(LimeWireCore limeWireCore) {        
-//        limeWireCore.getFileManager().addFileEventListener(new FileManagerWarningManager(NotifyUserProxy.instance()));
-//        limeWireCore.getFileManager().addFileEventListener(LibraryMediator.instance());
     }
     
     /** Starts the core. */
@@ -657,11 +527,6 @@ public final class Initializer {
             limeWireCore.getUPnPManager().start();
             stopwatch.resetAndLog("start UPnPManager");
         }
-        
-//        // Instruct the gui to perform tasks that can only be performed
-//        // after the backend has been constructed.
-//        GUIMediator.instance().coreInitialized();        
-//        stopwatch.resetAndLog("core initialized");
     }
     
     /** Runs control requests that we queued early in initializing. */
@@ -673,16 +538,6 @@ public final class Initializer {
     
     /** Runs post initialization tasks. */
     private void postinit() {
-//        
-//        // Tell the GUI that loading is all done.
-//        GUIMediator.instance().loadFinished();
-//        stopwatch.resetAndLog("load finished");
-//        
-//        // update the repaintInterval after the Splash is created,
-//        // so that the splash gets the smooth animation.
-//        if(OSUtils.isMacOSX())
-//            UIManager.put("ProgressBar.repaintInterval", new Integer(500));
-//        
         if(LOG.isTraceEnabled()) {
             long stopMemory = Runtime.getRuntime().totalMemory()
                             - Runtime.getRuntime().freeMemory();

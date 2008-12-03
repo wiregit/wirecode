@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -55,12 +54,12 @@ public class AppFrame extends SingleFrameApplication {
     private static List<ApplicationLifecycleListener> lifecycleListeners = new ArrayList<ApplicationLifecycleListener>();
 
     /** Default background color for panels */
-    @Resource
-    private Color bgColor;
-    @Resource
-    private Color glassPaneColor;
+    @Resource private Color bgColor;
+    @Resource private Color glassPaneColor;
     
-    private Application application;
+    @Inject private Application application;
+    @Inject private LimeWireSwingUI ui;
+    @Inject private SetupWizard setupWizard;
 
     public static boolean isStarted() {
         return started;
@@ -86,15 +85,16 @@ public class AppFrame extends SingleFrameApplication {
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
 
-        Injector localInjector = createInjector();
-        this.application = localInjector.getInstance(Application.class);
+        // Create the Injector for the UI.
+        assert ui == null;
+        createUiInjector();
+        assert ui != null;
 
-        LimeWireSwingUI ui = localInjector.getInstance(LimeWireSwingUI.class);
         ui.showTrayIcon();
         getMainFrame().setJMenuBar(ui.getMenuBar());
         
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
-        addExitListener(new ShutdownListener(getMainFrame(), localInjector.getInstance(Application.class)));        
+        addExitListener(new ShutdownListener(getMainFrame(), application));        
 
         show(ui);      
         restoreView();
@@ -102,15 +102,12 @@ public class AppFrame extends SingleFrameApplication {
         ui.goHome();
         ui.focusOnSearch();
 
-        // Keep this here while building UI - ensures we test
-        // with proper sizes.
-        getMainFrame().setSize(new Dimension(1024, 768));
-
         started = true;
-        
-        SetupWizard wizard = localInjector.getInstance(SetupWizard.class);
-
-        if (wizard.shouldShowWizard()) {
+    }
+    
+    @Override
+    protected void ready() {
+        if (setupWizard.shouldShowWizard()) {
             JXPanel glassPane = new JXPanel();
             glassPane.setOpaque(false);
             glassPane.setBackgroundPainter(new AbstractPainter<JComponent>() {
@@ -123,7 +120,7 @@ public class AppFrame extends SingleFrameApplication {
             getMainView().getFrame().setGlassPane(glassPane);
 
             glassPane.setVisible(true);
-            wizard.showDialogIfNeeded(getMainFrame());
+            setupWizard.showDialogIfNeeded(getMainFrame());
             glassPane.setVisible(false);
         }
         
@@ -150,7 +147,7 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().toFront();
     }
     
-    public Injector createInjector() {
+    public Injector createUiInjector() {
         Module thiz = new AbstractModule() {
             @Override
             protected void configure() {

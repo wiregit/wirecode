@@ -3,6 +3,9 @@ package org.limewire.ui.swing;
 import java.awt.IllegalComponentStateException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.service.ErrorService;
 
@@ -14,10 +17,26 @@ import org.limewire.service.ErrorService;
  * by ActionListeners in the AWT event dispatcher thread.
  */
 public class DefaultErrorCatcher {
+    
+    private static volatile boolean storeCaughtBugs = false;
+    private static final List<Throwable> storedBugs = new CopyOnWriteArrayList<Throwable>(); 
 
 	static void install() {
 	    System.setProperty("sun.awt.exception.handler",
 	                       DefaultErrorCatcher.class.getName());
+    }
+
+	/** Sets whether or not bugs are captured or reported to ErrorService. */
+    static void storeCaughtBugs() {
+        storeCaughtBugs = true;
+    }
+    
+    /** Gets all captured bugs & unsets storing. */
+    static List<Throwable> getAndResetStoredBugs() {
+        storeCaughtBugs = false;
+        List<Throwable> list = new ArrayList<Throwable>(storedBugs);
+        storedBugs.clear();
+        return list;
     }
 	
 	public void handle(Throwable ex) {
@@ -27,9 +46,13 @@ public class DefaultErrorCatcher {
 	    pw.flush();
 	    String bug = sw.toString();
 	    
-	    if(!isIgnorable(ex, bug))
-		    ErrorService.error(ex, "Uncaught event-thread error.");
-		else {
+	    if(!isIgnorable(ex, bug)) {
+	        if(storeCaughtBugs) {
+	            storedBugs.add(ex);
+	        } else {
+	            ErrorService.error(ex, "Uncaught event-thread error.");
+	        }
+	    } else {
 		    System.err.println("Ignoring error:");
 		    ex.printStackTrace();
         }
