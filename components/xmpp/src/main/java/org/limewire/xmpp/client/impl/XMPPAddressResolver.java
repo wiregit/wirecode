@@ -23,9 +23,9 @@ import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.net.address.AddressResolver;
 import org.limewire.net.address.FirewalledAddress;
 import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
-import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -68,9 +68,12 @@ public class XMPPAddressResolver implements AddressResolver {
             XMPPAddress friendIdAddress = (XMPPAddress)address;
             FriendPresence presence = getPresence(friendIdAddress);
             if (presence == null) {
+                LOG.debugf("no presence found for: {0}", friendIdAddress);
                 return false;
             }
-            return presence.hasFeatures(AddressFeature.ID);
+            boolean hasAddressFeature = presence.hasFeatures(AddressFeature.ID);
+            LOG.debugf("has addressfeature {0}", hasAddressFeature);
+            return hasAddressFeature;
         }
         return false;
     }
@@ -140,8 +143,9 @@ public class XMPPAddressResolver implements AddressResolver {
                 // if it's a firewalled address, see if sockets manager can resolve if further, i.e.
                 // if SameNATResolver can take care of it
                 if (socketsManager.canResolve(resolvedAddress)) {
+                    LOG.debugf("can be same nat resolved {0}", resolvedAddress);
                     socketsManager.resolve(resolvedAddress, observer);
-                } else if (resolvedPresence.getFeature(ConnectRequestFeature.ID) != null) {
+                } else if (resolvedPresence.hasFeatures(ConnectRequestFeature.ID)) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
                     resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
                     observer.resolved(resolvedAddress);
