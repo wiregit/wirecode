@@ -36,6 +36,7 @@ import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
+import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -194,6 +195,13 @@ public class AppFrame extends SingleFrameApplication {
         exit();
     }
     
+    @EventSubscriber
+    public void handleRestoreView(RestoreViewEvent event) {
+        getMainFrame().setVisible(true);
+        getMainFrame().setState(Frame.NORMAL);
+        getMainFrame().toFront();
+    }
+    
     @Action
     public void showAboutWindow() { // DO NOT CHANGE THIS METHOD NAME!  
         handleShowAboutWindow(null);
@@ -206,10 +214,8 @@ public class AppFrame extends SingleFrameApplication {
     }    
 
     @Action
-    public void restoreView() { // DO NOT CHANGE THIS METHOD NAME!  
-        getMainFrame().setVisible(true);
-        getMainFrame().setState(Frame.NORMAL);
-        getMainFrame().toFront();
+    public void restoreView() { // DO NOT CHANGE THIS METHOD NAME!
+        handleRestoreView(null);
     }
     
     public Injector createUiInjector() {

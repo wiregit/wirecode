@@ -12,6 +12,8 @@ import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
+import org.limewire.ui.swing.event.RestoreViewEvent;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.browser.ExternalControl;
@@ -120,15 +122,15 @@ public class MacEventHandler {
                 try {
                     downloadManager.downloadTorrent(file, false);
                 } catch (SaveLocationException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(e);
                 }
             }
         } else {
-//            PackagedMediaFileLauncher.launchFile(filename, false);
+            NativeLaunchUtils.launchFile(file);
         }
     }
     
     private void handleReopen() {
-//        GUIMediator.handleReopen();
+        new RestoreViewEvent().publish();
     }
 }
