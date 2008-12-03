@@ -57,14 +57,14 @@ public class ToolsMenu extends JMenu {
                 navItem.select();
             }
         });
-        addSeparator();
-        add(new AbstractAction(I18n.tr("Advanced Search")) {
-            // TODO wire in advanced search panel once it is written.
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("TODO implement me.");
-            }
-        });
+//        addSeparator();
+//        add(new AbstractAction(I18n.tr("Advanced Search")) {
+//            // TODO wire in advanced search panel once it is written.
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                throw new UnsupportedOperationException("TODO implement me.");
+//            }
+//        });
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
         add(new AbstractAction(I18n.tr("Advanced Tools")) {
