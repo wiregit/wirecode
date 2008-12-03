@@ -21,9 +21,9 @@ import org.jdesktop.swingx.painter.Painter;
  * responds to changes in its action's selected state to display a color
  * gradient.
  * 
- * <p><b>NOTE</b>: This is a version of FancyOptionTabButton that accepts a
- * plain Action, instead of TabAction.  TabButton could be moved into the 
- * ui.swing.components package</p>
+ * <p><b>NOTE</b>: This is an updated version of FancyOptionTabButton that 
+ * accepts a plain Action and provides a public setGradients() method.  
+ * TabButton could be moved into the ui.swing.components package.</p>
  */
 public class TabButton extends JXButton {
     
@@ -33,15 +33,14 @@ public class TabButton extends JXButton {
     public TabButton(Action action) {
         super(action);
         
-        setVerticalTextPosition(SwingConstants.CENTER);
-        setHorizontalTextPosition(SwingConstants.CENTER);
-        setPreferredSize(new Dimension(getPreferredSize().width, 50));
-        setGradients(Color.gray, Color.gray.brighter().brighter());
+        // Set button attributes.
         setBorderPainted(false);
-        setFocusPainted(false);
         setContentAreaFilled(false);
-        setBorder(null);
+        setFocusPainted(false);
         setOpaque(false);
+        setHorizontalTextPosition(SwingConstants.CENTER);
+        setVerticalTextPosition(SwingConstants.BOTTOM);
+        setPreferredSize(new Dimension(Math.max(getPreferredSize().width, 70), 50));
         
         // Add listener to repaint button when selected state changes.
         getAction().addPropertyChangeListener(new PropertyChangeListener() {
@@ -57,7 +56,7 @@ public class TabButton extends JXButton {
     /**
      * Sets the gradients used to paint the button. 
      */
-    private void setGradients(Color topGradient, Color bottomGradient) {
+    public void setGradients(Color topGradient, Color bottomGradient) {
         // Get current painter.
         final Painter<JXButton> oldPainter = getBackgroundPainter();
 
@@ -70,7 +69,7 @@ public class TabButton extends JXButton {
             @Override
             public void doPaint(Graphics2D g, JXButton component, int width,
                 int height) {
-                if(Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
+                if (Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
                     super.doPaint(g, component, width, height);
                 } else {
                     oldPainter.paint(g, component, width, height);
