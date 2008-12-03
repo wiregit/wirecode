@@ -325,7 +325,7 @@ class MyLibraryPanel extends LibraryPanel {
         }
         
         private void setLabelText(int numSharedCollections) {
-            collectionLabel.setText(I18n.tr("Collections shared: {0}", numSharedCollections));
+            collectionLabel.setText(I18n.tr("Sharing collection: {0}", numSharedCollections));
         }
         
         @Override

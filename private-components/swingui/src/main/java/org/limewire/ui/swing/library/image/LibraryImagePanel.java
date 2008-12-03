@@ -145,7 +145,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         
     private String getParent(LocalFileItem localFileItem){
         return localFileItem.isIncomplete() ? incomplete : 
-            ((localFileItem.getFile() == null) ? incomplete : localFileItem.getFile().getParent());
+            ((localFileItem.getFile() == null) ? incomplete : localFileItem.getFile().getParentFile().getName());
     }
     
     private class DirectoryMatcher implements Matcher<LocalFileItem>{
