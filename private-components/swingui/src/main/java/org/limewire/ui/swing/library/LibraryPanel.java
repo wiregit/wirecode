@@ -83,7 +83,7 @@ public class LibraryPanel extends JPanel implements Disposable {
         
 		String renderName = friend == null ? "Unknown" : friend.getRenderName();
         if(isLibraryPanel) {
-            headerPanel = headerBarFactory.createBasic(I18n.tr("{0}'s Library", renderName));
+            headerPanel = headerBarFactory.createBasic(I18n.tr("Download from {0}", renderName));
         } else {
             headerPanel = headerBarFactory.createSpecial(I18n.tr("Sharing with {0}", renderName));
         }

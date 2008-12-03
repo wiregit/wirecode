@@ -164,7 +164,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         }
         
         if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-            LockableUI blurUI = new LockedUI(category.name());
+            LockableUI blurUI = new LockedUI(category.toString());
             JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
             
             if(category == Category.AUDIO && this.friendFileList.isAddNewAudioAlways()) {
@@ -247,7 +247,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
     private class BackToLibraryAction extends AbstractAction {
 
         public BackToLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Back to Library"));
+            putValue(Action.NAME, I18n.tr("Back"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Returns to what's being shared with you."));
         }
         
