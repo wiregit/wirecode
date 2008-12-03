@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.io.Connectable;
@@ -23,7 +24,9 @@ import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
+import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.RosterEvent;
+import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -215,17 +218,26 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     } 
     
     @Override
-    public void send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
+    public boolean send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion) {
         LOG.debug("send connect request");
         XMPPConnectionImpl connection = getActiveConnection();
         if (connection == null) {
-            return;
+            return false;
+        }
+        User user = connection.getUser(StringUtils.parseBareAddress(userId));
+        if (user == null) {
+            return false;
+        }
+        Presence presence = user.getPresences().get(userId);
+        if (presence == null) {
+            return false;
         }
         ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
         connectRequest.setTo(userId);
         connectRequest.setFrom(connection.getLocalJid());
         LOG.debugf("sending request: {0}", connectRequest);
         connection.sendPacket(connectRequest);
+        return true;
     }
     
     private class ReconnectionManager implements EventListener<XMPPConnectionEvent> {

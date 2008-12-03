@@ -104,8 +104,14 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
         final PushedSocketConnectObserver pushedSocketObserver = new PushedSocketConnectObserver(firewalledAddress, observer);
         observers.add(pushedSocketObserver);
         boolean isFWT = !networkManager.acceptedIncomingConnection(); 
-        connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), publicAddress, clientGuid, 
-                 isFWT ? networkManager.supportsFWTVersion() : 0);
+        boolean canSend = connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), publicAddress, clientGuid, 
+                isFWT ? networkManager.supportsFWTVersion() : 0);
+        if (!canSend) {
+            // fall back on push download manager
+            observers.remove(pushedSocketObserver);
+            pushDownloadManager.connect(xmppFirewalledAddress.getFirewalledAddress(), observer);
+            return;
+        }
         if (isFWT) {
             LOG.debug("Starting fwt communication");
             AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();

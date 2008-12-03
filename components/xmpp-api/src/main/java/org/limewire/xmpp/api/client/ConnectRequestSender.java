@@ -19,7 +19,10 @@ public interface ConnectRequestSender {
      * @param clientGuid the client guid of the peer that is to connect to this peer
      * @param supportedFWTVersion the supported fwt version or 0 if a TCP connection
      * should be established
+     * 
+     * @return false if it could be determined immediately that the request will
+     * not be sent successfully
      */
-    public void send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion);
+    public boolean send(String userId, Connectable address, GUID clientGuid, int supportedFWTVersion);
     
 }
