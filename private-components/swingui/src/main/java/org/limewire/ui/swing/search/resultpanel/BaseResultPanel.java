@@ -49,11 +49,13 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
+import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -254,8 +256,12 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         PropertiesFactory<VisualSearchResult> properties) {
         resultsTable = new ConfigurableTable<VisualSearchResult>(true);
         
-        resultsTable.setEventList(eventList);
+        SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(eventList);
+        resultsTable.setEventList(sortedList);
         resultsTable.setTableFormat(tableFormat);
+        
+        //link the jxtable column headers to the sorted list
+        EventListJXTableSorting.install(resultsTable, sortedList);
         
         int columnCount = tableFormat.getColumnCount();
             

@@ -21,8 +21,8 @@ import org.limewire.util.FileUtils;
  */
 public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
 
-    IconManager iconManager;
-    JLabel label;
+    private final IconManager iconManager;
+    private final JLabel label;
     
     public IconLabelRenderer(IconManager iconManager) {
         super(new BorderLayout());
@@ -51,8 +51,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
             FileItem item = (FileItem) value;
 
             if (item instanceof RemoteFileItem) {
-                label.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(item
-                        .getFileName())));
+                label.setIcon(iconManager.getIconForExtension(FileUtils.getFileExtension(item.getFileName())));
             } else {
                 label.setIcon(iconManager.getIconForFile(((LocalFileItem) item).getFile()));
             }
@@ -64,12 +63,6 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
 
             label.setText(vsr.getHeading());
             label.setIcon(iconManager.getIconForExtension(vsr.getFileExtension()));
-//
-//            Font font = label.getFont().deriveFont(Font.PLAIN);
-//            label.setFont(font);
-//
-//            label.setOpaque(false);
-
 
             setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
         } else {

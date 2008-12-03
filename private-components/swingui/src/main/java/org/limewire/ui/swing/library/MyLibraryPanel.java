@@ -139,7 +139,7 @@ class MyLibraryPanel extends LibraryPanel {
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
-            LibraryTable table = tableFactory.createTable(category, filterList, null);
+            LibraryTable table = tableFactory.createMyTable(category, filterList);
             table.enableMyLibrarySharing(sharePanel);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             

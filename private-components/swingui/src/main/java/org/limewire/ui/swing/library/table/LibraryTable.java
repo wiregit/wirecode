@@ -16,6 +16,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.decorator.ColorHighlighter;
@@ -44,6 +46,10 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
+/**
+ * Creates a table that is used when displaying library information. This may
+ * be files in your own library or remote files in someone else's library. 
+ */
 public class LibraryTable<T extends FileItem> extends MouseableTable implements Sharable, Disposable, LibrarySelectable {
     
     private final LibraryTableFormat<T> format;
@@ -54,8 +60,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     private ShareTableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
-    private TableCellRenderer defaultRenderer;
-    
     protected final int rowHeight = 20;
     
     public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format, SaveLocationExceptionHandler saveLocationExceptionHandler) {
@@ -63,7 +67,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
 
         this.format = format;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        defaultRenderer = new DefaultLibraryRenderer();
         
         tableColors = new TableColors();
         setStripesPainted(true);
@@ -78,7 +81,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
        
         setFillsViewportHeight(true);
         setDragEnabled(true);
-        setDefaultRenderer(Object.class, defaultRenderer);
         setRowHeight(rowHeight);
         
         final JTableHeader header = getTableHeader();
@@ -90,7 +92,24 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
                 }
             }
         });       
-
+        
+        setupCellRenderers(format);
+    }
+    
+    protected void setupCellRenderers(LibraryTableFormat<T> format) {
+        TableCellRenderer defaultRenderer = new DefaultLibraryRenderer();
+        for (int i = 0; i < format.getColumnCount(); i++) {
+            Class clazz = format.getColumnClass(i);
+            if (clazz == String.class) {
+                setCellRenderer(i, defaultRenderer);
+            } 
+        }   
+    }
+    
+    protected void setCellRenderer(int column, TableCellRenderer cellRenderer) {
+        TableColumnModel tcm = this.getColumnModel();
+        TableColumn tc = tcm.getColumn(column);
+        tc.setCellRenderer(cellRenderer);
     }
     
     public void showHeaderPopupMenu(Point p) {
@@ -136,6 +155,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
         setRowHeight(rowHeight);
         hideColumns();        
+    }
+    
+    public void enableSharing() {
+        hideColumns();
     }
     
     public void dispose() {

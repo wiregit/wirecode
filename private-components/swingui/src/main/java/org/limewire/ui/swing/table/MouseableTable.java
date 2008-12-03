@@ -123,7 +123,6 @@ public class MouseableTable extends StripedJXTable {
 		
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
-		setSortable(false); // Breaks horribly with glazedlists unless it's explicitly set up.
 		
 		//HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
 		setHighlighters(colors.getEvenHighLighter(), 

@@ -7,15 +7,16 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Table format for the Program Table when it is in My Library
+ * Table format for Programs Table for LW buddies and Browse hosts
  */
-public class ProgramTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
+public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int SIZE_COL = NAME_COL + 1;
     public static final int PLATFORM_COL = SIZE_COL + 1;
     public static final int COMPANY_COL = PLATFORM_COL + 1;
     public static final int ACTION_COL = COMPANY_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
+
 
     @Override
     public int getColumnCount() {
@@ -24,16 +25,16 @@ public class ProgramTableFormat<T extends FileItem> extends AbstractMyLibraryFor
 
     public String getColumnName(int column) {
         switch (column) {
-        case NAME_COL:
-            return I18n.tr("Name");
-        case SIZE_COL:
-            return I18n.tr("Size");
-        case PLATFORM_COL:
-            return I18n.tr("Platform");
-        case COMPANY_COL:
-            return I18n.tr("Company");
-        case ACTION_COL:
-            return I18n.tr("Sharing");
+            case NAME_COL:
+                return I18n.tr("Name");
+            case SIZE_COL:
+                return I18n.tr("Size");
+            case PLATFORM_COL:
+                return I18n.tr("Platform");
+            case COMPANY_COL:
+                return I18n.tr("Company");
+            case ACTION_COL:
+                return I18n.tr("Download");
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -42,16 +43,16 @@ public class ProgramTableFormat<T extends FileItem> extends AbstractMyLibraryFor
     @Override
     public Object getColumnValue(FileItem baseObject, int column) {
         switch (column) {
-        case NAME_COL:
-            return baseObject;
-        case PLATFORM_COL:
-            return baseObject.getProperty(FilePropertyKey.PLATFORM);
-        case COMPANY_COL:
-        	return baseObject.getProperty(FilePropertyKey.COMPANY);
-        case SIZE_COL:
-            return baseObject.getSize();
-        case ACTION_COL:
-            return baseObject;
+            case NAME_COL:
+                return baseObject;
+            case PLATFORM_COL:
+                return baseObject.getProperty(FilePropertyKey.PLATFORM);
+            case COMPANY_COL:
+                return baseObject.getProperty(FilePropertyKey.COMPANY);
+            case SIZE_COL:
+                return baseObject.getSize();
+            case ACTION_COL:
+                return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

@@ -84,7 +84,7 @@ public class FriendLibraryPanel extends LibraryPanel {
         EventList<RemoteFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
 
-        LibraryTable table = tableFactory.createTable(category, filterList, friend);
+        LibraryTable table = tableFactory.createFriendTable(category, filterList, friend);
         table.enableDownloading(downloadListManager, libraryManager.getLibraryManagedList());
         addDisposable(table);
         

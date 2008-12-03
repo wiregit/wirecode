@@ -1,13 +1,16 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Comparator;
 import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
-
-public class DocumentTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
+/**
+ * Table format for the Document Table when it is in My Library
+ */
+public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
 	public static final int CREATED_COL = TYPE_COL + 1;
@@ -61,7 +64,6 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
          case TYPE_COL:
              return "description goes here";     
          }
-
          throw new IllegalArgumentException("Unknown column:" + column);
     }
 
@@ -84,5 +86,22 @@ public class DocumentTableFormat<T extends FileItem> implements LibraryTableForm
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
+    
+    @Override
+    public Class getColumnClass(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return FileItem.class;
+        }
+        return super.getColumnClass(column);
+    }
 
+    @Override
+    public Comparator getColumnComparator(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return new ActionComparator();
+        }
+        return super.getColumnComparator(column);
+    }
 }

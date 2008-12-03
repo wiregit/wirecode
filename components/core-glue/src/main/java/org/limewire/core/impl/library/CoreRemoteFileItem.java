@@ -10,7 +10,7 @@ import org.limewire.util.StringUtils;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 
-public class CoreRemoteFileItem implements RemoteFileItem {
+public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
     private final RemoteFileDescAdapter searchResult;
 
     public CoreRemoteFileItem(RemoteFileDescAdapter rfd) {
@@ -85,4 +85,13 @@ public class CoreRemoteFileItem implements RemoteFileItem {
     public URN getUrn() {
         return searchResult.getUrn();
     }
+
+    @Override
+    public int compareTo(Object obj) {
+        if (getClass() != obj.getClass()) {
+            return -1;
+        }
+        return getFileName().toLowerCase().compareTo(((CoreRemoteFileItem) obj).getFileName().toLowerCase());
+    }
+
 }

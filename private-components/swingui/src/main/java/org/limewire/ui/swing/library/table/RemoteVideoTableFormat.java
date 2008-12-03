@@ -8,9 +8,9 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Table format for the Video Table when it is in My Library
+ * Table format for the Video Table for LW buddies and Browse hosts
  */
-public class VideoTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
+public class RemoteVideoTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int LENGTH_COL = NAME_COL + 1;
     public static final int MISC_COL = LENGTH_COL + 1;
@@ -24,6 +24,7 @@ public class VideoTableFormat<T extends FileItem> extends AbstractMyLibraryForma
     public static final int ACTION_COL = WIDTH_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
+
     @Override
     public int getColumnCount() {
         return COLUMN_COUNT;
@@ -31,28 +32,28 @@ public class VideoTableFormat<T extends FileItem> extends AbstractMyLibraryForma
 
     public String getColumnName(int column) {
         switch (column) {
-        case NAME_COL:
-            return I18n.tr("Name");
-        case LENGTH_COL:
-            return I18n.tr("Length");
-        case MISC_COL:
-            return I18n.tr("Miscellaneous");
-        case YEAR_COL:
-            return I18n.tr("Year");
-        case RATING_COL:
-            return I18n.tr("Rating");
-        case SIZE_COL:
-            return I18n.tr("Size");
-        case COMMENTS_COL:
-            return I18n.tr("Comments");
-        case HEIGHT_COL:
-            return I18n.tr("Height");
-        case MODIFIED_COL:
-            return I18n.tr("Modified");
-        case ACTION_COL:
-            return I18n.tr("Sharing");    
-        case WIDTH_COL:
-            return I18n.tr("Width");  
+            case NAME_COL:
+                return I18n.tr("Name");
+            case LENGTH_COL:
+                return I18n.tr("Length");
+            case MISC_COL:
+                return I18n.tr("Miscellaneous");
+            case YEAR_COL:
+                return I18n.tr("Year");
+            case RATING_COL:
+                return I18n.tr("Rating");
+            case SIZE_COL:
+                return I18n.tr("Size");
+            case COMMENTS_COL:
+                return I18n.tr("Comments");
+            case HEIGHT_COL:
+                return I18n.tr("Height");
+            case MODIFIED_COL:
+                return I18n.tr("Modified");
+            case ACTION_COL:
+                return I18n.tr("Download");    
+            case WIDTH_COL:
+                return I18n.tr("Width");  
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -61,28 +62,28 @@ public class VideoTableFormat<T extends FileItem> extends AbstractMyLibraryForma
     @Override
     public Object getColumnValue(FileItem baseObject, int column) {
         switch (column) {
-        case NAME_COL:
-            return baseObject.getName();
-        case LENGTH_COL:
-            return baseObject.getProperty(FilePropertyKey.LENGTH);
-        case MISC_COL:
-            return baseObject.getProperty(FilePropertyKey.COMMENTS);
-        case YEAR_COL:
-            return baseObject.getProperty(FilePropertyKey.YEAR);
-        case RATING_COL:
-            return baseObject.getProperty(FilePropertyKey.RATING);
-        case SIZE_COL:
-            return baseObject.getSize();
-        case COMMENTS_COL:
-            return baseObject.getProperty(FilePropertyKey.COMMENTS);
-        case HEIGHT_COL:
-            return baseObject.getProperty(FilePropertyKey.HEIGHT); 
-        case WIDTH_COL:
-            return baseObject.getProperty(FilePropertyKey.WIDTH); 
-        case MODIFIED_COL:
-            return new Date(baseObject.getLastModifiedTime());
-        case ACTION_COL:
-            return baseObject;
+            case NAME_COL:
+                return baseObject.getName();
+            case LENGTH_COL:
+                return baseObject.getProperty(FilePropertyKey.LENGTH);
+            case MISC_COL:
+                return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case YEAR_COL:
+                return baseObject.getProperty(FilePropertyKey.YEAR);
+            case RATING_COL:
+                return baseObject.getProperty(FilePropertyKey.RATING);
+            case SIZE_COL:
+                return baseObject.getSize();
+            case COMMENTS_COL:
+                return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case HEIGHT_COL:
+                return baseObject.getProperty(FilePropertyKey.HEIGHT); 
+            case WIDTH_COL:
+                return baseObject.getProperty(FilePropertyKey.WIDTH); 
+            case MODIFIED_COL:
+                return new Date(baseObject.getLastModifiedTime());
+            case ACTION_COL:
+                return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

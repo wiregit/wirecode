@@ -140,6 +140,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         if (category != Category.IMAGE) {
             LibraryTable table = tableFactory.createSharingTable(category, sortedList, friendFileList);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
+            table.enableSharing();
             addDisposable(table);
             
             scrollPane = new JScrollPane(table);

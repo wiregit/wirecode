@@ -6,6 +6,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
 
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 
@@ -29,7 +30,7 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
     }
 
     public Comparator getColumnComparator(int index) {
-        return null;
+        return GlazedLists.comparableComparator();
     }
 
 
@@ -81,6 +82,28 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
         VisualSearchResult vsr, Object value, int index) {
         // do nothing with the new value
         return vsr;
+    }
+    
+    public FromComparator getFromComparator() {
+        return new FromComparator();
+    }
+    
+    /**
+     * Compares the number of files being shared. 
+     */
+    public static class FromComparator implements Comparator<VisualSearchResult> {
+        @Override
+        public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+            int size1 = o1.getSources().size();
+            int size2 = o2.getSources().size();
+            
+            if(size1 == size2)
+                return 0;
+            else if(size1 > size2)
+                return 1;
+            else 
+                return -1;
+        }
     }
 
 }

@@ -26,7 +26,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
-class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
+class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Comparable {
     private static final Pattern FIND_HTML_MARKUP = Pattern.compile("[<][/]?[\\w =\"\\./:#\\-\\!\\&\\?]*[>]");
 
     private final Log LOG = LogFactory.getLog(getClass());
@@ -330,5 +330,14 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult {
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
         this.preExistingDownload = preExistingDownload;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        if(!(o instanceof SearchResultAdapter)) 
+            return -1;
+        
+        SearchResultAdapter sra = (SearchResultAdapter) o;
+        return getHeading().compareTo(sra.getHeading());
     }
 }

@@ -2,9 +2,10 @@ package org.limewire.ui.swing.library.table;
 
 import org.limewire.core.api.library.FileItem;
 
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
-public interface LibraryTableFormat<T extends FileItem> extends WritableTableFormat<T>{
+public interface LibraryTableFormat<T extends FileItem> extends WritableTableFormat<T>, AdvancedTableFormat<T> {
     
     int getActionColumn();
     /**

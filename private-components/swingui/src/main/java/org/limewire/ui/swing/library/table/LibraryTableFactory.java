@@ -15,9 +15,14 @@ import ca.odell.glazedlists.EventList;
 public interface LibraryTableFactory {
     
     /**
-     * Creates a table for MyLibrary/Friends
+     * Creates a table for MyLibrary
      */
-    <T extends FileItem>LibraryTable<T> createTable(Category category, EventList<T> eventList, Friend friend);
+    <T extends FileItem>LibraryTable<T> createMyTable(Category category, EventList<T> eventList);
+    
+    /**
+     * Creates a table for Friends
+     */
+    <T extends FileItem>LibraryTable<T> createFriendTable(Category category, EventList<T> eventList, Friend friend);
     
     /**
      * Creates an image list for MyLibrary/Friends

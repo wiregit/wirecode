@@ -1,13 +1,16 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Comparator;
 import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
-public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
-
+/**
+ * Table format for the Audio Table for LW buddies and Browse hosts
+ */
+public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL =0;
     public static final int ARTIST_COL = NAME_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
@@ -16,7 +19,8 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
     public static final int BITRATE_COL = GENRE_COL + 1;
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int TRACK_COL = SIZE_COL + 1;
-    public static final int MODIFIED_COL = TRACK_COL + 1;
+    public static final int YEAR_COL = TRACK_COL + 1;
+    public static final int MODIFIED_COL = YEAR_COL + 1;
     public static final int ACTION_COL = MODIFIED_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
@@ -27,59 +31,59 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
     }
 
     public String getColumnName(int column) {
-
         switch (column) {
-        case NAME_COL:
-            return I18n.tr("Name");
-        case ARTIST_COL:
-            return I18n.tr("Artist");
-        case ALBUM_COL:
-            return I18n.tr("Album");
-        case LENGTH_COL:
-            return I18n.tr("Length");
-        case GENRE_COL:
-            return I18n.tr("Genre");
-        case BITRATE_COL:
-            return I18n.tr("Bitrate");
-        case SIZE_COL:
-            return I18n.tr("Size");
-        case TRACK_COL:
-            return I18n.tr("Track");
-        case MODIFIED_COL:
-            return I18n.tr("Modified");
-        case ACTION_COL:
-            return I18n.tr("Share");
+            case NAME_COL:
+                return I18n.tr("Name");
+            case ARTIST_COL:
+                return I18n.tr("Artist");
+            case ALBUM_COL:
+                return I18n.tr("Album");
+            case LENGTH_COL:
+                return I18n.tr("Length");
+            case GENRE_COL:
+                return I18n.tr("Genre");
+            case BITRATE_COL:
+                return I18n.tr("Bitrate");
+            case SIZE_COL:
+                return I18n.tr("Size");
+            case TRACK_COL:
+                return I18n.tr("Track");
+            case YEAR_COL:
+                return I18n.tr("Year");
+            case MODIFIED_COL:
+                return I18n.tr("Modified");
+            case ACTION_COL:
+                return I18n.tr("Download");
         }
-
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
-
+    public Object getColumnValue(T baseObject, int column) {
         switch (column) {
-        case NAME_COL:
-            return (baseObject.getProperty(FilePropertyKey.NAME) == null) ? baseObject.getName() : baseObject.getProperty(FilePropertyKey.NAME);
-        case ARTIST_COL:
-            return baseObject.getProperty(FilePropertyKey.AUTHOR);
-        case ALBUM_COL:
-            return baseObject.getProperty(FilePropertyKey.ALBUM);
-        case LENGTH_COL:
-            return baseObject.getProperty(FilePropertyKey.LENGTH);
-        case GENRE_COL:
-            return baseObject.getProperty(FilePropertyKey.GENRE);
-        case BITRATE_COL:
-            return baseObject.getProperty(FilePropertyKey.BITRATE);
-        case SIZE_COL:
-            return baseObject.getSize();
-        case TRACK_COL:
-            return baseObject.getProperty(FilePropertyKey.TITLE);
-        case MODIFIED_COL:
-            return new Date(baseObject.getLastModifiedTime());
-        case ACTION_COL:
-            return baseObject;
+            case NAME_COL:
+                return (baseObject.getProperty(FilePropertyKey.TITLE) == null) ? baseObject.getProperty(FilePropertyKey.NAME) : baseObject.getProperty(FilePropertyKey.TITLE);
+            case ARTIST_COL:
+                return baseObject.getProperty(FilePropertyKey.AUTHOR);
+            case ALBUM_COL:
+                return baseObject.getProperty(FilePropertyKey.ALBUM);
+            case LENGTH_COL:
+                return baseObject.getProperty(FilePropertyKey.LENGTH);
+            case GENRE_COL:
+                return baseObject.getProperty(FilePropertyKey.GENRE);
+            case BITRATE_COL:
+                return baseObject.getProperty(FilePropertyKey.BITRATE);
+            case SIZE_COL:
+                return baseObject.getSize();
+            case TRACK_COL:
+                return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
+            case YEAR_COL:
+                return baseObject.getProperty(FilePropertyKey.YEAR);
+            case MODIFIED_COL:
+                return new Date(baseObject.getLastModifiedTime());
+            case ACTION_COL:
+                return baseObject;
         }
-
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
@@ -90,7 +94,7 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { MODIFIED_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
+        return new int[] { MODIFIED_COL, YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
     }
 
     @Override
@@ -102,6 +106,22 @@ public class RemoteAudioTableFormat<T extends FileItem> implements LibraryTableF
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
+    
+    @Override
+    public Class getColumnClass(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return FileItem.class;
+        }
+        return super.getColumnClass(column);
+    }
 
- 
+    @Override
+    public Comparator getColumnComparator(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return new ActionComparator();
+        }
+        return super.getColumnComparator(column);
+    }
 }

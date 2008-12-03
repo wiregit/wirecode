@@ -27,7 +27,7 @@ import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LocalFileDetailsFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-class CoreLocalFileItem implements LocalFileItem {
+class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     private final Category category;
 
@@ -316,5 +316,13 @@ class CoreLocalFileItem implements LocalFileItem {
                     .lastModified(), fileDesc.getFileSize(), reloadedMap, doc);
             propertiesMap = reloadedMap;
         }
+    }
+
+    @Override
+    public int compareTo(Object obj) {
+        if (getClass() != obj.getClass()) {
+            return -1;
+        }
+        return getFileName().toLowerCase().compareTo(((CoreLocalFileItem) obj).getFileName().toLowerCase());
     }
 }

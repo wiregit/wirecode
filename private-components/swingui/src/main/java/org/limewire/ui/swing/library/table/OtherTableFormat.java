@@ -1,12 +1,15 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Comparator;
 import java.util.Date;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
 
-public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<T> {
-
+/**
+ * Table format for the Other Table when it is in My Library
+ */
+public class OtherTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
     public static final int SIZE_COL = TYPE_COL + 1;
@@ -15,14 +18,12 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
     public static final int ACTION_COL = MODIFIED_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
-
     @Override
     public int getColumnCount() {
         return COLUMN_COUNT;
     }
 
     public String getColumnName(int column) {
-
         switch (column) {
         case NAME_COL:
             return I18n.tr("Name");        
@@ -37,14 +38,11 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
         case ACTION_COL:
             return I18n.tr("Sharing");
         }
-
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
-
     @Override
     public Object getColumnValue(FileItem baseObject, int column) {
-
         switch (column) {
         case NAME_COL:
             return baseObject;  
@@ -59,7 +57,6 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
         case ACTION_COL:
             return baseObject;
         }
-
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
@@ -82,5 +79,22 @@ public class OtherTableFormat<T extends FileItem> implements LibraryTableFormat<
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
+    
+    @Override
+    public Class getColumnClass(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return FileItem.class;
+        }
+        return super.getColumnClass(column);
+    }
 
+    @Override
+    public Comparator getColumnComparator(int column) {
+        switch (column) {
+            case ACTION_COL:
+                return new ActionComparator();
+        }
+        return super.getColumnComparator(column);
+    }
 }

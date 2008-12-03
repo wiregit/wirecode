@@ -4,6 +4,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Component;
 import java.util.Calendar;
+import java.util.Comparator;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -82,5 +83,19 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     @Override
     public int getNameColumn() {
         return NAME_INDEX;
+    }
+    
+    /**
+     * If the FromColumn is sorted, use a custom column sorter
+     * otherwise it is assumed the column returns a value that 
+     * implements the Comparable interface
+     */
+    @Override
+    public Comparator getColumnComparator(int index) {
+        switch (index) {
+            case FROM_INDEX:
+                return getFromComparator();
+        }
+        return super.getColumnComparator(index);
     }
 }
