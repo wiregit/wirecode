@@ -74,7 +74,7 @@ public class XMPPAddress implements PermanentAddress {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof XMPPAddress) {
+        if(!(obj instanceof XMPPAddress)) {
             return false;
         }
         XMPPAddress other = (XMPPAddress)obj;
