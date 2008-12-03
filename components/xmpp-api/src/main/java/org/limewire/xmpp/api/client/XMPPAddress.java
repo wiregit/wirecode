@@ -66,4 +66,18 @@ public class XMPPAddress implements PermanentAddress {
             return XMPPAddress.substring(0, slashIndex);
         }
     }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof XMPPAddress) {
+            return false;
+        }
+        XMPPAddress other = (XMPPAddress)obj;
+        return id.equals(other.id);
+    }
 }
