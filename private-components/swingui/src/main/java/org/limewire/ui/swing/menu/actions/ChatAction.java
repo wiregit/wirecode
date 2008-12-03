@@ -51,18 +51,24 @@ public class ChatAction extends AbstractAction {
     void register(Navigator navigator, final LibraryNavigator libraryNavigator) {
         // listen for changes in the selected friend
         navigator.addNavigationListener(new NavigationListener() {
-
             @Override
             public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
+                handleFriendNav(libraryNavigator, category);
             }
 
             @Override
             public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
+                handleFriendNav(libraryNavigator, category);
             }
 
             @Override
             public void itemSelected(NavCategory category, NavItem navItem,
                     NavSelectable selectable, JComponent panel) {
+                handleFriendNav(libraryNavigator, category);
+            }
+
+            private void handleFriendNav(final LibraryNavigator libraryNavigator,
+                    NavCategory category) {
                 if (category == NavCategory.LIBRARY) {
                     setFriend(libraryNavigator.getSelectedFriend());
                 }
