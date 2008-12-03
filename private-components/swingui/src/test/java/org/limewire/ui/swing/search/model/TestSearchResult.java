@@ -133,6 +133,9 @@ public class TestSearchResult implements SearchResult {
         return 0;
     }
 
+    public boolean isLicensed() {
+        return false;
+    }
 
 
     private class TestURN implements URN {

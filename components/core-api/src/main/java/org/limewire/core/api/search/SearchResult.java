@@ -38,4 +38,9 @@ public interface SearchResult {
     String getMagnetURL();
 
     public int getRelevance();
+
+    /**
+     * @return true if the underlying associated file contains a license
+     */
+    boolean isLicensed();
 }

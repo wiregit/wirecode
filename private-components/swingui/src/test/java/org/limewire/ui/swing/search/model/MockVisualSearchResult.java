@@ -218,4 +218,8 @@ public class MockVisualSearchResult implements VisualSearchResult {
     public void setPreExistingDownload(boolean preExistingDownload) {
         
     }
+
+    public boolean isLicensed() {
+        return false;
+    }
 }

@@ -96,6 +96,12 @@ public class RemoteFileDescAdapter implements SearchResult {
     public String getFileExtension() {
         return extension;
     }
+
+    @Override
+    public boolean isLicensed() {
+        LimeXMLDocument doc = rfd.getXMLDocument();
+        return (doc != null) && (doc.getLicenseString() != null);
+    }
     
     
 

@@ -322,6 +322,22 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
         return relevance;
     }
 
+
+    /**
+     * If any of the search results' lime xml docs contains a license string
+     * the entire VisualSearchResult is considered "licensed".
+     *
+     */
+    @Override
+    public boolean isLicensed() {
+        for (SearchResult searchResult : coreResults) {
+             if (searchResult.isLicensed()) {
+                return true;
+             }
+        }
+        return false;
+    }
+
     @Override
     public boolean isPreExistingDownload() {
         return preExistingDownload;

@@ -5,12 +5,17 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
+import net.miginfocom.swing.MigLayout;
+import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.I18n;
-
-import net.miginfocom.swing.MigLayout;
+import org.limewire.util.Constants;
 
 public class WarningMessagesOptionPanel extends OptionPanel {
+
+    // backwards compatibility
+    private static final int SKIP_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SKIP_WARNING_VALUE;
+    private static final int SHOW_WARNING_VALUE = Constants.DOWNLOAD_WITHOUT_LICENSE_SHOW_WARNING_VALUE;
 
     private JCheckBox licensedMaterialCheckBox;
     private JButton okButton;
@@ -20,7 +25,9 @@ public class WarningMessagesOptionPanel extends OptionPanel {
         setLayout(new MigLayout("gapy 10"));
         
         cancelAction.setOptionPanel(this);
-        licensedMaterialCheckBox = new JCheckBox(I18n.tr("Warn me when downloading a file without a license"));
+        boolean warnWhenDownloadingWithNoLicense = QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.getValue() != SKIP_WARNING_VALUE;
+        licensedMaterialCheckBox = new JCheckBox(I18n.tr("Warn me when downloading a file without a license"),
+                warnWhenDownloadingWithNoLicense);
         licensedMaterialCheckBox.setContentAreaFilled(false);
         
         okButton = new JButton(okAction);
@@ -36,14 +43,18 @@ public class WarningMessagesOptionPanel extends OptionPanel {
     
     @Override
     void applyOptions() {
-        // TODO Auto-generated method stub
-        
+        int skipWarningSettingValue = getLicenseSettingValueFromCheckboxValue(licensedMaterialCheckBox.isSelected());
+        QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.setValue(skipWarningSettingValue);
     }
 
     @Override
     boolean hasChanged() {
-        // TODO Auto-generated method stub
-        return false;
+        return QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.getValue() ==
+                getLicenseSettingValueFromCheckboxValue(licensedMaterialCheckBox.isSelected());
+    }
+
+    private int getLicenseSettingValueFromCheckboxValue(boolean isSelected) {
+        return isSelected ? SHOW_WARNING_VALUE : SKIP_WARNING_VALUE;
     }
 
     @Override

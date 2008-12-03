@@ -188,4 +188,8 @@ public class MockSearchResult implements Cloneable, SearchResult {
     public int getRelevance() {
         return 0;
     }
+
+    public boolean isLicensed() {
+        return false;
+    }
 }

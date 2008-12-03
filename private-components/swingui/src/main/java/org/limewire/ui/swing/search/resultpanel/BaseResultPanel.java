@@ -6,11 +6,11 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
@@ -20,6 +20,12 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.RangeList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.EventTableModel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
@@ -43,22 +49,15 @@ import org.limewire.ui.swing.search.resultpanel.classic.OpaqueCalendarRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.OpaqueStringRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
-import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.RangeList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.EventTableModel;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
@@ -85,7 +84,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final SearchResultFromWidgetFactory factory;
     private final RemoteHostActions remoteHostActions;
     private IconManager iconManager;
-    
+    private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
+
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
             ResultsTableFormat<VisualSearchResult> tableFormat,
@@ -106,6 +106,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.remoteHostActions = remoteHostActions;
         this.factory = fromWidgetFactory;
         this.iconManager = iconManager;
+        this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         
         setLayout(layout);
                 
@@ -325,6 +326,17 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             // TODO: Need to go through some of the rigor that
             // com.limegroup.gnutella.gui.download.DownloaderUtils.createDownloader
             // went through.. checking for conflicts, etc.
+            // perhaps using a DownloadPreprocessor
+
+            // execute the download preprocessors
+            for (DownloadPreprocessor preprocessor : downloadPreprocessors) {
+                boolean shouldDownload = preprocessor.execute(vsr);
+                if (!shouldDownload) {
+                    // do not download!
+                    return;
+                }
+            }
+            
             DownloadItem di = downloadListManager.addDownload(
                 search, vsr.getCoreSearchResults());
             di.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));

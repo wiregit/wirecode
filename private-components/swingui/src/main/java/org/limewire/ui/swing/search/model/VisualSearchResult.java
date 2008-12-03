@@ -66,4 +66,9 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile {
     boolean isPreExistingDownload();
     void setPreExistingDownload(boolean preExistingDownload);
 
+    /**
+     * @return true if the associated file contains a license
+     */
+    boolean isLicensed();
+
 }
