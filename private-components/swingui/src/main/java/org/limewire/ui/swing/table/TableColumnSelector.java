@@ -52,6 +52,10 @@ public class TableColumnSelector {
         public void actionPerformed(ActionEvent e) {
             String columnName = e.getActionCommand();
             TableColumnExt column = table.getColumnExt(columnName);
+            if(column.isVisible() && table.getColumnCount(false) == 1) { 
+                //TODO: show error message? 
+                return;
+            }
             column.setVisible(!column.isVisible());
         }
     }
