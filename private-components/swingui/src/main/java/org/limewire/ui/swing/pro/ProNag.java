@@ -48,7 +48,7 @@ public class ProNag extends JXPanel implements Resizable {
                     if(a instanceof AttributeSet) {
                         href = ((AttributeSet)a).getAttribute(HTML.Attribute.HREF);
                     }
-                    if(href.equals("_hide_nag_")) {
+                    if(href != null && href.equals("_hide_nag_")) {
                         ProNag.this.setVisible(false);
                     } else if(e.getURL() != null) {
                         NativeLaunchUtils.openURL(e.getURL().toExternalForm());
