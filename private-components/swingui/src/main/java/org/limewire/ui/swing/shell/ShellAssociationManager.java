@@ -21,6 +21,7 @@ public class ShellAssociationManager {
      * be, it checks the users warning settings. If the user has been selected
      * to be notified the user will be prompted if they want their associations
      * to be fixed.
+     * 
      * @param frame frame for dialog to be relative to
      */
     public void validateFileAssociations(final JFrame frame) {
@@ -36,20 +37,22 @@ public class ShellAssociationManager {
                 ApplicationSettings.HANDLE_TORRENTS);
         boolean magnetsStolen = isSettingStolen(magnetAssociationOption,
                 ApplicationSettings.HANDLE_MAGNETS);
-if(true) {
-        //if (ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue()
-        //        && (torrentsStolen || magnetsStolen)) {
+
+        if (ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue()
+                && (torrentsStolen || magnetsStolen)) {
 
             String message = getMessage(torrentsStolen, magnetsStolen);
 
             final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message, I18n
-                    .tr("Warn me when other programs take LimeWire associations"), ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
+                    .tr("Warn me when other programs take LimeWire associations"),
+                    ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
             yesNoCheckBoxDialog.setLocationRelativeTo(frame);
             yesNoCheckBoxDialog.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    
-                    ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.setValue(yesNoCheckBoxDialog.isCheckBoxSelected());
+
+                    ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.setValue(yesNoCheckBoxDialog
+                            .isCheckBoxSelected());
                     boolean shouldReAssociate = YesNoCheckBoxDialog.YES_COMMAND.equals(e
                             .getActionCommand());
                     if (shouldReAssociate) {
