@@ -71,9 +71,7 @@ public class XMPPAddressResolver implements AddressResolver {
                 LOG.debugf("no presence found for: {0}", friendIdAddress);
                 return false;
             }
-            boolean hasAddressFeature = presence.hasFeatures(AddressFeature.ID);
-            LOG.debugf("has addressfeature {0}", hasAddressFeature);
-            return hasAddressFeature;
+            return true;
         }
         return false;
     }
@@ -107,7 +105,7 @@ public class XMPPAddressResolver implements AddressResolver {
      * id matches the one in <code>address</code> and the address is available in
      * the presence.
      * 
-     * Also ensures that auth-token and presence address are set.
+     * Also ensures that auth-token and address feature are set.
      */
     private FriendPresence getMatchingPresence(XMPPAddress xmppAddress, String resourceId, FriendPresence presence) {
         String originalId = xmppAddress.getFullId();
