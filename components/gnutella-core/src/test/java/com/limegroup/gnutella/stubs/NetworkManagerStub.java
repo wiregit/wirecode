@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
