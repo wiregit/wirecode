@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXLabel;
 import org.limewire.ui.swing.util.I18n;
 
 public class YesNoCheckBoxDialog extends LimeJDialog {
@@ -24,7 +25,8 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
-        JLabel messageLabel = new JLabel(message);
+        MultiLineLabel messageLabel = new MultiLineLabel(message, 300);
+        
 
         checkBox = new JCheckBox(checkBoxMessage);
         checkBox.setSelected(checked);
@@ -48,8 +50,8 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         panel.setLayout(new MigLayout("", "", ""));
         panel.add(messageLabel, "wrap");
         panel.add(checkBox, "wrap");
-        panel.add(yesButton, "");
-        panel.add(noButton, "wrap");
+        panel.add(yesButton, "alignx right");
+        panel.add(noButton, "alignx right, wrap");
 
         setContentPane(panel);
         pack();
