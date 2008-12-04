@@ -286,7 +286,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         
         if (value == null) {
             editorComponent.removeAll();
-            editorComponent.add(emptyPanel, "height 100%");
+            editorComponent.add(emptyPanel, BorderLayout.CENTER);
             return editorComponent;
         }
         
