@@ -413,5 +413,9 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
     public boolean hasBufferedOutput() {
         return getNumberOfPendingChunks() > 0;
     }
-    
+
+    @Override
+    public String toString() {
+        return getRemoteSocketAddress().toString();
+    }
 }
