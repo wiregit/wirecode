@@ -34,6 +34,7 @@ import org.limewire.util.BaseTestCase;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
+import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -58,15 +59,13 @@ public class XMPPServiceTest extends BaseTestCase {
 
     private static final int SLEEP = 5000; // Milliseconds
 
-    private Injector injector;
     private ServiceRegistry registry;
     private XMPPServiceImpl service;
-    private XMPPConnectionConfiguration alice;
-    private XMPPConnectionConfiguration bob;
     private RosterListenerMock aliceRosterListener;
     private RosterListenerMock bobRosterListener;
     private AddressEventTestBroadcaster addressEventBroadcaster;
     private FileOfferHandlerMock fileOfferHandler;
+    private XMPPAddressRegistry addressRegistry;
 
     public XMPPServiceTest(String name) {
         super(name);
@@ -74,7 +73,8 @@ public class XMPPServiceTest extends BaseTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        injector = createInjector(getModules());
+        Injector injector = createInjector(getModules());
+        addressRegistry = injector.getInstance(XMPPAddressRegistry.class);
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();
         registry.start();
@@ -82,9 +82,9 @@ public class XMPPServiceTest extends BaseTestCase {
         service.setMultipleConnectionsAllowed(true);
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
-        alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
+        XMPPConnectionConfiguration alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
                 HOST, PORT, SERVICE, aliceRosterListener);
-        bob = new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
+        XMPPConnectionConfiguration bob = new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
                 HOST, PORT, SERVICE, bobRosterListener);
         service.login(alice);
         service.login(bob);
@@ -155,7 +155,7 @@ public class XMPPServiceTest extends BaseTestCase {
      * Tests that friends logged in through LimeWire can detect each other
      * and exchange addresses 
      */
-    public void testDetectLimePresences() throws InterruptedException, UnknownHostException {
+    public void testAddresses() throws InterruptedException, UnknownHostException {
         assertEquals(1, aliceRosterListener.roster.size());
         assertEquals(USERNAME_2, aliceRosterListener.roster.keySet().iterator().next());
         assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
@@ -177,7 +177,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Mode.available, buddy2.getMode());
         AddressFeature addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        Connectable address = (Connectable)addressFeature.getFeature();
+        XMPPAddress xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy2.getJID(), xmppAddress.getFullId());
+        Connectable address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -192,7 +194,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Mode.available, buddy2.getMode());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        address = (Connectable)addressFeature.getFeature();
+        xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy1.getJID(), xmppAddress.getFullId());
+        address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -223,11 +227,6 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(USERNAME_1, bobRosterListener.roster.keySet().iterator().next());
         assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
 
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
-
-        Thread.sleep(SLEEP); 
-
         Presence buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
@@ -249,11 +248,6 @@ public class XMPPServiceTest extends BaseTestCase {
      * Tests that friends receive one another's chat messages
      */
     public void testChat() throws InterruptedException, XMPPException, IOException {
-        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
-                Address.EventType.ADDRESS_CHANGED));
-
-        Thread.sleep(SLEEP);
-
         MessageReaderMock reader = new MessageReaderMock();
         Presence automatedtestfriend2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
         MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
@@ -331,7 +325,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Type.available, buddy2.getType());
         AddressFeature addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        Connectable address = (Connectable)addressFeature.getFeature();
+        XMPPAddress xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy2.getJID(), xmppAddress.getFullId());
+        Connectable address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -343,7 +339,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Type.available, buddy1.getType());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        address = (Connectable)addressFeature.getFeature();
+        xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy1.getJID(), xmppAddress.getFullId());
+        address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("199.199.199.199", address.getAddress());
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
@@ -360,7 +358,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Type.available, buddy2.getType());
         addressFeature = (AddressFeature)buddy2.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        address = (Connectable)addressFeature.getFeature();
+        xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy2.getJID(), xmppAddress.getFullId());
+        address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
@@ -372,7 +372,9 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Type.available, buddy1.getType());
         addressFeature = (AddressFeature)buddy1.getFeature(AddressFeature.ID);
         assertNotNull(addressFeature);
-        address = (Connectable)addressFeature.getFeature();
+        xmppAddress = (XMPPAddress)addressFeature.getFeature();
+        assertEquals(buddy1.getJID(), xmppAddress.getFullId());
+        address = (Connectable)addressRegistry.get(xmppAddress);
         assertEquals("200.200.200.200", address.getAddress());
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
