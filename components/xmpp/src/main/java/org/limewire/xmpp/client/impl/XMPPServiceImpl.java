@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.core.api.friend.feature.features.ConnectRequestFeature;
+import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
@@ -18,7 +18,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectRequestEvent;
+import org.limewire.net.ConnectBackRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
@@ -35,7 +35,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 import org.limewire.xmpp.api.client.Presence.Mode;
-import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -59,7 +59,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private AddressEvent lastAddressEvent;
     private boolean multipleConnectionsAllowed;
 
-    private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
     private final JabberSettings jabberSettings;
 
@@ -70,7 +70,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
             EventMulticaster<FeatureEvent> featureSupport,
-            EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster,
+            EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster,
             XMPPAddressRegistry xmppAddressRegistry, JabberSettings jabberSettings) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
@@ -239,10 +239,10 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         if (presence == null) {
             return false;
         }
-        if (!presence.hasFeatures(ConnectRequestFeature.ID)) {
+        if (!presence.hasFeatures(ConnectBackRequestFeature.ID)) {
             return false;
         }
-        ConnectRequestIQ connectRequest = new ConnectRequestIQ(address, clientGuid, supportedFWTVersion);
+        ConnectBackRequestIQ connectRequest = new ConnectBackRequestIQ(address, clientGuid, supportedFWTVersion);
         connectRequest.setTo(userId);
         connectRequest.setFrom(connection.getLocalJid());
         LOG.debugf("sending request: {0}", connectRequest);

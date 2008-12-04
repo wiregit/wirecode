@@ -40,7 +40,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
  * Connects an {@link XMPPFirewalledAddress} and tries to get a socket for it.
  */
 @Singleton
-public class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
+class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHandler {
 
     private static final Log LOG = LogFactory.getLog(XMPPFirewalledAddressConnector.class);
     
@@ -81,6 +81,7 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
     public boolean canConnect(Address address) {
         if (address instanceof XMPPFirewalledAddress) {
             XMPPFirewalledAddress xmppFirewalledAddress = (XMPPFirewalledAddress)address;
+            // let push download manager decide if we're locally capabable of connecting 
             return pushDownloadManager.canConnect(xmppFirewalledAddress.getFirewalledAddress());
         }
         return false;
@@ -132,6 +133,8 @@ public class XMPPFirewalledAddressConnector implements AddressConnector, PushedS
                     pushedSocketObserver.handleIOException(new IOException("shutdown"));
                 }
             });
+        } else {
+            // wait for the other side to open a TCP connection to this peer
         }
         scheduleExpirerFor(pushedSocketObserver, 30 * 1000);
     }

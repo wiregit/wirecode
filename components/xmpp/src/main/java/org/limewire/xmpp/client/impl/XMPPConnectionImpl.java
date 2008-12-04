@@ -32,7 +32,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectRequestEvent;
+import org.limewire.net.ConnectBackRequestEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
@@ -51,9 +51,9 @@ import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQListener;
 import org.limewire.xmpp.client.impl.messages.authtoken.AuthTokenIQProvider;
-import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQ;
-import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQListener;
-import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectRequestIQProvider;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQ;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQListener;
+import org.limewire.xmpp.client.impl.messages.connectrequest.ConnectBackRequestIQProvider;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
@@ -80,7 +80,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final SmackConnectionListener smackConnectionListener;
     private final Map<URI, FeatureInitializer> featureInitializerMap;
 
-    private final EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
@@ -90,7 +90,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
                        EventMulticaster<FeatureEvent> featureSupport,
-                       EventBroadcaster<ConnectRequestEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
+                       EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
@@ -440,8 +440,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 if(ProviderManager.getInstance().getIQProvider("library-changed", "jabber:iq:lw-lib-change") == null) {
                     ProviderManager.getInstance().addIQProvider("library-changed", "jabber:iq:lw-lib-change", LibraryChangedIQ.getIQProvider());
                 }
-                if (ProviderManager.getInstance().getIQProvider(ConnectRequestIQ.ELEMENT_NAME, ConnectRequestIQ.NAME_SPACE) == null) {
-                    ProviderManager.getInstance().addIQProvider(ConnectRequestIQ.ELEMENT_NAME, ConnectRequestIQ.NAME_SPACE, new ConnectRequestIQProvider());
+                if (ProviderManager.getInstance().getIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE) == null) {
+                    ProviderManager.getInstance().addIQProvider(ConnectBackRequestIQ.ELEMENT_NAME, ConnectBackRequestIQ.NAME_SPACE, new ConnectBackRequestIQProvider());
                 }
             }
 
@@ -468,7 +468,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             LibraryChangedIQListener libChangedIQListener = new LibraryChangedIQListener(libraryChangedEventEventBroadcaster, XMPPConnectionImpl.this);
             connection.addPacketListener(libChangedIQListener, libChangedIQListener.getPacketFilter());
 
-            ConnectRequestIQListener connectRequestIQListener = new ConnectRequestIQListener(connectRequestEventBroadcaster, XMPPConnectionImpl.this);
+            ConnectBackRequestIQListener connectRequestIQListener = new ConnectBackRequestIQListener(connectRequestEventBroadcaster, XMPPConnectionImpl.this);
             connection.addPacketListener(connectRequestIQListener, connectRequestIQListener.getPacketFilter());
         }
 

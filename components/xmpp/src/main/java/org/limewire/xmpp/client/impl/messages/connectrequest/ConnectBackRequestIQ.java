@@ -16,7 +16,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 
 /**
- * IQ to be send to request the other peer to open a connection to this peer.
+ * IQ to be send to request the other peer to open a connection back to this peer.
  * 
  * The connection can be of two types:
  * 
@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
  *    the supported protocol version
  * In both cases a valid address for connecting needs to be provided
  */
-public class ConnectRequestIQ extends IQ {
+public class ConnectBackRequestIQ extends IQ {
 
     // private final Log LOG = LogFactory.getLog(ConnectRequestIQ.class);
     
@@ -33,21 +33,21 @@ public class ConnectRequestIQ extends IQ {
     private final int supportedfwtVersion;
     private final GUID clientGuid;
     
-    public static final String ELEMENT_NAME = "connect-request";
+    public static final String ELEMENT_NAME = "connect-back-request";
     
     public static final String NAME_SPACE = "jabber:iq:lw-connect-request";
     
     /**
      * Only constructs valid connect request iqs, otherwise throws {@link IOException}. 
      */
-    public ConnectRequestIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
+    public ConnectBackRequestIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
        int eventType = parser.getEventType();
        GUID guid = null;
        int fwtVersion = -1;
        Connectable connectable = null;
        for (; eventType != XmlPullParser.END_DOCUMENT; eventType = parser.next()) {
            if (eventType == XmlPullParser.START_TAG) {
-               if (parser.getName().equals("connect-request")) {
+               if (parser.getName().equals(ELEMENT_NAME)) {
                    String value = parser.getAttributeValue(null, "client-guid");
                    if (value == null) {
                        throw new IOException("no guid provided");
@@ -81,7 +81,7 @@ public class ConnectRequestIQ extends IQ {
                        throw new IOException("invalid address: " + connectable);
                    }
                }
-           } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("connect-request")) {
+           } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals(ELEMENT_NAME)) {
                // exit loop when we see end tag for connect-request
                break;
            }
@@ -100,7 +100,7 @@ public class ConnectRequestIQ extends IQ {
      * @param clientGuid
      * @param supportedFWTVersion 0 if fwt is not supported
      */
-    public ConnectRequestIQ(Connectable address, GUID clientGuid, int supportedFWTVersion) {
+    public ConnectBackRequestIQ(Connectable address, GUID clientGuid, int supportedFWTVersion) {
         this.address = address;
         this.clientGuid = Objects.nonNull(clientGuid, "clientGuid");
         this.supportedfwtVersion = supportedFWTVersion;

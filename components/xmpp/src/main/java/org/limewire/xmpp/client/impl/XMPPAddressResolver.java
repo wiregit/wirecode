@@ -10,7 +10,7 @@ import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureEvent.Type;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
-import org.limewire.core.api.friend.feature.features.ConnectRequestFeature;
+import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
@@ -146,7 +146,7 @@ public class XMPPAddressResolver implements AddressResolver {
                 if (socketsManager.canResolve(resolvedAddress)) {
                     LOG.debugf("can be same nat resolved {0}", resolvedAddress);
                     socketsManager.resolve(resolvedAddress, observer);
-                } else if (resolvedPresence.hasFeatures(ConnectRequestFeature.ID)) {
+                } else if (resolvedPresence.hasFeatures(ConnectBackRequestFeature.ID)) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
                     resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
                     observer.resolved(resolvedAddress);

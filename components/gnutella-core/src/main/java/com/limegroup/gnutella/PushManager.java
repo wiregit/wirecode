@@ -11,7 +11,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.net.ConnectRequestEvent;
+import org.limewire.net.ConnectBackRequestEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBSocket;
@@ -30,7 +30,7 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
  * Manages state for push upload requests.
  */
 @Singleton
-public final class PushManager implements EventListener<ConnectRequestEvent> {
+public final class PushManager implements EventListener<ConnectBackRequestEvent> {
     
     private static final Log LOG = LogFactory.getLog(PushManager.class);
 
@@ -54,7 +54,7 @@ public final class PushManager implements EventListener<ConnectRequestEvent> {
             Provider<HTTPAcceptor> httpAcceptor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<NetworkManager> networkManager,
-            ListenerSupport<ConnectRequestEvent> connectRequestEventListenerSupport) {
+            ListenerSupport<ConnectBackRequestEvent> connectRequestEventListenerSupport) {
         this.socketsManager = socketsManager;
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
@@ -233,7 +233,7 @@ public final class PushManager implements EventListener<ConnectRequestEvent> {
     }
 
     @Override
-    public void handleEvent(ConnectRequestEvent event) {
+    public void handleEvent(ConnectBackRequestEvent event) {
         // can assume false for lan, since same NAT resolver would have spotted that and opened a direct connection
         acceptPushUpload(event.getAddress(), event.getClientGuid(), false, event.getSupportedFWTVersion() > 0);
     }

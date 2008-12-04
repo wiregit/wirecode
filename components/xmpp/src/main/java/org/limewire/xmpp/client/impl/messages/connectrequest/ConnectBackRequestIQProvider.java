@@ -9,14 +9,14 @@ import org.limewire.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class ConnectRequestIQProvider implements IQProvider {
+public class ConnectBackRequestIQProvider implements IQProvider {
 
-    private static Log LOG = LogFactory.getLog(ConnectRequestIQProvider.class);
+    private static Log LOG = LogFactory.getLog(ConnectBackRequestIQProvider.class);
     
     @Override
     public IQ parseIQ(XmlPullParser parser) throws Exception {
         try {
-            return new ConnectRequestIQ(parser);
+            return new ConnectBackRequestIQ(parser);
         } catch (RuntimeException re) {
             LOG.debug("runtime", re);
             throw re;

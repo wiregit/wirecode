@@ -50,10 +50,10 @@ public class LimeWireNetModule extends AbstractModule {
         bind(new TypeLiteral<ListenerSupport<ConnectivityChangeEvent>>(){}).to(SocketsManager.class);
         bind(new TypeLiteral<EventBroadcaster<ConnectivityChangeEvent>>(){}).to(SocketsManagerImpl.class);
         
-        EventMulticaster<ConnectRequestEvent> connectRequestEventMulticaster = new EventMulticasterImpl<ConnectRequestEvent>();
-        bind(new TypeLiteral<EventMulticaster<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
-        bind(new TypeLiteral<EventBroadcaster<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
-        bind(new TypeLiteral<ListenerSupport<ConnectRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
+        EventMulticaster<ConnectBackRequestEvent> connectRequestEventMulticaster = new EventMulticasterImpl<ConnectBackRequestEvent>();
+        bind(new TypeLiteral<EventMulticaster<ConnectBackRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
+        bind(new TypeLiteral<EventBroadcaster<ConnectBackRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
+        bind(new TypeLiteral<ListenerSupport<ConnectBackRequestEvent>>(){}).toInstance(connectRequestEventMulticaster);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);
