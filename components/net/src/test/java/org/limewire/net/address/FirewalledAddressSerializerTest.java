@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.net.address;
+package org.limewire.net.address;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -11,9 +11,6 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
-import org.limewire.net.address.ConnectableSerializer;
-import org.limewire.net.address.FirewalledAddress;
-import org.limewire.net.address.FirewalledAddressSerializer;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.messages.GGEPKeys;
@@ -51,7 +48,7 @@ public class FirewalledAddressSerializerTest extends BaseTestCase {
         assertTrue(ggep.hasKey("PR"));
         assertTrue(ggep.hasKey("PX"));
         assertTrue(ggep.hasKey("GU"));
-        assertTrue(ggep.hasKey(GGEPKeys.GGEP_HEADER_FW_TRANS));
+        assertTrue(ggep.hasKey("FW"));
         
         Connectable readAddress = connectableSerializer.deserialize(ggep.getBytes("PU"));
         assertEquals("127.0.0.1", readAddress.getAddress());
