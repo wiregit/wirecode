@@ -51,18 +51,19 @@ public class PlayerPanel extends JXPanel {
     @Resource private Icon backIcon;
     @Resource private Icon backIconPressed;
     @Resource private Icon backIconRollover; 
-    
     @Resource private Icon forwardIcon;
     @Resource private Icon forwardIconPressed;
     @Resource private Icon forwardIconRollover;
-    
     @Resource private Icon playIcon;
     @Resource private Icon playIconPressed;
     @Resource private Icon playIconRollover;
-
     @Resource private Icon pauseIcon;
     @Resource private Icon pauseIconPressed;
     @Resource private Icon pauseIconRollover;
+    @Resource private Icon volumeIcon;
+    @Resource private Icon volumeIconPressed;
+    @Resource private Icon volumeIconRollover;
+    
     @Resource private ImageIcon progressTrackLeftIcon;
     @Resource private ImageIcon progressTrackCenterIcon;
     @Resource private ImageIcon progressTrackRightIcon;
@@ -128,7 +129,7 @@ public class PlayerPanel extends JXPanel {
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
         
-        volumeButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
+        volumeButton = new IconButton(volumeIcon, volumeIconRollover, volumeIconPressed);
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
 
@@ -160,7 +161,7 @@ public class PlayerPanel extends JXPanel {
         Dimension statusSize = new Dimension(buttonWidth, statusPanel.getPreferredSize().height);
         statusPanel.setPreferredSize(statusSize);
 
-        JXPanel innerPanel = new JXPanel(new MigLayout("insets 0 8 0 8, filly, gap 4, alignx center"));
+        JXPanel innerPanel = new JXPanel(new MigLayout("insets 4 8 4 8, filly, gap 6, alignx center"));
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
