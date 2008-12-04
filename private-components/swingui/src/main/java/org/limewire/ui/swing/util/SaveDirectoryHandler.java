@@ -49,8 +49,7 @@ public final class SaveDirectoryHandler {
     private static void promptAndSetNewSaveDirectory() {
         File dir = null;
         while(!isSaveDirectoryValid(dir) || !showVistaWarningIfNeeded(dir)) {
-            //TODO: component parameter
-            FocusJOptionPane.showMessageDialog(null, I18n.tr("Your save folder is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different folder."),
+            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), I18n.tr("Your save folder is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different folder."),
                     I18n.tr("Invalid Folder"), JOptionPane.WARNING_MESSAGE);
             
             dir = showChooser();
@@ -163,8 +162,7 @@ public final class SaveDirectoryHandler {
     private static boolean showVistaWarningIfNeeded(File f) {
         if (isGoodVistaDirectory(f))
             return true;
-        //TODO: component param
-        return FocusJOptionPane.showOptionDialog(null, 
+        return FocusJOptionPane.showOptionDialog(GuiUtils.getMainFrame(), 
                 I18n.tr("Saving downloads to {0} may not function correctly.\nTo be sure downloads are saved properly you should save them to a sub-folder of\n{1}.\nWould you like to choose another location?",
                 f, CommonUtils.getUserHomeDir()), I18n.tr("Folder Warning"), JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE, null, 
                 null, JOptionPane.YES_OPTION) == JOptionPane.NO_OPTION;
