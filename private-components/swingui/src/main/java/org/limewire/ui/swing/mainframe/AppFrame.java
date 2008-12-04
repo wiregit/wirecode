@@ -38,6 +38,7 @@ import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.shell.ShellAssociationManager;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -169,7 +170,9 @@ public class AppFrame extends SingleFrameApplication {
         
         // Now that the UI is ready to use, update it's priority a bit.
         Thread eventThread = Thread.currentThread();
-        eventThread.setPriority(eventThread.getPriority() + 1);        
+        eventThread.setPriority(eventThread.getPriority() + 1);
+        
+       new ShellAssociationManager().validateFileAssociations();
     }
     
     @EventSubscriber

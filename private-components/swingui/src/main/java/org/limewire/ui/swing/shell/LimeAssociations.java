@@ -41,10 +41,16 @@ public class LimeAssociations {
         return getMagnetAssociation() != null;
     }
 
+    /**
+     * Returns a torrent association option if available. Null otherwise. 
+     */
     public static LimeAssociationOption getTorrentAssociation() {
         return getSupportedAssociations().get(AssociationType.TORRENT);
     }
 
+    /**
+     * Returns a magnet association option if available. Null otherwise. 
+     */
     public static LimeAssociationOption getMagnetAssociation() {
         return getSupportedAssociations().get(AssociationType.MAGNET);
     }

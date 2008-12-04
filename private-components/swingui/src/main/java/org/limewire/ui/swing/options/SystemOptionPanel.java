@@ -162,8 +162,6 @@ public class SystemOptionPanel extends OptionPanel {
             if (hasChanged(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
                 applyOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
             }
-            // TODO check warnings on app startup and pop window to handle
-            // issues where other programs still the association.
         }
 
         private void applyOption(JCheckBox checkBox, BooleanSetting booleanSetting) {
@@ -184,9 +182,9 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             initOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS.getValue()
-                    && LimeAssociations.isMagnetAssociationSupported());
+                    && LimeAssociations.isMagnetAssociationSupported() && LimeAssociations.getMagnetAssociation().isEnabled());
             initOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS.getValue()
-                    && LimeAssociations.isTorrentAssociationSupported());
+                    && LimeAssociations.isTorrentAssociationSupported() && LimeAssociations.getTorrentAssociation().isEnabled());
             initOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
             updateView();
         }
