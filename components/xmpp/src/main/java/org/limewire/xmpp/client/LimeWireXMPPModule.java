@@ -7,6 +7,7 @@ import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.xmpp.api.client.ConnectRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
+import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -21,6 +22,11 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 public class LimeWireXMPPModule extends AbstractModule {
+    private final Class<? extends JabberSettings> jabberSettingsClass;
+    
+    public LimeWireXMPPModule(Class<? extends JabberSettings> jabberSettingsClass) {
+        this.jabberSettingsClass = jabberSettingsClass;
+    }
     
     protected void configure() {
         install(new LimeWireFriendXmppModule());
@@ -54,5 +60,9 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(XMPPAuthenticator.class).asEagerSingleton();
         
         bind(XMPPAddressRegistry.class);
+        
+        if(jabberSettingsClass != null) {
+            bind(JabberSettings.class).to(jabberSettingsClass);
+        }
     }
 }

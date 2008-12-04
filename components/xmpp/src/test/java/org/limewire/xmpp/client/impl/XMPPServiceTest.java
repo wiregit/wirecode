@@ -37,7 +37,6 @@ import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
-import org.limewire.xmpp.client.LimeWireXMPPModule;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -115,7 +114,7 @@ public class XMPPServiceTest extends BaseTestCase {
     }
 
     protected List<Module> getServiceModules() {
-        Module xmppModule = new LimeWireXMPPModule();
+        Module xmppModule = new LimeWireXMPPTestModule();
         addressEventBroadcaster = new AddressEventTestBroadcaster();
         fileOfferHandler = new FileOfferHandlerMock();
         Module m = new AbstractModule() {
