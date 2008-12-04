@@ -54,7 +54,7 @@ public class OpenLinkAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final LocationDialogue locationDialogue = new LocationDialogue();
+        final LocationDialog locationDialogue = new LocationDialog();
         locationDialogue.setLocationRelativeTo(mainPanel);
         locationDialogue.addActionListener(new ActionListener() {
             @Override

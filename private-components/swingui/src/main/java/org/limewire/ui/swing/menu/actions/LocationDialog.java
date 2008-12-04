@@ -19,12 +19,12 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.URIUtils;
 
-class LocationDialogue extends LimeJDialog {
+class LocationDialog extends LimeJDialog {
     private JButton openButton = null;
 
     private JTextField urlField = null;
 
-    public LocationDialogue() {
+    public LocationDialog() {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel urlPanel = new JPanel();
@@ -65,7 +65,7 @@ class LocationDialogue extends LimeJDialog {
         openButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                LocationDialogue.this.dispose();
+                LocationDialog.this.dispose();
             }
         });
         openButton.setEnabled(false);
@@ -74,7 +74,7 @@ class LocationDialogue extends LimeJDialog {
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LocationDialogue.this.dispose();
+                LocationDialog.this.dispose();
             }
         });
         urlPanel.setLayout(new MigLayout("", "[]5[]5[]", "[]5[]"));
