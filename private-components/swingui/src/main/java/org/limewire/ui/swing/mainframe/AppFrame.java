@@ -116,13 +116,13 @@ public class AppFrame extends SingleFrameApplication {
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
         
-        isStartup = (args.length > 0 && STARTUP.equals(args[0]));
+        isStartup = args.length > 0 && STARTUP.equals(args[0]);
     }
 
     @Override
     protected void startup() {        
         String title = getContext().getResourceMap().getString("Application.title");
-        JFrame frame = new MainFrame(title);
+        JFrame frame = new FirstVizIgnorer(title);
         frame.setName("mainFrame");
         getMainView().setFrame(frame);
 
@@ -139,7 +139,22 @@ public class AppFrame extends SingleFrameApplication {
         
         framePositioner.initialize(getMainFrame());
        
-        show(ui);   
+        // This will NOT actually show it -- we're purposely
+        // doing this to more explicitly control when it goes visible.
+        // Unfortunately, we have to call show in order to setup things
+        // on the ui.
+        show(ui);
+        
+        // Set the window position just before we become visible.
+        framePositioner.setWindowPosition();
+        
+        // Set visible if this isn't being run from startup --
+        // otherwise, minimize.
+        if (isStartup) {
+            minimizeToTray();
+        } else {
+            getMainFrame().setVisible(true);
+        }
         
         ui.goHome();
         ui.focusOnSearch();
@@ -211,7 +226,7 @@ public class AppFrame extends SingleFrameApplication {
     @Action
     public void minimizeToTray() { // DO NOT CHANGE THIS METHOD NAME!  
         getMainFrame().setState(Frame.ICONIFIED);
-        getMainFrame().setVisible(false);
+        getMainFrame().setVisible(!trayNotifier.supportsSystemTray());
     }    
 
     @Action
@@ -294,14 +309,11 @@ public class AppFrame extends SingleFrameApplication {
         
     }
     
-    private class MainFrame extends LimeJFrame {
+    private static class FirstVizIgnorer extends LimeJFrame {
+        /** false if we haven't shown once yet. */
+        private boolean shownOnce = false;
 
-        /**
-         * flag to set frame position, etc on first showing
-         */
-        boolean isFirstShowing = true;
-
-        public MainFrame(String title) {
+        public FirstVizIgnorer(String title) {
             super(title);
         }
 
@@ -309,26 +321,12 @@ public class AppFrame extends SingleFrameApplication {
         //and we don't want that to happen.  Unfortunately show() also calls private methods so we can't just override it.
         @Override
         public void setVisible(boolean visible) {
-            if (isStartup) {
-                isStartup = false;
-                minimizeToTray();
+            // Ignore the first call.
+            if(!shownOnce) {
+                shownOnce = true;
             } else {
                 super.setVisible(visible);
-                if (isFirstShowing) {
-                    restore();
-                    isFirstShowing = false;
-                }
             }
-        }
-
-        private void restore() {
-            getMainFrame().setState(Frame.NORMAL);
-            getMainFrame().toFront();
-
-            // Set the window position now that we're visible.
-            // This is necessary because otherwise the prior position doesn't
-            // stick, but we need to do it earlier too to prevent flickering.
-            framePositioner.setWindowPosition();
         }
 
     }

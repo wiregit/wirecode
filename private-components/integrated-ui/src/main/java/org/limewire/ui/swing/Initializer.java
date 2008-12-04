@@ -494,7 +494,7 @@ public final class Initializer {
         stopwatch.resetAndLog("update splash for UI");
         
         DefaultErrorCatcher.storeCaughtBugs();
-        String[] launchParams = isStartup ? new String[]{AppFrame.STARTUP} : new String[0];
+        String[] launchParams = isStartup ? new String[] { AppFrame.STARTUP } : new String[0];
         Application.launch(AppFrame.class, launchParams);
         
         SwingUtils.invokeAndWait(new Runnable() {

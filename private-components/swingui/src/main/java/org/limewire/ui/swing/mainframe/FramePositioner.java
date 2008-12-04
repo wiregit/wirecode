@@ -34,7 +34,6 @@ class FramePositioner {
     void initialize(JFrame frame) {
         assert this.frame == null : "already initialized on a frame!";
         this.frame = frame;
-        setWindowPosition();
         listenToWindowPosition();
     }
 
