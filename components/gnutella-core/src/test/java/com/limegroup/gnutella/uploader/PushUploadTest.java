@@ -445,9 +445,9 @@ public class PushUploadTest extends LimeTestCase {
         out = new BufferedWriter(new OutputStreamWriter(socket
                 .getOutputStream()));
 
-        assertEquals("Expected 'GIV', got null", "GIV 0:"
+        assertEquals("GIV 0:"
                 + new GUID(guid).toString() + "/file", in.readLine());
-        assertEquals("Expected blank line, got null", "", in.readLine());
+        assertEquals("", in.readLine());
     }
 
     private void closeConnection() throws IOException {

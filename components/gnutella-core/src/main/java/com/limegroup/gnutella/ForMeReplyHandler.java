@@ -294,7 +294,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         try {
             Connectable address = new ConnectableImpl(host, port, pushRequest.isTLSCapable());
             pushManager.get().acceptPushUpload(address,
-                    new GUID(pushRequest.getGUID()),
+                    new GUID(pushRequest.getClientGUID()),
                     pushRequest.isMulticast(), // force accept
                     pushRequest.isFirewallTransferPush());
         } catch (UnknownHostException e) {
