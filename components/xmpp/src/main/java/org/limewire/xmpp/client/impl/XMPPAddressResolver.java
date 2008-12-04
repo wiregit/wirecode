@@ -120,7 +120,7 @@ public class XMPPAddressResolver implements AddressResolver {
         if (originalId.substring(0, toOffset).equals(resourceId.substring(0, toOffset))) {
             // only return address if auth-token is available too, otherwise
             // the address is worthless still
-            Address address = addressRegistry.get(xmppAddress);
+            Address address = addressRegistry.get(new XMPPAddress(resourceId));
             Feature authTokenFeature = presence.getFeature(AuthTokenFeature.ID);
             if(address != null && authTokenFeature != null) {
                 return presence;
