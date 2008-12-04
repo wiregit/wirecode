@@ -60,6 +60,9 @@ import com.google.inject.Stage;
  * uses the mock-core.
  */
 public class AppFrame extends SingleFrameApplication {
+    
+    public static final String STARTUP = "startup";
+    private boolean isStartup = false;
 
     @Inject private static volatile Injector injector;
 
@@ -112,12 +115,14 @@ public class AppFrame extends SingleFrameApplication {
         
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
+        
+        isStartup = (args.length > 0 && STARTUP.equals(args[0]));
     }
 
     @Override
     protected void startup() {        
         String title = getContext().getResourceMap().getString("Application.title");
-        JFrame frame = new LimeJFrame(title);
+        JFrame frame = new MainFrame(title);
         frame.setName("mainFrame");
         getMainView().setFrame(frame);
 
@@ -133,19 +138,14 @@ public class AppFrame extends SingleFrameApplication {
         addExitListener(new ShutdownListener(getMainFrame(), application));
         
         framePositioner.initialize(getMainFrame());
-        
-        show(ui);      
-        restoreView();
-        
-        // Set the window position now that we're visible.
-        // This is necessary because otherwise the prior position doesn't stick,
-        // but we need to do it earlier too to prevent flickering.
-        framePositioner.setWindowPosition();
+       
+        show(ui);   
         
         ui.goHome();
         ui.focusOnSearch();
 
         started = true;
+
     }
     
     @Override
@@ -292,5 +292,44 @@ public class AppFrame extends SingleFrameApplication {
             System.out.println("Shut down");
         }
         
+    }
+    
+    private class MainFrame extends LimeJFrame {
+
+        /**
+         * flag to set frame position, etc on first showing
+         */
+        boolean isFirstShowing = true;
+
+        public MainFrame(String title) {
+            super(title);
+        }
+
+        //this is a bit hacky and ugly but necessary because SingleFrameApplication.show(Component) calls setVisible
+        //and we don't want that to happen.  Unfortunately show() also calls private methods so we can't just override it.
+        @Override
+        public void setVisible(boolean visible) {
+            if (isStartup) {
+                isStartup = false;
+                minimizeToTray();
+            } else {
+                super.setVisible(visible);
+                if (isFirstShowing) {
+                    restore();
+                    isFirstShowing = false;
+                }
+            }
+        }
+
+        private void restore() {
+            getMainFrame().setState(Frame.NORMAL);
+            getMainFrame().toFront();
+
+            // Set the window position now that we're visible.
+            // This is necessary because otherwise the prior position doesn't
+            // stick, but we need to do it earlier too to prevent flickering.
+            framePositioner.setWindowPosition();
+        }
+
     }
 }
