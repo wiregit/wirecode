@@ -63,14 +63,19 @@ class NavList extends JXPanel {
         collapsablePanels.setContentPane(panelContainer);
         add(collapsablePanels);
         
-        checkVisibility();
+        checkVisibility(true);
     }
     
-    private void checkVisibility() {
+    /**
+     * Checks and sets the visibility for this navlist. 
+     * If the nav list is empty the visibility is set to false. 
+     * Otherwise is is set to the supplied param canDisplay. 
+     */
+    protected void checkVisibility(boolean canDisplay) {
         if(navPanels.isEmpty()) {
             setVisible(false);
         } else {
-            setVisible(true);
+            setVisible(canDisplay);
         }
         invalidate();
         validate();
@@ -148,7 +153,7 @@ class NavList extends JXPanel {
         panel.getActionMap().put(NavKeys.MOVE_DOWN, panelMoveDownAction);
         panel.getActionMap().put(NavKeys.MOVE_UP, panelMoveUpAction);
         
-        checkVisibility();
+        checkVisibility(true);
     }
        
     private NavPanel moveDown() {
@@ -204,7 +209,7 @@ class NavList extends JXPanel {
         panel.setParentList(null);
         navPanels.remove(panel);
         panelContainer.remove(panel);
-        checkVisibility();
+        checkVisibility(true);
     }
     
     NavPanel removePanelForFriend(Friend friend) {

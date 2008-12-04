@@ -33,4 +33,10 @@ public class XMPPSettings extends LimeProps {
      */
     public static final BooleanSetting XMPP_DO_NOT_DISTURB =
         (BooleanSetting)FACTORY.createBooleanSetting("XMPP_DO_NOT_DISTURB", false).setPrivate(true);
+    
+    /**
+     * This setting is used to track whether or not the user wants to show offline buddies in the left panel.
+     */
+    public static final BooleanSetting XMPP_SHOW_OFFLINE =
+        (BooleanSetting)FACTORY.createBooleanSetting("XMPP_SHOW_OFFLINE", true).setPrivate(true);
 }

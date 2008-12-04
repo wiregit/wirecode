@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends.login;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -11,6 +12,7 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.settings.XMPPSettings;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
@@ -69,12 +71,16 @@ class LoggedInPanel extends JXPanel {
         });
         optionsMenu.addSeparator();
         optionsMenu.add(new JLabel(I18n.tr("Show:")));
-        optionsMenu.add(new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Offline friends")) {
-            @Override
+        final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem(I18n.tr("Offline friends"));
+        showOfflineFriends.setSelected(XMPPSettings.XMPP_SHOW_OFFLINE.getValue());
+        showOfflineFriends.addActionListener(new ActionListener() {
+           @Override
             public void actionPerformed(ActionEvent e) {
-                            
-            }
-        }));
+               XMPPSettings.XMPP_SHOW_OFFLINE.setValue(showOfflineFriends.isSelected());
+            } 
+        });
+
+        optionsMenu.add(showOfflineFriends);
         optionsMenu.addSeparator();
         optionsMenu.add(statusMenuLabel);
         optionsMenu.add(statusActions.getAvailableAction());

@@ -98,7 +98,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         this.shareListManager = shareListManager;
         this.limewireList = new NavList();
         this.onlineList = new NavList();
-        this.offlineList = new NavList();
+        this.offlineList = new OfflineNavList();
         this.allLists = new NavList[] { limewireList, onlineList, offlineList };
         this.navPanelFactory = navPanelFactory;
         this.friendLibraryMediatorFactory = friendLibraryMediatorFactory;
