@@ -53,6 +53,8 @@ class LoginPanel extends JXPanel {
     private static final String NETWORK_ERROR = tr("Network error.");
 
     private JComboBox serviceComboBox;
+    private JLabel serviceLabel;
+    private JTextField serviceField;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckBox;
@@ -81,7 +83,8 @@ class LoginPanel extends JXPanel {
         super.setVisible(flag);
         if(becameVisible) {
             populateInputs();
-            usernameField.requestFocusInWindow();
+            if(usernameField.getText().equals(""))
+                usernameField.requestFocusInWindow();
         }
     }
 
@@ -97,6 +100,8 @@ class LoginPanel extends JXPanel {
             }
         });
         serviceComboBox.setRenderer(new Renderer());
+        serviceLabel = new JLabel(tr("Jabber Server"));
+        serviceField = new JTextField();
         usernameField = new JTextField();
         passwordField = new JPasswordField();
 
@@ -123,6 +128,8 @@ class LoginPanel extends JXPanel {
         add(hideButton, "alignx right, wrap");
         add(new JLabel(tr("Using")), "alignx left, wrap");
         add(serviceComboBox, "wmin 0, wrap");
+        add(serviceLabel, "alignx left, hidemode 3, wrap");
+        add(serviceField, "alignx left, hidemode 3, grow, wmin 0, wrap");
         add(new JLabel(tr("Username")), "alignx left, wrap");
         add(usernameField, "alignx left, grow, wmin 0, wrap");
         add(new JLabel(tr("Password")), "alignx left, wrap");
@@ -143,12 +150,21 @@ class LoginPanel extends JXPanel {
 
     private void populateInputs() {
         String label = (String)serviceComboBox.getSelectedItem();
+        if(label.equals(accountManager.getCustomConfigLabel())) {
+            serviceLabel.setVisible(true);
+            serviceField.setVisible(true);
+        } else {
+            serviceLabel.setVisible(false);
+            serviceField.setVisible(false);
+        }
         XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
         if(auto != null && label.equals(auto.getLabel())) {
+            serviceField.setText(auto.getServiceName());
             usernameField.setText(auto.getUsername());
             passwordField.setText(auto.getPassword());
             autoLoginCheckBox.setSelected(true);
         } else {
+            serviceField.setText("");
             usernameField.setText("");
             passwordField.setText("");
             autoLoginCheckBox.setSelected(false);
@@ -170,6 +186,7 @@ class LoginPanel extends JXPanel {
     private void setSignInComponentsEnabled(boolean isEnabled) {
         signinAction.setEnabled(isEnabled);
         signinAction.putValue(Action.NAME, isEnabled ? SIGNIN_ENABLED_TEXT : SIGNIN_DISABLED_TEXT);
+        serviceField.setEnabled(isEnabled);
         usernameField.setEnabled(isEnabled);
         passwordField.setEnabled(isEnabled);
         autoLoginCheckBox.setEnabled(isEnabled);
@@ -210,11 +227,12 @@ class LoginPanel extends JXPanel {
             config.setUsername(user);
             config.setPassword(password);
             if(autoLoginCheckBox.isSelected()) {
+                // Set the service name if this is the custom config
+                if(serviceField.isVisible())
+                    config.setServiceName(serviceField.getText().trim());
                 // Set this as the auto-login account
                 accountManager.setAutoLoginConfig(config);
             } else {
-                passwordField.setText("");
-                
                 // If this was previously the auto-login account, delete it
                 XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
                 if(auto != null && auto.getLabel().equals(label)) {

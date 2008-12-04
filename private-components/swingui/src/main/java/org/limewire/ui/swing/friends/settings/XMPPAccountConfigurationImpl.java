@@ -7,7 +7,6 @@ import java.util.StringTokenizer;
 import javax.swing.ImageIcon;
 
 import org.limewire.listener.EventListener;
-import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.RosterEvent;
 
 /**
@@ -18,16 +17,16 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
     private final static String iconPath = "org/limewire/gui/images/xmpp/";
     private final static String iconExtension = ".png";
-    
+
     private final String resource;
     private final boolean isDebugEnabled;
     private final boolean requiresDomain;
-    private final String host;
+    private volatile String host;
     private final int port;
-    private final String serviceName;
-    private final String label;
+    private volatile String serviceName;
+    private volatile String label;
     private final String registrationURL;
-    private final ImageIcon icon;
+    private final ImageIcon icon;    
     private volatile String username;
     private volatile String password;
 
@@ -53,12 +52,24 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             // Fall back to the default LimeWire icon
             path = iconPath + "LimeWire" + iconExtension;
             url = ClassLoader.getSystemResource(path);
-            if(url == null)
-                throw new IllegalArgumentException("Could not load icon");
         }
         icon = new ImageIcon(url);
-        if(icon.getIconWidth() == -1)
-            throw new IllegalArgumentException("Corrupt icon");
+        username = "";
+        password = "";
+    }
+
+    public XMPPAccountConfigurationImpl(String resource) {
+        this.resource = resource;
+        isDebugEnabled = false;
+        requiresDomain = false;
+        host = "jabber.org";
+        port = 5222;
+        serviceName = "jabber.org";
+        label = "Jabber";
+        registrationURL = "http://www.jabber.org/web/Quickstart";
+        String path = iconPath + "LimeWire" + iconExtension;
+        URL url = ClassLoader.getSystemResource(path);
+        icon = new ImageIcon(url);
         username = "";
         password = "";
     }
@@ -84,8 +95,19 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     }
 
     @Override
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+        host = serviceName;
+    }
+
+    @Override
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     @Override
@@ -138,14 +160,17 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     public String getNetworkName() {
         return serviceName;
     }
-    
+
     @Override
     public EventListener<RosterEvent> getRosterListener() {
         return null;
     }
-    
+
     @Override
     public String toString() {
-        return StringUtils.toStringBlacklist(this, password);
+        // Return a string that can be parsed back into a config
+        return isDebugEnabled + "," + requiresDomain + "," +
+                host + "," + port + "," + serviceName + "," +
+                label + "," + registrationURL;
     }
 }

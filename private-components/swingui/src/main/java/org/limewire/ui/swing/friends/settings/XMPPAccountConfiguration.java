@@ -22,6 +22,16 @@ public interface XMPPAccountConfiguration extends XMPPConnectionConfiguration {
     public ImageIcon getIcon();
     
     /**
+     * Sets the label that the UI will display to identify the account.
+     */
+    public void setLabel(String label);
+    
+    /**
+     * Sets the service name of the account.
+     */
+    public void setServiceName(String serviceName);
+    
+    /**
      * Sets the username of the account.
      */
     public void setUsername(String username);

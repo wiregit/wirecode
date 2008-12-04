@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.core.settings.XMPPSettings;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.PasswordManager;
 
 import com.google.inject.Inject;
@@ -36,6 +37,16 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                 // Malformed string - no soup for you!
             }
         }
+        String custom = XMPPSettings.XMPP_SERVER.getValue();
+        XMPPAccountConfiguration customConfig;
+        try {
+            customConfig = new XMPPAccountConfigurationImpl(custom, resource);
+        } catch(IllegalArgumentException ignored) {
+            // Broken or missing custom config - use the default
+            customConfig = new XMPPAccountConfigurationImpl(resource);
+        }
+        customConfig.setLabel(getCustomConfigLabel());
+        configs.put(getCustomConfigLabel(), customConfig);
         String autoLogin = XMPPSettings.XMPP_AUTO_LOGIN.getValue();
         if(!autoLogin.equals("")) {
             int comma = autoLogin.indexOf(',');
@@ -59,10 +70,12 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         }
     }
     
+    @Override
     public XMPPAccountConfiguration getConfig(String label) {
         return configs.get(label);
     }
     
+    @Override
     public List<String> getLabels() {
         ArrayList<String> labels = new ArrayList<String>();
         for(XMPPAccountConfiguration config : configs.values())
@@ -71,10 +84,17 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         return labels;
     }
     
+    @Override
+    public String getCustomConfigLabel() {
+        return tr("Other...");
+    }
+    
+    @Override
     public XMPPAccountConfiguration getAutoLoginConfig() {
         return autoLoginConfig;
     }
     
+    @Override
     public void setAutoLoginConfig(XMPPAccountConfiguration config) {
         // Remove the old configuration, if there is one
         if(autoLoginConfig != null) {
@@ -84,6 +104,9 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         }
         // Store the new configuration, if there is one
         if(config != null) {
+            // If this is the custom config, save it
+            if(config.getLabel().equals(getCustomConfigLabel()))
+                XMPPSettings.XMPP_SERVER.setValue(config.toString());
             try {
                 passwordManager.storePassword(config.getUsername(),
                         config.getPassword());

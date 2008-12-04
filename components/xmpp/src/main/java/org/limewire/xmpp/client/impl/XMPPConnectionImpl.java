@@ -110,6 +110,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         this.xmppAddressRegistry = xmppAddressRegistry;
         
         rosterListeners = new EventListenerList<RosterEvent>();
+        // FIXME: this is only used by tests
         if(configuration.getRosterListener() != null) {
             rosterListeners.addListener(configuration.getRosterListener());
         }

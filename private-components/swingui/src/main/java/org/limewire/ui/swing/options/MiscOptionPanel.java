@@ -17,7 +17,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.settings.UISettings;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
-import org.limewire.ui.swing.util.I18n;
+import static org.limewire.ui.swing.util.I18n.tr;
 
 import com.google.inject.Inject;
 
@@ -57,8 +57,9 @@ public class MiscOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getNotificationsPanel().applyOptions() ||
-               getFriendChatPanel().applyOptions();
+        boolean restart = getNotificationsPanel().applyOptions();
+        restart |= getFriendChatPanel().applyOptions();
+        return restart;
     }
 
     @Override
@@ -78,11 +79,11 @@ public class MiscOptionPanel extends OptionPanel {
         private JCheckBox playNotificationsCheckBox;
 
         public NotificationsPanel() {
-            super(I18n.tr("Notifications"));
+            super(tr("Notifications"));
 
-            showNotificationsCheckBox = new JCheckBox(I18n.tr("Show popup system notifications"));
+            showNotificationsCheckBox = new JCheckBox(tr("Show popup system notifications"));
             showNotificationsCheckBox.setContentAreaFilled(false);
-            playNotificationsCheckBox = new JCheckBox(I18n.tr("Play notification sounds"));
+            playNotificationsCheckBox = new JCheckBox(tr("Play notification sounds"));
             playNotificationsCheckBox.setContentAreaFilled(false);
 
             add(showNotificationsCheckBox, "wrap");
@@ -113,20 +114,20 @@ public class MiscOptionPanel extends OptionPanel {
 
         private JCheckBox autoLoginCheckBox;
         private JComboBox serviceComboBox;
+        private JLabel serviceLabel;
+        private JTextField serviceField;
         private JTextField usernameField;
         private JPasswordField passwordField;
 
         public FriendsChatPanel() {
-            super(I18n.tr("Friends and Chat"));
+            super(tr("Friends and Chat"));
 
-            autoLoginCheckBox = new JCheckBox(I18n.tr("Sign in when LimeWire starts"));            
+            autoLoginCheckBox = new JCheckBox(tr("Sign in when LimeWire starts"));            
             autoLoginCheckBox.setContentAreaFilled(false);
             autoLoginCheckBox.addItemListener(new ItemListener(){
                 @Override
                 public void itemStateChanged(ItemEvent e) {
-                    serviceComboBox.setEnabled(autoLoginCheckBox.isSelected());
-                    usernameField.setEnabled(autoLoginCheckBox.isSelected());
-                    passwordField.setEnabled(autoLoginCheckBox.isSelected());
+                    setComponentsEnabled(autoLoginCheckBox.isSelected());
                 }
             });
 
@@ -140,18 +141,23 @@ public class MiscOptionPanel extends OptionPanel {
                 }
             });
             serviceComboBox.setRenderer(new Renderer());
+            serviceLabel = new JLabel(tr("Jabber Server:"));
+            serviceField = new JTextField(18);
             usernameField = new JTextField(18);
             passwordField = new JPasswordField(18);
 
             add(autoLoginCheckBox, "split, wrap");
 
-            add(new JLabel(I18n.tr("Using")), "gapleft 25, split");
+            add(new JLabel(tr("Using")), "gapleft 25, split");
             add(serviceComboBox, "wrap");
 
-            add(new JLabel(I18n.tr("Username:")), "gapleft 25, split");
+            add(serviceLabel, "gapleft 25, hidemode 3, split");
+            add(serviceField, "hidemode 3, wrap");
+
+            add(new JLabel(tr("Username:")), "gapleft 25, split");
             add(usernameField, "wrap");
 
-            add(new JLabel(I18n.tr("Password:")), "gapleft 25, split");
+            add(new JLabel(tr("Password:")), "gapleft 25, split");
             add(passwordField);
 
             // If there's an auto-login configuration, select it
@@ -164,14 +170,30 @@ public class MiscOptionPanel extends OptionPanel {
 
         private void populateInputs() {
             String label = (String)serviceComboBox.getSelectedItem();
+            if(label.equals(accountManager.getCustomConfigLabel())) {
+                serviceLabel.setVisible(true);
+                serviceField.setVisible(true);
+            } else {
+                serviceLabel.setVisible(false);
+                serviceField.setVisible(false);
+            }
             XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
             if(auto != null && label.equals(auto.getLabel())) {
+                serviceField.setText(auto.getServiceName());
                 usernameField.setText(auto.getUsername());
                 passwordField.setText(auto.getPassword());
             } else {
+                serviceField.setText("");
                 usernameField.setText("");
                 passwordField.setText("");
             }
+        }
+
+        private void setComponentsEnabled(boolean enabled) {
+            serviceComboBox.setEnabled(enabled);
+            serviceField.setEnabled(enabled);
+            usernameField.setEnabled(enabled);
+            passwordField.setEnabled(enabled);
         }
 
         @Override
@@ -180,7 +202,8 @@ public class MiscOptionPanel extends OptionPanel {
                 if(autoLoginCheckBox.isSelected()) {
                     String label = (String)serviceComboBox.getSelectedItem();
                     XMPPAccountConfiguration config = accountManager.getConfig(label);
-                    config.setUsername(usernameField.getText());
+                    config.setServiceName(serviceField.getText().trim());
+                    config.setUsername(usernameField.getText().trim());
                     config.setPassword(new String(passwordField.getPassword()));
                     accountManager.setAutoLoginConfig(config);
                 } else {
@@ -201,7 +224,10 @@ public class MiscOptionPanel extends OptionPanel {
                 String label = (String)serviceComboBox.getSelectedItem();
                 if(!label.equals(auto.getLabel()))
                     return true;
-                String username = usernameField.getText();
+                String serviceName = serviceField.getText().trim();
+                if(!serviceName.equals(auto.getServiceName()))
+                    return true;
+                String username = usernameField.getText().trim();
                 if(!username.equals(auto.getUsername()))
                     return true;
                 String password = new String(passwordField.getPassword());
@@ -213,27 +239,18 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
+            populateInputs();
             XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-            if(auto == null) {
-                autoLoginCheckBox.setSelected(false);
-                serviceComboBox.setSelectedItem("Gmail");
-                serviceComboBox.setEnabled(false);
-                usernameField.setEnabled(false);
-                passwordField.setEnabled(false);
-            } else {
-                autoLoginCheckBox.setSelected(true);
-                serviceComboBox.setSelectedItem(auto.getLabel());
-                usernameField.setText(auto.getUsername());
-                passwordField.setText(auto.getPassword());
-            }
+            setComponentsEnabled(auto != null);
+            autoLoginCheckBox.setSelected(auto != null);
         }
     }
-    
+
     private class Renderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            
+
             XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
             if(config != null) {
                 setIcon(config.getIcon());

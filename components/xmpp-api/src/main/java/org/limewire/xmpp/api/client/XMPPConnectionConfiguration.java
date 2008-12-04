@@ -8,7 +8,10 @@ import org.limewire.listener.EventListener;
  */
 public interface XMPPConnectionConfiguration extends Network {
     
-    /** Returns true if the account should enable debugging. (This causes a smack debug window to appear.) */
+    /**
+     * Returns true if the account should enable debugging.
+     * (This causes a smack debug window to appear.)
+     */
     public boolean isDebugEnabled();
     
     /** Returns the username this configuration will use. */
@@ -25,21 +28,24 @@ public interface XMPPConnectionConfiguration extends Network {
     
     /**
      * Returns a user-friendly name for the account.
-     * This is something like <code>Example</code> for users of example.com's
+     * This is something like <code>Example</code> for example.com's
      * XMPP server. 
      */
     public String getLabel();
     
     /**
      * Returns the service name that will be applied to the connection.
-     * This is something like <code>example.com</code> for users using
-     * a jabber.com XMPP server.  
+     * This is something like <code>example.com</code> for example.com's
+     * XMPP server.  
      */
     public String getServiceName();
     
-    /** The resource identifier for this connection.  This is something like "Home". */
+    /**
+     * Returns a resource identifier that uniquely identifies the connection
+     * even if the user is signed in through multiple clients.
+     */
     public String getResource();
     
-    /** A listener for Roster notifications from this configuration. */
+    // FIXME: this is only used by tests
     public EventListener<RosterEvent> getRosterListener();
 }
