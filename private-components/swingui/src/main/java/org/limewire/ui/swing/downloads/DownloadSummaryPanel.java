@@ -231,6 +231,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         });
         
         initializeDownloadCompleteListener();
+        initializeDownloadAddedListener();
 
         setLayout(new MigLayout("nocache, ins 0, gap 0! 0!, novisualpadding"));
         
@@ -244,7 +245,22 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		addListeners();
 		
 		setMinimumSize(new Dimension(0, panelHeight));
+		
+		setVisibility(false);
 	}
+
+    private void initializeDownloadAddedListener() {
+        final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
+        allList.addListEventListener(new ListEventListener<DownloadItem>(){
+            @Override
+            public void listChanged(ListEvent<DownloadItem> listChanges) {
+               if(allList.size() == 0){
+                   setVisibility(false);
+               } else if (!item.isSelected()){
+                 setVisibility(true);
+               }
+            }});
+    }
 
     private void initializeDownloadCompleteListener(){
         EventList<DownloadItem> completeDownloads = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.DONE));
@@ -283,7 +299,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
             @Override
             public void itemSelected(boolean selected) {
-                setVisibility(!selected);
+                boolean isVisible = !selected;
+                setVisibility(isVisible && allList.size() > 0);
                 header.setIcon(downloadIcon);
             }
         });
