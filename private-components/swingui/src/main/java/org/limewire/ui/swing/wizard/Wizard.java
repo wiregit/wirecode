@@ -77,7 +77,9 @@ public class Wizard extends JPanel{
         
         titleLabel = new JLabel();
         titleLabel.setOpaque(true);
-        titleLabel.setBackground(Color.LIGHT_GRAY);
+        //TODO: move colors to properties
+        titleLabel.setBackground(Color.BLACK);
+        titleLabel.setForeground(Color.WHITE);
         titleLabel.setBorder(new LineBorder(Color.BLACK));
         
         add(titleLabel, "dock north");

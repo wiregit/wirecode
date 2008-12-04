@@ -24,9 +24,32 @@ public class LimeCheckBox extends JCheckBox{
     private AbstractPainter<JCheckBox> checkPainter;
     private Painter<JCheckBox> textPainter;
     
+    public LimeCheckBox(String text){
+        super(text);
+        init();
+    }
+    
     public LimeCheckBox(Action action) {
         super(action);
-        
+        init();
+    }
+    
+    public void setCheckPainter(AbstractPainter<JCheckBox> painter) {
+        checkPainter = painter;
+    }
+    
+    public void setTextPainter(Painter<JCheckBox> painter) {
+        textPainter = painter;
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        checkPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
+        textPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
+    }
+    
+    
+    private void init(){        
         GuiUtils.assignResources(this);
         
         TextShadowPainter<JCheckBox> textPainter 
@@ -44,19 +67,6 @@ public class LimeCheckBox extends JCheckBox{
         });
     }
     
-    public void setCheckPainter(AbstractPainter<JCheckBox> painter) {
-        checkPainter = painter;
-    }
-    
-    public void setTextPainter(Painter<JCheckBox> painter) {
-        textPainter = painter;
-    }
-    
-    @Override
-    protected void paintComponent(Graphics g) {
-        checkPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
-        textPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
-    }
     
     private class CheckPainter extends AbstractPainter<JCheckBox> {
 

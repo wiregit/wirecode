@@ -11,7 +11,7 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.components.HyperLinkButton;
-import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.LimeCheckBox;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,13 +30,10 @@ public class SetupPage1 extends WizardPage {
     private String line2 = I18n.tr("Please take a minute to configure these options before moving on.");
     
     private String filterTitle = I18n.tr("Content Filters");
-    private String filterExplanation = I18n.tr("LimeWire can filter files that copyright owners request not be shared.  " +
-    		"By checking the box below you are telling LimeWire to confirm all files you download or share with a list of removed content.  " +
-    		"You can change this later in Options > Security > Filtering.");
     
     private String learnMore = I18n.tr("Learn more"); 
     
-    private String filterCheckText = I18n.tr("Filter out files LimeWire identifies as unauthorized or unlicensed");
+    private String filterCheckText = I18n.tr("Don't let me downloador upload files copyright owners request not to be shared.");
     private JCheckBox filterCheck;
 
     private String associationsAndStartupTitle = I18n.tr("File Associations and Startup");
@@ -55,13 +52,13 @@ public class SetupPage1 extends WizardPage {
         setLayout(new MigLayout());
         
         HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
-        filterCheck = new JCheckBox(filterCheckText);
+        filterCheck = new LimeCheckBox(filterCheckText);
         filterCheck.setOpaque(false);
 
-        associationCheck = new JCheckBox(associationsText);
+        associationCheck = new LimeCheckBox(associationsText);
         associationCheck.setOpaque(false);
         associationCheck.setSelected(true);
-        startupCheck = new JCheckBox(startupText);  
+        startupCheck = new LimeCheckBox(startupText);  
         startupCheck.setOpaque(false); 
         if (shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);
@@ -72,9 +69,8 @@ public class SetupPage1 extends WizardPage {
 
         int checkBoxIndent = 50;
         add(new JLabel(filterTitle), "gaptop 20, gap left 30, wrap");
-        add(new MultiLineLabel(filterExplanation, 500), "gaptop 20, gap left 40, wrap");
-        add(learnMoreButton, "gap left 40, wrap");
         add(filterCheck, "gaptop 20, gap left " + checkBoxIndent+ ", wrap");
+        add(learnMoreButton, "gap left 40, wrap");
         
         add(new JLabel(associationsAndStartupTitle), "gaptop 20, gap left 30, wrap");
         add(associationCheck, "gaptop 10, gap left " + checkBoxIndent+ ", wrap");
