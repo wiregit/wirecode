@@ -3,6 +3,8 @@ package org.limewire.ui.swing.shell;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFrame;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.components.YesNoCheckBoxDialog;
@@ -19,8 +21,9 @@ public class ShellAssociationManager {
      * be, it checks the users warning settings. If the user has been selected
      * to be notified the user will be prompted if they want their associations
      * to be fixed.
+     * @param frame frame for dialog to be relative to
      */
-    public void validateFileAssociations() {
+    public void validateFileAssociations(final JFrame frame) {
         final LimeAssociationOption torrentAssociationOption = LimeAssociations
                 .getTorrentAssociation();
         applyAvailableAssociation(torrentAssociationOption, ApplicationSettings.HANDLE_TORRENTS);
@@ -33,14 +36,15 @@ public class ShellAssociationManager {
                 ApplicationSettings.HANDLE_TORRENTS);
         boolean magnetsStolen = isSettingStolen(magnetAssociationOption,
                 ApplicationSettings.HANDLE_MAGNETS);
-
-        if (ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue()
-                && (torrentsStolen || magnetsStolen)) {
+if(true) {
+        //if (ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue()
+        //        && (torrentsStolen || magnetsStolen)) {
 
             String message = getMessage(torrentsStolen, magnetsStolen);
 
             final YesNoCheckBoxDialog yesNoCheckBoxDialog = new YesNoCheckBoxDialog(message, I18n
                     .tr("Warn me when other programs take LimeWire associations"), ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
+            yesNoCheckBoxDialog.setLocationRelativeTo(frame);
             yesNoCheckBoxDialog.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

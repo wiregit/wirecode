@@ -175,7 +175,7 @@ public class AppFrame extends SingleFrameApplication {
         Thread eventThread = Thread.currentThread();
         eventThread.setPriority(eventThread.getPriority() + 1);
         
-       new ShellAssociationManager().validateFileAssociations();
+       new ShellAssociationManager().validateFileAssociations(getMainFrame());
     }
     
     @EventSubscriber

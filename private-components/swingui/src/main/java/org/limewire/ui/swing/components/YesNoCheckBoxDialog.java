@@ -23,7 +23,7 @@ public class YesNoCheckBoxDialog extends LimeJDialog {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel panel = new JPanel();
-        MultiLineLabel messageLabel = new MultiLineLabel(message, 300);
+        MultiLineLabel messageLabel = new MultiLineLabel(message, 350);
         
 
         checkBox = new JCheckBox(checkBoxMessage);
