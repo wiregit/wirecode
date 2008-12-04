@@ -47,7 +47,6 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public File getFile() {
-        System.out.println("uploader.getFileDesc() = "+ uploader.getFileDesc());
         return uploader.getFileDesc().getFile();
     }
 
