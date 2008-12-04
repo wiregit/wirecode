@@ -110,45 +110,43 @@ public class ApplicationSettings extends LimeProps {
     public static final BooleanSetting INSTALLED =
         FACTORY.createBooleanSetting("INSTALLED", false);
     
+    /** True if any positions have been set. */
+    @InspectablePrimitive("application positions set")
+    public static final BooleanSetting POSITIONS_SET =
+        FACTORY.createBooleanSetting("POSITIONS_SET", false);
+    
     /**
 	 * The width that the application should be.
 	 */
     @InspectablePrimitive("application width")
     public static final IntSetting APP_WIDTH =
-        FACTORY.createIntSetting("APP_WIDTH", 840);
+        FACTORY.createIntSetting("APP_WIDTH_V5", 1024);
 	
     /**
 	 * The height that the application should be.
 	 */
     @InspectablePrimitive("application height")
     public static final IntSetting APP_HEIGHT =
-        FACTORY.createIntSetting("APP_HEIGHT", 800);
-    
-    /**
-	 * A flag for whether or not the application has been run one
-	 * time before this.
-	 */    
-    public static final BooleanSetting RUN_ONCE =
-        FACTORY.createBooleanSetting("RUN_ONCE", false);
+        FACTORY.createIntSetting("APP_HEIGHT_V5", 768);
   
     /**
 	 * The x position of the window for the next time the application
 	 * is started.
 	 */
     public static final IntSetting WINDOW_X =
-        FACTORY.createIntSetting("WINDOW_X", 0).setAlwaysSave(true);
+        FACTORY.createIntSetting("WINDOW_X_V5", 0).setAlwaysSave(true);
     
     /**
 	 * The y position of the window for the next time the application
 	 * is started.
 	 */
     public static final IntSetting WINDOW_Y =
-        FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
+        FACTORY.createIntSetting("WINDOW_Y_V5", 0).setAlwaysSave(true);
     
     /** Setting for whether or not LW should start maximized. */
     @InspectablePrimitive("is application maximized")
     public static final BooleanSetting MAXIMIZE_WINDOW =
-        FACTORY.createBooleanSetting("MAXIMIZE_WINDOW", false);
+        FACTORY.createBooleanSetting("MAXIMIZE_WINDOW_V5", false);
     
     /**
 	 * A flag for whether or not the application should be minimized

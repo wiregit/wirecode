@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.lang.reflect.Method;
@@ -72,6 +71,7 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private LimeWireSwingUI ui;
     @Inject private SetupWizard setupWizard;
     @Inject private OptionsDialog options;
+    @Inject private FramePositioner framePositioner;
 
     public static boolean isStarted() {
         return started;
@@ -127,28 +127,20 @@ public class AppFrame extends SingleFrameApplication {
         addExitListener(new TrayExitListener(ui.getTrayNotifier()));
         addExitListener(new ShutdownListener(getMainFrame(), application));
         
-        // We set the size here to avoid flickering, 
-        // because JDesktop sets visibile to true immediately.
-        setWindowPosition(getMainFrame());
+        framePositioner.initialize(getMainFrame());
         
         show(ui);      
         restoreView();
         
+        // Set the window position now that we're visible.
+        // This is necessary because otherwise the prior position doesn't stick,
+        // but we need to do it earlier too to prevent flickering.
+        framePositioner.setWindowPosition();
+        
         ui.goHome();
         ui.focusOnSearch();
-        
-        // We have to reset the window position in order to 
-        // ensure visible components are given the right size.
-        setWindowPosition(getMainFrame());
 
         started = true;
-    }
-    
-    // TODO: Use prior positioning.
-    private void setWindowPosition(JFrame frame) {
-        frame.setSize(new Dimension(1024, 768));
-        frame.setLocationRelativeTo(null);
-        frame.validate();
     }
     
     @Override
@@ -175,6 +167,10 @@ public class AppFrame extends SingleFrameApplication {
         for(ApplicationLifecycleListener listener : lifecycleListeners) {
             listener.startupComplete();
         }
+        
+        // Now that the UI is ready to use, update it's priority a bit.
+        Thread eventThread = Thread.currentThread();
+        eventThread.setPriority(eventThread.getPriority() + 1);        
     }
     
     @EventSubscriber
