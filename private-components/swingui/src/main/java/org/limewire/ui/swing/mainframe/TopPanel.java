@@ -70,7 +70,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
     public TopPanel(final SearchHandler searchHandler,
                     Navigator navigator,
                     final FriendAutoCompleters friendLibraries,
-                    HomePanel homePanel,
+                    final HomePanel homePanel,
                     final StorePanel storePanel,
                     final LeftPanel leftPanel,
                     SearchBar searchBar,
@@ -92,6 +92,12 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeButton.setName("WireframeTop.homeButton");
         homeButton.setText(I18n.tr("Home"));
         homeButton.setIconTextGap(1);
+        homeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                homePanel.loadDefaultUrl();
+            }
+        });
         
         JButton storeButton;
         if(MozillaInitialization.isInitialized()) {
@@ -106,7 +112,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         storeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                storePanel.reloadIfNecessary();
+                storePanel.loadDefaultUrl();
             }
         });
         

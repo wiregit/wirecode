@@ -74,6 +74,8 @@ class FramePositioner {
             locY = Math.max(insets.top, screenSize.height - insets.top - insets.bottom - appHeight);
         }
         
+        // TODO: Get a real minimum size? 
+		frame.setMinimumSize(new Dimension(500, 500));
         frame.setLocation(locX, locY);
         frame.setSize(new Dimension(appWidth, appHeight));
         

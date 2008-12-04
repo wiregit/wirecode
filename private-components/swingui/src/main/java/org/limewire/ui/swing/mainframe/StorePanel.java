@@ -2,8 +2,6 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 
 import javax.swing.JPanel;
 
@@ -22,7 +20,6 @@ public class StorePanel extends JPanel {
 
     private final Browser browser;
     private final Application application;
-    private boolean loadedOnce = false;
 
     @Inject
     public StorePanel(Application application) {
@@ -36,26 +33,13 @@ public class StorePanel extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         add(browser, gbc);
-        
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                if(!loadedOnce) {
-                    load("http://store.limewire.com/");
-                }
-                removeComponentListener(this);
-            }
-        });
     }
     
-    public void reloadIfNecessary() {
-        if(loadedOnce && !browser.isLastRequestSuccess()) {
-            browser.reload();
-        }
+    public void loadDefaultUrl() {
+        load("http://store.limewire.com/");
     }
 
     public void load(String url) {
-        loadedOnce = true;
         url = application.getUniqueUrl(url);
         if(!MozillaInitialization.isInitialized()) {
             NativeLaunchUtils.openURL(url);

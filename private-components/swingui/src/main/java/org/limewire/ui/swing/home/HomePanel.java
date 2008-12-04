@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.ui.swing.home;
 
 import java.awt.Dimension;
@@ -27,9 +24,15 @@ import com.google.inject.Inject;
 public class HomePanel extends JXPanel {
 
     public static final String NAME = "Home";
+    
+    private final Application application;
+    private final Browser browser;
+    private final JEditorPane fallbackBrowser;
 
     @Inject
     public HomePanel(Application application) {
+        this.application = application;
+        
         setPreferredSize(new Dimension(500, 500));
         
         setLayout(new GridBagLayout());
@@ -39,12 +42,14 @@ public class HomePanel extends JXPanel {
         gbc.weighty = 1;
         
         if(MozillaInitialization.isInitialized()) {
-            Browser browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
-            browser.load(application.getUniqueUrl("http://www.limewire.com/client_startup/"));
+            browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN, VisibilityMode.DEFAULT);
+            fallbackBrowser = null;
             add(browser, gbc);
+            loadDefaultUrl();
         } else {
-            JEditorPane editor = new JEditorPane();
-            editor.addHyperlinkListener(new HyperlinkListener() {
+            browser = null;
+            fallbackBrowser = new JEditorPane();
+            fallbackBrowser.addHyperlinkListener(new HyperlinkListener() {
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {
                     if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -52,14 +57,28 @@ public class HomePanel extends JXPanel {
                     }
                 }
             });
-            editor.setEditable(false);
-            try {
-                editor.setPage(application.getUniqueUrl("http://www.limewire.com/client_startup/?html32=true"));
-            } catch(IOException iox) {
-                editor.setContentType("text/html");
-                editor.setText("<html><body>This is the offline home page.</body></html>");
-            }
-            add(editor, gbc);
+            fallbackBrowser.setEditable(false);
+            loadDefaultUrl();
+            add(fallbackBrowser, gbc);
         }
     }
+    
+    public void loadDefaultUrl() {
+        load("http://www.limewire.com/client_startup/");
+    }
+
+    public void load(String url) {
+        url = application.getUniqueUrl(url);
+        if(!MozillaInitialization.isInitialized()) {
+            url += "&html32=true";
+            try {
+                fallbackBrowser.setPage(url);
+            } catch(IOException iox) {
+                fallbackBrowser.setContentType("text/html");
+                fallbackBrowser.setText("<html><body>This is the offline home page.</body></html>");
+            }
+        } else {
+            browser.load(url);
+        }
+    }    
 }
