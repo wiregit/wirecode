@@ -42,6 +42,7 @@ import org.limewire.ui.swing.shell.ShellAssociationManager;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import org.limewire.ui.swing.wizard.SetupWizard;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaInitialization.InitStatus;
@@ -166,6 +167,8 @@ public class AppFrame extends SingleFrameApplication {
             glassPane.setVisible(false);
         }
         
+        validateSaveDirectory();
+        
         EventAnnotationProcessor.subscribe(this);
         
         // Now that the UI is ready to use, update it's priority a bit.
@@ -259,6 +262,12 @@ public class AppFrame extends SingleFrameApplication {
         }
 
         uiDefaults.put("Table.background", bgColorResource);
+    }
+        
+    /** Ensures the save directory is valid. */
+    private void validateSaveDirectory() {        
+        // Make sure the save directory is valid.
+        SaveDirectoryHandler.validateSaveDirectoryAndPromptForNewOne();
     }
     
     private static class ShutdownListener implements ExitListener {

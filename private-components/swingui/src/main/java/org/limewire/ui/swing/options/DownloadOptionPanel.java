@@ -20,6 +20,7 @@ import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -167,7 +168,7 @@ public class DownloadOptionPanel extends OptionPanel {
             if(!save.equals(currentSaveDirectory)) {
                 try {
                     File saveDir = new File(save);
-                    if(!saveDir.isDirectory()) {
+                    if(!SaveDirectoryHandler.isDirectoryValid(saveDir)) {
                         if (!saveDir.mkdirs())
                             throw new IOException();
                     }
