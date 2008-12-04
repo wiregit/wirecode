@@ -97,7 +97,7 @@ public class ProNag extends JXPanel implements Resizable {
          + "<html>" 
          + "<body>"
          + "<table width=100% border=0><tr><td>"
-         + "<table width=100% border=0><tr><td align='left'><h1>Upgrade to PRO</h1></td><td align='right'><a href=\"_hide_nag_\">hide</a></td</tr></table>"
+         + "<table width=100% border=0><tr><td align='left'><h1>Upgrade to PRO</h1></td><td align='right'><a href=\"_hide_nag_\">hide</a></td></tr></table>"
          + "&nbsp;<b>Do you want:</b>"
          + "<ul>"
          + "<li>Turbo-charged downloads?</li>"
