@@ -90,7 +90,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
         homeButton.setName("WireframeTop.homeButton");
-        homeButton.setText(I18n.tr("Home"));
+        homeButton.setText(null);
         homeButton.setIconTextGap(1);
         homeButton.addActionListener(new ActionListener() {
             @Override
@@ -107,7 +107,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             storeButton = new IconButton();
         }
         storeButton.setName("WireframeTop.storeButton");
-        storeButton.setText(I18n.tr("Store"));
+        storeButton.setText(null);
         storeButton.setIconTextGap(1);
         storeButton.addActionListener(new ActionListener() {
             @Override
@@ -123,7 +123,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             }
         });
         libraryButton.setName("WireframeTop.libraryButton");
-        libraryButton.setText(I18n.tr("Libraries"));
+        libraryButton.setText(null);
         libraryButton.setIconTextGap(1);
         leftPanel.addVisibilityListener(new VisibilityListener() {
             @Override
