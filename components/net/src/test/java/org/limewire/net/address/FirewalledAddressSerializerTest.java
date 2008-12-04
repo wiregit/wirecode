@@ -13,8 +13,6 @@ import org.limewire.io.GGEP;
 import org.limewire.io.GUID;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.messages.GGEPKeys;
-
 public class FirewalledAddressSerializerTest extends BaseTestCase {
 
     private FirewalledAddressSerializer serializer;
@@ -65,7 +63,7 @@ public class FirewalledAddressSerializerTest extends BaseTestCase {
         assertContains(readproxies, proxy2);
         
         assertEquals(guid.bytes(), ggep.getBytes("GU"));
-        assertEquals(1, ggep.getInt(GGEPKeys.GGEP_HEADER_FW_TRANS));
+        assertEquals(1, ggep.getInt("FW"));
     }
     
     public void testDeserializeNotEnoughData() {
