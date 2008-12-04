@@ -2,6 +2,7 @@ package org.limewire.ui.swing;
 
 import org.limewire.ui.swing.callback.GuiCallbackImpl;
 import org.limewire.ui.swing.components.LimeWireUiComponentsModule;
+import org.limewire.ui.swing.dock.LimeWireUiDockModule;
 import org.limewire.ui.swing.downloads.LimeWireUiDownloadsModule;
 import org.limewire.ui.swing.friends.LimeWireUiFriendsModule;
 import org.limewire.ui.swing.images.LimeWireUiImagesModule;
@@ -37,5 +38,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiStatusbarModule());
         install(new LimeWireUiComponentsModule());
         install(new LimeWireUiUploadModule());
+        install(new LimeWireUiDockModule());
     }
 }

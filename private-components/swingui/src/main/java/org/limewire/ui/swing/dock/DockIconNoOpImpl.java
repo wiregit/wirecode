@@ -9,7 +9,7 @@ import java.awt.Graphics;
  * believe that sort of thing.
  *
  */
-public class DockIconNoOpImpl implements DockIcon {
+class DockIconNoOpImpl implements DockIcon {
 
     public int getIconHeight() { return 0; }
     public int getIconWidth() { return 0; }

@@ -23,6 +23,8 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.LimeCheckBox;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dock.DockIcon;
+import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.FontUtils;
@@ -54,24 +56,26 @@ public class MainDownloadPanel extends JPanel {
     private JButton resumeAllButton;
     private JXButton clearFinishedButton;
     private JCheckBox categoriseCheckBox;
+    private final DockIcon dock;
 	
-    private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
+    private final AbstractDownloadsAction pauseAction = new AbstractDownloadsAction(I18n.tr("Pause All")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             downloadMediator.pauseAll();
         }
     };
 
-    private final Action resumeAction = new AbstractAction(I18n.tr("Resume All")) {
+    private final AbstractDownloadsAction resumeAction = new AbstractDownloadsAction(I18n.tr("Resume All")) {
         public void actionPerformed(ActionEvent e) {
             downloadMediator.resumeAll();
         }
     };
 
-    private final Action clearAction = new AbstractAction(I18n.tr("Clear Finished")) {
+    private final AbstractDownloadsAction clearAction = new AbstractDownloadsAction(I18n.tr("Clear Finished")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             downloadMediator.clearFinished();
+            dock.draw(0);
         }
     };
     
@@ -84,6 +88,22 @@ public class MainDownloadPanel extends JPanel {
 
     };
     
+    private abstract class AbstractDownloadsAction extends AbstractAction {
+
+        private AbstractDownloadsAction(String name) {
+            super(name);
+        }
+        
+        /**
+         * Enables this action if the supplied downloadSize is greater than zero,
+         * and updates the dock icon with the number of downloads.
+         * @param downloadSize
+         */
+        public void setEnablementFromDownloadSize(int downloadSize) {
+            setEnabled(downloadSize > 0);
+            dock.draw(downloadSize);
+        }
+    }
     
 	/**
 	 * Create the panel
@@ -93,11 +113,12 @@ public class MainDownloadPanel extends JPanel {
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator, AudioPlayer player,
 	        LimeHeaderBarFactory headerBarFactory,
-	        ButtonDecorator buttonDecorator) {
+	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory) {
 	    
 	    
 		this.downloadMediator = downloadMediator;
 		this.buttonDecorator = buttonDecorator;
+		dock = dockIconFactory.createDockIcon();
 		
 		setLayout(new BorderLayout());
 		
@@ -135,21 +156,21 @@ public class MainDownloadPanel extends JPanel {
 		pausableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                pauseAction.setEnabled(listChanges.getSourceList().size() > 0);
+                pauseAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
         });
 
         resumableList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                resumeAction.setEnabled(listChanges.getSourceList().size() > 0);
+                resumeAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
         });
         
         doneList.addListEventListener(new ListEventListener<DownloadItem>() {
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
-                clearAction.setEnabled(listChanges.getSourceList().size() > 0);
+                clearAction.setEnablementFromDownloadSize(listChanges.getSourceList().size());
             }
         });
     }
@@ -157,9 +178,6 @@ public class MainDownloadPanel extends JPanel {
 	public void setCategorized(boolean categorized){
 		cardLayout.show(cardPanel, categorized? CATEGORY : NO_CATEGORY);
 	}
-	
-    
-    
 	
 	private void initHeader() {
 	    pauseAllButton = new JButton(pauseAction);	

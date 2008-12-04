@@ -18,7 +18,7 @@ import org.limewire.lifecycle.Service;
  * A Mac OS X Dock Icon for LimeWire. Overlays the download
  * completion count on the LimeWire icon in the dock.
  */
-public class DockIconMacOSXImpl implements DockIcon {
+class DockIconMacOSXImpl implements DockIcon {
     
     /**
      * The max number we can display (depends on the FONT!).
