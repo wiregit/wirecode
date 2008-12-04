@@ -125,7 +125,7 @@ public class DaapSettings extends LimeProps {
         FACTORY.createIntSetting("DAAP_MAX_LIBRARY_SIZE", 10000);
     
     public static IntSetting DAAP_BUFFER_SIZE =
-        FACTORY.createIntSetting("DAAP_BUFFER_SIZE", 2048);
+        FACTORY.createIntSetting("DAAP_BUFFER_SIZE_2", 2048);
      
     /**
      * Gets the user's name, in possessive format.

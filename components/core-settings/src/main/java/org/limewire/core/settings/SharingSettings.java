@@ -315,7 +315,7 @@ public class SharingSettings extends LimeProps {
      * Whether or not to auto-share .torrent files.
      */
     public static final BooleanSetting SHARE_TORRENT_META_FILES =
-        FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES", true);
+        FACTORY.createBooleanSetting("SHARE_TORRENT_META_FILES_2", true);
     
     /**
      * Whether or not to show .torrent directory in Library.
@@ -330,7 +330,7 @@ public class SharingSettings extends LimeProps {
      * incoming connections are accepted.
      */                                                        
     public static final IntSetting FREELOADER_ALLOWED =
-        FACTORY.createIntSetting("FREELOADER_ALLOWED", 100);
+        FACTORY.createIntSetting("FREELOADER_ALLOWED_2", 100);
     
     /**
      * Minimum the number of files a host must share to not be considered
@@ -338,7 +338,7 @@ public class SharingSettings extends LimeProps {
      * freeloader.
      */
     public static final IntSetting FREELOADER_FILES =
-        FACTORY.createIntSetting("FREELOADER_FILES", 1);
+        FACTORY.createIntSetting("FREELOADER_FILES_2", 1);
     
     /**
 	 * The timeout value for persistent HTTP connections in milliseconds.

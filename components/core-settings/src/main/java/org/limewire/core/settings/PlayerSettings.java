@@ -13,5 +13,5 @@ public class PlayerSettings extends LimeProps {
      * whether or not player should be enabled.
      */
     public static BooleanSetting PLAYER_ENABLED =
-        FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
+        FACTORY.createBooleanSetting("PLAYER_ENABLED_2", true);
 }

@@ -60,7 +60,7 @@ public class BittorrentSettings extends LimeProps {
      * downloaded through LimeWire.
      */
     public static BooleanSetting TORRENT_AUTO_START =
-        FACTORY.createBooleanSetting("TORRENT_AUTO_START", true);
+        FACTORY.createBooleanSetting("TORRENT_AUTO_START_2", true);
     
     /**
      * Whether to report Disk problems to the bug server

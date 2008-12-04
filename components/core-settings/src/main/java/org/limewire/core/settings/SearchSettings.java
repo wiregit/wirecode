@@ -299,19 +299,19 @@ public final class SearchSettings extends LimeProps {
 	 * display.
 	 */
     public static final IntSetting MINIMUM_SEARCH_QUALITY =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
+        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY_2", 0);
     
     /**
 	 * The minimum speed for search results to display.
 	 */
     public static final IntSetting MINIMUM_SEARCH_SPEED =
-        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
+        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED_2", 0);
     
     /**
 	 * The maximum number of simultaneous searches to allow.
 	 */    
     public static final IntSetting PARALLEL_SEARCH =
-        FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+        FACTORY.createIntSetting("PARALLEL_SEARCH_2", 5);
 	
 	/**
 	 * Whether or not to enable the spam filter.
@@ -337,7 +337,7 @@ public final class SearchSettings extends LimeProps {
 	 * Set how sensitive the spamfilter should be
 	 */
     public static final FloatSetting FILTER_SPAM_RESULTS =
-        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS", 0.85f, 0.5f, 1.0f);
+        FACTORY.createFloatSetting("FILTER_SPAM_RESULTS_2", 0.85f, 0.5f, 1.0f);
     
 	/**
      * Do not issue query keys more than this often
@@ -399,7 +399,7 @@ public final class SearchSettings extends LimeProps {
      */
     @InspectablePrimitive("disable promotional results")
     public static final BooleanSetting DISABLE_PROMOTIONAL_RESULTS = 
-        FACTORY.createBooleanSetting("DISABLE_PROMOTIONAL_RESULTS", false);
+        FACTORY.createBooleanSetting("DISABLE_PROMOTIONAL_RESULTS_2", false);
 
     /**
      * Whether or not to include metadata in plaintext searches

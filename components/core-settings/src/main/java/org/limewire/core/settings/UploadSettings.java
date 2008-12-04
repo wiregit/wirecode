@@ -35,7 +35,7 @@ public final class UploadSettings extends LimeProps {
      * Setting for the number of uploads per person.
      */
     public static final IntSetting UPLOADS_PER_PERSON =
-        FACTORY.createIntSetting("UPLOADS_PER_PERSON", 3);
+        FACTORY.createIntSetting("UPLOADS_PER_PERSON_2", 3);
         
     /**
 	 * The maximum number of upstream bytes per second ever passed by

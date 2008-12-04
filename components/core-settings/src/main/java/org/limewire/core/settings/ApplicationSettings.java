@@ -161,7 +161,7 @@ public class ApplicationSettings extends LimeProps {
      * tray icon while the application is visible. 
      */
     public static final BooleanSetting DISPLAY_TRAY_ICON =
-        FACTORY.createBooleanSetting("DISPLAY_TRAY_ICON", true);
+        FACTORY.createBooleanSetting("DISPLAY_TRAY_ICON_2", true);
     
     /**
 	 * A flag for whether or not the application should shutdown
