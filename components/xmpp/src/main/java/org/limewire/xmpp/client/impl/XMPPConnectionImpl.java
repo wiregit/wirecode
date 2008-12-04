@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
+
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.FeatureInitializer;
@@ -59,6 +61,11 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.Type;
+
 public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent>, FeatureRegistry {
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
@@ -67,21 +74,21 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventBroadcaster<FileOfferEvent> fileOfferBroadcaster;
     private final EventBroadcaster<LibraryChangedEvent> libraryChangedEventEventBroadcaster;
     private final EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster;
-    private final EventListenerList<RosterEvent> rosterListeners;
     private final AddressFactory addressFactory;
-    private volatile org.jivesoftware.smack.XMPPConnection connection;
-
-    private final Map<String, UserImpl> users;
-    private volatile AddressIQListener addressIQListener;
-    private volatile AddressEvent lastEvent;
     private final XMPPAuthenticator authenticator;
-    private final AtomicBoolean loggingIn = new AtomicBoolean(false);
     private final EventMulticaster<FeatureEvent> featureSupport;
-    private final SmackConnectionListener smackConnectionListener;
-    private final Map<URI, FeatureInitializer> featureInitializerMap;
-
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
+    
+    private final EventListenerList<RosterEvent> rosterListeners;
+    private final Map<String, UserImpl> users;
+    private final Map<URI, FeatureInitializer> featureInitializerMap;
+    private final SmackConnectionListener smackConnectionListener;
+    private final AtomicBoolean loggingIn = new AtomicBoolean(false);
+
+    private volatile org.jivesoftware.smack.XMPPConnection connection;
+    private volatile AddressIQListener addressIQListener;
+    private volatile AddressEvent lastEvent;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -90,23 +97,25 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
                        EventMulticaster<FeatureEvent> featureSupport,
-                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
+                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
+                       XMPPAddressRegistry xmppAddressRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
         this.authenticator = authenticator;
+        this.featureSupport = featureSupport;
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.xmppAddressRegistry = xmppAddressRegistry;
-        this.rosterListeners = new EventListenerList<RosterEvent>();
+        
+        rosterListeners = new EventListenerList<RosterEvent>();
         if(configuration.getRosterListener() != null) {
-            this.rosterListeners.addListener(configuration.getRosterListener());
+            rosterListeners.addListener(configuration.getRosterListener());
         }
-        this.rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
-        this.users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
-        this.featureSupport = featureSupport;
-        this.featureInitializerMap = new ConcurrentHashMap<URI, FeatureInitializer>();
+        rosterListeners.addListener(new EventRebroadcaster<RosterEvent>(rosterBroadcaster));
+        users = new TreeMap<String, UserImpl>(String.CASE_INSENSITIVE_ORDER);
+        featureInitializerMap = new ConcurrentHashMap<URI, FeatureInitializer>();
         smackConnectionListener = new SmackConnectionListener();
     }
 
@@ -180,10 +189,45 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         return connection != null && connection.isAuthenticated();
     }
 
+    /**
+     * Converts a LimeWire XMPPConnectionConfiguration into a Smack
+     * ConnectionConfiguration, trying to obtain the hostname from DNS SRV
+     * as per RFC 3920 and falling back to the hardcoded hostname if the
+     * SRV lookup fails. This method may block during the DNS lookup.
+     */
     private ConnectionConfiguration getConnectionConfig(XMPPConnectionConfiguration configuration) {
-        return new ConnectionConfiguration(configuration.getHost(),
-                                           configuration.getPort(),
-                                           configuration.getServiceName());
+        String host = configuration.getHost();
+        int port = configuration.getPort();
+        String serviceName = configuration.getServiceName();
+        try {
+            Lookup lookup = new Lookup(serviceName, Type.SRV);
+            Record[] answers = lookup.run();
+            int result = lookup.getResult();
+            if(result == Lookup.SUCCESSFUL && answers != null) {
+                // RFC 2782: use the server with the lowest-numbered priority,
+                // break ties by preferring servers with higher weights
+                int lowestPriority = Integer.MAX_VALUE;
+                int highestWeight = Integer.MIN_VALUE;
+                for(Record rec : answers) {
+                    if(rec instanceof SRVRecord) {
+                        SRVRecord srvRec = (SRVRecord)rec;
+                        int priority = srvRec.getPriority();
+                        int weight = srvRec.getWeight();
+                        if(priority < lowestPriority
+                                && weight > highestWeight) {
+                            port = srvRec.getPort();
+                            host = srvRec.getTarget().toString();
+                            lowestPriority = priority;
+                            highestWeight = weight;
+                        }
+                    }
+                }
+            }
+        } catch (IOException iox) {
+            // Failure looking up the SRV record - use the hostname
+            LOG.debug("Failed to look up SRV record", iox);
+        }
+        return new ConnectionConfiguration(host, port, serviceName);
     }
 
     @Override
