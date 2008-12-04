@@ -95,10 +95,10 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends when signed on"));
+            suggestFriendFiles = new JCheckBox(I18n.tr("Show suggestions from my friends when signed on"));
             suggestFriendFiles.setContentAreaFilled(false);
             
-            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my most recent searches"));
+            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
             searchTabNumberCheckBox.setContentAreaFilled(false);
             
             groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));

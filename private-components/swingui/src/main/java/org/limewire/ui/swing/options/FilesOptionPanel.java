@@ -126,7 +126,7 @@ public class FilesOptionPanel extends OptionPanel {
                     extensionsPanel, I18n.tr("Manage file extensions"),
                     I18n.tr("Manage"),I18n.tr("Manage file extensions to load")));
             
-            add(new JLabel(I18n.tr("Choose the specific file extensions LimeWire scans into your Library")), "push");
+            add(new JLabel(I18n.tr("Choose the file extensions that belong in each category")), "push");
             add(manageButton);
         }
         
