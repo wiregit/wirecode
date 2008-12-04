@@ -82,7 +82,8 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "DAAP", "",
         "Metadata Loader", "",
         "What's New Manager", "",
-        "P2P Network Keyword Library", ""};
+        "P2P Network Keyword Library", "",
+        "Uptime Statistics", "UptimeStatTimer"};
         
         List<String> missing = new ArrayList<String>();
         
