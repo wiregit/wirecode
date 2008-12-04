@@ -20,11 +20,11 @@ public class ConnectBackRequestIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(ConnectBackRequestIQListener.class);
     
-    private final EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestEvent> connectBackRequestEventBroadcaster;
 
     public ConnectBackRequestIQListener(EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster,
                                     FeatureRegistry featureRegistry) {
-        this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
+        this.connectBackRequestEventBroadcaster = connectRequestEventBroadcaster;
         new ConnectBackRequestIQFeatureInitializer().register(featureRegistry);
     }
     
@@ -32,7 +32,7 @@ public class ConnectBackRequestIQListener implements PacketListener {
     public void processPacket(Packet packet) {
         ConnectBackRequestIQ connectRequest = (ConnectBackRequestIQ)packet;
         LOG.debugf("processing connect request: {0}", connectRequest);
-        connectRequestEventBroadcaster.broadcast(new ConnectBackRequestEvent(connectRequest.getAddress(), connectRequest.getClientGuid(), connectRequest.getSupportedFWTVersion()));
+        connectBackRequestEventBroadcaster.broadcast(new ConnectBackRequestEvent(connectRequest.getAddress(), connectRequest.getClientGuid(), connectRequest.getSupportedFWTVersion()));
     }
     
     public PacketFilter getPacketFilter() {
