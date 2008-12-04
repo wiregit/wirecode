@@ -20,7 +20,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
     static final String PUBLIC_ADDRESS = "PU";
     static final String PRIVATEADDRESS = "PR";
     static final String PROXIES = "PX";
-    static final String FWT_VERSION = "FW"; // same as com.limegroup.gnutella.messages.GGEPKeys
+    static final String FWT_VERSION = "FW";
     static final String GUID = "GU";
     
     private final ConnectableSerializer serializer;
