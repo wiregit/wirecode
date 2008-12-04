@@ -3,6 +3,7 @@ package org.limewire.ui.swing.components;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -39,7 +40,13 @@ public class HyperLinkButton extends JButton implements MouseListener {
     
     private void initialize(String text) {
         if(text != null)
-            setText(text);        
+            setText(text);
+        
+        setBorderPainted(false);
+        setMargin(new Insets(0, 0, 0, 0));
+        setFocusPainted(false);
+        setRolloverEnabled(false);
+        setOpaque(false);        
         setBorder(null);
         setContentAreaFilled(false);
         setFocusable(false);
