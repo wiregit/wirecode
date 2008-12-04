@@ -3,7 +3,6 @@ package org.limewire.ui.swing.options;
 import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -61,13 +60,13 @@ public class SearchOptionPanel extends OptionPanel {
 
         private JComboBox defaultSearchSpinner;
 
-        private JCheckBox searchTabNumberCheckBox;
-        
-        private JCheckBox suggestFriendFiles;
+//        private JCheckBox searchTabNumberCheckBox;
+//
+//        private JCheckBox suggestFriendFiles;
 
         private JCheckBox groupSimilarResults;
 
-        private JButton clearNowButton;
+//        private JButton clearNowButton;
 
         public SearchBarPanel() {
             super(I18n.tr("Searching"));
@@ -77,11 +76,11 @@ public class SearchOptionPanel extends OptionPanel {
             add(new JLabel(I18n.tr("By default, search for")), "split");
             add(defaultSearchSpinner, "wrap");
 
-            add(suggestFriendFiles, "split 4, wrap");
-            
-            add(searchTabNumberCheckBox, "split 4, push");
-
-            add(clearNowButton, "wrap, alignx right");
+//            add(suggestFriendFiles, "split 4, wrap");
+//
+//            add(searchTabNumberCheckBox, "split 4, push");
+//
+//            add(clearNowButton, "wrap, alignx right");
 
             add(groupSimilarResults, "split 4");
         }
@@ -95,18 +94,18 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            suggestFriendFiles = new JCheckBox(I18n.tr("Show suggestions from my friends when signed on"));
-            suggestFriendFiles.setContentAreaFilled(false);
-            
-            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
-            searchTabNumberCheckBox.setContentAreaFilled(false);
+//            suggestFriendFiles = new JCheckBox(I18n.tr("Show suggestions from my friends when signed on"));
+//            suggestFriendFiles.setContentAreaFilled(false);
+//
+//            searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
+//            searchTabNumberCheckBox.setContentAreaFilled(false);
             
             groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
             groupSimilarResults.setContentAreaFilled(false);
 
-            clearNowButton = new JButton(I18n.tr("Clear Now"));
-            //TODO this button should do something
-            clearNowButton.setBorderPainted(false);
+//            clearNowButton = new JButton(I18n.tr("Clear Now"));
+//            //TODO this button should do something
+//            clearNowButton.setBorderPainted(false);
         }
 
         @Override
@@ -114,10 +113,10 @@ public class SearchOptionPanel extends OptionPanel {
             SearchSettings.DEFAULT_SEARCH_CATEGORY_ID
                     .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
             
-            SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestFriendFiles.isSelected());
-            
-            SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox
-                    .isSelected());
+//            SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestFriendFiles.isSelected());
+//
+//            SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox
+//                    .isSelected());
             SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
         }
 
@@ -125,9 +124,9 @@ public class SearchOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner
                     .getSelectedItem()).getId()
-                    || SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue() != suggestFriendFiles.isSelected()
-                    || SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue() != searchTabNumberCheckBox
-                            .isSelected()
+//                    || SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue() != suggestFriendFiles.isSelected()
+//                    || SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue() != searchTabNumberCheckBox
+//                            .isSelected()
                     || groupSimilarResults.isSelected() != SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED
                             .getValue();
         }
@@ -136,10 +135,10 @@ public class SearchOptionPanel extends OptionPanel {
         public void initOptions() {
             defaultSearchSpinner.setSelectedItem(SearchCategory
                     .forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
-            suggestFriendFiles.setSelected(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
-            // TODO: this setting isn't linked to anything
-            searchTabNumberCheckBox.setSelected(SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR
-                    .getValue());
+//            suggestFriendFiles.setSelected(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
+//            // TODO: this setting isn't linked to anything
+//            searchTabNumberCheckBox.setSelected(SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR
+//                    .getValue());
             groupSimilarResults
                     .setSelected(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
         }
