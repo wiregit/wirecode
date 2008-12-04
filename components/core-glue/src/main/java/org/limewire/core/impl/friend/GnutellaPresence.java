@@ -86,6 +86,11 @@ public class GnutellaPresence implements FriendPresence {
             public Map<String, FriendPresence> getFriendPresences() {
                 return Collections.emptyMap();
             }
+
+            @Override
+            public String getFirstName() {
+                return getName();
+            }
         };
     }
 

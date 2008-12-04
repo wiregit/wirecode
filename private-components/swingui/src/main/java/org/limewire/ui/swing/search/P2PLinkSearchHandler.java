@@ -152,6 +152,11 @@ class P2PLinkSearchHandler implements SearchHandler {
         }
 
         @Override
+        public String getFirstName() {
+            return name;
+        }
+
+        @Override
         public boolean isAnonymous() {
             return true;
         }

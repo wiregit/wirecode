@@ -450,6 +450,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         }
 
         @Override
+        public String getFirstName() {
+            return renderName;
+        }
+
+        @Override
         public void setName(String name) {
         }
 

@@ -39,6 +39,11 @@ public class MockUser implements User {
     }
 
     @Override
+    public String getFirstName() {
+        return name;
+    }
+
+    @Override
     public String getId() {
         return id;
     }

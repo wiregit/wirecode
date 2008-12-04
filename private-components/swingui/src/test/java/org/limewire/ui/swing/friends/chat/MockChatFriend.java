@@ -39,6 +39,10 @@ class MockChatFriend implements ChatFriend {
             public String getRenderName() {
                 return name;
             }
+            @Override
+            public String getFirstName() {
+                return name;
+            }
 
             @Override
             public void setName(String name) {

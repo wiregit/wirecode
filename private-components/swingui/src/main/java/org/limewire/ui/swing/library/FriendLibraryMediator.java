@@ -69,7 +69,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
             
             JLabel label = new JLabel(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
             FontUtils.bold(label);
-            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getRenderName()));
+            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getFirstName()));
           
             add(label, "wrap");
             add(secondLabel, "gaptop 10");
@@ -85,7 +85,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
             
             JLabel label = new JLabel(I18n.tr("{0} is on LimeWire but there were problems viewing their library", friend.getRenderName()));
             FontUtils.bold(label);
-            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getRenderName()));
+            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getFirstName()));
           
             add(label, "wrap");
             add(secondLabel, "gaptop 10");

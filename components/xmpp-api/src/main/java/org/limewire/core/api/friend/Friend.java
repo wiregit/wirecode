@@ -25,6 +25,9 @@ public interface Friend {
     
     /** Returns the best possible name this can be rendered with. */
     public String getRenderName();
+    
+    /** If getRenderName returns something other than email, will return subString using the first ' ' delimeter*/
+    public String getFirstName();
 
     /** Sets a new name for this Friend. */
     void setName(String name);

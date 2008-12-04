@@ -116,6 +116,17 @@ public class UserImpl implements User {
             return visualName;
         }
     }
+    
+    @Override
+    public String getFirstName() {
+        String visualName = rosterEntry.get().getName();
+        if(visualName == null) {
+            return idNoService;
+        } else {
+            String[] subStrings = visualName.split(" ");
+            return subStrings[0];
+        }
+    }
 
     void setRosterEntry(RosterEntry rosterEntry) {
         this.rosterEntry.set(rosterEntry);
@@ -373,6 +384,4 @@ public class UserImpl implements User {
             reader.newChatState(ChatState.valueOf(state.toString()));
         }
     }
-
-
 }

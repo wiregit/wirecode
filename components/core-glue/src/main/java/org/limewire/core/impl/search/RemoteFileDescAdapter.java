@@ -244,6 +244,11 @@ public class RemoteFileDescAdapter implements SearchResult {
                             }
 
                             @Override
+                            public String getFirstName() {
+                                return getName();
+                            }
+
+                            @Override
                             public void setName(String name) {
 
                             }
@@ -367,6 +372,12 @@ public class RemoteFileDescAdapter implements SearchResult {
                         public String getRenderName() {
                             return address.getAddressDescription();
                         }
+
+                        @Override
+                        public String getFirstName() {
+                            return getRenderName();
+                        }
+                        
 
                         @Override
                         public void setName(String name) {

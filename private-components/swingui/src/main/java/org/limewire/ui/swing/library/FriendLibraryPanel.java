@@ -103,8 +103,8 @@ public class FriendLibraryPanel extends LibraryPanel {
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getRenderName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getRenderName()));
+            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getFirstName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getFirstName()));
         }
         
         @Override

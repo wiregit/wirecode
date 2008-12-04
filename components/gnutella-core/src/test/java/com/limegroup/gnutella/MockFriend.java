@@ -68,4 +68,9 @@ public class MockFriend implements Friend {
     public Map<String, FriendPresence> getFriendPresences() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
+    @Override
+    public String getFirstName() {
+        return null;
+    }
 }
