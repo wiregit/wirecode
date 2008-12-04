@@ -7,13 +7,13 @@ import org.limewire.util.Objects;
 /**
  * Event that an external connect request has arrived.
  */
-public class ConnectBackRequestEvent {
+public class ConnectBackRequestedEvent {
 
     private final Connectable address;
     private final GUID clientGuid;
     private final int supportedFWTVersion;
 
-    public ConnectBackRequestEvent(Connectable address, GUID clientGuid, int supportedFWTVersion) {
+    public ConnectBackRequestedEvent(Connectable address, GUID clientGuid, int supportedFWTVersion) {
         this.address = Objects.nonNull(address, "address");
         this.clientGuid = Objects.nonNull(clientGuid, "clientGuid");
         this.supportedFWTVersion = supportedFWTVersion;

@@ -23,7 +23,7 @@ import org.limewire.net.address.FirewalledAddress;
 import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.xmpp.api.client.ConnectRequestSender;
+import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.client.impl.XMPPFirewalledAddress;
 
 import com.google.inject.Inject;
@@ -46,7 +46,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     
     private final PushDownloadManager pushDownloadManager;
     private final NetworkManager networkManager;
-    private final ConnectRequestSender connectRequestSender;
+    private final ConnectBackRequestSender connectRequestSender;
     private final ScheduledExecutorService backgroundExecutor;
     private final List<PushedSocketConnectObserver> observers = new CopyOnWriteArrayList<PushedSocketConnectObserver>();
 
@@ -55,7 +55,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     private final Provider<SocketProcessor> socketProcessor;
 
     @Inject
-    public XMPPFirewalledAddressConnector(ConnectRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
+    public XMPPFirewalledAddressConnector(ConnectBackRequestSender connectRequestSender, PushDownloadManager pushDownloadManager,
             NetworkManager networkManager, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
             Provider<SocketProcessor> socketProcessor) {

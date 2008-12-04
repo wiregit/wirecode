@@ -5,7 +5,7 @@ import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.api.client.ConnectRequestSender;
+import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
@@ -32,7 +32,7 @@ public class LimeWireXMPPModule extends AbstractModule {
         install(new LimeWireFriendXmppModule());
         
         bind(XMPPService.class).to(XMPPServiceImpl.class);
-        bind(ConnectRequestSender.class).to(XMPPServiceImpl.class);
+        bind(ConnectBackRequestSender.class).to(XMPPServiceImpl.class);
 
         EventMulticaster<RosterEvent> rosterMulticaster = new EventMulticasterImpl<RosterEvent>(); 
         bind(new TypeLiteral<EventBroadcaster<RosterEvent>>(){}).toInstance(rosterMulticaster);

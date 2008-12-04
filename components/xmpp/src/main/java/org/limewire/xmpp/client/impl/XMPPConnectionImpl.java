@@ -32,7 +32,7 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequestEvent;
+import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
@@ -80,7 +80,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final SmackConnectionListener smackConnectionListener;
     private final Map<URI, FeatureInitializer> featureInitializerMap;
 
-    private final EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
@@ -90,7 +90,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        EventBroadcaster<XMPPConnectionEvent> connectionBroadcaster,
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
                        EventMulticaster<FeatureEvent> featureSupport,
-                       EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
+                       EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster, XMPPAddressRegistry xmppAddressRegistry) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.libraryChangedEventEventBroadcaster = libraryChangedEventEventBroadcaster;

@@ -18,11 +18,11 @@ import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequestEvent;
+import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
-import org.limewire.xmpp.api.client.ConnectRequestSender;
+import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
@@ -43,7 +43,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent>, ConnectRequestSender {
+public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent>, ConnectBackRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
@@ -59,7 +59,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private AddressEvent lastAddressEvent;
     private boolean multipleConnectionsAllowed;
 
-    private final EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
     private final JabberSettings jabberSettings;
 
@@ -70,7 +70,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
             EventMulticaster<FeatureEvent> featureSupport,
-            EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster,
+            EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
             XMPPAddressRegistry xmppAddressRegistry, JabberSettings jabberSettings) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;

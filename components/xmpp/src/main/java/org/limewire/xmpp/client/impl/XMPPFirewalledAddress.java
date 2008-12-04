@@ -8,7 +8,7 @@ import org.limewire.xmpp.api.client.XMPPAddress;
 
 /**
  * A composite of {@link XMPPAddress} and {@link FirewalledAddress} to
- * allow connect requests to be sent over xmpp. 
+ * allow connect back requests to be sent over xmpp. 
  */
 public class XMPPFirewalledAddress implements Address {
 

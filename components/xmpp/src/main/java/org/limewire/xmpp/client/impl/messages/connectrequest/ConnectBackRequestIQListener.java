@@ -10,21 +10,21 @@ import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.net.ConnectBackRequestEvent;
+import org.limewire.net.ConnectBackRequestedEvent;
 
 /**
  * Listens for {@link ConnectBackRequestIQ connect back request iqs} and fires
- * a {@link ConnectBackRequestEvent}.
+ * a {@link ConnectBackRequestedEvent}.
  */
 public class ConnectBackRequestIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(ConnectBackRequestIQListener.class);
     
-    private final EventBroadcaster<ConnectBackRequestEvent> connectBackRequestEventBroadcaster;
+    private final EventBroadcaster<ConnectBackRequestedEvent> connectBackRequestedEventBroadcaster;
 
-    public ConnectBackRequestIQListener(EventBroadcaster<ConnectBackRequestEvent> connectRequestEventBroadcaster,
+    public ConnectBackRequestIQListener(EventBroadcaster<ConnectBackRequestedEvent> connectBackRequestedEventBroadcaster,
                                     FeatureRegistry featureRegistry) {
-        this.connectBackRequestEventBroadcaster = connectRequestEventBroadcaster;
+        this.connectBackRequestedEventBroadcaster = connectBackRequestedEventBroadcaster;
         new ConnectBackRequestIQFeatureInitializer().register(featureRegistry);
     }
     
@@ -32,7 +32,7 @@ public class ConnectBackRequestIQListener implements PacketListener {
     public void processPacket(Packet packet) {
         ConnectBackRequestIQ connectRequest = (ConnectBackRequestIQ)packet;
         LOG.debugf("processing connect request: {0}", connectRequest);
-        connectBackRequestEventBroadcaster.broadcast(new ConnectBackRequestEvent(connectRequest.getAddress(), connectRequest.getClientGuid(), connectRequest.getSupportedFWTVersion()));
+        connectBackRequestedEventBroadcaster.broadcast(new ConnectBackRequestedEvent(connectRequest.getAddress(), connectRequest.getClientGuid(), connectRequest.getSupportedFWTVersion()));
     }
     
     public PacketFilter getPacketFilter() {

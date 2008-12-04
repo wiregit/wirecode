@@ -11,7 +11,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.net.ConnectBackRequestEvent;
+import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBSocket;
@@ -30,7 +30,7 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
  * Manages state for push upload requests.
  */
 @Singleton
-public final class PushManager implements EventListener<ConnectBackRequestEvent> {
+public final class PushManager implements EventListener<ConnectBackRequestedEvent> {
     
     private static final Log LOG = LogFactory.getLog(PushManager.class);
 
@@ -53,15 +53,18 @@ public final class PushManager implements EventListener<ConnectBackRequestEvent>
     public PushManager(Provider<SocketsManager> socketsManager,
             Provider<HTTPAcceptor> httpAcceptor,
             Provider<UDPSelectorProvider> udpSelectorProvider,
-            Provider<NetworkManager> networkManager,
-            ListenerSupport<ConnectBackRequestEvent> connectRequestEventListenerSupport) {
+            Provider<NetworkManager> networkManager) {
         this.socketsManager = socketsManager;
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
         this.networkManager = networkManager;
-        // listener is leaked, but both are singleton scope, so it's fine
-        connectRequestEventListenerSupport.addListener(this);
     }    
+    
+    @Inject
+    void register(ListenerSupport<ConnectBackRequestedEvent> connectBackRequestedEventListenerSupport) {
+        // listener is leaked, but both are singleton scope, so it's fine
+        connectBackRequestedEventListenerSupport.addListener(this);
+    }
 
 	/**
 	 * Accepts a new push upload asynchronously.
@@ -233,7 +236,7 @@ public final class PushManager implements EventListener<ConnectBackRequestEvent>
     }
 
     @Override
-    public void handleEvent(ConnectBackRequestEvent event) {
+    public void handleEvent(ConnectBackRequestedEvent event) {
         // can assume false for lan, since same NAT resolver would have spotted that and opened a direct connection
         acceptPushUpload(event.getAddress(), event.getClientGuid(), false, event.getSupportedFWTVersion() > 0);
     }
