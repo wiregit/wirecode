@@ -84,19 +84,9 @@ public class ChatPanel extends JPanel implements Displayable {
         JEditorPane pane = new JEditorPane();
         pane.setEditable(false);
         pane.setContentType("text/html");
-        pane.setText(getMessagesPaneText());
         pane.addHyperlinkListener(new HyperlinkHandler());
         panel.add(pane, BorderLayout.CENTER);
         return panel;
-    }
-
-    private String getMessagesPaneText() {
-        return getRecentUpdatesText();
-    }
-    
-    private String getRecentUpdatesText() {
-        // TODO
-        return "Replace me with an HTML doc describing recent updates to LimeWire 5";
     }
 
     private static class HyperlinkHandler implements HyperlinkListener {
