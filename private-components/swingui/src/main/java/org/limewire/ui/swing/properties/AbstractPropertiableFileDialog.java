@@ -23,6 +23,7 @@ public abstract class AbstractPropertiableFileDialog extends Dialog {
         rating.setModel(new DefaultComboBoxModel(new Object[]{ propertiable.getProperty(FilePropertyKey.RATING) }));
         platform.setModel(new DefaultComboBoxModel(new Object[]{ propertiable.getProperty(FilePropertyKey.PLATFORM) }));
         populateMetadata(propertiable);
+        System.out.println("title is null? : " + (title == null) + ", " + str(propertiable.getProperty(FilePropertyKey.TITLE)));
         title.setText(str(propertiable.getProperty(FilePropertyKey.TITLE)));
         artist.setText(str(propertiable.getProperty(FilePropertyKey.AUTHOR)));
         author.setText(str(propertiable.getProperty(FilePropertyKey.AUTHOR)));

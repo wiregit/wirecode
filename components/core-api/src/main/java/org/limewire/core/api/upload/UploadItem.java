@@ -4,11 +4,12 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.PropertiableFile;
 
 /**
  * A single upload
  */
-public interface UploadItem {
+public interface UploadItem extends PropertiableFile {
 
     /**
      * cancels the upload
@@ -64,4 +65,6 @@ public interface UploadItem {
     public long getRemainingUploadTime();
 
     float getUploadSpeed();
+
+    UploadErrorState getErrorState();
 }

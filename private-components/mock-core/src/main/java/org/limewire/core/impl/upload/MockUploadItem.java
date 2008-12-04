@@ -5,6 +5,9 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
+import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
@@ -101,6 +104,33 @@ public class MockUploadItem implements UploadItem {
     @Override
     public float getUploadSpeed() {
         return 64;
+    }
+
+    @Override
+    public UploadErrorState getErrorState() {
+        return UploadErrorState.FILE_ERROR;
+    }
+
+    @Override
+    public Object getProperty(FilePropertyKey key) {
+        // TODO Auto-generated method stub
+        return "property for " + key;
+    }
+
+    @Override
+    public String getPropertyString(FilePropertyKey filePropertyKey) {
+        // TODO Auto-generated method stub
+        return "filePropertyKey for " + filePropertyKey;
+    }
+
+    @Override
+    public URN getUrn() {
+        return new URN() {
+            @Override
+            public int compareTo(URN o) {
+                return 0;
+            }
+        };
     }
 
 }

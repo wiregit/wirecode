@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -16,6 +17,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -46,19 +48,18 @@ public class UploadPanel extends JXPanel{
     
     @Inject
     public UploadPanel(UploadListManager listManager, LimeHeaderBarFactory headerBarFactory,
-            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
+            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory){
         super(new BorderLayout());
         
         this.buttonDecorator = buttonDecorator;
         this.headerBarFactory = headerBarFactory;
         this.uploadItems = listManager.getSwingThreadSafeUploads();
-        
 
-        UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory);
+        UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory);
         initHeader();
         
         add(header, BorderLayout.NORTH);
-        add(table, BorderLayout.CENTER);
+        add(new JScrollPane(table), BorderLayout.CENTER);
     }
     
     private void clearFinished() {

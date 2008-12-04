@@ -13,6 +13,7 @@ import org.limewire.ui.swing.player.LimeWireUiPlayerModule;
 import org.limewire.ui.swing.search.LimeWireUiSearchModule;
 import org.limewire.ui.swing.statusbar.LimeWireUiStatusbarModule;
 import org.limewire.ui.swing.tray.LimeWireUiTrayModule;
+import org.limewire.ui.swing.upload.LimeWireUiUploadModule;
 import org.limewire.ui.swing.util.LimeWireUiUtilModule;
 
 import com.google.inject.AbstractModule;
@@ -35,5 +36,6 @@ public class LimeWireSwingUiModule extends AbstractModule {
         install(new LimeWireUiOptionsModule());
         install(new LimeWireUiStatusbarModule());
         install(new LimeWireUiComponentsModule());
+        install(new LimeWireUiUploadModule());
     }
 }

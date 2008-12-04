@@ -14,6 +14,7 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
@@ -35,21 +36,14 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JProgressBar progressBar;
     private JLabel timeLabel;
     
-    private final Action cancelAction = new AbstractAction(I18n.tr("Cancel")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-           cancelUpload();
-           cancelCellEditing();
-        }
-    };
-    
+
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
         setLayout(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         this.categoryIconManager = categoryIconManager;
         
         nameLabel = new JLabel("Name");
         statusLabel = new JLabel("Status");
-        cancelButton = new JXButton(cancelAction);  
+        cancelButton = new JXButton("X"); 
         
 
         timeLabel = new JLabel("Time");
@@ -65,7 +59,20 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         add(cancelButton, "alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "hidemode 3, wrap");
         add(statusLabel, "aligny top, split 2");
-        add(timeLabel, "push, aligny top, alignx right");
+        add(timeLabel, "push, aligny top, alignx right, hidemode 3");
+    }
+    
+    public void setActionHandler(final UploadActionHandler actionHandler){
+        cancelButton.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
+
+        Action cancelAction = new AbstractAction(I18n.tr("Cancel")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               actionHandler.performAction(cancelButton.getActionCommand(), editItem);
+            }
+        };
+        
+        cancelButton.addActionListener(cancelAction);
     }
 
     @Override
@@ -93,18 +100,12 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             progressBar.setValue((int)(100 * item.getTotalAmountUploaded()/item.getFileSize()));
         }
         
-        if (item.getRemainingUploadTime() > Long.MAX_VALUE-1000) {
-            timeLabel.setVisible(false);
-        }
-        else {
+        timeLabel.setVisible(item.getState() == UploadState.UPLOADING);
+        if (timeLabel.isVisible()) {
             timeLabel.setText(CommonUtils.seconds2time(item.getRemainingUploadTime()));
-            timeLabel.setVisible(item.getState() == UploadState.UPLOADING);
-        }
+        }        
     }
     
-    private void cancelUpload() {
-        editItem.cancel();
-    }
     
     private String getMessage(UploadItem item){
         switch (item.getState()){
@@ -117,9 +118,21 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         case QUEUED:
             return I18n.trn("Waiting - {0} file needs to finish before upload can begin", "Waiting - {0} files need to finish before upload can begin", item.getQueuePosition());
         case UNABLE_TO_UPLOAD:
-            return I18n.tr("Unable to upload");        
+            return getErrorMessage(item.getErrorState());        
         }
         throw new IllegalArgumentException("Unknown UploadState " + item.getState());
+    }
+    
+    private String getErrorMessage(UploadErrorState errorState){
+        switch(errorState){
+        case FILE_ERROR:
+            return I18n.tr("Unable to upload: file error"); 
+        case INTERRUPTED:
+            return I18n.tr("Unable to upload: transfer interrupted"); 
+        case LIMIT_REACHED:
+            return I18n.tr("Unable to upload: upload limit reached"); 
+        }
+        throw new IllegalArgumentException("Unknown UploadErrorState " + errorState);
     }
 
 }

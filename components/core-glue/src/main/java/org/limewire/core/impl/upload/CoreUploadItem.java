@@ -3,15 +3,24 @@ package org.limewire.core.impl.upload;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.FilePropertyKey;
+import org.limewire.core.api.URN;
+import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.impl.URNImpl;
+import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.library.FileDesc;
 
 class CoreUploadItem implements UploadItem {
 
@@ -20,6 +29,8 @@ class CoreUploadItem implements UploadItem {
     private boolean isStopped = false;
 
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
+    
+    private Map<FilePropertyKey, Object> propertiesMap;
     
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;
 
@@ -36,6 +47,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public File getFile() {
+        System.out.println("uploader.getFileDesc() = "+ uploader.getFileDesc());
         return uploader.getFileDesc().getFile();
     }
 
@@ -154,6 +166,7 @@ class CoreUploadItem implements UploadItem {
     @Override
     public float getUploadSpeed() {
         try {
+            uploader.measureBandwidth();
             return uploader.getMeasuredBandwidth();
         } catch (InsufficientDataException e) {
             return 0;
@@ -170,5 +183,79 @@ class CoreUploadItem implements UploadItem {
             return UNKNOWN_TIME;
         }
 
+    }
+    
+    @Override
+    public UploadErrorState getErrorState() {
+        switch (uploader.getState()) {
+        case LIMIT_REACHED:
+        case BANNED_GREEDY:
+        case FREELOADER:
+            return UploadErrorState.LIMIT_REACHED;
+        case INTERRUPTED:
+        case SUSPENDED:
+        case WAITING_REQUESTS:
+            return UploadErrorState.INTERRUPTED;
+        case FILE_NOT_FOUND:
+        case MALFORMED_REQUEST:
+        case UNAVAILABLE_RANGE:
+            return UploadErrorState.FILE_ERROR;       
+        }
+        throw new IllegalStateException("Non-error UploaderState: " + uploader.getState());
+    }
+
+    @Override
+    public Object getProperty(FilePropertyKey key) {
+        return getPropertiesMap().get(key);
+    }
+
+    @Override
+    public String getPropertyString(FilePropertyKey key) {
+        Object value = getProperty(key);
+        if (value != null) {
+            String stringValue = value.toString();
+            return stringValue;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public URN getUrn() {
+        com.limegroup.gnutella.URN urn = uploader.getFileDesc().getSHA1Urn();
+        if(urn != null) {
+            return new URNImpl(urn);
+        }
+        return null;
+    }
+    
+    /**
+     * Lazily builds the properties map for this local file item. Uses double
+     * checked locking to prevent multiple threads from creating this map.
+     */
+    private Map<FilePropertyKey, Object> getPropertiesMap() {        
+        if (propertiesMap == null) {
+            synchronized (this) {
+                if (propertiesMap == null) {
+                    reloadProperties();
+                }
+            }
+        }
+        return propertiesMap;
+    }
+    
+    /**
+     * Reloads the properties map to whatever values are stored in the
+     * LimeXmlDocs for this file.
+     */
+    private void reloadProperties() {
+        synchronized (this) {
+            Map<FilePropertyKey, Object> reloadedMap = Collections
+                    .synchronizedMap(new HashMap<FilePropertyKey, Object>());
+            FileDesc fileDesc = uploader.getFileDesc();
+            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
+                    .lastModified(), fileDesc.getFileSize(), reloadedMap, fileDesc.getXMLDocument());
+            propertiesMap = reloadedMap;
+        }
     }
 }

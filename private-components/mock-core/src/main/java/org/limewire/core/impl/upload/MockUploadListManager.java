@@ -25,10 +25,10 @@ public class MockUploadListManager implements UploadListManager {
                 .observableElementList(new BasicEventList<UploadItem>(), uploadConnector));
         
         addUpload(UploadState.DONE, "File.mp3", 30000, 15000, Category.AUDIO);
-        addUpload(UploadState.UPLOADING, "File.avi", 3000, 150, Category.VIDEO);
+        addUpload(UploadState.QUEUED, "File.avi", 3000, 150, Category.VIDEO);
         addUpload(UploadState.UPLOADING, "File2mp3", 30000, 25544, Category.AUDIO);
         addUpload(UploadState.DONE, "File3.exe", 300, 150, Category.PROGRAM);
-        addUpload(UploadState.UPLOADING, "File3.doc", 300, 15, Category.DOCUMENT);
+        addUpload(UploadState.UNABLE_TO_UPLOAD, "File3.doc", 300, 15, Category.DOCUMENT);
         
     }
     
