@@ -54,6 +54,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster;
     private final XMPPAuthenticator authenticator;
     private final EventMulticaster<FeatureEvent> featureSupport;
+    // Connections that are logged in or logging in
     private final List<XMPPConnectionImpl> connections;
     
     private AddressEvent lastAddressEvent;
@@ -148,13 +149,14 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             if(lastAddressEvent != null) {
                 connection.handleEvent(lastAddressEvent);
             }
-            try {            
+            try {
+                connections.add(connection);
                 connection.login();
                 //maintain the last set login state available or do not disturb
                 connection.setMode(jabberSettings.isDoNotDisturbSet() ? Presence.Mode.dnd : Presence.Mode.available);
-                connections.add(connection);
                 return connection;
             } catch(XMPPException e) {
+                connections.remove(connection);
                 LOG.debug(e.getMessage(), e);
                 throw new XMPPException(e);
             }
@@ -184,9 +186,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     @Override
     public void logout() {
         for(XMPPConnection connection : connections) {
-            if(connection.isLoggedIn()) {
-                connection.logout();
-            }
+            connection.logout();
         }
         connections.clear();
     }
