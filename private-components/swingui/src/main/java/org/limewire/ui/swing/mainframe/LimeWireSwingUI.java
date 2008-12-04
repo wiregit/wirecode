@@ -9,12 +9,14 @@ import java.awt.event.ComponentEvent;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
+import org.limewire.core.api.Application;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.pro.ProNag;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.statusbar.StatusPanel;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -30,7 +32,8 @@ public class LimeWireSwingUI extends JPanel {
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
-            AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel) {
+            AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel,
+            Application application,  ProNag proNag) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -66,6 +69,11 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.addComponentListener(new PanelResizer(friendsPanel));
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
+        if(!application.isProVersion()) {
+            layeredPane.addComponentListener(new PanelResizer(proNag));
+            layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
+            proNag.loadContents();
+        }
         add(layeredPane, gbc);
                 
         JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);
