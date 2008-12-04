@@ -42,8 +42,8 @@ public class SearchOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getSearchBarPanel().applyOptions();
+    boolean applyOptions() {
+        return getSearchBarPanel().applyOptions();
     }
 
     @Override
@@ -109,7 +109,7 @@ public class SearchOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             SearchSettings.DEFAULT_SEARCH_CATEGORY_ID
                     .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
             
@@ -118,6 +118,7 @@ public class SearchOptionPanel extends OptionPanel {
 //            SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox
 //                    .isSelected());
             SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
+            return false;
         }
 
         @Override

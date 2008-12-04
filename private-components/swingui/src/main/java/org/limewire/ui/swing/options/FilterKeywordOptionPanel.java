@@ -76,10 +76,11 @@ public class FilterKeywordOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
         FilterSettings.BANNED_WORDS.setValue(values);
         spamManager.adjustSpamFilters();
+        return false;
     }
 
     @Override

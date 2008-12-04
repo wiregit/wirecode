@@ -70,9 +70,9 @@ public class FilteringOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
-        getBlockHostsPanel().applyOptions();
-        getAllowHostsPanel().applyOptions();
+    boolean applyOptions() {
+        return  getBlockHostsPanel().applyOptions() ||
+                getAllowHostsPanel().applyOptions();
     }
     
     @Override
@@ -112,12 +112,13 @@ public class FilteringOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             List<String> list = filterTable.getFilterModel().getModel();
             
             FilterSettings.USE_NETWORK_FILTER.setValue(backListCheckBox.isSelected());
             FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(list.toArray(new String[list.size()]));
             spamManager.reloadIPFilter();
+            return false;
         }
     
         @Override
@@ -160,11 +161,12 @@ public class FilteringOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             List<String> list = filterTable.getFilterModel().getModel();
             
             FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(list.toArray(new String[list.size()]));
             spamManager.reloadIPFilter();
+            return false;
         }
     
         @Override

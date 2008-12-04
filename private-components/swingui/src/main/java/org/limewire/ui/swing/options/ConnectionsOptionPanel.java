@@ -67,10 +67,10 @@ public class ConnectionsOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getConnectionSpeedPanel().applyOptions();
-        getDownloadsPanel().applyOptions();
-        getUploadPanel().applyOptions();
+    boolean applyOptions() {
+        return  getConnectionSpeedPanel().applyOptions() ||
+                getDownloadsPanel().applyOptions() ||
+                getUploadPanel().applyOptions();
     }
 
     @Override
@@ -114,8 +114,9 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             ConnectionSettings.CONNECTION_SPEED.setValue(getSpeed(broadBandButton.isSelected()));
+            return false;
         }
 
         @Override
@@ -177,9 +178,10 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             DownloadSettings.MAX_SIM_DOWNLOAD.setValue((Integer) maxDownloadSpinner.getModel().getValue());
             DownloadSettings.DOWNLOAD_SPEED.setValue(bandWidthSlider.getValue());
+            return false;
         }
 
         @Override
@@ -241,10 +243,11 @@ public class ConnectionsOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             UploadSettings.HARD_MAX_UPLOADS.setValue((Integer)maxUploadSpinner.getModel().getValue());
             UploadSettings.UPLOAD_SPEED.setValue(bandWidthSlider.getValue());
             SharingSettings.CLEAR_UPLOAD.setValue(clearUploadCheckBox.isSelected());
+            return false;
         }
 
         @Override

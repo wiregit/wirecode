@@ -33,9 +33,10 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         LibrarySettings.ALLOW_PROGRAMS.setValue(programCheckBox.isSelected());
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(documentCheckBox.isSelected());
+        return false;
     }
 
     @Override

@@ -107,11 +107,12 @@ public class LibraryManagerOptionPanel extends OptionPanel {
     }
 
     @Override
-    public void applyOptions() {
+    public boolean applyOptions() {
         LibraryManagerModel model = treeTable.getLibraryModel();
         Collection<File> manage = model.getManagedDirectories();
         Collection<File> exclude = model.getExcludedDirectories();
         libraryData.setManagedOptions(manage, exclude, getManagedCategories());
+        return false;
     }
 
     private Collection<Category> getManagedCategories() {

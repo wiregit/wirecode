@@ -54,9 +54,8 @@ public class FirewallOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
-        getListeningPortPanel().applyOptions();
-        getRouterConfigPanel().applyOptions();
+    boolean applyOptions() {
+        return getListeningPortPanel().applyOptions() || getRouterConfigPanel().applyOptions();
     }
 
     @Override
@@ -89,7 +88,7 @@ public class FirewallOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             int newPort = Integer.parseInt(portField.getText());
             if(newPort != port) {
                 try {
@@ -106,6 +105,7 @@ public class FirewallOptionPanel extends OptionPanel {
                     portField.setValue(port);
                 }
             }
+            return false;
         }
 
         @Override
@@ -167,10 +167,9 @@ public class FirewallOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-//            boolean restart = false;
-            //TODO: notify about restart required
-//            boolean oldUPNP = ConnectionSettings.UPNP_IN_USE.getValue();
+        boolean applyOptions() {
+            boolean restart = false;
+            boolean oldUPNP = ConnectionSettings.UPNP_IN_USE.getValue();
             int oldPort = ConnectionSettings.FORCED_PORT.getValue();
             boolean oldForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
 
@@ -178,8 +177,8 @@ public class FirewallOptionPanel extends OptionPanel {
                 if(!ConnectionSettings.UPNP_IN_USE.getValue())
                     ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
-//                if(!oldUPNP)
-//                    restart = true;
+                if(!oldUPNP)
+                    restart = true;
             } else if(doNothingRadioButton.isSelected()) {
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
                 ConnectionSettings.DISABLE_UPNP.setValue(true);
@@ -201,6 +200,8 @@ public class FirewallOptionPanel extends OptionPanel {
                 networkManager.addressChanged();
             if(newForce && (oldPort != newPort))
                 networkManager.portChanged();
+
+            return restart;
         }
 
         @Override

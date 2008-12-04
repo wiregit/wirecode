@@ -107,12 +107,13 @@ public class BitTorrentOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         BittorrentSettings.AUTOMATIC_SETTINGS.setValue(limewireControl.isSelected());
         BittorrentSettings.TORRENT_MAX_UPLOADS.setValue((Integer)maxUploadSpinner.getModel().getValue());
         BittorrentSettings.TORRENT_MIN_UPLOADS.setValue((Integer)minUploadSpinner.getModel().getValue());
         BittorrentSettings.TORRENT_FLUSH_VERIRY.setValue(safeChunkCheckBox.isSelected());
         BittorrentSettings.TORRENT_USE_MMAP.setValue(experimentCheckBox.isSelected());
+        return false;
     }
     
     @Override

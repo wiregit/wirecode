@@ -42,9 +42,10 @@ public class WarningMessagesOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         int skipWarningSettingValue = getLicenseSettingValueFromCheckboxValue(licensedMaterialCheckBox.isSelected());
         QuestionsHandler.SKIP_FIRST_DOWNLOAD_WARNING.setValue(skipWarningSettingValue);
+        return false;
     }
 
     @Override

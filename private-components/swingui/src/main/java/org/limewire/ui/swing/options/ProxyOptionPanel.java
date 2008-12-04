@@ -111,7 +111,7 @@ public class ProxyOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         int connectionMethod = ConnectionSettings.C_NO_PROXY;
 
         if (socksV4RadionButton.isSelected())
@@ -131,6 +131,7 @@ public class ProxyOptionPanel extends OptionPanel {
         ConnectionSettings.PROXY_USERNAME.setValue(userNameTextField.getText());
         ConnectionSettings.PROXY_PASS.setValue(passwordField.getPassword().toString());
         ConnectionSettings.PROXY_AUTHENTICATE.setValue(authenticationCheckBox.isSelected());
+        return false;
     }
 
     @Override

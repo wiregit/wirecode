@@ -70,7 +70,7 @@ public class PerformanceOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         
         boolean upChanged = UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() != disableUltraPeerCheckBox.isSelected();
         boolean tlsServerChanged = disableTLS.isSelected() != !networkManager.isIncomingTLSEnabled();
@@ -87,6 +87,7 @@ public class PerformanceOptionPanel extends OptionPanel {
         if((tlsServerChanged || (upChanged && disableUltraPeerCheckBox.isSelected()) && isSupernode)) {
             connectionManager.restart();
         }
+        return false;
     }
 
     @Override

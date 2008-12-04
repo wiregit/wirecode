@@ -110,10 +110,12 @@ public class ReallyAdvancedOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
+        boolean restartRequired = false;
         for(OptionPanel panel : panels.values()) {
-            panel.applyOptions();
+            restartRequired |= panel.applyOptions();
         }
+        return restartRequired;
     }
 
     @Override

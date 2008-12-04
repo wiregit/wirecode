@@ -89,11 +89,11 @@ public class FilesOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getManageExtensionsPanel().applyOptions();
-        getSaveOptionPanel().applyOptions();
-        getLimeWireStorePanel().applyOptions();
-        getITunesPanel().applyOptions();
+    boolean applyOptions() {
+        return getManageExtensionsPanel().applyOptions() ||
+                getSaveOptionPanel().applyOptions() ||
+                getLimeWireStorePanel().applyOptions() ||
+                getITunesPanel().applyOptions();
     }
 
     @Override
@@ -131,8 +131,8 @@ public class FilesOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-            extensionsPanel.applyOptions();
+        boolean applyOptions() {
+            return extensionsPanel.applyOptions();
         }
 
         @Override
@@ -165,8 +165,8 @@ public class FilesOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-            saveFolderPanel.applyOptions();
+        boolean applyOptions() {
+            return saveFolderPanel.applyOptions();
         }
 
         @Override
@@ -210,7 +210,7 @@ public class FilesOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             final String save = storePathTextField.getText();
             if(!save.equals(currentSaveDirectory)) {
                 try {
@@ -230,7 +230,7 @@ public class FilesOptionPanel extends OptionPanel {
                 }
             }
             
-            storeOptionPanel.applyOptions();
+            return storeOptionPanel.applyOptions();
         }
 
         @Override
@@ -300,7 +300,7 @@ public class FilesOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             final boolean prevEnabled = DaapSettings.DAAP_ENABLED.getValue();
            
             final boolean prevRequiresPassword = DaapSettings.DAAP_REQUIRES_PASSWORD.getValue();
@@ -316,7 +316,7 @@ public class FilesOptionPanel extends OptionPanel {
                         JOptionPane.ERROR_MESSAGE);
                 
                 initOptions();
-                return;
+                return false;
             }
             
             //enable daap setting
@@ -360,6 +360,7 @@ public class FilesOptionPanel extends OptionPanel {
                         I18n.tr("Daap Error"),
                         JOptionPane.ERROR_MESSAGE);
             }
+            return false;
         }
 
         @Override

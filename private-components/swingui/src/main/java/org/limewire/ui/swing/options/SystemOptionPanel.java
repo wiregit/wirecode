@@ -67,10 +67,10 @@ public class SystemOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getFileAssociationPanel().applyOptions();
-        getStartupShutdownPanel().applyOptions();
-        getUpdatesBugsPanel().applyOptions();
+    boolean applyOptions() {
+        return getFileAssociationPanel().applyOptions() ||
+               getStartupShutdownPanel().applyOptions() ||
+               getUpdatesBugsPanel().applyOptions();
     }
 
     @Override
@@ -140,7 +140,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             if (hasChanged(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS)) {
                 applyOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS);
                 LimeAssociationOption magnetAssociationOption = LimeAssociations
@@ -162,6 +162,7 @@ public class SystemOptionPanel extends OptionPanel {
             if (hasChanged(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
                 applyOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
             }
+            return false;
         }
 
         private void applyOption(JCheckBox checkBox, BooleanSetting booleanSetting) {
@@ -257,7 +258,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
             ApplicationSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
 
@@ -270,6 +271,7 @@ public class SystemOptionPanel extends OptionPanel {
                 ApplicationSettings.DISPLAY_TRAY_ICON.setValue(false);
             }
             ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.setValue(false);
+            return false;
         }
 
         @Override
@@ -333,7 +335,7 @@ public class SystemOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             applyOption(bugCheckBox, BugSettings.REPORT_BUGS);
             applyOption(bugMessageCheckBox, BugSettings.SHOW_BUGS);
             
@@ -342,6 +344,7 @@ public class SystemOptionPanel extends OptionPanel {
             } else {
                 UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
             }
+            return false;
         }
 
         private void applyOption(JCheckBox checkbox, BooleanSetting setting) {

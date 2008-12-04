@@ -53,8 +53,8 @@ public class ManageFileExtensionsOptionPanel extends OptionPanel {
     }
 
     @Override
-    public void applyOptions() {
-        this.manager.applyOptions();
+    public boolean applyOptions() {
+        return this.manager.applyOptions();
     }
 
     @Override

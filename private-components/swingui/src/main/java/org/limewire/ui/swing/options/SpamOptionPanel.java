@@ -55,7 +55,8 @@ public class SpamOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
+        return false;
     }
 
     @Override

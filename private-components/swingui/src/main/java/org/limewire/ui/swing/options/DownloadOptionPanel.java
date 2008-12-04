@@ -76,11 +76,11 @@ public class DownloadOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getSharingDownloadsPanel().applyOptions();
-        getSavingPanel().applyOptions();
-        getRecentDownloadsPanel().applyOptions();
-        getITunesPanel().applyOptions();
+    boolean applyOptions() {
+        return getSharingDownloadsPanel().applyOptions() ||
+                getSavingPanel().applyOptions() ||
+                getRecentDownloadsPanel().applyOptions() ||
+                getITunesPanel().applyOptions();
     }
 
     @Override
@@ -114,9 +114,10 @@ public class DownloadOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.setValue(shareCompletedDownloadsCheckBox.isSelected());
             SharingSettings.ALLOW_PARTIAL_SHARING.setValue(shareCompletedDownloadsCheckBox.isSelected());
+            return false;
         }
 
         @Override
@@ -161,7 +162,7 @@ public class DownloadOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearDownloadsCheckBox.isSelected());
             DownloadSettings.AUTO_RENAME_DUPLICATE_FILES.setValue(autoRenameDuplicateFilesCheckBox.isSelected());
             final String save = downloadSaveTextField.getText();
@@ -182,6 +183,7 @@ public class DownloadOptionPanel extends OptionPanel {
                     downloadSaveTextField.setText(currentSaveDirectory);
                 }
             }
+            return false;
         }
 
         @Override
@@ -235,8 +237,9 @@ public class DownloadOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             iTunesSettings.ITUNES_SUPPORT_ENABLED.setValue(addToITunesCheckBox.isSelected());
+            return false;
         }
 
         @Override
@@ -276,11 +279,12 @@ public class DownloadOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             DownloadSettings.REMEMBER_RECENT_DOWNLOADS.setValue(rememberDownloadsCheckBox.isSelected());
             if(!rememberDownloadsCheckBox.isSelected()) {
                 DownloadSettings.RECENT_DOWNLOADS.clear();
             }
+            return false;
         }
 
         @Override

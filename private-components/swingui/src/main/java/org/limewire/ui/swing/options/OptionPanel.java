@@ -23,7 +23,7 @@ public abstract class OptionPanel extends JPanel {
     
     public abstract void initOptions();
     
-    abstract void applyOptions();
+    abstract boolean applyOptions();
     
     abstract boolean hasChanged();
 }

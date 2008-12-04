@@ -131,13 +131,14 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         applyOption(MediaType.getAudioMediaType(), audioTextField);
         applyOption(MediaType.getVideoMediaType(), videoTextField);
         applyOption(MediaType.getImageMediaType(), imageTextField);
         applyOption(MediaType.getDocumentMediaType(), documentTextField);
         applyOption(MediaType.getProgramMediaType(), programTextField);
         applyOption(MediaType.getOtherMediaType(), otherTextField);
+        return false;
     }
     
     private void revertToDefault(JTextField textField) {

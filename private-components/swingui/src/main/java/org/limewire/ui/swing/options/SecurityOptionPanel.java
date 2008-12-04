@@ -59,10 +59,10 @@ public class SecurityOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getWarningMessagesPanel().applyOptions();
-        getUnsafeTypesPanel().applyOptions();
-        getFilteringPanel().applyOptions();
+    boolean applyOptions() {
+        return getWarningMessagesPanel().applyOptions() ||
+               getUnsafeTypesPanel().applyOptions()     ||
+               getFilteringPanel().applyOptions();
     }
 
     @Override
@@ -97,8 +97,8 @@ public class SecurityOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-            warningMessagesPanel.applyOptions();
+        boolean applyOptions() {
+            return warningMessagesPanel.applyOptions();
         }
 
         @Override
@@ -135,8 +135,8 @@ public class SecurityOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-            unsafeOptionPanel.applyOptions();
+        boolean applyOptions() {
+            return unsafeOptionPanel.applyOptions();
         }
 
         @Override
@@ -177,9 +177,9 @@ public class SecurityOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
-            filterKeywordPanel.applyOptions();
+            return filterKeywordPanel.applyOptions();
         }
 
         @Override

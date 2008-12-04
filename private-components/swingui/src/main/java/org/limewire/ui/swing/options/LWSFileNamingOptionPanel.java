@@ -73,7 +73,7 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
     }
     
     @Override
-    void applyOptions() {
+    boolean applyOptions() {
         // get the english version of the template
         String subDirectoryTemplateText = ((ListNode)subFolderComboBox.getSelectedItem()).getTemplateText();
         String fileTemplateText = ((ListNode)fileNameComboBox.getSelectedItem()).getTemplateText();
@@ -84,6 +84,8 @@ public class LWSFileNamingOptionPanel extends OptionPanel {
                     
         if (!subDirectoryTemplateText.equals(oldSubDirectory) ) 
             SharingSettings.setSubdirectoryLWSTemplate(subDirectoryTemplateText);
+
+        return false;
     }
 
     @Override

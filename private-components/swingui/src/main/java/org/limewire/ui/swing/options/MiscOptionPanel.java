@@ -56,9 +56,9 @@ public class MiscOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getNotificationsPanel().applyOptions();
-        getFriendChatPanel().applyOptions();
+    boolean applyOptions() {
+        return getNotificationsPanel().applyOptions() ||
+               getFriendChatPanel().applyOptions();
     }
 
     @Override
@@ -90,9 +90,10 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
+        boolean applyOptions() {
             UISettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
             UISettings.PLAY_NOTIFICATION_SOUND.setValue(playNotificationsCheckBox.isSelected());
+            return false;
         }
 
         @Override
@@ -174,18 +175,19 @@ public class MiscOptionPanel extends OptionPanel {
         }
 
         @Override
-        void applyOptions() {
-            if(!hasChanged())
-                return;
-            if(autoLoginCheckBox.isSelected()) {
-                String label = (String)serviceComboBox.getSelectedItem();
-                XMPPAccountConfiguration config = accountManager.getConfig(label);
-                config.setUsername(usernameField.getText());
-                config.setPassword(new String(passwordField.getPassword()));
-                accountManager.setAutoLoginConfig(config);
-            } else {
-                accountManager.setAutoLoginConfig(null);
+        boolean applyOptions() {
+            if(hasChanged()) {
+                if(autoLoginCheckBox.isSelected()) {
+                    String label = (String)serviceComboBox.getSelectedItem();
+                    XMPPAccountConfiguration config = accountManager.getConfig(label);
+                    config.setUsername(usernameField.getText());
+                    config.setPassword(new String(passwordField.getPassword()));
+                    accountManager.setAutoLoginConfig(config);
+                } else {
+                    accountManager.setAutoLoginConfig(null);
+                }
             }
+            return false;
         }
 
         @Override

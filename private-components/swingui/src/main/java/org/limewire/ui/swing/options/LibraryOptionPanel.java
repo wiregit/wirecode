@@ -41,8 +41,8 @@ public class LibraryOptionPanel extends OptionPanel {
     }
 
     @Override
-    void applyOptions() {
-        getLibraryManagerPanel().applyOptions();
+    boolean applyOptions() {
+        return getLibraryManagerPanel().applyOptions();
     }
 
     @Override
@@ -79,8 +79,8 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         
         @Override
-        void applyOptions() {
-            libraryOptionPanel.applyOptions();
+        boolean applyOptions() {
+            return libraryOptionPanel.applyOptions();
         }
 
         @Override
