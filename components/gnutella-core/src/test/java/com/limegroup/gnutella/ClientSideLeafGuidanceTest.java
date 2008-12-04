@@ -338,35 +338,40 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         SearchSettings.FILTER_SPAM_RESULTS.setValue(0.5f); // Strict
         spamManager.clearFilterData();        
         callback.responses.clear();
-        
-        // spawn a query and make sure all UPs get it
-        GUID queryGuid = spawnQuery("anita kesavan");
-        
-        // mark anita as spammy
-        RemoteFileDesc anita =injector.getInstance(RemoteFileDescFactory.class)
-                .createRemoteFileDesc(new ConnectableImpl("127.0.0.1", 6355, false), 1, "anita kasevan", 1000, DataUtils.EMPTY_GUID, 3, false, 3, false,
-                        null, URN.NO_URN_SET, false, "ALT", 0l);
-        
-        spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{anita});
-        assertTrue(anita.isSpam());
-        
-        // now send back results
+        final String query = "badgers";
+        final int size = 1234;
+
+        // Spawn a query and make sure the UPs get it
+        GUID queryGuid = spawnQuery(query);
+
+        // Mark a result as spam so the later results will be rated as spam
+        RemoteFileDescFactory rfdFactory =
+            injector.getInstance(RemoteFileDescFactory.class); 
+        RemoteFileDesc rfd = rfdFactory.createRemoteFileDesc(
+                new ConnectableImpl("127.0.0.1", 6355, false),
+                1, query, size, DataUtils.EMPTY_GUID, 3, false,
+                3, false, null, URN.NO_URN_SET, false, "ALT", 0l);
+        spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{rfd});
+        assertTrue(rfd.isSpam());
+
+        // Send back results from the UP - they should be rated as spam
+        // because they have the same address and size as the spam result
         Response[] res = new Response[REPORT_INTERVAL*4];
         for (int i = 0; i < res.length; i++)
-            res[i] = responseFactory.createResponse(10, 10, "anita kesavan "+i);
+            res[i] = responseFactory.createResponse(10, size, query + i);
 
-        QueryReply reply =
-            queryReplyFactory.createQueryReply(queryGuid.bytes(), (byte) 1,
-                    6355, myIP(), 0, res, GUID.makeGuid(), new byte[0],
-                    false, false, true, true, false, false, null);
-        
+        QueryReply reply = queryReplyFactory.createQueryReply(
+                queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                GUID.makeGuid(), new byte[0], false, false, true, true,
+                false, false, null);
+
         testUP[0].send(reply);
         testUP[0].flush();
         Thread.sleep(1000);
-        
+
         // the gui should be informed about the results 
         assertEquals(res.length, callback.responses.size());
-        
+
         // the UP should not get a QueryStatusResponse for spam results
         QueryStatusResponse qsr = getFirstQueryStatus(testUP[0]);
         assertNull(qsr);
