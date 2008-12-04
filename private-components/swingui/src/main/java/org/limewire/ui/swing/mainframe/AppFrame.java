@@ -36,8 +36,10 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
+import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
 import org.limewire.ui.swing.tray.TrayExitListener;
+import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.wizard.SetupWizard;
 import org.mozilla.browser.MozillaInitialization;
@@ -57,11 +59,9 @@ import com.google.inject.Stage;
  */
 public class AppFrame extends SingleFrameApplication {
 
-    @Inject
-    private static volatile Injector injector;
+    @Inject private static volatile Injector injector;
 
     private static volatile boolean started;
-    private static List<ApplicationLifecycleListener> lifecycleListeners = new ArrayList<ApplicationLifecycleListener>();
 
     /** Default background color for panels */
     @Resource private Color bgColor;
@@ -72,7 +72,10 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private SetupWizard setupWizard;
     @Inject private OptionsDialog options;
     @Inject private FramePositioner framePositioner;
+    @Inject private TrayNotifier trayNotifier;
+    @Inject private LimeMenuBar limeMenuBar;
 
+    /** Returns true if the UI has initialized & successfully been shown. */
     public static boolean isStarted() {
         return started;
     }
@@ -121,10 +124,10 @@ public class AppFrame extends SingleFrameApplication {
         createUiInjector();
         assert ui != null;
 
-        ui.showTrayIcon();
-        getMainFrame().setJMenuBar(ui.getMenuBar());
+        trayNotifier.showTrayIcon();
+        getMainFrame().setJMenuBar(limeMenuBar);
         
-        addExitListener(new TrayExitListener(ui.getTrayNotifier()));
+        addExitListener(new TrayExitListener(trayNotifier));
         addExitListener(new ShutdownListener(getMainFrame(), application));
         
         framePositioner.initialize(getMainFrame());
@@ -155,7 +158,7 @@ public class AppFrame extends SingleFrameApplication {
                     g.fillRect(0, 0, width, height);
                 }
             });
-            getMainView().getFrame().setGlassPane(glassPane);
+            getMainFrame().setGlassPane(glassPane);
 
             glassPane.setVisible(true);
             setupWizard.showDialogIfNeeded(getMainFrame());
@@ -163,10 +166,6 @@ public class AppFrame extends SingleFrameApplication {
         }
         
         EventAnnotationProcessor.subscribe(this);
-        
-        for(ApplicationLifecycleListener listener : lifecycleListeners) {
-            listener.startupComplete();
-        }
         
         // Now that the UI is ready to use, update it's priority a bit.
         Thread eventThread = Thread.currentThread();
@@ -258,14 +257,6 @@ public class AppFrame extends SingleFrameApplication {
 
         uiDefaults.put("Table.background", bgColorResource);
     }
-    
-    public static void addApplicationLifecycleListener(ApplicationLifecycleListener listener) {
-        lifecycleListeners.add(listener);
-    }
-    
-    public static void removeApplicationLifecycleListener(ApplicationLifecycleListener listener) {
-        lifecycleListeners.remove(listener);
-    }    
     
     private static class ShutdownListener implements ExitListener {
         private final Application application;

@@ -85,18 +85,6 @@ class SystemTrayNotifier implements TrayNotifier {
 		
 		menu.addSeparator();
 		
-		// about box
-		item = new MenuItem(I18n.tr("About"));
-		item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
-                map.get("showAboutWindow").actionPerformed(e);
-			}
-		});
-		menu.add(item);
-		
-		menu.addSeparator();
-		
 		//exit after transfers
 		item = new MenuItem(I18n.tr("Exit after Transfers"));
 		item.addActionListener(new ActionListener() {
@@ -121,8 +109,9 @@ class SystemTrayNotifier implements TrayNotifier {
 	
 	@Override
 	public boolean isExitEvent(EventObject event) {
-	    if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue())
+	    if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
 	        return true;
+	    }
 	    
 	    if(event != null && event.getSource() instanceof MenuItem) {
 	        MenuItem item = (MenuItem)event.getSource();

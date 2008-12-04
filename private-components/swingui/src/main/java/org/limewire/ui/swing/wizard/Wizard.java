@@ -115,6 +115,8 @@ public class Wizard extends JPanel{
         }
         if(dialog != null){
             dialog.setVisible(false);
+            dialog.dispose();
+            dialog = null;
         }
     }
 

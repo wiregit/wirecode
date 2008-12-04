@@ -7,13 +7,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
 import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -29,8 +26,6 @@ import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.PanelDisplayedEvent;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
-import org.limewire.ui.swing.mainframe.AppFrame;
-import org.limewire.ui.swing.mainframe.ApplicationLifecycleListener;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.sound.WavSoundPlayer;
 import org.limewire.ui.swing.tray.Notification;
@@ -50,13 +45,12 @@ import com.google.inject.Singleton;
  * All visible aspects of chat are rendered in this panel.
  */
 @Singleton
-public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLifecycleListener, VisibleComponent {
+public class ChatFramePanel extends JXPanel implements Resizable, VisibleComponent {
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     private static final Log LOG = LogFactory.getLog(ChatFramePanel.class);
     private static final String MESSAGE_SOUND_PATH = "/org/limewire/ui/swing/mainframe/resources/sounds/friends/message.wav";
     private final ChatPanel chatPanel;
     private final TrayNotifier notifier;
-    private final WindowStateListener windowStateListener;
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
     
@@ -70,7 +64,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
         this.chatPanel = chatPanel;
         this.notifier = notifier;
         this.mainPanel = new java.awt.Panel();
-        this.windowStateListener = new WindowStateListener();
         
         mainPanel.setVisible(false);
         mainPanel.setBackground(getBackground());
@@ -86,8 +79,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
                 setChatPanelVisible(false);
             }
         });
-        
-        AppFrame.addApplicationLifecycleListener(this);
           
         EventAnnotationProcessor.subscribe(this);
     }
@@ -111,14 +102,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     
     public void setUnseenMessageListener(UnseenMessageListener unseenMessageListener) {
         this.unseenMessageListener = unseenMessageListener;
-    }
-
-    @Override
-    public void startupComplete() {
-        JFrame frame = GuiUtils.getMainFrame();
-        if (frame != null) {
-            frame.addWindowFocusListener(windowStateListener);
-        }
     }
     
     @Override
@@ -157,7 +140,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
         unseenMessageListener.messageReceivedFrom(event.getMessage().getFriendID(), isVisible());
         
-        if (event.getMessage().getType() != Message.Type.Sent && !windowStateListener.isWindowMainFocus()) {
+        if (event.getMessage().getType() != Message.Type.Sent && !GuiUtils.getMainFrame().isActive()) {
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(new Notification(getNoticeForMessage(event)));
             
@@ -208,43 +191,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, ApplicationLif
     public void resize() {
         if (isVisible()) {
             resetBounds();
-        }
-    }
-    
-    private class WindowStateListener extends WindowAdapter {
-        private WindowEvent lastWindowState;
-        private String originalTitlebarText;
-
-        @Override
-        public void windowGainedFocus(WindowEvent e) {
-            lastWindowState = e;
-            JFrame frame = (JFrame)e.getComponent();
-            if (frame != null) {
-                if (originalTitlebarText != null) {
-                    frame.setTitle(originalTitlebarText);
-                    originalTitlebarText = null;
-                }
-            }
-        }
-
-        @Override
-        public void windowLostFocus(WindowEvent e) {
-            lastWindowState = e;
-            JFrame frame = (JFrame)e.getComponent();
-            if (frame != null) {
-                String title = frame.getTitle();
-                if (title != null) {
-                    originalTitlebarText = title;
-                }
-            }
-        }
-
-        public boolean isWindowMainFocus() {
-            if (lastWindowState != null) {
-                int newState = lastWindowState.getNewState();
-                return newState == WindowEvent.WINDOW_GAINED_FOCUS;
-            }
-            return true;
         }
     }
 

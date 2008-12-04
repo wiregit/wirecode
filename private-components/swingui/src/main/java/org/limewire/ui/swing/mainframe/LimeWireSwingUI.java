@@ -7,7 +7,6 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.JLayeredPane;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
 import org.limewire.player.api.AudioPlayer;
@@ -15,11 +14,9 @@ import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
-import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.statusbar.StatusPanel;
-import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
@@ -27,21 +24,16 @@ import com.google.inject.Inject;
 public class LimeWireSwingUI extends JPanel {
     
     private final TopPanel topPanel;
-    private final TrayNotifier trayNotifier;
-    private final JMenuBar menuBar;
     
 	@Inject
     public LimeWireSwingUI(
             TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
-            TrayNotifier trayNotifier, AudioPlayer player,
-            LimeMenuBar limeMenuBar, DownloadSummaryPanel downloadSummaryPanel) {
+            AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel) {
     	GuiUtils.assignResources(this);
     	        
-    	this.trayNotifier = trayNotifier;
     	this.topPanel = topPanel;
-    	this.menuBar = limeMenuBar;
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -96,18 +88,6 @@ public class LimeWireSwingUI extends JPanel {
 
     public void focusOnSearch() {
         topPanel.requestFocusInWindow();
-    }
-    
-    public void showTrayIcon() {
-        trayNotifier.showTrayIcon();
-    }
-    
-    public TrayNotifier getTrayNotifier() {
-        return trayNotifier;
-    }
-
-    public JMenuBar getMenuBar() {
-        return menuBar;
     }
     
     private static class MainPanelResizer extends ComponentAdapter {
