@@ -9,14 +9,15 @@ import java.awt.event.ComponentEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
@@ -31,7 +32,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
-    private final HyperLinkButton shareLabel;
+    private final JXHyperlink shareLabel;
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
     private final XMPPService xmppService;
@@ -46,9 +47,9 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         this.loginPanel = loginPanel;
         this.xmppService = xmppService;
         this.accountManager = accountManager;
-        setLayout(new VerticalLayout(0));
+        setLayout(new MigLayout("insets 0", "0[]0", "[][][]"));
         
-        shareLabel = new HyperLinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
+        shareLabel = new JXHyperlink(new AbstractAction(I18n.tr("<HTML><U>Share with friends!</U></HTML>")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 shareLabel.setVisible(false);
@@ -56,8 +57,8 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
             }
         });
         shareLabel.setName("FriendsSignIn.ShareLabel");
-        add(shareLabel);
-        add(loginPanel);
+        add(shareLabel, "wrap, gapleft 10");
+        add(loginPanel, "wrap");
         add(loggedInPanel);
         
         // Presetup the UI so that it looks correct until services start.
