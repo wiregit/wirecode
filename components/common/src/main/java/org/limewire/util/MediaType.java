@@ -151,7 +151,7 @@ public class MediaType implements Serializable {
     private static final MediaType TYPE_IMAGES =
         new MediaType(SCHEMA_IMAGES, IMAGES,
             new String[] {
-                "gif", "png",
+                "gif", "png", "bmp",
                 "jpg", "jpeg", "jpe", "jif", "jiff", "jfif",
                 "tif", "tiff", "iff", "lbm", "ilbm", "eps",
                 "mac", "drw", "pct", "img",
