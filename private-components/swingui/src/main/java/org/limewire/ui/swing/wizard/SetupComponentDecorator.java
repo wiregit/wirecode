@@ -11,6 +11,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
@@ -89,7 +90,7 @@ public class SetupComponentDecorator {
     }
     
     public void decoratePlainButton(JXButton button) {
-        plainButtonDecorator.decorateDarkFullButton(button);
+        plainButtonDecorator.decorateDarkFullButton(button, AccentType.NONE);
     }
     
     public void decorateSetupHeader(JXPanel header) {

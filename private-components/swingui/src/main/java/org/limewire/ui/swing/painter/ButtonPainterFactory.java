@@ -3,6 +3,7 @@ package org.limewire.ui.swing.painter;
 import java.awt.Color;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -45,11 +46,8 @@ public class ButtonPainterFactory {
         return new LightButtonBackgroundPainter();
     }
     
-    public ButtonBackgroundPainter createDarkFullButtonBackgroundPainter() {
-        return new DarkButtonBackgroundPainter();
-    }
-    
-    public ButtonBackgroundPainter createDarkFullButtonBackgroundPainter(DrawMode mode) {
-        return new DarkButtonBackgroundPainter(mode);
+    public ButtonBackgroundPainter createDarkFullButtonBackgroundPainter(DrawMode mode, 
+            AccentType accent) {
+        return new DarkButtonBackgroundPainter(mode, accent);
     }
 }

@@ -7,6 +7,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.ui.swing.painter.ButtonPainterFactory;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 
 import com.google.inject.Inject;
@@ -43,21 +44,25 @@ public class ButtonDecorator {
         button.setFont(miniTextFont);
     }
     
+    public void decorateDarkFullButton(JXButton button, AccentType accent) {
+        decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, accent);
+    }
+    
     public void decorateDarkFullButton(JXButton button) {
-        decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED);
+        decorateDarkFullButton(button, DrawMode.FULLY_ROUNDED, AccentType.SHADOW);
     }
     
     public void decorateDarkFullImageButton(JXButton button, DrawMode mode) {
         decorateDarkFullButton(button, button.getForegroundPainter(), 
-                painterFactory.createDarkFullButtonBackgroundPainter(mode));
+                painterFactory.createDarkFullButtonBackgroundPainter(mode, AccentType.SHADOW));
         
         button.setContentAreaFilled(false);
         button.setPaintBorderInsets(true);
     }
     
-    public void decorateDarkFullButton(JXButton button, DrawMode mode) {
+    public void decorateDarkFullButton(JXButton button, DrawMode mode, AccentType accent) {
         decorateDarkFullButton(button, painterFactory.createDarkFullButtonForegroundPainter(), 
-                painterFactory.createDarkFullButtonBackgroundPainter(mode));
+                painterFactory.createDarkFullButtonBackgroundPainter(mode, accent));
     }
     
     private void decorateDarkFullButton(JXButton button,

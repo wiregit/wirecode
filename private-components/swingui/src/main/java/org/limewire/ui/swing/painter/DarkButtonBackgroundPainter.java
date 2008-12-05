@@ -41,12 +41,8 @@ public class DarkButtonBackgroundPainter extends ButtonBackgroundPainter {
     @Resource private Color disabledBorderGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color disabledBorderGradientBottom = PainterUtils.TRASPARENT;
     
-    
-    public DarkButtonBackgroundPainter() {
-        this(DrawMode.FULLY_ROUNDED);
-    }
-    
-    public DarkButtonBackgroundPainter(DrawMode mode) {
+   
+    public DarkButtonBackgroundPainter(DrawMode mode, AccentType accentType) {
         GuiUtils.assignResources(this);
         
         this.drawMode = mode;
@@ -65,19 +61,19 @@ public class DarkButtonBackgroundPainter extends ButtonBackgroundPainter {
         
         this.normalPainter = createPainter(this.normalGradientTop, this.normalGradientBottom,
                 this.border, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT,
-                normalRightGradient, this.normalBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
+                normalRightGradient, this.normalBevelBottom, this.arcWidth, this.arcHeight, accentType);
         
         this.hoveredPainter = createPainter(this.highlightGradientTop, this.highlightGradientBottom,
                 this.border,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                hoveredRightGradient, this.highlightBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
+                hoveredRightGradient, this.highlightBevelBottom, this.arcWidth, this.arcHeight, accentType);
         
         this.clickedPainter = createPainter(this.clickGradientTop, this.clickGradientBottom,
                 this.border,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                clickedRightGradient, this.clickBevelBottom, this.arcWidth, this.arcHeight, AccentType.SHADOW);
+                clickedRightGradient, this.clickBevelBottom, this.arcWidth, this.arcHeight, accentType);
         
         this.disabledPainter = createPainter(this.disabledGradientTop, this.disabledGradientBottom,
                 disabledBorderGradient,  PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, 
-                PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, this.arcWidth, this.arcHeight, AccentType.NONE);
+                PainterUtils.TRASPARENT, PainterUtils.TRASPARENT, this.arcWidth, this.arcHeight, accentType);
         
         this.setCacheable(false);
     }
