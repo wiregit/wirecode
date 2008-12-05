@@ -219,4 +219,9 @@ public class BTUploader implements Uploader, TorrentEventListener {
     public URN getUrn() {
         return _torrent.getMetaInfo().getURN();
     }
+
+    @Override
+    public int getNumUploadConnections() {
+        return _torrent.getNumUploadPeers();
+    }
 }

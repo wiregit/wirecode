@@ -132,4 +132,14 @@ public class MockUploadItem implements UploadItem {
         return new File(fileName);
     }
 
+    @Override
+    public UploadItemType getUploadItemType() {
+        return UploadItemType.GNUTELLA;
+    }
+
+    @Override
+    public int getNumUploadConnections() {
+        return 0;
+    }
+
 }

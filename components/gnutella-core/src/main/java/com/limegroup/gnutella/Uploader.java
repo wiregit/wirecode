@@ -156,6 +156,12 @@ public interface Uploader extends BandwidthTracker, Connectable {
      * Returns the URN for the file backing this uploader. 
      */
     public URN getUrn();
+    
+    /**
+     * Returns the number of connections we are currently uplaoding to. 
+     */
+    public int getNumUploadConnections();
+    
 
 }
 

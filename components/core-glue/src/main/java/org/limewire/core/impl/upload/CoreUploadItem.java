@@ -17,6 +17,7 @@ import org.limewire.core.impl.URNImpl;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
+import com.limegroup.bittorrent.BTUploader;
 import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
@@ -33,9 +34,11 @@ class CoreUploadItem implements UploadItem {
     private Map<FilePropertyKey, Object> propertiesMap;
     
     public final static long UNKNOWN_TIME = Long.MAX_VALUE;
-
+    private final UploadItemType uploadItemType;
+    
     public CoreUploadItem(Uploader uploader) {
         this.uploader = uploader;
+        uploadItemType = uploader instanceof BTUploader ? UploadItemType.BITTORRENT : UploadItemType.GNUTELLA;
     }
 
     @Override
@@ -264,5 +267,15 @@ class CoreUploadItem implements UploadItem {
     @Override
     public File getFile() {
         return uploader.getFile();
+    }
+
+    @Override
+    public UploadItemType getUploadItemType() {
+        return uploadItemType;
+    }
+
+    @Override
+    public int getNumUploadConnections() {
+        return uploader.getNumUploadConnections();
     }
 }

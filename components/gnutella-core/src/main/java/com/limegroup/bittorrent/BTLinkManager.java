@@ -110,6 +110,18 @@ public class BTLinkManager implements Shutdownable,
 		}
 		return busy;
 	}
+	
+	/**
+	 * Returns the number of peers we are curerntly uplaoding to. 
+	 */
+	public synchronized int getNumUploadingPeers() {
+        int upload = 0;
+        for (BTLink con : _connections) {
+            if (con.isUploading())
+                upload++;
+        }
+        return upload;
+    }
 
 	public synchronized int getNumChockingPeers() {
 		int qd = 0;

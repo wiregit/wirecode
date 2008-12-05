@@ -1225,5 +1225,10 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
     public Swarmer getSwarmer() {
         return webSeedSwarmer;
     }
+
+    @Override
+    public int getNumUploadPeers() {
+        return linkManager.getNumUploadingPeers();
+    }
     
 }

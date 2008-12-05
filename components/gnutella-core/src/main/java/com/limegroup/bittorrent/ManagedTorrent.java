@@ -122,4 +122,9 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      */
     BTLinkManager getLinkManager();
 
+    /**
+     * Returns the number of peers you are currently uploading to. 
+     */
+    int getNumUploadPeers();
+
 }

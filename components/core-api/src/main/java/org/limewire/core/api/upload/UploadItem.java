@@ -10,6 +10,11 @@ import org.limewire.core.api.library.PropertiableFile;
  * A single upload
  */
 public interface UploadItem extends PropertiableFile {
+    
+    public enum UploadItemType {
+        GNUTELLA,
+        BITTORRENT
+    }
 
     /**
      * cancels the upload
@@ -63,5 +68,18 @@ public interface UploadItem extends PropertiableFile {
 
     UploadErrorState getErrorState();
 
+    /**
+     * Returns the file backing this upload item. 
+     */
     public File getFile();
+    
+    /**
+     * Returns the type of this upload item.
+     */
+    public UploadItemType getUploadItemType();
+
+    /**
+     * Returns the number of connections we are currently uploading to.
+     */
+    public int getNumUploadConnections();
 }
