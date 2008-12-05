@@ -74,6 +74,7 @@ class CoreUploadItem implements UploadItem {
             return UploadState.UPLOADING;
 
         case QUEUED:
+        case WAITING_REQUESTS:
             return UploadState.QUEUED;
 
         case LIMIT_REACHED:
@@ -82,7 +83,6 @@ class CoreUploadItem implements UploadItem {
         case UNAVAILABLE_RANGE:
         case MALFORMED_REQUEST:
         case SUSPENDED:
-        case WAITING_REQUESTS:
         case BANNED_GREEDY:
         case FREELOADER:
             return UploadState.UNABLE_TO_UPLOAD;
@@ -216,7 +216,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public URN getUrn() {
-        com.limegroup.gnutella.URN urn = uploader.getFileDesc().getSHA1Urn();
+        com.limegroup.gnutella.URN urn = uploader.getUrn();
         if(urn != null) {
             return new URNImpl(urn);
         }

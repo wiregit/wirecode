@@ -255,4 +255,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public File getFile() {
         return getFileDesc().getFile();
     }
+    
+    @Override
+    public URN getUrn() {
+     return getFileDesc().getSHA1Urn();
+    }
 }

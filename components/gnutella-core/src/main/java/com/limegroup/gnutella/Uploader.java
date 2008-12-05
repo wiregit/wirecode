@@ -151,6 +151,11 @@ public interface Uploader extends BandwidthTracker, Connectable {
      * Returns the file backing this uploader. 
      */
     public File getFile();
+    
+    /**
+     * Returns the URN for the file represented by this file. 
+     */
+    public URN getUrn();
 
 }
 

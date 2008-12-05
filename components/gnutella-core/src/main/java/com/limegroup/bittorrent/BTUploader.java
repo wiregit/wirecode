@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.uploader.UploadType;
@@ -208,5 +209,10 @@ public class BTUploader implements Uploader, TorrentEventListener {
     @Override
     public File getFile() {
         return _torrent.getMetaInfo().getFileSystem().getCompleteFile();
+    }
+    
+    @Override
+    public URN getUrn() {
+        return _torrent.getMetaInfo().getURN();
     }
 }
