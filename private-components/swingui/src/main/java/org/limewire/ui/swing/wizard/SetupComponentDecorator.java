@@ -11,14 +11,19 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
+
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * A non singleton decorator class for the special components
  *  used during the setup wizard
  */
 public class SetupComponentDecorator {
+    
+    private final ButtonDecorator plainButtonDecorator;
     
     @Resource private Icon largeBox;
     @Resource private Icon largeBoxChecked;
@@ -37,8 +42,12 @@ public class SetupComponentDecorator {
     
     private final GenericBarPainter<JXPanel> pooledBarPainter;
     
-    SetupComponentDecorator() {
+    @AssistedInject
+    SetupComponentDecorator(ButtonDecorator plainButtonDecorator) {
+        
         GuiUtils.assignResources(this);
+        
+        this.plainButtonDecorator = plainButtonDecorator;
         
         pooledBarPainter = new GenericBarPainter<JXPanel>(
                 new GradientPaint(0,0, headerGradientTop, 0,1, headerGradientBottom, false),
@@ -72,11 +81,20 @@ public class SetupComponentDecorator {
         box.setFocusPainted(false);
     }
     
-    public void decorateContinueButton(JXButton button) {
+    public void decorateGreenButton(JXButton button) {
         button.setBackground(Color.GREEN);
-    }   
+        button.setOpaque(true);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+    }
+    
+    public void decoratePlainButton(JXButton button) {
+        plainButtonDecorator.decorateDarkFullButton(button);
+    }
     
     public void decorateSetupHeader(JXPanel header) {
         header.setBackgroundPainter(pooledBarPainter);
     }
+    
+    
 }

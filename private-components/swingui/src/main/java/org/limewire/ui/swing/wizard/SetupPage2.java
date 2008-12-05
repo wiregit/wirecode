@@ -8,13 +8,13 @@ import java.util.Collection;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -46,7 +46,7 @@ public class SetupPage2 extends WizardPage {
     
     private LibraryManagerTreeTable treeTable;
     private JScrollPane treeTableScrollPane;
-    private JButton addFolderButton;
+    private JXButton addFolderButton;
     private LibraryData libraryData;
     
     public SetupPage2(SetupComponentDecorator decorator, LibraryData libraryData) {
@@ -63,7 +63,8 @@ public class SetupPage2 extends WizardPage {
         decorator.decorateLargeRadioButton(manualButton);
         manualButton.addActionListener(new ButtonSelectionListener());
         
-        addFolderButton = new JButton(new AddDirectoryAction(SetupPage2.this));
+        addFolderButton = new JXButton(new AddDirectoryAction(SetupPage2.this));
+        decorator.decoratePlainButton(addFolderButton);
         
         treeTable = new LibraryManagerTreeTable(libraryData);
         initManualPanel();

@@ -16,9 +16,11 @@ public class SetupWizard {
     private Wizard wizard;
     
     @Inject
-    public SetupWizard(LibraryManager libraryManager){        
+    public SetupWizard(SetupComponentDecoratorFactory decoratorFactory, 
+            LibraryManager libraryManager){
+        
         if (shouldShowWizard()) {
-            createWizard(libraryManager.getLibraryData());
+            createWizard(decoratorFactory, libraryManager.getLibraryData());
         }
     }
     
@@ -32,8 +34,10 @@ public class SetupWizard {
         }
     }
         
-    private void createWizard(LibraryData libraryData){
-        SetupComponentDecorator decorator = new SetupComponentDecorator();
+    private void createWizard(SetupComponentDecoratorFactory decoratorFactory, 
+            LibraryData libraryData){
+        
+        SetupComponentDecorator decorator = decoratorFactory.create();
         
         wizard = new Wizard(decorator);
         

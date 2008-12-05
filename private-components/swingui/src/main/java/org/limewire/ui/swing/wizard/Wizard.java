@@ -56,7 +56,7 @@ public class Wizard extends JPanel{
         }
     };
     
-    private JButton finishButton;    
+    private JXButton finishButton;    
     private Action finishAction = new AbstractAction(I18n.tr("Finish")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -80,11 +80,13 @@ public class Wizard extends JPanel{
         pageList = new ArrayList<WizardPage>();
         
         continueButton = new JXButton(continueAction);
-        decorator.decorateContinueButton(continueButton);
+        decorator.decorateGreenButton(continueButton);
         
         backButton = new HyperLinkButton((String)backAction.getValue(Action.NAME), backAction);
-        finishButton = new JButton(finishAction);
-        finishButton.setBackground(getBackground());
+        
+        finishButton = new JXButton(finishAction);
+        decorator.decorateGreenButton(finishButton);
+        
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
         mainPanel.setBackground(getBackground());
