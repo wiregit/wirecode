@@ -128,7 +128,8 @@ public class BrowseHostHandler {
                 return;
             }
         } catch (IOException ie) {
-            LOG.debug("Error during browse host", ie);
+            if (LOG.isDebugEnabled())
+                LOG.debug("Error during browse host: " + friendPresence, ie);
         } catch (URISyntaxException e) {
             LOG.debug("Error during browse host", e);
         } catch (HttpException e) {

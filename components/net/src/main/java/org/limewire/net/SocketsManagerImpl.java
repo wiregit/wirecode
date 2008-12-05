@@ -136,6 +136,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     private AddressResolver getResolver(Address address) {
         for (AddressResolver resolver : addressResolvers) {
             if (resolver.canResolve(address)) {
+                LOG.debugf("found resolver: {0} for: {1}", resolver, address);
                 return resolver;
             }
         }
@@ -145,6 +146,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     private AddressConnector getConnector(Address address) {
         for (AddressConnector connector : addressConnectors) {
             if (connector.canConnect(address)) {
+                LOG.debugf("found connector: {0} for: {1}", connector, address);
                 return connector;
             }
         }
@@ -182,7 +184,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
                 }
                 @Override
                 public void shutdown() {
-                    observer.shutdown();
+                    // observer.shutdown();
                 }
             }); 
         } else {
@@ -203,7 +205,7 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
     }
 
     @Override
-    public <T extends AddressResolutionObserver> T resolve(Address address, final T observer) {
+    public <T extends AddressResolutionObserver> T resolve(final Address address, final T observer) {
         // feel free to rework this logic with more use cases that don't fit the model
         if (address == null) { 
             throw new NullPointerException("address must not be null");
@@ -212,11 +214,12 @@ public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<Conn
         if (resolver != null) {
             resolver.resolve(address, new AddressResolutionObserver() {
                 @Override
-                public void resolved(Address address) {
-                    if (canResolve(address)) {
-                        resolve(address, this);
+                public void resolved(Address resolvedAddress) {
+                    LOG.debugf("resolved {0} to {1}", address, resolvedAddress);
+                    if (canResolve(resolvedAddress)) {
+                        resolve(resolvedAddress, this);
                     } else {
-                        observer.resolved(address);
+                        observer.resolved(resolvedAddress);
                     }
                 }
                 @Override

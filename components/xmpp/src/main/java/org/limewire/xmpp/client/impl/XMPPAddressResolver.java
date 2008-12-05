@@ -132,9 +132,11 @@ public class XMPPAddressResolver implements AddressResolver {
 
     @Override
     public void resolve(Address address, AddressResolutionObserver observer) {
+        LOG.debugf("resolving: {0}", address);
         XMPPAddress xmppAddress = (XMPPAddress)address;
         FriendPresence resolvedPresence = getPresence(xmppAddress);
         if (resolvedPresence == null) {
+            LOG.debugf("{0} could not be resolved", address);
             observer.handleIOException(new IOException("Could not be resolved"));
         } else {
             Address resolvedAddress = addressRegistry.get(xmppAddress);
@@ -142,16 +144,19 @@ public class XMPPAddressResolver implements AddressResolver {
                 // if it's a firewalled address, see if sockets manager can resolve if further, i.e.
                 // if SameNATResolver can take care of it
                 if (socketsManager.canResolve(resolvedAddress)) {
-                    LOG.debugf("can be same nat resolved {0}", resolvedAddress);
+                    LOG.debugf("can be same nat resolved {0}", address);
                     socketsManager.resolve(resolvedAddress, observer);
                 } else if (resolvedPresence.hasFeatures(ConnectBackRequestFeature.ID)) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
+                    LOG.debugf("resolving as xmpp firewalled address: {0}", address);
                     resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
                     observer.resolved(resolvedAddress);
                 } else {
+                    LOG.debugf("resolving as firewalled address {0}", address);
                     observer.resolved(resolvedAddress);
                 }
             } else {
+                LOG.debugf("resolved as non-firewalled address {0}", address);
                 observer.resolved(resolvedAddress);
             }
         }
