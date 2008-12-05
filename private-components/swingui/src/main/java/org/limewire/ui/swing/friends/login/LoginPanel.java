@@ -236,10 +236,8 @@ class LoginPanel extends JXPanel {
                 // Set this as the auto-login account
                 accountManager.setAutoLoginConfig(config);
             } else {
-                // If this was previously the auto-login account, delete it
-                if(config == accountManager.getAutoLoginConfig()) {
-                    accountManager.setAutoLoginConfig(null);
-                }
+                // If there was previously an auto-login account, delete it
+                accountManager.setAutoLoginConfig(null);
             }
             login(config);
         }

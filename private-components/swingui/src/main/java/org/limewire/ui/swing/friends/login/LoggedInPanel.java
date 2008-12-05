@@ -12,16 +12,18 @@ import javax.swing.JPopupMenu;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
+
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
+import org.limewire.ui.swing.friends.AddFriendDialog;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 
@@ -34,12 +36,12 @@ class LoggedInPanel extends JXPanel {
     private final JButton switchUserButton;
     private final LimeComboBox optionsBox;
     private final LimeComboBox signoutBox;
-    private final FriendActions friendActions;    
+    private final FriendActions friendActions;
 
     @Inject
     LoggedInPanel(LimeComboBoxFactory comboFactory,
-            FriendActions friendActions,
-            BarPainterFactory barPainterFactory, StatusActions statusActions) {
+            FriendActions friendActions, BarPainterFactory barPainterFactory,
+            StatusActions statusActions, XMPPService xmppService) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
 
@@ -53,15 +55,17 @@ class LoggedInPanel extends JXPanel {
         switchUserButton = new HyperLinkButton();
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter()); 
 
-        initComponents(statusActions);
+        initComponents(statusActions, xmppService);
     }
 
-    private void initComponents(final StatusActions statusActions) {
+    private void initComponents(final StatusActions statusActions,
+                                final XMPPService xmppService) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
         optionsMenu.add(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new NotImplementedException();
+                new AddFriendDialog(LoggedInPanel.this,
+                        xmppService.getActiveConnection());
             }
         });
         optionsMenu.addSeparator();

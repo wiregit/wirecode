@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
+
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -165,7 +166,8 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         loginPanel.autoLogin(config);
     }
         
-    @Inject void register(ServiceRegistry registry) {
+    @Inject
+    void register(ServiceRegistry registry) {
         registry.register(new Service() {
             @Override
             public String getServiceName() {
@@ -181,7 +183,8 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
+                        XMPPAccountConfiguration auto =
+                            accountManager.getAutoLoginConfig();
                         if(auto != null) {
                             autoLogin(auto);
                         }
@@ -195,7 +198,8 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         });
     }
     
-    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+    @Inject
+    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
         connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
             @Override
             @SwingEDTEvent
