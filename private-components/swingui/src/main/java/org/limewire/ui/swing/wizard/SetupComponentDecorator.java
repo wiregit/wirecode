@@ -1,10 +1,12 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GradientPaint;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JRadioButton;
 
 import org.jdesktop.application.Resource;
@@ -25,6 +27,9 @@ import com.google.inject.assistedinject.AssistedInject;
 public class SetupComponentDecorator {
     
     private final ButtonDecorator plainButtonDecorator;
+    
+    @Resource private Font headingFont;
+    @Resource private Font normalFont;
     
     @Resource private Icon largeBox;
     @Resource private Icon largeBoxChecked;
@@ -95,6 +100,14 @@ public class SetupComponentDecorator {
     
     public void decorateSetupHeader(JXPanel header) {
         header.setBackgroundPainter(pooledBarPainter);
+    }
+    
+    public void decorateHeadingText(JComponent component) {
+        component.setFont(headingFont);
+    }
+    
+    public void decorateNormalText(JComponent component) {
+        component.setFont(normalFont);
     }
     
     

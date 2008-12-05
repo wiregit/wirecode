@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -22,9 +25,6 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-
-import net.miginfocom.swing.MigLayout;
-
 public class Wizard extends JPanel{
     
     @Resource Color background;
@@ -32,6 +32,7 @@ public class Wizard extends JPanel{
     @Resource Color titleBarBackground;
     @Resource Color titleBarForeground;
     @Resource Color titleBarBorder;
+    @Resource Font titleBarFont;
     
     private JDialog dialog;    
  
@@ -93,9 +94,10 @@ public class Wizard extends JPanel{
         
         titleLabel = new JLabel();
         titleLabel.setOpaque(true);
+        titleLabel.setFont(titleBarFont);
         titleLabel.setBackground(titleBarBackground);
         titleLabel.setForeground(titleBarForeground);
-        titleLabel.setBorder(new LineBorder(titleBarBorder));
+        titleLabel.setBorder(new LineBorder(titleBarBorder,3));
         
         add(titleLabel, "dock north");
         add(mainPanel, "push, wrap");
