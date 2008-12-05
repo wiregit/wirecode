@@ -225,7 +225,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void uploadsComplete() {
-        // TODO Auto-generated method stub
+        for (UploadListener listener : uploadListeners) {
+            listener.uploadsCompleted();
+        }
     }
 
     @Override
@@ -243,8 +245,9 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     
     @Override
     public void downloadsComplete() {
-        // TODO Auto-generated method stub
-
+        for (DownloadListener listener : downloadListeners) {
+            listener.downloadsCompleted();
+        }
     }
     
     @Override
