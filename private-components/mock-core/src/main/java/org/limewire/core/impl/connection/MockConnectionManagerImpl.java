@@ -26,8 +26,21 @@ public class MockConnectionManagerImpl implements GnutellaConnectionManager {
     }
 
     @Override
+    public boolean isConnected() {
+        return true;
+    }
+
+    @Override
     public boolean isUltrapeer() {
         return false;
+    }
+
+    @Override
+    public void connect() {
+    }
+
+    @Override
+    public void disconnect() {
     }
 
     @Override

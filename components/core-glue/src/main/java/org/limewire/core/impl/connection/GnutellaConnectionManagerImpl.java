@@ -220,10 +220,25 @@ public class GnutellaConnectionManagerImpl
     }
 
     @Override
+    public boolean isConnected() {
+        return connectionServices.isConnected();
+    }
+
+    @Override
     public boolean isUltrapeer() {
         return connectionManager.isSupernode();
     }
 
+    @Override
+    public void connect() {
+        connectionServices.connect();
+    }
+    
+    @Override
+    public void disconnect() {
+        connectionServices.disconnect();
+    }
+    
     @Override
     public void restart() {
         connectionManager.disconnect(true);

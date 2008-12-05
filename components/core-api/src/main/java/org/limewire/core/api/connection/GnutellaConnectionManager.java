@@ -22,9 +22,24 @@ public interface GnutellaConnectionManager {
     public void removePropertyChangeListener(PropertyChangeListener listener);
 
     /** 
+     * Returns true if we are connected to the Gnutella network. 
+     */
+    public boolean isConnected();   
+
+    /** 
      * Returns true if the node is currently an ultrapeer. 
      */
     public boolean isUltrapeer();
+
+    /** 
+     * Connects to the Gnutella network. 
+     */
+    public void connect();   
+
+    /** 
+     * Disconnects from the Gnutella network. 
+     */
+    public void disconnect();   
 
     /** 
      * Disconnects & reconnects to Gnutella. 
