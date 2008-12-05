@@ -158,10 +158,17 @@ class LoginPanel extends JXPanel {
             serviceField.setVisible(false);
         }
         XMPPAccountConfiguration config = accountManager.getConfig(label);
-        serviceField.setText(config.getServiceName());
-        usernameField.setText(config.getUsername());
-        passwordField.setText(config.getPassword());
-        autoLoginCheckBox.setSelected(config == accountManager.getAutoLoginConfig());
+        if(config == accountManager.getAutoLoginConfig()) {
+            serviceField.setText(config.getServiceName());
+            usernameField.setText(config.getUsername());
+            passwordField.setText(config.getPassword());
+            autoLoginCheckBox.setSelected(true);
+        } else {
+            serviceField.setText("");
+            usernameField.setText("");
+            passwordField.setText("");
+            autoLoginCheckBox.setSelected(false);
+        }
     }
 
     void disconnected(Exception reason) {

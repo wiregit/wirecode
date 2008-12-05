@@ -171,9 +171,15 @@ public class MiscOptionPanel extends OptionPanel {
                 serviceField.setVisible(false);
             }
             XMPPAccountConfiguration config = accountManager.getConfig(label);
-            serviceField.setText(config.getServiceName());
-            usernameField.setText(config.getUsername());
-            passwordField.setText(config.getPassword());
+            if(config == accountManager.getAutoLoginConfig()) {
+                serviceField.setText(config.getServiceName());
+                usernameField.setText(config.getUsername());
+                passwordField.setText(config.getPassword());
+            } else {
+                serviceField.setText("");
+                usernameField.setText("");
+                passwordField.setText("");
+            }
         }
 
         private void setComponentsEnabled(boolean enabled) {
@@ -181,6 +187,11 @@ public class MiscOptionPanel extends OptionPanel {
             serviceField.setEnabled(enabled);
             usernameField.setEnabled(enabled);
             passwordField.setEnabled(enabled);
+            if(!enabled) {
+                serviceField.setText("");
+                usernameField.setText("");
+                passwordField.setText("");
+            }
         }
 
         @Override
