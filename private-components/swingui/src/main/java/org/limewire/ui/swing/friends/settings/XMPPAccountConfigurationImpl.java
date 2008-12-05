@@ -15,7 +15,8 @@ import org.limewire.xmpp.api.client.RosterEvent;
  */
 class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
 
-    private final static String iconPath = "org/limewire/gui/images/xmpp/";
+    private final static String iconPath =
+        "org/limewire/ui/swing/mainframe/resources/icons/friends/";
     private final static String iconExtension = ".png";
 
     private final String resource;
@@ -53,7 +54,10 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             path = iconPath + "LimeWire" + iconExtension;
             url = ClassLoader.getSystemResource(path);
         }
-        icon = new ImageIcon(url);
+        if(url == null)
+            icon = null;
+        else
+            icon = new ImageIcon(url);
         username = "";
         password = "";
     }
@@ -69,7 +73,10 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         registrationURL = "http://www.jabber.org/web/Quickstart";
         String path = iconPath + "LimeWire" + iconExtension;
         URL url = ClassLoader.getSystemResource(path);
-        icon = new ImageIcon(url);
+        if(url == null)
+            icon = null;
+        else
+            icon = new ImageIcon(url);
         username = "";
         password = "";
     }
