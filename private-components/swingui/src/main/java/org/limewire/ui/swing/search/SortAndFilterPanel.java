@@ -226,15 +226,15 @@ public class SortAndFilterPanel {
     private void selectListView(final SortAndFilterPanel outerThis) {
         tableViewToggleButton.setSelected(false);
         listViewToggleButton.setSelected(true);
-        sortLabel.setEnabled(true);
-        sortCombo.setEnabled(true);
+        sortLabel.setVisible(true);
+        sortCombo.setVisible(true);
     }
 
     private void selectTableView(final SortAndFilterPanel outerThis) {
         tableViewToggleButton.setSelected(true);
         listViewToggleButton.setSelected(false);
-        sortLabel.setEnabled(false);
-        sortCombo.setEnabled(false);
+        sortLabel.setVisible(false);
+        sortCombo.setVisible(false);
     }
 
     public EventList<VisualSearchResult> getFilteredAndSortedList(
@@ -463,8 +463,8 @@ public class SortAndFilterPanel {
         panel.setLayout(new MigLayout("insets 0, filly, gapx 0", "push[][][][][]"));
         
         panel.add(filterBox, "gapafter 10");
-        panel.add(sortLabel, "gapafter 10");
-        panel.add(sortCombo, "gapafter 10");
+        panel.add(sortLabel, "gapafter 10, hidemode 3");
+        panel.add(sortCombo, "gapafter 10, hidemode 3");
         panel.add(listViewToggleButton);
         panel.add(tableViewToggleButton, "gapafter 10");
     }
