@@ -58,7 +58,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         this.vsr = vsr;
-System.out.println("qualitgy " + getProperty(FilePropertyKey.QUALITY));
+
         switch (index) {
             case FROM_INDEX: return vsr;
             case TITLE_INDEX: return (getProperty(FilePropertyKey.TITLE) == null) ? getProperty(FilePropertyKey.NAME) : getProperty(FilePropertyKey.TITLE);
