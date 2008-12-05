@@ -77,8 +77,8 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case FROM_INDEX: return 100;
-            case NAME_INDEX: return 400;
+            case FROM_INDEX: return 55;
+            case NAME_INDEX: return 410;
             case EXTENSION_INDEX: return 60;
             case LENGTH_INDEX: return 60;
             case YEAR_INDEX: return 60;

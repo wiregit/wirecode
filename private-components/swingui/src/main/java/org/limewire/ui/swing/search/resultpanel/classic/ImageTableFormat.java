@@ -56,8 +56,8 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case FROM_INDEX: return 100;
-            case NAME_INDEX: return 460;
+            case FROM_INDEX: return 55;
+            case NAME_INDEX: return 540;
             case FILE_EXTENSION_INDEX: return 60;
             case DATE_INDEX: return 100;
             default: return 100;

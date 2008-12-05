@@ -64,8 +64,8 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case FROM_INDEX: return 100;
-            case NAME_INDEX: return 360;
+            case FROM_INDEX: return 55;
+            case NAME_INDEX: return 350;
             case SIZE_INDEX: return 80;
             case PLATFORM_INDEX: return 80;
             case COMPANY_INDEX: return 120;

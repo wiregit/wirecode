@@ -65,8 +65,8 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case FROM_INDEX: return 100;
-            case NAME_INDEX: return 380;
+            case FROM_INDEX: return 55;
+            case NAME_INDEX: return 360;
             case TYPE_INDEX: return 80;
             case SIZE_INDEX: return 80;
             case DATE_INDEX: return 100;

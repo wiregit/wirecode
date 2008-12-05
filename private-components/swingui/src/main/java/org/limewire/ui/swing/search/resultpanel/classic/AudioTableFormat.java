@@ -80,7 +80,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public int getInitialColumnWidth(int index) {
         switch (index) {
-            case FROM_INDEX: return 100;
+            case FROM_INDEX: return 55;
             case TITLE_INDEX: return 200;
             case ARTIST_INDEX: return 155;
             case ALBUM_INDEX: return 155;
