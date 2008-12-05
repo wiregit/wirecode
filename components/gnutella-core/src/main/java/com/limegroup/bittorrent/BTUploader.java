@@ -208,7 +208,11 @@ public class BTUploader implements Uploader, TorrentEventListener {
 
     @Override
     public File getFile() {
-        return _torrent.getMetaInfo().getFileSystem().getCompleteFile();
+        if(_torrent.isComplete()) {
+            return _torrent.getMetaInfo().getFileSystem().getCompleteFile();
+        } else {
+            return _torrent.getMetaInfo().getFileSystem().getInCompleteFile();
+        }
     }
     
     @Override

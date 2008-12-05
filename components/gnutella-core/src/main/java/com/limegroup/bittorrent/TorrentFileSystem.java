@@ -233,13 +233,13 @@ public class TorrentFileSystem {
 	 * used by this torrent during download
 	 */
 	public boolean conflictsIncomplete(File f) {
-		return getBaseFile().getParentFile().equals(f);
+		return getInCompleteFile().getParentFile().equals(f);
 	}
 
 	/**
 	 * @return <tt>File</tt> the parent file for all files in this torrent.
 	 */
-	public File getBaseFile() {
+	public File getInCompleteFile() {
 		return _incompleteFile;
 	}
 

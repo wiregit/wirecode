@@ -144,7 +144,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	public File getFile() {
 		if (torrent.isComplete())
 			return torrentFileSystem.getCompleteFile();
-		return torrentFileSystem.getBaseFile();
+		return torrentFileSystem.getInCompleteFile();
 	}
 
 	public File getDownloadFragment() {
@@ -155,11 +155,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		long size = torrentContext.getDiskManager().getLastVerifiedOffset();
         if (size <= 0)
             return null;
-        File file=new File(torrentFileSystem.getBaseFile().getParent(),
+        File file=new File(torrentFileSystem.getInCompleteFile().getParent(),
                 IncompleteFileManager.PREVIEW_PREFIX
-                    +torrentFileSystem.getBaseFile().getName());
+                    +torrentFileSystem.getInCompleteFile().getName());
         // Copy first block, returning if nothing was copied.
-        if (FileUtils.copy(torrentFileSystem.getBaseFile(), size, file) <=0 ) 
+        if (FileUtils.copy(torrentFileSystem.getInCompleteFile(), size, file) <=0 ) 
             return null;
         return file;
 	}
