@@ -18,9 +18,7 @@ import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
 
-/**
- * The main home page.
- */
+/** The main home page. */
 public class HomePanel extends JXPanel {
 
     public static final String NAME = "Home";
@@ -69,12 +67,21 @@ public class HomePanel extends JXPanel {
     }
     
     public void loadDefaultUrl() {
-        load("http://www.limewire.com/client_startup/");
+        load("http://www.limewire.com/client_startup/alpha/");
     }
 
     public void load(String url) {
         url = application.getUniqueUrl(url);
-        if(!MozillaInitialization.isInitialized()) {
+        if(MozillaInitialization.isInitialized()) {
+            if(firstRequest) {
+                if(browser.isLastRequestSuccessful()) {
+                    firstRequest = false;
+                } else {
+                    url += "&firstRequest=true";
+                }
+            }
+            browser.load(url);
+        } else {
             String offlinePage = "<html><body>This is the offline home page.</body></html>";
             url += "&html32=true";
             if(firstRequest) {
@@ -85,15 +92,6 @@ public class HomePanel extends JXPanel {
                 }
             }
             fallbackBrowser.setPageAsynchronous(url, offlinePage);
-        } else {
-            if(firstRequest) {
-                if(browser.isLastRequestSuccessful()) {
-                    firstRequest = false;
-                } else {
-                    url += "&firstRequest=true";
-                }
-            }
-            browser.load(url);
         }
     }    
 }
