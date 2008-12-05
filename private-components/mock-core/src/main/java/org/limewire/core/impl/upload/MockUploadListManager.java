@@ -48,6 +48,18 @@ public class MockUploadListManager implements UploadListManager {
         return uploadItems;
     }
     
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    }
+    
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    }
+    
+    @Override
+    public void updateUploadsCompleted() {
+    }
+    
     private class UploadPropertyListener implements PropertyChangeListener {
         private UploadItem item;
 

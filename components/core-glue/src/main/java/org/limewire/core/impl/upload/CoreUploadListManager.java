@@ -3,6 +3,7 @@ package org.limewire.core.impl.upload;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -20,11 +22,15 @@ import ca.odell.glazedlists.ObservableElementList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 
 @Singleton
 public class CoreUploadListManager implements UploadListener, UploadListManager{
+
+    private final UploadServices uploadServices;
+    private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
 
     private final EventList<UploadItem> uploadItems;
 
@@ -32,11 +38,13 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     
     private static final int PERIOD = 1000;
 
-
     @Inject
     public CoreUploadListManager(UploadListenerList uploadListenerList, @Named("backgroundExecutor")
-            ScheduledExecutorService backgroundExecutor) {
+            ScheduledExecutorService backgroundExecutor,
+            UploadServices uploadServices) {
 
+        this.uploadServices = uploadServices;
+        
         ObservableElementList.Connector<UploadItem> uploadConnector = GlazedLists.beanConnector(UploadItem.class);
         
         uploadItems = GlazedListsFactory.threadSafeList(GlazedListsFactory.observableElementList(
@@ -68,6 +76,36 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         }
         return swingThreadUploadItems;
     }
+    
+    /**
+     * Adds the specified listener to the list that is notified when a 
+     * property value changes.  Notification events are fired on the Swing UI 
+     * thread. 
+     */
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes the specified listener from the list that is notified when a 
+     * property value changes. 
+     */
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
+    }
+    
+    /**
+     * Checks for uploads in progress, and fires a property change event if
+     * all uploads are completed.
+     */
+    @Override
+    public void updateUploadsCompleted() {
+        if (uploadServices.getNumUploads() == 0) {
+            uploadsCompleted();
+        }
+    }
 
     @Override
     public void uploadAdded(Uploader uploader) {
@@ -84,7 +122,12 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         // uploadItems.remove(new CoreUploadItem(uploader));
     }
     
- // forces refresh
+    @Override
+    public void uploadsCompleted() {
+        changeSupport.firePropertyChange("uploadsCompleted", false, true);
+    }
+    
+    // forces refresh
     private void update() {
         uploadItems.getReadWriteLock().writeLock().lock();
         try {
