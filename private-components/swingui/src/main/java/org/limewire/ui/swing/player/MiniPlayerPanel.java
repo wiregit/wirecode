@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -42,6 +43,8 @@ public class MiniPlayerPanel extends JPanel {
     private Icon playIconRollover;
     @Resource 
     private Color foregroundColor;
+    @Resource
+    private Font font;
 
     private JButton playPauseButton;
 
@@ -69,6 +72,7 @@ public class MiniPlayerPanel extends JPanel {
         playPauseButton.addActionListener(new PlayListener());
 
         statusButton = new MarqueeButton("nothing", 16);
+        statusButton.setFont(font);
         statusButton.setForeground(foregroundColor);    
         statusButton.addActionListener(new ShowPlayerListener());
 

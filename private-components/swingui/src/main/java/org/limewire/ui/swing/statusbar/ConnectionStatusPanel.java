@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.statusbar;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -31,6 +32,7 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Icon medium;
     @Resource private Icon full;
     @Resource private Icon turbo;
+    @Resource private Font font;
     
     @Inject
     ConnectionStatusPanel(GnutellaConnectionManager connectionManager) {
@@ -45,7 +47,7 @@ class ConnectionStatusPanel extends JXPanel {
         this.connectionStatusLabel = new JLabel(I18n.tr("Connecting..."));
         this.connectionStatusLabel.setVisible(false);
         this.connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
-        this.connectionStatusLabel.setFont(this.getFont());
+        this.connectionStatusLabel.setFont(font);
         this.connectionStatusLabel.setForeground(this.getForeground());
         
         this.add(this.connectionStrengthLabel,BorderLayout.WEST);
