@@ -68,9 +68,11 @@ public class SystemOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getFileAssociationPanel().applyOptions() ||
-               getStartupShutdownPanel().applyOptions() ||
-               getUpdatesBugsPanel().applyOptions();
+        boolean restart = getFileAssociationPanel().applyOptions();
+        restart |= getStartupShutdownPanel().applyOptions();
+        restart |= getUpdatesBugsPanel().applyOptions();
+
+        return restart;
     }
 
     @Override

@@ -60,9 +60,11 @@ public class SecurityOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getWarningMessagesPanel().applyOptions() ||
-               getUnsafeTypesPanel().applyOptions()     ||
-               getFilteringPanel().applyOptions();
+        boolean restart = getWarningMessagesPanel().applyOptions();
+        restart |= getUnsafeTypesPanel().applyOptions();
+        restart |= getFilteringPanel().applyOptions();
+
+        return restart;
     }
 
     @Override

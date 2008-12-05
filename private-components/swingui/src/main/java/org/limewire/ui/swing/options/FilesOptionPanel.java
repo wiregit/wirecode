@@ -90,10 +90,12 @@ public class FilesOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getManageExtensionsPanel().applyOptions() ||
-                getSaveOptionPanel().applyOptions() ||
-                getLimeWireStorePanel().applyOptions() ||
-                getITunesPanel().applyOptions();
+        boolean restart = getManageExtensionsPanel().applyOptions();
+        restart |= getSaveOptionPanel().applyOptions();
+        restart |= getLimeWireStorePanel().applyOptions();
+        restart |= getITunesPanel().applyOptions();
+
+        return restart;
     }
 
     @Override

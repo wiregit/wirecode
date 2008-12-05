@@ -71,8 +71,10 @@ public class FilteringOptionPanel extends OptionPanel {
     
     @Override
     boolean applyOptions() {
-        return  getBlockHostsPanel().applyOptions() ||
-                getAllowHostsPanel().applyOptions();
+        boolean restart = getBlockHostsPanel().applyOptions();
+        restart |= getAllowHostsPanel().applyOptions();
+
+        return restart;
     }
     
     @Override

@@ -68,9 +68,11 @@ public class ConnectionsOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return  getConnectionSpeedPanel().applyOptions() ||
-                getDownloadsPanel().applyOptions() ||
-                getUploadPanel().applyOptions();
+        boolean restart = getConnectionSpeedPanel().applyOptions();
+        restart |= getDownloadsPanel().applyOptions();
+        restart |= getUploadPanel().applyOptions();
+
+        return restart;
     }
 
     @Override

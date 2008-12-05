@@ -77,10 +77,12 @@ public class DownloadOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getSharingDownloadsPanel().applyOptions() ||
-                getSavingPanel().applyOptions() ||
-                getRecentDownloadsPanel().applyOptions() ||
-                getITunesPanel().applyOptions();
+        boolean restart = getSharingDownloadsPanel().applyOptions();
+        restart |= getSavingPanel().applyOptions();
+        restart |= getRecentDownloadsPanel().applyOptions();
+        restart |= getITunesPanel().applyOptions();
+
+        return restart;
     }
 
     @Override

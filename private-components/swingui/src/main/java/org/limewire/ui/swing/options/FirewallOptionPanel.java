@@ -55,7 +55,9 @@ public class FirewallOptionPanel extends OptionPanel {
     
     @Override
     boolean applyOptions() {
-        return getListeningPortPanel().applyOptions() || getRouterConfigPanel().applyOptions();
+        boolean restart = getListeningPortPanel().applyOptions();
+        restart |= getRouterConfigPanel().applyOptions();
+        return restart;
     }
 
     @Override
