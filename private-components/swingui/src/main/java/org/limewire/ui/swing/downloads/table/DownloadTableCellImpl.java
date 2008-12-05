@@ -145,7 +145,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullStatusLabel.setForeground(statusLabelColour);
         fullStatusLabel.setPreferredSize(new Dimension(20, 20));
         
-        fullProgressBar = progressBarFactory.create();
+        fullProgressBar = progressBarFactory.create(0, 100);
         Dimension size = new Dimension(progressBarWidth, 16);
         fullProgressBar.setMaximumSize(size);
         fullProgressBar.setMinimumSize(size);
@@ -339,8 +339,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         editor.fullIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
         editor.fullTitleLabel.setText(item.getTitle());
         
-        editor.fullProgressBar.setMaximum((int) item.getTotalSize());
-        editor.fullProgressBar.setValue((int) item.getCurrentSize());
+        editor.fullProgressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
 
         editor.fullProgressBar.setEnabled(item.getState() != DownloadState.PAUSED);
         
