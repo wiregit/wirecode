@@ -26,6 +26,7 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
+import org.limewire.ui.swing.options.actions.HelpAction;
 import org.limewire.ui.swing.options.actions.TabAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -192,7 +193,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         footerPanel.setLayout(new MigLayout());
         footerPanel.setBackground(backgroundColor);
         
-        helpButton = new JButton(I18n.tr("Help"));
+        helpButton = new JButton(new HelpAction());
         helpButton.setPreferredSize(new Dimension(50,30));
         
         okButton = new JButton(I18n.tr("OK"));
