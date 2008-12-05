@@ -31,8 +31,6 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
             break;
         case VIDEO:
         case IMAGE:
-            renderName = name;
-            break;
         case DOCUMENT:
         case PROGRAM:
         case OTHER:
