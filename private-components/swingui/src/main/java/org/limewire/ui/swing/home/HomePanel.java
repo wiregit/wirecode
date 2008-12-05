@@ -3,9 +3,7 @@ package org.limewire.ui.swing.home;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.IOException;
 
-import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -13,6 +11,7 @@ import javax.swing.event.HyperlinkListener;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
+import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
@@ -26,9 +25,11 @@ public class HomePanel extends JXPanel {
 
     public static final String NAME = "Home";
     
+    private boolean firstRequest = true;
+    
     private final Application application;
     private final Browser browser;
-    private final JEditorPane fallbackBrowser;
+    private final HTMLPane fallbackBrowser;
 
     @Inject
     public HomePanel(Application application) {
@@ -49,7 +50,7 @@ public class HomePanel extends JXPanel {
             loadDefaultUrl();
         } else {
             browser = null;
-            fallbackBrowser = new JEditorPane();
+            fallbackBrowser = new HTMLPane();
             fallbackBrowser.addHyperlinkListener(new HyperlinkListener() {
                 @Override
                 public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -58,7 +59,6 @@ public class HomePanel extends JXPanel {
                     }
                 }
             });
-            fallbackBrowser.setEditable(false);
             loadDefaultUrl();
             add(new JScrollPane(fallbackBrowser,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -73,14 +73,24 @@ public class HomePanel extends JXPanel {
     public void load(String url) {
         url = application.getUniqueUrl(url);
         if(!MozillaInitialization.isInitialized()) {
+            String offlinePage = "<html><body>This is the offline home page.</body></html>";
             url += "&html32=true";
-            try {
-                fallbackBrowser.setPage(url);
-            } catch(IOException iox) {
-                fallbackBrowser.setContentType("text/html");
-                fallbackBrowser.setText("<html><body>This is the offline home page.</body></html>");
+            if(firstRequest) {
+                if(fallbackBrowser.isLastRequestSuccessful()) {
+                    firstRequest = false;
+                } else {
+                    url += "&firstRequest=true";
+                }
             }
+            fallbackBrowser.setPageAsynchronous(url, offlinePage);
         } else {
+            if(firstRequest) {
+                if(browser.isLastRequestSuccessful()) {
+                    firstRequest = false;
+                } else {
+                    url += "&firstRequest=true";
+                }
+            }
             browser.load(url);
         }
     }    

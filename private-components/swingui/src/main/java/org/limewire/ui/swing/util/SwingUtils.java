@@ -30,7 +30,9 @@ public class SwingUtils {
                 } else {
                     throw new UndeclaredThrowableException(t);
                 }
-            } catch(InterruptedException ignored) {}
+            } catch(InterruptedException ignored) {
+                throw new RuntimeException(ignored);
+            }
         }
     }
     

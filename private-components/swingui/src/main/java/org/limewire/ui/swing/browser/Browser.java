@@ -72,7 +72,7 @@ public class Browser extends MozillaPanel {
     }
     
     /** Returns true if the last request is currently in progress or succeeded. */
-    public boolean isLastRequestSuccess() {
+    public boolean isLastRequestSuccessful() {
         return !lastRequestFailed;
     }
 

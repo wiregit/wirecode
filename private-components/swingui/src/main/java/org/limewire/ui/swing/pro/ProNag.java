@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Panel;
 import java.awt.Rectangle;
-import java.io.IOException;
 
-import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -15,6 +13,7 @@ import javax.swing.text.html.HTML;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Application;
+import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
@@ -25,13 +24,13 @@ public class ProNag extends JXPanel implements Resizable {
     
     private final Application application;
     private final java.awt.Panel parent;
-    private final JEditorPane editorPane;
+    private final HTMLPane editorPane;
     
     @Inject public ProNag(Application application) {
         super(new BorderLayout());
         this.application = application;
         this.parent = new Panel(new BorderLayout()); // heavyweight, to show over other things.
-        this.editorPane = new JEditorPane();
+        this.editorPane = new HTMLPane();
 
         setOpaque(false);
         parent.setMinimumSize(new Dimension(350, 200));
@@ -55,9 +54,7 @@ public class ProNag extends JXPanel implements Resizable {
                     }
                 }
             }            
-        });
-        
-        editorPane.setEditable(false);       
+        });   
         
         add(parent, BorderLayout.CENTER);
         
@@ -80,14 +77,7 @@ public class ProNag extends JXPanel implements Resizable {
     
     
     public void loadContents() {
-        try {
-            editorPane.setPage(application.getUniqueUrl("http://client-data.limewire.com/pronag?html32=true"));
-        } catch(IOException iox) {
-            editorPane.setContentType("text/html");
-            editorPane.setText(createDefaultPage());
-        }
-        
-        editorPane.setCaretPosition(0);
+        editorPane.setPageAsynchronous(application.getUniqueUrl("http://client-data.limewire.com/pronag?html32=true"), createDefaultPage());
     }
     
     private String createDefaultPage() {
