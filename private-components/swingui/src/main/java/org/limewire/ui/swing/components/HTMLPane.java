@@ -35,7 +35,7 @@ public class HTMLPane extends JEditorPane {
     
     private static final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("HTMLPane Queue");
 
-    private final EditorKit kit = new SynchronousEditorKit();    
+    private final SynchronousEditorKit kit = new SynchronousEditorKit();    
     private HashMap<Object, Object> pageProperties;
     
     private volatile boolean pageLoaded;
@@ -46,6 +46,7 @@ public class HTMLPane extends JEditorPane {
         setEditorKitForContentType(kit.getContentType(), kit);
         setContentType("text/html");
         setEditable(false);
+        kit.setAutoFormSubmission(false);
     }
     
     /** Loads the given URL, loading the backup page if it fails to load. */

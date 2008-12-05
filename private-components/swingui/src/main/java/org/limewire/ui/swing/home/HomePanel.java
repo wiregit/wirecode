@@ -60,9 +60,11 @@ public class HomePanel extends JXPanel {
                 }
             });
             loadDefaultUrl();
-            add(new JScrollPane(fallbackBrowser,
+            JScrollPane scroller = new JScrollPane(fallbackBrowser,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scroller.setBorder(null);
+            add(scroller, gbc);
         }
     }
     
