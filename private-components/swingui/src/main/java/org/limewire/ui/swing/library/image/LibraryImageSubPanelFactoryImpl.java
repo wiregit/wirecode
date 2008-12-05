@@ -5,7 +5,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 
-import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -49,9 +48,9 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(String name,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            Icon panelIcon, ImageLibraryPopupParams params, LibrarySharePanel sharePanel) {
+            ImageLibraryPopupParams params, LibrarySharePanel sharePanel) {
 
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, panelIcon, params);
+        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, params);
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
         panel.setImageEditor(enableMyLibraryEditor(sharePanel, panel));
@@ -64,8 +63,8 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createSharingLibraryImageSubPanel(String name,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            Icon panelIcon, ImageLibraryPopupParams params, LocalFileList currentFriendFileList) {
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, panelIcon, params);
+            ImageLibraryPopupParams params, LocalFileList currentFriendFileList) {
+        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, params);
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableSharingRenderer(list, currentFriendFileList));
         panel.setImageEditor(enableSharingEditor(currentFriendFileList));

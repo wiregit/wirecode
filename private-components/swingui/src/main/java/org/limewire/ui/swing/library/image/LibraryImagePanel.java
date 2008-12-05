@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
@@ -57,8 +56,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
 
     private final LocalFileList fileList;
     private final LocalFileList currentFriendFileList;
-
-    private final Icon panelIcon;
     
     private final String incomplete = I18n.tr("Incomplete Files");
 
@@ -67,7 +64,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     private JScrollPane scrollPane;
     
     public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, 
-            LocalFileList fileList, Icon panelIcon, JScrollPane scrollPane,
+            LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
             LibrarySharePanel sharePanel,
             LocalFileList selectedFriendList) {       
@@ -76,7 +73,6 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         GuiUtils.assignResources(this); 
         
         this.fileList = fileList;
-        this.panelIcon = panelIcon;
         this.currentEventList = eventList;
         this.params = params;
         this.scrollPane = scrollPane;
@@ -135,9 +131,9 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     private void createSubPanel(String parent, EventList<LocalFileItem> list){
         LibraryImageSubPanel subPanel;
         if(sharePanel != null )
-            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, panelIcon, params, sharePanel);
+            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, params, sharePanel);
         else {
-            subPanel = factory.createSharingLibraryImageSubPanel(parent, list, fileList, panelIcon, params, currentFriendFileList);
+            subPanel = factory.createSharingLibraryImageSubPanel(parent, list, fileList, params, currentFriendFileList);
         }
         panelMap.put(parent, subPanel);
         add(subPanel);

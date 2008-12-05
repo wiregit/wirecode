@@ -44,15 +44,17 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem> {
     
     @Resource
-    private Color lineColor = Color.BLACK;
+    private Color lineColor;
     @Resource
-    private int lineSize = 2;
+    private int lineSize;
     @Resource
-    private Color backgroundColor = Color.WHITE;
+    private Color backgroundColor;
     @Resource
-    private Color mainLabelColor = Color.BLACK;
+    private Color mainLabelColor;
     @Resource
-    private int mainLabelFontSize = 12;
+    private int mainLabelFontSize;
+    @Resource
+    private Icon panelIcon;
     
     private final ImageList imageList;    
     
@@ -61,8 +63,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     private EventList<LocalFileItem> currentEventList;
     private EventList<LocalFileItem> listSelection;    
     
-    public LibraryImageSubPanel(String name, EventList<LocalFileItem> eventList, LocalFileList fileList, Icon panelIcon, 
-            ImageLibraryPopupParams params) {       
+    public LibraryImageSubPanel(String name, EventList<LocalFileItem> eventList, LocalFileList fileList, ImageLibraryPopupParams params) {       
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
