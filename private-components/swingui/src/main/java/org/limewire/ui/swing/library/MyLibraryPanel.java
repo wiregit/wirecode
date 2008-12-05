@@ -325,6 +325,7 @@ class MyLibraryPanel extends LibraryPanel {
         
         private void setLabelText(int numSharedCollections) {
             collectionLabel.setText(I18n.tr("Sharing collection: {0}", numSharedCollections));
+            collectionLabel.setEnabled(numSharedCollections > 0);
         }
         
         @Override
@@ -334,7 +335,7 @@ class MyLibraryPanel extends LibraryPanel {
                 button.setForeground(selectedTextColor);
                 if(shareButton != null) {
                     shareButton.setVisible(true);
-                    collectionLabel.setVisible(true);
+                    collectionLabel.setVisible(collectionLabel.isEnabled());
                 }
             } else {
                 setBackground(nonSelectedBackground);
