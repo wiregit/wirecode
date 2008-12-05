@@ -117,6 +117,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                     GuiUtils.rate2speed(item.getUploadSpeed()), item.getHost());
         case QUEUED:
             return I18n.trn("Waiting - {0} file needs to finish before upload can begin", "Waiting - {0} files need to finish before upload can begin", item.getQueuePosition());
+        case WAITING:
+            return I18n.tr("Waiting for connections...");
         case UNABLE_TO_UPLOAD:
             return getErrorMessage(item.getErrorState());        
         }
