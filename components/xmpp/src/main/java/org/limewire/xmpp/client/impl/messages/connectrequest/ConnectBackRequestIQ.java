@@ -112,9 +112,13 @@ public class ConnectBackRequestIQ extends IQ {
     @Override
     public String getChildElementXML() {
         ConnectableSerializer serializer = new ConnectableSerializer();
-        String message = "<connect-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"{0}\" supported-fwt-version=\"{1}\"><address type=\"{2}\" value=\"{3}\"/></connect-request>";
+        String message = "<{0} xmlns=\"{1}\" client-guid=\"{2}\" supported-fwt-version=\"{3}\"><address type=\"{4}\" value=\"{5}\"/></{6}>";
         try {
-            return MessageFormat.format(message, clientGuid.toHexString(), String.valueOf(supportedfwtVersion), serializer.getAddressType(), StringUtils.getUTF8String(Base64.encodeBase64(serializer.serialize(address))));
+            return MessageFormat.format(ELEMENT_NAME, NAME_SPACE,
+                    message, clientGuid.toHexString(),
+                    String.valueOf(supportedfwtVersion), serializer.getAddressType(),
+                    StringUtils.getUTF8String(Base64.encodeBase64(serializer.serialize(address))),
+                    ELEMENT_NAME);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } 
