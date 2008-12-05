@@ -2,8 +2,10 @@ package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.ActionMap;
 import javax.swing.JMenu;
 
+import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.magnet.MagnetFactory;
@@ -44,8 +46,17 @@ public class FileMenu extends JMenu {
         addSeparator();
         add(new AddFileAction(I18n.tr("Add File To Library"), mainPanel, libraryManager));
         add(new AddFolderAction(I18n.tr("Add Folder To Library"), libraryManager, mainPanel));
+        
+        // Add exit actions.
         if (!OSUtils.isMacOSX()) {
             addSeparator();
+            add(new AbstractAction(I18n.tr("Exit after &Transfers")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
+                    map.get("shutdownAfterTransfers").actionPerformed(e);
+                }
+            });
             add(new AbstractAction(I18n.tr("E&xit")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
