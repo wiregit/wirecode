@@ -100,18 +100,18 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         if(autoLoginConfig != null) {
             passwordManager.removePassword(autoLoginConfig.getUsername());
             XMPPSettings.XMPP_AUTO_LOGIN.setValue("");
+            XMPPSettings.XMPP_SERVER.setValue("");
             autoLoginConfig = null;
         }
         // Store the new configuration, if there is one
         if(config != null) {
-            // If this is the custom config, save it
-            if(config.getLabel().equals(getCustomConfigLabel()))
-                XMPPSettings.XMPP_SERVER.setValue(config.toString());
             try {
                 passwordManager.storePassword(config.getUsername(),
                         config.getPassword());
                 XMPPSettings.XMPP_AUTO_LOGIN.setValue(config.getLabel() + "," +
                         config.getUsername());
+                if(config.getLabel().equals(getCustomConfigLabel()))
+                    XMPPSettings.XMPP_SERVER.setValue(config.toString());
                 autoLoginConfig = config;
             } catch (IllegalArgumentException ignored) {
                 // Empty username or password - no soup for you!
