@@ -91,7 +91,7 @@ public class FirewallOptionPanel extends OptionPanel {
         
         @Override
         boolean applyOptions() {
-            int newPort = Integer.parseInt(portField.getText());
+            int newPort = portField.getValue(port);
             if(newPort != port) {
                 try {
                     NetworkSettings.PORT.setValue(newPort);
@@ -112,7 +112,8 @@ public class FirewallOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return NetworkSettings.PORT.getValue() != portField.getValue();
+            int portSetting = NetworkSettings.PORT.getValue();
+            return portSetting != portField.getValue(portSetting);
         }
 
         @Override
@@ -171,21 +172,23 @@ public class FirewallOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             boolean restart = false;
-            boolean oldUPNP = ConnectionSettings.UPNP_IN_USE.getValue();
+            boolean oldUPNP = ConnectionSettings.DISABLE_UPNP.getValue();
             int oldPort = ConnectionSettings.FORCED_PORT.getValue();
             boolean oldForce = ConnectionSettings.FORCE_IP_ADDRESS.getValue();
 
             if(plugAndPlayRadioButton.isSelected()) {
-                if(!ConnectionSettings.UPNP_IN_USE.getValue())
+                if(!ConnectionSettings.UPNP_IN_USE.getValue()) {
                     ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
+                }
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
-                if(!oldUPNP)
+                if(oldUPNP || oldForce) {
                     restart = true;
+                }
             } else if(doNothingRadioButton.isSelected()) {
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(false);
                 ConnectionSettings.DISABLE_UPNP.setValue(true);
             } else { // PORT.isSelected()
-                int forcedPort = portTextField.getValue();
+                int forcedPort = portTextField.getValue(oldPort);
                 
                 ConnectionSettings.DISABLE_UPNP.setValue(false);
                 ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
@@ -219,7 +222,9 @@ public class FirewallOptionPanel extends OptionPanel {
                 if (!plugAndPlayRadioButton.isSelected()) 
                     return true;
             }
-            return portForwardRadioButton.isSelected() && portTextField.getValue() != ConnectionSettings.FORCED_PORT.getValue();
+            int forcedPortSetting = ConnectionSettings.FORCED_PORT.getValue();
+            return portForwardRadioButton.isSelected() &&
+                    portTextField.getValue(forcedPortSetting) != forcedPortSetting;
         }
 
         @Override

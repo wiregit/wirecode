@@ -122,12 +122,7 @@ public class AddConnectionPanel extends JPanel {
             }
 
             // Convert port number to int.
-            int portnum = -1;
-            try {
-                portnum = portTextField.getValue();
-            } catch (NumberFormatException ee) {
-                portnum = 6346;
-            }
+            int portnum = portTextField.getValue(6346);
 
             // Verify port number is valid.
             if (!NetworkUtils.isValidPort(portnum)) {

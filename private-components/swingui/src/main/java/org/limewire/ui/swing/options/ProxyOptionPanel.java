@@ -121,7 +121,8 @@ public class ProxyOptionPanel extends OptionPanel {
         else if (httpRadioButton.isSelected())
             connectionMethod = ConnectionSettings.C_HTTP_PROXY;
 
-        final int proxyPort = portTextField.getValue();
+        int oldProxyPort = ConnectionSettings.PROXY_PORT.getValue();
+        final int proxyPort = portTextField.getValue(oldProxyPort);
         final String proxy = proxyTextField.getText();
 
         ConnectionSettings.PROXY_PORT.setValue(proxyPort);
@@ -136,7 +137,8 @@ public class ProxyOptionPanel extends OptionPanel {
 
     @Override
     boolean hasChanged() {
-        if(ConnectionSettings.PROXY_PORT.getValue() != portTextField.getValue())
+        int oldProxyPort = ConnectionSettings.PROXY_PORT.getValue();
+        if(oldProxyPort != portTextField.getValue(oldProxyPort))
             return true;
         if(!ConnectionSettings.PROXY_HOST.getValue().equals(proxyTextField.getText()))
             return true;

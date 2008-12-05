@@ -31,10 +31,24 @@ public class NumericTextField extends JTextField {
         addIntegerWithMaxValueFilter(minValue, maxValue);
     }
 
-    public int getValue() {
-        return Integer.parseInt(getText());   // TODO: who deals with NumberFormatException?  The caller, or this class
+    /**
+     * @return the value of the field as an int.  If field is empty, or the field text
+     * cannot be retrieved as an int for any other reason, return the specified default value
+     */
+    public int getValue(int defaultValue) {
+        try {
+            return Integer.parseInt(getText());
+        } catch (NumberFormatException e) {
+            setValue(defaultValue);
+            return defaultValue;
+        }
     }
 
+    /**
+     * Given an int, set the content of the text field
+     *
+     * @param value set on the field
+     */
     public void setValue(int value) {
         setText(String.valueOf(value));
     }

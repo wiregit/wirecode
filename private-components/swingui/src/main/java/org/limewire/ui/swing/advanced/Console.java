@@ -682,11 +682,7 @@ public class Console extends JPanel {
      * value.
      */
     public void setDelay() {
-        try {
-            delay = delayTxt.getValue();
-        } catch (NumberFormatException ex) {
-            delay = 0;
-        }
+        delay = delayTxt.getValue(0);
         
         // if the delay is set to zero, flush the buffer to
         // the console text area, since it is possible that
