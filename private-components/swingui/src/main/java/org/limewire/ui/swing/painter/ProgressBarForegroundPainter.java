@@ -9,8 +9,8 @@ import javax.swing.JSlider;
 
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.util.PaintUtils;
+import org.limewire.ui.swing.util.NotImplementedException;
 
-import com.jacob.com.NotImplementedException;
 
 public class ProgressBarForegroundPainter<X extends JComponent> extends AbstractPainter<X> {
     
