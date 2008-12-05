@@ -11,12 +11,11 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 
-public class ConnectRequestIQTest extends BaseTestCase {
+public class ConnectBackRequestIQTest extends BaseTestCase {
 
-    public ConnectRequestIQTest(String name) {
+    public ConnectBackRequestIQTest(String name) {
         super(name);
     }
-
     
     public void testParsesItsOwnOutput() throws Exception {
         GUID guid = new GUID();
@@ -38,7 +37,7 @@ public class ConnectRequestIQTest extends BaseTestCase {
     
     public void testThrowsOnMissingAddress() throws Exception {
         try {
-            new ConnectBackRequestIQ(createParser("<connect-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"" + new GUID() + "\" supported-fwt-version=\"0\"></connect-request>"));
+            new ConnectBackRequestIQ(createParser("<connect-back-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"" + new GUID() + "\" supported-fwt-version=\"0\"></connect-back-request>"));
             fail("io exception expected");
         } catch (XmlPullParserException e) {
             fail(e);
@@ -48,7 +47,7 @@ public class ConnectRequestIQTest extends BaseTestCase {
     
     public void testThrowsOnInvalidGuid() throws Exception {
         try {
-            new ConnectBackRequestIQ(createParser("<connect-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"ffdfdd\" supported-fwt-version=\"0\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-request>"));
+            new ConnectBackRequestIQ(createParser("<connect-back-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"ffdfdd\" supported-fwt-version=\"0\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-back-request>"));
             fail("io exception expected");
         } catch (XmlPullParserException e) {
             fail(e);
@@ -58,7 +57,7 @@ public class ConnectRequestIQTest extends BaseTestCase {
     
     public void testThrowsOnMissingGuid() throws Exception {
         try {
-            new ConnectBackRequestIQ(createParser("<connect-request xmlns=\"jabber:iq:lw-connect-request\" supported-fwt-version=\"0\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-request>"));
+            new ConnectBackRequestIQ(createParser("<connect-back-request xmlns=\"jabber:iq:lw-connect-request\" supported-fwt-version=\"0\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-back-request>"));
             fail("io exception expected");
         } catch (XmlPullParserException e) {
             fail(e);
@@ -68,7 +67,7 @@ public class ConnectRequestIQTest extends BaseTestCase {
     
     public void testThrowsOnMissingFWTVersion() throws Exception {
         try {
-            new ConnectBackRequestIQ(createParser("<connect-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"BD2BF8AA3D262F0957AF5F96B7F16600\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-request>"));
+            new ConnectBackRequestIQ(createParser("<connect-back-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"BD2BF8AA3D262F0957AF5F96B7F16600\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-back-request>"));
             fail("io exception expected");
         } catch (XmlPullParserException e) {
             fail(e);
@@ -78,7 +77,7 @@ public class ConnectRequestIQTest extends BaseTestCase {
     
     public void testThrowsOnInvalidFWTVersion() throws Exception {
         try {
-            new ConnectBackRequestIQ(createParser("<connect-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"BD2BF8AA3D262F0957AF5F96B7F16600\"  supported-fwt-version=\"A\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-request>"));
+            new ConnectBackRequestIQ(createParser("<connect-back-request xmlns=\"jabber:iq:lw-connect-request\" client-guid=\"BD2BF8AA3D262F0957AF5F96B7F16600\"  supported-fwt-version=\"A\"><address type=\"direct-connect\" value=\"AIEAAAETiAE=\"/></connect-back-request>"));
             fail("io exception expected");
         } catch (XmlPullParserException e) {
             fail(e);

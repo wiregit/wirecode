@@ -114,8 +114,8 @@ public class ConnectBackRequestIQ extends IQ {
         ConnectableSerializer serializer = new ConnectableSerializer();
         String message = "<{0} xmlns=\"{1}\" client-guid=\"{2}\" supported-fwt-version=\"{3}\"><address type=\"{4}\" value=\"{5}\"/></{6}>";
         try {
-            return MessageFormat.format(ELEMENT_NAME, NAME_SPACE,
-                    message, clientGuid.toHexString(),
+            return MessageFormat.format(message, ELEMENT_NAME, NAME_SPACE,
+                    clientGuid.toHexString(),
                     String.valueOf(supportedfwtVersion), serializer.getAddressType(),
                     StringUtils.getUTF8String(Base64.encodeBase64(serializer.serialize(address))),
                     ELEMENT_NAME);
