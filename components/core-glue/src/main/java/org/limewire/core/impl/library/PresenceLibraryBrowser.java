@@ -135,6 +135,8 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                     presenceLibrary.setState(LibraryState.LOADED);
                 } else {
                     presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
+                    librariesToBrowse.add(presenceLibrary);
+                    LOG.debugf("browse failed: {0}", presenceLibrary);
                 }
             }
         });
@@ -148,6 +150,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
 
         @Override
         public void handleEvent(ConnectivityChangeEvent event) {
+            LOG.debug("connectivity change");
             synchronized (librariesToBrowse) {
                 // calls in here need to be non-blocking 
                 for (Iterator<PresenceLibrary> i = librariesToBrowse.iterator(); i.hasNext();) {
