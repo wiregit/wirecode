@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.version;
 
+import org.limewire.listener.EventListener;
+
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.URN;
 
@@ -51,4 +53,9 @@ public interface UpdateHandler {
      * @return null if there is none
      */
     public UpdateCollection getUpdateCollection();
+    
+    
+    public void addListener(EventListener<UpdateEvent> listener);
+
+    public boolean removeListener(EventListener<UpdateEvent> listener);
 }

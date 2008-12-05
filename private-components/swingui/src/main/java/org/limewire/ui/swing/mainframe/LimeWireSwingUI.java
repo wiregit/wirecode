@@ -1,17 +1,24 @@
 package org.limewire.ui.swing.mainframe;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.Application;
+import org.limewire.core.api.updates.UpdateEvent;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.BoxPanel;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
@@ -19,7 +26,9 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.pro.ProNag;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.statusbar.StatusPanel;
+import org.limewire.ui.swing.update.UpdatePanel;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
@@ -123,5 +132,25 @@ public class LimeWireSwingUI extends JPanel {
         public void componentResized(ComponentEvent e) {
             target.resize();
         }
+    }
+    
+    /**
+     * Listens for Update events and display a dialog if a update exists.
+     * @param updateEvent
+     */
+    @Inject void register(ListenerSupport<UpdateEvent> updateEvent, final Application application) {
+        updateEvent.addListener(new EventListener<UpdateEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(UpdateEvent event) {
+                UpdatePanel updatePanel = new UpdatePanel(event.getSource(), application);
+                JDialog dialog = FocusJOptionPane.createDialog(I18n.tr("New Version Available!"), null, updatePanel);
+                dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+                dialog.getRootPane().setDefaultButton(updatePanel.getDefaultButton());
+                dialog.setSize(new Dimension(500, 300));
+                dialog.setModal(false);
+                dialog.setVisible(true);
+            }
+        });
     }
 }

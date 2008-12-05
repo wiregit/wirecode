@@ -13,6 +13,7 @@ class ApplicationImpl implements Application {
     
     private final ApplicationServices applicationServices;
     private final LifecycleManager lifecycleManager;
+    private volatile String flag = null;
     
     @Inject
     public ApplicationImpl(ApplicationServices applicationServices, LifecycleManager lifecycleManager) {
@@ -32,7 +33,15 @@ class ApplicationImpl implements Application {
     
     @Override
     public void stopCore() {
-        lifecycleManager.shutdown();
+        if(flag == null)
+            lifecycleManager.shutdown();
+        else
+            lifecycleManager.shutdown(flag);
+    }
+    
+    @Override
+    public void setShutdownFlag(String flag) {
+        this.flag = flag;
     }
     
     @Override

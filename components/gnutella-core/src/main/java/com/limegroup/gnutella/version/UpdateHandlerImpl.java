@@ -36,6 +36,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.util.Base32;
 import org.limewire.util.Clock;
@@ -50,7 +51,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -152,7 +152,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     private final HttpRequestControl httpRequestControl = new HttpRequestControl();
     
     private final ScheduledExecutorService backgroundExecutor;
-    private final Provider<ActivityCallback> activityCallback;
     private final ConnectionServices connectionServices;
     private final Provider<HttpExecutor> httpExecutor;
     private final Provider<HttpParams> defaultParams;
@@ -165,6 +164,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final EventListenerList<UpdateEvent> listeners;
     
     private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
     private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
@@ -185,7 +185,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     
     @Inject
     UpdateHandlerImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<ActivityCallback> activityCallback,
             ConnectionServices connectionServices,
             Provider<HttpExecutor> httpExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
@@ -200,7 +199,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
             UpdateMessageVerifier updateMessageVerifier, 
             RemoteFileDescFactory remoteFileDescFactory) {
         this.backgroundExecutor = backgroundExecutor;
-        this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
         this.defaultParams = defaultParams;
@@ -214,6 +212,8 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        
+        this.listeners = new EventListenerList<UpdateEvent>();
     }
     
     @Inject
@@ -287,9 +287,9 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
                 
                 if (updateInfo != null && 
                 		updateInfo.getUpdateURN() != null &&
-                		isMyUpdateDownloaded(updateInfo))
-                    activityCallback.get().updateAvailable(updateInfo);
-                
+                		isMyUpdateDownloaded(updateInfo)) {
+                    fireUpdate(updateInfo);
+                }
                 downloadUpdates(_updatesToDownload, null);
             }
         });
@@ -485,7 +485,6 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         _updatesToDownload = updatesToDownload;
         
         downloadUpdates(updatesToDownload, null);
-        
         if(updateInfo == null) {
             LOG.warn("No relevant update info to notify about.");
             return;
@@ -501,7 +500,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
                     TimeUnit.MILLISECONDS);
         } else if (isMyUpdateDownloaded(updateInfo)) {
             LOG.debug("there is an update for me, but I happen to have it on disk");
-            activityCallback.get().updateAvailable(updateInfo);
+            fireUpdate(updateInfo);
         } else
             LOG.debug("we have an update, it needs a download.  Rely on callbacks");
     }
@@ -735,8 +734,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
         
         UpdateInformation update = _updateInfo;
         assert(update != null);
-        
-        activityCallback.get().updateAvailable(update);
+        fireUpdate(update);
     }
     
     /**
@@ -789,7 +787,7 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
                         long delay = delay(clock.now(),_lastTimestamp);
                         backgroundExecutor.schedule(new NotificationFailover(_lastId),delay,TimeUnit.MILLISECONDS);
                     } else {
-                        activityCallback.get().updateAvailable(updateInfo);
+                        fireUpdate(updateInfo);
                         connectionManager.get().sendUpdatedCapabilities();
                     }
                 }
@@ -1030,5 +1028,19 @@ public class UpdateHandlerImpl implements UpdateHandler, EventListener<ManagedLi
     @Override
     public UpdateCollection getUpdateCollection() {
         return updateCollection;
+    }
+    
+    private void fireUpdate(UpdateInformation update) {
+        listeners.broadcast(new UpdateEvent(update, UpdateEvent.Type.UPDATE));
+    }
+    
+    @Override
+    public void addListener(EventListener<UpdateEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    @Override
+    public boolean removeListener(EventListener<UpdateEvent> listener) {
+        return listeners.removeListener(listener);
     }
 }

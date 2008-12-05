@@ -13,7 +13,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
-import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.gnutella.messages.QueryReply;
 
 /**
@@ -94,11 +93,6 @@ public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleL
      * @param file The File that needs updating
      */    
     public void handleSharedFileUpdate(File file);
-
-	/**
-	 * Notification that an update became available.
-	 */
-	public void updateAvailable(UpdateInformation info);
     
     /** 
      * Notifies that all active uploads have been completed.

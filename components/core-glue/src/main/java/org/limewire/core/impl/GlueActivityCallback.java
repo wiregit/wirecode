@@ -33,7 +33,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * An implementation of the UI callback to handle notifications about 
@@ -225,15 +224,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public void updateAvailable(UpdateInformation info) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public void uploadsComplete() {
         // TODO Auto-generated method stub
-
     }
 
     @Override

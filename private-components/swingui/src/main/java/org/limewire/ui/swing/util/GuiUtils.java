@@ -247,7 +247,7 @@ public class GuiUtils {
 
     
     /** Returns the int as a hex string. */
-    private static String toHex(int i) {
+    public static String toHex(int i) {
         String hex = Integer.toHexString(i).toUpperCase(Locale.US);
         if (hex.length() == 1)
             return "0" + hex;

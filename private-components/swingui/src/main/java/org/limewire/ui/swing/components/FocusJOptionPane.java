@@ -18,7 +18,10 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
+
 
 /**
  * A simple wrapper around {@link JOptionPane} methods that
@@ -141,6 +144,31 @@ public class FocusJOptionPane {
         return dialog;
     }
     
+    public static int showYesNoMessage(String message, String title, int defaultOption, JComponent parent) {
+        final String[] options = {I18n.tr("Yes"), I18nMarker.marktr("No")};
+        
+        int option;
+        try {
+            option = FocusJOptionPane.showOptionDialog(getWindowForComponent(parent), 
+                         getLabel(message), 
+                         title,
+                         JOptionPane.YES_NO_OPTION, 
+                         JOptionPane.WARNING_MESSAGE, null,
+                         options, defaultOption);
+        } catch(InternalError ie) {
+            option = JOptionPane.NO_OPTION;
+        }
+        
+        return option;
+    }
+    
+    private static JComponent getLabel(String message) {
+        if(message.startsWith("<html"))
+            return new HTMLLabel(message);
+        else
+            return new MultiLineLabel(message, 400);
+    }
+    
     public static Window getWindowForComponent(Component parentComponent) throws HeadlessException {
         if (parentComponent == null) {
             return GuiUtils.getMainFrame();
@@ -152,5 +180,4 @@ public class FocusJOptionPane {
         
         return FocusJOptionPane.getWindowForComponent(parentComponent.getParent());
     }
-
 }

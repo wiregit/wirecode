@@ -23,6 +23,12 @@ public class MockApplication implements Application {
     }
     
     @Override
+    public void setShutdownFlag(String flag) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
     public boolean isTestingVersion() {
         // TODO Auto-generated method stub
         return true;

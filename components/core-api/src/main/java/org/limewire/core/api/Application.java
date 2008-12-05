@@ -21,6 +21,11 @@ public interface Application {
      * Stops the core services of the application.
      */
     void stopCore();
+    
+    /**
+     * Sets a command than will be executed after shutdown.
+     */
+    void setShutdownFlag(String flag);
 
     /** Returns the version of the program. */
     String getVersion();

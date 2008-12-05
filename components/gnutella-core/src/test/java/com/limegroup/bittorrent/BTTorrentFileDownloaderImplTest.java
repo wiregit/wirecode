@@ -46,7 +46,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.version.DownloadInformation;
-import com.limegroup.gnutella.version.UpdateInformation;
 import com.limegroup.mozilla.MozillaDownload;
 
 public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
@@ -532,10 +531,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             @Override
             public String translate(String s) {
                 return null;
-            }
-
-            @Override
-            public void updateAvailable(UpdateInformation info) {
             }
 
             @Override
