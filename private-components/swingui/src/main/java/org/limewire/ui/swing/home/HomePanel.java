@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.io.IOException;
 
 import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -59,7 +60,9 @@ public class HomePanel extends JXPanel {
             });
             fallbackBrowser.setEditable(false);
             loadDefaultUrl();
-            add(fallbackBrowser, gbc);
+            add(new JScrollPane(fallbackBrowser,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
         }
     }
     
