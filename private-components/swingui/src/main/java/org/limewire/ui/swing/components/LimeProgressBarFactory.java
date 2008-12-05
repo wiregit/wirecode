@@ -33,8 +33,8 @@ public class LimeProgressBarFactory {
     
     
     public LimeProgressBar create() {
-        AbstractPainter<JProgressBar> foregroundPainter = this.painterFactory.createForegroundPainter();
-        AbstractPainter<JComponent>   backgroundPainter = this.painterFactory.createBackgroundPainter();
+        AbstractPainter<JProgressBar> foregroundPainter = this.painterFactory.createRegularForegroundPainter();
+        AbstractPainter<JComponent>   backgroundPainter = this.painterFactory.createRegularBackgroundPainter();
         
         LimeProgressBar bar = new LimeProgressBar(foregroundPainter, backgroundPainter);
         
@@ -53,7 +53,7 @@ public class LimeProgressBarFactory {
     
     public static LimeProgressBar createSplashProgressBar() {
         return new LimeProgressBar(
-                new ProgressBarForegroundPainter(
+                new ProgressBarForegroundPainter<JProgressBar>(
                         new GradientPaint(0,0,new Color(0xcf,0xf8,0x8f),0,1,new Color(0xaa,0xcb,0x75)),
                         Color.GRAY),
                 new RectanglePainter<JComponent>(Color.WHITE, new Color(0x53,0x7e,0x10)));

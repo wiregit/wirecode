@@ -34,7 +34,6 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -84,14 +83,14 @@ class MyLibraryPanel extends LibraryPanel {
                           ShareListManager shareListManager,
                           @Named("known") Collection<Friend> allFriends,
                           LimeHeaderBarFactory headerBarFactory,
-                          AudioPlayer player){
+                          PlayerPanel player){
         super(null, true, headerBarFactory);
         
         this.shareListManager = shareListManager;
         this.allFriends = allFriends;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
-        this.playerPanel = new PlayerPanel(player);
+        this.playerPanel = player;
         
         setHeaderTitle(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);

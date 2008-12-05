@@ -3,12 +3,16 @@ package org.limewire.ui.swing.painter;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
+import javax.swing.JComponent;
 import javax.swing.JProgressBar;
+import javax.swing.JSlider;
 
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.util.PaintUtils;
 
-public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> {
+import com.jacob.com.NotImplementedException;
+
+public class ProgressBarForegroundPainter<X extends JComponent> extends AbstractPainter<X> {
     
     private Paint foreground;
     private Paint disabledForeground;
@@ -16,6 +20,7 @@ public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> 
     private int heightCache = 0;
     
     public ProgressBarForegroundPainter(Paint foreground, Paint disabledForeground) {
+        
         this.foreground = foreground;
         this.disabledForeground = disabledForeground;
         
@@ -24,7 +29,7 @@ public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> 
     }
     
     @Override
-    protected void doPaint(Graphics2D g, JProgressBar object, int width, int height) {
+    protected void doPaint(Graphics2D g, X object, int width, int height) {
         if (height != this.heightCache) {
             this.heightCache = height;
             
@@ -32,8 +37,8 @@ public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> 
             this.disabledForeground = PaintUtils.resizeGradient(this.disabledForeground, 0, height-2);
         }
         
-        int progress = (int) (width * object.getPercentComplete());
-                
+        int progress = (int) (width * getPercentComplete(object));
+                        
         if (object.isEnabled()) {
             g.setPaint(this.foreground);
         } 
@@ -43,5 +48,27 @@ public class ProgressBarForegroundPainter extends AbstractPainter<JProgressBar> 
         
         g.fillRect(1, 1, progress-2, height-2);
         
+    }
+    
+    /**
+     * Avoiding using 2 painter classes for exactly the same function.
+     *  Shortcut method to avoid using providers for now.  There
+     *  is no nice way to do this anyways since in order to be consistent
+     *  any provider MUST match the object passed into doPaint.  
+     */
+    private static double getPercentComplete(Object object) {
+        if (object instanceof JProgressBar) {
+            return ((JProgressBar)object).getPercentComplete();
+        }
+     
+        if (object instanceof JSlider) {
+            JSlider slider = (JSlider)object;
+            
+            return   (double)(slider.getValue()   - slider.getMinimum()) 
+                   / (double)(slider.getMaximum() - slider.getMinimum()); 
+        }
+        
+        throw new NotImplementedException("ProgressForegroundPainter" +
+        		" applied to a not yet supported component");
     }
 }

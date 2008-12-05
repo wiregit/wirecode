@@ -68,7 +68,7 @@ public class MiniPlayerPanel extends JPanel {
         playPauseButton.setHideActionText(true);
         playPauseButton.addActionListener(new PlayListener());
 
-        statusButton = new MarqueeButton("Clean Your Room - The Your Moms", 16);
+        statusButton = new MarqueeButton("nothing", 16);
         statusButton.setForeground(foregroundColor);    
         statusButton.addActionListener(new ShowPlayerListener());
 

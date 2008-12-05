@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.util.Map;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,10 +30,13 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeSliderBarFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import com.google.inject.Inject;
 
 public class PlayerPanel extends JXPanel {
 
@@ -63,19 +65,14 @@ public class PlayerPanel extends JXPanel {
     @Resource private Icon volumeIcon;
     @Resource private Icon volumeIconPressed;
     @Resource private Icon volumeIconRollover;
+          
+    @Resource private Font font;
     
-    @Resource private ImageIcon progressTrackLeftIcon;
-    @Resource private ImageIcon progressTrackCenterIcon;
-    @Resource private ImageIcon progressTrackRightIcon;
-    @Resource private ImageIcon progressThumbUpIcon;
-    @Resource private ImageIcon progressThumbDownIcon;
-    @Resource private ImageIcon progressIcon;
-        
     private final JButton backButton;
     private final JButton playButton;
     private final JButton pauseButton;
     private final JButton forwardButton;
-    private final SongProgressBar progressSlider;
+    private final JSlider progressSlider;
     private final JPanel statusPanel;
     private final JButton volumeButton;
     
@@ -102,7 +99,8 @@ public class PlayerPanel extends JXPanel {
     private static final String FORWARD = "FORWARD";
     private static final String VOLUME = "VOLUME";
 
-    public PlayerPanel(AudioPlayer player) {
+    @Inject
+    public PlayerPanel(AudioPlayer player, LimeSliderBarFactory sliderBarFactory) {
         this.player = player;
 
         GuiUtils.assignResources(this);
@@ -124,6 +122,9 @@ public class PlayerPanel extends JXPanel {
         pauseButton.addActionListener(playerListener);
         pauseButton.setActionCommand(PAUSE);
         pauseButton.setVisible(false);
+        
+        pauseButton.setMinimumSize(playButton.getMinimumSize());
+        pauseButton.setPreferredSize(playButton.getPreferredSize());
 
         forwardButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
         forwardButton.addActionListener(playerListener);
@@ -133,19 +134,18 @@ public class PlayerPanel extends JXPanel {
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
 
-        progressSlider = new SongProgressBar(progressTrackLeftIcon, progressTrackCenterIcon,
-                progressTrackRightIcon, progressThumbUpIcon, progressThumbDownIcon, progressIcon);
+        progressSlider = sliderBarFactory.create();
         progressSlider.addChangeListener(new AudioProgressListener());
-        progressSlider.setMaximum(500);
-        progressSlider.setMaximumSize(new Dimension(206, 4));
-        progressSlider.setMinimumSize(new Dimension(206, 4));
-        progressSlider.setPreferredSize(new Dimension(206, 4));
+        progressSlider.setMaximum(0);
+        progressSlider.setMaximumSize(new Dimension(206, 6));
+        progressSlider.setMinimumSize(new Dimension(206, 6));
+        progressSlider.setPreferredSize(new Dimension(206, 6));
         progressSlider.setSize(new Dimension(206, 4));
         
         statusPanel = new JPanel(new MigLayout());
         
-        titleLabel = new JLabel("Sample Media Author - Sample Audio Title");
-        titleLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        titleLabel = new JLabel("Lime Audio Previewer...");
+        titleLabel.setFont(font);
         titleLabel.setMaximumSize(new Dimension(206, (int)titleLabel.getMaximumSize().getHeight()));
         titleLabel.setMinimumSize(new Dimension(206, (int)titleLabel.getMinimumSize().getHeight()));
         titleLabel.setPreferredSize(new Dimension(206, (int)titleLabel.getPreferredSize().getHeight()));
@@ -186,6 +186,17 @@ public class PlayerPanel extends JXPanel {
     private void initVolumeControl() {
         volumeSlider.addChangeListener(new VolumeListener());
         volumeSlider.setOrientation(JSlider.VERTICAL);
+        
+        volumeSlider.setMinimumSize(new Dimension((int)volumeSlider.getMinimumSize().getWidth(), 75));
+        volumeSlider.setMaximumSize(new Dimension((int)volumeSlider.getMaximumSize().getWidth(), 75));
+        volumeSlider.setPreferredSize(new Dimension((int)volumeSlider.getPreferredSize().getWidth(), 75));
+        volumeSlider.setSize(new Dimension((int)volumeSlider.getSize().getWidth(), 75));
+        
+        volumeControlPopup.setMinimumSize(new Dimension(20, 80));
+        volumeControlPopup.setMaximumSize(new Dimension(20, 80));
+        volumeControlPopup.setPreferredSize(new Dimension(20, 80));
+        volumeControlPopup.setSize(new Dimension(20, 80));
+        
         volumeControlPopup.add(volumeSlider);
     }
 
@@ -198,19 +209,48 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == PAUSE){
                 player.pause();
             } else if (e.getActionCommand() == FORWARD) {
+                System.out.println("TODO: next audio file");
             } else if (e.getActionCommand() == BACK) {
+                System.out.println("TODO: seek back / previous audio file");
             } else if (e.getActionCommand() == VOLUME) {
-                volumeControlPopup.show(volumeButton, 0, 0);
+                volumeControlPopup.show(volumeButton, 0, 14);
             }
         }
     }
   
     private class AudioProgressListener implements ChangeListener {
+        
+        private boolean waiting = false; 
+        private boolean wasPlaying = false; 
+        
         @Override
-        public void stateChanged(ChangeEvent e) {            
-            if (progressSlider.getMaximum() != 0 && progressSlider.getValueIsAdjusting()){
+        public void stateChanged(ChangeEvent e) {
+            
+            if (progressSlider.getMaximum() != 0 && progressSlider.getValueIsAdjusting()) {
+                if (!waiting) {
+                    waiting = true;
+                    System.out.println("waiting to seek");
+                    wasPlaying = player.getStatus() == PlayerState.PLAYING;
+                    if (wasPlaying) {
+                        System.out.println("pausing");
+                        player.pause();
+                    }
+                }
+            } 
+            else if (waiting) {
+                System.out.println("seeking");
+                
                 int position = byteLength * progressSlider.getValue() / progressSlider.getMaximum();
+                System.out.println("seeking to " + position);
                 player.seekLocation(position);
+                
+                if (wasPlaying) {
+                
+                    System.out.println("unpausing");
+                    player.unpause();
+                }
+                
+                waiting = false;
             }
         }
     }
@@ -224,7 +264,7 @@ public class PlayerPanel extends JXPanel {
     }
     
     
-    private class PlayerListener implements AudioPlayerListener{
+    private class PlayerListener implements AudioPlayerListener {
        
         @Override
         public void progressChange(int bytesread) {
@@ -236,7 +276,7 @@ public class PlayerPanel extends JXPanel {
         @Override
         public void songOpened(Map<String, Object> properties) {
            titleLabel.setText((String)properties.get("author") + " - " + (String)properties.get("title"));
-           durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000*1000);
+           durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
            progressSlider.setMaximum(durationSecs);
            byteLength = (Integer)properties.get("audio.length.bytes");
         }
