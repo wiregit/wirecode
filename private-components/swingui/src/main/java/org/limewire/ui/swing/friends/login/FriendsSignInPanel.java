@@ -111,9 +111,24 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        shareLabel.setVisible(!switchUser);
-                        loginPanel.setVisible(switchUser);
-                        loggedInPanel.setVisible(false);                        
+                        if(switchUser) {
+                            shareLabel.setVisible(false);
+                            loginPanel.setVisible(true);
+                            loggedInPanel.setVisible(false);
+                        } else {
+                            XMPPAccountConfiguration auto =
+                                accountManager.getAutoLoginConfig();
+                            if(auto == null) {
+                                shareLabel.setVisible(true);
+                                loginPanel.setVisible(false);
+                                loggedInPanel.setVisible(false);
+                            } else {
+                                shareLabel.setVisible(false);
+                                loginPanel.setVisible(false);
+                                loggedInPanel.setVisible(true);
+                                loggedInPanel.disconnected(auto);
+                            }
+                        }
                     }
                 });
             }

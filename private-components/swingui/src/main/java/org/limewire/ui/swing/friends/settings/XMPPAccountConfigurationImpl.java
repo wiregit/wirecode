@@ -62,10 +62,10 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         this.resource = resource;
         isDebugEnabled = false;
         requiresDomain = false;
-        host = "jabber.org";
+        host = "";
         port = 5222;
-        serviceName = "jabber.org";
-        label = "Jabber";
+        serviceName = "";
+        label = "";
         registrationURL = "http://www.jabber.org/web/Quickstart";
         String path = iconPath + "LimeWire" + iconExtension;
         URL url = ClassLoader.getSystemResource(path);

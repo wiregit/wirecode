@@ -78,7 +78,7 @@ public class HyperLinkButton extends JButton implements MouseListener {
     @Override
     public void setAction(Action a) {
         super.setAction(a);
-        setText(text);
+        setText(text); // FIXME: ?
     }
     
     @Override

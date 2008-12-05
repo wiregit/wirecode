@@ -157,24 +157,17 @@ class LoginPanel extends JXPanel {
             serviceLabel.setVisible(false);
             serviceField.setVisible(false);
         }
-        XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-        if(auto != null && label.equals(auto.getLabel())) {
-            serviceField.setText(auto.getServiceName());
-            usernameField.setText(auto.getUsername());
-            passwordField.setText(auto.getPassword());
-            autoLoginCheckBox.setSelected(true);
-        } else {
-            serviceField.setText("");
-            usernameField.setText("");
-            passwordField.setText("");
-            autoLoginCheckBox.setSelected(false);
-        }
+        XMPPAccountConfiguration config = accountManager.getConfig(label);
+        serviceField.setText(config.getServiceName());
+        usernameField.setText(config.getUsername());
+        passwordField.setText(config.getPassword());
+        autoLoginCheckBox.setSelected(config == accountManager.getAutoLoginConfig());
     }
 
     void disconnected(Exception reason) {
         setSignInComponentsEnabled(true);
         populateInputs();
-        if(reason.getMessage().contains("auth")) {
+        if(reason.getMessage().contains("auth") || reason.getMessage().contains("Auth")) {
             authFailedLabel.setText(AUTHENTICATION_ERROR);
             passwordField.setText("");
         } else {
@@ -224,18 +217,20 @@ class LoginPanel extends JXPanel {
             }            
             String label = (String)serviceComboBox.getSelectedItem();
             XMPPAccountConfiguration config = accountManager.getConfig(label);
+            if(label.equals(accountManager.getCustomConfigLabel())) {
+                String service = serviceField.getText().trim();
+                if(service.equals(""))
+                    return;
+                config.setServiceName(service);
+            }
             config.setUsername(user);
             config.setPassword(password);
             if(autoLoginCheckBox.isSelected()) {
-                // Set the service name if this is the custom config
-                if(serviceField.isVisible())
-                    config.setServiceName(serviceField.getText().trim());
                 // Set this as the auto-login account
                 accountManager.setAutoLoginConfig(config);
             } else {
                 // If this was previously the auto-login account, delete it
-                XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-                if(auto != null && auto.getLabel().equals(label)) {
+                if(config == accountManager.getAutoLoginConfig()) {
                     accountManager.setAutoLoginConfig(null);
                 }
             }

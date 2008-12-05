@@ -159,13 +159,6 @@ public class MiscOptionPanel extends OptionPanel {
 
             add(new JLabel(tr("Password:")), "gapleft 25, split");
             add(passwordField);
-
-            // If there's an auto-login configuration, select it
-            XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-            if(auto == null)
-                serviceComboBox.setSelectedItem("Gmail");
-            else
-                serviceComboBox.setSelectedItem(auto.getLabel());
         }
 
         private void populateInputs() {
@@ -177,16 +170,10 @@ public class MiscOptionPanel extends OptionPanel {
                 serviceLabel.setVisible(false);
                 serviceField.setVisible(false);
             }
-            XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-            if(auto != null && label.equals(auto.getLabel())) {
-                serviceField.setText(auto.getServiceName());
-                usernameField.setText(auto.getUsername());
-                passwordField.setText(auto.getPassword());
-            } else {
-                serviceField.setText("");
-                usernameField.setText("");
-                passwordField.setText("");
-            }
+            XMPPAccountConfiguration config = accountManager.getConfig(label);
+            serviceField.setText(config.getServiceName());
+            usernameField.setText(config.getUsername());
+            passwordField.setText(config.getPassword());
         }
 
         private void setComponentsEnabled(boolean enabled) {
@@ -200,11 +187,22 @@ public class MiscOptionPanel extends OptionPanel {
         boolean applyOptions() {
             if(hasChanged()) {
                 if(autoLoginCheckBox.isSelected()) {
+                    // Set this as the auto-login account
+                    String user = usernameField.getText().trim();
+                    String password = new String(passwordField.getPassword());
+                    if(user.equals("") || password.equals("")) {
+                        return false;
+                    }            
                     String label = (String)serviceComboBox.getSelectedItem();
                     XMPPAccountConfiguration config = accountManager.getConfig(label);
-                    config.setServiceName(serviceField.getText().trim());
-                    config.setUsername(usernameField.getText().trim());
-                    config.setPassword(new String(passwordField.getPassword()));
+                    if(label.equals(accountManager.getCustomConfigLabel())) {
+                        String service = serviceField.getText().trim();
+                        if(service.equals(""))
+                            return false;
+                        config.setServiceName(service);
+                    }
+                    config.setUsername(user);
+                    config.setPassword(password);
                     accountManager.setAutoLoginConfig(config);
                 } else {
                     accountManager.setAutoLoginConfig(null);
@@ -239,10 +237,17 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            populateInputs();
             XMPPAccountConfiguration auto = accountManager.getAutoLoginConfig();
-            setComponentsEnabled(auto != null);
-            autoLoginCheckBox.setSelected(auto != null);
+            if(auto == null) {
+                serviceComboBox.setSelectedItem("Gmail");
+                setComponentsEnabled(false);
+                autoLoginCheckBox.setSelected(false);
+            } else {
+                serviceComboBox.setSelectedItem(auto.getLabel());
+                setComponentsEnabled(true);
+                autoLoginCheckBox.setSelected(true);
+            }
+            populateInputs();
         }
     }
 
