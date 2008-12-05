@@ -48,6 +48,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
     }
     
+    /**
+     * Required to make sure that {@link PresenceLibraryBrowser} locks before
+     * its internal locking. Remove ASAP.
+     */
+    ReadWriteLock getReadWriteLock() {
+        return lock;
+    }
+    
     @Override
     public EventList<FriendLibrary> getFriendLibraryList() {
         return readOnlyFriendLibraries;

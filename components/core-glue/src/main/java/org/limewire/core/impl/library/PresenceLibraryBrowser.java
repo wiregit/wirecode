@@ -42,7 +42,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     private static final Log LOG = LogFactory.getLog(PresenceLibraryBrowser.class);
 
     private final BrowseFactory browseFactory;
-    private final RemoteLibraryManager remoteLibraryManager;
+    private final RemoteLibraryManagerImpl remoteLibraryManager;
 
     private final SocketsManager socketsManager;
     
@@ -55,7 +55,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
     private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
 
     @Inject
-    public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManager remoteLibraryManager,
+    public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManagerImpl remoteLibraryManager,
             SocketsManager socketsManager, XMPPRemoteFileDescDeserializer remoteFileDescDeserializer) {
         this.browseFactory = browseFactory;
         this.remoteLibraryManager = remoteLibraryManager;
@@ -151,20 +151,25 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         @Override
         public void handleEvent(ConnectivityChangeEvent event) {
             LOG.debug("connectivity change");
-            synchronized (librariesToBrowse) {
-                // calls in here need to be non-blocking 
-                for (Iterator<PresenceLibrary> i = librariesToBrowse.iterator(); i.hasNext();) {
-                    PresenceLibrary presenceLibrary = i.next();
-                    FriendPresence friendPresence = presenceLibrary.getPresence();
-                    AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
-                    if(addressFeature != null) {
-                        Address address = addressFeature.getFeature();
-                        if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                            i.remove();
-                            browse(presenceLibrary, friendPresence);
+            remoteLibraryManager.getReadWriteLock().writeLock().lock(); 
+            try {
+                synchronized (librariesToBrowse) {
+                    // calls in here need to be non-blocking 
+                    for (Iterator<PresenceLibrary> i = librariesToBrowse.iterator(); i.hasNext();) {
+                        PresenceLibrary presenceLibrary = i.next();
+                        FriendPresence friendPresence = presenceLibrary.getPresence();
+                        AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
+                        if(addressFeature != null) {
+                            Address address = addressFeature.getFeature();
+                            if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
+                                i.remove();
+                                browse(presenceLibrary, friendPresence);
+                            }
                         }
                     }
                 }
+            } finally {
+                remoteLibraryManager.getReadWriteLock().writeLock().unlock();
             }
         }
     }

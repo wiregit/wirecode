@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
@@ -17,11 +19,15 @@ class PresenceImpl implements Presence {
     private final User user;
     private final Map<URI, Feature> features;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
-    private final  String jid;
-    private volatile Type type;
-    private volatile String status;
-    private volatile int priority;
-    private volatile Mode mode;
+    private final String jid;
+    
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    
+    private Type type;
+    private String status;
+    private int priority;
+    private Mode mode;
+    
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
                  User user, EventBroadcaster<FeatureEvent> featureSupport) {
@@ -33,11 +39,14 @@ class PresenceImpl implements Presence {
     }
 
     public void update(org.jivesoftware.smack.packet.Presence presence) {
-        synchronized (this) {
+        rwLock.writeLock().lock();
+        try {
             this.type = Type.valueOf(presence.getType().toString());
             this.status = presence.getStatus();
             this.priority = presence.getPriority();
             this.mode = presence.getMode() != null ? Mode.valueOf(presence.getMode().toString()) : Mode.available;
+        } finally {
+            rwLock.writeLock().unlock();
         }
     }
 
@@ -48,29 +57,41 @@ class PresenceImpl implements Presence {
 
     @Override
     public Type getType() {
-        synchronized (this) {
+        rwLock.readLock().lock();
+        try {
             return type;
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
     @Override
     public String getStatus() {
-        synchronized (this) {
+        rwLock.readLock().lock();
+        try {
             return status;
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
     @Override
     public int getPriority() {
-        synchronized (this) {
+        rwLock.readLock().lock();
+        try {
             return priority;
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
     @Override
     public Mode getMode() {
-        synchronized (this) {
+        rwLock.readLock().lock();
+        try {
             return mode;
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
