@@ -1,6 +1,8 @@
 package org.limewire.core.impl.download;
 
 import java.awt.EventQueue;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
@@ -35,9 +37,15 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.setting.FileSetting;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,17 +55,12 @@ import com.limegroup.bittorrent.BTTorrentFileDownloader;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 
 @Singleton
 public class CoreDownloadListManager implements DownloadListManager {
@@ -72,6 +75,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     private final ActivityCallback activityCallback;
     private final SpamManager spamManager;
     private final ItunesDownloadListenerFactory itunesDownloadListenerFactory;
+    private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
     
     private static final int PERIOD = 1000;
     
@@ -235,6 +239,35 @@ public class CoreDownloadListManager implements DownloadListManager {
         return rfds;
     }
 
+	/**
+	 * Adds the specified listener to the list that is notified when a 
+	 * property value changes.  Notification events are fired on the Swing UI 
+	 * thread. 
+	 */
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes the specified listener from the list that is notified when a 
+     * property value changes.
+     */
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        changeSupport.removePropertyChangeListener(listener);
+    }
+    
+    /**
+     * Checks for downloads in progress, and fires a property change event if
+     * all downloads are completed.
+     */
+    @Override
+    public void updateDownloadsCompleted() {
+        if (downloadManager.downloadsInProgress() == 0) {
+            changeSupport.firePropertyChange("downloadsCompleted", false, true);
+        }
+    }
 
     private class CoreDownloadListener implements DownloadListener {
 	    
@@ -265,6 +298,11 @@ public class CoreDownloadListManager implements DownloadListManager {
                 list.remove(item);
             }
             urnMap.remove(item.getUrn());
+        }
+        
+        @Override
+        public void downloadsCompleted() {
+            changeSupport.firePropertyChange("downloadsCompleted", false, true);
         }
 
         private DownloadItem getDownloadItem(Downloader downloader) {

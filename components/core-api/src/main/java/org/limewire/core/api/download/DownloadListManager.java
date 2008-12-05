@@ -1,6 +1,6 @@
 package org.limewire.core.api.download;
 
-
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
 
@@ -9,6 +9,9 @@ import org.limewire.core.api.magnet.MagnetLink;
 
 import ca.odell.glazedlists.EventList;
 
+/**
+ * Defines the manager API for the list of downloads. 
+ */
 public interface DownloadListManager extends ResultDownloader {
 	
     /**
@@ -18,7 +21,7 @@ public interface DownloadListManager extends ResultDownloader {
 	
 	/** Returns a Swing-thread safe version of the downloads event list. */
 	public EventList<DownloadItem> getSwingThreadSafeDownloads();
-    
+	
 	/**
 	 * Downloads the torrent file at the given uri.
 	 */
@@ -38,4 +41,23 @@ public interface DownloadListManager extends ResultDownloader {
      * Downloads the given magnet link.
      */
     public DownloadItem addDownload(MagnetLink magnet, File saveFile, boolean overwrite) throws SaveLocationException;
+    
+    /**
+     * Adds the specified listener to the list that is notified when a 
+     * property value changes. 
+     */
+    public void addPropertyChangeListener(PropertyChangeListener listener);
+
+    /**
+     * Removes the specified listener from the list that is notified when a 
+     * property value changes. 
+     */
+    public void removePropertyChangeListener(PropertyChangeListener listener);
+    
+    /**
+     * Checks for downloads in progress, and fires a property change event if
+     * all downloads are completed.
+     */
+    public void updateDownloadsCompleted();
+    
 }

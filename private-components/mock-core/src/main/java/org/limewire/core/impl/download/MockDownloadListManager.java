@@ -146,4 +146,17 @@ public class MockDownloadListManager implements DownloadListManager {
             throws SaveLocationException {
         return null;
     }
+    
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+    }
+
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    }
+    
+    @Override
+    public void updateDownloadsCompleted() {
+    }
+    
 }
