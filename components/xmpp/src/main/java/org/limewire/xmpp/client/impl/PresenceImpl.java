@@ -5,65 +5,73 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.xmpp.api.client.Presence;
 import org.limewire.xmpp.api.client.User;
 
 class PresenceImpl implements Presence {
 
-    @SuppressWarnings("unused")
-    private static final Log LOG = LogFactory.getLog(PresenceImpl.class);
-
-    private final org.jivesoftware.smack.packet.Presence presence;
     private final User user;
     private final Map<URI, Feature> features;
     private final EventBroadcaster<FeatureEvent> featureBroadcaster;
+    private final  String jid;
+    private volatile Type type;
+    private volatile String status;
+    private volatile int priority;
+    private volatile Mode mode;
 
     PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
                  User user, EventBroadcaster<FeatureEvent> featureSupport) {
-        this.presence = presence;
         this.user = user;
         this.features = new ConcurrentHashMap<URI, Feature>();
         this.featureBroadcaster = featureSupport;
+        this.jid = presence.getFrom();
+        update(presence);
     }
 
-    PresenceImpl(org.jivesoftware.smack.packet.Presence presence,
-                 PresenceImpl currentPresence) {
-        this.presence = presence;
-        this.user = currentPresence.user;
-        this.features = currentPresence.features;
-        this.featureBroadcaster = currentPresence.featureBroadcaster;
+    public void update(org.jivesoftware.smack.packet.Presence presence) {
+        synchronized (this) {
+            this.type = Type.valueOf(presence.getType().toString());
+            this.status = presence.getStatus();
+            this.priority = presence.getPriority();
+            this.mode = presence.getMode() != null ? Mode.valueOf(presence.getMode().toString()) : Mode.available;
+        }
     }
 
     @Override
     public String getJID() {
-        return presence.getFrom();
+        return jid;
     }
 
     @Override
     public Type getType() {
-        return Type.valueOf(presence.getType().toString());
+        synchronized (this) {
+            return type;
+        }
     }
 
     @Override
     public String getStatus() {
-        return presence.getStatus();
+        synchronized (this) {
+            return status;
+        }
     }
 
     @Override
     public int getPriority() {
-        return presence.getPriority();
+        synchronized (this) {
+            return priority;
+        }
     }
 
     @Override
     public Mode getMode() {
-        return presence.getMode() != null ? Mode.valueOf(presence.getMode().toString()) : Mode.available;
+        synchronized (this) {
+            return mode;
+        }
     }
 
     public String toString() {
@@ -103,10 +111,6 @@ class PresenceImpl implements Presence {
     @Override
     public String getPresenceId() {
         return getJID();
-    }
-
-    public Address getPresenceAddress() {
-        return null;
     }
 
     @Override

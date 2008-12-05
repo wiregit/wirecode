@@ -314,7 +314,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                             } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
                                 PresenceImpl p = (PresenceImpl)user.getPresence(presence.getFrom());
                                 if(p != null) {
-                                    user.removePresense(new PresenceImpl(presence, p));
+                                    p.update(presence);
+                                    user.removePresense(p);
                                 }
                             }
                         }
@@ -385,7 +386,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         private void updatePresence(UserImpl user, org.jivesoftware.smack.packet.Presence presence) {
             PresenceImpl currentPresence = (PresenceImpl)user.getFriendPresences().get(presence.getFrom());
-            user.updatePresence(new PresenceImpl(presence, currentPresence));
+            currentPresence.update(presence);
+            user.updatePresence(currentPresence);
         }
     }
     
