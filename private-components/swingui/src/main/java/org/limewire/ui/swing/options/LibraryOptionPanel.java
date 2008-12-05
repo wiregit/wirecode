@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.JOptionPane;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -21,6 +22,7 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
@@ -234,7 +236,13 @@ public class LibraryOptionPanel extends OptionPanel {
                     if(libraryData.isDirectoryAllowed(folder)) {
                         treeTable.addDirectory(folder);
                     } else {
-                        // TODO: Display message?
+                    FocusJOptionPane.showMessageDialog(LibraryManagerOptionPanel.this,
+                            I18n.tr("You selected: {0}\n\nLimeWire cannot share " +
+                                    "this folder because it is either not a folder " +
+                                    "or cannot be read.\n\nPlease select another " +
+                                    "folder to share.", folder),
+                            I18n.tr("Library Manager Error"),
+                            JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
