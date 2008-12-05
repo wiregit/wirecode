@@ -20,10 +20,10 @@ import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 import com.google.inject.Inject;
-
 
 class LoggedInPanel extends JXPanel {
 
@@ -61,8 +61,7 @@ class LoggedInPanel extends JXPanel {
         optionsMenu.add(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                throw new RuntimeException("Implement me");
+                throw new NotImplementedException();
             }
         });
         optionsMenu.addSeparator();

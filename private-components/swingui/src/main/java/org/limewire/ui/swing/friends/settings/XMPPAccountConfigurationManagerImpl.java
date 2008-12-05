@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.core.settings.XMPPSettings;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.PasswordManager;
 
 import com.google.inject.Inject;
