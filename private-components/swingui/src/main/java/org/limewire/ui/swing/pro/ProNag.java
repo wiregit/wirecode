@@ -94,7 +94,7 @@ public class ProNag extends JXPanel implements Resizable {
          + "<li>More search results?</li>"
          + "<li>Free tech support and upgrades?</li>"
          + "</ul>"
-         + "<center><form action=\"" + outgoing + "\" method='post'><input type='submit' value='Get LimeWire PRO now'/></form></center>"
+         + "<center><form action=\"" + outgoing + "\" method='get'><input type='submit' value='Get LimeWire PRO now'/></form></center>"
          + "</td></tr></table>"
          + "</body>"
          + "</html>"
