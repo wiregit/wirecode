@@ -30,10 +30,4 @@ public interface XMPPAccountConfigurationManager {
      * LimeWire starts; use null to disable auto-login.
      */
     public void setAutoLoginConfig(XMPPAccountConfiguration config);
-
-    /**
-     * Returns the label that should be used for the custom configuration.
-     * (This is needed for internationalisation.)
-     */
-    public String getCustomConfigLabel();
 }

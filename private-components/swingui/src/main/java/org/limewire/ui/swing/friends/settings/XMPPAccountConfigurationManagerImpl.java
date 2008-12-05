@@ -45,8 +45,8 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
             // Broken or missing custom config - use the default
             customConfig = new XMPPAccountConfigurationImpl(resource);
         }
-        customConfig.setLabel(getCustomConfigLabel());
-        configs.put(getCustomConfigLabel(), customConfig);
+        customConfig.setLabel("Jabber");
+        configs.put("Jabber", customConfig);
         String autoLogin = XMPPSettings.XMPP_AUTO_LOGIN.getValue();
         if(!autoLogin.equals("")) {
             int comma = autoLogin.indexOf(',');
@@ -85,11 +85,6 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     }
     
     @Override
-    public String getCustomConfigLabel() {
-        return tr("Other...");
-    }
-    
-    @Override
     public XMPPAccountConfiguration getAutoLoginConfig() {
         return autoLoginConfig;
     }
@@ -110,7 +105,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                         config.getPassword());
                 XMPPSettings.XMPP_AUTO_LOGIN.setValue(config.getLabel() + "," +
                         config.getUsername());
-                if(config.getLabel().equals(getCustomConfigLabel()))
+                if(config.getLabel().equals("Jabber"))
                     XMPPSettings.XMPP_SERVER.setValue(config.toString());
                 autoLoginConfig = config;
             } catch (IllegalArgumentException ignored) {

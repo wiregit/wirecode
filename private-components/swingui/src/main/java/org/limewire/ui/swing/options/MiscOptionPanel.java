@@ -163,7 +163,7 @@ public class MiscOptionPanel extends OptionPanel {
 
         private void populateInputs() {
             String label = (String)serviceComboBox.getSelectedItem();
-            if(label.equals(accountManager.getCustomConfigLabel())) {
+            if(label.equals("Jabber")) {
                 serviceLabel.setVisible(true);
                 serviceField.setVisible(true);
             } else {
@@ -195,7 +195,7 @@ public class MiscOptionPanel extends OptionPanel {
                     }            
                     String label = (String)serviceComboBox.getSelectedItem();
                     XMPPAccountConfiguration config = accountManager.getConfig(label);
-                    if(label.equals(accountManager.getCustomConfigLabel())) {
+                    if(label.equals("Jabber")) {
                         String service = serviceField.getText().trim();
                         if(service.equals(""))
                             return false;

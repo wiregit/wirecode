@@ -150,7 +150,7 @@ class LoginPanel extends JXPanel {
 
     private void populateInputs() {
         String label = (String)serviceComboBox.getSelectedItem();
-        if(label.equals(accountManager.getCustomConfigLabel())) {
+        if(label.equals("Jabber")) {
             serviceLabel.setVisible(true);
             serviceField.setVisible(true);
         } else {
@@ -217,7 +217,7 @@ class LoginPanel extends JXPanel {
             }            
             String label = (String)serviceComboBox.getSelectedItem();
             XMPPAccountConfiguration config = accountManager.getConfig(label);
-            if(label.equals(accountManager.getCustomConfigLabel())) {
+            if(label.equals("Jabber")) {
                 String service = serviceField.getText().trim();
                 if(service.equals(""))
                     return;
