@@ -1,69 +1,127 @@
 package org.limewire.core.impl.xmpp;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.limewire.core.api.browse.server.BrowseTracker;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifier;
 import org.limewire.core.api.friend.feature.features.LibraryChangedNotifierFeature;
 import org.limewire.core.api.library.FriendShareListEvent;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.listener.BlockingEvent;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+import org.limewire.xmpp.api.client.User;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
 
-public class FriendShareListRefresher {
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
-    @Singleton
-    static class FriendShareListEventImpl implements RegisteringEventListener<FriendShareListEvent> {
+/**
+ * Sends library changed messages to friends when:<BR>
+ * 1) File manager is finished loading<BR>
+ * OR<BR>
+ * 2) A friend's sharelist changes
+ */
 
-        private final AtomicBoolean FILE_MANAGER_LOADED = new AtomicBoolean(false);
+@Singleton
+class FriendShareListRefresher implements RegisteringEventListener<FriendShareListEvent> {
 
-        @Inject
-        public void register(ListenerSupport<FriendShareListEvent> friendShareListEventListenerSupport) {
-            friendShareListEventListenerSupport.addListener(this);
+    private final BrowseTracker tracker;
+    private final XMPPService xmppService;
+
+    private final Map<String, LibraryChangedSender> listeners;
+    private final AtomicBoolean fileManagerLoaded = new AtomicBoolean(false);
+
+    @Inject
+    FriendShareListRefresher(BrowseTracker tracker,
+                             XMPPService xmppService) {
+        this.tracker = tracker;
+        this.xmppService = xmppService;
+        listeners = new ConcurrentHashMap<String, LibraryChangedSender>();
+    }
+
+    @Inject
+    public void register(FileManager fileManager) {
+        fileManager.getManagedFileList().addManagedListStatusListener(new FinishedLoadingListener());
+    }
+
+    @Inject
+    public void register(ListenerSupport<FriendShareListEvent> friendShareListEventListenerSupport) {
+        friendShareListEventListenerSupport.addListener(this);
+    }
+
+    public void handleEvent(final FriendShareListEvent event) {
+        if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
+            LibraryChangedSender listener = new LibraryChangedSender(event.getFriend());
+            listeners.put(event.getFriend().getId(), listener);
+            event.getFileList().getModel().addListEventListener(listener);
+        } else if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED) {
+            event.getFileList().getModel().removeListEventListener(listeners.get(event.getFriend().getId()));
         }
-
-        @Inject
-        public void register(FileManager fileManager) {
-            fileManager.getManagedFileList().addManagedListStatusListener(new EventListener<ManagedListStatusEvent>() {
-                public void handleEvent(ManagedListStatusEvent evt) {
-                    if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
-                        FILE_MANAGER_LOADED.set(true);
-                    }
-                }
-            });
-        }
-
-        // TODO: Sharelists are going to change a lot, in rapid succession --
-        //       We need to queue up the changes to avoid sending a zillion
-        //       library refresh packets.
-        public void handleEvent(final FriendShareListEvent event) {
-            if(event.getType() == FriendShareListEvent.Type.FRIEND_SHARE_LIST_ADDED) {
-                event.getFileList().getModel().addListEventListener(new ListEventListener<LocalFileItem>() {
-                    @SuppressWarnings("unchecked")
-                    public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                        if(FILE_MANAGER_LOADED.get()) {
-                            Map<String,FriendPresence> presences = event.getFriend().getFriendPresences();
-                            for(FriendPresence presence : presences.values()) {
-                                Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
-                                if(notifier != null) {
-                                    notifier.getFeature().sendLibraryRefresh();
-                                }
+    }
+    
+    private class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
+        @BlockingEvent
+        public void handleEvent(ManagedListStatusEvent evt) {
+            if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
+                fileManagerLoaded.set(true);  
+                XMPPConnection connection = xmppService.getActiveConnection();
+                if(connection != null) {
+                    Collection<User> friends = connection.getUsers();
+                    for(Friend friend : friends) {
+                        tracker.sentRefresh(friend);
+                        Map<String, FriendPresence> presences = friend.getFriendPresences();
+                        for(FriendPresence presence : presences.values()) {
+                            Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
+                            if(notifier != null) {
+                                notifier.getFeature().sendLibraryRefresh();
                             }
                         }
                     }
-                });
+                }
             }
+        }            
+    }
+    
+    class LibraryChangedSender implements ListEventListener<LocalFileItem> {
+        
+        private final Friend friend;
+        
+        LibraryChangedSender(Friend friend){
+            this.friend = friend;
         }
+        
+        @SuppressWarnings("unchecked")
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            if(fileManagerLoaded.get()) {
+                BrowseTracker browseTracker = FriendShareListRefresher.this.tracker;
+                Date lastBrowseTime = browseTracker.lastBrowseTime(friend);
+                Date lastRefreshTime = browseTracker.lastRefreshTime(friend);
+                if(lastBrowseTime != null && (lastRefreshTime == null || lastBrowseTime.after(lastRefreshTime))) {
+                    browseTracker.sentRefresh(friend);
+                    Map<String,FriendPresence> presences = friend.getFriendPresences();
+                    for(FriendPresence presence : presences.values()) {
+                        Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);
+                        if(notifier != null) {
+                            notifier.getFeature().sendLibraryRefresh();
+                        }
+                    }
+                }                        
+            }
+        }        
     }
 }

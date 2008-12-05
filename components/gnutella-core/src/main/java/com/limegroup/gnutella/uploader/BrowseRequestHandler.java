@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,10 +22,14 @@ import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.api.browse.server.BrowseTracker;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.io.GUID;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
+import org.limewire.xmpp.api.client.XMPPConnection;
+import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Constants;
@@ -64,15 +68,21 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     private boolean requestorCanDoFWT = true;
 
     private final HttpRequestFileListProvider browseRequestFileListProvider;
+    private final BrowseTracker tracker;
+    private final XMPPService xmppService;
 
     BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
             Provider<ResponseFactory> responseFactory,
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
-            HttpRequestFileListProvider browseRequestFileListProvider) {
+            HttpRequestFileListProvider browseRequestFileListProvider,
+            BrowseTracker tracker,
+            XMPPService xmppService) {
         this.sessionManager = sessionManager;
         this.responseFactory = responseFactory;
         this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
         this.browseRequestFileListProvider = browseRequestFileListProvider;
+        this.tracker = tracker;
+        this.xmppService = xmppService;
     }
     
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
@@ -96,7 +106,22 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         try {
             // TODO handler code should not know that much about request uris
             String uri = request.getRequestLine().getUri();
-            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(uri.equals("/") ? null : getFriend(request), context);
+            String friendID;
+            if(uri.equals("/")) {
+                friendID = null;
+            } else {
+                friendID = getFriend(request);
+                if(friendID != null) {
+                    XMPPConnection connection = xmppService.getActiveConnection();
+                    if(connection != null) {
+                        Friend friend = connection.getUser(friendID);
+                        if(friend != null) {
+                            tracker.browsed(friend);
+                        }
+                    }
+                }
+            }            
+            Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(friendID, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
             for (FileList list : lists) {
                 iterables.add(list.pausableIterable());
