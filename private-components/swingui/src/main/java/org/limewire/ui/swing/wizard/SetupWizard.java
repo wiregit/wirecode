@@ -33,13 +33,16 @@ public class SetupWizard {
     }
         
     private void createWizard(LibraryData libraryData){
-        wizard = new Wizard();
+        SetupComponentDecorator decorator = new SetupComponentDecorator();
+        
+        wizard = new Wizard(decorator);
+        
         if(needsPage1()){
-            wizard.addPage(new SetupPage1());
+            wizard.addPage(new SetupPage1(decorator));
         }        
 
         if(needsPage2()){
-            wizard.addPage(new SetupPage2(libraryData));
+            wizard.addPage(new SetupPage2(decorator, libraryData));
         }
     }
     

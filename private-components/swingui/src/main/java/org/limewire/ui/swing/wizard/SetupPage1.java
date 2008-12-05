@@ -1,26 +1,21 @@
 package org.limewire.ui.swing.wizard;
 
-import java.awt.Color;
-
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
-import org.jdesktop.application.Resource;
+import net.miginfocom.swing.MigLayout;
+
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.components.HyperLinkButton;
-import org.limewire.ui.swing.components.LimeCheckBox;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
-
-import net.miginfocom.swing.MigLayout;
 
 
 
@@ -43,23 +38,23 @@ public class SetupPage1 extends WizardPage {
     private JCheckBox associationCheck;
     private JCheckBox startupCheck;    
     
-    @Resource
-    private Color backgroundColor;
-    
-    public SetupPage1(){
-        GuiUtils.assignResources(this);
-        setBackground(backgroundColor);
+    public SetupPage1(SetupComponentDecorator decorator){
+
+        setOpaque(false);
+        
         setLayout(new MigLayout());
         
         HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
-        filterCheck = new LimeCheckBox(filterCheckText);
-        filterCheck.setOpaque(false);
-
-        associationCheck = new LimeCheckBox(associationsText);
-        associationCheck.setOpaque(false);
+        filterCheck = new JCheckBox(filterCheckText);
+        decorator.decorateLargeCheckBox(filterCheck);
+        
+        associationCheck = new JCheckBox(associationsText);
+        decorator.decorateLargeCheckBox(associationCheck);
         associationCheck.setSelected(true);
-        startupCheck = new LimeCheckBox(startupText);  
-        startupCheck.setOpaque(false); 
+
+        startupCheck = new JCheckBox(startupText);  
+        decorator.decorateLargeCheckBox(startupCheck);
+        
         if (shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);
         }

@@ -14,9 +14,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -24,13 +27,20 @@ import net.miginfocom.swing.MigLayout;
 
 public class Wizard extends JPanel{
     
+    @Resource Color background;
+    @Resource Color border;
+    @Resource Color titleBarBackground;
+    @Resource Color titleBarForeground;
+    @Resource Color titleBarBorder;
+    
     private JDialog dialog;    
  
     private JLabel titleLabel;
     
     private int currentPage;
 
-    private JButton continueButton;    
+    private JXButton continueButton;
+    
     private Action continueAction = new AbstractAction(I18n.tr("Continue")) {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -39,7 +49,7 @@ public class Wizard extends JPanel{
     };
     
     private JButton backButton;
-    private Action backAction = new AbstractAction(I18n.tr("<Go back")) {
+    private Action backAction = new AbstractAction(I18n.tr("Go back")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             back();
@@ -59,28 +69,31 @@ public class Wizard extends JPanel{
     private JPanel mainPanel;
     private CardLayout cardLayout;
     
-    public Wizard(){
-        super(new MigLayout("nogrid"));
+    public Wizard(SetupComponentDecorator decorator){
+        super(new MigLayout("nogrid, insets 4"));
         
-        setBackground(Color.WHITE);
-        setBorder(new LineBorder(Color.BLACK));
+        GuiUtils.assignResources(this);
+        
+        setBackground(background);
+        setBorder(new LineBorder(border, 3));
         
         pageList = new ArrayList<WizardPage>();
         
-        continueButton = new JButton(continueAction);
-        continueButton.setBackground(getBackground());
+        continueButton = new JXButton(continueAction);
+        decorator.decorateContinueButton(continueButton);
+        
         backButton = new HyperLinkButton((String)backAction.getValue(Action.NAME), backAction);
         finishButton = new JButton(finishAction);
         finishButton.setBackground(getBackground());
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
+        mainPanel.setBackground(getBackground());
         
         titleLabel = new JLabel();
         titleLabel.setOpaque(true);
-        //TODO: move colors to properties
-        titleLabel.setBackground(Color.BLACK);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setBorder(new LineBorder(Color.BLACK));
+        titleLabel.setBackground(titleBarBackground);
+        titleLabel.setForeground(titleBarForeground);
+        titleLabel.setBorder(new LineBorder(titleBarBorder));
         
         add(titleLabel, "dock north");
         add(mainPanel, "push, wrap");

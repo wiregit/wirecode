@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.wizard;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +15,6 @@ import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -26,10 +24,7 @@ import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-
-
 
 public class SetupPage2 extends WizardPage {
 
@@ -54,23 +49,18 @@ public class SetupPage2 extends WizardPage {
     private JButton addFolderButton;
     private LibraryData libraryData;
     
-    @Resource
-    private Color backgroundColor;
-    
-    public SetupPage2(LibraryData libraryData){
-        GuiUtils.assignResources(this);
-        
+    public SetupPage2(SetupComponentDecorator decorator, LibraryData libraryData) {
         this.libraryData = libraryData;
         
-        setBackground(backgroundColor);
+        setOpaque(false);
         setLayout(new MigLayout("nogrid"));
         
         autoButton = new JRadioButton(autoText);
-        autoButton.setOpaque(false);
+        decorator.decorateLargeRadioButton(autoButton);
         autoButton.setSelected(true);
         autoButton.addActionListener(new ButtonSelectionListener());
         manualButton = new JRadioButton(manualText);
-        manualButton.setOpaque(false);
+        decorator.decorateLargeRadioButton(manualButton);
         manualButton.addActionListener(new ButtonSelectionListener());
         
         addFolderButton = new JButton(new AddDirectoryAction(SetupPage2.this));
