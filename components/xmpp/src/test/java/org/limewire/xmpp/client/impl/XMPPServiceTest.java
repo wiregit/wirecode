@@ -144,6 +144,9 @@ public class XMPPServiceTest extends BaseTestCase {
      * Tests that a friend can be renamed in the roster
      */
     public void testSetName() throws InterruptedException {
+        // Reset the name first, in case a previous test left it as "foo"
+        aliceRosterListener.users.get(USERNAME_2).setName("buddy2");
+        Thread.sleep(SLEEP);
         assertEquals("buddy2", aliceRosterListener.users.get(USERNAME_2).getName());
         aliceRosterListener.users.get(USERNAME_2).setName("foo");
         Thread.sleep(SLEEP);
