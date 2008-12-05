@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.core.api.browse.server.BrowseTracker;
-import org.limewire.core.api.friend.Friend;
 
 import com.google.inject.Singleton;
 
@@ -21,22 +20,22 @@ public class BrowseTrackerImpl implements BrowseTracker {
     }
     
     @Override
-    public void browsed(Friend friend) {
-        browseHistory.put(friend.getId(), new Date());    
+    public void browsed(String friendId) {
+        browseHistory.put(friendId, new Date());    
     }
 
     @Override
-    public Date lastBrowseTime(Friend friend) {
-        return browseHistory.get(friend.getId());
+    public Date lastBrowseTime(String friendId) {
+        return browseHistory.get(friendId);
     }
 
     @Override
-    public void sentRefresh(Friend friend) {
-        refreshHistory.put(friend.getId(), new Date());
+    public void sentRefresh(String friendId) {
+        refreshHistory.put(friendId, new Date());
     }
 
     @Override
-    public Date lastRefreshTime(Friend friend) {
-        return refreshHistory.get(friend.getId());
+    public Date lastRefreshTime(String friendId) {
+        return refreshHistory.get(friendId);
     }
 }

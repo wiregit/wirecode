@@ -2,7 +2,6 @@ package com.limegroup.gnutella.uploader;
 
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.http.auth.RequiresAuthentication;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -18,26 +17,23 @@ public class BrowseRequestHandlerFactory {
     private final Provider<ResponseFactory> responseFactory;
     private final OutgoingQueryReplyFactory outgoingQueryReplyFactory;
     private final BrowseTracker tracker;
-    private final XMPPService xmppService;
 
     @Inject
     public BrowseRequestHandlerFactory(HTTPUploadSessionManager sessionManager,
             Provider<ResponseFactory> responseFactory,
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
-            BrowseTracker tracker,
-            XMPPService xmppService) {
+            BrowseTracker tracker) {
         this.sessionManager = sessionManager;
         this.responseFactory = responseFactory;
         this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
         this.tracker = tracker;
-        this.xmppService = xmppService;
     }
     
     public BrowseRequestHandler createBrowseRequestHandler(HttpRequestFileListProvider browseRequestFileListProvider,
                                                            boolean requiresAuthentication) {
         if(!requiresAuthentication) {
             return new BrowseRequestHandler(sessionManager, responseFactory, outgoingQueryReplyFactory,
-                    browseRequestFileListProvider, tracker, xmppService);
+                    browseRequestFileListProvider, tracker);
         } else {
             return new ProtectedBrowseRequestHandler(sessionManager, responseFactory, outgoingQueryReplyFactory,
                     browseRequestFileListProvider);
@@ -47,7 +43,7 @@ public class BrowseRequestHandlerFactory {
     @RequiresAuthentication 
     class ProtectedBrowseRequestHandler extends BrowseRequestHandler {
         ProtectedBrowseRequestHandler(HTTPUploadSessionManager sessionManager, Provider<ResponseFactory> responseFactory, OutgoingQueryReplyFactory outgoingQueryReplyFactory, HttpRequestFileListProvider browseRequestFileListProvider) {
-            super(sessionManager, responseFactory, outgoingQueryReplyFactory, browseRequestFileListProvider, tracker, xmppService);
+            super(sessionManager, responseFactory, outgoingQueryReplyFactory, browseRequestFileListProvider, tracker);
         }
     }
 

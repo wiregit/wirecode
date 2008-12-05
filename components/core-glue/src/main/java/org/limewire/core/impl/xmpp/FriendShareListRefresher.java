@@ -3,8 +3,8 @@ package org.limewire.core.impl.xmpp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.api.browse.server.BrowseTracker;
 import org.limewire.core.api.friend.Friend;
@@ -22,13 +22,13 @@ import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPService;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileManager;
 import com.limegroup.gnutella.library.ManagedListStatusEvent;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * Sends library changed messages to friends when:<BR>
@@ -75,6 +75,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
     }
     
     private class FinishedLoadingListener implements EventListener<ManagedListStatusEvent> {
+        @SuppressWarnings("unchecked")
         @BlockingEvent
         public void handleEvent(ManagedListStatusEvent evt) {
             if(evt.getType() == ManagedListStatusEvent.Type.LOAD_COMPLETE) {
@@ -83,7 +84,7 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
                 if(connection != null) {
                     Collection<User> friends = connection.getUsers();
                     for(Friend friend : friends) {
-                        tracker.sentRefresh(friend);
+                        tracker.sentRefresh(friend.getId());
                         Map<String, FriendPresence> presences = friend.getFriendPresences();
                         for(FriendPresence presence : presences.values()) {
                             Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);                                
@@ -109,10 +110,10 @@ class FriendShareListRefresher implements RegisteringEventListener<FriendShareLi
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
             if(fileManagerLoaded.get()) {
                 BrowseTracker browseTracker = FriendShareListRefresher.this.tracker;
-                Date lastBrowseTime = browseTracker.lastBrowseTime(friend);
-                Date lastRefreshTime = browseTracker.lastRefreshTime(friend);
+                Date lastBrowseTime = browseTracker.lastBrowseTime(friend.getId());
+                Date lastRefreshTime = browseTracker.lastRefreshTime(friend.getId());
                 if(lastBrowseTime != null && (lastRefreshTime == null || lastBrowseTime.after(lastRefreshTime))) {
-                    browseTracker.sentRefresh(friend);
+                    browseTracker.sentRefresh(friend.getId());
                     Map<String,FriendPresence> presences = friend.getFriendPresences();
                     for(FriendPresence presence : presences.values()) {
                         Feature<LibraryChangedNotifier> notifier = presence.getFeature(LibraryChangedNotifierFeature.ID);

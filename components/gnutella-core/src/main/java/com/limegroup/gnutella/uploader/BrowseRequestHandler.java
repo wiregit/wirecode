@@ -23,13 +23,10 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.browse.server.BrowseTracker;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.http.HttpCoreUtils;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.io.GUID;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
-import org.limewire.xmpp.api.client.XMPPConnection;
-import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Constants;
@@ -69,20 +66,17 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
     private final HttpRequestFileListProvider browseRequestFileListProvider;
     private final BrowseTracker tracker;
-    private final XMPPService xmppService;
 
     BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
             Provider<ResponseFactory> responseFactory,
             OutgoingQueryReplyFactory outgoingQueryReplyFactory,
             HttpRequestFileListProvider browseRequestFileListProvider,
-            BrowseTracker tracker,
-            XMPPService xmppService) {
+            BrowseTracker tracker) {
         this.sessionManager = sessionManager;
         this.responseFactory = responseFactory;
         this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
         this.browseRequestFileListProvider = browseRequestFileListProvider;
         this.tracker = tracker;
-        this.xmppService = xmppService;
     }
     
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
@@ -111,15 +105,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
                 friendID = null;
             } else {
                 friendID = getFriend(request);
-                if(friendID != null) {
-                    XMPPConnection connection = xmppService.getActiveConnection();
-                    if(connection != null) {
-                        Friend friend = connection.getUser(friendID);
-                        if(friend != null) {
-                            tracker.browsed(friend);
-                        }
-                    }
-                }
+                tracker.browsed(friendID);
             }            
             Iterable<SharedFileList> lists = browseRequestFileListProvider.getFileLists(friendID, context);
             List<Iterable<FileDesc>> iterables = new ArrayList<Iterable<FileDesc>>();
