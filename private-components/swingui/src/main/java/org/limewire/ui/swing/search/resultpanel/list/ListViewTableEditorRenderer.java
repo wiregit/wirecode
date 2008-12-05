@@ -65,6 +65,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDi
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -401,7 +402,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconPanel.setOpaque(false);
         itemIconPanel.add(itemIconLabel);
 
-        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "3[fill]", "[]0[]0[]"));
+        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "0[fill]", "[]0[top]0[]"));
         searchResultTextPanel.setOpaque(false);
         searchResultTextPanel.add(heading, "wrap, growx");
         searchResultTextPanel.add(subheadingLabel, "wrap");
@@ -576,13 +577,14 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     private void populateSearchResultTextPanel(RowDisplayConfig config) {
+        String subHeadingLabelPadding = OSUtils.isMacOSX() ? "" : "pad 0 4 0 0,";
         switch(config) {
         case HeadingOnly:
             searchResultTextPanel.remove(subheadingLabel);
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndSubheading:
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1");
+            searchResultTextPanel.add(subheadingLabel, subHeadingLabelPadding + "cell 0 1");
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndMetadata:
@@ -590,7 +592,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             searchResultTextPanel.add(metadataLabel, "cell 0 1");
             break;
         case HeadingSubHeadingAndMetadata:
-            searchResultTextPanel.add(subheadingLabel, "cell 0 1, wrap");
+            searchResultTextPanel.add(subheadingLabel, subHeadingLabelPadding + "cell 0 1, wrap");
             searchResultTextPanel.add(metadataLabel, "cell 0 2");
         }
     }
