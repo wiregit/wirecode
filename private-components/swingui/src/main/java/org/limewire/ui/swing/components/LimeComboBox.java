@@ -302,7 +302,7 @@ public class LimeComboBox extends JXButton {
             
             @Override
             public void mousePressed(MouseEvent e) {
-                if (menu != null) {
+                if (menu != null && isEnabled()) {
                     // If the menu is visible or this is the click that
                     // caused it to become invisible, go with inviz.
                     if(!clickForcesVisible && (menuVisible || System.currentTimeMillis() - menuInvizTime <= 10f)) {

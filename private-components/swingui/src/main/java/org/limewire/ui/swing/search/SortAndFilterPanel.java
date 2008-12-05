@@ -69,7 +69,7 @@ public class SortAndFilterPanel {
     private final String COMPANY = tr("Company");
     private final String PLATFORM = tr("Platform");
     private final String TYPE = tr("Type");
-    private final String DATE_CREATED = tr("Date created (more recent)");
+    private final String DATE_CREATED = tr("Date created");
     private final String QUALITY = tr("Quality");
     private final String YEAR = tr("Year");
     private final String FILE_EXTENSION = tr("File extension");
@@ -178,6 +178,7 @@ public class SortAndFilterPanel {
         buttonDecorator.decorateDarkFullImageButton(tableViewToggleButton, DrawMode.RIGHT_ROUNDED);
         tableViewToggleButton.setIcon(tableViewIcon);
         tableViewToggleButton.setPressedIcon(tableViewIcon);
+        tableViewToggleButton.setToolTipText(tr("Classic view"));
         tableViewToggleButton.setMargin(new Insets(0, 6, 0, 10));
         
         tableViewToggleButton.addItemListener(new ItemListener() {
@@ -225,15 +226,15 @@ public class SortAndFilterPanel {
     private void selectListView(final SortAndFilterPanel outerThis) {
         tableViewToggleButton.setSelected(false);
         listViewToggleButton.setSelected(true);
-        sortLabel.setVisible(true);
-        sortCombo.setVisible(true);
+        sortLabel.setEnabled(true);
+        sortCombo.setEnabled(true);
     }
 
     private void selectTableView(final SortAndFilterPanel outerThis) {
         tableViewToggleButton.setSelected(true);
         listViewToggleButton.setSelected(false);
-        sortLabel.setVisible(false);
-        sortCombo.setVisible(false);
+        sortLabel.setEnabled(false);
+        sortCombo.setEnabled(false);
     }
 
     public EventList<VisualSearchResult> getFilteredAndSortedList(
