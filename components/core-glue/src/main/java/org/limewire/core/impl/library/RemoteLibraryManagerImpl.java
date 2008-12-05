@@ -337,6 +337,11 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             changeSupport = new PropertyChangeSupport(this);
         }
 
+        @Override
+        public String toString() {
+            return StringUtils.toString(this, presence);
+        }
+        
         public FriendPresence getPresence() {
             return presence;
         }
