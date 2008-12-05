@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -120,6 +121,7 @@ public class MouseableTable extends StripedJXTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);        
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
+	    setTableHeaderRenderer();
 		
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
@@ -234,6 +236,11 @@ public class MouseableTable extends StripedJXTable {
         }
         
         return comp;
+    }
+    
+    private void setTableHeaderRenderer() {
+        JTableHeader th = getTableHeader();
+        th.setDefaultRenderer(new TableCellHeaderRenderer());
     }
 	          
     /**
