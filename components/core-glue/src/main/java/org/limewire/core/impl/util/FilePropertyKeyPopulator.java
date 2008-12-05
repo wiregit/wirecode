@@ -231,6 +231,8 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.DOCUMENT_AUTHOR;
             case TITLE:
                 return LimeXMLNames.DOCUMENT_TITLE;
+            case TOPIC:
+                return LimeXMLNames.DOCUMENT_TOPIC;
             }
         } else if (category == Category.IMAGE) {
             switch (filePropertyKey) {

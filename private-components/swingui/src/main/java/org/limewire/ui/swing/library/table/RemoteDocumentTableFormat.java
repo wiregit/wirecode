@@ -62,7 +62,7 @@ public class RemoteDocumentTableFormat<T extends FileItem> extends AbstractRemot
              case SIZE_COL:
                  return baseObject.getSize();
              case TYPE_COL:
-                 return "description goes here";     
+                 return baseObject.getProperty(FilePropertyKey.TOPIC);     
          }
          throw new IllegalArgumentException("Unknown column:" + column);
     }

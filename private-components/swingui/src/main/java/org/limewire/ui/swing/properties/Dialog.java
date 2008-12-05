@@ -344,6 +344,8 @@ public abstract class Dialog extends LimeJDialog {
                 break;
             case DOCUMENT:
                 addDateCreatedMetadata(str(propFile.getProperty(FilePropertyKey.DATE_CREATED)), metadata);
+                //TODO: parse TOPIC property
+                break;
         }
         addHashMetadata(propFile.getUrn(), metadata);
         setMetadataText(metadata);
