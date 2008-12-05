@@ -144,7 +144,7 @@ public class PlayerPanel extends JXPanel {
         
         statusPanel = new JPanel(new MigLayout());
         
-        titleLabel = new JLabel("Lime Audio Previewer...");
+        titleLabel = new JLabel("Lime Audio Previewer - Stopped");
         titleLabel.setFont(font);
         titleLabel.setMaximumSize(new Dimension(206, (int)titleLabel.getMaximumSize().getHeight()));
         titleLabel.setMinimumSize(new Dimension(206, (int)titleLabel.getMinimumSize().getHeight()));
