@@ -17,6 +17,8 @@ import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.Objects;
 
@@ -39,6 +41,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implements
         BTTorrentFileDownloader, EventListener<DownloadStatusEvent> {
+    
+    private static Log LOG = LogFactory.getLog(BTTorrentFileDownloaderImpl.class);
 
     private static final int TIMEOUT = 5000;
 
@@ -113,19 +117,11 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
                 throw new IOException("invalid response");
 
             m = btMetaInfoFactory.createBTMetaInfoFromBytes(body);           
-        } catch (SaveLocationException security) {
-            downloadStatus = DownloadStatus.INVALID;
-            throw new UnsupportedOperationException("Need to implement feedback.", security);
-            // TODO show warning
-            // GUIMediator.showWarning(I18n.tr(
-            // "The selected .torrent file may contain a security hazard."));
         } catch (IOException iox) {
             downloadStatus = DownloadStatus.INVALID;
-            throw new UnsupportedOperationException("Need to implement feedback.", iox);
-            // TODO show warning
-            // GUIMediator.showWarning(I18n.tr(
-            // "LimeWire could not download a .torrent file from the provided URL."
-            // ));
+            if(LOG.isErrorEnabled()) {
+                LOG.error("Error downloading torrent: " + torrentURI, iox);
+            }
         } finally {
             httpExecutor.releaseResources(response);
         }

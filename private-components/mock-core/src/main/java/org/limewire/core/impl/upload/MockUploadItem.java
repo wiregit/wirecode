@@ -35,12 +35,6 @@ public class MockUploadItem implements UploadItem {
     }
 
     @Override
-    public File getFile() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public String getFileName() {
         return fileName;
     }
@@ -131,6 +125,11 @@ public class MockUploadItem implements UploadItem {
                 return 0;
             }
         };
+    }
+
+    @Override
+    public File getFile() {
+        return new File(fileName);
     }
 
 }

@@ -17,11 +17,6 @@ public interface UploadItem extends PropertiableFile {
     public void cancel();
 
     /**
-     * @return the file being uploaded
-     */
-    public File getFile();
-
-    /**
      * @return the {@link UploadState} of the upload
      */
     public UploadState getState();
@@ -67,4 +62,6 @@ public interface UploadItem extends PropertiableFile {
     float getUploadSpeed();
 
     UploadErrorState getErrorState();
+
+    public File getFile();
 }

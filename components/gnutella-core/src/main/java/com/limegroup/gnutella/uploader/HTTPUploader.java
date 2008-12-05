@@ -250,4 +250,9 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     public PushEndpoint getPushEndpoint() {
         return pushEndpoint;
     }
+
+    @Override
+    public File getFile() {
+        return getFileDesc().getFile();
+    }
 }

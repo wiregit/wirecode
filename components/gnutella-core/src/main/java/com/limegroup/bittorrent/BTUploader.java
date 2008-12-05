@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent;
 
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -202,5 +203,10 @@ public class BTUploader implements Uploader, TorrentEventListener {
     @Override
     public String getAddressDescription() {
         return null;
+    }
+
+    @Override
+    public File getFile() {
+        return _torrent.getMetaInfo().getFileSystem().getCompleteFile();
     }
 }

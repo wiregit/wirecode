@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
+
 import org.limewire.io.Connectable;
 
 import com.limegroup.gnutella.library.FileDesc;
@@ -144,6 +146,11 @@ public interface Uploader extends BandwidthTracker, Connectable {
      * (shared file, browse host, malformed request, etc..)
      */
     public UploadType getUploadType();
+
+    /**
+     * Returns the file backing this uploader. 
+     */
+    public File getFile();
 
 }
 

@@ -46,11 +46,6 @@ class CoreUploadItem implements UploadItem {
     }
 
     @Override
-    public File getFile() {
-        return uploader.getFileDesc().getFile();
-    }
-
-    @Override
     public String getFileName() {
         return uploader.getFileName();
     }
@@ -144,7 +139,7 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public Category getCategory() {
-        return CategoryConverter.categoryForFile(getFile());
+        return CategoryConverter.categoryForFileName(getFileName());
     }
 
     @Override
@@ -249,12 +244,23 @@ class CoreUploadItem implements UploadItem {
      */
     private void reloadProperties() {
         synchronized (this) {
+            
             Map<FilePropertyKey, Object> reloadedMap = Collections
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
+            
+            
             FileDesc fileDesc = uploader.getFileDesc();
-            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
+            
+            if(fileDesc != null) {
+                FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
                     .lastModified(), fileDesc.getFileSize(), reloadedMap, fileDesc.getXMLDocument());
+            }
             propertiesMap = reloadedMap;
         }
+    }
+
+    @Override
+    public File getFile() {
+        return uploader.getFile();
     }
 }
