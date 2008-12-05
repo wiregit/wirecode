@@ -18,7 +18,7 @@ import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
 import com.google.inject.Inject;
 
-/** The main home page. */
+/** The main home page.*/
 public class HomePanel extends JXPanel {
 
     public static final String NAME = "Home";

@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -47,6 +48,7 @@ public class HTMLPane extends JEditorPane {
         setContentType("text/html");
         setEditable(false);
         kit.setAutoFormSubmission(false);
+        setMargin(new Insets(0, 0, 0, 0));
     }
     
     /** Loads the given URL, loading the backup page if it fails to load. */
