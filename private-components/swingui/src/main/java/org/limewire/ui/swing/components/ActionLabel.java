@@ -16,6 +16,7 @@ import javax.swing.UIManager;
 import org.jdesktop.swingx.JXLabel;
 import org.limewire.ui.swing.action.ActionKeys;
 import org.limewire.ui.swing.listener.ActionHandListener;
+import org.limewire.ui.swing.listener.MouseActionListener;
 import org.limewire.ui.swing.util.FontUtils;
 
 
@@ -46,9 +47,9 @@ public class ActionLabel extends JXLabel  {
      * @param action
      * @param color
      */
-    public ActionLabel(Action action, boolean renderAsLink) {
+    public ActionLabel(Action action, boolean renderAsLink, boolean showHand) {
         this.renderAsLink = renderAsLink;
-        setAction(action);
+        setAction(action, showHand);
         setHorizontalTextPosition(SwingConstants.RIGHT);
         setHorizontalAlignment(SwingConstants.LEFT);
     }
@@ -79,7 +80,7 @@ public class ActionLabel extends JXLabel  {
     }
    
     
-    public void setAction(Action action) {
+    public void setAction(Action action, boolean showHand) {
         // remove old listener
         Action oldAction = getAction();
         if (oldAction != null) {
@@ -89,14 +90,25 @@ public class ActionLabel extends JXLabel  {
         // add listener
         currentAction = action;
         currentAction.addPropertyChangeListener(getListener());
-        installListener(new ActionHandListener(new ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-                currentAction.actionPerformed(e);
-                for(ActionListener listener : actionListeners) {
-                    listener.actionPerformed(e);
+        if(showHand) {
+            installListener(new ActionHandListener(new ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    currentAction.actionPerformed(e);
+                    for(ActionListener listener : actionListeners) {
+                        listener.actionPerformed(e);
+                    }
                 }
-            }
-        }));
+            }));
+        } else {
+            installListener(new MouseActionListener(new ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    currentAction.actionPerformed(e);
+                    for(ActionListener listener : actionListeners) {
+                        listener.actionPerformed(e);
+                    }
+                }
+            }));
+        }
         updateLabel(currentAction, null);
     }
     

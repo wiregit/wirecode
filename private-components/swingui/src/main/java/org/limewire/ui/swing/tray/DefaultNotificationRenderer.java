@@ -72,7 +72,7 @@ class DefaultNotificationRenderer implements NotificationRenderer {
             
             if (notification.getActions() != null) {
                 for (Action action : notification.getActions()) {
-                    ActionLabel actionLabel = new ActionLabel(action, true);
+                    ActionLabel actionLabel = new ActionLabel(action, true, true);
                     actionLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
                      
                     actionPanel.add(actionLabel);

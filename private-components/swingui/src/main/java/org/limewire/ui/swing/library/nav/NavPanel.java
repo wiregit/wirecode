@@ -75,7 +75,7 @@ public class NavPanel extends JXPanel {
         this.libraryPanel = libraryPanel;
         this.remoteLibraryManager = remoteLibraryManager;        
         
-        categoryLabel = new ActionLabel(action, false);
+        categoryLabel = new ActionLabel(action, false, false);
         categoryLabel.setFont(textFont);
         categoryLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
         categoryLabel.setMinimumSize(new Dimension(0, 20));

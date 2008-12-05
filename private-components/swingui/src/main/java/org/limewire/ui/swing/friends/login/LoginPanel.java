@@ -122,7 +122,7 @@ class LoginPanel extends JXPanel {
             public void actionPerformed(ActionEvent e) {
                 LoginPanel.this.setVisible(false);
             }
-        }, true);
+        }, true, true);
 
         setLayout(new MigLayout("gap 0, fill"));
         add(hideButton, "alignx right, wrap");

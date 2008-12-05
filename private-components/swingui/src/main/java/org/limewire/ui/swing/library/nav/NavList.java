@@ -45,7 +45,7 @@ class NavList extends JXPanel {
             public void actionPerformed(ActionEvent e) {
                 collapsablePanels.setCollapsed(!collapsablePanels.isCollapsed());
             }
-        }, false);
+        }, false, true);
         FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
