@@ -50,11 +50,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         // Use the label as the icon name
         String path = iconPath + label + iconExtension;
         URL url = ClassLoader.getSystemResource(path);
-        if(url == null) {
-            // Fall back to the default LimeWire icon
-            path = iconPath + "LimeWire" + iconExtension;
-            url = ClassLoader.getSystemResource(path);
-        }
         if(url == null)
             icon = new EmptyIcon(16, 16);
         else
