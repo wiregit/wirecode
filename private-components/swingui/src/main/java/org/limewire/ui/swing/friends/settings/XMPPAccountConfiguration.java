@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.friends.settings;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 
 /**
@@ -10,16 +10,10 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 public interface XMPPAccountConfiguration extends XMPPConnectionConfiguration {
     
     /**
-     * Returns a URL where users can register new accounts with the service
-     * provider.
-     */
-    public String getRegistrationURL();
-    
-    /**
      * Returns an icon associated with the account, such as the logo of the
-     * service provider.
+     * service provider. May be null.
      */
-    public ImageIcon getIcon();
+    public Icon getIcon();
     
     /**
      * Sets the label that the UI will display to identify the account.

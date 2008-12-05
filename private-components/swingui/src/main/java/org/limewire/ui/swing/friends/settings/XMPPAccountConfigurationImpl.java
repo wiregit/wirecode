@@ -4,7 +4,10 @@ import java.net.URL;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
+
+import org.jdesktop.swingx.icon.EmptyIcon;
 
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.RosterEvent;
@@ -26,8 +29,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final int port;
     private volatile String serviceName;
     private volatile String label;
-    private final String registrationURL;
-    private final ImageIcon icon;    
+    private final Icon icon;    
     private volatile String username;
     private volatile String password;
 
@@ -42,7 +44,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             port = Integer.valueOf(st.nextToken());
             serviceName = st.nextToken();
             label = st.nextToken();
-            registrationURL = st.nextToken();
         } catch(NoSuchElementException nsex) {
             throw new IllegalArgumentException("Malformed XMPP server setting");
         }
@@ -55,7 +56,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             url = ClassLoader.getSystemResource(path);
         }
         if(url == null)
-            icon = null;
+            icon = new EmptyIcon(16, 16);
         else
             icon = new ImageIcon(url);
         username = "";
@@ -70,13 +71,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         port = 5222;
         serviceName = "";
         label = "";
-        registrationURL = "http://www.jabber.org/web/Quickstart";
-        String path = iconPath + "LimeWire" + iconExtension;
-        URL url = ClassLoader.getSystemResource(path);
-        if(url == null)
-            icon = null;
-        else
-            icon = new ImageIcon(url);
+        icon = new EmptyIcon(16, 16); // Naomi Klein
         username = "";
         password = "";
     }
@@ -118,13 +113,8 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     }
 
     @Override
-    public ImageIcon getIcon() {
+    public Icon getIcon() {
         return icon;
-    }
-
-    @Override
-    public String getRegistrationURL() {
-        return registrationURL;
     }
 
     @Override
@@ -177,7 +167,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     public String toString() {
         // Return a string that can be parsed back into a config
         return isDebugEnabled + "," + requiresDomain + "," +
-                host + "," + port + "," + serviceName + "," +
-                label + "," + registrationURL;
+                host + "," + port + "," + serviceName + "," + label;
     }
 }
