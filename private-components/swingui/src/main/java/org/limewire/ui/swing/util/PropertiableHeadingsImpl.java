@@ -71,7 +71,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
                 if (insertHypen) {
                     subheading += " - ";
                 }
-                subheading += GuiUtils.toQualityString(qualityScore);
+                subheading += I18n.tr("{0} Quality", GuiUtils.toQualityString(qualityScore));
                 insertHypen = true;
             }
 
@@ -89,7 +89,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
 
             boolean insertHyphen = false;
             if (qualityScore != null) {
-                subheading += GuiUtils.toQualityString(qualityScore);
+                subheading += I18n.tr("{0} Quality", GuiUtils.toQualityString(qualityScore));
                 insertHyphen = true;
             }
 
