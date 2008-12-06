@@ -64,7 +64,7 @@ public class LibraryPanel extends JPanel implements Disposable {
 
     private final JPanel selectionPanel = new LibrarySelectionPanel();
     private final Friend friend;
-    private final LimeHeaderBar headerPanel;    
+    protected final LimeHeaderBar headerPanel;    
     
     private final boolean isLibraryPanel;
     private final Next next = new Next();

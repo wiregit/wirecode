@@ -100,6 +100,9 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         addShareButton(new BackToLibraryAction(), buttonDecorator);
         createMyCategories(eventList, friend, friendFileList);
         
+        //TODO: fix this. Turns text to Black for the time being till we get some sort of color spec
+        headerPanel.setForeground(Color.BLACK);
+        
         selectFirst();
     }
     
