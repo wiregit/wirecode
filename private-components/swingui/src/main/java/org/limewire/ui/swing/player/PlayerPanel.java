@@ -161,7 +161,7 @@ public class PlayerPanel extends JXPanel {
         Dimension statusSize = new Dimension(buttonWidth, statusPanel.getPreferredSize().height);
         statusPanel.setPreferredSize(statusSize);
 
-        JXPanel innerPanel = new JXPanel(new MigLayout("insets 4 5 4 5, filly, gap 5, alignx center"));
+        JXPanel innerPanel = new JXPanel(new MigLayout("insets 4 10 4 10, filly, gap 5, alignx center"));
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
