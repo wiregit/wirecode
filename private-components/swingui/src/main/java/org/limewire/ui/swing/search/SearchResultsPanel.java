@@ -351,7 +351,7 @@ public class SearchResultsPanel extends JXPanel {
         painter.setRoundWidth(10);
         painter.setRounded(true);
         painter.setPaintStretched(true);
-        painter.setInsets(new Insets(4,0,4,0));
+        painter.setInsets(new Insets(6,0,7,0));
                 
         painter.setAntialiasing(true);
         painter.setCacheable(true);
