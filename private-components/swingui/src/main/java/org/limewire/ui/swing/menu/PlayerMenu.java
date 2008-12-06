@@ -44,7 +44,7 @@ public class PlayerMenu extends JMenu {
                 case STOPPED:
                 case OPENED:
                 case SEEKING_PAUSED:
-                    audioPlayer.playSong();
+                    audioPlayer.unpause();
                     break;
                 case PLAYING:
                 case RESUMED:
