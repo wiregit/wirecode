@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.table;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -12,6 +14,9 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.JTableHeader;
@@ -122,6 +127,7 @@ public class MouseableTable extends StripedJXTable {
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 	    setTableHeaderRenderer();
+	    
 		
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
@@ -241,6 +247,37 @@ public class MouseableTable extends StripedJXTable {
     protected void setTableHeaderRenderer() {
         JTableHeader th = getTableHeader();
         th.setDefaultRenderer(new TableCellHeaderRenderer());
+    }
+    
+    /**
+	 * Fills in the top right corner if a scrollbar appears
+     * with an empty table header
+ 	 */
+    @Override
+    protected void configureEnclosingScrollPane() {
+        super.configureEnclosingScrollPane();
+        
+        Container p = getParent();
+        if (p instanceof JViewport) {
+            Container gp = p.getParent();
+            if (gp instanceof JScrollPane) {
+                JScrollPane scrollPane = (JScrollPane)gp;
+                // Make certain we are the viewPort's view and not, for
+                // example, the rowHeaderView of the scrollPane -
+                // an implementor of fixed columns might do this.
+                JViewport viewport = scrollPane.getViewport();
+                if (viewport == null || viewport.getView() != this) {
+                    return;
+                }
+                JTableHeader th = new JTableHeader();
+                th.setDefaultRenderer(new TableCellHeaderRenderer());
+                // Put a dummy header in the upper-right corner.
+                final Component renderer = th.getDefaultRenderer().getTableCellRendererComponent(null, "", false, false, -1, -1);
+                JPanel cornerComponent = new JPanel(new BorderLayout());
+                cornerComponent.add(renderer, BorderLayout.CENTER);
+                scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
+            }
+        }
     }
 	          
     /**

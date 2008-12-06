@@ -70,19 +70,21 @@ public class TableCellHeaderRenderer extends JXLabel implements TableCellRendere
         setText((String) value);
         setIcon(sortIcon);
         
-        // show the appropriate arrow if this column is sorted
-        SortOrder order = t.getSortOrder(column);
-        if(order == SortOrder.UNSORTED) { 
-            setIcon(null);
-        } else if(order == SortOrder.ASCENDING) {
-            setIcon(upIcon);
-        } else {
-            setIcon(downIcon);
-        }
-
         setPreferredSize(new Dimension(20, getPreferredSize().width));
         setBorder(emptyBorder);
         setFont(font);
+        
+        if(column >= 0) {
+            // show the appropriate arrow if this column is sorted
+            SortOrder order = t.getSortOrder(column);
+            if(order == SortOrder.UNSORTED) { 
+                setIcon(null);
+            } else if(order == SortOrder.ASCENDING) {
+                setIcon(upIcon);
+            } else {
+                setIcon(downIcon);
+            }
+        }
         
         return this;
     }
