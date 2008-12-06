@@ -14,6 +14,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
+import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -73,8 +74,8 @@ public class SetupComponentDecorator {
     }
     
     public void decorateGreenButton(JXButton button) {
-        button.setBackground(Color.GREEN);
-        button.setOpaque(true);
+        button.setBackgroundPainter(new GreenButtonBackgroundPainter());
+        button.setOpaque(false);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
     }
