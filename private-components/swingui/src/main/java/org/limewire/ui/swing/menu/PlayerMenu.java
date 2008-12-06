@@ -10,7 +10,6 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
-import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.I18n;
@@ -54,13 +53,6 @@ public class PlayerMenu extends JMenu {
                 default:
                     //ignore
                     break;
-                }
-                
-                
-                if (audioPlayer.getStatus() == PlayerState.PAUSED || audioPlayer.getStatus() == PlayerState.STOPPED || audioPlayer.getStatus() == PlayerState.OPENED) {
-                    audioPlayer.playSong();
-                } else {
-                    audioPlayer.pause();
                 }
             }
         };
