@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.login;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -20,15 +22,20 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+
+import org.limewire.core.settings.XMPPSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -36,16 +43,14 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import net.miginfocom.swing.MigLayout;
-
 /**
  * @author Mario Aquino, Object Computing, Inc.
  */
 @Singleton
-class LoginPanel extends JXPanel {
+class LoginPanel extends JXPanel implements SettingListener {
 
     // private static final Log LOG = LogFactory.getLog(LoginPanel.class);
-    
+
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
@@ -69,14 +74,15 @@ class LoginPanel extends JXPanel {
         this.accountManager = accountManager;
         this.xmppService = xmppService;
         GuiUtils.assignResources(this);
+        XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
         initComponents();
     }
-    
+
     void autoLogin(XMPPAccountConfiguration auto) {
         serviceComboBox.setSelectedItem(auto.getLabel());
         login(auto);
     }    
-    
+
     @Override
     public void setVisible(boolean flag) {
         boolean becameVisible = flag && !isVisible();
@@ -111,12 +117,12 @@ class LoginPanel extends JXPanel {
         autoLoginCheckBox.setOpaque(false);
         autoLoginCheckBox.setMargin(new Insets(0, 0, 0, 0));
         autoLoginCheckBox.setBorder(BorderFactory.createEmptyBorder());
-        
+
         signInButton = new JButton(signinAction);
         signInButton.setOpaque(false);
-        
+
         authFailedLabel = new JLabel();
-        
+
         JLabel hideButton = new ActionLabel(new AbstractAction(("X")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -137,11 +143,11 @@ class LoginPanel extends JXPanel {
         add(autoLoginCheckBox, "gaptop 2, alignx left, wmin 0, wrap");
         add(authFailedLabel, "alignx left, wmin 0, hidemode 3, wrap");
         add(signInButton, "gaptop 2, alignx left, wmin 0");
-        
+
         authFailedLabel.setVisible(false);
         authFailedLabel.setForeground(Color.RED);
         FontUtils.changeStyle(authFailedLabel, Font.ITALIC);
-        
+
         setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
 
         serviceComboBox.setSelectedItem("Gmail");
@@ -211,6 +217,11 @@ class LoginPanel extends JXPanel {
         });            
     }
 
+    @Override
+    public void settingChanged(SettingEvent evt) {
+        populateInputs();
+    }
+
     class SignInAction extends AbstractAction {
         public SignInAction() {
             super();
@@ -242,12 +253,12 @@ class LoginPanel extends JXPanel {
             login(config);
         }
     }
-    
+
     private class Renderer extends DefaultListCellRenderer {
         public Component getListCellRendererComponent(JList list, Object value,
                 int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            
+
             XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
             if(config != null) {
                 setIcon(config.getIcon());

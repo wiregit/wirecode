@@ -4,13 +4,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 
 import org.limewire.core.settings.XMPPSettings;
@@ -20,6 +20,7 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.friends.AddFriendDialog;
 import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -32,8 +33,8 @@ class LoggedInPanel extends JXPanel {
     private final JLabel currentUser;
     private final JLabel loggingInLabel;
     private final JLabel statusMenuLabel;
-    private final JButton signInButton;
-    private final JButton switchUserButton;
+    private final JXButton signInButton;
+    private final JXButton switchUserButton;
     private final LimeComboBox optionsBox;
     private final LimeComboBox signoutBox;
     private final FriendActions friendActions;
@@ -41,6 +42,7 @@ class LoggedInPanel extends JXPanel {
     @Inject
     LoggedInPanel(LimeComboBoxFactory comboFactory,
             FriendActions friendActions, BarPainterFactory barPainterFactory,
+            ButtonDecorator buttonDecorator,
             StatusActions statusActions, XMPPService xmppService) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
@@ -52,7 +54,9 @@ class LoggedInPanel extends JXPanel {
         currentUser = new JLabel();
         loggingInLabel = new JLabel(I18n.tr("Signing in..."));
         signInButton = new HyperLinkButton();
+        buttonDecorator.decorateMiniButton(signInButton);
         switchUserButton = new HyperLinkButton();
+        buttonDecorator.decorateMiniButton(switchUserButton);
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter()); 
 
         initComponents(statusActions, xmppService);
@@ -118,10 +122,10 @@ class LoggedInPanel extends JXPanel {
         add(currentUser, "gapleft 9, gaptop 2, wmin 0, wrap");
 
         add(optionsBox, "gapleft 2, alignx left, gapbottom 2, split");
-        add(signoutBox, "gapleft push, gapbottom 2, wrap");
+        add(signoutBox, "gapleft push, gapbottom 2, gapright 2, wrap");
 
         add(signInButton, "gapleft 2, alignx left, gapbottom 2, split");
-        add(switchUserButton, "gapleft push, gapbottom 2, wrap");
+        add(switchUserButton, "gapleft push, gapbottom 2, gapright 2, wrap");
 
         add(loggingInLabel, "alignx left, gapleft 9, gaptop 2, gapbottom 2");
 

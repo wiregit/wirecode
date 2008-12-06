@@ -15,8 +15,12 @@ import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.UISettings;
+import org.limewire.core.settings.XMPPSettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.util.SwingUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import com.google.inject.Inject;
@@ -110,7 +114,7 @@ public class MiscOptionPanel extends OptionPanel {
         }
     }
 
-    private class FriendsChatPanel extends OptionPanel {
+    private class FriendsChatPanel extends OptionPanel implements SettingListener {
 
         private JCheckBox autoLoginCheckBox;
         private JComboBox serviceComboBox;
@@ -121,6 +125,8 @@ public class MiscOptionPanel extends OptionPanel {
 
         public FriendsChatPanel() {
             super(tr("Friends and Chat"));
+            
+            XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
 
             autoLoginCheckBox = new JCheckBox(tr("Sign in when LimeWire starts"));            
             autoLoginCheckBox.setContentAreaFilled(false);
@@ -260,6 +266,16 @@ public class MiscOptionPanel extends OptionPanel {
                 autoLoginCheckBox.setSelected(true);
             }
             populateInputs();
+        }
+        
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            SwingUtils.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    initOptions();
+                }
+            });
         }
     }
 

@@ -8,7 +8,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.Action;
-import javax.swing.JButton;
+
+import org.jdesktop.swingx.JXButton;
 
 import org.limewire.ui.swing.util.FontUtils;
 
@@ -17,7 +18,7 @@ import org.limewire.ui.swing.util.FontUtils;
  * On mouse over the text changes colors and the cursor changes to a hand as
  * is expected for a hyperlink.
  */
-public class HyperLinkButton extends JButton implements MouseListener {
+public class HyperLinkButton extends JXButton implements MouseListener {
     protected Color mouseOverColor = getForeground();
     protected Color foregroundColor = getForeground();
     
