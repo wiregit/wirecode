@@ -57,7 +57,7 @@ class SystemTrayNotifier implements TrayNotifier {
 
 	private TrayIcon buildTrayIcon(String desc) {
         TrayIcon icon = new TrayIcon(((ImageIcon)trayIconResource).getImage(), desc, popupMenu);
-        
+
     	// left click restores.  This happens on the awt thread.
         icon.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
@@ -74,7 +74,7 @@ class SystemTrayNotifier implements TrayNotifier {
 		PopupMenu menu = new PopupMenu();
 		
 		// restore
-		MenuItem item = new MenuItem(I18n.tr("Restore"));
+		MenuItem item = new MenuItem(I18n.tr("Show LimeWire"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();
@@ -86,7 +86,7 @@ class SystemTrayNotifier implements TrayNotifier {
 		menu.addSeparator();
 		
 		//exit after transfers
-		item = new MenuItem(I18n.tr("Exit after Transfers"));
+		item = new MenuItem(I18n.tr("Exit After Transfers"));
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			    ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();

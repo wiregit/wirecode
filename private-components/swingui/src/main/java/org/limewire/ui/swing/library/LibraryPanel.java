@@ -79,7 +79,7 @@ public class LibraryPanel extends JPanel implements Disposable {
         
         this.friend = friend;
         this.isLibraryPanel = isLibraryPanel;        
-        this.filterField = new PromptTextField(I18n.tr("Filter"));
+        this.filterField = new PromptTextField(I18n.tr("Search Library..."));
         
 		String renderName = friend == null ? "Unknown" : friend.getRenderName();
         if(isLibraryPanel) {
