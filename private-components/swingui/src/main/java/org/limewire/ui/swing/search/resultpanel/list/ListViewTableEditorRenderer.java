@@ -65,6 +65,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDi
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.assistedinject.Assisted;
@@ -114,6 +115,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private final ListViewDisplayedRowsLimit displayLimit;
     private final SearchResultTruncator truncator;
     private final HeadingFontWidthResolver headingFontWidthResolver = new HeadingFontWidthResolver();
+    private final IconManager iconManager;
     private ActionButtonPanel actionButtonPanel;
     private SearchResultFromWidget fromWidget;
     private JLabel itemIconLabel;
@@ -157,7 +159,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         final PropertiesFactory<VisualSearchResult> properties,
         final @Assisted ListViewDisplayedRowsLimit displayLimit,
         LibraryNavigator libraryNavigator,
-        SearchResultTruncator truncator) {
+        SearchResultTruncator truncator, IconManager iconManager) {
 
         this.categoryIconManager = categoryIconManager;
         
@@ -167,6 +169,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         this.rowHeightRule = rowHeightRule;
         this.displayLimit = displayLimit;
         this.truncator = truncator;
+        this.iconManager = iconManager;
         GuiUtils.assignResources(this);
 
         similarButton.setPressedIcon(similarDownIcon);
@@ -573,7 +576,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
             return libraryIcon;
         }
-        return categoryIconManager.getIcon(vsr.getCategory());
+        return categoryIconManager.getIcon(vsr, iconManager);
     }
 
     private void populateSearchResultTextPanel(RowDisplayConfig config) {

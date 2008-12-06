@@ -123,7 +123,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         case DOCUMENT:
         case OTHER:
         default: {
-             subheading = iconManager.getMIMEDescription(getFileExtension(propertiable));
+             subheading = iconManager.getMIMEDescription(propertiable);
             // TODO add name of program used to open this file, not included in
             // 5.0
             Long fileSize = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));

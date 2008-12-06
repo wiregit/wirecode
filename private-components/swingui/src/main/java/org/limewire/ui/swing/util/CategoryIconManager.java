@@ -4,6 +4,7 @@ import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -105,7 +106,7 @@ public class CategoryIconManager {
             }
         }
     }
-
+    
     public Icon getIcon(Category category) {
         switch (category) {
         case AUDIO:
@@ -132,6 +133,16 @@ public class CategoryIconManager {
             
             return otherIcon;
             
+        }
+    }
+    
+    public Icon getIcon(PropertiableFile file, IconManager iconManager) {
+        switch(file.getCategory()) {
+        case DOCUMENT:
+        case OTHER:
+            return iconManager.getIconForPropertiableFile(file);
+        default:
+            return getIcon(file.getCategory());
         }
     }
 }

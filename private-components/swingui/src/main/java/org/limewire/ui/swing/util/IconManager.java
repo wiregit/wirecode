@@ -8,6 +8,8 @@ import javax.swing.Icon;
 import javax.swing.SwingUtilities;
 
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.library.PropertiableFile;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -100,10 +102,24 @@ public class IconManager {
         return fileController.getIconForExtension(ext);
     }
     
+    /**
+     * Returns the icon associated with the extension for this PropertiableFile.
+	 */
+    public Icon getIconForPropertiableFile(PropertiableFile file) {
+        return getIconForExtension(getExtension(file));
+    }
+    
     /** Returns true if the icon can be returned immediately. */
     public boolean isIconForFileAvailable(File f) {
         validate();
         return fileController.isIconForFileAvailable(f);
+    }
+    
+    /**
+     * Returns a text description of the MIME type for the given PropertiableFile's extension
+     */
+    public String getMIMEDescription(PropertiableFile propertiable) {
+        return getMIMEDescription(getExtension(propertiable));
     }
     
     /**
@@ -131,6 +147,10 @@ public class IconManager {
         }
         
         return iconString;
+    }
+
+    private String getExtension(PropertiableFile propertiable) {
+        return FileUtils.getFileExtension(propertiable.getFileName());
     }
     
     /**
