@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.player;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -18,8 +19,10 @@ import javax.swing.JToolTip;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.HorizontalLayout;
+import org.jdesktop.swingx.JXButton;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -53,31 +56,35 @@ public class MiniPlayerPanel extends JPanel {
     private AudioPlayer player;
 
     public MiniPlayerPanel(AudioPlayer player) {
-        super(new HorizontalLayout());
         GuiUtils.assignResources(this);
         this.player = player;
-        
+        setLayout(new MigLayout("insets 0", "4[][]", "0[]0"));
         setOpaque(false);
 
-        playPauseButton = new JButton();
+        playPauseButton = new JXButton();
         playPauseButton.setMargin(new Insets(0, 0, 0, 0));
         playPauseButton.setBorderPainted(false);
         playPauseButton.setContentAreaFilled(false);
         playPauseButton.setFocusPainted(false);
         playPauseButton.setRolloverEnabled(true);
         playPauseButton.setIcon(playIcon);
+        Dimension playPauseDimensions = new Dimension(playIcon.getIconWidth(), playIcon.getIconHeight());
+        playPauseButton.setMaximumSize(playPauseDimensions);
+        playPauseButton.setPreferredSize(playPauseDimensions);
         playPauseButton.setRolloverIcon(playIconRollover);
         playPauseButton.setPressedIcon(playIconPressed);
         playPauseButton.setHideActionText(true);
         playPauseButton.addActionListener(new PlayListener());
 
         statusButton = new MarqueeButton("nothing", 16);
+        Dimension statusButtonDimensions = new Dimension(Integer.MAX_VALUE, playIcon.getIconHeight());
+        statusButton.setMaximumSize(statusButtonDimensions);
         statusButton.setFont(font);
         statusButton.setForeground(foregroundColor);    
         statusButton.addActionListener(new ShowPlayerListener());
 
-        add(playPauseButton);
-        add(statusButton);
+        add(playPauseButton, "gapbottom 0, gaptop 0");
+        add(statusButton, "gapbottom 0, gaptop 0");
      
         setMaximumSize(getPreferredSize());
         player.addAudioPlayerListener(new PlayerListener());
