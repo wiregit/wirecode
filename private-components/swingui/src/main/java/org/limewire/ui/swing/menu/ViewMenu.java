@@ -21,9 +21,9 @@ public class ViewMenu extends JMenu {
     @Inject
     public ViewMenu(final LeftPanel leftPanel, final DownloadSummaryPanel downloadSummaryPanel, final ChatFramePanel friendsPanel) {
         super(I18n.tr("View"));
-        add(buildAction(leftPanel, I18n.tr("Hide Libraries bar"), I18n.tr("Show Libraries bar")));
+        add(buildAction(leftPanel, I18n.tr("Hide Sidebar"), I18n.tr("Show Sidebar")));
         add(buildForceInvisibleAction(downloadSummaryPanel, I18n.tr("Hide Download Tray"), I18n.tr("Show Download Tray")));
-        add(buildAction(friendsPanel, I18n.tr("Hide Chat window"), I18n.tr("Show Chat window")));
+        add(buildAction(friendsPanel, I18n.tr("Hide Chat Window"), I18n.tr("Show Chat Window")));
     }
 
     private Action buildAction(final VisibleComponent component, final String visibleName,

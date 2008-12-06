@@ -361,7 +361,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
             FontUtils.setSize(label, 12);
             FontUtils.bold(label);
             
-            minLabel = new JLabel(I18n.tr("Sharing your {0} collection automatically shares new {1} files added to your Library", category, category.toLowerCase()));
+            minLabel = new JLabel(I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", category, category.toLowerCase()));
             FontUtils.setSize(minLabel, 10);
             
             panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));

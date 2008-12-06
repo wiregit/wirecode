@@ -229,8 +229,9 @@ class MyLibraryPanel extends LibraryPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
           ((CategoryShareModel)shareAllPanel.getShareModel()).setCategory(category);
+          String catStr = category.toString();
           shareAllPanel.setBottomLabel(
-                  I18n.tr("Sharing your {0} collection automatically shares new {0} files added to your Library", category));
+                  I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", catStr, catStr.toLowerCase()));
           shareAllPanel.show((JComponent)e.getSource());
         }
     }

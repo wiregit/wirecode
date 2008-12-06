@@ -38,19 +38,19 @@ public class FileMenu extends JMenu {
             SearchHandler searchHandler, AudioPlayer audioPlayer) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        add(new OpenFileAction(navigator, I18n.tr("&Open File"), downloadListManager, mainPanel,
+        add(new OpenFileAction(navigator, I18n.tr("&Open File..."), downloadListManager, mainPanel,
                 saveLocationExceptionHandler));
-        add(new OpenLinkAction(navigator, I18n.tr("Open &Link"), mainPanel, downloadListManager,
+        add(new OpenLinkAction(navigator, I18n.tr("Open &Link..."), mainPanel, downloadListManager,
                 saveLocationExceptionHandler, magnetFactory, searchHandler));
         add(new RecentDownloadsMenu(I18n.tr("Recent Downloads"), libraryManager, audioPlayer));
         addSeparator();
-        add(new AddFileAction(I18n.tr("Add File To Library"), mainPanel, libraryManager));
-        add(new AddFolderAction(I18n.tr("Add Folder To Library"), libraryManager, mainPanel));
+        add(new AddFileAction(I18n.tr("Add File to Library..."), mainPanel, libraryManager));
+        add(new AddFolderAction(I18n.tr("Add Folder to Library..."), libraryManager, mainPanel));
         
         // Add exit actions.
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("Exit after &Transfers")) {
+            add(new AbstractAction(I18n.tr("Exit After &Transfers")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     ActionMap map = Application.getInstance().getContext().getActionManager().getActionMap();

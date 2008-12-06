@@ -128,7 +128,7 @@ public class MiscOptionPanel extends OptionPanel {
             
             XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
 
-            autoLoginCheckBox = new JCheckBox(tr("Sign in when LimeWire starts"));            
+            autoLoginCheckBox = new JCheckBox(tr("Sign into Friends when LimeWire starts"));            
             autoLoginCheckBox.setContentAreaFilled(false);
             autoLoginCheckBox.addItemListener(new ItemListener(){
                 @Override

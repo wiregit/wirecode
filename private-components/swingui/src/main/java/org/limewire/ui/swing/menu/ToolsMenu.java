@@ -65,7 +65,7 @@ public class ToolsMenu extends JMenu {
 //        });
         add(createWhatsNewSubmenu(searchHandler));
         addSeparator();
-        add(new AbstractAction(I18n.tr("Advanced Tools")) {
+        add(new AbstractAction(I18n.tr("Advanced Tools...")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AdvancedToolsPanel advancedTools = advancedProvider.get();
@@ -74,7 +74,7 @@ public class ToolsMenu extends JMenu {
         });
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("Options")) {
+            add(new AbstractAction(I18n.tr("Options...")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new OptionsDisplayEvent().publish();

@@ -232,7 +232,7 @@ public class DownloadOptionPanel extends OptionPanel {
         public ITunesPanel() {
             super(I18n.tr("iTunes"));
             
-            addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from LimeWire to my iTunes Library"));
+            addToITunesCheckBox = new JCheckBox(I18n.tr("Add audio files I downloaded from LimeWire to iTunes"));
             addToITunesCheckBox.setContentAreaFilled(false);
             
             add(addToITunesCheckBox, "wrap");

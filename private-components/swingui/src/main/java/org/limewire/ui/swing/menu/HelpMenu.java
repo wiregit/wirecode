@@ -31,14 +31,14 @@ class HelpMenu extends JMenu {
             final StorePanel storePanel) {
         super(I18n.tr("Help"));
 
-        add(new AbstractAction(I18n.tr("Using LimeWire...")) {
+        add(new AbstractAction(I18n.tr("Using LimeWire")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL("http://www.limewire.com/support/");
             }
         });
 
-        add(new AbstractAction(I18n.tr("FAQ...")) {
+        add(new AbstractAction(I18n.tr("FAQ")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils
@@ -59,7 +59,7 @@ class HelpMenu extends JMenu {
         
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("About LimeWire")) {
+            add(new AbstractAction(I18n.tr("About LimeWire...")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new AboutDisplayEvent().publish();

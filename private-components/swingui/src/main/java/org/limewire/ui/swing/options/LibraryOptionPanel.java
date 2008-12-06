@@ -98,12 +98,12 @@ public class LibraryOptionPanel extends OptionPanel {
             
             createComponents();
             
-            add(new JLabel(I18n.tr("LimeWire will automatically scan the folders below and place files in your Library.")), "span 2, gapbottom 10, wrap");
+            add(new JLabel(I18n.tr("LimeWire will automatically scan the folders below")), "span 2, gapbottom 10, wrap");
         
             add(new JScrollPane(treeTable), "span 2, growx, wrap");
             add(addFolderButton, "skip 1, alignx right, wrap");
             
-            add(new JLabel(I18n.tr("Add the following types of files to your Library:")), "span 2, wrap");
+            add(new JLabel(I18n.tr("and add the following types of files to My Library:")), "span 2, wrap");
             add(getCheckBoxPanel(), "gapbottom 20, span 2, wrap");
             
             add(new MultiLineLabel(I18n.tr("Scanning these folders into your Library will not automatically share your files unless you explicitly choose to share a collection.")), "span 2, growx");
