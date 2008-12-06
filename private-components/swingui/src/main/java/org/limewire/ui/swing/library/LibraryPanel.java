@@ -34,6 +34,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.PromptTextField;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -72,7 +73,7 @@ public class LibraryPanel extends JPanel implements Disposable {
     private final PromptTextField filterField;        
     
     public LibraryPanel(Friend friend, boolean isLibraryPanel, LimeHeaderBarFactory headerBarFactory) {        
-        setLayout(new MigLayout("fill, gap 0, insets 0", "[][grow]", "[][grow]"));
+        setLayout(new MigLayout("fill, gap 0, insets 0", "[][][grow]", "[][grow]"));
 
         cardPanel.setLayout(cardLayout);
         
@@ -105,6 +106,8 @@ public class LibraryPanel extends JPanel implements Disposable {
     
     protected void addMainPanels() {
         add(selectionPanel, "growy, width 125!");
+        // TODO: move to properties -- funky because this class gets subclassed.
+        add(Line.createVerticalLine(Color.decode("#696969")), "growy, width 1!");
         add(cardPanel, "grow");
     }
     
