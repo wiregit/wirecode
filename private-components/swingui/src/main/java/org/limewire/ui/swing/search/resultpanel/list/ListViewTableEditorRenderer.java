@@ -577,23 +577,23 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     private void populateSearchResultTextPanel(RowDisplayConfig config) {
-        String subHeadingLabelPadding = OSUtils.isMacOSX() ? "" : "pad 0 4 0 0,";
+        String labelPadding = OSUtils.isMacOSX() ? "" : "pad 0 4 0 0,";
         switch(config) {
         case HeadingOnly:
             searchResultTextPanel.remove(subheadingLabel);
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndSubheading:
-            searchResultTextPanel.add(subheadingLabel, subHeadingLabelPadding + "cell 0 1");
+            searchResultTextPanel.add(subheadingLabel, labelPadding + "cell 0 1");
             searchResultTextPanel.remove(metadataLabel);
             break;
         case HeadingAndMetadata:
             searchResultTextPanel.remove(subheadingLabel);
-            searchResultTextPanel.add(metadataLabel, "cell 0 1");
+            searchResultTextPanel.add(metadataLabel, labelPadding + "cell 0 1");
             break;
         case HeadingSubHeadingAndMetadata:
-            searchResultTextPanel.add(subheadingLabel, subHeadingLabelPadding + "cell 0 1, wrap");
-            searchResultTextPanel.add(metadataLabel, "cell 0 2");
+            searchResultTextPanel.add(subheadingLabel, labelPadding + "cell 0 1, wrap");
+            searchResultTextPanel.add(metadataLabel, labelPadding + "cell 0 2");
         }
     }
 
