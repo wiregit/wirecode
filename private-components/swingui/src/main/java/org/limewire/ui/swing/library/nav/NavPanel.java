@@ -14,26 +14,24 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.jdesktop.swingx.painter.BusyPainter;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
+import net.miginfocom.swing.MigLayout;
 
 public class NavPanel extends JXPanel {
     
@@ -52,13 +50,14 @@ public class NavPanel extends JXPanel {
     private final FriendLibraryMediator libraryPanel;
     
     private final Friend friend;
+    private FriendLibrary friendLibrary;
     private final ActionLabel categoryLabel;
     private final JXBusyLabel statusIcon;
     private final Action action;
     
     private NavList parentList;
-    private MouseListener removeListener;
-    
+    private MouseListener removeListener;     
+
     @AssistedInject
     NavPanel(@Assisted Action action,
              @Assisted Friend friend,
@@ -228,8 +227,10 @@ public class NavPanel extends JXPanel {
         }
     }
     
-    public void updateLibrary(EventList<RemoteFileItem> eventList, LibraryState state) {
-        libraryPanel.showLibraryPanel(eventList, state);
+    public void updateLibrary(FriendLibrary friendLibrary) {
+        this.friendLibrary = friendLibrary;
+        updateLibraryState(friendLibrary.getState());
+        libraryPanel.showLibraryPanel(friendLibrary.getSwingModel(), friendLibrary.getState());
     }
 
     public boolean hasSelection() {
@@ -249,5 +250,9 @@ public class NavPanel extends JXPanel {
     
     public Friend getFriend() {
         return friend;
+    }
+
+    public FriendLibrary getFriendLibrary() {
+        return friendLibrary;
     }
 }

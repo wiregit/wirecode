@@ -16,8 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
@@ -55,6 +53,8 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
@@ -215,7 +215,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                     }
                 } else {
                     NavPanel panel = limewireList.getPanelForFriend(item.getFriend());
-                    if(panel != null) {
+                    if(panel != null && panel.getFriendLibrary() == item) {
+                        // extra check is needed b/c when
+                        // glazedlist batches up updates, add/remove events
+                        // can get dispatched out of order
                         limewireList.removePanel(panel);
                         panel.removeBrowse();
                         onlineList.addNavPanel(panel); // Assume still online.
@@ -232,8 +235,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
             
             void updatePanel(FriendLibrary item, NavPanel panel) {
-                panel.updateLibraryState(item.getState());
-                panel.updateLibrary(item.getSwingModel(), item.getState());
+                panel.updateLibrary(item);
             }
         }.install(remoteLibraryManager.getSwingFriendLibraryList());
     }
