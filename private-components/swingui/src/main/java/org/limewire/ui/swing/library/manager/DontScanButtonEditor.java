@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -14,11 +15,23 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 
+import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.GuiUtils;
+
 public class DontScanButtonEditor extends JCheckBox implements TableCellEditor {
 
+    private @Resource Icon icon;
+    private @Resource Icon selectedIcon;
+    
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     
     public DontScanButtonEditor(final LibraryManagerTreeTable treeTable) {
+        
+        GuiUtils.assignResources(this);
+        
+        this.setIcon(icon);
+        this.setSelectedIcon(selectedIcon);
+                
         setHorizontalAlignment(SwingConstants.CENTER);
         
         addActionListener(new ActionListener(){

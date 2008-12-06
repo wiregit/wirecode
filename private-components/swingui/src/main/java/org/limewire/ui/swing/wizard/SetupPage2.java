@@ -53,13 +53,14 @@ public class SetupPage2 extends WizardPage {
         this.libraryData = libraryData;
         
         setOpaque(false);
-        setLayout(new MigLayout("nogrid"));
+        setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
-        autoButton = new JRadioButton(autoText);
+        autoButton = new JRadioButton();
         decorator.decorateLargeRadioButton(autoButton);
         autoButton.setSelected(true);
         autoButton.addActionListener(new ButtonSelectionListener());
-        manualButton = new JRadioButton(manualText);
+        
+        manualButton = new JRadioButton();
         decorator.decorateLargeRadioButton(manualButton);
         manualButton.addActionListener(new ButtonSelectionListener());
         
@@ -76,21 +77,36 @@ public class SetupPage2 extends WizardPage {
         buttonGroup.add(autoButton);
         buttonGroup.add(manualButton);
         
+        JLabel label;
 
-        add(new JLabel(line1), "wrap");
-        add(new JLabel(line2), "wrap");
+        add(autoButton, "gaptop 10, gapleft 40");
+        label = new JLabel(autoText);
+        decorator.decorateHeadingText(label);
+        add(label, "gaptop 10, gapleft 10, wrap");
         
-        int radioIndent = 50;
-        int explanationIndent = 70;
-        add(autoButton, "gaptop 20, gap left " + radioIndent+ ", wrap");
-        add(new MultiLineLabel(autoExplanation, 500),  "gap left " + explanationIndent+ ", wrap");
-        add(manualButton, "gaptop 20, gap left " + radioIndent+ ", wrap");
-        add(new MultiLineLabel(manualExplanation, 500),  "gap left " + explanationIndent+ ", wrap");
-        add(treeTableScrollPane, "growx");
-        add(addFolderButton, "wrap");
+        label = new MultiLineLabel(autoExplanation, 500);
+        decorator.decorateNormalText(label);
+        add(label, "gapleft 76, wrap");
+        
+        add(manualButton, "gaptop 10, gapleft 40");
+        label = new JLabel(manualText);
+        decorator.decorateHeadingText(label);
+        add(label, "gaptop 10, gapleft 10, wrap");
+        
+        label = new MultiLineLabel(manualExplanation, 500);
+        decorator.decorateNormalText(label);
+        add(label, "gapleft 76, wrap");
+        
+        add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
+        add(addFolderButton, "gaptop 10, wrap");
 
-        add(new JLabel(bottomText1), "pushy, aligny bottom, wrap");
-        add(new JLabel(bottomText2), "aligny bottom");        
+        label = new MultiLineLabel(bottomText1,630);
+        decorator.decorateHeadingText(label);
+        add(label, "gaptop 10, gapleft 14, pushy, aligny bottom, wrap");
+        
+        label = new JLabel(bottomText2);
+        decorator.decorateNormalText(label);
+        add(label, "gapleft 14, aligny bottom");        
     }
 
     private void initManualPanel() {

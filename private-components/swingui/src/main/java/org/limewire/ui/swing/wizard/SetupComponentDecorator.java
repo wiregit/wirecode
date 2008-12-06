@@ -36,9 +36,6 @@ public class SetupComponentDecorator {
     @Resource private Icon largeBoxChecked;
     @Resource private Icon largeRadio;
     @Resource private Icon largeRadioChecked;
-    @Resource private Icon smallBox;
-    @Resource private Icon smallBoxTicked;
-    @Resource private Icon smallBoxXed;
    
     @Resource private Color headerGradientTop;
     @Resource private Color headerGradientBottom;
@@ -59,19 +56,6 @@ public class SetupComponentDecorator {
         pooledBarPainter = new GenericBarPainter<JXPanel>(
                 new GradientPaint(0,0, headerGradientTop, 0,1, headerGradientBottom, false),
                 headerTopBorder1, headerTopBorder2, headerBottomBorder1, headerBottomBorder2);
-    }
-
-    public void decorateTickCheckBox(JCheckBox box) {
-        box.setIcon(smallBox);
-        box.setSelectedIcon(smallBoxTicked);
-        box.setOpaque(false);
-    }
-    
-    public void decorateXCheckBox(JCheckBox box) {
-        box.setIcon(smallBox);
-        box.setSelectedIcon(smallBoxXed);
-        box.setOpaque(false);
-        box.setFocusPainted(false);
     }
     
     public void decorateLargeCheckBox(JCheckBox box) {

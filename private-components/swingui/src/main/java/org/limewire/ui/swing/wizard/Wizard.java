@@ -1,7 +1,10 @@
 package org.limewire.ui.swing.wizard;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -26,7 +29,7 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-public class Wizard extends JPanel{
+public class Wizard extends JPanel {
     
     @Resource Color background;
     @Resource Color border;
@@ -74,7 +77,7 @@ public class Wizard extends JPanel{
     private CardLayout cardLayout;
     
     public Wizard(SetupComponentDecorator decorator){
-        super(new MigLayout("nogrid, insets 0"));
+        super(new BorderLayout());
         
         GuiUtils.assignResources(this);
         
@@ -108,19 +111,24 @@ public class Wizard extends JPanel{
         headerLine2 = new JLabel();
         decorator.decorateNormalText(headerLine2);
         
-        JXPanel headerBar = new JXPanel(new MigLayout("insets 8, gap 0"));
+        JXPanel headerBar = new JXPanel(new MigLayout("insets 14, gap 0, fill"));
         decorator.decorateSetupHeader(headerBar);
+
+        headerBar.add(titleBarLabel, "dock north, growx");
+        headerBar.add(headerLine1, "growx, wrap");
+        headerBar.add(headerLine2, "growx");
+
+        // TODO: Redo this layout
+        JPanel bottomBar = new JPanel(new BorderLayout());
+        JPanel bottomBarInner = new JPanel(new FlowLayout());
+        bottomBarInner.add(backButton);
+        bottomBarInner.add(continueButton);
+        bottomBarInner.add(finishButton);
+        bottomBar.add(bottomBarInner, BorderLayout.EAST);
         
-        headerBar.add(headerLine1, "wrap");
-        headerBar.add(headerLine2);
-        
-        add(titleBarLabel, "dock north");
-        add(headerBar, "growx, wrap");
-        add(mainPanel, "push, wrap");
-        
-        add(backButton, "tag back");
-        add(continueButton, "tag next, hidemode 3");
-        add(finishButton, "tag next, hidemode 3");
+        add(headerBar, BorderLayout.NORTH);
+        add(mainPanel, BorderLayout.CENTER);
+        add(bottomBar, BorderLayout.SOUTH);
     }
     
     public void addPage(WizardPage page){
@@ -135,7 +143,13 @@ public class Wizard extends JPanel{
     public void showDialogIfNeeded(Frame owner){
         if (getPageCount() > 0) {
             setCurrentPage(0);
+
             dialog = new LimeJDialog(owner, true);
+            
+            dialog.setPreferredSize(new Dimension(650, 490));
+            dialog.setMinimumSize(dialog.getPreferredSize());
+            dialog.setMaximumSize(dialog.getPreferredSize());
+            
             dialog.setUndecorated(true);
             dialog.add(this);
             dialog.pack();
@@ -182,5 +196,4 @@ public class Wizard extends JPanel{
         backButton.setVisible(currentPage != 0);
         updateTitle(pageList.get(currentPage));
     }
-
 }

@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.wizard;
 
+import java.awt.Color;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
@@ -10,6 +12,7 @@ import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.I18n;
@@ -28,7 +31,7 @@ public class SetupPage1 extends WizardPage {
     
     private String learnMore = I18n.tr("Learn more"); 
     
-    private String filterCheckText = I18n.tr("Don't let me downloador upload files copyright owners request not to be shared.");
+    private String filterCheckText = I18n.tr("Don't let me download or upload files copyright owners request not to be shared.");
     private JCheckBox filterCheck;
 
     private String associationsAndStartupTitle = I18n.tr("File Associations and Startup");
@@ -42,32 +45,52 @@ public class SetupPage1 extends WizardPage {
 
         setOpaque(false);
         
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
         HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
-        filterCheck = new JCheckBox(filterCheckText);
+        decorator.decorateNormalText(learnMoreButton);
+        learnMoreButton.setForeground(Color.BLUE);
+        
+        filterCheck = new JCheckBox();
         decorator.decorateLargeCheckBox(filterCheck);
         
-        associationCheck = new JCheckBox(associationsText);
-        decorator.decorateLargeCheckBox(associationCheck);
+        associationCheck = new JCheckBox();
         associationCheck.setSelected(true);
+        decorator.decorateLargeCheckBox(associationCheck);
 
-        startupCheck = new JCheckBox(startupText);  
+        startupCheck = new JCheckBox();  
         decorator.decorateLargeCheckBox(startupCheck);
+        decorator.decorateNormalText(startupCheck);
+        
+
+        JLabel label;
+        
+        label = new JLabel(filterTitle);
+        decorator.decorateHeadingText(label);
+        
+        add(label, "gaptop 15, gapleft 14, wrap" );
+        
+        add(filterCheck, "gaptop 10, gapleft 40");
+        label = new MultiLineLabel(filterCheckText, 500);
+        decorator.decorateNormalText(label);       
+        add(label, "gaptop 10, gapleft 10, wrap");
+        add(learnMoreButton, "gapleft 76, wrap");
+        
+        label = new JLabel(associationsAndStartupTitle);
+        decorator.decorateHeadingText(label);
+        add(label, "gaptop 20, gapleft 14, wrap");
+        
+        add(associationCheck, "gaptop 10, gapleft 40");
+        label = new MultiLineLabel(associationsText, 500);
+        decorator.decorateNormalText(label);       
+        add(label, "gaptop 10, gapleft 10, wrap");
         
         if (shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);
-        }
-
-        int checkBoxIndent = 50;
-        add(new JLabel(filterTitle), "gaptop 20, gap left 30, wrap");
-        add(filterCheck, "gaptop 20, gap left " + checkBoxIndent+ ", wrap");
-        add(learnMoreButton, "gap left 40, wrap");
-        
-        add(new JLabel(associationsAndStartupTitle), "gaptop 20, gap left 30, wrap");
-        add(associationCheck, "gaptop 10, gap left " + checkBoxIndent+ ", wrap");
-        if (shouldShowStartOnStartupWindow()) {
-            add(startupCheck, "gaptop 10, gap left " + checkBoxIndent + ", wrap");
+            add(startupCheck, "gaptop 0, gapleft 40");
+            label = new MultiLineLabel(startupText, 500);
+            decorator.decorateNormalText(label);       
+            add(label, "gaptop 10, gapleft 10, wrap");
         }
         
     }
@@ -113,7 +136,6 @@ public class SetupPage1 extends WizardPage {
             StartupSettings.RUN_ON_STARTUP.setValue(startupCheck.isSelected());
         }
         InstallSettings.START_STARTUP.setValue(true);
-
     }
     
     /**
@@ -122,5 +144,4 @@ public class SetupPage1 extends WizardPage {
     private boolean shouldShowStartOnStartupWindow() {
         return OSUtils.isMacOSX() || OSUtils.isGoodWindows();
     }
- 
 }
