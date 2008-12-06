@@ -403,7 +403,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         return visibileComponent;
     }
     
-    private static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
+    public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
         private boolean ignoreRepaints;
         
         public ListViewTable() {

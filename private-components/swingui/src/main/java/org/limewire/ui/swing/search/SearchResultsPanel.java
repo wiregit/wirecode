@@ -40,6 +40,7 @@ import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
+import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -291,11 +292,37 @@ public class SearchResultsPanel extends JXPanel {
             } else {
                 int width = super.getPreferredSize().width;
                 int height = ((JComponent)scrollable).getPreferredSize().height;
-                if(sponsoredResultsPanel.isVisible()) {
-                    height = Math.max(height, sponsoredResultsPanel.getPreferredSize().height);
+                
+                // the list view has some weird rendering sometimes (double space after last result)
+                // so don't fill full screen on list view
+                if( (scrollable instanceof ListViewTable)) {
+                    // old check, if sponsored results aren't showing properlly revert to just using this
+                    if(sponsoredResultsPanel.isVisible()) {
+                        height = Math.max(height, sponsoredResultsPanel.getPreferredSize().height);
+                    }
+                } else { // classic view
+                    int headerHeight = 0;
+                    
+                    //the table headers aren't being set on the scrollpane, so if its visible check its
+                    // height and subtract it from the viewport size
+                    JTableHeader header = ((JTable)scrollable).getTableHeader();
+                    if(header != null && header.isShowing()) {
+                        headerHeight = header.getHeight();
+                    }
+                    
+                    // if the height of table is less than the scrollPane height, set preferred height
+                    // to same size as scrollPane
+                    if(height < scrollPane.getSize().height - headerHeight) {
+                        height = scrollPane.getSize().height - headerHeight;
+                    }
                 }
                 return new Dimension(width, height);
             }
+        }
+        
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
         }
 
         @Override
