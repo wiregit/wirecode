@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.wizard;
 
-import java.awt.Color;
-
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
