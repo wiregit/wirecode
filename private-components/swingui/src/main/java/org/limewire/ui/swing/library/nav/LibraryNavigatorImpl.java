@@ -16,6 +16,8 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
@@ -53,8 +55,6 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
-import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
@@ -147,7 +147,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         allFriends.setName("LibraryNavigator.allFriends");
 
         setLayout(new MigLayout("insets 0, fill, gap 2"));
-        add(myLibrary, "gaptop 2, growx, wmin 0, wrap"); 
+        add(myLibrary, "growx, wmin 0, wrap"); 
         add(p2pNetwork, "growx, wmin 0, wrap");
         add(allFriends, "growx, wmin 0, wrap");
         add(friendsPanel, "growx, wmin 0, wrap");
