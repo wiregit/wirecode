@@ -44,12 +44,12 @@ public class GenericBarPainter<X> extends AbstractPainter<X> {
         if (this.cachedHeight != height) {
             this.cachedHeight = height;
             
-            this.gradient = PaintUtils.resizeGradient(gradient, 0, height-1);
+            this.gradient = PaintUtils.resizeGradient(gradient, 0, height);
         }
         
         //paint the gradient
         g.setPaint(this.gradient);
-        g.fillRect(0, 0, width, height-1);
+        g.fillRect(0, 0, width, height);
 
         // paint the top borders
         g.setPaint(this.topBorder1);
