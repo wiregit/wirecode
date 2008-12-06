@@ -28,9 +28,8 @@ import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
-
-import com.limegroup.gnutella.gui.I18n;
 
 public class MiniPlayerPanel extends JPanel {
   
