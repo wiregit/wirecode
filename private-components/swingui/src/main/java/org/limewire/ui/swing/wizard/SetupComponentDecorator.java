@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -32,6 +33,12 @@ public class SetupComponentDecorator {
     
     @Resource private Font headingFont;
     @Resource private Font normalFont;
+
+    @Resource private Color greenButtonForeground;
+    @Resource private Font greenButtonFont;
+    
+    @Resource private Color backButtonForeground;
+    @Resource private Font backButtonFont;
     
     @Resource private Icon largeBox;
     @Resource private Icon largeBoxChecked;
@@ -75,9 +82,25 @@ public class SetupComponentDecorator {
     
     public void decorateGreenButton(JXButton button) {
         button.setBackgroundPainter(new GreenButtonBackgroundPainter());
+        button.setForeground(greenButtonForeground);
+        button.setFont(greenButtonFont);
         button.setOpaque(false);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(0,10,3,10));
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        button.setMinimumSize(new Dimension(105, 32));
+        button.setPreferredSize(new Dimension(105, 32));
+    }
+    
+    public void decorateBackButton(JComponent button) {
+        button.setForeground(backButtonForeground);
+        button.setFont(backButtonFont);
+        button.setBorder(BorderFactory.createEmptyBorder(0,10,3,10));
+    }
+    
+    public void decorateLink(JComponent link) {
+        link.setForeground(backButtonForeground);
     }
     
     public void decoratePlainButton(JXButton button) {

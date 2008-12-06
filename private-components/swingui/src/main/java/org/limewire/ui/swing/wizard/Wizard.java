@@ -90,6 +90,7 @@ public class Wizard extends JPanel {
         decorator.decorateGreenButton(continueButton);
         
         backButton = new HyperLinkButton((String)backAction.getValue(Action.NAME), backAction);
+        decorator.decorateBackButton(backButton);
         
         finishButton = new JXButton(finishAction);
         decorator.decorateGreenButton(finishButton);

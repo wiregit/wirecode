@@ -49,7 +49,7 @@ public class SetupPage1 extends WizardPage {
         
         HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
         decorator.decorateNormalText(learnMoreButton);
-        learnMoreButton.setForeground(Color.BLUE);
+        decorator.decorateLink(learnMoreButton);
         
         filterCheck = new JCheckBox();
         decorator.decorateLargeCheckBox(filterCheck);
@@ -68,7 +68,7 @@ public class SetupPage1 extends WizardPage {
         label = new JLabel(filterTitle);
         decorator.decorateHeadingText(label);
         
-        add(label, "gaptop 15, gapleft 14, wrap" );
+        add(label, "gaptop 15, gapleft 14, wrap");
         
         add(filterCheck, "gaptop 10, gapleft 40");
         label = new MultiLineLabel(filterCheckText, 500);
