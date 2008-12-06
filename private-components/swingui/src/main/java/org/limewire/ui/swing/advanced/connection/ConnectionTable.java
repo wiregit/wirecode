@@ -90,6 +90,11 @@ public class ConnectionTable extends MouseableTable {
         });
     }
 
+    @Override
+    protected void setTableHeaderRenderer() {
+        //use default table headers
+    }
+    
     /**
      * Creates the default cell renderers.
      */

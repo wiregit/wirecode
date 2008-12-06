@@ -238,7 +238,7 @@ public class MouseableTable extends StripedJXTable {
         return comp;
     }
     
-    private void setTableHeaderRenderer() {
+    protected void setTableHeaderRenderer() {
         JTableHeader th = getTableHeader();
         th.setDefaultRenderer(new TableCellHeaderRenderer());
     }
