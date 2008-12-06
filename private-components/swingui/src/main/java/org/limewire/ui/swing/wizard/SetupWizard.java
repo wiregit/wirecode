@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.wizard;
 
-
 import java.awt.Frame;
 
 import org.limewire.core.api.library.LibraryData;
@@ -9,7 +8,6 @@ import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Inject;
-
 
 public class SetupWizard {
     
@@ -24,7 +22,7 @@ public class SetupWizard {
         }
     }
     
-    public boolean shouldShowWizard(){
+    public boolean shouldShowWizard() {
         return needsPage1() || needsPage2();
     }
     
@@ -35,7 +33,7 @@ public class SetupWizard {
     }
         
     private void createWizard(SetupComponentDecoratorFactory decoratorFactory, 
-            LibraryData libraryData){
+            LibraryData libraryData) {
         
         SetupComponentDecorator decorator = decoratorFactory.create();
         
@@ -50,7 +48,7 @@ public class SetupWizard {
         }
     }
     
-    private boolean needsPage1(){
+    private boolean needsPage1() {
         if (!InstallSettings.FILTER_OPTION.getValue()) {
             return true;
         }
@@ -60,7 +58,7 @@ public class SetupWizard {
         return false;
     }
     
-    private boolean needsPage2(){
+    private boolean needsPage2() {
         return !InstallSettings.SCAN_FILES.getValue();
     }
 

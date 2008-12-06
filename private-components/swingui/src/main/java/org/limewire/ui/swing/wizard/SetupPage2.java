@@ -102,7 +102,16 @@ public class SetupPage2 extends WizardPage {
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
     }
 
-
+    @Override
+    public String getLine1() {
+        return line1;
+    }
+    
+    @Override
+    public String getLine2() {
+        return line2;
+    }
+    
     @Override
     public void applySettings() {
         InstallSettings.SCAN_FILES.setValue(true);

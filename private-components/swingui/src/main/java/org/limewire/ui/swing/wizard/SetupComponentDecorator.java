@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.wizard;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
 
@@ -100,15 +101,16 @@ public class SetupComponentDecorator {
     
     public void decorateSetupHeader(JXPanel header) {
         header.setBackgroundPainter(pooledBarPainter);
+        header.setMaximumSize(new Dimension(Integer.MAX_VALUE, (int)header.getMaximumSize().getHeight()));
     }
     
     public void decorateHeadingText(JComponent component) {
         component.setFont(headingFont);
+        component.setOpaque(false);
     }
     
     public void decorateNormalText(JComponent component) {
         component.setFont(normalFont);
+        component.setOpaque(false);
     }
-    
-    
 }

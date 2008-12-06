@@ -59,9 +59,6 @@ public class SetupPage1 extends WizardPage {
             startupCheck.setSelected(true);
         }
 
-        add(new JLabel(line1), "wrap");
-        add(new JLabel(line2), "wrap");
-
         int checkBoxIndent = 50;
         add(new JLabel(filterTitle), "gaptop 20, gap left 30, wrap");
         add(filterCheck, "gaptop 20, gap left " + checkBoxIndent+ ", wrap");
@@ -75,8 +72,16 @@ public class SetupPage1 extends WizardPage {
         
     }
 
-
-
+    @Override
+    public String getLine1() {
+        return line1;
+    }
+    
+    @Override
+    public String getLine2() {
+        return line2;
+    }
+    
     @Override
     public void applySettings() {
         // filter settings

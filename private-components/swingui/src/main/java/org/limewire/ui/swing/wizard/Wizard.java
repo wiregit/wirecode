@@ -19,6 +19,7 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
@@ -36,11 +37,13 @@ public class Wizard extends JPanel{
     
     private JDialog dialog;    
  
-    private JLabel titleLabel;
+    private final JLabel titleBarLabel;
+    private final JLabel headerLine1;
+    private final JLabel headerLine2;
     
     private int currentPage;
 
-    private JXButton continueButton;
+    private final JXButton continueButton;
     
     private Action continueAction = new AbstractAction(I18n.tr("Continue")) {
         @Override
@@ -71,7 +74,7 @@ public class Wizard extends JPanel{
     private CardLayout cardLayout;
     
     public Wizard(SetupComponentDecorator decorator){
-        super(new MigLayout("nogrid, insets 4"));
+        super(new MigLayout("nogrid, insets 0"));
         
         GuiUtils.assignResources(this);
         
@@ -92,14 +95,27 @@ public class Wizard extends JPanel{
         mainPanel = new JPanel(cardLayout);
         mainPanel.setBackground(getBackground());
         
-        titleLabel = new JLabel();
-        titleLabel.setOpaque(true);
-        titleLabel.setFont(titleBarFont);
-        titleLabel.setBackground(titleBarBackground);
-        titleLabel.setForeground(titleBarForeground);
-        titleLabel.setBorder(new LineBorder(titleBarBorder,3));
+        titleBarLabel = new JLabel();
+        titleBarLabel.setOpaque(true);
+        titleBarLabel.setFont(titleBarFont);
+        titleBarLabel.setBackground(titleBarBackground);
+        titleBarLabel.setForeground(titleBarForeground);
+        titleBarLabel.setBorder(new LineBorder(titleBarBorder,3));
         
-        add(titleLabel, "dock north");
+        headerLine1 = new JLabel();
+        decorator.decorateHeadingText(headerLine1);
+        
+        headerLine2 = new JLabel();
+        decorator.decorateNormalText(headerLine2);
+        
+        JXPanel headerBar = new JXPanel(new MigLayout("insets 8, gap 0"));
+        decorator.decorateSetupHeader(headerBar);
+        
+        headerBar.add(headerLine1, "wrap");
+        headerBar.add(headerLine2);
+        
+        add(titleBarLabel, "dock north");
+        add(headerBar, "growx, wrap");
         add(mainPanel, "push, wrap");
         
         add(backButton, "tag back");
@@ -143,12 +159,15 @@ public class Wizard extends JPanel{
         setCurrentPage(currentPage - 1);
     }
 
-    private void updateTitle() {
+    private void updateTitle(WizardPage page) {
         if (pageList.size() > 1) {
-            titleLabel.setText(I18n.tr("Setup - step {0} of {1}", currentPage + 1, pageList.size()));
+            titleBarLabel.setText(I18n.tr("Setup - step {0} of {1}", currentPage + 1, pageList.size()));
         } else {
-            titleLabel.setText(I18n.tr("Setup"));
+            titleBarLabel.setText(I18n.tr("Setup"));
         }
+        
+        headerLine1.setText(page.getLine1());
+        headerLine2.setText(page.getLine2());
     }
     
     private void next(){
@@ -161,7 +180,7 @@ public class Wizard extends JPanel{
         finishButton.setVisible(currentPage == pageList.size() - 1);
         continueButton.setVisible(!finishButton.isVisible());
         backButton.setVisible(currentPage != 0);
-        updateTitle();
+        updateTitle(pageList.get(currentPage));
     }
 
 }
