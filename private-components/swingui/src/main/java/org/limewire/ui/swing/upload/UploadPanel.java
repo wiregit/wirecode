@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
@@ -58,8 +59,11 @@ public class UploadPanel extends JXPanel{
         UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory);
         initHeader();
         
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        
         add(header, BorderLayout.NORTH);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
     }
     
     private void clearFinished() {
