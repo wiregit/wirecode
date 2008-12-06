@@ -30,6 +30,8 @@ import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.gnutella.gui.I18n;
+
 public class MiniPlayerPanel extends JPanel {
   
     @Resource
@@ -76,7 +78,7 @@ public class MiniPlayerPanel extends JPanel {
         playPauseButton.setHideActionText(true);
         playPauseButton.addActionListener(new PlayListener());
 
-        statusButton = new MarqueeButton("nothing", 16);
+        statusButton = new MarqueeButton(I18n.tr("Nothing selected"), 16);
         Dimension statusButtonDimensions = new Dimension(Integer.MAX_VALUE, playIcon.getIconHeight());
         statusButton.setMaximumSize(statusButtonDimensions);
         statusButton.setFont(font);
