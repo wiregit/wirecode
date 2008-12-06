@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -62,7 +61,7 @@ public class LibraryPanel extends JPanel implements Disposable {
     
     private ButtonItem currentItem = null;
 
-    private final JPanel selectionPanel = new JPanel();
+    private final JPanel selectionPanel = new LibrarySelectionPanel();
     private final Friend friend;
     private final LimeHeaderBar headerPanel;    
     
@@ -377,34 +376,28 @@ public class LibraryPanel extends JPanel implements Disposable {
             button.setFocusPainted(false);
             button.setBorder(BorderFactory.createEmptyBorder(2,8,2,8));
             button.setHorizontalAlignment(SwingConstants.LEFT);
+            
+            setOpaque(false);
 
             button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
+                        if(Boolean.TRUE.equals(evt.getNewValue())) {
+                            setOpaque(true);
+                            setBackground(selectedBackground);
+                            button.setForeground(selectedTextColor);
+                        } else {
+                            setOpaque(false);
+                            button.setForeground(textColor);
+                        }
                         repaint();
                     }
                 }
             });
             
             addNavigation(button);
-        }
-        
-        @Override
-        public void paintComponent(Graphics g) {
-            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
-                setOpaque(true);
-                setBackground(selectedBackground);
-                button.setForeground(selectedTextColor);
-//                setFont(selectedTextFont);
-            } else {
-                setOpaque(false);
-                button.setForeground(textColor);
-//                setFont(textFont);
-            }
-            
-            super.paintComponent(g);
-        }
+        }        
         
         public JButton getButton() {
             return button;

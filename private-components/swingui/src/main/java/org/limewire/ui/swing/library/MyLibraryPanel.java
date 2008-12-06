@@ -6,7 +6,6 @@ package org.limewire.ui.swing.library;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -239,7 +238,6 @@ class MyLibraryPanel extends LibraryPanel {
     //TODO: use a button painter and JXButton
     private class MySelectionPanel extends JPanel {
         @Resource Color selectedBackground;
-        @Resource Color nonSelectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
         @Resource Font shareButtonFont;
@@ -254,6 +252,7 @@ class MyLibraryPanel extends LibraryPanel {
             super(new MigLayout("insets 0, fill, hidemode 3"));
 
             GuiUtils.assignResources(this);
+            setOpaque(false);
 
             button = new JButton(action);           
             button.setContentAreaFilled(false);
@@ -261,13 +260,31 @@ class MyLibraryPanel extends LibraryPanel {
             button.setFocusPainted(false);
             button.setBorder(BorderFactory.createEmptyBorder(2,8,2,0));
             button.setHorizontalAlignment(SwingConstants.LEFT);
+            button.setOpaque(false);
             button.getAction().addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
-                        MySelectionPanel.this.repaint();
-                    }
+                        if(Boolean.TRUE.equals(evt.getNewValue())) {
+                            setOpaque(true);
+                            setBackground(selectedBackground);
+                            button.setForeground(selectedTextColor);
+                            if(shareButton != null) {
+                                shareButton.setVisible(true);
+                                collectionLabel.setVisible(collectionLabel.isEnabled());
+                            }
+                        } else {
+                            setOpaque(false);
+                            button.setForeground(textColor);
+                            if(shareButton != null) {
+                                shareButton.setVisible(false);
+                                collectionLabel.setVisible(false);
+                            }
+                        }
+                        repaint();
+                    }   
                 }
+                    
             });
             
             add(button, "growx, push");
@@ -326,26 +343,6 @@ class MyLibraryPanel extends LibraryPanel {
         private void setLabelText(int numSharedCollections) {
             collectionLabel.setText(I18n.tr("Sharing collection: {0}", numSharedCollections));
             collectionLabel.setEnabled(numSharedCollections > 0);
-        }
-        
-        @Override
-        public void paintComponent(Graphics g) {
-            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
-                setBackground(selectedBackground);
-                button.setForeground(selectedTextColor);
-                if(shareButton != null) {
-                    shareButton.setVisible(true);
-                    collectionLabel.setVisible(collectionLabel.isEnabled());
-                }
-            } else {
-                setBackground(nonSelectedBackground);
-                button.setForeground(textColor);
-                if(shareButton != null) {
-                    shareButton.setVisible(false);
-                    collectionLabel.setVisible(false);
-                }
-            }
-            super.paintComponent(g);
         }
         
         public JButton getButton() {

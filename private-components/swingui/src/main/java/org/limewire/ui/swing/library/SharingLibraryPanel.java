@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -259,7 +258,6 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
     
     private class SharingSelectionPanel extends JPanel {
         @Resource Color selectedBackground;
-        @Resource Color nonSelectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
         
@@ -279,6 +277,8 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
             checkBox.setOpaque(false);
             
             add(checkBox);
+            
+            setOpaque(false);
             
             if(category != Category.AUDIO && category != Category.VIDEO && category != Category.IMAGE) {
                 checkBox.setVisible(false);
@@ -316,25 +316,21 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
                     if(evt.getPropertyName().equals(Action.SELECTED_KEY)) {
-                        SharingSelectionPanel.this.repaint();
+                        if(Boolean.TRUE.equals(evt.getNewValue())) {
+                            setOpaque(true);
+                            setBackground(selectedBackground);
+                            button.setForeground(selectedTextColor);
+                        } else {
+                            setOpaque(false);
+                            button.setForeground(textColor);
+                        }
+                        repaint();
                     }
                 }
             });
             add(button, "growx");
         
             addNavigation(button);
-        }
-        
-        @Override
-        public void paintComponent(Graphics g) {
-            if(Boolean.TRUE.equals(button.getAction().getValue(Action.SELECTED_KEY))) {
-                setBackground(selectedBackground);
-                button.setForeground(selectedTextColor);
-            } else {
-                setBackground(nonSelectedBackground);
-                button.setForeground(textColor);
-            }
-            super.paintComponent(g);
         }
         
         public void setSelect(boolean value) {
