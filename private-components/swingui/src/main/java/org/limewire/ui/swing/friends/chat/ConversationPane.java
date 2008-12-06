@@ -78,6 +78,7 @@ import org.limewire.ui.swing.util.I18n;
 import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.util.FileUtils;
 import org.limewire.xmpp.api.client.ChatState;
@@ -389,7 +390,7 @@ public class ConversationPane extends JPanel implements Displayable {
                 } catch (InvalidDataException ide) {
                     // not exactly broken, but need better behavior --
                     // this means the FileMetaData we received isn't well-formed.
-                    throw new RuntimeException("FIX ME", ide);
+                    throw new NotImplementedException(ide);
                 } catch(UnsupportedEncodingException uee) {
                     throw new RuntimeException(uee); // impossible
                 }

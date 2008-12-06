@@ -29,6 +29,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.SpeedConstants;
+import org.limewire.io.Address;
 import org.limewire.io.DiskException;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
@@ -2751,6 +2752,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public int getNumHosts() {
         return _activeWorkers.size();
     }
+    
+    @Override
+    public List<Address> getSourcesAsAddresses() {
+        List<Address> sources = new ArrayList<Address>(_activeWorkers.size());
+        for(DownloadWorker worker : _activeWorkers) {
+            sources.add(worker.getRFD().getAddress());
+        }
+        return sources;
+    }    
    
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getChatEnabledHost()

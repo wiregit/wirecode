@@ -1,10 +1,12 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
+import java.util.List;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -379,6 +381,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	public int getNumHosts() {
 		return torrent.getNumConnections();
+	}
+	
+	@Override
+	public List<Address> getSourcesAsAddresses() {
+	    return torrent.getSourceAddresses();
 	}
 
 	public void handleTorrentEvent(TorrentEvent evt) {

@@ -64,19 +64,17 @@ public class MainPanel extends JPanel {
                 remove(keyToComponents.remove(asString(navItem)));
             }
             @Override
-            public void itemSelected(NavCategory category, NavItem navItem, NavSelectable selectable,
-                    JComponent panel) {
+            public void itemSelected(NavCategory category, NavItem navItem,
+                    NavSelectable selectable, JComponent panel) {
                 LOG.debugf("Selected item {0}", navItem);
-                if(navItem != null) {
+                if (navItem != null) {
                     cardLayout.show(MainPanel.this, asString(navItem));
-                    if(selectable != null && panel instanceof NavComponent) {
-                        NavComponent navComponent = (NavComponent)panel;
+                    if (selectable != null && panel instanceof NavComponent) {
+                        NavComponent navComponent = (NavComponent) panel;
                         navComponent.select(selectable);
                     }
-                    // TODO: This breaks focus in the nav, so cannot scroll
-                    //       up/down.  Need to figure out what to do properly here.
-                    //keyToComponents.get(asString(navItem)).requestFocusInWindow();
-                }            }
+                }
+            }
         });
     }
     

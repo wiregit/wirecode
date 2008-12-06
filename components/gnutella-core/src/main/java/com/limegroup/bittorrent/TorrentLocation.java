@@ -5,8 +5,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.util.Base32;
 
 
@@ -17,8 +17,7 @@ import org.limewire.util.Base32;
  * <p>
  * The TorrentLocation class extends IpPortImpl to have an IP address and port number.
  */
-public class TorrentLocation extends IpPortImpl {
-	private static final long serialVersionUID = 7953314787152210101L;
+public class TorrentLocation extends ConnectableImpl {
 
 	/**
 	 * Use this for unknown peer ids
@@ -69,7 +68,7 @@ public class TorrentLocation extends IpPortImpl {
 	 */
 	public TorrentLocation(InetSocketAddress address, byte[] peerId,
 			byte[] extensionBytes) {
-		super(address);
+		super(address, false);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
 		EXTENSION_BYTES = extensionBytes;
 	}
@@ -79,7 +78,7 @@ public class TorrentLocation extends IpPortImpl {
 	 * (Tracker responses do not carry that information)
 	 */
 	public TorrentLocation(InetAddress address, int port, byte [] peerId) {
-		super(address, port);
+		super(address, port, false);
 		PEER_ID = (peerId == null) ? NULL_PEER_STRING : peerId;
 		EXTENSION_BYTES = EXTENTION_BYTES;
 	}

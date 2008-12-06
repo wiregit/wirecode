@@ -7,6 +7,7 @@ import java.util.List;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.PropertiableFile;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.Address;
 
 /**
  * A single download
@@ -74,7 +75,7 @@ public interface DownloadItem extends PropertiableFile {
 
 	public int getDownloadSourceCount();
 
-	public List<DownloadSource> getSources();
+	public List<Address> getSources();
 	
 	public Category getCategory();
 

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.limewire.collection.NECallable;
+import org.limewire.io.Address;
 import org.limewire.net.address.StrictIpPortSet;
 import org.limewire.nio.observer.Shutdownable;
 
@@ -58,6 +59,14 @@ public class BTLinkManager implements Shutdownable,
 	
 	public synchronized int getNumConnections() {
 		return _connections.size();
+	}
+	
+	public synchronized List<Address> getSourceAddresses() {
+	    List<Address> locs = new ArrayList<Address>(_connections.size());
+	    for(BTConnection connection : _connections) {
+	        locs.add(connection.getEndpoint());
+	    }
+	    return locs;
 	}
 	
 	public synchronized void addConnection(BTConnection connection) {

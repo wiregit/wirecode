@@ -1,9 +1,12 @@
 package com.limegroup.mozilla;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.core.settings.SharingSettings;
+import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
@@ -139,6 +142,12 @@ public class MozillaDownloaderImpl extends AbstractCoreDownloader implements
     @Override
     public int getNumHosts() {
         return 1;
+    }
+    
+    @Override
+    public List<Address> getSourcesAsAddresses() {
+        // TODO: Get the source from moz.
+        return Collections.emptyList();
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,6 +19,7 @@ import org.limewire.concurrent.SyncWrapper;
 import org.limewire.core.settings.BittorrentSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.http.reactor.LimeConnectingIOReactorFactory;
+import org.limewire.io.Address;
 import org.limewire.io.DiskException;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.address.StrictIpPortSet;
@@ -1023,6 +1025,11 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      */
     public int getNumConnections() {
         return linkManager.getNumConnections();
+    }
+    
+    @Override
+    public List<Address> getSourceAddresses() {
+        return linkManager.getSourceAddresses();
     }
 
     /*

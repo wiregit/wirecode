@@ -22,6 +22,7 @@ import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -162,7 +163,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     @Override
     public void selectAndScroll(Object selectedObject) {
         //TODO selectAndScroll for library image table
-        throw new RuntimeException("Implement me");
+        throw new NotImplementedException();
     }
     /**
      * Overrides getPreferredSize. getPreferredSize is used by scrollable to 

@@ -92,8 +92,7 @@ class ResizingInputPanel extends JPanel implements Displayable {
                     updateChatState(ChatState.active);
                 }
             } catch (XMPPException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                LOG.error("Unable to write message", e1);
             }
         }
     }

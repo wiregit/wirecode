@@ -55,7 +55,7 @@ public class LimeMozillaDownloadProgressListenerImpl implements nsIDownloadProgr
 
     private final LimeMozillaDownloadManagerListener manager;
 
-    private EventListenerList<DownloadStatusEvent> listeners;
+    private final EventListenerList<DownloadStatusEvent> listeners;
 
     private final BlockingQueue<DownloadStatusEvent> statusEvents;
 

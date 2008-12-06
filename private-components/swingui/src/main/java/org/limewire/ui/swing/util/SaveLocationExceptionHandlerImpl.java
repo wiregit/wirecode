@@ -48,7 +48,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         if (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS
                 && sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO) {
             // TODO better user feedback
-            throw new UnsupportedOperationException("Error starting download.", sle);
+            throw new NotImplementedException(sle);
         }
 
         File saveFile = null;

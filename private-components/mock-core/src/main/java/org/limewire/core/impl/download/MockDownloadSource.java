@@ -1,25 +1,18 @@
 package org.limewire.core.impl.download;
 
-import org.limewire.core.api.download.DownloadSource;
+import org.limewire.io.Address;
 
-public class MockDownloadSource implements DownloadSource{
-	private String name;
+public class MockDownloadSource implements Address {
 	private String address;
 
-	public MockDownloadSource(String name, String address) {
-		this.name = name;
+	public MockDownloadSource(String address) {
 		this.address = address;
 	}
-	
-	public String getName(){
-		return name;
-	}
-	
-	public String toString(){
-		return name;
-	}
 
-    public String getAddress() {
+    @Override
+    public String getAddressDescription() {
         return address;
     }
+	
+	
 }

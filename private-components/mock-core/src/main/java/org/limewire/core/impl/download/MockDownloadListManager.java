@@ -10,25 +10,24 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.DownloadItem.ErrorState;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
-
-import com.google.inject.Singleton;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
+import com.google.inject.Singleton;
+
 @Singleton
 public class MockDownloadListManager implements DownloadListManager {
-	private static final String LOCALHOST = "127.0.0.1";
     private final RemoveCancelledListener cancelListener = new RemoveCancelledListener();
 	private final EventList<DownloadItem> downloadItems;
 	
@@ -73,27 +72,27 @@ public class MockDownloadListManager implements DownloadListManager {
 	private void initializeMockData(){
 	    MockDownloadItem item = new MockDownloadItem("Monkey on ice skates", 4416,
 				DownloadState.DOWNLOADING, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("134.23.2.7", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("134.23.2.7"));
 		addDownload(item);
 
 		item = new MockDownloadItem("Psychology 101 Lecture 3", 446,
 				DownloadState.DOWNLOADING, Category.AUDIO);
-		item.addDownloadSource(new MockDownloadSource("245.2.7.78", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("245.2.7.78"));
 		addDownload(item);
 		
 		item = new MockDownloadItem("New England Foliage.bmp", 46,
 				DownloadState.DOWNLOADING, Category.IMAGE);
-		item.addDownloadSource(new MockDownloadSource("234.2.3.4", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("234.2.3.4"));
 		addDownload(item);
 
 		item = new MockDownloadItem("Psychology 101 Lecture 2.avi", 55,
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
-		item.addDownloadSource(new MockDownloadSource("34.2.7.7", LOCALHOST));
+		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));
 		addDownload(item);
 		
         item = new MockDownloadItem("Psychology 101 Lecture 1", 55,
                 DownloadState.ERROR, Category.VIDEO);
-        item.addDownloadSource(new MockDownloadSource("23.12.33.4", LOCALHOST));
+        item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
         item.setErrorState(ErrorState.DISK_PROBLEM);
         addDownload(item);
 

@@ -49,7 +49,6 @@ public class ToolsMenu extends JMenu {
         });
         navigator.createNavItem(NavCategory.UPLOAD, UploadPanel.NAME, uploadPanel);
         add(new AbstractAction(I18n.tr("Uploads")) {
-            // TODO wire in Uploads panel once it is written.
             @Override
             public void actionPerformed(ActionEvent e) {
                 NavItem navItem = navigator.getNavItem(NavCategory.UPLOAD, UploadPanel.NAME);

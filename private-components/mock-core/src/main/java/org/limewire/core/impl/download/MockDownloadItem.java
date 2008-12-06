@@ -12,8 +12,8 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.io.Address;
 
 
 public class MockDownloadItem implements DownloadItem {
@@ -25,7 +25,7 @@ public class MockDownloadItem implements DownloadItem {
 	//guarded by this
 	private volatile boolean running = true;
 	private volatile DownloadState state = DownloadState.DOWNLOADING;
-	private final List<DownloadSource> downloadSources;
+	private final List<Address> downloadSources;
 	private final Category category;
 	
 	private ErrorState errorState = ErrorState.NONE;
@@ -38,7 +38,7 @@ public class MockDownloadItem implements DownloadItem {
 		this.category = category;
 		this.totalSize = totalSize;
 		this.state = state;
-		downloadSources = new ArrayList<DownloadSource>();
+		downloadSources = new ArrayList<Address>();
 		if (this.state == DownloadState.DOWNLOADING) {
 			start();
 		}
@@ -140,7 +140,7 @@ public class MockDownloadItem implements DownloadItem {
 		//notifyObservers();
 	}
 	
-	public void addDownloadSource(DownloadSource source){
+	public void addDownloadSource(Address source){
 		downloadSources.add(source);
 	}
 
@@ -154,7 +154,7 @@ public class MockDownloadItem implements DownloadItem {
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
 	@Override
-	public List<DownloadSource> getSources() {
+	public List<Address> getSources() {
 		return downloadSources;
 	}
 

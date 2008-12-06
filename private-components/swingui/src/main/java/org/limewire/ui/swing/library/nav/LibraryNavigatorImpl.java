@@ -50,6 +50,7 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
@@ -58,9 +59,6 @@ import com.google.inject.name.Named;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
-
-    private static final String NAME = "__@internal@__";
-
     
     private final NavPanel myLibrary;
     private final NavPanel p2pNetwork;
@@ -112,9 +110,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setScrollableTracksViewportHeight(false);
         
         LibraryFileList libraryList = libraryManager.getLibraryManagedList();
-        Friend me = new FriendAdapter(NAME, I18n.tr("My Library"));
+        Friend me = new FriendAdapter("me", I18n.tr("My Library"));
         myLibraryMediator.setMainCardEventList(me, libraryList.getSwingModel());
-        myLibrary = navPanelFactory.createNavPanel(createMyLibraryAction(), me, null);
+        myLibrary = navPanelFactory.createNavPanel(createAction(me, myLibraryMediator), me, null);
         myLibrary.updateLibraryState(libraryList.getState());        
         myLibrary.addActionListener(new ActionListener() {
             @Override
@@ -135,13 +133,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         });
         
         Friend p2p = new FriendAdapter("p2p", I18n.tr("P2P Network"));
-        p2pNetwork = navPanelFactory.createNavPanel(createP2PNetworkAction(), p2p, null);
+        p2pNetwork = navPanelFactory.createNavPanel(createAction(p2p, new JLabel("P2P Network")), p2p, null);
         p2pNetwork.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         p2pNetwork.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
         p2pNetwork.setName("LibraryNavigator.p2pNetwork");
         
         Friend all = new FriendAdapter("allFriends", I18n.tr("All Friends"));
-        allFriends = navPanelFactory.createNavPanel(createAllFriendsAction(), all, null);
+        allFriends = navPanelFactory.createNavPanel(createAction(all, new JLabel("All Friends")), all, null);
         allFriends.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         allFriends.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
         allFriends.setName("LibraryNavigator.allFriends");
@@ -307,21 +305,9 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         return this;
     }
     
-    private Action createMyLibraryAction() {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, NAME, myLibraryMediator);
+    private Action createAction(Friend friend, JComponent component) {
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getRenderName(), component);
         Action action = NavigatorUtils.getNavAction(navItem);
-        return action;
-    }
-    
-    private Action createP2PNetworkAction() {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, "P2P Network", new JLabel("P2P Network"));
-        Action action = NavigatorUtils.getNavAction(navItem); 
-        return action;
-    }
-    
-    private Action createAllFriendsAction() {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, "All Friends", new JLabel("All Friends"));
-        Action action = NavigatorUtils.getNavAction(navItem); 
         return action;
     }
     
@@ -336,15 +322,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     @Override
     public void selectInLibrary(URN urn, Category category) {
-        throw new RuntimeException("TODO: select in library");
-//        navigator.getNavItem(NavCategory.LIBRARY,
-//                NAME_PREFIX + propertiable.getCategory()).select(
-//                new NavSelectable<URN>() {
-//                    @Override
-//                    public URN getNavSelectionId() {
-//                        return ;
-//                    }
-//                });   
+        throw new NotImplementedException();   
     }
     
     private void ensureFriendVisible(Friend friend) {

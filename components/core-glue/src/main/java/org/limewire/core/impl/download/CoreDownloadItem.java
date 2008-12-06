@@ -3,16 +3,15 @@ package org.limewire.core.impl.download;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.impl.URNImpl;
+import org.limewire.io.Address;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.util.FileUtils;
@@ -108,9 +107,8 @@ class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public List<DownloadSource> getSources() {
-        //TODO: getSources
-        return Collections.singletonList((DownloadSource)new CoreDownloadSource("name", "127.0.0.1"));
+    public List<Address> getSources() {
+        return downloader.getSourcesAsAddresses();
     }
 
     @Override

@@ -100,8 +100,7 @@ public final class NativeLaunchUtils {
                     launchFileOther(url);
                 }
     	    } catch(IOException iox) {
-    	        // TODO: Show an error.
-    	        throw new UnsupportedOperationException("TODO show good error message.");
+    	        throw new NotImplementedException("show good error message.");
     	    }
         } 
     }
@@ -162,11 +161,11 @@ public final class NativeLaunchUtils {
 	    try {
 	        launchFileImpl(file);
 	    } catch(LaunchException le) {
-	        // TODO: show an error
+	        throw new NotImplementedException();
 	    } catch(IOException iox) {
-	        // TODO: show an error
+	        throw new NotImplementedException();
 	    } catch(SecurityException se) {
-	        // TODO: show an error
+	        throw new NotImplementedException();
 	    }
 	}
 	
@@ -221,13 +220,12 @@ public final class NativeLaunchUtils {
         try {
             return launchExplorerImpl(file);
         } catch(LaunchException le) {
-            // TODO: show error
+            throw new NotImplementedException();
         } catch (SecurityException e) {
-            // TODO: show error
+            throw new NotImplementedException();
         } catch (IOException e) {
-            // TODO: show error
+            throw new NotImplementedException();
         }
-        return null;
     }
     
     private static Process launchExplorerImpl(File file) throws IOException, SecurityException {

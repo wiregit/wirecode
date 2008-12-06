@@ -329,10 +329,10 @@ public class SearchResultsPanel extends JXPanel {
     
     private void updateMessages() {
         if(!lifeCycleComplete) {
-            messageLabel.setText(I18n.tr("TODO get better copy... LimeWire is currently starting. When it has completed, your search will continue."));
+            messageLabel.setText(I18n.tr("LimeWire is currently starting. Your search will start when it completes."));
             messagePanel.setVisible(true);
         } else if(!fullyConnected) {
-            messageLabel.setText(I18n.tr("TODO get better copy... LimeWire is not fully connected. You will not receive many search results until it finishes connecting."));
+            messageLabel.setText(I18n.tr("LimeWire is not fully connected. You may not receive many search results until it finishes connecting."));
             messagePanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);

@@ -21,6 +21,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -99,7 +100,7 @@ public class ChatPanel extends JPanel implements Displayable {
             if (EventType.ACTIVATED == e.getEventType()) {
                 LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
                 if (e.getDescription().equals("all_friends_share_list")) {
-                    throw new IllegalArgumentException("TODO: implement me. There is no longer any such view");
+                    throw new NotImplementedException();
                 }
             }
         }

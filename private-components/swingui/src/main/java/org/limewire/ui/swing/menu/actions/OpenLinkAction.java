@@ -23,6 +23,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 public class OpenLinkAction extends AbstractAction {
@@ -64,8 +65,7 @@ public class OpenLinkAction extends AbstractAction {
                     if (magnetFactory.isMagnetLink(uri)) {
                         MagnetLink[] magnetLinks = magnetFactory.parseMagnetLink(uri);
                         if (magnetLinks.length == 0) {
-                            throw new UnsupportedOperationException(
-                                    "TODO implement user feedback. Error parsing magnet link.");
+                            throw new NotImplementedException("need user feedback");
                         }
 
                         for (final MagnetLink magnet : magnetLinks) {
@@ -76,9 +76,7 @@ public class OpenLinkAction extends AbstractAction {
                                 searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
                                         .getQueryString(), SearchCategory.ALL));
                             } else {
-                                throw new UnsupportedOperationException(
-                                        "TODO implement user feedback.");
-                                // TODO error case?
+                                throw new NotImplementedException("need user feedback");
                             }
                         }
                     } else {

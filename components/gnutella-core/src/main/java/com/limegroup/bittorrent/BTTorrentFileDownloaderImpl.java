@@ -3,6 +3,8 @@ package com.limegroup.bittorrent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -13,6 +15,7 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationManager;
+import org.limewire.io.Address;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.listener.EventListener;
@@ -71,7 +74,7 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
      */
     private volatile Shutdownable aborter;
 
-    URI torrentURI;
+    private URI torrentURI;
 
     @Inject
     public BTTorrentFileDownloaderImpl(DownloadManager downloadManager,
@@ -198,6 +201,11 @@ public class BTTorrentFileDownloaderImpl extends AbstractCoreDownloader implemen
 
     public int getNumHosts() {
         return 0;
+    }
+    
+    @Override
+    public List<Address> getSourcesAsAddresses() {
+        return Collections.emptyList();
     }
 
     public int getNumberOfAlternateLocations() {

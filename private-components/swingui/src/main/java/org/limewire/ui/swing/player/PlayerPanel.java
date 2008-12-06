@@ -35,6 +35,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NotImplementedException;
 
 import com.google.inject.Inject;
 
@@ -209,9 +210,9 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == PAUSE){
                 player.pause();
             } else if (e.getActionCommand() == FORWARD) {
-                System.out.println("TODO: next audio file");
+                throw new NotImplementedException();
             } else if (e.getActionCommand() == BACK) {
-                System.out.println("TODO: seek back / previous audio file");
+                throw new NotImplementedException();
             } else if (e.getActionCommand() == VOLUME) {
                 volumeControlPopup.show(volumeButton, 0, 14);
             }
@@ -229,27 +230,23 @@ public class PlayerPanel extends JXPanel {
             if (progressSlider.getMaximum() != 0 && progressSlider.getValueIsAdjusting()) {
                 if (!waiting) {
                     waiting = true;
-                    System.out.println("waiting to seek");
+//                    System.out.println("waiting to seek");
                     wasPlaying = player.getStatus() == PlayerState.PLAYING;
                     if (wasPlaying) {
-                        System.out.println("pausing");
+//                        System.out.println("pausing");
                         player.pause();
                     }
                 }
             } 
             else if (waiting) {
-                System.out.println("seeking");
-                
+//                System.out.println("seeking");                
                 int position = byteLength * progressSlider.getValue() / progressSlider.getMaximum();
-                System.out.println("seeking to " + position);
-                player.seekLocation(position);
-                
-                if (wasPlaying) {
-                
-                    System.out.println("unpausing");
+//                System.out.println("seeking to " + position);
+                player.seekLocation(position);                
+                if (wasPlaying) {                
+//                    System.out.println("unpausing");
                     player.unpause();
-                }
-                
+                }                
                 waiting = false;
             }
         }

@@ -103,7 +103,6 @@ public class AdvancedToolsPanel extends JPanel {
      */
     @Inject
     public AdvancedToolsPanel(Provider<ConnectionsPanel> connectionsPanel, 
-        Provider<LoggingPanel> loggingPanel, 
         Provider<ConsolePanel> consolePanel) {
 
         // Inject annotated resource values.

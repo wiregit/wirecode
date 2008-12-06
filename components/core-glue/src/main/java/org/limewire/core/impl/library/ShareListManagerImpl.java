@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
@@ -327,24 +328,21 @@ class ShareListManagerImpl implements ShareListManager {
         final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
         EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(category));
         final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
-        //TODO: change this to an executor, quick change to fix build
-        Thread t = new Thread(new Runnable(){
+        ThreadExecutor.startThread(new Runnable(){
             @Override
             public void run() {
                 for(LocalFileItem item : items) {
                     fileList.add(item.getFile());
                 }
             }
-        });
-        t.start();
+        }, "File Category Adder");
     }
     
     private void removeAll(String friend, Category category, EventList<LocalFileItem> list) {
         final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
         EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(list, new CategoryFilter(category));
         final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
-        //TODO: change this to an executor, quick change to fix build
-        Thread t = new Thread(new Runnable(){
+        ThreadExecutor.startThread(new Runnable(){
             @Override
             public void run() {
                 for(LocalFileItem item : items) {
@@ -352,8 +350,7 @@ class ShareListManagerImpl implements ShareListManager {
                         fileList.remove(item.getFile());
                 }
             }
-        });
-        t.start();
+        }, "File Category Remover");
     }
     
     private void fireAudioCollectionChange(PropertyChangeSupport propertyChange, boolean newValue) {

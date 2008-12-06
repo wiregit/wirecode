@@ -35,17 +35,12 @@ public class BasicFileIconController extends NonBlockFileIconController {
     }
     
     /** Returns the icon assocated with the extension. */
-    
-    // TODO: use named media type approach to get actual icon
     public Icon getIconForExtension(String ext) {
         MediaType mt = null;
         if (ext != null)
             mt = MediaType.getMediaTypeForExtension(ext);
         
-        Category category = CategoryUtils.getCategory(mt);
-        
-        // String location = GuiCoreMediator.getLimeXMLProperties().getXMLImagesResourcePath() + mt.getSchema();
-                
+        Category category = CategoryUtils.getCategory(mt);        
         return this.categoryIconManager.getIcon(category);
     }
 

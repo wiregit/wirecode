@@ -1,8 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.List;
 
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.io.Address;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
@@ -326,5 +328,8 @@ public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadSt
      * used.
      */
     public String getCustomIconDescriptor();
+    
+    /** Gets all sources as addresses */
+    public List<Address> getSourcesAsAddresses();
 }
 

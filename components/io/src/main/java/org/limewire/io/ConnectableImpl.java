@@ -34,6 +34,11 @@ public class ConnectableImpl implements Connectable {
     }
     
     /** Constructs a Connectable based on the given host data. */
+    public ConnectableImpl(InetAddress host, int port, boolean tlsCapable) {
+        this(new IpPortImpl(host, port), tlsCapable);
+    }    
+    
+    /** Constructs a Connectable based on the given host data. */
     public ConnectableImpl(String host, int port, boolean tlsCapable) throws UnknownHostException {
         this(new IpPortImpl(host, port), tlsCapable);
     }

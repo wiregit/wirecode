@@ -15,13 +15,12 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadSource;
+import org.limewire.io.Address;
 import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PropertiableHeadings;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -72,8 +71,8 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             
             readOnlyInfoModel.setColumnCount(2);
             readOnlyInfoModel.setColumnIdentifiers(new Object[]{tr("Address"), tr("Filename")});
-            for(DownloadSource source : propertiable.getSources()) {
-                readOnlyInfoModel.addRow(new Object[] {getSourceAddress(source), 
+            for(Address source : propertiable.getSources()) {
+                readOnlyInfoModel.addRow(new Object[] {source.getAddressDescription(), 
                                                        propertiable.getDownloadingFile().getName() });
             }
             
@@ -95,15 +94,6 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
             });
             
             showDialog(propertiable.getFileName(), propertiable.getCategory());
-        }
-
-        private String getSourceAddress(DownloadSource source) {
-            StringBuilder bldr = new StringBuilder();
-            bldr.append(source.getAddress());
-            if (!StringUtils.isEmpty(source.getName())) {
-                bldr.append(" (").append(source.getName()).append(")");
-            }
-            return bldr.toString();
         }
 
         @Override

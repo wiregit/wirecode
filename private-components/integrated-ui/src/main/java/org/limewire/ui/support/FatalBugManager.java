@@ -234,193 +234,158 @@ public final class FatalBugManager {
     private static class FatalSessionInfo implements SessionInfo {
 
         public boolean acceptedIncomingConnection() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         public boolean canReceiveSolicited() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         public long getByteBufferCacheSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public long getContentResponsesSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public long getCreationCacheSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public long getCurrentUptime() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public long getDiskControllerByteCacheSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getDiskControllerQueueSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public long getDiskControllerVerifyingCacheSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumIndividualDownloaders() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumLeafToUltrapeerConnections() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumOldConnections() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumUltrapeerToLeafConnections() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumUltrapeerToUltrapeerConnections() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumWaitingDownloads() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumberOfPendingTimeouts() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getNumberOfWaitingSockets() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public int getPort() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         public boolean isGUESSCapable() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean canDoFWT() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public int getNumActiveDownloads() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int getNumActiveUploads() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int getNumConnectionCheckerWorkarounds() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int getNumQueuedUploads() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public long[] getSelectStats() {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public int getSharedFileListSize() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int getSimppVersion() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public String getUploadSlotManagerInfo() {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public boolean isConnected() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean isLifecycleLoaded() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean isShieldedLeaf() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean isSupernode() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean isUdpPortStable() {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public int lastReportedUdpPort() {
-            // TODO Auto-generated method stub
             return 0;
         }
 
         @Override
         public int receivedIpPong() {
-            // TODO Auto-generated method stub
             return 0;
         }
         
