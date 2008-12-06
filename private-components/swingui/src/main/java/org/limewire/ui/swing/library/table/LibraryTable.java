@@ -71,6 +71,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
         tableColors = new TableColors();
         setStripesPainted(true);
         setShowHorizontalLines(false);
+        setShowGrid(false, true);
         
         EventSelectionModel<T> model = new EventSelectionModel<T>(libraryItems);
         setSelectionModel(model);
