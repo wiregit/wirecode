@@ -277,31 +277,6 @@ public final class FileTypeOptionPanelManager {
         }
     }  
 
-    
-    
-    
-    private String getDescriptionText(String obj) {
-        if (obj == null) {
-            throw new NullPointerException("Null object passed to desription lookup.");
-        }
-        
-        Icon icon = iconManager.getIconForExtension(obj);
-        
-        if (icon == null) {
-            return null;
-        }
-        
-        if (icon.toString().indexOf("@") > -1) {
-            return null;
-        }
-        
-        if (icon.toString().endsWith(".png")) {
-            return null;
-        }
-        
-        return icon.toString();
-    }
-    
     // Providers   
     
     private class ExtensionProvider implements CheckBoxList.TextProvider<String> {
@@ -315,7 +290,7 @@ public final class FileTypeOptionPanelManager {
         }
         
         public String getToolTipText(String obj) {
-            return getDescriptionText(obj);
+            return iconManager.getMIMEDescription(obj);
         }
 
         public Icon getIcon(String obj) {
@@ -389,7 +364,7 @@ public final class FileTypeOptionPanelManager {
 
         @Override
         public String getComment(String obj) {
-            return getDescriptionText(obj);
+            return iconManager.getMIMEDescription(obj);
         }
 
         @Override

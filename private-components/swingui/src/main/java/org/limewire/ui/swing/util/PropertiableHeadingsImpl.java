@@ -8,11 +8,18 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 class PropertiableHeadingsImpl implements PropertiableHeadings {
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
+    private final IconManager iconManager;
+    
+    @Inject
+    public PropertiableHeadingsImpl(IconManager iconManager) {
+        this.iconManager = iconManager;
+    }
     
     @Override
     public String getHeading(PropertiableFile propertiable) {
@@ -116,16 +123,16 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         case DOCUMENT:
         case OTHER:
         default: {
-            // subheading = "{application name}";
+             subheading = iconManager.getMIMEDescription(getFileExtension(propertiable));
             // TODO add name of program used to open this file, not included in
             // 5.0
             Long fileSize = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
             if (fileSize != null) {
-                subheading = GuiUtils.toUnitbytes(fileSize);
+                subheading = (subheading == null ? "" : subheading + " - ") + GuiUtils.toUnitbytes(fileSize);
             }
         }
         }
-        return subheading;
+        return subheading == null ? "" : subheading;
 
     }
 }

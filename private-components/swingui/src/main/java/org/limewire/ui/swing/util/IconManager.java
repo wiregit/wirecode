@@ -107,6 +107,33 @@ public class IconManager {
     }
     
     /**
+     * Returns a text description of the MIME type for the given file extension
+     */
+    public String getMIMEDescription(String extension) {
+        if (extension == null) {
+            return null;
+        }
+        
+        Icon icon = getIconForExtension(extension);
+        
+        if (icon == null) {
+            return null;
+        }
+        
+        String iconString = icon.toString();
+        if (iconString.indexOf("@") > -1) {
+            //MIME label isn't set to something readable for the icon
+            return null;
+        }
+        
+        if (iconString.endsWith(".png")) {
+            return null;
+        }
+        
+        return iconString;
+    }
+    
+    /**
      * Reverts the IconController to a basic controller if at any point
      * in time the controller becomes invalid.
      * 
