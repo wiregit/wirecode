@@ -52,6 +52,7 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.Version;
@@ -230,7 +231,7 @@ public final class BugManager {
         }
         
         if (!sent &&  _dialogsShowing < MAX_DIALOGS ) {
-            reviewBug(info);
+            reviewBug(info, bug instanceof NotImplementedException);
         }
     }
     
@@ -380,10 +381,11 @@ public final class BugManager {
      * report to the servlet and has the option to review the bug
      * before it is sent.
      */
-    private void reviewBug(final LocalClientInfo info) {
+    private void reviewBug(final LocalClientInfo info, boolean notImplemented) {
         _dialogsShowing++;
         
-		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), I18n.tr("Internal Error"), ModalityType.APPLICATION_MODAL);
+        String title = notImplemented ? I18n.tr("Oops!") : I18n.tr("Internal Error");
+		final JDialog DIALOG = new LimeJDialog(GuiUtils.getMainFrame(), title, ModalityType.APPLICATION_MODAL);
 		final Dimension DIALOG_DIMENSION = new Dimension(DIALOG_BOX_WIDTH, DIALOG_BOX_HEIGHT);
 		DIALOG.setSize(DIALOG_DIMENSION);
 		
@@ -396,10 +398,19 @@ public final class BugManager {
 		boolean sendable = isSendableVersion();
 
         String msg;
-        if(sendable)
-            msg = I18n.tr("LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click \'Send\' to notify LimeWire about the problem. If desired, you can click \'Review\' to look at the information that will be sent. Thank you.");
-        else
-            msg = I18n.tr("LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click \'Discard\'. If desired, you can click \'Review\' to look at the information about the error.");
+        if(notImplemented) {
+            if(sendable) {
+                msg = I18n.tr("Oops!  You did something we haven't written yet.  Sorry about that.  LimeWire's still going to run just fine, but please click \'Send\' to remind us to write this.  If you want, you can click \'Review\' to look at the information that will be sent. Thanks!");
+            } else {
+                msg = I18n.tr("Oops!  You did something we haven't written yet.  Sorry about that.  LimeWire's still going to run just fine, so don't worry.  If you want, you can click \'Review\' to look at the information about the error.");                
+            }
+        } else {
+            if(sendable) {
+                msg = I18n.tr("LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click \'Send\' to notify LimeWire about the problem. If desired, you can click \'Review\' to look at the information that will be sent. Thank you.");
+            } else {
+                msg = I18n.tr("LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, click \'Discard\'. If desired, you can click \'Review\' to look at the information about the error.");
+            }
+        }
         
         msg = warning() + "\n\n" + msg;
        
