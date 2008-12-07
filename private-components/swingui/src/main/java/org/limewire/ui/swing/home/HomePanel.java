@@ -13,6 +13,7 @@ import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.components.HTMLPane;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -80,6 +81,8 @@ public class HomePanel extends JXPanel {
                     url += "&firstRequest=true";
                 }
             }
+            // Reset the page to blank before continuing -- blocking is OK because this is fast.
+            MozillaAutomation.blockingLoad(browser, "about:blank");
             browser.load(url);
         } else {
             String offlinePage = "<html><body>This is the offline home page.</body></html>";

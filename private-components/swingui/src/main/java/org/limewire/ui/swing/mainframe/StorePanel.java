@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.browser.Browser;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.mozilla.browser.MozillaAutomation;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaPanel.VisibilityMode;
 
@@ -44,6 +45,8 @@ public class StorePanel extends JPanel {
         if(!MozillaInitialization.isInitialized()) {
             NativeLaunchUtils.openURL(url);
         } else {
+            // Reset the page to blank before continuing -- blocking is OK because this is fast.
+            MozillaAutomation.blockingLoad(browser, "about:blank");
             browser.load(url + "&isClient=true");
         }
     }
