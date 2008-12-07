@@ -7,19 +7,17 @@ import org.limewire.core.api.library.FileItem;
 
 import ca.odell.glazedlists.TextFilterator;
 
-    public class LibraryTextFilterator<T extends FileItem> implements TextFilterator<T> {
-        @Override
-        public void getFilterStrings(
-                List<String> list, T fileItem) {
-            list.add(fileItem.getName());
-            list.add(String.valueOf(fileItem.getSize()));            
+class LibraryTextFilterator<T extends FileItem> implements TextFilterator<T> {
+    @Override
+    public void getFilterStrings(List<String> list, T fileItem) {
+        list.add(fileItem.getName());
+        list.add(String.valueOf(fileItem.getSize()));
 
-         
-            for (FilePropertyKey key : FilePropertyKey.values()) {
-                Object value = fileItem.getProperty(key);
-                if(value != null) {
-                    list.add(value.toString());
-                }
+        for (FilePropertyKey key : FilePropertyKey.values()) {
+            Object value = fileItem.getProperty(key);
+            if (value != null) {
+                list.add(value.toString());
             }
         }
     }
+}

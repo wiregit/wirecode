@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 import org.limewire.ui.swing.nav.NavComponent;
 import org.limewire.ui.swing.nav.NavSelectable;
 
-public class BaseLibraryMediator extends JPanel implements Disposable, NavComponent {
+class LibraryMediator extends JPanel implements Disposable, NavComponent {
 
     private static final String LIBRRY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
@@ -21,7 +21,7 @@ public class BaseLibraryMediator extends JPanel implements Disposable, NavCompon
     private JComponent libraryComponent = null;
     private JComponent sharingComponent = null;
     
-    public BaseLibraryMediator() {
+    public LibraryMediator() {
         cardLayout = new CardLayout();
         
         setLayout(cardLayout);

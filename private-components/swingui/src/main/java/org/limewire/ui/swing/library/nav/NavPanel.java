@@ -79,7 +79,9 @@ public class NavPanel extends JXPanel {
         categoryLabel.setBorder(BorderFactory.createEmptyBorder(0,10,0,10));
         categoryLabel.setMinimumSize(new Dimension(0, 20));
         categoryLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, 20));
-        categoryLabel.setText(friend.getRenderName());
+        if(friend != null) {
+            categoryLabel.setText(friend.getRenderName());
+        }
         statusIcon = new JXBusyLabel(new Dimension(12, 12));
         statusIcon.setOpaque(false);
         
@@ -106,6 +108,10 @@ public class NavPanel extends JXPanel {
                 }
             }
         });
+    }
+    
+    void setTitle(String text) {
+        categoryLabel.setText(text);
     }
     
     Action getAction() {
@@ -166,7 +172,7 @@ public class NavPanel extends JXPanel {
     }
     
     private void unbusy() {
-        if(friend.isAnonymous()) {
+        if(friend != null && friend.isAnonymous()) {
             statusIcon.setVisible(true);
             statusIcon.setBusy(false);
             statusIcon.setIcon(removeLibraryIcon);

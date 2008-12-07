@@ -18,11 +18,11 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
-public class FriendLibraryMediator extends BaseLibraryMediator {
+public class FriendLibraryMediator extends LibraryMediator {
 
     private final EmptyLibraryFactory emptyFactory;
     private final FriendLibraryFactory factory;
-    private final SharingLibraryFactory sharingFactory;
+    private final FriendSharingPanelFactory sharingFactory;
     private final LibraryManager libraryManager;
     private final ShareListManager shareListManager;
 
@@ -31,7 +31,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
     
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
-            SharingLibraryFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager) {
+            FriendSharingPanelFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager) {
         this.factory = factory;
         this.friend = friend;        
         this.sharingFactory = sharingFactory;
@@ -95,7 +95,7 @@ public class FriendLibraryMediator extends BaseLibraryMediator {
     @Override
     public void showSharingCard() {
         if(!isSharingCardSet()) {
-            setSharingCard(sharingFactory.createSharingLibrary(this, friend, 
+            setSharingCard(sharingFactory.createPanel(this, friend, 
                     libraryManager.getLibraryManagedList().getSwingModel(),
                     shareListManager.getOrCreateFriendShareList(friend)));
         }

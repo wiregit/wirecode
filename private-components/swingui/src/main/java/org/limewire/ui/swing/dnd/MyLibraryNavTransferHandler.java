@@ -12,7 +12,7 @@ import javax.swing.TransferHandler;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -21,14 +21,14 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
 
     private DownloadListManager downloadListManager;
 
-    private LibraryManager libraryManager;
+    private LibraryFileList library;
 
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     
     public MyLibraryNavTransferHandler(DownloadListManager downloadListManager,
-            LibraryManager libraryManager, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            LibraryFileList library, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.downloadListManager = downloadListManager;
-        this.libraryManager = libraryManager;
+        this.library = library;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
@@ -77,9 +77,9 @@ public class MyLibraryNavTransferHandler extends TransferHandler {
             }
             for (File file : fileList) {
                 if (file.isDirectory()) {
-                    libraryManager.getLibraryManagedList().addFolder(file);
+                    library.addFolder(file);
                 } else {
-                    libraryManager.getLibraryManagedList().addFile(file);
+                    library.addFile(file);
                 }
             }
         }

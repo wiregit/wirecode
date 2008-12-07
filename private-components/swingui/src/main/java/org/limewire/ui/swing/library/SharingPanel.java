@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
@@ -13,7 +12,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.Action;
@@ -39,11 +37,11 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -53,71 +51,63 @@ import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
-import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
-public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeListener {
+abstract class SharingPanel extends AbstractFileListPanel implements PropertyChangeListener {
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
-    private final BaseLibraryMediator basePanel;
     private final FriendFileList friendFileList;
     
     private final Map<Category, LockableUI> locked = new EnumMap<Category, LockableUI>(Category.class);
     private final Map<Category, SharingSelectionPanel> listeners = new EnumMap<Category, SharingSelectionPanel>(Category.class);
     
-    @AssistedInject
-    public SharingLibraryPanel( @Assisted BaseLibraryMediator basePanel,
-                                @Assisted Friend friend,
-                                @Assisted EventList<LocalFileItem> eventList,
-                                @Assisted FriendFileList friendFileList,
-                                IconManager iconManager,
-                                CategoryIconManager categoryIconManager,
-                                LibraryTableFactory tableFactory,
-                                LimeHeaderBarFactory headerBarFactory,
-                                ButtonDecorator buttonDecorator) {
-        super(friend, false, headerBarFactory);
+    SharingPanel(EventList<LocalFileItem> wholeLibraryList,
+                 FriendFileList friendFileList,
+                 CategoryIconManager categoryIconManager,
+                 LibraryTableFactory tableFactory,
+                 LimeHeaderBarFactory headerBarFactory) {
+        super(headerBarFactory);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
-        this.basePanel = basePanel;
-        this.friendFileList = friendFileList;
-        
+        this.friendFileList = friendFileList;        
         this.friendFileList.addPropertyChangeListener(this);
-        
-        addShareButton(new BackToLibraryAction(), buttonDecorator);
-        createMyCategories(eventList, friend, friendFileList);
-        
+
         //TODO: fix this. Turns text to Black for the time being till we get some sort of color spec
-        headerPanel.setForeground(Color.BLACK);
-        
-        selectFirst();
+        getHeaderPanel().setForeground(Color.BLACK);
     }
     
-    private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList, Friend friend, LocalFileList friendFileList) {
-        Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
+    abstract String getFullPanelName();
+    abstract String getShortPanelName();
+    
+    @Override
+    protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
+        return headerBarFactory.createSpecial(); 
+    }
+    
+    protected void createMyCategories(EventList<LocalFileItem> wholeLibraryList, LocalFileList friendFileList) {
         for(Category category : Category.getCategoriesInOrder()) {
-            FilterList<LocalFileItem> filteredAll = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+            FilterList<LocalFileItem> filteredAll = GlazedListsFactory.filterList(wholeLibraryList, new CategoryFilter(category));
             FilterList<LocalFileItem> filteredShared = GlazedListsFactory.filterList(friendFileList.getSwingModel(), new CategoryFilter(category));
-            createButton(categoryIconManager.getIcon(category), category,
-                        createMyCategoryAction(category, filteredAll, friend, friendFileList), filteredAll, filteredShared, null);
+            addCategory(categoryIconManager.getIcon(category), category,
+                        createMyCategoryAction(category, filteredAll, friendFileList), filteredAll, filteredShared, null);
+            addDisposable(filteredAll);
+            addDisposable(filteredShared);
         }
-        return categories;
     }
     
-    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered, Friend friend, final LocalFileList friendFileList) {
+    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered, final LocalFileList friendFileList) {
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
 
@@ -188,9 +178,10 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
     }   
     
     @Override
-    protected JComponent createSelectionButton(Action action, Category category) {
+    protected JComponent createCategoryButton(Action action, Category category) {
         SharingSelectionPanel panel = new SharingSelectionPanel(action, category);
         listeners.put(category, panel);
+        addNavigation(panel.getButton());
         return panel;
     }
     
@@ -199,6 +190,45 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
         super.dispose();
         friendFileList.removePropertyChangeListener(this);
     }
+    
+    @Override
+    protected <T extends FileItem> void addCategorySizeListener(String categoryName,
+            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(categoryName, action, filteredAllFileList, filteredList);
+        filteredAllFileList.addListEventListener(listener);
+        filteredList.addListEventListener(listener);
+        addDisposable(listener);
+    }
+    
+    private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
+        private final String text;
+        private final Action action;
+        private final FilterList<T> allFileList;
+        private final FilterList<T> list;
+        
+        private ButtonSizeListener(String text, Action action, FilterList<T> allFileList, FilterList<T> list) {
+            this.text = text;
+            this.action = action;
+            this.allFileList = allFileList;
+            this.list = list;
+            setText();
+        }
+
+        private void setText() {
+            action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + "/" + allFileList.size() + ")");
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            allFileList.removeListEventListener(this);
+        }
+
+        @Override
+        public void listChanged(ListEvent<T> listChanges) {
+            setText();
+        }
+    }    
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
         private LibraryTableModel<LocalFileItem> model;
@@ -244,19 +274,6 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
             //TODO cache values?
             return !(friendFileList.contains(fileItem.getUrn()));
         }       
-    }
-    
-    private class BackToLibraryAction extends AbstractAction {
-
-        public BackToLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Back"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Returns to what's being shared with you."));
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            basePanel.showLibraryCard();
-        }
     }
     
     private class SharingSelectionPanel extends JPanel {
@@ -332,12 +349,14 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
                 }
             });
             add(button, "growx");
-        
-            addNavigation(button);
         }
         
         public void setSelect(boolean value) {
             checkBox.setSelected(value);
+        }
+        
+        public JButton getButton() {
+            return button;
         }
     }    
     
@@ -357,7 +376,7 @@ public class SharingLibraryPanel extends LibraryPanel implements PropertyChangeL
             messagePanel = new JPanel(new MigLayout("insets 5, gapy 10, wrap, alignx 50%"));
             messagePanel.setBackground(new Color(209,247,144));
             
-            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, getFriend().getRenderName()));
+            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, getFullPanelName()));
             FontUtils.setSize(label, 12);
             FontUtils.bold(label);
             

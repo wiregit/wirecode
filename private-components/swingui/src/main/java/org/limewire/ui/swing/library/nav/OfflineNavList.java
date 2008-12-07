@@ -8,7 +8,7 @@ import org.limewire.setting.evt.SettingListener;
  * Overrides checkVisibility from NavList to setVisibility based on the
  * XMPPSettings.XMPP_SHOW_OFFLINE setting.
  */
-public class OfflineNavList extends NavList {
+class OfflineNavList extends NavList {
 
     public OfflineNavList() {
         XMPPSettings.XMPP_SHOW_OFFLINE.addSettingListener(new SettingListener() {

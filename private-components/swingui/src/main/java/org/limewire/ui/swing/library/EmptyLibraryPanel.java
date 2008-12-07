@@ -24,6 +24,7 @@ import com.google.inject.assistedinject.AssistedInject;
  */
 public class EmptyLibraryPanel extends LibraryPanel {
     
+    private final Friend friend;
     private final FriendLibraryMediator mediator;
         
     @AssistedInject
@@ -32,13 +33,22 @@ public class EmptyLibraryPanel extends LibraryPanel {
             @Assisted JComponent messageComponent,
             LimeHeaderBarFactory headerBarFactory,
             ButtonDecorator buttonDecorator) {
-        super(friend, true, headerBarFactory);
+        super(headerBarFactory);
   
+        this.friend = friend;
         this.mediator = mediator;
-
-        addShareButton(new ViewSharedLibraryAction(), buttonDecorator);
-
+        addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
         createEmptyPanel(messageComponent);
+        getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
+        
+    }
+    
+    protected String getFullPanelName() {
+        return friend.getRenderName();
+    }
+    
+    protected String getShortPanelName() {
+        return friend.getFirstName();
     }
     
     private void createEmptyPanel(JComponent component) {
@@ -56,8 +66,8 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getFirstName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getFirstName()));
+            putValue(Action.NAME, I18n.tr("Share with {0}", getShortPanelName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getShortPanelName()));
         }
         
         @Override

@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -39,6 +37,7 @@ public class FriendLibraryPanel extends LibraryPanel {
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
     private final FriendLibraryMediator mediator;
+    private final Friend friend;
     
     @AssistedInject
     public FriendLibraryPanel(@Assisted Friend friend,
@@ -51,8 +50,9 @@ public class FriendLibraryPanel extends LibraryPanel {
                     LimeHeaderBarFactory headerBarFactory,
                     ButtonDecorator buttonDecorator) {
         
-        super(friend, true, headerBarFactory);
+        super(headerBarFactory);
         
+        this.friend = friend;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
@@ -61,29 +61,39 @@ public class FriendLibraryPanel extends LibraryPanel {
 
         //don't show share button for browse hosts
         if(!friend.isAnonymous()) {
-            addShareButton(new ViewSharedLibraryAction(), buttonDecorator);
+            addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
         }
         createMyCategories(eventList, friend);   
         
         selectFirst();
+        
+        getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
     }
     
-    private Map<Category, JComponent> createMyCategories(EventList<RemoteFileItem> eventList, Friend friend) {       
-        Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
+    protected String getFullPanelName() {
+        return friend.getRenderName();
+    }
+    
+    protected String getShortPanelName() {
+        return friend.getFirstName();
+    }    
+    
+    private void createMyCategories(EventList<RemoteFileItem> eventList, Friend friend) {
         for(Category category : Category.getCategoriesInOrder()) {
             FilterList<RemoteFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             JComponent component = createMyCategoryAction(category, filtered, friend);
             if(component != null) {
-                createButton(categoryIconManager.getIcon(category), category, component, filtered, null);                
+                addCategory(categoryIconManager.getIcon(category), category, component, filtered, null);                
             }
+            addDisposable(filtered);
         }
-        return categories;
     }
     
     private JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered, Friend friend) {
-        EventList<RemoteFileItem> filterList = GlazedListsFactory.filterList(filtered, 
+        FilterList<RemoteFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
-
+        addDisposable(filterList);
+        
         LibraryTable table = tableFactory.createFriendTable(category, filterList, friend);
         table.enableDownloading(downloadListManager, libraryManager.getLibraryManagedList());
         addDisposable(table);
@@ -103,8 +113,8 @@ public class FriendLibraryPanel extends LibraryPanel {
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", getFriend().getFirstName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getFriend().getFirstName()));
+            putValue(Action.NAME, I18n.tr("Share with {0}", getShortPanelName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getShortPanelName()));
         }
         
         @Override

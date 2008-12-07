@@ -34,10 +34,18 @@ public class LimeHeaderBarFactory {
         return bar;
     }
     
+    public LimeHeaderBar createBasic() {
+        return createBasic("");
+    }
+    
     public LimeHeaderBar createBasic(String text) {
         LimeHeaderBar bar = new LimeHeaderBar(text);
         this.decorateBasic(bar);
         return bar;
+    }
+    
+    public LimeHeaderBar createSpecial() {
+        return createSpecial("");
     }
 
     public LimeHeaderBar createSpecial(String text) {

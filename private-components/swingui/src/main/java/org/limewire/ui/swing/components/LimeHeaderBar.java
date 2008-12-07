@@ -23,6 +23,10 @@ public class LimeHeaderBar extends JXPanel {
     private final JPanel componentContainer;
     
     @Resource private int defaultCompHeight;
+
+    public LimeHeaderBar() {
+        this("");
+    }
     
     public LimeHeaderBar(String title) {
         GuiUtils.assignResources(this);

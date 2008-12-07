@@ -11,8 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -30,6 +28,8 @@ import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.LibraryFileList;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
@@ -60,53 +60,51 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-class MyLibraryPanel extends LibraryPanel {
-    private Collection<Friend> allFriends;
-    private ShareListManager shareListManager;
-    private LibraryTableFactory tableFactory;
+public class MyLibraryPanel extends LibraryPanel {
+    
+    private final Collection<Friend> allFriends;
+    private final ShareListManager shareListManager;
+    private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
+    private final LibraryManager libraryManager;
     
     private LibrarySharePanel shareAllPanel = null;
     
-    @AssistedInject
-    public MyLibraryPanel(  @Assisted Friend friend,
-                            @Assisted EventList<LocalFileItem> eventList,
+    @Inject
+    public MyLibraryPanel(LibraryManager libraryManager,
                           IconManager iconManager,
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
                           ShareListManager shareListManager,
                           @Named("known") Collection<Friend> allFriends,
                           LimeHeaderBarFactory headerBarFactory,
-                          PlayerPanel player){
-        super(null, true, headerBarFactory);
+                          PlayerPanel player) {
+        super(headerBarFactory);
         
+        this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.allFriends = allFriends;
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
         this.playerPanel = player;
         
-        setHeaderTitle(I18n.tr("My Library"));
+        getHeaderPanel().setText(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);
         shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
-        createMyCategories(eventList);
+        createMyCategories(libraryManager.getLibraryManagedList().getSwingModel());
         
         selectFirst();
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
-        playerPanel.setPreferredSize(new Dimension(999,999));
-        
+        playerPanel.setPreferredSize(new Dimension(999,999));        
     }
     
-    private Map<Category, JComponent> createMyCategories(EventList<LocalFileItem> eventList) {
-        Map<Category, JComponent> categories = new LinkedHashMap<Category, JComponent>();
-        
+    private void createMyCategories(EventList<LocalFileItem> eventList) {
         for(Category category : Category.getCategoriesInOrder()) {
         
             CategorySelectionCallback callback = null;
@@ -120,10 +118,10 @@ class MyLibraryPanel extends LibraryPanel {
             }
             
             FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
-            createButton(categoryIconManager.getIcon(category), category, 
+            addCategory(categoryIconManager.getIcon(category), category, 
                     createMyCategoryAction(category, filtered), filtered, callback);
+            addDisposable(filtered);
         }
-        return categories;
     }
 
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {
@@ -165,8 +163,10 @@ class MyLibraryPanel extends LibraryPanel {
     }
     
     @Override
-    protected JComponent createSelectionButton(Action action, Category category) {
-        return new MySelectionPanel(action, new ShareAllAction(category), category);
+    protected JComponent createCategoryButton(Action action, Category category) {
+        MySelectionPanel component = new MySelectionPanel(action, new ShareAllAction(category), category);
+        addNavigation(component.getButton());
+        return component;
     }
     
     @SuppressWarnings("unchecked")
@@ -237,7 +237,7 @@ class MyLibraryPanel extends LibraryPanel {
     }
     
     //TODO: use a button painter and JXButton
-    private class MySelectionPanel extends JPanel {
+    private static class MySelectionPanel extends JPanel {
         @Resource Color selectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
@@ -337,8 +337,6 @@ class MyLibraryPanel extends LibraryPanel {
                      });
                 }
             }
-        
-            addNavigation(button);
         }
         
         private void setLabelText(int numSharedCollections) {
@@ -349,5 +347,9 @@ class MyLibraryPanel extends LibraryPanel {
         public JButton getButton() {
             return button;
         }
+    }
+
+    public LibraryFileList getLibrary() {
+        return libraryManager.getLibraryManagedList();
     }    
 }

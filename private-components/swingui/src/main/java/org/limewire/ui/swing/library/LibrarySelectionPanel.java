@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class LibrarySelectionPanel extends JPanel {
+class LibrarySelectionPanel extends JPanel {
     
     @Resource private Color backgroundColor;
 

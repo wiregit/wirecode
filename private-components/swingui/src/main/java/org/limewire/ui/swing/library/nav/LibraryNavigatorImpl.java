@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collections;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -26,11 +24,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.library.FriendLibrary;
-import org.limewire.core.api.library.LibraryFileList;
-import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
@@ -43,7 +37,7 @@ import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
-import org.limewire.ui.swing.library.MyLibraryMediator;
+import org.limewire.ui.swing.library.MyLibraryPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -69,7 +63,6 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final NavList[] allLists;
     
     private final Navigator navigator;
-    private final MyLibraryMediator myLibraryMediator;
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
     private final NavPanelFactory navPanelFactory;
@@ -78,11 +71,12 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
-            LibraryManager libraryManager,
             RemoteLibraryManager remoteLibraryManager,
             DownloadListManager downloadListManager,
             ShareListManager shareListManager,
-            MyLibraryMediator myLibraryMediator,
+            MyLibraryPanel myLibraryPanel,
+            /*P2PNetworkPanel p2pNetworkPanel,
+            AllFriendsPanel allFriendsPanel, */
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
             FriendsSignInPanel friendsPanel,
@@ -92,7 +86,6 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setMaximumSize(new Dimension(150, 999));
         setPreferredSize(new Dimension(150, 999));
         
-        this.myLibraryMediator = myLibraryMediator;
         this.shareListManager = shareListManager;
         this.limewireList = new NavList();
         this.onlineList = new NavList();
@@ -109,21 +102,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setOpaque(false);
         setScrollableTracksViewportHeight(false);
         
-        LibraryFileList libraryList = libraryManager.getLibraryManagedList();
-        Friend me = new FriendAdapter("me", I18n.tr("My Library"));
-        myLibraryMediator.setMainCardEventList(me, libraryList.getSwingModel());
-        myLibrary = navPanelFactory.createNavPanel(createAction(me, myLibraryMediator), me, null);
-        myLibrary.updateLibraryState(libraryList.getState());        
-        myLibrary.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                LibraryNavigatorImpl.this.myLibraryMediator.showLibraryCard();
-            }
-        });        
-        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, libraryManager, saveLocationExceptionHandler));
-        myLibrary.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
-        myLibrary.setName("LibraryNavigator.myLibrary");
-        libraryList.addPropertyChangeListener(new PropertyChangeListener() {
+        myLibrary = initializePanel(I18n.tr("My Library"), myLibraryPanel, "LibraryNavigator.myLibrary");
+        myLibrary.updateLibraryState(myLibraryPanel.getLibrary().getState());
+        myLibrary.setTransferHandler(new MyLibraryNavTransferHandler(downloadListManager, myLibraryPanel.getLibrary(), saveLocationExceptionHandler));
+        myLibraryPanel.getLibrary().addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals("state")) {
@@ -132,17 +114,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        Friend p2p = new FriendAdapter("p2p", I18n.tr("P2P Network"));
-        p2pNetwork = navPanelFactory.createNavPanel(createAction(p2p, new JLabel("P2P Network")), p2p, null);
-        p2pNetwork.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
-        p2pNetwork.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
-        p2pNetwork.setName("LibraryNavigator.p2pNetwork");
-        
-        Friend all = new FriendAdapter("allFriends", I18n.tr("All Friends"));
-        allFriends = navPanelFactory.createNavPanel(createAction(all, new JLabel("All Friends")), all, null);
-        allFriends.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
-        allFriends.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
-        allFriends.setName("LibraryNavigator.allFriends");
+        p2pNetwork = initializePanel(I18n.tr("P2P Network"), new JLabel("P2P Network"), "LibraryNavigator.p2pNetwork");        
+        allFriends = initializePanel(I18n.tr("All Friends"), new JLabel("All Friends"), "LibraryNavigator.allFriends");
 
         setLayout(new MigLayout("insets 0, fill, gap 2"));
         add(myLibrary, "growx, wmin 0, wrap"); 
@@ -238,6 +211,15 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         }.install(remoteLibraryManager.getSwingFriendLibraryList());
     }
     
+    private NavPanel initializePanel(String title, JComponent component, String name) {
+        NavPanel panel = navPanelFactory.createNavPanel(createAction(title, component), null, null);
+        panel.setTitle(title);
+        panel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
+        panel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
+        panel.setName(name);                
+        return panel;
+    }    
+    
     @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownListeners,
                           @Named("available") ListenerSupport<FriendEvent> availListeners) {
         
@@ -305,8 +287,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         return this;
     }
     
-    private Action createAction(Friend friend, JComponent component) {
-        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, friend.getRenderName(), component);
+    private Action createAction(String title, JComponent component) {
+        NavItem navItem = navigator.createNavItem(NavCategory.LIBRARY, title, component);
         Action action = NavigatorUtils.getNavAction(navItem);
         return action;
     }
@@ -339,7 +321,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     }    
     
     private NavPanel createFriendNavPanel(Friend friend) {
-        final FriendLibraryMediator component = friendLibraryMediatorFactory.createFriendLibraryBasePanel(friend);
+        final FriendLibraryMediator component = friendLibraryMediatorFactory.createMediator(friend);
         NavPanel navPanel = navPanelFactory.createNavPanel(createFriendAction(navigator, friend, component), 
                 friend, component);
         navPanel.addActionListener(new ActionListener(){
@@ -400,59 +382,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         }
     }
     
-    private static class FriendAdapter implements Friend {
-        private final String id;
-        private final String renderName;
-        
-        public FriendAdapter(String id, String renderName) {
-            this.id = id;
-            this.renderName = renderName;
-        }
-        
-        @Override
-        public boolean isAnonymous() {
-            return false;
-        }
-
-        @Override
-        public String getId() {
-            return id;
-        }
-
-        @Override
-        public String getName() {
-            return null;
-        }
-
-        @Override
-        public String getRenderName() {
-            return renderName;
-        }
-
-        @Override
-        public String getFirstName() {
-            return renderName;
-        }
-
-        @Override
-        public void setName(String name) {
-        }
-
-        public Network getNetwork() {
-            return null;
-        }
-
-        @Override
-        public Map<String, FriendPresence> getFriendPresences() {
-            return Collections.emptyMap();
-        }
-    }
-
     @Override
     public Friend getSelectedFriend() {
-        if(selectedFriend instanceof FriendAdapter) {
-            return null;
-        }
         return selectedFriend;
     }
 }
