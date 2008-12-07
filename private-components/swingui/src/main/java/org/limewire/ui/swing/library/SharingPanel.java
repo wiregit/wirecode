@@ -88,7 +88,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         getHeaderPanel().setForeground(Color.BLACK);
     }
     
+    /** Returns the full name of the panel, which may be very long. */
     abstract String getFullPanelName();
+    /** Returns a shorter more concise version of the panel name. */
     abstract String getShortPanelName();
     
     @Override

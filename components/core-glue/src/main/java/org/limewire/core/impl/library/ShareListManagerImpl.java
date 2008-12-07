@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -23,6 +24,7 @@ import org.limewire.logging.LogFactory;
 
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.Matcher;
 
@@ -154,9 +156,9 @@ class ShareListManagerImpl implements ShareListManager {
         
         private void setSharing(boolean value, Category category) {
             if(value)
-                addAll(com.limegroup.gnutella.library.GnutellaFileList.ID, category);
+                addAll(getCoreFileList(), category);
             else
-                removeAll(com.limegroup.gnutella.library.GnutellaFileList.ID, category, readOnlyList);
+                removeAll(getCoreFileList(), category, readOnlyList);
         }
 
         public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -250,9 +252,9 @@ class ShareListManagerImpl implements ShareListManager {
         
         private void setSharing(boolean value, Category category) {
             if(value)
-                addAll(name, category);
+                addAll(getCoreFileList(), category);
             else
-                removeAll(name, category, readOnlyList);
+                removeAll(getCoreFileList(), category, readOnlyList);
         }
         
         public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -324,30 +326,29 @@ class ShareListManagerImpl implements ShareListManager {
 
     }
     
-    private void addAll(String friend, Category category) {
-        final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
-        EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(category));
-        final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
+    private void addAll(final com.limegroup.gnutella.library.FileList fileList, final Category category) {
         ThreadExecutor.startThread(new Runnable(){
             @Override
             public void run() {
-                for(LocalFileItem item : items) {
+                FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryManager.getLibraryManagedList().getModel(), new CategoryFilter(category));
+                List<LocalFileItem> copyList = GlazedListsFactory.copyList(filtered);
+                filtered.dispose();
+                for(LocalFileItem item : copyList) {
                     fileList.add(item.getFile());
                 }
             }
         }, "File Category Adder");
     }
     
-    private void removeAll(String friend, Category category, EventList<LocalFileItem> list) {
-        final com.limegroup.gnutella.library.FileList fileList = fileManager.getFriendFileList(friend);
-        EventList<LocalFileItem> filtered = GlazedListsFactory.filterList(list, new CategoryFilter(category));
-        final LocalFileItem[] items = filtered.toArray(new LocalFileItem[filtered.size()]);
+    private void removeAll(final com.limegroup.gnutella.library.FileList fileList, final Category category, final EventList<LocalFileItem> list) {
         ThreadExecutor.startThread(new Runnable(){
             @Override
             public void run() {
-                for(LocalFileItem item : items) {
-                    if(item != null)
-                        fileList.remove(item.getFile());
+                FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(list, new CategoryFilter(category));
+                List<LocalFileItem> copyList = GlazedListsFactory.copyList(filtered);
+                filtered.dispose();
+                for(LocalFileItem item : copyList) {
+                    fileList.remove(item.getFile());
                 }
             }
         }, "File Category Remover");

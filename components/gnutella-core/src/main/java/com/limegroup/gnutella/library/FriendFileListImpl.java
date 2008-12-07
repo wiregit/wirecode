@@ -153,7 +153,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
      * Returns true if this file type is being smartly shared. Smartly shared file
      * types are always added to this list.
      */
-    private boolean isSmartlySharedType(File file) {
+    protected boolean isSmartlySharedType(File file) {
         if(addNewAudioAlways == false && addNewImagesAlways == false && addNewVideoAlways == false)
             return false;
         

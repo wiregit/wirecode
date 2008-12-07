@@ -24,7 +24,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     private final AtomicInteger applicationShared = new AtomicInteger();
     
     public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
-        super(data, managedList, ID);
+        super(data, managedList, "_@_GNUTELLA_@_"); // @'s added to avoid clashes with xmpp ids.
         this.numBytes = new AtomicLong();
     }
     
@@ -106,6 +106,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     @Override
     protected boolean isPending(File file, FileDesc fd) {
         return LibraryUtils.isForcedShareDirectory(file.getParentFile())
+            || isSmartlySharedType(file)
             || data.isSharedWithGnutella(file) 
             || sessionFiles.containsKey(file);
     }

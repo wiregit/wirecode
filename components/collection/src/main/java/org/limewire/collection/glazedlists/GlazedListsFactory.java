@@ -1,6 +1,8 @@
 package org.limewire.collection.glazedlists;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import ca.odell.glazedlists.CollectionList;
 import ca.odell.glazedlists.EventList;
@@ -33,6 +35,17 @@ import ca.odell.glazedlists.util.concurrent.Lock;
  * in a multi-threaded environment.
  */
 public class GlazedListsFactory {
+    
+    /** Returns a snapshot copy of the list. */
+    public static <E> List<E> copyList(EventList<? extends E> source) {
+        Lock lock = source.getReadWriteLock().readLock();
+        lock.lock();
+        try {
+            return new ArrayList<E>(source);
+        } finally {
+            lock.unlock();
+        }
+    }
     
     public static CachingList cachingList(EventList source, int maxSize) {
         Lock lock = source.getReadWriteLock().readLock();

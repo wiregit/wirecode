@@ -38,6 +38,7 @@ import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryPanel;
+import org.limewire.ui.swing.library.P2PNetworkSharingPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
@@ -75,8 +76,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             DownloadListManager downloadListManager,
             ShareListManager shareListManager,
             MyLibraryPanel myLibraryPanel,
-            /*P2PNetworkPanel p2pNetworkPanel,
-            AllFriendsPanel allFriendsPanel, */
+            P2PNetworkSharingPanel p2pNetworkSharingPanel,
+            /*AllFriendsPanel allFriendsPanel, */
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
             FriendsSignInPanel friendsPanel,
@@ -114,7 +115,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        p2pNetwork = initializePanel(I18n.tr("P2P Network"), new JLabel("P2P Network"), "LibraryNavigator.p2pNetwork");        
+        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");        
         allFriends = initializePanel(I18n.tr("All Friends"), new JLabel("All Friends"), "LibraryNavigator.allFriends");
 
         setLayout(new MigLayout("insets 0, fill, gap 2"));

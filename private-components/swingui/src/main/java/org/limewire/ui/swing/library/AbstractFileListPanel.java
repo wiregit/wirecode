@@ -75,7 +75,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         filterField = new PromptTextField(I18n.tr("Search Library..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
-        headerPanel.add(filterField, "cell 1 0, gapafter 10");
+        headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
         
         createSelectionPanel();
         
