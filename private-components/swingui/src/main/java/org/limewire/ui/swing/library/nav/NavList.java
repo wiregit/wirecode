@@ -221,7 +221,7 @@ class NavList extends JXPanel {
     }
     
     NavPanel selectFirst() {
-        if(!navPanels.isEmpty()) {
+        if(isVisible() && !navPanels.isEmpty()) {
             NavPanel panel = navPanels.get(0);
             panel.select();
             return panel;
@@ -232,7 +232,7 @@ class NavList extends JXPanel {
     }
 
     NavPanel selectLast() {
-        if(!navPanels.isEmpty()) {
+        if(isVisible() && !navPanels.isEmpty()) {
             NavPanel panel = navPanels.get(navPanels.size()-1);
             panel.select();
             return panel;
