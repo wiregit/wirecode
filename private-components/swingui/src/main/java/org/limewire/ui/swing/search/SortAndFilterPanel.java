@@ -5,7 +5,9 @@ import static org.limewire.util.Objects.compareToNull;
 import static org.limewire.util.Objects.compareToNullIgnoreCase;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -82,7 +84,7 @@ public class SortAndFilterPanel {
     private final String CATEGORY = tr("Category");
     private final String NAME = tr("Name");
     private final String RELEVANCE_ITEM = tr("Relevance");
-
+    
     private final HashMap<String,Action> actions = new HashMap<String,Action>(); 
 
     @Resource private Icon listViewIcon;
@@ -121,11 +123,28 @@ public class SortAndFilterPanel {
         sortLabel.setFont(sortLabelFont);
         sortLabel.setForeground(Color.WHITE);
         sortCombo = comboBoxFactory.createDarkFullComboBox();
+        
+        sizeSortCombo();
 
         listViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         tableViewToggleButton.setModel(new JToggleButton.ToggleButtonModel());
         setSearchCategory(SearchCategory.ALL);
         configureViewButtons();
+    }
+
+    private void sizeSortCombo() {
+        int widestActionText = 0;
+        FontMetrics sortFontMetrics = sortCombo.getFontMetrics(sortCombo.getFont());
+        
+        for(String action : actions.keySet()) {
+            widestActionText = Math.max(widestActionText, sortFontMetrics.stringWidth(action));
+        }
+        
+        //Width of text plus padding for the whitespace around the text and the drop down icon
+        Dimension sortComboDimensions = new Dimension(widestActionText + 30, sortCombo.getPreferredSize().height);
+        sortCombo.setPreferredSize(sortComboDimensions);
+        sortCombo.setMinimumSize(sortComboDimensions);
+        sortCombo.setMaximumSize(sortComboDimensions);
     }
 
     private void populateActionList() {
@@ -545,6 +564,8 @@ public class SortAndFilterPanel {
         }
         
         sortCombo.addActions(actionList);
+        
+        sizeSortCombo();
 
         repopulatingCombo = false;
 
