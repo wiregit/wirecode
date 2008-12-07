@@ -305,7 +305,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
     @Override
     public void selectInLibrary(URN urn, Category category) {
-        throw new NotImplementedException();   
+        myLibrary.select();
     }
     
     private void ensureFriendVisible(Friend friend) {
