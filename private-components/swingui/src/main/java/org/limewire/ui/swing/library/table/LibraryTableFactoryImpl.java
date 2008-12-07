@@ -11,6 +11,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.TransferHandler;
 
+import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
@@ -210,8 +211,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      */
     public <T extends FileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList, Friend friend) {
 
-        final LibraryTable<T> libTable;
-        SortedList<T> sortedList = new SortedList<T>(eventList);
+        LibraryTable<T> libTable;
+        SortedList<T> sortedList = GlazedListsFactory.sortedList(eventList);
 
         switch (category) {
         case AUDIO:
@@ -247,7 +248,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             throw new IllegalArgumentException("Unknown category: " + category);
         }
 
-        libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
+        if(friend != null) {
+            libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
+        }
         libTable.setPopupHandler(new FriendLibraryPopupHandler(
                 castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
                 remoteItemPropFactory, saveLocationExceptionHandler));

@@ -8,6 +8,7 @@ import java.util.Comparator;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.PresenceLibrary;
@@ -15,26 +16,29 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.util.StringUtils;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
+    
+    private final AllFriendsLibraryImpl allFriendsList;
     private final EventList<FriendLibrary> allFriendLibraries;
     private final EventList<FriendLibrary> readOnlyFriendLibraries;
     private volatile EventList<FriendLibrary> swingFriendLibraries;
@@ -46,6 +50,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         lock = LockFactory.DEFAULT.createReadWriteLock();
         allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(lock)), connector);
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
+        allFriendsList = new AllFriendsLibraryImpl(lock);
     }
     
     /**
@@ -54,6 +59,11 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
      */
     ReadWriteLock getReadWriteLock() {
         return lock;
+    }
+    
+    @Override
+    public FileList<RemoteFileItem> getAllFriendsFileList() {
+        return allFriendsList;
     }
     
     @Override
@@ -121,13 +131,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     }
 
     private FriendLibraryImpl getOrCreateFriendLibrary(Friend friend) {
-        FriendLibraryImpl library = findFriendLibrary(friend);
-        if(library == null) {
-            library = new FriendLibraryImpl(friend, lock);
-            library.commit();
-            allFriendLibraries.add(library);
+        FriendLibraryImpl friendLibrary = findFriendLibrary(friend);
+        if(friendLibrary == null) {
+            friendLibrary = new FriendLibraryImpl(allFriendsList, friend, lock);
+            allFriendsList.addMemberList(friendLibrary);
+            friendLibrary.commit();
+            allFriendLibraries.add(friendLibrary);
         }
-        return library;
+        return friendLibrary;
     }
 
     @Override
@@ -146,7 +157,58 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
 
     private void removeFriendLibrary(FriendLibraryImpl friendLibrary) {
         allFriendLibraries.remove(friendLibrary);
+        allFriendsList.removeMemberList(friendLibrary);
         friendLibrary.dispose();
+    }
+    
+    private static class AllFriendsLibraryImpl implements FileList<RemoteFileItem> {
+        private final CompositeList<RemoteFileItem> compositeList;
+        private final ReadOnlyList<RemoteFileItem> readOnlyList;
+        private final UniqueList<RemoteFileItem> threadSafeUniqueList;
+        private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
+        
+        public AllFriendsLibraryImpl(ReadWriteLock lock) {
+            compositeList = new CompositeList<RemoteFileItem>(ListEventAssembler.createListEventPublisher(), lock);
+            readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
+            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
+                    new Comparator<RemoteFileItem>() {
+                @Override
+                public int compare(RemoteFileItem o1, RemoteFileItem o2) {
+                    return o1.getUrn().compareTo(o2.getUrn());
+                }
+            });
+        }
+        
+        @Override
+        public EventList<RemoteFileItem> getModel() {
+            return threadSafeUniqueList;
+        }
+
+        @Override
+        public EventList<RemoteFileItem> getSwingModel() {
+            assert EventQueue.isDispatchThread();
+            if(swingList == null) {
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
+            }
+            return swingList;
+        }
+
+        @Override
+        public int size() {
+            return threadSafeUniqueList.size();
+        }
+        
+        ListEventPublisher getPublisher() {
+            return compositeList.getPublisher();
+        }
+        
+        void removeMemberList(FriendLibrary friendLibrary) {
+            compositeList.removeMemberList(friendLibrary.getModel());
+        }
+
+        void addMemberList(FriendLibrary friendLibrary) {
+            compositeList.addMemberList(friendLibrary.getModel());
+        }        
     }
 
     private static class FriendLibraryImpl implements FriendLibrary {
@@ -156,6 +218,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         private final ReadOnlyList<PresenceLibrary> readOnlyPresenceLibraries;
         
         private final CompositeList<RemoteFileItem> compositeList;
+        private final ReadOnlyList<RemoteFileItem> readOnlyList;
         private final UniqueList<RemoteFileItem> threadSafeUniqueList;
         private volatile TransformedList<RemoteFileItem, RemoteFileItem> swingList;
         
@@ -164,11 +227,12 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         private final PropertyChangeSupport changeSupport;
         private volatile LibraryState state = LibraryState.LOADING;
 
-        public FriendLibraryImpl(Friend friend, ReadWriteLock lock) {
+        public FriendLibraryImpl(AllFriendsLibraryImpl allFriendsList, Friend friend, ReadWriteLock lock) {
             this.friend = friend;
             this.lock = lock;
-            compositeList = new CompositeList<RemoteFileItem>(ListEventAssembler.createListEventPublisher(), lock);
-            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(compositeList),
+            compositeList = new CompositeList<RemoteFileItem>(allFriendsList.getPublisher(), lock);
+            readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
+            threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
                     new Comparator<RemoteFileItem>() {
                 @Override
                 public int compare(RemoteFileItem o1, RemoteFileItem o2) {
@@ -300,7 +364,6 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         }
 
         void commit() {
-            // Add things here after we guarantee we want to use this list.
         }
 
         void dispose() {
@@ -308,6 +371,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                 swingList.dispose();
             }
             compositeList.dispose();
+            readOnlyList.dispose();
             threadSafeUniqueList.dispose();
             readOnlyPresenceLibraries.dispose();
             allPresenceLibraries.dispose();

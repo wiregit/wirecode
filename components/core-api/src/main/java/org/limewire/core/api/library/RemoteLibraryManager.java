@@ -42,4 +42,9 @@ public interface RemoteLibraryManager {
 
     /** A list of all friend's libraries suitable for use in Swing. */
     EventList<FriendLibrary> getSwingFriendLibraryList();
+    
+    /** Returns a FileList that is a concatenation of all friends libraries. */
+    FileList<RemoteFileItem> getAllFriendsFileList();
+    
+    
 }

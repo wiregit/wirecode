@@ -10,7 +10,6 @@ import java.beans.PropertyChangeListener;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
@@ -34,6 +33,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
+import org.limewire.ui.swing.library.AllFriendsLibraryPanel;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
@@ -77,7 +77,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             ShareListManager shareListManager,
             MyLibraryPanel myLibraryPanel,
             P2PNetworkSharingPanel p2pNetworkSharingPanel,
-            /*AllFriendsPanel allFriendsPanel, */
+            AllFriendsLibraryPanel allFriendsLibraryPanel,
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
             FriendsSignInPanel friendsPanel,
@@ -116,7 +116,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         });
         
         p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");        
-        allFriends = initializePanel(I18n.tr("All Friends"), new JLabel("All Friends"), "LibraryNavigator.allFriends");
+        allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
 
         setLayout(new MigLayout("insets 0, fill, gap 2"));
         add(myLibrary, "growx, wmin 0, wrap"); 
