@@ -2,6 +2,7 @@ package org.limewire.ui.swing.upload.table;
 
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -15,11 +16,12 @@ public class UploadTable extends MouseableTable {
     private EventTableModel<UploadItem> model;
 
     public UploadTable(EventList<UploadItem> swingThreadSafeUploads, CategoryIconManager categoryIconManager, 
-            LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory) {
+            LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory,
+            LibraryNavigator libraryNavigator) {
         model = new EventTableModel<UploadItem>(swingThreadSafeUploads, new LimeSingleColumnTableFormat<UploadItem>());
         setModel(model);
         
-        UploadActionHandler actionHandler = new UploadActionHandler(swingThreadSafeUploads, propertiesFactory);
+        UploadActionHandler actionHandler = new UploadActionHandler(swingThreadSafeUploads, propertiesFactory, libraryNavigator);
         
         TableRendererEditor editor = new UploadTableRendererEditor(categoryIconManager, progressBarFactory);
         getColumn(0).setCellEditor(editor);

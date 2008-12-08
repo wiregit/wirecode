@@ -18,6 +18,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.upload.table.UploadTable;
 import org.limewire.ui.swing.util.ButtonDecorator;
@@ -49,14 +50,15 @@ public class UploadPanel extends JXPanel{
     
     @Inject
     public UploadPanel(UploadListManager listManager, LimeHeaderBarFactory headerBarFactory,
-            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory){
+            ButtonDecorator buttonDecorator, CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory, 
+            PropertiesFactory<UploadItem> propertiesFactory, LibraryNavigator libraryNavigator){
         super(new BorderLayout());
         
         this.buttonDecorator = buttonDecorator;
         this.headerBarFactory = headerBarFactory;
         this.uploadItems = listManager.getSwingThreadSafeUploads();
 
-        UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory);
+        UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory, libraryNavigator);
         table.setTableHeader(null);
         initHeader();
         

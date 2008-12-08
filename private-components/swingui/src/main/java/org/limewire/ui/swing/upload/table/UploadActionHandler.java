@@ -1,10 +1,10 @@
 package org.limewire.ui.swing.upload.table;
 
 import org.limewire.core.api.upload.UploadItem;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.NotImplementedException;
 
 import ca.odell.glazedlists.EventList;
 
@@ -21,10 +21,12 @@ public class UploadActionHandler {
     
     private EventList<UploadItem> uploadItems;
     private PropertiesFactory<UploadItem> propertiesFactory;
+    private LibraryNavigator libraryNavigator;
     
-    public UploadActionHandler(EventList<UploadItem> uploadItems, PropertiesFactory<UploadItem> propertiesFactory){
+    public UploadActionHandler(EventList<UploadItem> uploadItems, PropertiesFactory<UploadItem> propertiesFactory, LibraryNavigator libraryNavigator){
         this.uploadItems = uploadItems;
         this.propertiesFactory = propertiesFactory;
+        this.libraryNavigator = libraryNavigator;
     }
 
     public void performAction(final String actionCommmand, final UploadItem item){
@@ -37,7 +39,7 @@ public class UploadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             uploadItems.remove(item);
         } else if (actionCommmand == LIBRARY_COMMAND){
-            throw new NotImplementedException();
+            libraryNavigator.selectInLibrary(item.getFile(), item.getCategory());
         } else if (actionCommmand == LAUNCH_COMMAND){
             NativeLaunchUtils.launchFile(item.getFile());
         } else if (actionCommmand == PLAY_COMMAND){
