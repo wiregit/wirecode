@@ -17,10 +17,10 @@ import javax.swing.JMenuItem;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.DownloadSettings;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -29,17 +29,12 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
 public class RecentDownloadsMenu extends JMenu {
-    private final AudioPlayer audioPlayer;
-
     private final JMenuItem emptyItem;
 
     private final Action clearMenu;
 
-    public RecentDownloadsMenu(String name, final LibraryManager libraryManager,
-            final AudioPlayer audioPlayer) {
+    public RecentDownloadsMenu(String name, final LibraryManager libraryManager) {
         super(name);
-        this.audioPlayer = audioPlayer;
-
         emptyItem = new JMenuItem(I18n.tr("(empty)"));
         emptyItem.setEnabled(false);
 
@@ -95,9 +90,7 @@ public class RecentDownloadsMenu extends JMenu {
 
                 switch (category) {
                 case AUDIO:
-                    audioPlayer.stop();
-                    audioPlayer.loadSong(file);
-                    audioPlayer.playSong();
+                    PlayerUtils.playOrLaunch(file);
                     break;
                 case DOCUMENT:
                 case IMAGE:

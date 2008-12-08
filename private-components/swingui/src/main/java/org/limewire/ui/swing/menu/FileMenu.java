@@ -9,7 +9,6 @@ import org.jdesktop.application.Application;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.magnet.MagnetFactory;
-import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.mainframe.MainPanel;
@@ -35,14 +34,14 @@ public class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager, MainPanel mainPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
-            SearchHandler searchHandler, AudioPlayer audioPlayer) {
+            SearchHandler searchHandler) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(new OpenFileAction(navigator, I18n.tr("&Open File..."), downloadListManager, mainPanel,
                 saveLocationExceptionHandler));
         add(new OpenLinkAction(navigator, I18n.tr("Open &Link..."), mainPanel, downloadListManager,
                 saveLocationExceptionHandler, magnetFactory, searchHandler));
-        add(new RecentDownloadsMenu(I18n.tr("Recent Downloads"), libraryManager, audioPlayer));
+        add(new RecentDownloadsMenu(I18n.tr("Recent Downloads"), libraryManager));
         addSeparator();
         add(new AddFileAction(I18n.tr("Add File to Library..."), mainPanel, libraryManager));
         add(new AddFolderAction(I18n.tr("Add Folder to Library..."), libraryManager, mainPanel));
