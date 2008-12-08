@@ -31,6 +31,7 @@ public class MockDownloadItem implements DownloadItem {
 	private ErrorState errorState = ErrorState.NONE;
 	
 	private final PropertyChangeSupport support = new SwingPropertyChangeSupport(this);
+    private int queuePostion = 2;
 
 	//TODO: change constructor
 	public MockDownloadItem(String title, long totalSize, DownloadState state, Category category) {
@@ -170,7 +171,11 @@ public class MockDownloadItem implements DownloadItem {
 
     @Override
     public int getQueuePosition() {
-        return 2;
+        return queuePostion;
+    }
+    
+    public void setQueuePosition(int position) {
+        queuePostion = position;
     }
 
 
