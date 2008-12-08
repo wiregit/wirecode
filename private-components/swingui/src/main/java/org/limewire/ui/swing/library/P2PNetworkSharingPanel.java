@@ -26,7 +26,7 @@ public class P2PNetworkSharingPanel extends SharingPanel {
                 shareListManager.getGnutellaShareList(), categoryIconManager, 
                 tableFactory, headerBarFactory);
 
-        getHeaderPanel().setText(I18n.tr("Sharing with {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Share with {0}", getFullPanelName()));
 
         createMyCategories(libraryManager.getLibraryManagedList().getSwingModel(),
                            shareListManager.getGnutellaShareList());

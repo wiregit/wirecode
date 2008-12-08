@@ -39,7 +39,7 @@ public class FriendSharingPanel extends SharingPanel {
         this.friend = friend;
         
         addButtonToHeader(new BackToLibraryAction(returnToLibraryPanel), buttonDecorator);
-        getHeaderPanel().setText(I18n.tr("Sharing with {0}", getFullPanelName()));
+        getHeaderPanel().setText(I18n.tr("Share with {0}", getFullPanelName()));
         
         createMyCategories(wholeLibraryList, friendFileList);
         selectFirst();
