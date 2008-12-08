@@ -222,7 +222,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setVisible(false);
-                    libraryNavigator.selectInLibrary(propertiable.getUrn(), propertiable.getCategory());
+                    libraryNavigator.selectInLibrary(propertiable.getFile(), propertiable.getCategory());
                 }
             });
             

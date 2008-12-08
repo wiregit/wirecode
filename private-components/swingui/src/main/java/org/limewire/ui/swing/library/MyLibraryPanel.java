@@ -11,6 +11,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -27,6 +29,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -71,6 +74,7 @@ public class MyLibraryPanel extends LibraryPanel {
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
+    private final Map<Category, LibrarySelectable> selectableMap;
     
     private LibrarySharePanel shareAllPanel = null;
     
@@ -91,6 +95,7 @@ public class MyLibraryPanel extends LibraryPanel {
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
         this.playerPanel = player;
+        this.selectableMap = new EnumMap<Category, LibrarySelectable>(Category.class);
         
         getHeaderPanel().setText(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);
@@ -105,13 +110,12 @@ public class MyLibraryPanel extends LibraryPanel {
     }
     
     private void createMyCategories(EventList<LocalFileItem> eventList) {
-        for(Category category : Category.getCategoriesInOrder()) {
-        
+        for(Category category : Category.getCategoriesInOrder()) {        
             CategorySelectionCallback callback = null;
             if (category == Category.AUDIO) {
                 callback = new CategorySelectionCallback() {
                     @Override
-                    public void call(Category category, boolean state) {
+                    public void categorySelected(Category category, boolean state) {
                         playerPanel.setVisible(state);
                     }
                 };
@@ -124,41 +128,31 @@ public class MyLibraryPanel extends LibraryPanel {
         }
     }
 
-    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {
-        
+    private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {        
         //TODO: can this be a singleton??? 
         final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriends);
-        addDisposable(sharePanel);
-        
-        sharePanel.setShareModel(new FileShareModel(shareListManager));
-        
-        final JScrollPane scrollPane;
-        
+        addDisposable(sharePanel);        
+        sharePanel.setShareModel(new FileShareModel(shareListManager));        
+        JScrollPane scrollPane;        
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
             LibraryTable table = tableFactory.createMyTable(category, filterList);
             table.enableMyLibrarySharing(sharePanel);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
-            
+            selectableMap.put(category, table);
             scrollPane = new JScrollPane(table);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());    
-
             addDisposable(table);
-//            librarySelectable = table;
-
-        } else {//Category.IMAGE 
+        } else { //Category.IMAGE 
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
             LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane, sharePanel);
-            
+            selectableMap.put(category, imagePanel);
             scrollPane.setViewportView(imagePanel);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());            
             addDisposable(imagePanel);
-//            librarySelectable = imagePanel;
-        }
-                      
+        }                      
         return scrollPane;
     }
     
@@ -351,5 +345,15 @@ public class MyLibraryPanel extends LibraryPanel {
 
     public LibraryFileList getLibrary() {
         return libraryManager.getLibraryManagedList();
+    }
+
+    public void selectItem(File file, Category category) {
+        select(category);
+        selectableMap.get(category).selectAndScrollTo(file);
+    }
+
+    public void selectItem(URN urn, Category category) {
+        select(category);
+        selectableMap.get(category).selectAndScrollTo(urn);        
     }    
 }

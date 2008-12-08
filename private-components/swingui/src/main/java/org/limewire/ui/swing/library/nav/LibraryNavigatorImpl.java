@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -62,6 +63,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final NavList offlineList;
     private final NavList[] allLists;
     
+    private final MyLibraryPanel myLibraryPanel;
     private final Navigator navigator;
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
@@ -86,6 +88,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         setMaximumSize(new Dimension(150, 999));
         setPreferredSize(new Dimension(150, 999));
         
+        this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
         this.limewireList = new NavList();
         this.onlineList = new NavList();
@@ -294,6 +297,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     @Override
     public void selectInLibrary(URN urn, Category category) {
         myLibrary.select();
+        myLibraryPanel.selectItem(urn, category);
+    }
+    
+    @Override
+    public void selectInLibrary(File file, Category category) {
+        myLibrary.select();
+        myLibraryPanel.selectItem(file, category);
     }
     
     private void ensureFriendVisible(Friend friend) {

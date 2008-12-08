@@ -24,6 +24,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.table.TableColumnExt;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
@@ -294,17 +295,33 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
             return table.isRowDisabled(adapter.row);
         }
     }
-
+    
     @Override
-    public void selectAndScroll(Object selectedObject) {
+    public void selectAndScrollTo(File file) {
         LibraryTableModel<T> model = getLibraryTableModel();
-      for(int y=0; y < model.getRowCount(); y++) {
-          FileItem localFileItem = model.getElementAt(y);
-          if(selectedObject.equals(localFileItem.getUrn())) {
-              getSelectionModel().setSelectionInterval(y, y);
-              break;
-          }
-      }
-      ensureSelectionVisible();
+        for(int y=0; y < model.getRowCount(); y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(!(fileItem instanceof LocalFileItem)) {
+                break; // Never going to find it.
+            }
+            if(file.equals(((LocalFileItem)fileItem).getFile())) {
+                getSelectionModel().setSelectionInterval(y, y);
+                break;
+            }
+        }
+        ensureSelectionVisible();
+    }
+    
+    @Override
+    public void selectAndScrollTo(URN urn) {
+        LibraryTableModel<T> model = getLibraryTableModel();
+        for(int y=0; y < model.getRowCount(); y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(urn.equals(fileItem.getUrn())) {
+                getSelectionModel().setSelectionInterval(y, y);
+                break;
+            }
+        }
+        ensureSelectionVisible();
     }
 }

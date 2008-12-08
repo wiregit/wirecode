@@ -142,13 +142,13 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     /** Adds the given category to the list of categories in the left. */
-    protected <T extends FileItem> JComponent addCategory(Icon icon, Category category, 
+    protected <T extends FileItem> void addCategory(Icon icon, Category category, 
             JComponent component, FilterList<T> filteredList, CategorySelectionCallback callback) {
-        return addCategory(icon, category, component, null, filteredList, callback);
+        addCategory(icon, category, component, null, filteredList, callback);
     }
     
     /** Adds the given category to the list of categories in the left. */
-    protected <T extends FileItem> JComponent addCategory(Icon icon, Category category, 
+    protected <T extends FileItem> void addCategory(Icon icon, Category category, 
             JComponent component, FilterList<T> filteredAllFileList, FilterList<T> filteredList,
             CategorySelectionCallback callback) {
         cardPanel.add(component, category.name());
@@ -162,8 +162,6 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         
         addCategorySizeListener(category.toString(), action, filteredAllFileList, filteredList);
         selectionPanel.add(button, "growx");
-        
-        return button;
     }
     
     /** Adds a listener to the category so things can bind to the action, if necessary. */
@@ -239,7 +237,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                     putValue(SELECTED_KEY, selected);
                     
                     if (callback != null) {
-                        callback.call((Category)getValue("limewire.category"), selected);
+                        callback.categorySelected((Category)getValue("limewire.category"), selected);
                     }
                 }
             });
@@ -256,7 +254,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
      *  events on this category 
      */
     protected interface CategorySelectionCallback {
-        public void call(Category category, boolean state);
+        public void categorySelected(Category category, boolean selected);
     }
     
     private interface ButtonItem {

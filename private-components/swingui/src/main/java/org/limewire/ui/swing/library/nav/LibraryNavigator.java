@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.nav;
 
+import java.io.File;
+
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
@@ -16,6 +18,9 @@ public interface LibraryNavigator {
     
     /** Selects a specific item in your library. */
     void selectInLibrary(URN urn, Category category);
+    
+    /** Selects a specific item in your library. */
+    void selectInLibrary(File file, Category category);
     
     /**
      * Returns the selected friend in the library. 

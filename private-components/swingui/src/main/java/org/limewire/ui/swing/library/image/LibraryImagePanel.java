@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.image;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.library.Disposable;
@@ -32,7 +34,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 
-public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Disposable, LibrarySelectable, Scrollable {
+public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibrarySelectable {
     
     private LibraryImageSubPanelFactory factory;
     private LibrarySharePanel sharePanel;
@@ -159,12 +161,17 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         }
         
     }
-
+    
     @Override
-    public void selectAndScroll(Object selectedObject) {
-        //TODO selectAndScroll for library image table
+    public void selectAndScrollTo(File file) {
         throw new NotImplementedException();
     }
+    
+    @Override
+    public void selectAndScrollTo(URN urn) {
+        throw new NotImplementedException();        
+    }
+    
     /**
      * Overrides getPreferredSize. getPreferredSize is used by scrollable to 
      * determine how big to make the scrollableViewPort. Uses the parent 

@@ -6,15 +6,10 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.nav.NavComponent;
-import org.limewire.ui.swing.nav.NavSelectable;
-
-class LibraryMediator extends JPanel implements Disposable, NavComponent {
+class LibraryMediator extends JPanel implements Disposable {
 
     private static final String LIBRRY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
-    
-    private LibrarySelectable librarySelectable;
     
     private CardLayout cardLayout;
 
@@ -66,10 +61,5 @@ class LibraryMediator extends JPanel implements Disposable, NavComponent {
         for(Component component : getComponents()) {
             ((Disposable)component).dispose();
         }
-    }
-
-    @Override
-    public void select(NavSelectable selectable) {
-        librarySelectable.selectAndScroll(selectable.getNavSelectionId());
     }
 }
