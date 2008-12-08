@@ -24,6 +24,7 @@ public class DownloadButtonPanel extends JPanel {
 	private JButton pauseButton;
     private JButton cancelButton;
     private JButton resumeButton;
+    private JButton removeButton;
 
 
     @Resource
@@ -57,12 +58,17 @@ public class DownloadButtonPanel extends JPanel {
 		pauseButton.setActionCommand(DownloadActionHandler.PAUSE_COMMAND);
 		pauseButton.addActionListener(actionListener);
 		pauseButton.setToolTipText(I18n.tr("Pause"));		
-		
 
-		cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
-		cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
-		cancelButton.addActionListener(actionListener);
-        cancelButton.setToolTipText(I18n.tr("Remove Download"));
+
+        cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+        cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
+        cancelButton.addActionListener(actionListener);
+        cancelButton.setToolTipText(I18n.tr("Cancel Download"));
+
+        removeButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+        removeButton.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
+        removeButton.addActionListener(actionListener);
+        removeButton.setToolTipText(I18n.tr("Remove Download"));
 
 		resumeButton = new IconButton(resumeIcon, resumeIconRollover, resumeIconPressed);
 		resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
@@ -80,6 +86,7 @@ public class DownloadButtonPanel extends JPanel {
 		cancelPanel.setOpaque(false);
 		cancelPanel.setBorder(BorderFactory.createEmptyBorder(0,0,0,15));
 		cancelPanel.add(cancelButton);
+		cancelPanel.add(removeButton);
 		
 				
 		add(leadPanel, BorderLayout.WEST);
@@ -90,6 +97,7 @@ public class DownloadButtonPanel extends JPanel {
 	    pauseButton.addActionListener(actionListener);
         cancelButton.addActionListener(actionListener);
         resumeButton.addActionListener(actionListener);
+        removeButton.addActionListener(actionListener);
 	}
 
 	
@@ -97,7 +105,8 @@ public class DownloadButtonPanel extends JPanel {
 	public void updateButtons(DownloadState state) {
 		pauseButton.setVisible(state.isPausable());
 		resumeButton.setVisible(state.isResumable());
-		cancelButton.setVisible(true);
+        cancelButton.setVisible(state != DownloadState.DONE);
+        removeButton.setVisible(state == DownloadState.DONE);
 	}
 
 }
