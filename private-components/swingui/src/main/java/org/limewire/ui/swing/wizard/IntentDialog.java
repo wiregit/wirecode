@@ -30,8 +30,8 @@ public class IntentDialog extends LimeJDialog {
     private final Font normalFont = new Font("Arial", Font.PLAIN, 14);
     
     
-    private final String title = I18n.tr("LimeWire 5");
-    private final String heading  = I18n.tr("State Your Intent");
+    private final String title = I18n.tr("LimeWire 5 Alpha");
+    private final String heading  = I18n.tr(" ");
     
     private final String bodyText1 = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  " +
     		"Installing and using either program does not constitute a license for obtaining or distributing " +
@@ -39,7 +39,7 @@ public class IntentDialog extends LimeJDialog {
     
     private final String linkText = I18n.tr("Learn more");
     
-    private final String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright infringement");
+    private final String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright infringement.");
     
     private final String learnMoreURL = "http://www.limewire.com/learnMore/intent";
     

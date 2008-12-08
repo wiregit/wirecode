@@ -17,6 +17,8 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -110,7 +112,7 @@ public class PlayerPanel extends JXPanel {
         setLayout(new MigLayout("insets 0, filly, alignx center"));
         setOpaque(false);
         
-        ActionListener playerListener = new ButtonListener();
+        final ButtonListener playerListener = new ButtonListener();
 
         backButton = new IconButton(backIcon, backIconRollover, backIconPressed);
         backButton.addActionListener(playerListener);
@@ -167,12 +169,12 @@ public class PlayerPanel extends JXPanel {
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
-        innerPanel.add(backButton);
+        innerPanel.add(backButton, "gapright 1");
         innerPanel.add(pauseButton, "hidemode 3");
         innerPanel.add(playButton, "hidemode 3");
-        innerPanel.add(forwardButton);
+        innerPanel.add(forwardButton, "gapright 3");
         innerPanel.add(statusPanel, "gapbottom 2");
-        innerPanel.add(volumeButton);
+        innerPanel.add(volumeButton, "gapleft 2");
                 
         add(innerPanel, "gaptop 2, gapbottom 2");
         
@@ -182,7 +184,23 @@ public class PlayerPanel extends JXPanel {
         
         volumeControlPopup = new JPopupMenu();
         volumeSlider = new JSlider(0,100);
-        initVolumeControl();        
+        initVolumeControl();
+        
+        volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                System.out.println("a");
+                playerListener.clearMenu();
+            }
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                System.out.println("b");
+            }
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            }
+        });
+    
     }
     
     private void initVolumeControl() {
@@ -200,10 +218,18 @@ public class PlayerPanel extends JXPanel {
         volumeControlPopup.setSize(new Dimension(20, 80));
         
         volumeControlPopup.add(volumeSlider);
+        
+
     }
 
     private class ButtonListener implements ActionListener {
-
+        
+        private long menuInvizTime = -1;
+        
+        public void clearMenu() {
+            menuInvizTime = System.currentTimeMillis();
+        }
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand() == PLAY){
@@ -215,7 +241,14 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == BACK) {
                 throw new NotImplementedException();
             } else if (e.getActionCommand() == VOLUME) {
-                volumeControlPopup.show(volumeButton, 0, 14);
+                if (System.currentTimeMillis() - menuInvizTime > 10f) {
+                    volumeControlPopup.show(volumeButton, 0, 14);
+                    System.out.println("show");
+                }
+                else {
+                    System.out.println("invisible");
+                }
+                
             }
         }
     }
