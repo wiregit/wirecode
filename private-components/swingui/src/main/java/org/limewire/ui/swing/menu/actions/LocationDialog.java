@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.menu.actions;
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -25,7 +26,11 @@ class LocationDialog extends LimeJDialog {
     private JTextField urlField = null;
 
     public LocationDialog() {
-        super();
+        this((Frame) null);
+    }
+
+    public LocationDialog(Frame owner) {
+        super(owner);
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel urlPanel = new JPanel();
         urlField = new JTextField(30);
