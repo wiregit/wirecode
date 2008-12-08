@@ -277,7 +277,10 @@ public class MyLibraryPanel extends LibraryPanel {
                             }
                         }
                         repaint();
-                    }   
+                    } else if(evt.getPropertyName().equals("enabled")) {
+                        boolean value = (Boolean)evt.getNewValue();
+                        setVisible(value);
+                    }
                 }
                     
             });

@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library;
 
 import javax.swing.Action;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -23,28 +24,32 @@ class LibraryPanel extends AbstractFileListPanel {
     }
     
     @Override
-    protected <T extends FileItem> void addCategorySizeListener(String categoryName,
+    protected <T extends FileItem> void addCategorySizeListener(Category category,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
         // Comment this out & return null if you don't want sizes added to library panels.
-        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(categoryName, action, filteredList);
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
         filteredList.addListEventListener(listener);
         addDisposable(listener);
     }
     
     private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
-        private final String text;
+        private final Category category;
         private final Action action;
         private final FilterList<T> list;
         
-        private ButtonSizeListener(String text, Action action, FilterList<T> list) {
-            this.text = text;
+        private ButtonSizeListener(Category category, Action action, FilterList<T> list) {
+            this.category = category;
             this.action = action;
             this.list = list;
             setText();
         }
 
         private void setText() {
-            action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + ")");
+            action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
+            //disable other category if size is 0
+            if(category == Category.OTHER) {
+                action.setEnabled(list.size() > 0);
+            }
         }
         
         @Override

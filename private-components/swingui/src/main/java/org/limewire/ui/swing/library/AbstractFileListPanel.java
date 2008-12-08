@@ -160,12 +160,12 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         Action action = new SelectionAction(icon, category, item, callback);
         JComponent button = createCategoryButton(action, category);
         
-        addCategorySizeListener(category.toString(), action, filteredAllFileList, filteredList);
+        addCategorySizeListener(category, action, filteredAllFileList, filteredList);
         selectionPanel.add(button, "growx");
     }
     
     /** Adds a listener to the category so things can bind to the action, if necessary. */
-    protected abstract <T extends FileItem> void addCategorySizeListener(String categoryName, Action action,
+    protected abstract <T extends FileItem> void addCategorySizeListener(Category category, Action action,
             FilterList<T> filteredAllFileList, FilterList<T> filteredList);
     
     
@@ -353,6 +353,9 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                             button.setForeground(textColor);
                         }
                         repaint();
+                    } else if(evt.getPropertyName().equals("enabled")) {
+                        boolean value = (Boolean)evt.getNewValue();
+                        setVisible(value);
                     }
                 }
             });

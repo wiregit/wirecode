@@ -194,22 +194,22 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }
     
     @Override
-    protected <T extends FileItem> void addCategorySizeListener(String categoryName,
+    protected <T extends FileItem> void addCategorySizeListener(Category category,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(categoryName, action, filteredAllFileList, filteredList);
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredAllFileList, filteredList);
         filteredAllFileList.addListEventListener(listener);
         filteredList.addListEventListener(listener);
         addDisposable(listener);
     }
     
     private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
-        private final String text;
+        private final Category category;
         private final Action action;
         private final FilterList<T> allFileList;
         private final FilterList<T> list;
         
-        private ButtonSizeListener(String text, Action action, FilterList<T> allFileList, FilterList<T> list) {
-            this.text = text;
+        private ButtonSizeListener(Category category, Action action, FilterList<T> allFileList, FilterList<T> list) {
+            this.category = category;
             this.action = action;
             this.allFileList = allFileList;
             this.list = list;
@@ -217,7 +217,10 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         }
 
         private void setText() {
-            action.putValue(Action.NAME, I18n.tr(text) + " (" + list.size() + "/" + allFileList.size() + ")");
+            action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + "/" + allFileList.size() + ")");
+            if(category == Category.OTHER) {
+                action.setEnabled(allFileList.size() > 0);
+            }
         }
         
         @Override
@@ -347,6 +350,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                             button.setForeground(textColor);
                         }
                         repaint();
+                    } else if(evt.getPropertyName().equals("enabled")) {
+                        boolean value = (Boolean)evt.getNewValue();
+                        setVisible(value);
                     }
                 }
             });
