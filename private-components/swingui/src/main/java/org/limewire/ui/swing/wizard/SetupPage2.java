@@ -55,14 +55,16 @@ public class SetupPage2 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
+        ButtonSelectionListener buttonSelectionListener = new ButtonSelectionListener();
+        
         autoButton = new JRadioButton();
         decorator.decorateLargeRadioButton(autoButton);
         autoButton.setSelected(true);
-        autoButton.addActionListener(new ButtonSelectionListener());
+        autoButton.addActionListener(buttonSelectionListener);
         
         manualButton = new JRadioButton();
         decorator.decorateLargeRadioButton(manualButton);
-        manualButton.addActionListener(new ButtonSelectionListener());
+        manualButton.addActionListener(buttonSelectionListener);
         
         addFolderButton = new JXButton(new AddDirectoryAction(SetupPage2.this));
         decorator.decoratePlainButton(addFolderButton);
