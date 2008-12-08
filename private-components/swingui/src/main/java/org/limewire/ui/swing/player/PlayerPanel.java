@@ -35,6 +35,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NotImplementedException;
 
 import com.google.inject.Inject;
@@ -272,7 +273,17 @@ public class PlayerPanel extends JXPanel {
 
         @Override
         public void songOpened(Map<String, Object> properties) {
-           titleLabel.setText((String)properties.get("author") + " - " + (String)properties.get("title"));
+            
+           String songText = null;
+           
+           if (properties.get("author") == null || properties.get("title") == null) {
+               songText = I18n.tr("Unknown");
+           } 
+           else {
+               songText = properties.get("author") + " - " + properties.get("title");
+           }
+            
+           titleLabel.setText(songText);
            durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
            progressSlider.setMaximum(durationSecs);
            byteLength = (Integer)properties.get("audio.length.bytes");
