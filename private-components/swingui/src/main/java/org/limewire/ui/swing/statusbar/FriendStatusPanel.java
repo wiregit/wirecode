@@ -17,10 +17,14 @@ import javax.swing.Timer;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -34,12 +38,12 @@ class FriendStatusPanel {
 
     @Inject FriendStatusPanel(final FriendActions friendActions, final ChatFramePanel friendsPanel) {
         Color whiteBackground = Color.WHITE;
-        JPanel menuPanel = new JPanel(new BorderLayout());
-        menuPanel.setBorder(BorderFactory.createLineBorder(new Color(159, 159, 159)));
-        menuPanel.setOpaque(true);
-        menuPanel.setMinimumSize(new Dimension(0, 20));
-        menuPanel.setMaximumSize(new Dimension(150, 20));
-        menuPanel.setBackground(whiteBackground);
+        JPanel chatPanel = new JPanel(new BorderLayout());
+        chatPanel.setBorder(BorderFactory.createLineBorder(new Color(159, 159, 159)));
+        chatPanel.setOpaque(true);
+        chatPanel.setMinimumSize(new Dimension(0, 20));
+        chatPanel.setMaximumSize(new Dimension(150, 20));
+        chatPanel.setBackground(whiteBackground);
         
         friendsButton = new JXButton(new AbstractAction(I18n.tr("Chat")) {
             @Override
@@ -52,15 +56,33 @@ class FriendStatusPanel {
             }
         });
         friendsButton.setBackgroundPainter(new RectanglePainter<JXButton>(whiteBackground, whiteBackground));
-        menuPanel.add(friendsButton, BorderLayout.EAST);
+        chatPanel.add(friendsButton, BorderLayout.EAST);
+        chatPanel.setVisible(false);
         
         friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(friendsButton));       
         
-        mainComponent = menuPanel;
+        mainComponent = chatPanel;
     }
     
     Component getComponent() {
         return mainComponent;
+    }
+    
+    @Inject void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECTED:
+                    mainComponent.setVisible(true);
+                    break;
+                case DISCONNECTED:
+                    mainComponent.setVisible(false);
+                    break;
+                }
+            }
+        });
     }
     
     private static class UnseenMessageFlasher implements UnseenMessageListener {
