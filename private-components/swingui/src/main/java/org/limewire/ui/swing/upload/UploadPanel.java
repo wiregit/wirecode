@@ -2,6 +2,8 @@ package org.limewire.ui.swing.upload;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -70,12 +72,17 @@ public class UploadPanel extends JXPanel{
     }
     
     private void clearFinished() {
+        List<UploadItem> finishedItems = new ArrayList<UploadItem>();
         uploadItems.getReadWriteLock().writeLock().lock();
         try {
             for(UploadItem item : uploadItems){
                 if(item.getState() == UploadState.DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD){
-                    uploadItems.remove(item);
+                    finishedItems.add(item);
                 }
+            }
+            
+            for (UploadItem item : finishedItems) {
+                uploadItems.remove(item);
             }
         } finally {
             uploadItems.getReadWriteLock().writeLock().unlock();
