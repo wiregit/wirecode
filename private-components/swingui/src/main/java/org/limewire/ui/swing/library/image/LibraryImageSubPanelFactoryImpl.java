@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.image;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JComponent;
@@ -89,7 +88,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         return renderer;
     }
     
-    private TableRendererEditor enableMyLibraryEditor(LibrarySharePanel sharePanel, JComponent parent){
+    private TableRendererEditor enableMyLibraryEditor(LibrarySharePanel sharePanel, LibraryImageSubPanel parent){
         ShareAction action = new ShareAction(I18n.tr("Sharing"), sharePanel, parent);
         ShareTableRendererEditor shareEditor = new ShareTableRendererEditor(action);
         action.setEditor(shareEditor);
@@ -126,9 +125,9 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private class ShareAction extends AbstractAction {
         private ShareTableRendererEditor shareEditor;
         private LibrarySharePanel librarySharePanel;
-        private JComponent parent;
+        private LibraryImageSubPanel parent;
 
-        public ShareAction(String text, LibrarySharePanel librarySharePanel, JComponent parent){
+        public ShareAction(String text, LibrarySharePanel librarySharePanel, LibraryImageSubPanel parent){
             super(text);
             this.librarySharePanel = librarySharePanel;
             this.parent = parent;
@@ -142,14 +141,18 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         public void actionPerformed(ActionEvent e) {
             ((FileShareModel)librarySharePanel.getShareModel()).setFileItem(shareEditor.getLocalFileItem());
           
-            Rectangle bounds = shareEditor.getShareButton().getBounds();
             Point convertedLocation = 
-                SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), parent.getParent());
-            bounds.x = convertedLocation.x;
-            bounds.y = convertedLocation.y;
+                SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), parent.getImageList());
+            selectImage(convertedLocation);
             librarySharePanel.show(shareEditor.getShareButton());
             shareEditor.cancelCellEditing();
         }
         
+        private void selectImage(Point point) {
+            int index = parent.getImageList().locationToIndex(point);
+            if(index > -1)
+                parent.getImageList().setSelectedIndex(index);
+        }
     }
+
 }

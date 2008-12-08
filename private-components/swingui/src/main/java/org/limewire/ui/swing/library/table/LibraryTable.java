@@ -199,7 +199,11 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(convertRowIndexToModel(getEditingRow())));
+            // highlight the row that has the share widget was pressed in
+            int selectedIndex = convertRowIndexToModel(getEditingRow());
+            getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
+            
+            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex));
             librarySharePanel.show(shareEditor);
             shareEditor.cancelCellEditing();
         }
