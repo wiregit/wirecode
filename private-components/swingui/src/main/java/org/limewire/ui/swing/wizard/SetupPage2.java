@@ -28,27 +28,25 @@ import org.limewire.ui.swing.util.I18n;
 
 public class SetupPage2 extends WizardPage {
 
-    private String line1 = I18n.tr("LimeWire is ready to fill your Library");
-    private String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files with the P2P Network and, or your friends.");
+    private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
+    private final String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files with the P2P Network and, or your friends.");
+    private final String autoText = I18n.tr("Automatically manage My Library");
+    private final String autoExplanation = I18n.tr("Choose this option to have LimeWire automatically scan files into your Library from My Documents and the Desktop.");
+    private final String manualText = I18n.tr("Manually manage My Library");
+    private final String manualExplanation = I18n.tr("Choose this option if you want to select which folders LimeWire scans into your Library.");
+    private final String bottomText1 = I18n.tr("Scanning these folders into your Library will not automatically share your files.");
+    private final String bottomText2 = I18n.tr("You can change these options later from Tools > Options");
     
-    private ButtonGroup buttonGroup;
+    private final LibraryData libraryData;
     
-    private JRadioButton autoButton;
-    private String autoText = I18n.tr("Automatically manage My Library");
-    private String autoExplanation = I18n.tr("Choose this option to have LimeWire automatically scan files into your Library from My Documents and the Desktop.");
-    private JRadioButton manualButton;
-    private String manualText = I18n.tr("Manually manage My Library");
-    private String manualExplanation = I18n.tr("Choose this option if you want to select which folders LimeWire scans into your Library.");
+    private final ButtonGroup buttonGroup;
+    private final JRadioButton autoButton;
+    private final JRadioButton manualButton;
     
-
-    private String bottomText1 = I18n.tr("Scanning these folders into your Library will not automatically share your files.");
-    private String bottomText2 = I18n.tr("You can change these options later from Tools > Options");
-    
-    private LibraryManagerTreeTable treeTable;
-    private JScrollPane treeTableScrollPane;
-    private JXButton addFolderButton;
-    private LibraryData libraryData;
-    
+    private final LibraryManagerTreeTable treeTable;
+    private final JScrollPane treeTableScrollPane;
+    private final JXButton addFolderButton;
+        
     public SetupPage2(SetupComponentDecorator decorator, LibraryData libraryData) {
         this.libraryData = libraryData;
         
@@ -129,6 +127,11 @@ public class SetupPage2 extends WizardPage {
     public String getLine2() {
         return line2;
     }
+
+    @Override
+    public String getFooter() {
+        return "";
+    }
     
     @Override
     public void applySettings() {
@@ -175,6 +178,5 @@ public class SetupPage2 extends WizardPage {
                 }
             }
         }
-    } 
- 
+    }
 }

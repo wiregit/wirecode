@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -43,6 +44,7 @@ public class Wizard extends JPanel {
     private final JLabel titleBarLabel;
     private final JLabel headerLine1;
     private final JLabel headerLine2;
+    private final JLabel footer;
     
     private int currentPage;
 
@@ -112,6 +114,10 @@ public class Wizard extends JPanel {
         headerLine2 = new JLabel();
         decorator.decorateNormalText(headerLine2);
         
+        footer = new JLabel();
+        decorator.decorateNormalText(footer);
+        footer.setBorder(BorderFactory.createEmptyBorder(0,14,0,0));
+        
         JXPanel headerBar = new JXPanel(new MigLayout("insets 14, gap 0, fill"));
         decorator.decorateSetupHeader(headerBar);
 
@@ -119,13 +125,13 @@ public class Wizard extends JPanel {
         headerBar.add(headerLine1, "growx, wrap");
         headerBar.add(headerLine2, "growx");
 
-        // TODO: Redo this layout
         JPanel bottomBar = new JPanel(new BorderLayout());
         JPanel bottomBarInner = new JPanel(new FlowLayout());
         bottomBarInner.add(backButton);
         bottomBarInner.add(continueButton);
         bottomBarInner.add(finishButton);
         bottomBar.add(bottomBarInner, BorderLayout.EAST);
+        bottomBar.add(footer, BorderLayout.WEST);
         
         add(headerBar, BorderLayout.NORTH);
         add(mainPanel, BorderLayout.CENTER);
@@ -183,6 +189,7 @@ public class Wizard extends JPanel {
         
         headerLine1.setText(page.getLine1());
         headerLine2.setText(page.getLine2());
+        footer.setText(page.getFooter());
     }
     
     private void next(){

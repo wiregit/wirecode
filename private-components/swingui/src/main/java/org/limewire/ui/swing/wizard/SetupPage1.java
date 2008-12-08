@@ -42,7 +42,6 @@ public class SetupPage1 extends WizardPage {
     public SetupPage1(SetupComponentDecorator decorator){
 
         setOpaque(false);
-        
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
         HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
@@ -101,6 +100,11 @@ public class SetupPage1 extends WizardPage {
     @Override
     public String getLine2() {
         return line2;
+    }
+    
+    @Override
+    public String getFooter() {
+        return "";
     }
     
     @Override
