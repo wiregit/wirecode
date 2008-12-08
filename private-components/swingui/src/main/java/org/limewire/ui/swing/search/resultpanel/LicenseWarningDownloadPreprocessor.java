@@ -7,10 +7,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.I18n;
 
@@ -43,7 +43,7 @@ public class LicenseWarningDownloadPreprocessor implements DownloadPreprocessor 
             JPanel thePanel = new JPanel(new BorderLayout(0, 15));
             thePanel.setOpaque(false);
             JCheckBox option = new JCheckBox(I18n.tr("Do not warn me again"));
-            JComponent lbl = new JTextArea(licenseWarning);
+            JComponent lbl = new MultiLineLabel(licenseWarning, 400);
             thePanel.add(lbl, BorderLayout.NORTH);
             thePanel.add(option, BorderLayout.WEST);
             option.addItemListener(new ItemListener() {
