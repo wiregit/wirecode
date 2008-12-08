@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.upload.table;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -15,7 +16,9 @@ import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
@@ -35,36 +38,25 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JLabel statusLabel;
     private JLabel nameLabel;
     private JXButton cancelButton;
+    private JXHyperlink removeButton;
     private UploadItem editItem;
     private JProgressBar progressBar;
     private JLabel timeLabel;
+    @Resource
+    private Color linkColor;
     
 
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
+        GuiUtils.assignResources(this);
         setLayout(new MigLayout("fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         this.categoryIconManager = categoryIconManager;
         
-        nameLabel = new JLabel("Name");
-        statusLabel = new JLabel("Status");
-        cancelButton = new JXButton("X"); 
+        initializeComponents(progressBarFactory);
         
-
-        timeLabel = new JLabel("Time");
-        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        
-        progressBar = progressBarFactory.create();
-        Dimension size = new Dimension(400, 16);
-        progressBar.setPreferredSize(size);
-        progressBar.setMinimumSize(size);
-        progressBar.setMaximumSize(size);
-        
-        add(nameLabel, "aligny bottom");
-        add(cancelButton, "alignx right, aligny 50%, spany 3, push, wrap");
-        add(progressBar, "hidemode 3, wrap");
-        add(statusLabel, "aligny top, split 2");
-        add(timeLabel, "push, aligny top, alignx right, hidemode 3");
+        addComponents();
     }
-    
+
+
     public void setActionHandler(final UploadActionHandler actionHandler){
         cancelButton.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
 
@@ -72,10 +64,23 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             @Override
             public void actionPerformed(ActionEvent e) {
                actionHandler.performAction(cancelButton.getActionCommand(), editItem);
+               cancelCellEditing();
             }
         };
         
         cancelButton.addActionListener(cancelAction);
+        
+        removeButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
+
+        Action removeAction = new AbstractAction(I18n.tr("Remove")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               actionHandler.performAction(removeButton.getActionCommand(), editItem);
+               cancelCellEditing();
+            }
+        };
+        
+        removeButton.addActionListener(removeAction);
     }
 
     @Override
@@ -91,6 +96,34 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         editItem = (UploadItem)value;
         update(editItem);
         return this;
+    }
+    
+    private void initializeComponents(LimeProgressBarFactory progressBarFactory){
+        nameLabel = new JLabel("Name");
+        statusLabel = new JLabel("Status");
+        cancelButton = new JXButton("X"); 
+        removeButton = new JXHyperlink();
+        removeButton.setText("Remove");
+        removeButton.setForeground(linkColor);        
+        removeButton.setClickedColor(linkColor);
+
+        timeLabel = new JLabel("Time");
+        timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        
+        progressBar = progressBarFactory.create();
+        Dimension size = new Dimension(400, 16);
+        progressBar.setPreferredSize(size);
+        progressBar.setMinimumSize(size);
+        progressBar.setMaximumSize(size);
+    }
+    
+    private void addComponents() {
+        add(nameLabel, "aligny bottom");
+        add(cancelButton, "alignx right, aligny 50%, spany 3, push, wrap");
+        add(progressBar, "hidemode 3, wrap");
+        add(statusLabel, "aligny top, split 3");
+        add(timeLabel, "push, aligny top, alignx right, hidemode 3");
+        add(removeButton, "push, aligny top, alignx right, hidemode 3");
     }
     
     private void update(UploadItem item){
@@ -113,6 +146,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             progressBar.setVisible(false);
             timeLabel.setVisible(false);
         }
+        
+        removeButton.setVisible(item.getState() == UploadState.UNABLE_TO_UPLOAD);
     }
     
     

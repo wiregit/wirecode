@@ -6,7 +6,6 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.LimeSingleColumnTableFormat;
 import org.limewire.ui.swing.table.MouseableTable;
-import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
 import ca.odell.glazedlists.EventList;
@@ -23,7 +22,8 @@ public class UploadTable extends MouseableTable {
         
         UploadActionHandler actionHandler = new UploadActionHandler(swingThreadSafeUploads, propertiesFactory, libraryNavigator);
         
-        TableRendererEditor editor = new UploadTableRendererEditor(categoryIconManager, progressBarFactory);
+        UploadTableRendererEditor editor = new UploadTableRendererEditor(categoryIconManager, progressBarFactory);
+        editor.setActionHandler(actionHandler);
         getColumn(0).setCellEditor(editor);
         getColumn(0).setCellRenderer(new UploadTableRendererEditor(categoryIconManager, progressBarFactory));
         setRowHeight(editor.getPreferredSize().height);
