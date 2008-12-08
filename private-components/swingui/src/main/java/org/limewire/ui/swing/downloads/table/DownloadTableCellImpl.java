@@ -339,7 +339,12 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         editor.fullIconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
         editor.fullTitleLabel.setText(item.getTitle());
         
-        editor.fullProgressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
+        if (item.getTotalSize() != 0) {
+            editor.fullProgressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
+        }
+        else {
+            editor.fullProgressBar.setValue(0);
+        }
 
         editor.fullProgressBar.setEnabled(item.getState() != DownloadState.PAUSED);
         

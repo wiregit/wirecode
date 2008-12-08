@@ -453,7 +453,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             nameLabel.setText(item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
             if (progressBar.isVisible()) { 
-                progressBar.setValue((int)(100 * item.getCurrentSize()/item.getTotalSize()));
+                if (item.getTotalSize() != 0) {
+                    progressBar.setValue((int)(100 * item.getCurrentSize() / item.getTotalSize()));
+                } 
+                else {
+                    progressBar.setValue(0);
+                }
                 progressBar.setEnabled(item.getState() == DownloadState.DOWNLOADING);
             }
             
