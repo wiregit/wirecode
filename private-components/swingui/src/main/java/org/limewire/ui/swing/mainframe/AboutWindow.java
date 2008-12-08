@@ -309,7 +309,7 @@ class AboutWindow {
         // bt notice
         sb.append("<small>");
         sb.append("<br><br>");
-        sb.append(I18n.tr("BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc."));
+        sb.append(I18n.tr("BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, Inc. Gmail is a trademark of Google Inc. Jabber and LiveJournal are the registered trademarks of the XMPP Standards Foundation and LiveJournal, Inc., d/b/a LiveJournal.com, respectively. Neither Google Inc., the XMPP Standards Foundation or LiveJournal.com are sponsors or partners of Lime&nbsp;Wire&nbsp;LLC nor do they endorse Lime&nbsp;Wire&nbsp;LLC or the LimeWire software. Use of these trademarks is merely to refer to the technology or service of the respective owner and not to confuse Lime&nbsp;Wire as the source of the respective Gmail, Jabber and/or LiveJournal service or technology."));
         sb.append("</small>");
         
         sb.append("</body></html>");
