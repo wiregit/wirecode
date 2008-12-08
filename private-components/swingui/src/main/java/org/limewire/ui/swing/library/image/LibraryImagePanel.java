@@ -26,6 +26,10 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.ui.swing.images.ImageListModel;
+import org.limewire.ui.swing.images.ImageList;
+import org.limewire.util.Objects;
+import org.mortbay.html.Image;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;
@@ -164,12 +168,37 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     
     @Override
     public void selectAndScrollTo(File file) {
-        throw new NotImplementedException();
+        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+            ImageListModel model = subPanel.getModel();
+            for (int x=0; x<model.getSize(); x++) {
+                LocalFileItem item = model.getFileItem(x);
+                if (file.equals(item.getFile())) {
+                    scrollToImageInSubPanel(subPanel, x);
+                    break;
+                }
+            }
+        }
     }
     
     @Override
     public void selectAndScrollTo(URN urn) {
-        throw new NotImplementedException();        
+        for (LibraryImageSubPanel subPanel : panelMap.values()) {
+            ImageListModel model = subPanel.getModel();
+            for (int x=0; x<model.getSize(); x++) {
+                LocalFileItem item = model.getFileItem(x);
+                if (urn.equals(item.getUrn())) {
+                    scrollToImageInSubPanel(subPanel, x);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void scrollToImageInSubPanel(LibraryImageSubPanel subPanel, int index) {
+        ImageList imageList = subPanel.getImageList();
+        imageList.setSelectedIndex(index);
+        Rectangle rect = imageList.getCellBounds(index, index);
+        subPanel.scrollRectToVisible(rect);
     }
     
     /**
