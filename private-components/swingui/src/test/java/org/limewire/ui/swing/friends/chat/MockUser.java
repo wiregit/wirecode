@@ -101,7 +101,7 @@ public class MockUser implements User {
     @Override
     public Network getNetwork() {
         return new Network() {
-            public String getMyID() {
+            public String getCanonicalizedLocalID() {
                 return "";
             }
 

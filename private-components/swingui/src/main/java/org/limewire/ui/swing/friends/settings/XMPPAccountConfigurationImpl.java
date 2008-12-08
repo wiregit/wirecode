@@ -147,7 +147,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     public String getCanonicalizedLocalID() {
         // friend and friendpresence ids are
         // canonicalized to be lowercase
-        return username.toLowerCase(Locale.getDefault());
+        return username.toLowerCase(Locale.US);
     }
 
     @Override

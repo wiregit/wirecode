@@ -12,18 +12,18 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.limewire.core.settings.UISettings;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
-import org.limewire.ui.swing.util.SwingUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
+import org.limewire.ui.swing.util.SwingUtils;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Misc Option View
@@ -179,7 +179,7 @@ public class MiscOptionPanel extends OptionPanel {
             XMPPAccountConfiguration config = accountManager.getConfig(label);
             if(config == accountManager.getAutoLoginConfig()) {
                 serviceField.setText(config.getServiceName());
-                usernameField.setText(config.getUsername());
+                usernameField.setText(config.getUserInputLocalID());
                 passwordField.setText(config.getPassword());
             } else {
                 serviceField.setText("");
@@ -244,7 +244,7 @@ public class MiscOptionPanel extends OptionPanel {
                 if(!serviceName.equals(auto.getServiceName()))
                     return true;
                 String username = usernameField.getText().trim();
-                if(!username.equals(auto.getUsername()))
+                if(!username.equals(auto.getUserInputLocalID()))
                     return true;
                 String password = new String(passwordField.getPassword());
                 if(!password.equals(auto.getPassword()))

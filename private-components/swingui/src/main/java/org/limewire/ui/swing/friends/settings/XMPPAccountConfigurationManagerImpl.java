@@ -92,7 +92,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     public void setAutoLoginConfig(XMPPAccountConfiguration config) {
         // Remove the old configuration, if there is one
         if(autoLoginConfig != null) {
-            passwordManager.removePassword(autoLoginConfig.getUsername());
+            passwordManager.removePassword(autoLoginConfig.getUserInputLocalID());
             XMPPSettings.XMPP_AUTO_LOGIN.setValue("");
             XMPPSettings.XMPP_SERVER.setValue("");
             autoLoginConfig = null;
@@ -100,10 +100,10 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         // Store the new configuration, if there is one
         if(config != null) {
             try {
-                passwordManager.storePassword(config.getUsername(),
+                passwordManager.storePassword(config.getUserInputLocalID(),
                         config.getPassword());
                 XMPPSettings.XMPP_AUTO_LOGIN.setValue(config.getLabel() + "," +
-                        config.getUsername());
+                        config.getUserInputLocalID());
                 if(config.getLabel().equals("Jabber"))
                     XMPPSettings.XMPP_SERVER.setValue(config.toString());
                 autoLoginConfig = config;
