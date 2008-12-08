@@ -506,7 +506,9 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }
         
         void cleanup() {
-            rosterListeners.removeListener(discoInfoListener.getRosterListener());
+            if(discoInfoListener != null) {
+                rosterListeners.removeListener(discoInfoListener.getRosterListener());
+            }
         }
     }
 }
