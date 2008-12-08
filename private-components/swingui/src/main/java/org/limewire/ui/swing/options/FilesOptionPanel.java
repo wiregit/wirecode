@@ -126,7 +126,7 @@ public class FilesOptionPanel extends OptionPanel {
             
             manageButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     extensionsPanel, I18n.tr("Manage file extensions"),
-                    I18n.tr("Manage"),I18n.tr("Manage file extensions to load")));
+                    I18n.tr("Manage..."),I18n.tr("Manage file extensions to load")));
             
             add(new JLabel(I18n.tr("Choose the file extensions that belong in each category")), "push");
             add(manageButton);
@@ -160,7 +160,7 @@ public class FilesOptionPanel extends OptionPanel {
             saveFolderPanel.setSize(new Dimension(400,500));
             
             configureButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this, saveFolderPanel, 
-                    I18n.tr("Manage Save Folders"),I18n.tr("Configure"),I18n.tr("Configure how file types are saved")));
+                    I18n.tr("Manage Save Folders"),I18n.tr("Configure..."),I18n.tr("Configure how file types are saved")));
             
             add(new JLabel(I18n.tr("Choose where specific file types get saved")), "push");
             add(configureButton);
@@ -202,7 +202,7 @@ public class FilesOptionPanel extends OptionPanel {
             browseStorePathButton = new JButton(new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField));
             configureNamingButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     storeOptionPanel,I18n.tr("LimeWire Store File Organization"),
-                    I18n.tr("Configure file naming"),I18n.tr("Configure how files are automatically named")));
+                    I18n.tr("Configure file naming..."),I18n.tr("Configure how files are automatically named")));
             
             add(new JLabel(I18n.tr("Save store downloads to:")), "split");
             add(storePathTextField);

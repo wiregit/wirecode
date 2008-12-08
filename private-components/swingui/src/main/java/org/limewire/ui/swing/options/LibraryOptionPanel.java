@@ -223,7 +223,7 @@ public class LibraryOptionPanel extends OptionPanel {
             public AddDirectoryAction(Container parent) {
                 this.parent = parent;
                 
-                putValue(Action.NAME, I18n.tr("Add New Folder"));
+                putValue(Action.NAME, I18n.tr("Add New Folder..."));
                 putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a folder to automatically scan for changes"));
             }
             

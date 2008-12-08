@@ -48,7 +48,7 @@ class HelpMenu extends JMenu {
         
         if(!application.isProVersion()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("Get personal tech support")) {
+            add(new AbstractAction(I18n.tr("Get personalized tech support")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     NativeLaunchUtils

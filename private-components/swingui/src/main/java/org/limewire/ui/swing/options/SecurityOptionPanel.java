@@ -92,7 +92,7 @@ public class SecurityOptionPanel extends OptionPanel {
             
             settingsButton = new JButton(new DialogDisplayAction(SecurityOptionPanel.this ,
                     warningMessagesPanel, I18n.tr("Warning Messages"),
-                    I18n.tr("Settings"), I18n.tr("Choose which warning messags to display")));
+                    I18n.tr("Settings..."), I18n.tr("Choose which warning messags to display")));
             
             add(new JLabel(I18n.tr("Choose which warning messages you want to see when using LimeWire")), "push");
             add(settingsButton);
@@ -169,7 +169,7 @@ public class SecurityOptionPanel extends OptionPanel {
             adultContentCheckBox.setContentAreaFilled(false);
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
-                    I18n.tr("Filter Keywords"),I18n.tr("Restrict files with certain words from being displayed in search results")));
+                    I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
             
             add(new JLabel(I18n.tr("In search results...")), "wrap");
             
