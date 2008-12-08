@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.chat;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,6 +29,7 @@ import org.limewire.ui.swing.sound.WavSoundPlayer;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
@@ -165,7 +164,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     private void handleConnectionEstablished(XMPPConnectionEvent event) {
         mainPanel.add(chatPanel);
-        chatPanel.setLoggedInID(event.getSource().getConfiguration().getUsername());
+        chatPanel.setLoggedInID(event.getSource().getConfiguration().getCanonicalizedLocalID());
         resetBounds();
     }
     

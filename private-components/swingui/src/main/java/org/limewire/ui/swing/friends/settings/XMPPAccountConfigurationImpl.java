@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.friends.settings;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
@@ -8,7 +9,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.jdesktop.swingx.icon.EmptyIcon;
-
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.api.client.RosterEvent;
 
@@ -113,7 +113,7 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     }
 
     @Override
-    public String getUsername() {
+    public String getUserInputLocalID() {
         return username;
     }
 
@@ -144,8 +144,10 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     }
 
     @Override
-    public String getMyID() {
-        return username;
+    public String getCanonicalizedLocalID() {
+        // friend and friendpresence ids are
+        // canonicalized to be lowercase
+        return username.toLowerCase(Locale.getDefault());
     }
 
     @Override

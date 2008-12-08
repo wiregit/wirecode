@@ -8,11 +8,8 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.HyperLinkButton;
@@ -27,6 +24,8 @@ import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
+
+import net.miginfocom.swing.MigLayout;
 
 class LoggedInPanel extends JXPanel {
 
@@ -138,7 +137,7 @@ class LoggedInPanel extends JXPanel {
 
     private void setConfig(XMPPConnectionConfiguration config) {
         if(config != null) {
-            currentUser.setText(config.getUsername());
+            currentUser.setText(config.getUserInputLocalID());
             statusMenuLabel.setText(I18n.tr("Set {0} Status:", config.getLabel()));
         }
     }

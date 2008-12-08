@@ -14,8 +14,9 @@ public interface XMPPConnectionConfiguration extends Network {
      */
     public boolean isDebugEnabled();
     
-    /** Returns the username this configuration will use. */
-    public String getUsername();
+    /** Returns the username this configuration will use,
+     * as entered by the user; not canonicalized */
+    public String getUserInputLocalID();
     
     /** Returns the password this configuration will use. */
     public String getPassword();

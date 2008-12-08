@@ -27,9 +27,9 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     public boolean isDebugEnabled() {
         return true;
     }
-    
+
     @Override
-    public String getUsername() {
+    public String getUserInputLocalID() {
         return username;
     }
 
@@ -57,10 +57,10 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     public String getLabel() {
         return serviceName;
     }
-    
+
     @Override
-    public String getMyID() {
-        return getUsername();
+    public String getCanonicalizedLocalID() {
+        return getUserInputLocalID();
     }
 
     @Override

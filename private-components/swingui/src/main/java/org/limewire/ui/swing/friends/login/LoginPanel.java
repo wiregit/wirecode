@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.friends.login;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Insets;
@@ -21,11 +19,8 @@ import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
-
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -35,12 +30,15 @@ import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
+import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * @author Mario Aquino, Object Computing, Inc.
@@ -176,7 +174,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         XMPPAccountConfiguration config = accountManager.getConfig(label);
         if(config == accountManager.getAutoLoginConfig()) {
             serviceField.setText(config.getServiceName());
-            usernameField.setText(config.getUsername());
+            usernameField.setText(config.getUserInputLocalID());
             passwordField.setText(config.getPassword());
             autoLoginCheckBox.setSelected(true);
         } else {

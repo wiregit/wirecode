@@ -141,8 +141,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 connection.connect();
                 LOG.info("connected.");
                 if (LOG.isInfoEnabled())
-                    LOG.infof("logging in " + configuration.getUsername() + " with resource: " + configuration.getResource());
-                connection.login(configuration.getUsername(), configuration.getPassword(), configuration.getResource());
+                    LOG.infof("logging in " + configuration.getUserInputLocalID() + " with resource: " + configuration.getResource());
+                connection.login(configuration.getUserInputLocalID(), configuration.getPassword(), configuration.getResource());
                 LOG.info("logged in.");
                 connectionBroadcaster.broadcast(new XMPPConnectionEvent(this, XMPPConnectionEvent.Type.CONNECTED));
             } catch (org.jivesoftware.smack.XMPPException e) {

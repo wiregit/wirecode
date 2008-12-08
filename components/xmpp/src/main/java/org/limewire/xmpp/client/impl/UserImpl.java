@@ -3,13 +3,8 @@ package org.limewire.xmpp.client.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
-
-import net.jcip.annotations.GuardedBy;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -36,6 +31,8 @@ import org.limewire.xmpp.api.client.PresenceEvent;
 import org.limewire.xmpp.api.client.User;
 import org.limewire.xmpp.api.client.XMPPException;
 
+import net.jcip.annotations.GuardedBy;
+
 
 public class UserImpl implements User {
     private static final Log LOG = LogFactory.getLog(UserImpl.class);
@@ -54,7 +51,7 @@ public class UserImpl implements User {
     private final Object presenceLock;
     
     @GuardedBy("presenceLock")
-    private final SortedMap<String, Presence> presences;
+    private final Map<String, Presence> presences;
 
     @GuardedBy("presenceLock")
     private String activePresenceJid;
@@ -75,7 +72,7 @@ public class UserImpl implements User {
         this.idNoService = stripService(id, network.getNetworkName());
         this.network = network;
         this.rosterEntry = new AtomicReference<RosterEntry>(rosterEntry);
-        this.presences = new TreeMap<String, Presence>(String.CASE_INSENSITIVE_ORDER);
+        this.presences = new HashMap<String, Presence>();
         this.presenceListeners = new EventListenerList<PresenceEvent>();
         this.activePresenceJid = null;
         this.connection = connection;
@@ -84,7 +81,7 @@ public class UserImpl implements User {
     }
     
     private static String stripService(String id, String service) {
-        int idx = id.toLowerCase(Locale.US).lastIndexOf("@" + service);
+        int idx = id.lastIndexOf("@" + service);
         if(idx == -1) {
             return id;
         } else {

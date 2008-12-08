@@ -235,7 +235,7 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(Presence.Mode.available, buddy2.getMode());
 
         for(XMPPConnection connection : service.getConnections()) {
-            if(connection.getConfiguration().getUsername().equals(USERNAME_2)) {
+            if(connection.getConfiguration().getUserInputLocalID().equals(USERNAME_2)) {
                 connection.setMode(Presence.Mode.away);
             }
         }

@@ -53,7 +53,7 @@ public class MockFriend implements Friend {
     public Network getNetwork() {
         return new Network() {
             @Override
-            public String getMyID() {
+            public String getCanonicalizedLocalID() {
                 return localID;
             }
 

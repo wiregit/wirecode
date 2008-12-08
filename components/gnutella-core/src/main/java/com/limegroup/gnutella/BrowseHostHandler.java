@@ -207,7 +207,7 @@ public class BrowseHostHandler {
         SocketWrappingHttpClient client = clientProvider.get();
         client.setSocket(socket);
         if(!friendPresence.getFriend().isAnonymous()) {
-            String username = friendPresence.getFriend().getNetwork().getMyID();
+            String username = friendPresence.getFriend().getNetwork().getCanonicalizedLocalID();
             Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
             if(feature != null) {
                 AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
@@ -241,7 +241,7 @@ public class BrowseHostHandler {
             return "/";
         } else {
             try {
-                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getFriend().getNetwork().getMyID(), "UTF-8") + "/";
+                return "/friend/browse/" +  URLEncoder.encode(friendPresence.getFriend().getNetwork().getCanonicalizedLocalID(), "UTF-8") + "/";
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

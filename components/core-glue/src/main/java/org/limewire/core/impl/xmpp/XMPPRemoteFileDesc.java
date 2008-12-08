@@ -136,7 +136,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
             return null;
         }
         byte[] authToken = authTokenFeature.getFeature();
-        return new UsernamePasswordCredentials(presence.getFriend().getNetwork().getMyID(), StringUtils.getUTF8String(authToken));
+        return new UsernamePasswordCredentials(presence.getFriend().getNetwork().getCanonicalizedLocalID(), StringUtils.getUTF8String(authToken));
     }
 
     @Override
@@ -159,7 +159,7 @@ public class XMPPRemoteFileDesc implements RemoteFileDesc {
             return HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
         }
         try {
-            return CoreGlueXMPPService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(presence.getFriend().getNetwork().getMyID(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
+            return CoreGlueXMPPService.FRIEND_DOWNLOAD_PREFIX + URLEncoder.encode(presence.getFriend().getNetwork().getCanonicalizedLocalID(), "UTF-8") + HTTPConstants.URI_RES_N2R + sha1Urn.httpStringValue();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
