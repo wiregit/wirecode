@@ -123,6 +123,8 @@ public class HTMLPane extends JEditorPane {
         
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
+                // Start at the top, then move if necessary.
+                setCaretPosition(0);
                 final String reference = page.getRef();
                 if (reference != null) {
                     if (!reloaded.get()) {
@@ -136,8 +138,6 @@ public class HTMLPane extends JEditorPane {
                             }
                         });
                     }
-                } else {
-                    setCaretPosition(0);
                 }
                 getDocument().putProperty(Document.StreamDescriptionProperty, page);
                 firePropertyChange("page", loaded.get(), page);

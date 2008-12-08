@@ -60,7 +60,7 @@ public class ProNag extends JXPanel implements Resizable {
         
         JScrollPane scroller = new JScrollPane(editorPane, 
                                                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                               JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         parent.add(scroller, BorderLayout.CENTER);
     }
 
