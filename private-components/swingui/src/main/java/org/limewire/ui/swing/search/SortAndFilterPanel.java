@@ -40,7 +40,7 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
-import org.limewire.ui.swing.components.PromptTextField;
+import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.components.LimeComboBox.SelectionListener;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
@@ -95,7 +95,7 @@ public class SortAndFilterPanel {
     private final LimeComboBox sortCombo;
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
-    private final JTextField filterBox = new PromptTextField(tr("Refine results..."));
+    private final JTextField filterBox = new LimePromptTextField(tr("Refine results..."));
     private final JXButton listViewToggleButton = new JXButton();
     private final JXButton tableViewToggleButton = new JXButton();
     

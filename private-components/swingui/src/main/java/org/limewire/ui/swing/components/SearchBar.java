@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.components;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import javax.swing.JButton;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
@@ -32,8 +34,10 @@ import com.google.inject.Singleton;
 @Singleton
 public class SearchBar extends JXPanel {
 
+    @Resource private Color searchBorder;
+    
     private final LimeComboBox comboBox;
-    private final PromptTextField searchField;
+    private final LimePromptTextField searchField;
     private final JButton searchButton;
     
     private final DropDownListAutoCompleteControl dropDownListAutoCompleteControl;
@@ -81,7 +85,7 @@ public class SearchBar extends JXPanel {
         this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
         this.comboBox.setName("SearchBar.comboBox");
                 
-        this.searchField = new PromptTextField(I18n.tr("Search"), AccentType.BUBBLE);
+        this.searchField = new LimePromptTextField(I18n.tr("Search"), AccentType.BUBBLE, searchBorder);
         this.searchField.setName("SearchBar.searchField");
         
         this.searchButton = new IconButton();

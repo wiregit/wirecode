@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -45,6 +46,11 @@ public class LimePromptTextField extends JTextField implements FocusListener {
      */
     private AccentType accentType = AccentType.SHADOW;
     
+    /**
+     * Allows the default border paint to be overridden
+     */
+    private Paint workingBorder = null;  
+    
     
     public LimePromptTextField() {
         this.init();
@@ -62,10 +68,11 @@ public class LimePromptTextField extends JTextField implements FocusListener {
         this.init();
     }
     
-    public LimePromptTextField(String promptText, AccentType accentType) {
+    public LimePromptTextField(String promptText, AccentType accentType, Paint border) {
         this.promptText = promptText;
         this.accentType = accentType;
-    
+        this.workingBorder = border;
+        
         init();
     }
     
@@ -79,7 +86,11 @@ public class LimePromptTextField extends JTextField implements FocusListener {
     
     private void init() {
         GuiUtils.assignResources(this);
-
+        
+        if (workingBorder == null) {
+            workingBorder = borderColour;
+        }            
+        
         TextFieldClipboardControl.install(this);
         this.addFocusListener(this);
         this.setOpaque(false);
@@ -204,7 +215,7 @@ public class LimePromptTextField extends JTextField implements FocusListener {
         painter.setCacheable(true);
         
         compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
-                this.borderColour,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
+                workingBorder,  this.bevelLeft,  this.bevelTop1,  this.bevelTop2, 
                 this.bevelRight,  this.bevelBottom, this.accentType));
         compoundPainter.setCacheable(true);
         
