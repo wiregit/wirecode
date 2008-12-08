@@ -6,18 +6,22 @@ import java.util.List;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.table.JTableHeader;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 import org.limewire.core.api.library.LibraryData;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.util.FileUtils;
 
 public class LibraryManagerTreeTable extends JXTreeTable {
     
     private final LibraryData libraryData;
 
-    public LibraryManagerTreeTable(LibraryData libraryData) {        
+    public LibraryManagerTreeTable(LibraryData libraryData) {
+        setTableHeaderRenderer();
+        
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setEditable(true);
         this.libraryData = libraryData;
@@ -100,6 +104,11 @@ public class LibraryManagerTreeTable extends JXTreeTable {
             }
         }
         return null;
+    }
+    
+    protected void setTableHeaderRenderer() { 
+        JTableHeader th = getTableHeader(); 
+        th.setDefaultRenderer(new TableCellHeaderRenderer()); 
     }
     
 }
