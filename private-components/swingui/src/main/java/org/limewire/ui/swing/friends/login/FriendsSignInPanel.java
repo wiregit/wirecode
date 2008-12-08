@@ -113,6 +113,8 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                     @Override
                     public void run() {
                         if(switchUser) {
+                            // 'Switch User' trumps 'Remember Me'
+                            accountManager.setAutoLoginConfig(null);
                             shareLabel.setVisible(false);
                             loginPanel.setVisible(true);
                             loggedInPanel.setVisible(false);
