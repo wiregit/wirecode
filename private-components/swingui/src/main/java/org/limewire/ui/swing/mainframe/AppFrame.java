@@ -239,7 +239,7 @@ public class AppFrame extends SingleFrameApplication {
     
     @EventSubscriber
     public void handleExitApplication(ExitApplicationEvent event) {
-        exit();
+        exit(event.getActionEvent());
     }
     
     @EventSubscriber

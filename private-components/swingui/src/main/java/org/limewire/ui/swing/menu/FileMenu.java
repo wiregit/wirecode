@@ -59,7 +59,7 @@ public class FileMenu extends JMenu {
             add(new AbstractAction(I18n.tr("E&xit")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    new ExitApplicationEvent().publish();
+                    new ExitApplicationEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown")).publish();
                 }
             });
         }

@@ -98,7 +98,7 @@ public class MacEventHandler {
     }
     
     private void handleQuit() {
-        new ExitApplicationEvent().publish();
+        new ExitApplicationEvent(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown")).publish();
     }
     
     /**
