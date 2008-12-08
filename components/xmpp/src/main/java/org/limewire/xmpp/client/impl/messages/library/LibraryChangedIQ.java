@@ -18,7 +18,7 @@ public class LibraryChangedIQ extends IQ {
                 }
             } else if(eventType == XmlPullParser.END_TAG) {
                 if(parser.getName().equals("library-changed")) {
-                    return;
+                    break;
                 }
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);

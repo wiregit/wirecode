@@ -8,15 +8,19 @@ import org.jivesoftware.smack.packet.IQ;
 import org.limewire.io.Address;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
+import org.limewire.util.StringUtils;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class AddressIQ extends IQ {
-    private Address address;
-    private AddressFactory factory;
+    
+    private final Address address;
+    private final AddressFactory factory;
 
-    public AddressIQ(XmlPullParser parser, AddressFactory factory) throws IOException, XmlPullParserException {
+    public AddressIQ(XmlPullParser parser, AddressFactory factory) throws IOException, XmlPullParserException, InvalidIQException {
         this.factory = factory;
+        Address parsedAddress = null;
         do {
             int eventType = parser.getEventType();
             if(eventType == XmlPullParser.START_TAG) {
@@ -26,25 +30,28 @@ public class AddressIQ extends IQ {
                         if(eventType == XmlPullParser.START_TAG) {
                             String type = parser.getName();
                             String value = parser.getAttributeValue(null, "value");
-                            address = factory.deserialize(type,  Base64.decodeBase64(value.getBytes("UTF-8")));
-                            return;
-                        } else {
-                            return;
+                            if (value == null) {
+                                throw new InvalidIQException("no value attribute");
+                            }
+                            try {
+                                parsedAddress = factory.deserialize(type,  Base64.decodeBase64(StringUtils.toUTF8Bytes(value)));
+                            } catch (IOException ie) {
+                                throw new InvalidIQException("invalid address: " + value, ie);
+                            }
                         }
-                    } else {
-                        return;
                     }
                 }
-            } else if(eventType == XmlPullParser.END_TAG) {
+            } else if (eventType == XmlPullParser.END_TAG) {
                 if(parser.getName().equals("address")) {
-                    return;
+                    break;
                 }
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-    }
-    
-    public AddressIQ() {
         
+        if (parsedAddress == null) {
+            throw new InvalidIQException("no address to be parsed"); 
+        }
+        this.address = parsedAddress;
     }
     
     public AddressIQ(Address address, AddressFactory factory) {

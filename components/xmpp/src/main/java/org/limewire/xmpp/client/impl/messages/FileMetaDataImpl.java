@@ -21,7 +21,7 @@ public class FileMetaDataImpl implements FileMetaData {
 
     private final Map<Element, String> data = new HashMap<Element, String>();
 
-    public FileMetaDataImpl(XmlPullParser parser) throws XmlPullParserException, IOException {
+    public FileMetaDataImpl(XmlPullParser parser) throws XmlPullParserException, IOException, InvalidIQException {
         parser.nextTag();
         do {            
             int eventType = parser.getEventType();

@@ -1,13 +1,11 @@
 package org.limewire.xmpp.client.impl.messages.connectrequest;
 
-import java.io.IOException;
-
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 public class ConnectBackRequestIQProvider implements IQProvider {
 
@@ -17,15 +15,9 @@ public class ConnectBackRequestIQProvider implements IQProvider {
     public IQ parseIQ(XmlPullParser parser) throws Exception {
         try {
             return new ConnectBackRequestIQ(parser);
-        } catch (RuntimeException re) {
-            LOG.debug("runtime", re);
-            throw re;
-        } catch (IOException ie) {
-            LOG.debug("io", ie);
-            throw ie;
-        } catch (XmlPullParserException e) {
-            LOG.debug("xml", e);
-            throw e;
+        } catch (InvalidIQException ie) {
+            LOG.debug("invalid iq", ie);
+            return null;
         }
     }
 

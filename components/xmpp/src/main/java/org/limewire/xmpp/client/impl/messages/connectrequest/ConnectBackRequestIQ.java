@@ -11,6 +11,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.net.address.ConnectableSerializer;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -40,7 +41,7 @@ public class ConnectBackRequestIQ extends IQ {
     /**
      * Only constructs valid connect request iqs, otherwise throws {@link IOException}. 
      */
-    public ConnectBackRequestIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
+    public ConnectBackRequestIQ(XmlPullParser parser) throws IOException, XmlPullParserException, InvalidIQException {
        int eventType = parser.getEventType();
        GUID guid = null;
        int fwtVersion = -1;
@@ -50,35 +51,35 @@ public class ConnectBackRequestIQ extends IQ {
                if (parser.getName().equals(ELEMENT_NAME)) {
                    String value = parser.getAttributeValue(null, "client-guid");
                    if (value == null) {
-                       throw new IOException("no guid provided");
+                       throw new InvalidIQException("no guid provided");
                    }
                    try { 
                        guid = new GUID(value);
                    } catch (IllegalArgumentException iae) {
-                       throw new IOException("invalid guid: " + value, iae);
+                       throw new InvalidIQException("invalid guid: " + value, iae);
                    }
                    value = parser.getAttributeValue(null, "supported-fwt-version");
                    if (value == null) {
-                       throw new IOException("no fwt version provided");
+                       throw new InvalidIQException("no fwt version provided");
                    }
                    try {
                        fwtVersion = Integer.parseInt(value);
                    } catch (NumberFormatException nfe) {
-                       throw new IOException("fwt version no a valid number: " + value, nfe);
+                       throw new InvalidIQException("fwt version no a valid number: " + value, nfe);
                    }
                } else if (parser.getName().equals("address")) {
                    String type = parser.getAttributeValue(null, "type");
                    ConnectableSerializer serializer = new ConnectableSerializer();
                    if (type == null || !type.equals(serializer.getAddressType())) {
-                       throw new IOException("no address type provided or invalid: " + type);
+                       throw new InvalidIQException("no address type provided or invalid: " + type);
                    }
                    String value = parser.getAttributeValue(null, "value");
                    if (value == null) {
-                       throw new IOException("no address value found");
+                       throw new InvalidIQException("no address value found");
                    }
                    connectable = serializer.deserialize(Base64.decodeBase64(StringUtils.toUTF8Bytes(value)));
                    if (!NetworkUtils.isValidIpPort(connectable)) {
-                       throw new IOException("invalid address: " + connectable);
+                       throw new InvalidIQException("invalid address: " + connectable);
                    }
                }
            } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals(ELEMENT_NAME)) {
@@ -87,7 +88,7 @@ public class ConnectBackRequestIQ extends IQ {
            }
        }
        if (guid == null || fwtVersion == -1 || connectable == null) {
-           throw new IOException(MessageFormat.format("incomplete connect request, {0}, {1}, {2}", guid, fwtVersion, connectable));
+           throw new InvalidIQException(MessageFormat.format("incomplete connect request, {0}, {1}, {2}", guid, fwtVersion, connectable));
        }
        clientGuid = guid;
        supportedfwtVersion = fwtVersion;

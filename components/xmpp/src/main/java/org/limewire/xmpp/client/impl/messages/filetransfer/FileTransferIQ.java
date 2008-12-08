@@ -1,36 +1,50 @@
 package org.limewire.xmpp.client.impl.messages.filetransfer;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
+import org.limewire.xmpp.client.impl.messages.InvalidIQException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class FileTransferIQ extends IQ {
 
+    private static Log LOG = LogFactory.getLog(FileTransferIQ.class);
+    
     public enum TransferType {OFFER, REQUEST}
 
-    private FileMetaData fileMetaData;
-    private TransferType transferType;
+    private final FileMetaData fileMetaData;
+    private final TransferType transferType;
     
-    public FileTransferIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
+    public FileTransferIQ(XmlPullParser parser) throws IOException, XmlPullParserException, InvalidIQException {
+        FileMetaData parsedMetaData = null;
+        TransferType parsedTransferType = null;
         do {
             int eventType = parser.getEventType();
             if(eventType == XmlPullParser.START_TAG) {
                 if(parser.getName().equals("file-transfer")) {
-                    transferType = TransferType.valueOf(parser.getAttributeValue(null, "type"));
+                    parsedTransferType = TransferType.valueOf(parser.getAttributeValue(null, "type"));
                 } else if(parser.getName().equals("file")) {
-                    fileMetaData = new FileMetaDataImpl(parser);
+                    parsedMetaData = new FileMetaDataImpl(parser);
                 }
             } else if(eventType == XmlPullParser.END_TAG) {
                 if(parser.getName().equals("file-transfer")) {
-                    return;
+                    break;
                 }
             }
         } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
+        
+        if (parsedMetaData == null || parsedTransferType == null) {
+            throw new InvalidIQException(MessageFormat.format("parsedMetaData {0}, parsedTransferType {1}", parsedMetaData, parsedTransferType));
+        }
+        this.fileMetaData = parsedMetaData;
+        this.transferType = parsedTransferType;
     }
     
     public FileTransferIQ(FileMetaData fileMetaData, TransferType transferType) {
@@ -61,8 +75,13 @@ public class FileTransferIQ extends IQ {
 
     private static class FileTransferIQProvider implements IQProvider {
 
-        public IQ parseIQ(XmlPullParser parser) throws Exception {                     
-            return new FileTransferIQ(parser);
+        public IQ parseIQ(XmlPullParser parser) throws Exception {
+            try {
+                return new FileTransferIQ(parser);
+            } catch (InvalidIQException ie) {
+                LOG.debug("invalid iq", ie);
+                return null;
+            }
         }
     }
 }
