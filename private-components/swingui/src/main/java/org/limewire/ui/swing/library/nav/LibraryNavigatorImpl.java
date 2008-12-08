@@ -45,7 +45,6 @@ import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
@@ -115,14 +114,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         });
         
-        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");        
+        p2pNetwork = initializePanel(I18n.tr("P2P Network"), p2pNetworkSharingPanel, "LibraryNavigator.p2pNetwork");
+        p2pNetwork.setTransferHandler(new FriendLibraryNavTransferHandler(shareListManager.getGnutellaShareList()));
+        
         allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
 
         setLayout(new MigLayout("insets 0, fill, gap 2"));
-        add(myLibrary, "growx, wmin 0, wrap"); 
-        add(p2pNetwork, "growx, wmin 0, wrap");
-        add(allFriends, "growx, wmin 0, wrap");
-        add(friendsPanel, "growx, wmin 0, wrap");
+
         
         JXPanel friendsListPanel = new JXPanel(new VerticalLayout(2));
         friendsListPanel.setOpaque(false);
@@ -133,35 +131,15 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollableNav.setBorder(null);
-        add(scrollableNav, "grow, wmin 0, wrap");
         
-        // Add all the navlists and hook up the actions.
-        myLibrary.getActionMap().put(NavKeys.MOVE_DOWN, p2pNetwork.getAction());
-        p2pNetwork.getActionMap().put(NavKeys.MOVE_UP, myLibrary.getAction());
-        p2pNetwork.getActionMap().put(NavKeys.MOVE_DOWN, allFriends.getAction());
-        allFriends.getActionMap().put(NavKeys.MOVE_UP, p2pNetwork.getAction());
-        allFriends.getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(allLists[0], true));
-        for(int i = 0; i < allLists.length; i++) {
-            // Move up action goes to all friends if first
-            if(i == 0) {
-                allLists[i].getActionMap().put(NavKeys.MOVE_UP, new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        allFriends.select();
-                    }
-                });
-            } else {
-                // Otherwise it goes to the prior list.
-                allLists[i].getActionMap().put(NavKeys.MOVE_UP, new MoveAction(allLists[i-1], false));
-            }
-            
-            // If this isn't the last list, down goes to the next
-            if(i < allLists.length - 1) {
-                allLists[i].getActionMap().put(NavKeys.MOVE_DOWN, new MoveAction(allLists[i+1], true));
-            }
-            
-            friendsListPanel.add(allLists[i]);
-        }
+        addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
+        addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
+        addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
+        addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
+        addItem(scrollableNav,this, "grow, wmin 0, wrap",  null, null);
+        addItem(limewireList, friendsListPanel, "", allFriends.getAction(), new MoveAction(onlineList, true));
+        addItem(onlineList,  friendsListPanel, "", new MoveAction(limewireList, false), new MoveAction(offlineList, true));
+        addItem(offlineList, friendsListPanel, "", new MoveAction(onlineList, false), null);
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override
@@ -211,6 +189,16 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         }.install(remoteLibraryManager.getSwingFriendLibraryList());
     }
+    
+    private void addItem(JComponent item, JComponent parent, String constraints, Action upAction, Action downAction) {
+        parent.add(item, constraints);
+        if(upAction != null) {
+            item.getActionMap().put(NavKeys.MOVE_UP, upAction);
+        }
+        if(downAction != null) {
+            item.getActionMap().put(NavKeys.MOVE_DOWN, downAction);
+        }
+    }    
     
     private NavPanel initializePanel(String title, JComponent component, String name) {
         NavPanel panel = navPanelFactory.createNavPanel(createAction(title, component), null, null);
@@ -319,7 +307,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private void disposeNavPanel(NavPanel navPanel) {
         navPanel.removeBrowse();
         navigator.getNavItem(NavCategory.LIBRARY, navPanel.getFriend().getId()).remove();
-    }    
+    }
     
     private NavPanel createFriendNavPanel(Friend friend) {
         final FriendLibraryMediator component = friendLibraryMediatorFactory.createMediator(friend);
@@ -333,7 +321,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         });
         navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NavKeys.MOVE_DOWN);
         navPanel.getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), NavKeys.MOVE_UP);
-        navPanel.setTransferHandler(new FriendLibraryNavTransferHandler(friend, shareListManager));
+        navPanel.setTransferHandler(new FriendLibraryNavTransferHandler(shareListManager.getOrCreateFriendShareList(friend)));
         
         return navPanel;
     }

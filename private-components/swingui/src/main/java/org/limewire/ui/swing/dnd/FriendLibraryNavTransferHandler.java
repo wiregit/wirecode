@@ -8,19 +8,15 @@ import java.util.List;
 
 import javax.swing.TransferHandler;
 
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.ShareListManager;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.util.DNDUtils;
 
 public class FriendLibraryNavTransferHandler extends TransferHandler {
 
-    private final Friend friend;
+    private final LocalFileList fileList;
 
-    private final ShareListManager shareListManager;
-
-    public FriendLibraryNavTransferHandler(Friend friend, ShareListManager shareListManager) {
-        this.friend = friend;
-        this.shareListManager = shareListManager;
+    public FriendLibraryNavTransferHandler(LocalFileList fileList) {
+        this.fileList = fileList;
     }
 
     @Override
@@ -48,12 +44,12 @@ public class FriendLibraryNavTransferHandler extends TransferHandler {
         return true;
     }
 
-    private void handleFiles(final List<File> fileList) {
-        for (File file : fileList) {
+    private void handleFiles(final List<File> files) {
+        for (File file : files) {
             if(file.isDirectory()) {
-                shareListManager.getFriendShareList(friend).addFolder(file);
+                fileList.addFolder(file);
             } else {
-                shareListManager.getFriendShareList(friend).addFile(file);
+                fileList.addFile(file);
             }
         }
     }
