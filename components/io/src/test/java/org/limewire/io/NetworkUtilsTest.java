@@ -832,5 +832,10 @@ public class NetworkUtilsTest extends BaseTestCase {
     public void testInvalidConnectableIsInvalid() {
         assertFalse(NetworkUtils.isValidAddress(ConnectableImpl.INVALID_CONNECTABLE.getAddress()));
         assertTrue(NetworkUtils.isValidPort(ConnectableImpl.INVALID_CONNECTABLE.getPort()));
+        assertFalse(NetworkUtils.isValidIpPort(ConnectableImpl.INVALID_CONNECTABLE));
+    }
+    
+    public void testInvalidAddressValiPort() throws Exception {
+        assertFalse(NetworkUtils.isValidIpPort(new ConnectableImpl("0.0.0.0", 20144, true)));
     }
 }
