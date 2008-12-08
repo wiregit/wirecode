@@ -4,6 +4,11 @@ import org.jdesktop.swingx.JXLabel;
 
 public class MultiLineLabel extends JXLabel {
     
+    public MultiLineLabel() {
+        super();
+        setLineWrap(true);
+    }
+    
     public MultiLineLabel(String text) {
         super(text);
         setLineWrap(true);
