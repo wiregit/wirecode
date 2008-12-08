@@ -16,6 +16,7 @@ import javax.swing.event.DocumentListener;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -44,15 +45,22 @@ public class AddFriendDialog extends LimeJDialog {
                 String user = usernameField.getText().trim();
                 if(user.indexOf('@') == -1)
                     user += "@" + connection.getConfiguration().getServiceName();
+                final String username = user;
                 // If the user didn't enter a nickname, use the username
                 String nick = nicknameField.getText().trim();
                 if(nick.equals(""))
                     nick = usernameField.getText();
+                final String nickname = nick;
                 setVisible(false);
                 dispose();
-                try {
-                    connection.addUser(user, nick);
-                } catch(XMPPException ignored) {}
+                BackgroundExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            connection.addUser(username, nickname);
+                        } catch(XMPPException ignored) {}
+                    }
+                });
             }
         });
         ok.setEnabled(false); // Disable until a username is entered
@@ -93,7 +101,7 @@ public class AddFriendDialog extends LimeJDialog {
         add(nicknameLabel);
         add(nicknameField, "span, wrap");
         add(ok, "cell 1 2");
-        add(cancel, "cell 2 2, wrap");
+        add(cancel, "cell 2 2");
 
         pack();
         setVisible(true);

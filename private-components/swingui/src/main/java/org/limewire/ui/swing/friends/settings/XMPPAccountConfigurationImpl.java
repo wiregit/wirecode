@@ -25,8 +25,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     private final String resource;
     private final boolean isDebugEnabled;
     private final boolean requiresDomain;
-    private volatile String host;
-    private final int port;
     private volatile String serviceName;
     private volatile String label;
     private final Icon icon;    
@@ -40,8 +38,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
             StringTokenizer st = new StringTokenizer(configString, ",");
             isDebugEnabled = Boolean.valueOf(st.nextToken());
             requiresDomain = Boolean.valueOf(st.nextToken());
-            host = st.nextToken();
-            port = Integer.valueOf(st.nextToken());
             serviceName = st.nextToken();
             label = st.nextToken();
         } catch(NoSuchElementException nsex) {
@@ -62,8 +58,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
         this.resource = resource;
         isDebugEnabled = false;
         requiresDomain = false;
-        host = "";
-        port = 5222;
         serviceName = "";
         label = "";
         icon = new EmptyIcon(16, 16); // Naomi Klein
@@ -77,16 +71,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     }
 
     @Override
-    public String getHost() {
-        return host;
-    }
-
-    @Override
-    public int getPort() {
-        return port;
-    }
-
-    @Override
     public String getServiceName() {
         return serviceName;
     }
@@ -94,7 +78,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     @Override
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
-        host = serviceName;
     }
 
     @Override
@@ -163,7 +146,6 @@ class XMPPAccountConfigurationImpl implements XMPPAccountConfiguration {
     @Override
     public String toString() {
         // Return a string that can be parsed back into a config
-        return isDebugEnabled + "," + requiresDomain + "," +
-                host + "," + port + "," + serviceName + "," + label;
+        return isDebugEnabled + "," + requiresDomain + "," + serviceName + "," + label;
     }
 }

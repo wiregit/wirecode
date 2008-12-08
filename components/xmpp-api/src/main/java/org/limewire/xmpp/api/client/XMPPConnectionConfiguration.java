@@ -21,12 +21,6 @@ public interface XMPPConnectionConfiguration extends Network {
     /** Returns the password this configuration will use. */
     public String getPassword();
     
-    /** Returns the host this configuration will connect to. */
-    public String getHost();
-    
-    /** Returns the port this configuration will connect to. */
-    public int getPort();
-    
     /**
      * Returns a user-friendly name for the account.
      * This is something like <code>Example</code> for example.com's

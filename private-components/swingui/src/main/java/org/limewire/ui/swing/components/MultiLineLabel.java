@@ -19,7 +19,4 @@ public class MultiLineLabel extends JXLabel {
         setMaxLineSpan(lineWidth);
         setLineWrap(true);
     }
-    
-    
-
 }

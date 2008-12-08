@@ -53,8 +53,6 @@ public class XMPPServiceTest extends BaseTestCase {
     private static final String USERNAME_2 = "automatedtestfriend2@gmail.com";
     private static final String PASSWORD_1 = "automatedtestfriend123";
     private static final String PASSWORD_2 = "automatedtestfriend234";
-    private static final String HOST = "talk.google.com";
-    private static final int PORT = 5222;
     private static final String SERVICE = "gmail.com";
 
     private static final int SLEEP = 5000; // Milliseconds
@@ -83,9 +81,9 @@ public class XMPPServiceTest extends BaseTestCase {
         aliceRosterListener = new RosterListenerMock();
         bobRosterListener = new RosterListenerMock();
         XMPPConnectionConfiguration alice = new XMPPConnectionConfigurationMock(USERNAME_1, PASSWORD_1,
-                HOST, PORT, SERVICE, aliceRosterListener);
+                SERVICE, aliceRosterListener);
         XMPPConnectionConfiguration bob = new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
-                HOST, PORT, SERVICE, bobRosterListener);
+                SERVICE, bobRosterListener);
         service.login(alice);
         service.login(bob);
         // Allow login, roster, presence, library messages to be sent, received
@@ -394,7 +392,7 @@ public class XMPPServiceTest extends BaseTestCase {
         RosterListenerMock bob2RosterListener = new RosterListenerMock();
         XMPPConnectionConfiguration bob2 = 
             new XMPPConnectionConfigurationMock(USERNAME_2, PASSWORD_2,
-                    HOST, PORT, SERVICE, bob2RosterListener);
+                    SERVICE, bob2RosterListener);
         service.login(bob2);
         Thread.sleep(SLEEP);
 

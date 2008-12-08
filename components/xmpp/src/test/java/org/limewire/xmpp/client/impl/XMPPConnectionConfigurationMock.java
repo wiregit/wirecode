@@ -7,18 +7,13 @@ import org.limewire.xmpp.api.client.RosterEvent;
 public class XMPPConnectionConfigurationMock implements XMPPConnectionConfiguration {
     private final String username;
     private final String password;
-    private final String host;
-    private final int port;
     private final String serviceName;
     private final EventListener<RosterEvent> rosterListener;
 
     public XMPPConnectionConfigurationMock(String username, String password,
-            String host, int port, String serviceName,
-            EventListener<RosterEvent> rosterListener) {
+            String serviceName, EventListener<RosterEvent> rosterListener) {
         this.username = username;
         this.password = password;
-        this.host = host;
-        this.port = port;
         this.serviceName = serviceName;
         this.rosterListener = rosterListener;
     }
@@ -36,16 +31,6 @@ public class XMPPConnectionConfigurationMock implements XMPPConnectionConfigurat
     @Override
     public String getPassword() {
         return password;
-    }
-
-    @Override
-    public String getHost() {
-        return host;
-    }
-
-    @Override
-    public int getPort() {
-        return port;
     }
 
     @Override

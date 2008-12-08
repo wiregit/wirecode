@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
@@ -24,6 +25,7 @@ import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
+import org.limewire.xmpp.api.client.FriendRequestEvent;
 import org.limewire.xmpp.api.client.JabberSettings;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.Presence;
@@ -49,32 +51,35 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
 
     private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
+    private final Provider<EventBroadcaster<FriendRequestEvent>> friendRequestBroadcaster;
     private final Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster;
     private final AddressFactory addressFactory;
     private final Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster;
     private final XMPPAuthenticator authenticator;
     private final EventMulticaster<FeatureEvent> featureSupport;
-    // Connections that are logged in or logging in
-    private final List<XMPPConnectionImpl> connections;
-    
-    private AddressEvent lastAddressEvent;
-    private boolean multipleConnectionsAllowed;
-
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
     private final JabberSettings jabberSettings;
+    
+    // Connections that are logged in or logging in
+    private final List<XMPPConnectionImpl> connections;
+    private boolean multipleConnectionsAllowed;    
+    private AddressEvent lastAddressEvent;
 
     @Inject
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
             Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster,
+            Provider<EventBroadcaster<FriendRequestEvent>> friendRequestBroadcaster,
             Provider<EventBroadcaster<LibraryChangedEvent>> libraryChangedBroadcaster,
             Provider<EventMulticaster<XMPPConnectionEvent>> connectionBroadcaster,
             AddressFactory addressFactory, XMPPAuthenticator authenticator,
             EventMulticaster<FeatureEvent> featureSupport,
             EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
-            XMPPAddressRegistry xmppAddressRegistry, JabberSettings jabberSettings) {
+            XMPPAddressRegistry xmppAddressRegistry,
+            JabberSettings jabberSettings) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
+        this.friendRequestBroadcaster = friendRequestBroadcaster;
         this.libraryChangedBroadcaster = libraryChangedBroadcaster;
         this.connectionBroadcaster = connectionBroadcaster;
         this.addressFactory = addressFactory;
@@ -83,9 +88,12 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.xmppAddressRegistry = xmppAddressRegistry;
         this.jabberSettings = jabberSettings;
-        this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
-        this.multipleConnectionsAllowed = false;
-        this.connectionBroadcaster.get().addListener(new ReconnectionManager());
+
+        connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
+        multipleConnectionsAllowed = false;
+        connectionBroadcaster.get().addListener(new ReconnectionManager());
+        // We'll install our own subscription listeners
+        Roster.setDefaultSubscriptionMode(Roster.SubscriptionMode.manual);
     }
 
     @Inject
@@ -142,10 +150,14 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                 }                
             }
             
-            XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration,
-                    rosterBroadcaster.get(), fileOfferBroadcaster.get(),
-                    libraryChangedBroadcaster.get(), connectionBroadcaster.get(),
-                    addressFactory, authenticator, featureSupport, connectRequestEventBroadcaster, xmppAddressRegistry);
+            XMPPConnectionImpl connection = new XMPPConnectionImpl(
+                    configuration, rosterBroadcaster.get(),
+                    fileOfferBroadcaster.get(),
+                    friendRequestBroadcaster.get(),
+                    libraryChangedBroadcaster.get(),
+                    connectionBroadcaster.get(),
+                    addressFactory, authenticator, featureSupport,
+                    connectRequestEventBroadcaster, xmppAddressRegistry);
             if(lastAddressEvent != null) {
                 connection.handleEvent(lastAddressEvent);
             }

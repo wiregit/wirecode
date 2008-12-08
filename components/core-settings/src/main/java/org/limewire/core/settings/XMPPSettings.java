@@ -15,8 +15,8 @@ public class XMPPSettings extends LimeProps {
     
     public static final StringSetSetting XMPP_SERVERS =
         FACTORY.createStringSetSetting("XMPP_SERVERS",
-                "false,true,talk.google.com,5222,gmail.com,Gmail;" +
-                "false,false,xmpp.services.livejournal.com,5222,livejournal.com,LiveJournal;" +
+                "false,true,gmail.com,Gmail;" +
+                "false,false,livejournal.com,LiveJournal;" +
         "");
     
     public static final StringSetting XMPP_SERVER =
