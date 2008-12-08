@@ -57,6 +57,7 @@ public class UploadPanel extends JXPanel{
         this.uploadItems = listManager.getSwingThreadSafeUploads();
 
         UploadTable table = new UploadTable(uploadItems, categoryIconManager, progressBarFactory, propertiesFactory);
+        table.setTableHeader(null);
         initHeader();
         
         JScrollPane scrollPane = new JScrollPane(table);
