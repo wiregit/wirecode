@@ -109,13 +109,19 @@ class SystemTrayNotifier implements TrayNotifier {
 	
 	@Override
 	public boolean isExitEvent(EventObject event) {
-	    if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+	    if (!ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
 	        return true;
 	    }
 	    
-	    if(event != null && event.getSource() instanceof MenuItem) {
-	        MenuItem item = (MenuItem)event.getSource();
+	    if ((event != null) && (event.getSource() instanceof MenuItem)) {
+	        // Return true on exit from system tray popup menu.
+	        MenuItem item = (MenuItem) event.getSource();
 	        return item.getParent() == popupMenu;
+	        
+        } else if (event instanceof ActionEvent) {
+            // Return true on action to shutdown application.
+            return "Shutdown".equals(((ActionEvent) event).getActionCommand());
+            
 	    } else {
 	        return false;
 	    }
