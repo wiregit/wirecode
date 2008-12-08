@@ -58,39 +58,41 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
 
     @Override
     public String getSubHeading(PropertiableFile propertiable) {
+        //TODO: Unit test this class (then refactor)!!! So many conditions :-(
         String subheading = "";
 
         switch (propertiable.getCategory()) {
         case AUDIO: {
             String albumTitle = getPropertyString(propertiable, FilePropertyKey.ALBUM);
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.LENGTH));
+            Long qualityScore = getQualityScore(propertiable);
+            Long length = getLength(propertiable);
 
-            boolean insertHypen = false;
+            boolean insertHyphen = false;
             if (!StringUtils.isEmpty(albumTitle)) {
                 subheading += albumTitle;
-                insertHypen = true;
+                insertHyphen = true;
             }
 
             if (qualityScore != null) {
-                if (insertHypen) {
+                if (insertHyphen) {
                     subheading += " - ";
                 }
                 subheading += I18n.tr("{0} Quality", GuiUtils.toQualityString(qualityScore));
-                insertHypen = true;
+                insertHyphen = true;
             }
 
             if (length != null) {
-                if (insertHypen) {
-                    subheading += " - ";
-                }
-                subheading += CommonUtils.seconds2time(length);
+                subheading = addLength(subheading, length, insertHyphen);
+            } else {
+                Long fileSize = getFileSize(propertiable);
+                subheading = addFileSize(subheading, fileSize, insertHyphen);
             }
         }
             break;
         case VIDEO: {
-            Long qualityScore = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
-            Long length = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.LENGTH));
+            Long qualityScore = getQualityScore(propertiable);
+            Long length = getLength(propertiable);
+            Long fileSize = getFileSize(propertiable);
 
             boolean insertHyphen = false;
             if (qualityScore != null) {
@@ -98,12 +100,10 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
                 insertHyphen = true;
             }
 
-            if (length != null) {
-                if (insertHyphen) {
-                    subheading += " - ";
-                }
-                subheading += CommonUtils.seconds2time(length);
-            }
+            subheading = addLength(subheading, length, insertHyphen);
+            
+            subheading = addFileSize(subheading, fileSize, insertHyphen);
+            
         }
             break;
         case IMAGE: {
@@ -114,7 +114,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         }
             break;
         case PROGRAM: {
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
+            Long fileSize = getFileSize(propertiable);
             if (fileSize != null) {
                 subheading = GuiUtils.toUnitbytes(fileSize);
             }
@@ -126,13 +126,43 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
              subheading = iconManager.getMIMEDescription(propertiable);
             // TODO add name of program used to open this file, not included in
             // 5.0
-            Long fileSize = CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
-            if (fileSize != null) {
-                subheading = (subheading == null ? "" : subheading + " - ") + GuiUtils.toUnitbytes(fileSize);
-            }
+            Long fileSize = getFileSize(propertiable);
+            subheading = addFileSize(subheading, fileSize, subheading == null);
         }
         }
         return subheading == null ? "" : subheading;
 
+    }
+
+    private String addLength(String subheading, Long length, boolean insertHyphen) {
+        if (length != null) {
+            if (insertHyphen) {
+                subheading += " - ";
+            }
+            subheading += CommonUtils.seconds2time(length);
+        }
+        return subheading;
+    }
+
+    private String addFileSize(String subheading, Long fileSize, boolean insertHyphen) {
+        if (fileSize != null) {
+            if (insertHyphen) {
+                subheading += " - ";
+            }
+            subheading += GuiUtils.toUnitbytes(fileSize);
+        }
+        return subheading;
+    }
+
+    private Long getLength(PropertiableFile propertiable) {
+        return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.LENGTH));
+    }
+
+    private Long getQualityScore(PropertiableFile propertiable) {
+        return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
+    }
+
+    private Long getFileSize(PropertiableFile propertiable) {
+        return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
     }
 }
