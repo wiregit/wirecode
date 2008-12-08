@@ -3,6 +3,9 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -154,6 +157,13 @@ public class AppFrame extends SingleFrameApplication {
 
         trayNotifier.showTrayIcon();
         getMainFrame().setJMenuBar(limeMenuBar);
+
+        // Add listener to cancel delayed shutdown whenever UI is restored.
+        getMainFrame().addWindowListener(new WindowAdapter() {
+            public void windowDeiconified(WindowEvent e) {
+                cancelDelayedShutdown();
+            }
+        });
         
         addExitListener(new TrayExitListener(trayNotifier));
         addExitListener(new ShutdownListener(getMainFrame(), application));
@@ -237,9 +247,6 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setVisible(true);
         getMainFrame().setState(Frame.NORMAL);
         getMainFrame().toFront();
-        
-        // Delayed shutdown always cancelled when UI is visible.
-        cancelDelayedShutdown();
     }
     
     @Action
@@ -330,7 +337,8 @@ public class AppFrame extends SingleFrameApplication {
      */
     private void doDelayedShutdown() {
         if (shutdownInitiated && downloadsCompleted && uploadsCompleted) {
-            exit();
+            // Exit using action to notify ExitListener instances.
+            exit(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown"));
         }
     }
     
