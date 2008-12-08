@@ -3,8 +3,6 @@ package org.limewire.ui.swing.library;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
@@ -13,10 +11,11 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+
+import ca.odell.glazedlists.EventList;
+import net.miginfocom.swing.MigLayout;
 
 public class FriendLibraryMediator extends LibraryMediator {
 
@@ -27,7 +26,7 @@ public class FriendLibraryMediator extends LibraryMediator {
     private final ShareListManager shareListManager;
 
     private final Friend friend;
-    private boolean setLibraryPanel;
+    private EventList<RemoteFileItem> eventList;
     
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
@@ -45,14 +44,13 @@ public class FriendLibraryMediator extends LibraryMediator {
     public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
-            setLibraryPanel = false;
             setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new ConnectionErrorComponent()));
             showLibraryCard();
             break;
         case LOADED:
         case LOADING:
-            if(!setLibraryPanel) {
-                setLibraryPanel = true;
+            if(this.eventList != eventList) {
+                this.eventList = eventList;
                 setLibraryCard(factory.createFriendLibrary(friend, eventList, this));
                 showLibraryCard();
             }

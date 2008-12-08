@@ -49,6 +49,8 @@ class LibraryMediator extends JPanel implements Disposable {
     
     public void showLibraryCard() {
         cardLayout.show(this, LIBRRY_CARD);
+        validate();
+        repaint();
     }
     
     protected void showSharingCard() {
