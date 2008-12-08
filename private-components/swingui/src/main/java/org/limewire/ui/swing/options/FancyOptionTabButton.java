@@ -26,6 +26,7 @@ public class FancyOptionTabButton extends JXButton {
         
         setVerticalTextPosition(SwingConstants.BOTTOM);
         setHorizontalTextPosition(SwingConstants.CENTER);
+        setIconTextGap(0);
         setPreferredSize(new Dimension(getPreferredSize().width, 50));
         setGradients(Color.gray, Color.gray.brighter().brighter());
         setBorderPainted(false);

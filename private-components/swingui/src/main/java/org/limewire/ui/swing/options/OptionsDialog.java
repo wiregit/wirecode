@@ -13,6 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -45,6 +46,19 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     private Color dividerColor;
     @Resource
     private Color backgroundColor;
+    @Resource
+    private Icon securityIcon;
+    @Resource
+    private Icon advancedIcon;
+    @Resource
+    private Icon downloadsIcon;
+    @Resource
+    private Icon libraryIcon;
+    @Resource
+    private Icon miscIcon;
+    @Resource
+    private Icon searchIcon;
+    
     
     private static final String LIBRARY = I18n.tr("Library");
     private static final String SEARCH = I18n.tr("Search");
@@ -94,7 +108,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         setPreferredSize(new Dimension(700,600));
         setResizable(false);
         
-        setDefaultCloseOperation(2);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
         createComponents();
         
@@ -149,16 +163,16 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         MoveDown down = new MoveDown();
         MoveUp up = new MoveUp();
         
-        createButton(LIBRARY, libraryOptionPanel, down, up);
-        createButton(SEARCH, searchOptionPanel, down, up);
-        createButton(DOWNLOADS, downloadOptionPanel, down, up);
-        createButton(SECURITY, securityOptionPanel, down, up);
-        createButton(MISC, miscOptionPanel, down, up);
-        createButton(ADVANCED, advancedOptionPanel, down, up);
+        createButton(LIBRARY, libraryIcon, libraryOptionPanel, down, up);
+        createButton(SEARCH, searchIcon, searchOptionPanel, down, up);
+        createButton(DOWNLOADS, downloadsIcon, downloadOptionPanel, down, up);
+        createButton(SECURITY, securityIcon, securityOptionPanel, down, up);
+        createButton(MISC, miscIcon, miscOptionPanel, down, up);
+        createButton(ADVANCED, advancedIcon, advancedOptionPanel, down, up);
     }
     
-    private void createButton(String title, Provider<? extends OptionPanel> provider, MoveDown down, MoveUp up) {
-        FancyOptionTabButton button = new FancyOptionTabButton(new TabAction(null, addOptionTab(title, this, provider)));
+    private void createButton(String title, Icon icon,  Provider<? extends OptionPanel> provider, MoveDown down, MoveUp up) {
+        FancyOptionTabButton button = new FancyOptionTabButton(new TabAction(icon, addOptionTab(title, this, provider)));
         
         button.getActionMap().put(MoveDown.KEY, down);
         button.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), MoveDown.KEY);
