@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-01 11:30-0500\n"
+"POT-Creation-Date: 2008-12-08 11:30-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,23 +58,23 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:17
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:18
 msgid "No problems."
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:18
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:19
 msgid "There is a disk problem."
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:19
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
 msgid "The file is corrupted"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:21
 msgid "The File is not shareable"
 msgstr ""
 
-#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:21
+#: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
 msgid "Trouble connecting to people"
 msgstr ""
 
@@ -249,7 +249,7 @@ msgstr ""
 msgid "Connection Listener"
 msgstr ""
 
-#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:73
+#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 msgid "Browse Host Handler"
 msgstr ""
 
@@ -257,7 +257,7 @@ msgstr ""
 msgid "Connection Dispatching"
 msgstr ""
 
-#: core/com/limegroup/gnutella/ConnectionManagerImpl.java:395
+#: core/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 msgid "Connection Management"
 msgstr ""
 
@@ -273,22 +273,22 @@ msgstr ""
 msgid "Gnutella Connections"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:200
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:201
 msgid "Old Downloads"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:223
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
 msgid "Download Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:272
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:273
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:274
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:275
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -303,7 +303,7 @@ msgstr ""
 msgid "Upload Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/HostCatcher.java:380
+#: core/com/limegroup/gnutella/HostCatcher.java:381
 msgid "Peer Locator"
 msgstr ""
 
@@ -311,11 +311,11 @@ msgstr ""
 msgid "Core Glue"
 msgstr ""
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:550
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:551
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:133
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:134
 msgid "Network Management"
 msgstr ""
 
@@ -331,7 +331,7 @@ msgstr ""
 msgid "Promotion System"
 msgstr ""
 
-#: core/com/limegroup/gnutella/QueryUnicaster.java:224
+#: core/com/limegroup/gnutella/QueryUnicaster.java:225
 msgid "Directed Querier"
 msgstr ""
 
@@ -427,7 +427,11 @@ msgstr ""
 msgid "Spam Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1007
+#: core/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
+msgid "Uptime Statistics"
+msgstr ""
+
+#: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1005
 msgid "Update Checks"
 msgstr ""
 
@@ -607,7 +611,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:34
 #: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:39
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:54
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:221
 msgid "Name"
 msgstr ""
 
@@ -623,11 +627,11 @@ msgstr ""
 msgid "Metadata Loader"
 msgstr ""
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:108
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:111
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:110
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:113
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 
@@ -887,7 +891,7 @@ msgstr ""
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
-"project. Without LimeWire users, the LimeWire network would not exist."
+"project. Without LimeWire users, the P2P network would not exist."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:327
@@ -2571,7 +2575,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:284
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:74
 msgid "Complete"
 msgstr ""
 
@@ -2823,13 +2827,13 @@ msgid "View All Files on the Selected Computer"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:52
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:227
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:229
 msgid "Host"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:55
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:371
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:243
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:245
 msgid "Status"
 msgstr ""
 
@@ -2875,14 +2879,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:411
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:283
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:285
 msgid "Vendor/Version"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:91
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:403
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:31
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:275
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:277
 msgid "Time"
 msgstr ""
 
@@ -2946,7 +2950,7 @@ msgid "Leaf"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:66
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:42
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:44
 msgid "Connecting"
 msgstr ""
 
@@ -3129,7 +3133,7 @@ msgid "Downloading .torrent file..."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:176
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:126
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:128
 msgid "Average Bandwidth"
 msgstr ""
 
@@ -3142,17 +3146,17 @@ msgid "Invalid Alternate Locations"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:194
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:132
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:134
 msgid "Started On"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:200
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:138
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:140
 msgid "Finished On"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:206
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:144
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:146
 msgid "Time Spent"
 msgstr ""
 
@@ -3211,19 +3215,19 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:106
 #: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:40
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:64
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:235
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:237
 msgid "Size"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:379
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:74
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:253
 msgid "Chat"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:387
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:261
 msgid "Progress"
 msgstr ""
 
@@ -3232,7 +3236,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:69
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:269
 msgid "Speed"
 msgstr ""
 
@@ -5799,7 +5803,7 @@ msgid "General"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:24
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:316
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:318
 msgid "Multiple"
 msgstr ""
 
@@ -6334,55 +6338,55 @@ msgstr ""
 msgid "Remove Inactive Uploads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:48
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:50
 msgid "Uploading"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:54
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:56
 msgid "Upload Limit Reached"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:60
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:62
 msgid "Freeloader Uploading"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:66
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:68
 msgid "Transfer Interrupted"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:78
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:80
 msgid "File Not Found"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:86
 msgid "Queued at"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:90
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:92
 msgid "Range Unavailable"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:96
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:98
 msgid "Malformed Request"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:102
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:104
 msgid "Banned Greedy Servent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:108
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:110
 msgid "Uploading Hash Tree"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:116
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:118
 msgid "Suspended"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:120
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:122
 msgid "Awaiting Requests"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:314
+#: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:316
 #, java-format
 msgid "Swarm for {0}"
 msgstr ""
