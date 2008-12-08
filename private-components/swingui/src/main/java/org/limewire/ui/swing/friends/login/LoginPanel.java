@@ -4,7 +4,6 @@ import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -31,10 +30,10 @@ import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.ActionLabel;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
@@ -54,7 +53,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
-    private static final String AUTHENTICATION_ERROR = tr("Incorrect password.");
+    private static final String AUTHENTICATION_ERROR = tr("Incorrect username\nor password.");
     private static final String NETWORK_ERROR = tr("Network error.");
 
     private JComboBox serviceComboBox;
@@ -106,14 +105,27 @@ class LoginPanel extends JXPanel implements SettingListener {
             }
         });
         serviceComboBox.setRenderer(new Renderer());
+        
         serviceLabel = new JLabel(tr("Jabber Server"));
         serviceField = new JTextField();
         usernameField = new JTextField();
         passwordField = new JPasswordField();
-
         passwordField.setAction(signinAction);
 
         autoLoginCheckBox = new JCheckBox(tr("Remember me"));
+        autoLoginCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                // When the user clears the auto-login checkbox,
+                // forget the auto-login config
+                if(!autoLoginCheckBox.isSelected()) {
+                    serviceField.setText("");
+                    usernameField.setText("");
+                    passwordField.setText("");
+                    accountManager.setAutoLoginConfig(null);
+                }
+            }
+        });
         autoLoginCheckBox.setOpaque(false);
         autoLoginCheckBox.setMargin(new Insets(0, 0, 0, 0));
         autoLoginCheckBox.setBorder(BorderFactory.createEmptyBorder());
@@ -121,7 +133,9 @@ class LoginPanel extends JXPanel implements SettingListener {
         signInButton = new JButton(signinAction);
         signInButton.setOpaque(false);
 
-        authFailedLabel = new JLabel();
+        authFailedLabel = new MultiLineLabel();
+        authFailedLabel.setVisible(false);
+        authFailedLabel.setForeground(Color.RED);
 
         JLabel hideButton = new ActionLabel(new AbstractAction(("X")) {
             @Override
@@ -143,10 +157,6 @@ class LoginPanel extends JXPanel implements SettingListener {
         add(autoLoginCheckBox, "gaptop 2, alignx left, wmin 0, wrap");
         add(authFailedLabel, "alignx left, wmin 0, hidemode 3, wrap");
         add(signInButton, "gaptop 2, alignx left, wmin 0");
-
-        authFailedLabel.setVisible(false);
-        authFailedLabel.setForeground(Color.RED);
-        FontUtils.changeStyle(authFailedLabel, Font.ITALIC);
 
         setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
 
