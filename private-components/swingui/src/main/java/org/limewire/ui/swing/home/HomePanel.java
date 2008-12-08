@@ -68,7 +68,7 @@ public class HomePanel extends JXPanel {
     }
     
     public void loadDefaultUrl() {
-        load("http://www.limewire.com/client_startup/alpha/");
+        load("http://client-data.limewire.com/client_startup/alpha/");
     }
 
     public void load(String url) {
