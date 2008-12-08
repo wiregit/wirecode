@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.search;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -41,6 +42,7 @@ import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
+import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -123,6 +125,7 @@ public class SearchResultsPanel extends JXPanel {
         this.scrollPane = new JScrollPane();
         scrollPane.setBorder(null);
         this.scrollablePanel = new ScrollablePanel();
+        configureEnclosingScrollPane();
 
         final EventList<VisualSearchResult> filteredList =
             sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList), preserver);
@@ -171,6 +174,20 @@ public class SearchResultsPanel extends JXPanel {
         messagePanel.add(messageLabel);
         messagePanel.setVisible(false);
         layoutComponents();
+    }
+    
+    /**
+    * Fills in the top right corner if a scrollbar appears
+    * with an empty table header
+    */
+    protected void configureEnclosingScrollPane() {
+        JTableHeader th = new JTableHeader();
+        th.setDefaultRenderer(new TableCellHeaderRenderer());
+        // Put a dummy header in the upper-right corner.
+        final Component renderer = th.getDefaultRenderer().getTableCellRendererComponent(null, "", false, false, -1, -1);
+        JPanel cornerComponent = new JPanel(new BorderLayout());
+        cornerComponent.add(renderer, BorderLayout.CENTER);
+        scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
     }
     
     private EventList<VisualSearchResult> newVisibleFilterList(
