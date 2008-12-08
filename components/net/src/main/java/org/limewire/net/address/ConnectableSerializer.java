@@ -9,8 +9,11 @@ import java.nio.ByteOrder;
 import java.util.Set;
 
 import org.limewire.io.Address;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -25,17 +28,14 @@ public class ConnectableSerializer implements AddressSerializer {
     private static final int IP_V4 = 0;
     private static final int IP_V6 = 1;
     
+    static final String CONNECTABLE = "CN";
+    
     public String getAddressType() {
         return "direct-connect";
     }
 
     public Class<? extends Address> getAddressClass() {
         return Connectable.class;
-    }
-
-    public Connectable deserialize(byte[] serializedAddress) throws IOException {
-        ByteArrayInputStream in = new ByteArrayInputStream(serializedAddress);
-        return deserialize(in);
     }
 
     public Address deserialize(String address) throws IOException {
@@ -45,25 +45,40 @@ public class ConnectableSerializer implements AddressSerializer {
         return NetworkUtils.parseIpPort(address, false);
     }
     
-    public Connectable deserialize(InputStream in) throws IOException {
-        int hostPortLength = (IOUtils.readByte(in) == IP_V4 ? 4 : 16) + 2;
-        byte[] hostPort = new byte[hostPortLength];
-        IOUtils.readFully(in, hostPort);
+    public Connectable deserialize(byte[] serializedAddress) throws IOException {
         try {
-            IpPort ipPort = NetworkUtils.getIpPort(hostPort, ByteOrder.BIG_ENDIAN);
-            boolean supportsTLS = IOUtils.readByte(in) == (byte)1;
-            return new ConnectableImpl(ipPort.getAddress(), ipPort.getPort(), supportsTLS);
-        } catch (InvalidDataException e) {
+            GGEP ggep = new GGEP(serializedAddress);
+            InputStream in = new ByteArrayInputStream(ggep.getBytes(CONNECTABLE));
+            int hostPortLength = (IOUtils.readByte(in) == IP_V4 ? 4 : 16) + 2;
+            byte[] hostPort = new byte[hostPortLength];
+            IOUtils.readFully(in, hostPort);
+            try {
+                IpPort ipPort = NetworkUtils.getIpPort(hostPort, ByteOrder.BIG_ENDIAN);
+                boolean supportsTLS = IOUtils.readByte(in) == (byte)1;
+                return new ConnectableImpl(ipPort.getAddress(), ipPort.getPort(), supportsTLS);
+            } catch (InvalidDataException e) {
+                throw new IOException(e);
+            }
+        } catch (BadGGEPBlockException e) {
+            throw new IOException(e);
+        } catch (BadGGEPPropertyException e) {
             throw new IOException(e);
         }
     }
     
-    public Set<Connectable> deserializeSet(InputStream in) throws IOException {
-        StrictIpPortSet<Connectable> set = new StrictIpPortSet<Connectable>();
-        while (in.available() > 0) {
-            set.add(deserialize(in));
+    public Set<Connectable> deserializeSet(byte[] serializedSet) throws IOException {
+        try {
+            GGEP ggep = new GGEP(serializedSet);
+            StrictIpPortSet<Connectable> set = new StrictIpPortSet<Connectable>();    
+            for (int i = 0; ggep.hasKey(CONNECTABLE + i); i++) {
+                set.add(deserialize(ggep.getBytes(CONNECTABLE + i)));
+            }
+            return set;
+        } catch (BadGGEPBlockException e) {
+            throw new IOException(e);
+        } catch (BadGGEPPropertyException e) {
+            throw new IOException(e);
         }
-        return set;
     }
 
     public byte[] serialize(Address address) throws IOException {
@@ -73,15 +88,19 @@ public class ConnectableSerializer implements AddressSerializer {
         bos.write(type);
         bos.write(NetworkUtils.getBytes(connectable, ByteOrder.BIG_ENDIAN));
         bos.write(connectable.isTLSCapable() ? (byte)1 : (byte) 0);
-        return bos.toByteArray();
+        GGEP ggep = new GGEP();
+        ggep.put(CONNECTABLE, bos.toByteArray());
+        return ggep.toByteArray();
     }
     
     public byte[] serialize(Set<Connectable> addresses) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        GGEP ggep = new GGEP();
+        int i = 0;
         for (Connectable connectable : addresses) {
-            out.write(serialize(connectable));
+            ggep.put(CONNECTABLE + i, serialize(connectable));
+            ++i;
         }
-        return out.toByteArray();
+        return ggep.toByteArray();
     }
 
     @Inject

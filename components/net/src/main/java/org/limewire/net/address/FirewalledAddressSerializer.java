@@ -1,6 +1,5 @@
 package org.limewire.net.address;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Set;
 
@@ -53,7 +52,7 @@ public class FirewalledAddressSerializer implements AddressSerializer {
             Connectable publicAddress = serializer.deserialize(ggep.getBytes(PUBLIC_ADDRESS));
             Connectable privateAddress = serializer.deserialize(ggep.getBytes(PRIVATEADDRESS));
             GUID clientGuid = new GUID(ggep.getBytes(GUID));
-            Set<Connectable> pushProxies = serializer.deserializeSet(new ByteArrayInputStream(ggep.getBytes(PROXIES)));
+            Set<Connectable> pushProxies = serializer.deserializeSet(ggep.getBytes(PROXIES));
             int fwtVersion = ggep.getInt(FWT_VERSION);
             return new FirewalledAddress(publicAddress, privateAddress, clientGuid, pushProxies, fwtVersion);
         } catch (BadGGEPBlockException e) {

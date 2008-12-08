@@ -1,6 +1,5 @@
 package org.limewire.net.address;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -58,7 +57,7 @@ public class FirewalledAddressSerializerTest extends BaseTestCase {
         assertEquals(15, readAddress.getPort());
         assertFalse(readAddress.isTLSCapable());
         
-        Set<Connectable> readproxies = connectableSerializer.deserializeSet(new ByteArrayInputStream(ggep.getBytes("PX")));
+        Set<Connectable> readproxies = connectableSerializer.deserializeSet(ggep.getBytes("PX"));
         assertContains(readproxies, proxy1);
         assertContains(readproxies, proxy2);
         

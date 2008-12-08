@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.net.address.AddressSerializer;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
-public interface PushEndpointFactory extends AddressSerializer {
+public interface PushEndpointFactory {
 
     /** Gets the endpoint for the self. */
     public PushEndpoint createForSelf();

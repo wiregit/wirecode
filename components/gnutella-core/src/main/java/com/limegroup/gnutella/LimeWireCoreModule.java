@@ -387,6 +387,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FirewalledAddressSerializer.class).asEagerSingleton();
         bind(SameNATAddressResolver.class).asEagerSingleton();
         bind(ConnectableConnector.class).asEagerSingleton();
+        bind(PushEndpointSerializer.class).asEagerSingleton();
     }
     
     

@@ -10,6 +10,7 @@ import junit.framework.Test;
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.util.BaseTestCase;
 
 public class ConnectableSerializerTest extends BaseTestCase {
@@ -31,7 +32,9 @@ public class ConnectableSerializerTest extends BaseTestCase {
     
     public void testDeserializeIPv4Address() throws Exception {
         byte[] data = { 0, 127, 0, 0, 1, 0, 5, 1 };
-        Address address = serializer.deserialize(data);
+        GGEP ggep = new GGEP();
+        ggep.put("CN", data);
+        Address address = serializer.deserialize(ggep.toByteArray());
         assertTrue(address instanceof Connectable);
         Connectable connectable = (Connectable)address;
         assertEquals(new InetSocketAddress("127.0.0.1", 5), connectable.getInetSocketAddress());
@@ -45,7 +48,9 @@ public class ConnectableSerializerTest extends BaseTestCase {
         data[17] = 0; // port
         data[18] = 5; // port
         data[19] = 1; // tls
-        Address address = serializer.deserialize(data);
+        GGEP ggep = new GGEP();
+        ggep.put("CN", data);
+        Address address = serializer.deserialize(ggep.toByteArray());
         assertTrue(address instanceof Connectable);
         Connectable connectable = (Connectable)address;
         assertEquals(new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(data, 1, 17)), 5), connectable.getInetSocketAddress());
@@ -54,7 +59,8 @@ public class ConnectableSerializerTest extends BaseTestCase {
 
     public void testSerializeIPv4Address() throws Exception {
         Connectable connectable = new ConnectableImpl(new InetSocketAddress("127.0.0.1", 5), true);
-        assertEquals(new byte[] { 0, 127, 0, 0, 1, 0, 5, 1 }, serializer.serialize(connectable)); 
+        GGEP ggep = new GGEP(serializer.serialize(connectable));
+        assertEquals(new byte[] { 0, 127, 0, 0, 1, 0, 5, 1 }, ggep.getBytes("CN")); 
     }
     
     public void testSerializeIPv6Address() throws Exception {
@@ -64,8 +70,10 @@ public class ConnectableSerializerTest extends BaseTestCase {
         data[17] = 0; // port
         data[18] = 5; // port
         data[19] = 1; // tls
+        GGEP ggep = new GGEP();
+        ggep.put("CN", data);
         Connectable connectable = new ConnectableImpl(new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(data, 1, 17)), 5), true);
-        assertEquals(data, serializer.serialize(connectable));
+        assertEquals(ggep.toByteArray(), serializer.serialize(connectable));
     }
 
     public void testSerializeDeserialize() throws Exception {

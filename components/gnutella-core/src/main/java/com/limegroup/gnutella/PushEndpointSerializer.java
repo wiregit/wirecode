@@ -3,9 +3,11 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 
 import org.limewire.io.Address;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,6 +16,8 @@ import com.google.inject.Singleton;
 public class PushEndpointSerializer implements AddressSerializer {
 
     private final PushEndpointFactory pushEndpointFactory;
+    
+    private static final String PUSH_ENDPOINT = "PE";
 
     @Inject
     public PushEndpointSerializer(PushEndpointFactory pushEndpointFactory) {
@@ -27,8 +31,14 @@ public class PushEndpointSerializer implements AddressSerializer {
 
     @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {
-        String httpString = StringUtils.getUTF8String(serializedAddress);
-        return pushEndpointFactory.createPushEndpoint(httpString);
+        try {
+            GGEP ggep = new GGEP(serializedAddress);
+            return pushEndpointFactory.createPushEndpoint(ggep.getString(PUSH_ENDPOINT));
+        } catch (BadGGEPBlockException e) {
+            throw new IOException(e);
+        } catch (BadGGEPPropertyException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -41,15 +51,17 @@ public class PushEndpointSerializer implements AddressSerializer {
         return "push-endpoint";
     }
 
-    @Inject
     @Override
+    @Inject
     public void register(AddressFactory factory) {
         factory.registerSerializer(this);
     }
 
     @Override
     public byte[] serialize(Address address) throws IOException {
-        return StringUtils.toUTF8Bytes(((PushEndpoint)address).httpStringValue());
+        GGEP ggep = new GGEP();
+        ggep.put(PUSH_ENDPOINT, ((PushEndpoint)address).httpStringValue());
+        return ggep.toByteArray();
     }
 
 }

@@ -3,9 +3,11 @@ package org.limewire.xmpp.client.impl;
 import java.io.IOException;
 
 import org.limewire.io.Address;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressSerializer;
-import org.limewire.util.StringUtils;
 import org.limewire.xmpp.api.client.XMPPAddress;
 
 import com.google.inject.Inject;
@@ -17,6 +19,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class XMPPAddressSerializer implements AddressSerializer {
 
+    static final String JID = "JID";
+    
     @Override
     @Inject
     public void register(AddressFactory factory) {
@@ -48,13 +52,22 @@ public class XMPPAddressSerializer implements AddressSerializer {
     
     @Override
     public Address deserialize(byte[] serializedAddress) throws IOException {
-        return new XMPPAddress(StringUtils.getUTF8String(serializedAddress));
+        try {
+            GGEP ggep = new GGEP(serializedAddress);
+            return new XMPPAddress(ggep.getString(JID));
+        } catch (BadGGEPBlockException e) {
+            throw new IOException(e);
+        } catch (BadGGEPPropertyException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public byte[] serialize(Address address) throws IOException {
         XMPPAddress xmppAddress = (XMPPAddress)address;
-        return StringUtils.toUTF8Bytes(xmppAddress.getFullId());
+        GGEP ggep = new GGEP();
+        ggep.put(JID, xmppAddress.getFullId());
+        return ggep.toByteArray();
     }
 
 }
