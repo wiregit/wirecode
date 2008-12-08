@@ -595,8 +595,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             searchResultTextPanel.add(metadataLabel, labelPadding + "cell 0 1");
             break;
         case HeadingSubHeadingAndMetadata:
-            searchResultTextPanel.add(subheadingLabel, OSUtils.isMacOSX() ? "" : "pad -3 4 0 0," + "cell 0 1, wrap");
-            searchResultTextPanel.add(metadataLabel, OSUtils.isMacOSX() ? "" : "pad 0 4 0 0," + "cell 0 2, gapbottom 3");
+            searchResultTextPanel.add(subheadingLabel, (OSUtils.isMacOSX() ? "" : "pad -3 4 0 0,") + "cell 0 1, wrap");
+            searchResultTextPanel.add(metadataLabel, (OSUtils.isMacOSX() ? "" : "pad 0 4 0 0, gapbottom 3,") + "cell 0 2");
         }
     }
 
