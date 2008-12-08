@@ -449,8 +449,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             if(item.getQueuePosition() == -1 || item.getQueuePosition() == Integer.MAX_VALUE){
                 return getQueueTimeMessage(item.getRemainingQueueTime());
             }
-            return I18n.trn("Queued - {0} person ahead of you for this file",
-                    "Queued - {0} people ahead of you for this file",
+            return I18n.trn("Waiting - Next in line",
+                    "Waiting - {0} in line",
                     item.getQueuePosition(), item.getQueuePosition());
         default:
             throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
@@ -460,9 +460,9 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     
     private String getQueueTimeMessage(long queueTime){
         if(queueTime == DownloadItem.UNKNOWN_TIME){
-            return I18n.tr("Queued - remaining time unknown");                
+            return I18n.tr("Waiting - remaining time unknown");                
         } else {
-            return I18n.tr("Queued - About {0} before download can begin", CommonUtils.seconds2time(queueTime));
+            return I18n.tr("Waiting - Starting in {0}", CommonUtils.seconds2time(queueTime));
         }
     }
 

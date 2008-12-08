@@ -495,7 +495,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 if(item.getQueuePosition() == -1 || item.getQueuePosition() == Integer.MAX_VALUE){
                     return getQueueTime(item.getRemainingQueueTime());
                 } 
-                return I18n.tr("Queued - #{0} in line", item.getQueuePosition());
+                return I18n.trn("Waiting - Next in line",
+                        "Waiting - {0} in line",
+                        item.getQueuePosition(), item.getQueuePosition());
             default:
                 throw new IllegalArgumentException("Unknown DownloadState: " + item.getState());
             }            
@@ -503,9 +505,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         
         private String getQueueTime(long queueTime){
             if(queueTime == DownloadItem.UNKNOWN_TIME){
-                return I18n.tr("Queued - remaining time unknown");                
+                return I18n.tr("Waiting - remaining time unknown");                
             } else {
-                return I18n.tr("Queued - Starting in {0}", CommonUtils.seconds2time(queueTime));
+                return I18n.tr("Waiting - Starting in {0}", CommonUtils.seconds2time(queueTime));
             }
         }
 

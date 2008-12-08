@@ -128,9 +128,9 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                 long fileSize = item.getFileSize() == 0 ? 1 : item.getFileSize();
                 String ratio = formatter.format(item.getTotalAmountUploaded()/(double)fileSize);
                 if(numConnections == 1) {
-                    return I18n.tr("Seeding to {0} Person at {1} - Ratio ({2})", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
+                    return I18n.tr("Seeding to {0} person at {1} - Ratio ({2})", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
                 } else {
-                    return I18n.tr("Seeding to {0} People at {1} - Ratio ({2})", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
+                    return I18n.tr("Seeding to {0} people at {1} - Ratio ({2})", numConnections, GuiUtils.rate2speed(item.getUploadSpeed()), ratio);
                 }
             } else {
                 return I18n.tr("Uploading - {0} of {1}({2}) to {3}", GuiUtils.toUnitbytes(item.getTotalAmountUploaded()), 
@@ -138,7 +138,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                         GuiUtils.rate2speed(item.getUploadSpeed()), item.getHost());
             }
         case QUEUED:
-            return I18n.trn("Waiting - {0} file needs to finish before upload can begin", "Waiting - {0} files need to finish before upload can begin", item.getQueuePosition());
+            return I18n.trn("Waiting for {0} upload to finish", "Waiting for {0} uploads to finish", item.getQueuePosition());
         case WAITING:
             return I18n.tr("Waiting for connections...");
         case UNABLE_TO_UPLOAD:
