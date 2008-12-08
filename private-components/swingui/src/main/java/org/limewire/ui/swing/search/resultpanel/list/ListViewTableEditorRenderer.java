@@ -405,7 +405,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconPanel.setOpaque(false);
         itemIconPanel.add(itemIconLabel);
 
-        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0 0 0 0", "0[fill]", "[]0[top]0[]"));
+        searchResultTextPanel = new JXPanel(new MigLayout("fill, insets 0", "0[fill]", "[]0[]0[]"));
         searchResultTextPanel.setOpaque(false);
         searchResultTextPanel.add(heading, "wrap, growx");
         searchResultTextPanel.add(subheadingLabel, "wrap");
@@ -580,7 +580,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     }
 
     private void populateSearchResultTextPanel(RowDisplayConfig config) {
-        String labelPadding = OSUtils.isMacOSX() ? "" : "pad 0 4 0 0,";
+        String labelPadding = OSUtils.isMacOSX() ? "" : "pad -6 4 0 0,";
         switch(config) {
         case HeadingOnly:
             searchResultTextPanel.remove(subheadingLabel);
@@ -595,8 +595,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             searchResultTextPanel.add(metadataLabel, labelPadding + "cell 0 1");
             break;
         case HeadingSubHeadingAndMetadata:
-            searchResultTextPanel.add(subheadingLabel, labelPadding + "cell 0 1, wrap");
-            searchResultTextPanel.add(metadataLabel, labelPadding + "cell 0 2");
+            searchResultTextPanel.add(subheadingLabel, OSUtils.isMacOSX() ? "" : "pad -3 4 0 0," + "cell 0 1, wrap");
+            searchResultTextPanel.add(metadataLabel, OSUtils.isMacOSX() ? "" : "pad 0 4 0 0," + "cell 0 2, gapbottom 3");
         }
     }
 
