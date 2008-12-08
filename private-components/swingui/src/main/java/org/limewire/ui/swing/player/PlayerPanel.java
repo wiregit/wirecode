@@ -189,12 +189,10 @@ public class PlayerPanel extends JXPanel {
         volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-                System.out.println("a");
                 playerListener.clearMenu();
             }
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                System.out.println("b");
             }
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -243,10 +241,8 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == VOLUME) {
                 if (System.currentTimeMillis() - menuInvizTime > 10f) {
                     volumeControlPopup.show(volumeButton, 0, 14);
-                    System.out.println("show");
                 }
                 else {
-                    System.out.println("invisible");
                 }
                 
             }
