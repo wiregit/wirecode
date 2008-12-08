@@ -98,7 +98,7 @@ public class SetupPage2 extends WizardPage {
         add(label, "gapleft 76, wrap");
         
         add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
-        add(addFolderButton, "gaptop 10, gapright 10, wrap");
+        add(addFolderButton, "gaptop 10, gapright 30, wrap");
 
         label = new MultiLineLabel(bottomText1,630);
         decorator.decorateHeadingText(label);
