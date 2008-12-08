@@ -1,16 +1,13 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.FileDialog;
-import java.awt.Frame;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -20,8 +17,6 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJFrame;
-import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
@@ -345,7 +340,7 @@ public final class FileChooser {
     public static File getSaveAsFile(Component parent, String titleKey,
                                      File suggestedFile, final FileFilter filter) {
         if (OSUtils.isAnyMac()) {
-            FileDialog dialog = new FileDialog(getParentFrame(parent),
+            FileDialog dialog = new FileDialog(GuiUtils.getParentFrame(parent),
                                                I18n.tr(titleKey),
                                                FileDialog.SAVE);
             dialog.setDirectory(suggestedFile.getParent());
@@ -383,25 +378,5 @@ public final class FileChooser {
             setLastInputDirectory(file);
             return (ret != JFileChooser.APPROVE_OPTION) ? null : file;
         }
-    }
-    
-    /**
-     * Returns the window frame containing the specified component.  If the
-     * component has not been added to a window frame, then the main GUI 
-     * frame is returned.
-     * @param component the UI component being examined
-     * @return window frame containing the component
-     */
-    private static Frame getParentFrame(Component component) {
-        // Access top level ancestor for Swing component.
-        if (component instanceof JComponent) {
-            Container ancestor = ((JComponent) component).getTopLevelAncestor();
-            if (ancestor instanceof Frame) {
-                return (Frame) ancestor;
-            }
-        }
-
-        // Return main frame if parent frame cannot be determined.
-        return GuiUtils.getMainFrame();
     }
 }

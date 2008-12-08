@@ -2,7 +2,9 @@ package org.limewire.ui.swing.util;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -219,6 +221,26 @@ public class GuiUtils {
         } else {
             return null;
         }
+    }
+    
+    /**
+     * Returns the window frame containing the specified component.  If the
+     * component has not been added to a window frame, then the main GUI 
+     * frame is returned.
+     * @param component the UI component being examined
+     * @return window frame containing the component
+     */
+    public static Frame getParentFrame(Component component) {
+        // Access top level ancestor for Swing component.
+        if (component instanceof JComponent) {
+            Container ancestor = ((JComponent) component).getTopLevelAncestor();
+            if (ancestor instanceof Frame) {
+                return (Frame) ancestor;
+            }
+        }
+
+        // Return main frame if parent frame cannot be determined.
+        return GuiUtils.getMainFrame();
     }
     
 	/**
