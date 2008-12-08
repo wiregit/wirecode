@@ -19,6 +19,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -109,11 +110,14 @@ public class FancyTab extends JXPanel {
         mainButton.addMouseListener(highlightListener);
 
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
-        
+        //For some reason, setting the border on the main button resolves a layout
+        //problem only visible on OSX. The problem is that the additionalText
+        //label displays far to the right and well below the mainButton.
+        mainButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         setLayout(new MigLayout("insets 0, filly, gapy 0, hidemode 1"));        
         add(busyLabel, "gapbefore 4, alignx left, aligny bottom, hidemode 0");
         add(mainButton, "aligny bottom, width min(pref,50):pref:max, split 1");
-        add(additionalText, "aligny bottom");
+        add(additionalText, "aligny bottom, gapbottom 1");
         add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
         // TODO: this edges a bit over the right if additionalText is invisible
         add(underline, "skip 1, span 2, growx, aligny top, gapafter 0");
