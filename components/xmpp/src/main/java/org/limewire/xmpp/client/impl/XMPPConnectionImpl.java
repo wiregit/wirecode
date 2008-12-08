@@ -418,6 +418,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     }
     
     private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
+        private DiscoInfoListener discoInfoListener;
 
         @Override
         public void connectionCreated(XMPPConnection connection) {
@@ -449,8 +450,9 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             }
 
             ChatStateManager.getInstance(connection);
-            
-            DiscoInfoListener discoInfoListener = new DiscoInfoListener(XMPPConnectionImpl.this, connection);
+
+            discoInfoListener = new DiscoInfoListener(XMPPConnectionImpl.this, connection);
+            rosterListeners.addListener(discoInfoListener.getRosterListener());
             connection.addPacketListener(discoInfoListener, discoInfoListener.getPacketFilter());
 
             synchronized (XMPPConnectionImpl.this) {
@@ -482,11 +484,13 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         @Override
         public void connectionClosed() {
             connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED));
+            cleanup();
         }
 
         @Override
         public void connectionClosedOnError(Exception e) {
             connectionBroadcaster.broadcast(new XMPPConnectionEvent(XMPPConnectionImpl.this, XMPPConnectionEvent.Type.DISCONNECTED, e));
+            cleanup();
         }
 
         @Override
@@ -499,6 +503,10 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         @Override
         public void reconnectionSuccessful() {
+        }
+        
+        void cleanup() {
+            rosterListeners.removeListener(discoInfoListener.getRosterListener());
         }
     }
 }

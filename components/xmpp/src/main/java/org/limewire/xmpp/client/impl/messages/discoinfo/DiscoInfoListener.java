@@ -33,9 +33,10 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
     
     private static final Log LOG = LogFactory.getLog(DiscoInfoListener.class);
     
-    private Map<URI, FeatureInitializer> featureInitializerMap;
+    private final Map<URI, FeatureInitializer> featureInitializerMap;
     private final XMPPConnection connection;
     private final org.jivesoftware.smack.XMPPConnection smackConnection;
+    private final RosterListener rosterListener;
     private final PresenceListener presenceListener;      
 
     public DiscoInfoListener(XMPPConnection connection,
@@ -43,6 +44,7 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
         this.connection = connection;
         this.smackConnection = smackConnection;
         featureInitializerMap = new ConcurrentHashMap<URI, FeatureInitializer>();
+        rosterListener = new RosterListener();
         presenceListener = new PresenceListener();
     }
     
@@ -76,6 +78,10 @@ public class DiscoInfoListener implements PacketListener, FeatureRegistry {
                         || ((DiscoverInfo)packet).getType() == IQ.Type.RESULT);
             }
         };
+    }
+    
+    public RosterListener getRosterListener() {
+        return rosterListener;
     }
     
     class RosterListener implements EventListener<RosterEvent> {
