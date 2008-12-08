@@ -487,7 +487,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
              * Sets a tooltip for the heading field only if the text has been truncated. 
              */
             private void handleHeadingTooltip(String headingText, String truncatedHeading) {
-                heading.setToolTipText(headingText.equals(truncatedHeading) ? null : HTML + headingText + CLOSING_HTML_TAG);
+                String tooltipText = HTML + headingText + CLOSING_HTML_TAG;
+                heading.setToolTipText(tooltipText);
+                editorComponent.setToolTipText(tooltipText);
             }
 
             @Override
