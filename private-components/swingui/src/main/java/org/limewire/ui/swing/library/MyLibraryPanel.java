@@ -158,7 +158,7 @@ public class MyLibraryPanel extends LibraryPanel {
     
     @Override
     protected JComponent createCategoryButton(Action action, Category category) {
-        MySelectionPanel component = new MySelectionPanel(action, new ShareAllAction(category), category);
+        MySelectionPanel component = new MySelectionPanel(action, new ShareAllAction(category), category, this);
         addNavigation(component.getButton());
         return component;
     }
@@ -242,10 +242,13 @@ public class MyLibraryPanel extends LibraryPanel {
         private JButton button;
         private HyperLinkButton shareButton;
         private JLabel collectionLabel;
+        private LibraryPanel libraryPanel;
         
-        public MySelectionPanel(Action action, Action shareAction, Category category) {
+        public MySelectionPanel(Action action, Action shareAction, Category category, LibraryPanel panel) {
             super(new MigLayout("insets 0, fill, hidemode 3"));
 
+            this.libraryPanel = panel;
+            
             GuiUtils.assignResources(this);
             setOpaque(false);
 
@@ -280,6 +283,11 @@ public class MyLibraryPanel extends LibraryPanel {
                     } else if(evt.getPropertyName().equals("enabled")) {
                         boolean value = (Boolean)evt.getNewValue();
                         setVisible(value);
+                        //select first category if this category is hidden
+                        if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
+                                button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                            libraryPanel.selectFirst();
+                        }
                     }
                 }
                     

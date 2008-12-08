@@ -171,7 +171,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     /** Creates the category button & adds navigation listeners to it. */
     protected JComponent createCategoryButton(Action action, Category category) {
-        SelectionPanel component = new SelectionPanel(action);
+        SelectionPanel component = new SelectionPanel(action, this);
         addNavigation(component.getButton());
         return component;
     }    
@@ -322,10 +322,13 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         @Resource Color textColor;
         
         private JButton button;
+        private AbstractFileListPanel libraryPanel;
         
-        public SelectionPanel(Action action) {
+        public SelectionPanel(Action action, AbstractFileListPanel library) {
             super(new BorderLayout());
 
+            this.libraryPanel = library;
+            
             GuiUtils.assignResources(this);
             
             button = new JButton(action);
@@ -356,6 +359,11 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                     } else if(evt.getPropertyName().equals("enabled")) {
                         boolean value = (Boolean)evt.getNewValue();
                         setVisible(value);
+                        //select first category if this category is hidden
+                        if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
+                                button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                            libraryPanel.selectFirst();
+                        }
                     }
                 }
             });

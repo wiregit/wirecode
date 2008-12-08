@@ -181,7 +181,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     
     @Override
     protected JComponent createCategoryButton(Action action, Category category) {
-        SharingSelectionPanel panel = new SharingSelectionPanel(action, category);
+        SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this);
         listeners.put(category, panel);
         addNavigation(panel.getButton());
         return panel;
@@ -288,9 +288,12 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
         private JCheckBox checkBox;
         private JButton button;
+        private AbstractFileListPanel libraryPanel;
         
-        public SharingSelectionPanel(Action action, final Category category) {
+        public SharingSelectionPanel(Action action, final Category category, AbstractFileListPanel library) {
             super(new MigLayout("insets 0, fill"));
+            
+            this.libraryPanel = library;
             
             GuiUtils.assignResources(this);     
 
@@ -353,6 +356,11 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                     } else if(evt.getPropertyName().equals("enabled")) {
                         boolean value = (Boolean)evt.getNewValue();
                         setVisible(value);
+                        //select first category if this category is hidden
+                        if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
+                                button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                            libraryPanel.selectFirst();
+                        }
                     }
                 }
             });
