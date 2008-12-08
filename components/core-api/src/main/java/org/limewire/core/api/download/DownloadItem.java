@@ -16,9 +16,9 @@ public interface DownloadItem extends PropertiableFile {
 
 	public static enum ErrorState {
 	    NONE(I18nMarker.marktr("No problems.")),
-	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem.")),
+	    DISK_PROBLEM(I18nMarker.marktr("There is a disk problem")),
 	    CORRUPT_FILE(I18nMarker.marktr("The file is corrupted")),
-	    FILE_NOT_SHARABLE(I18nMarker.marktr("The File is not shareable")),
+	    FILE_NOT_SHARABLE(I18nMarker.marktr("This file is not shareable")),
 	    UNABLE_TO_CONNECT(I18nMarker.marktr("Trouble connecting to people"));
 	    
 	    private final String message;
