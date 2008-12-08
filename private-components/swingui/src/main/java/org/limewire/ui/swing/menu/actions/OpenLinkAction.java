@@ -23,6 +23,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -56,6 +57,7 @@ public class OpenLinkAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         final LocationDialog locationDialogue = new LocationDialog();
+        locationDialogue.setTitle(I18n.tr("Open Link"));
         locationDialogue.setLocationRelativeTo(mainPanel);
         locationDialogue.addActionListener(new ActionListener() {
             @Override

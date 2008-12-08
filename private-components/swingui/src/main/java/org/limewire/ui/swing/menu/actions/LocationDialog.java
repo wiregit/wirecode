@@ -28,12 +28,12 @@ class LocationDialog extends LimeJDialog {
         super();
         setModalityType(ModalityType.APPLICATION_MODAL);
         JPanel urlPanel = new JPanel();
-        JLabel urlLabel = new JLabel(I18n.tr("Link:"));
         urlField = new JTextField(30);
-        urlField.setText("http://");
+        urlField.setText("");
 
-        final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link!"));
+        final JLabel errorLabel = new JLabel(I18n.tr("Invalid Link"));
         errorLabel.setForeground(Color.RED);
+        errorLabel.setVisible(false);
 
         urlField.addKeyListener(new KeyListener() {
             @Override
@@ -78,9 +78,8 @@ class LocationDialog extends LimeJDialog {
             }
         });
         urlPanel.setLayout(new MigLayout("", "[]5[]5[]", "[]5[]"));
-        urlPanel.add(new JLabel(I18n.tr("Open magnet or torrent link.")), "span 3, wrap");
-        urlPanel.add(urlLabel, "alignx right");
-        urlPanel.add(urlField, "span 2");
+        urlPanel.add(new JLabel(I18n.tr("Enter a magnet or torrent link below:")), "span 3, wrap");
+        urlPanel.add(urlField, "span 3");
         urlPanel.add(errorLabel, "wrap");
         urlPanel.add(openButton, "skip 2, alignx right");
         urlPanel.add(cancelButton, "alignx right");
