@@ -124,10 +124,11 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         case OTHER:
         default: {
              subheading = iconManager.getMIMEDescription(propertiable);
+             subheading = subheading == null ? "" : subheading;
             // TODO add name of program used to open this file, not included in
             // 5.0
             Long fileSize = getFileSize(propertiable);
-            subheading = addFileSize(subheading, fileSize, subheading == null);
+            subheading = addFileSize(subheading, fileSize, !"".equals(subheading));
         }
         }
         return subheading == null ? "" : subheading;
