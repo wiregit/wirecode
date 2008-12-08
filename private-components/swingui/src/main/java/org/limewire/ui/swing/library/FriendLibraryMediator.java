@@ -44,6 +44,7 @@ public class FriendLibraryMediator extends LibraryMediator {
     public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
+            this.eventList = null;
             setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new ConnectionErrorComponent()));
             showLibraryCard();
             break;
