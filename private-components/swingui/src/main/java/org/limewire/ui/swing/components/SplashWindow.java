@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -17,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -57,14 +57,15 @@ public class SplashWindow {
         
         textLabel = new JLabel();
         textLabel.setOpaque(false);
-        FontUtils.changeStyle(textLabel, Font.BOLD);
+        textLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        textLabel.setForeground(new Color(0x31,0x31,0x31));
         
         progressBar = LimeProgressBarFactory.createSplashProgressBar();
         
         int width = progressBar.getPreferredSize().width;
-        progressBar.setPreferredSize(new Dimension(width, 13));
-        progressBar.setMinimumSize(new Dimension(width, 13));
-        progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 13));
+        progressBar.setPreferredSize(new Dimension(width, 8));
+        progressBar.setMinimumSize(new Dimension(width, 8));
+        progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
         progressBar.setMaximum(steps+1);
         progressBar.setMinimum(0);
         progressBar.setValue(0);        
@@ -76,10 +77,8 @@ public class SplashWindow {
         panel.add(textLabel, BorderLayout.SOUTH);
         textAndProgressPanel.add(Box.createVerticalGlue());
         textAndProgressPanel.add(panel);
-        textAndProgressPanel.add(Box.createVerticalStrut(9));
         textAndProgressPanel.add(progressBar);
-        textAndProgressPanel.add(Box.createVerticalStrut(8));
-        textAndProgressPanel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
+        textAndProgressPanel.setBorder(BorderFactory.createEmptyBorder(0, 8, 8, 8));
 
         int imgWidth = splashImage.getWidth(null);
         if(imgWidth < 1)
