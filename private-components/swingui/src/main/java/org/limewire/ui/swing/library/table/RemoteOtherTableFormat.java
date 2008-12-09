@@ -12,8 +12,7 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
     public static final int SIZE_COL = TYPE_COL + 1;
-    public static final int FILE_COUNT_COL = SIZE_COL + 1;
-    public static final int ACTION_COL = FILE_COUNT_COL + 1;
+    public static final int ACTION_COL = SIZE_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
     @Override
@@ -27,8 +26,6 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return I18n.tr("Name");        
             case SIZE_COL:
                 return I18n.tr("Size");
-            case FILE_COUNT_COL:
-                return I18n.tr("Number of Files");
             case TYPE_COL:
                 return I18n.tr("Type");
             case ACTION_COL:
@@ -45,8 +42,6 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return baseObject;  
             case SIZE_COL:
                 return baseObject.getSize();
-            case FILE_COUNT_COL:
-                return 1999;
             case TYPE_COL:
                 return "Verbal description";
             case ACTION_COL:

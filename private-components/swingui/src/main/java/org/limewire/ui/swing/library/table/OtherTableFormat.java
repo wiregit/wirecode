@@ -14,8 +14,7 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
     public static final int SIZE_COL = TYPE_COL + 1;
-    public static final int FILE_COUNT_COL = SIZE_COL + 1;
-    public static final int MODIFIED_COL = FILE_COUNT_COL + 1;
+    public static final int MODIFIED_COL = SIZE_COL + 1;
     public static final int ACTION_COL = MODIFIED_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
@@ -30,8 +29,6 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return I18n.tr("Name");        
         case SIZE_COL:
             return I18n.tr("Size");
-        case FILE_COUNT_COL:
-            return I18n.tr("Number of Files");
         case TYPE_COL:
             return I18n.tr("Type");
         case MODIFIED_COL:
@@ -49,8 +46,6 @@ public class OtherTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return baseObject;  
         case SIZE_COL:
             return baseObject.getSize();
-        case FILE_COUNT_COL:
-            return 1999;
         case TYPE_COL:
             return "Verbal description";
         case MODIFIED_COL:
