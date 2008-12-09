@@ -138,6 +138,10 @@ public class PlayerPanel extends JXPanel {
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
 
+        volumeControlPopup = new JPopupMenu();
+        volumeSlider = new JSlider(0,100);
+        initVolumeControl();
+        
         progressSlider = sliderBarFactory.create();
         progressSlider.addChangeListener(new AudioProgressListener());
         progressSlider.setMaximum(0);
@@ -154,6 +158,7 @@ public class PlayerPanel extends JXPanel {
         titleLabel.setMinimumSize(new Dimension(206, (int)titleLabel.getMinimumSize().getHeight()));
         titleLabel.setPreferredSize(new Dimension(206, (int)titleLabel.getPreferredSize().getHeight()));
         titleLabel.setSize(new Dimension(206, (int)titleLabel.getSize().getHeight()));
+        titleLabel.setVisible(false);
         
         statusPanel.add(titleLabel);
         statusPanel.add(progressSlider, "dock south");
@@ -173,18 +178,16 @@ public class PlayerPanel extends JXPanel {
         innerPanel.add(pauseButton, "hidemode 3");
         innerPanel.add(playButton, "hidemode 3");
         innerPanel.add(forwardButton, "gapright 3");
-        innerPanel.add(statusPanel, "gapbottom 2");
+        innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
                 
         add(innerPanel, "gaptop 2, gapbottom 2");
         
         EventAnnotationProcessor.subscribe(this);
 
-        player.addAudioPlayerListener(new PlayerListener());      
-        
-        volumeControlPopup = new JPopupMenu();
-        volumeSlider = new JSlider(0,100);
-        initVolumeControl();
+        VolumeController volumeController = new VolumeController();
+        volumeSlider.addChangeListener(volumeController);
+        player.addAudioPlayerListener(new PlayerListener(volumeController));      
         
         volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -193,6 +196,7 @@ public class PlayerPanel extends JXPanel {
             }
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                playerListener.clearMenu();
             }
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
@@ -202,9 +206,7 @@ public class PlayerPanel extends JXPanel {
     }
     
     private void initVolumeControl() {
-        volumeSlider.addChangeListener(new VolumeListener());
         volumeSlider.setOrientation(JSlider.VERTICAL);
-        
         volumeSlider.setMinimumSize(new Dimension((int)volumeSlider.getMinimumSize().getWidth(), 75));
         volumeSlider.setMaximumSize(new Dimension((int)volumeSlider.getMaximumSize().getWidth(), 75));
         volumeSlider.setPreferredSize(new Dimension((int)volumeSlider.getPreferredSize().getWidth(), 75));
@@ -239,12 +241,9 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == BACK) {
                 throw new NotImplementedException();
             } else if (e.getActionCommand() == VOLUME) {
-                if (System.currentTimeMillis() - menuInvizTime > 10f) {
+                if (System.currentTimeMillis() - menuInvizTime > 250f) {
                     volumeControlPopup.show(volumeButton, 0, 14);
                 }
-                else {
-                }
-                
             }
         }
     }
@@ -283,16 +282,32 @@ public class PlayerPanel extends JXPanel {
     }
 
     
-    private class VolumeListener implements ChangeListener {
+    private class VolumeController implements ChangeListener {
+        
+        private int lastVolume = -1;  
+        
         @Override
         public void stateChanged(ChangeEvent e) {
-            player.setVolume((double)volumeSlider.getValue() / 100);
+            lastVolume = volumeSlider.getValue();
+            player.setVolume((double)lastVolume / 100);
+        }
+        
+        public void resetVolume() {
+            if (lastVolume != -1) {
+                player.setVolume((double)lastVolume / 100);
+            }
         }
     }
     
     
     private class PlayerListener implements AudioPlayerListener {
        
+        private final VolumeController volumeController;
+        
+        public PlayerListener(VolumeController volumeController) {
+            this.volumeController = volumeController;
+        }
+        
         @Override
         public void progressChange(int bytesread) {
             if (byteLength != 0 && !progressSlider.getValueIsAdjusting()) {
@@ -312,7 +327,9 @@ public class PlayerPanel extends JXPanel {
                songText = properties.get("author") + " - " + properties.get("title");
            }
             
+           volumeController.resetVolume();
            titleLabel.setText(songText);
+           titleLabel.setVisible(true);
            durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
            progressSlider.setMaximum(durationSecs);
            byteLength = (Integer)properties.get("audio.length.bytes");

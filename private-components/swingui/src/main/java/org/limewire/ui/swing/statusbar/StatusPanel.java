@@ -5,7 +5,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -55,13 +54,11 @@ public class StatusPanel extends JXPanel {
         minDownloadPanel.setVisible(false);
         
         add(connectionStatus, "growy, gapafter 4");
-        add(sharedFileCountPanel, "growy");
+        add(sharedFileCountPanel, "growy, push");
         add(minDownloadPanel, "growy, gapafter 4, hidemode 3");
         add(miniPlayerPanel, "");
         
-        add(new JLabel(), "gapafter push, growx");
-        
-        add(friendStatusPanel.getComponent(), "gapbefore push");
+        add(friendStatusPanel.getComponent(), "gapbefore push, hidemode 3, dock east");
         
         connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
