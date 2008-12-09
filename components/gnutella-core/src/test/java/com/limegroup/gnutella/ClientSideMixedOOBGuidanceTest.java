@@ -115,8 +115,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
                                      SERVER_PORT), 12);
                 os = sock.getOutputStream();
                 os.write("CONNECT BACK\n\n".getBytes());
-            } catch (IOException ignored) {
-            } catch (SecurityException ignored) {
+                os.flush();
             } catch (Throwable t) {
                 ErrorService.error(t);
             } finally {
