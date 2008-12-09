@@ -17,16 +17,26 @@ import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.AuthTokenFeature;
-import org.limewire.http.httpclient.SocketWrappingHttpClient;
+import org.limewire.http.httpclient.SocketWrapperProtocolSocketFactory;
 import org.limewire.io.GUID;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
@@ -35,7 +45,6 @@ import org.limewire.net.SocketsManager;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -84,7 +93,7 @@ public class BrowseHostHandler {
     private final Provider<ReplyHandler> forMeReplyHandler;
 
     private final MessageFactory messageFactory;
-    private final Provider<SocketWrappingHttpClient> clientProvider;
+    private final Provider<HttpParams> httpParams;
     private final NetworkManager networkManager;
 
     private final PushEndpointFactory pushEndpointFactory;
@@ -98,16 +107,16 @@ public class BrowseHostHandler {
      */
     BrowseHostHandler(GUID sessionGuid, 
                       SocketsManager socketsManager,
-                      @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
+                      Provider<ReplyHandler> forMeReplyHandler,
                       MessageFactory messageFactory,
-                      Provider<SocketWrappingHttpClient> clientProvider, 
+                      Provider<HttpParams> httpParams,
                       NetworkManager networkManager,
                       PushEndpointFactory pushEndpointFactory) {
         _guid = sessionGuid;
         this.socketsManager = socketsManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
-        this.clientProvider = clientProvider;
+        this.httpParams = httpParams;
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
     }
@@ -204,8 +213,9 @@ public class BrowseHostHandler {
     }
 
     private HttpResponse makeHTTPRequest(Socket socket, FriendPresence friendPresence) throws IOException, URISyntaxException, HttpException, InterruptedException {
-        SocketWrappingHttpClient client = clientProvider.get();
-        client.setSocket(socket);
+//        SocketWrappingHttpClient client = clientProvider.get();
+//        client.setSocket(socket);
+        SocketWrappingHttpClient client = new SocketWrappingHttpClient(socket);
         if(!friendPresence.getFriend().isAnonymous()) {
             String username = friendPresence.getFriend().getNetwork().getCanonicalizedLocalID();
             Feature feature = friendPresence.getFeature(AuthTokenFeature.ID);
@@ -332,4 +342,58 @@ public class BrowseHostHandler {
             return friendPresence;
         }
     }
+    
+    class SocketWrappingHttpClient extends DefaultHttpClient {
+        private Credentials credentials;
+        
+        SocketWrappingHttpClient(Socket socket) {
+            super(new SingleClientConnManager(httpParams.get(), getSchemeRegistry(socket)), httpParams.get());    
+        }
+
+        void setCredentials(Credentials credentials) {
+            this.credentials = credentials;
+        }
+        
+        @Override
+        protected CredentialsProvider createCredentialsProvider() {
+            return new CredentialsProvider() {
+                public void setCredentials(AuthScope authscope, Credentials credentials) {
+                    throw new UnsupportedOperationException();
+                }
+    
+                public Credentials getCredentials(AuthScope authscope) {
+                    return credentials;
+                }
+    
+                public void clear() {
+                    credentials = null;
+                }
+            };
+        }
+        
+        /**
+         * @return an <code>HttpRequestRetryHandler</code> that always returns
+         * <code>false</code>
+         */
+        @Override
+        protected HttpRequestRetryHandler createHttpRequestRetryHandler() {
+            return new HttpRequestRetryHandler() {
+                public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                    // when requests fail for unexpected reasons (eg., IOException), we don't 
+                    // want to blindly re-attempt 
+                    return false;
+                }
+            };
+        }        
+    }
+    
+    private static SchemeRegistry getSchemeRegistry(Socket socket) {
+        SchemeRegistry schemeRegistry = new SchemeRegistry();
+        schemeRegistry.register(new Scheme("http", new SocketWrapperProtocolSocketFactory(socket), 80));
+        schemeRegistry.register(new Scheme("tls", new SocketWrapperProtocolSocketFactory(socket),80));
+        schemeRegistry.register(new Scheme("https", new SocketWrapperProtocolSocketFactory(socket),80));
+        return schemeRegistry;            
+    }
+    
+    
 }

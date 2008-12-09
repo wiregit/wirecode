@@ -13,13 +13,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.friend.FriendPresence;
+import org.limewire.io.GUID;
 import org.limewire.lifecycle.Service;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
-import org.limewire.http.httpclient.SocketWrappingHttpClient;
-import org.limewire.io.GUID;
-import org.limewire.core.api.friend.FriendPresence;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -41,28 +41,28 @@ class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service 
     private final ScheduledExecutorService backgroundExecutor;
 
     private final MessageFactory messageFactory;
-    private final Provider<SocketWrappingHttpClient> clientProvider;
 
     private final NetworkManager networkManager;
 
     private final PushEndpointFactory pushEndpointFactory;
+    private final Provider<HttpParams> httpParams;
 
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
-                                        ScheduledExecutorService backgroundExecutor,
+    ScheduledExecutorService backgroundExecutor,
                                         SocketsManager socketsManager,
-                                        @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
+                                        @Named("forMeReplyHandler") Provider<ReplyHandler> forMeReplyHandler,
                                         MessageFactory messageFactory,
-                                        Provider<SocketWrappingHttpClient> clientProvider,
                                         NetworkManager networkManager,
-                                        PushEndpointFactory pushEndpointFactory) {
+                                        PushEndpointFactory pushEndpointFactory, 
+                                        @Named("defaults")Provider<HttpParams> httpParams) {
         this.socketsManager = socketsManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
         this.backgroundExecutor = backgroundExecutor;
-        this.clientProvider = clientProvider;
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.httpParams = httpParams;
     }
     
     @Inject
@@ -97,7 +97,7 @@ class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service 
      */
     public BrowseHostHandler createBrowseHostHandler(GUID guid, GUID serventID) {
         return new BrowseHostHandler(guid, socketsManager,
-                forMeReplyHandler, messageFactory, clientProvider, 
+                forMeReplyHandler, messageFactory, httpParams, 
                 networkManager, pushEndpointFactory);
     }
 
@@ -170,7 +170,7 @@ class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service 
     @Override
     public BrowseHostHandler createBrowseHostHandler(GUID browseGuid) {
         return new BrowseHostHandler(browseGuid, socketsManager,
-                forMeReplyHandler, messageFactory, clientProvider,
+                forMeReplyHandler, messageFactory, httpParams,
                 networkManager, pushEndpointFactory);
     }
 

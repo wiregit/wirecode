@@ -15,27 +15,31 @@ import com.google.inject.Inject;
  * a <code>SocketFactory</code> that can be given 
  * a <code>Socket</code> to use
  */
-class SocketWrapperProtocolSocketFactory implements SocketFactory {
+public class SocketWrapperProtocolSocketFactory implements SocketFactory {
 
-        private Socket socket;
+    private Socket socket;
 
-        @Inject
-        SocketWrapperProtocolSocketFactory() {
-        }
-        
-        void setSocket(Socket s) {
-            this.socket = s;
-        }
-
-        public Socket createSocket() throws IOException {
-            return socket;
-        }
-
-        public Socket connectSocket(Socket socket, String s, int i, InetAddress inetAddress, int i1, HttpParams httpParams) throws IOException, UnknownHostException, ConnectTimeoutException {
-            return socket; // TODO validate parameters actually match those of the socket
-        }
-
-        public boolean isSecure(Socket socket) throws IllegalArgumentException {
-            return false; // TODO
-        }
+    @Inject
+    public SocketWrapperProtocolSocketFactory() {
     }
+
+    public SocketWrapperProtocolSocketFactory(Socket socket) {
+        this.socket = socket;
+    }
+    
+    void setSocket(Socket s) {
+        this.socket = s;
+    }
+
+    public Socket createSocket() throws IOException {
+        return socket;
+    }
+
+    public Socket connectSocket(Socket socket, String s, int i, InetAddress inetAddress, int i1, HttpParams httpParams) throws IOException, UnknownHostException, ConnectTimeoutException {
+        return socket; // TODO validate parameters actually match those of the socket
+    }
+
+    public boolean isSecure(Socket socket) throws IllegalArgumentException {
+        return false; // TODO
+    }
+}
