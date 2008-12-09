@@ -117,13 +117,19 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         presenceLibrary.setState(LibraryState.LOADING);
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
+        AddressFeature addressFeature = ((AddressFeature)friendPresence.getFeature(AddressFeature.ID));
+        if(addressFeature == null) {
+            // happens during sign-off
+            return;    
+        }
+        final XMPPAddress address = (XMPPAddress) addressFeature.getFeature();
         browse.start(new BrowseListener() {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
                 if(!friendPresence.getFriend().isAnonymous()) {
-                    // copy construct to add injectables and change address to xmpp address 
-                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDescAdapter.getRfd(), (XMPPAddress)((AddressFeature)friendPresence.getFeature(AddressFeature.ID)).getFeature()), new IpPortSet(remoteFileDescAdapter.getAlts()));
+                    // copy construct to add injectables and change address to xmpp address                    
+                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDescAdapter.getRfd(), address), new IpPortSet(remoteFileDescAdapter.getAlts()));
                     remoteFileDescAdapter.setFriendPresence(friendPresence);
                 }
                 RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
