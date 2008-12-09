@@ -81,6 +81,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final TimeRenderer timeRenderer = new TimeRenderer();
     private final FileSizeRenderer fileSizeRenderer = new FileSizeRenderer();
     private final IconLabelRenderer iconLabelRenderer;
+    private final IconManager iconManager;
 
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
@@ -93,6 +94,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler) {
+        this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.player = player;
@@ -175,7 +177,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             libTable.getColumnModel().getColumn(VideoTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
             break;
         case DOCUMENT:
-            libTable = new LibraryTable<T>(sortedList, new DocumentTableFormat<T>(), saveLocationExceptionHandler);
+            libTable = new LibraryTable<T>(sortedList, new DocumentTableFormat<T>(iconManager), saveLocationExceptionHandler);
             libTable.getColumnModel().getColumn(DocumentTableFormat.NAME_COL).setCellRenderer(iconLabelRenderer);
             libTable.getColumnModel().getColumn(DocumentTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
             break;
