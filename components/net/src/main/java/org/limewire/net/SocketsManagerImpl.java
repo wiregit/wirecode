@@ -35,7 +35,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class SocketsManagerImpl implements SocketsManager, EventBroadcaster<ConnectivityChangeEvent>, ListenerSupport<ConnectivityChangeEvent> {
     
-    private static Log LOG = LogFactory.getLog(SocketsManagerImpl.class);
+    private final static Log LOG = LogFactory.getLog(SocketsManagerImpl.class);
     
     private final SocketController socketController;
     
