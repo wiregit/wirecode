@@ -66,6 +66,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
             } else {
                 LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS, id);
             }
+            fireCollectionEvent(FileListChangedEvent.Type.IMAGE_COLLECTION, value);
             addNewImagesAlways = value;
         }
     }
@@ -92,6 +93,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
             } else {
                 LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS, id);
             }
+            fireCollectionEvent(FileListChangedEvent.Type.AUDIO_COLLECTION, value);
             addNewAudioAlways = value;
         }
     }
@@ -118,6 +120,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
             } else {
                 LibrarySettings.addFriendShareNewFiles(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS, id);
             }
+            fireCollectionEvent(FileListChangedEvent.Type.VIDEO_COLLECTION, value);
             addNewVideoAlways = value;
         }
     }
@@ -137,16 +140,20 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     
     @Override
     protected void saveChange(File file, boolean added) {
-        // If we're smart sharing, stop doing it if we removed.
-        //                       , if added do nothing special.
-        // If not smart sharing, just synchronize the data.
-        if(isSmartlySharedType(file)) {
-            if(!added) {
-                stopSmartSharingType(file);
-            }
-        } else {
-            data.setSharedWithFriend(file, id, added);
-        }        
+        // Just synchronize the data.
+        data.setSharedWithFriend(file, id, added);      
+    }
+    
+    @Override
+    public boolean remove(FileDesc fileDesc) {
+        boolean contains = super.remove(fileDesc);
+        // to stop auto sharing on remove, must be contained in this list, not an incomplete file
+        // be of the type that is smartly shared and must still exist in the managed List
+        // (not existing in the managed list means it was removed from LW)
+        if(contains && !(fileDesc instanceof IncompleteFileDesc) && isSmartlySharedType(fileDesc.getFile()) && managedList.contains(fileDesc)) {
+            stopSmartSharingType(fileDesc.getFile());
+        }
+        return contains;
     }
     
     /**

@@ -130,8 +130,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewAudioAlways(boolean value) {
             getCoreFileList().setAddNewAudioAlways(value);
-            fireAudioCollectionChange(propertyChange, value);
-            setSharing(value, Category.AUDIO);
+            audioCollectionUpdate(value);
         }
         
         public boolean isAddNewVideoAlways() {
@@ -140,8 +139,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewVideoAlways(boolean value) {
             getCoreFileList().setAddNewVideoAlways(value);
-            fireVideoCollectionChange(propertyChange, value);
-            setSharing(value, Category.VIDEO);
+            videoCollectionUpdate(value);
         }
         
         public boolean isAddNewImageAlways() {
@@ -150,8 +148,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewImageAlways(boolean value) {
             getCoreFileList().setAddNewImageAlways(value);
-            fireImageCollectionChange(propertyChange, value);
-            setSharing(value, Category.IMAGE);
+            imageCollectionUpdate(value);
         }
         
         private void setSharing(boolean value, Category category) {
@@ -167,6 +164,24 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void removePropertyChangeListener(PropertyChangeListener listener) {
             propertyChange.removePropertyChangeListener(listener);
+        }
+        
+        @Override
+        protected void imageCollectionUpdate(boolean value) {
+            fireImageCollectionChange(propertyChange, value);
+            setSharing(value, Category.IMAGE);
+        }
+        
+        @Override
+        protected void audioCollectionUpdate(boolean value) {
+            fireAudioCollectionChange(propertyChange, value);
+            setSharing(value, Category.AUDIO);
+        }
+        
+        @Override
+        protected void videoCollectionUpdate(boolean value) {
+            fireVideoCollectionChange(propertyChange, value);
+            setSharing(value, Category.VIDEO);
         }
     }
     
@@ -226,8 +241,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewAudioAlways(boolean value) {
             getCoreFileList().setAddNewAudioAlways(value);
-            fireAudioCollectionChange(propertyChange, value);
-            setSharing(value, Category.AUDIO);
+            audioCollectionUpdate(value);
         }
         
         public boolean isAddNewVideoAlways() {
@@ -236,8 +250,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewVideoAlways(boolean value) {
             getCoreFileList().setAddNewVideoAlways(value);
-            fireVideoCollectionChange(propertyChange, value);
-            setSharing(value, Category.VIDEO);
+            videoCollectionUpdate(value);
         }
         
         public boolean isAddNewImageAlways() {
@@ -246,8 +259,7 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void setAddNewImageAlways(boolean value) {
             getCoreFileList().setAddNewImageAlways(value);
-            fireImageCollectionChange(propertyChange, value);
-            setSharing(value, Category.IMAGE);
+            imageCollectionUpdate(value);
         }
         
         private void setSharing(boolean value, Category category) {
@@ -263,6 +275,24 @@ class ShareListManagerImpl implements ShareListManager {
         
         public void removePropertyChangeListener(PropertyChangeListener listener) {
             propertyChange.removePropertyChangeListener(listener);
+        }
+        
+        @Override
+        protected void imageCollectionUpdate(boolean value) {
+            fireImageCollectionChange(propertyChange, value);
+            setSharing(value, Category.IMAGE);
+        }
+        
+        @Override
+        protected void audioCollectionUpdate(boolean value) {
+            fireAudioCollectionChange(propertyChange, value);
+            setSharing(value, Category.AUDIO);
+        }
+        
+        @Override
+        protected void videoCollectionUpdate(boolean value) {
+            fireVideoCollectionChange(propertyChange, value);
+            setSharing(value, Category.VIDEO);
         }
     } 
     

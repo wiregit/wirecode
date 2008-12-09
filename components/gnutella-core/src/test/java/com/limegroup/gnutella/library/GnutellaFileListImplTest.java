@@ -364,4 +364,88 @@ public class GnutellaFileListImplTest extends LimeTestCase {
         assertFalse(managedList.contains(f5));
     }
     
+    public void testShareCollection() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "wav", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "wav", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "txt", _scratchDir); // no auto shared, wrong type
+        
+        assertEquals(0, fileList.size());
+        fileList.setAddNewAudioAlways(true);
+
+        assertAdds(managedList, f1);
+        assertAdds(managedList, f2);
+        assertAdds(managedList, f3);
+        assertEquals(3, managedList.size());
+        // files auto added to fileList
+        assertEquals(2, fileList.size());
+    }
+    
+    public void testUnShareCollection() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "wav", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "wav", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        assertEquals(0, fileList.size());
+        fileList.setAddNewAudioAlways(true);
+
+        assertAdds(managedList, f1);
+        assertAdds(managedList, f2);
+        assertEquals(2, managedList.size());
+        // files auto added to fileList
+        assertEquals(2, fileList.size());
+        
+        fileList.setAddNewAudioAlways(false);
+        assertAdds(managedList, f3);
+        
+        assertEquals(3, managedList.size());
+        // no new files added
+        assertEquals(2, fileList.size());
+    }
+    
+    public void testRemoveFileFromAutoShareCollection() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "wav", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "wav", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        assertEquals(0, fileList.size());
+        fileList.setAddNewAudioAlways(true);
+
+        assertAdds(managedList, f1);
+        assertAdds(managedList, f2);
+        assertAdds(managedList, f3);
+        assertEquals(3, managedList.size());
+        // files auto added to fileList
+        assertEquals(3, fileList.size());
+        
+        fileList.remove(f1);
+        
+        assertEquals(2, fileList.size());
+        assertFalse("Auto share not disbled after remove", fileList.isAddNewAudioAlways());
+    }
+    
+    public void testRemoveManagedFileAutoShareContinues() throws Exception {
+        f1 = createNewExtensionTestFile(1,  "wav", _scratchDir);
+        f2 = createNewExtensionTestFile(3,  "wav", _scratchDir);
+        f3 = createNewExtensionTestFile(11, "wav", _scratchDir);
+        
+        assertEquals(0, fileList.size());
+        fileList.setAddNewAudioAlways(true);
+
+        assertAdds(managedList, f1);
+        assertAdds(managedList, f2);
+        assertEquals(2, managedList.size());
+        // files auto added to fileList
+        assertEquals(2, fileList.size());
+        
+        managedList.remove(f1);
+        assertEquals(1, managedList.size());
+        // files auto added to fileList
+        assertEquals(1, fileList.size());
+        assertTrue("Auto share not enabled after managed remove", fileList.isAddNewAudioAlways());
+        
+        assertAdds(managedList, f3);
+        
+        assertEquals(2, fileList.size());
+        assertTrue("Auto share not enabled after managed remove", fileList.isAddNewAudioAlways());
+    }
 }

@@ -9,7 +9,7 @@ import org.limewire.util.StringUtils;
 public class FileListChangedEvent {
     
     public static enum Type {
-        ADDED, REMOVED, CHANGED, ADD_FAILED, CHANGE_FAILED, CLEAR;
+        ADDED, REMOVED, CHANGED, ADD_FAILED, CHANGE_FAILED, CLEAR, AUDIO_COLLECTION, VIDEO_COLLECTION, IMAGE_COLLECTION;
     }
     
     private final Type type;
@@ -18,6 +18,7 @@ public class FileListChangedEvent {
     private final FileDesc oldValue;
     private final File oldFile;
     private final File newFile;
+    private boolean isShared = false;
     
     public FileListChangedEvent(FileList list, Type type) {
         assert type == Type.CLEAR;
@@ -69,6 +70,17 @@ public class FileListChangedEvent {
         this.newFile = Objects.nonNull(newValue.getFile(), "newValue.getFile()");
     }
     
+    public FileListChangedEvent(Type type, boolean state) {
+        assert type == Type.AUDIO_COLLECTION || type == Type.VIDEO_COLLECTION || type == Type.IMAGE_COLLECTION;
+        this.type = Objects.nonNull(type, "type");
+        this.list = null;
+        this.oldValue = null;
+        this.newFile = null;
+        this.oldFile = null;
+        this.newValue = null;
+        this.isShared = state;
+    }
+    
     public File getOldFile() {
         return oldFile;
     }
@@ -91,6 +103,10 @@ public class FileListChangedEvent {
     
     public FileDesc getOldValue() {
         return oldValue;
+    }
+    
+    public boolean isShared() {
+        return isShared;
     }
     
     @Override

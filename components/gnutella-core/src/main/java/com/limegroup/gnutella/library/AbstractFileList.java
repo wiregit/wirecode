@@ -40,7 +40,7 @@ abstract class AbstractFileList implements SharedFileList {
     private final IntSet fileDescIndexes;
     
     /** The managed list of all FileDescs. */
-    private final ManagedFileListImpl managedList;
+    protected final ManagedFileListImpl managedList;
     
     /** The listener on the ManagedList, to synchronize changes. */
     private final EventListener<FileListChangedEvent> managedListListener;
@@ -369,6 +369,11 @@ abstract class AbstractFileList implements SharedFileList {
     /** Fires a clear event to all listeners. */
     protected void fireClearEvent() {
         listenerSupport.handleEvent(new FileListChangedEvent(AbstractFileList.this, FileListChangedEvent.Type.CLEAR));
+    }
+    
+    /** Fires an event when the state of a shared collection changes*/
+    protected void fireCollectionEvent(FileListChangedEvent.Type type, boolean value) {
+        listenerSupport.handleEvent(new FileListChangedEvent(type, value));
     }
     
     /**

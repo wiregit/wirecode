@@ -150,11 +150,30 @@ abstract class LocalFileListImpl implements LocalFileList {
                     break;
                 case CLEAR:
                     clearFileDescs();
-                    break;                
+                    break;     
+                case AUDIO_COLLECTION:
+                    if(event.getType() == FileListChangedEvent.Type.AUDIO_COLLECTION) {
+                        audioCollectionUpdate(event.isShared());
+                    }
+                    break;
+                case VIDEO_COLLECTION:
+                    if(event.getType() == FileListChangedEvent.Type.VIDEO_COLLECTION) {
+                        videoCollectionUpdate(event.isShared());
+                    }
+                    break;
+                case IMAGE_COLLECTION:
+                    if(event.getType() == FileListChangedEvent.Type.IMAGE_COLLECTION) {
+                        imageCollectionUpdate(event.isShared());
+                    }
+                    break;
                 }
             }
         };
     }
+
+    protected void imageCollectionUpdate(boolean value) {}
+    protected void audioCollectionUpdate(boolean value) {}
+    protected void videoCollectionUpdate(boolean value) {}
     
     private class ListWrapper extends ListeningFutureDelegator<List<ListeningFuture<FileDesc>>, List<ListeningFuture<LocalFileItem>>> {
         public ListWrapper(ListeningFuture<List<ListeningFuture<FileDesc>>> delegate) {
