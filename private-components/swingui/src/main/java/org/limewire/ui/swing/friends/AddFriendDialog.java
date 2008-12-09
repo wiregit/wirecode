@@ -21,6 +21,9 @@ import org.limewire.util.Objects;
 import org.limewire.xmpp.api.client.XMPPConnection;
 import org.limewire.xmpp.api.client.XMPPException;
 
+/**
+ * Displays a dialog for adding a friend to the roster of an XMPP account.
+ */
 public class AddFriendDialog extends LimeJDialog {
 
     public AddFriendDialog(JComponent parent, final XMPPConnection connection) {

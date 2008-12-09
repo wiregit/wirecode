@@ -22,6 +22,12 @@ import org.limewire.xmpp.api.client.FriendRequestEvent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * Handles incoming friend requests by prompting the user to accept or
+ * decline them and returning the user's decision in each case to the
+ * appropriate <code>FriendRequestDecisionHandler</code> on a
+ * background thread.
+ */
 @Singleton
 class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequestEvent> {
 
@@ -30,6 +36,7 @@ class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequest
         FriendRequestEventListenerSupport.addListener(this);
     }
 
+    @Override
     @SwingEDTEvent
     public void handleEvent(final FriendRequestEvent event) {
         new FriendRequestConfirmationDialog(event.getSource());

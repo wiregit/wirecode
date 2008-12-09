@@ -86,8 +86,14 @@ class LoginPanel extends JXPanel implements SettingListener {
         super.setVisible(flag);
         if(becameVisible) {
             populateInputs();
-            if(usernameField.getText().equals(""))
-                usernameField.requestFocusInWindow();
+            // Give focus to the first visible, empty text field
+            if(serviceField.isVisible()) {
+                if(serviceField.getText().trim().equals(""))
+                    serviceField.requestFocusInWindow();
+            } else {
+                if(usernameField.getText().trim().equals(""))
+                    usernameField.requestFocusInWindow();
+            }
         }
     }
 
