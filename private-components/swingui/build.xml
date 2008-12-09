@@ -21,6 +21,7 @@
 				<pathelement location="${limewire.lib.jars}/AppFramework.jar"/>
 				<pathelement location="${limewire.lib.jars}/EventBus-1.2b.jar"/>
 				<pathelement location="${limewire.lib.jars}/forms.jar"/>
+				<pathelement location="${limewire.lib.jars}/growlwrapper.jar"/>
 				<pathelement location="${limewire.lib.jars}/guice-snapshot.jar"/>
 				<pathelement location="${limewire.lib.jars}/guice-assistedinject-snapshot.jar"/>
 				<pathelement location="${limewire.lib.jars}/mozdom4java.jar"/>

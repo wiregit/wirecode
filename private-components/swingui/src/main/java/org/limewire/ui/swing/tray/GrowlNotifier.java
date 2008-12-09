@@ -2,12 +2,16 @@ package org.limewire.ui.swing.tray;
 
 import java.util.EventObject;
 
+import org.limewire.ui.swing.util.I18n;
+
+import com.growl.GrowlWrapper;
+
 class GrowlNotifier implements TrayNotifier {
-    
-    private final Growl mGrowl;
+    private static final String NOTIFY_USER = "NotifyUser";
+    private GrowlWrapper wrapper;
     
     public GrowlNotifier() {
-        mGrowl = new Growl();
+        wrapper = new GrowlWrapper(I18n.tr("LimeWire"), null, new String[] {NOTIFY_USER}, new String[] {NOTIFY_USER});
     }
     
     public boolean supportsSystemTray() {
@@ -23,7 +27,7 @@ class GrowlNotifier implements TrayNotifier {
     }
 
     public void showMessage(Notification notification) {
-        mGrowl.showMessage(notification.getMessage());
+        wrapper.notify(NOTIFY_USER, I18n.tr("Alert!"), notification.getMessage());
     }
     
     public void hideMessage(Notification notification) {
@@ -38,5 +42,4 @@ class GrowlNotifier implements TrayNotifier {
     public boolean isExitEvent(EventObject event) {
         return false;
     }
-    
 }
