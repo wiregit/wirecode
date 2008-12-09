@@ -97,6 +97,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
         if (!NetworkUtils.isValidIpPort(publicAddress)) {
             LOG.debugf("not a valid public address yet: {0}", publicAddress);
             observer.handleIOException(new ConnectException("no valid address yet: " + publicAddress));
+            return;
         }
         /* there's a slight race condition, if a connection was just accepted between getting the address
          * and checking for it in the call below, but this should only change the address wrt to port vs
@@ -108,6 +109,7 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
         boolean canSend = connectRequestSender.send(xmppFirewalledAddress.getXmppAddress().getFullId(), publicAddress, clientGuid, 
                 isFWT ? networkManager.supportsFWTVersion() : 0);
         if (!canSend) {
+            LOG.debugf("could not send xmpp connect back request {0}", address);
             // fall back on push download manager
             observers.remove(pushedSocketObserver);
             pushDownloadManager.connect(xmppFirewalledAddress.getFirewalledAddress(), observer);
