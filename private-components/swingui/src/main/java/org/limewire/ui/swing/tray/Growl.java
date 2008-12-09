@@ -1,23 +1,32 @@
 package org.limewire.ui.swing.tray;
 
-import org.limewire.service.ErrorService;
+
 
 class Growl {
     
+    private static boolean loaded = false;
+    
     static {
+        boolean growlLoaded = false;
         try {
             System.loadLibrary("Growl");
+            growlLoaded = true;
         } catch (UnsatisfiedLinkError err) {
-            ErrorService.error(err);
+            growlLoaded = false;
         }
+        loaded = growlLoaded;
     }
     
     public Growl() {
-        RegisterGrowl();
+        if(loaded) {
+            RegisterGrowl();
+        }
     }
     
     public void showMessage (String message) {
-        SendNotification(message);
+        if(loaded) {
+            SendNotification(message);
+        }
     }
     
     private static final native void RegisterGrowl();
