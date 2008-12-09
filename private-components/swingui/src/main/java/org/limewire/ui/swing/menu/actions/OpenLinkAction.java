@@ -18,7 +18,6 @@ import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
@@ -33,8 +32,6 @@ public class OpenLinkAction extends AbstractAction {
 
     private final Navigator navigator;
 
-    private final MainPanel mainPanel;
-
     private final DownloadListManager downloadListManager;
 
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
@@ -43,13 +40,11 @@ public class OpenLinkAction extends AbstractAction {
 
     private final SearchHandler searchHandler;
 
-    public OpenLinkAction(Navigator navigator, String name, MainPanel mainPanel,
-            DownloadListManager downloadListManager,
+    public OpenLinkAction(Navigator navigator, String name, DownloadListManager downloadListManager,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
             SearchHandler searchHandler) {
         super(name);
         this.navigator = navigator;
-        this.mainPanel = mainPanel;
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.magnetFactory = magnetFactory;
@@ -59,12 +54,12 @@ public class OpenLinkAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         // Get owner frame.
-        Frame frame = GuiUtils.getParentFrame(mainPanel);
+        Frame frame = GuiUtils.getMainFrame();
         
         // Create dialog.
         final LocationDialog locationDialogue = new LocationDialog(frame);
         locationDialogue.setTitle(I18n.tr("Open Link"));
-        locationDialogue.setLocationRelativeTo(mainPanel);
+        locationDialogue.setLocationRelativeTo(frame);
         locationDialogue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -79,7 +74,7 @@ public class OpenLinkAction extends AbstractAction {
                         for (final MagnetLink magnet : magnetLinks) {
                             if (magnet.isDownloadable()) {
                                 downloadMagnet(downloadListManager, saveLocationExceptionHandler,
-                                        mainPanel, magnet);
+                                        magnet);
                             } else if (magnet.isKeywordTopicOnly()) {
                                 searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
                                         .getQueryString(), SearchCategory.ALL));
@@ -89,14 +84,14 @@ public class OpenLinkAction extends AbstractAction {
                         }
                     } else {
                         downloadTorrent(downloadListManager, saveLocationExceptionHandler,
-                                mainPanel, uri);
+                                 uri);
                     }
                 }
             }
 
             private void downloadTorrent(final DownloadListManager downloadListManager,
                     final SaveLocationExceptionHandler saveLocationExceptionHandler,
-                    final MainPanel mainPanel, final URI uri) {
+                    final URI uri) {
                 try {
                     DownloadItem item = downloadListManager.addTorrentDownload(uri, false);
                     navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
@@ -117,7 +112,7 @@ public class OpenLinkAction extends AbstractAction {
 
             private void downloadMagnet(final DownloadListManager downloadListManager,
                     final SaveLocationExceptionHandler saveLocationExceptionHandler,
-                    final MainPanel mainPanel, final MagnetLink magnet) {
+                    final MagnetLink magnet) {
                 try {
                     downloadListManager.addDownload(magnet, null, false);
                 } catch (SaveLocationException e1) {

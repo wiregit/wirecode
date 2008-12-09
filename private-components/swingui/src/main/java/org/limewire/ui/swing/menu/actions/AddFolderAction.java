@@ -12,24 +12,21 @@ import javax.swing.filechooser.FileFilter;
 
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.util.FileChooser;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 public class AddFolderAction extends AbstractAction {
     private final LibraryManager libraryManager;
 
-    private final MainPanel mainPanel;
-
-    public AddFolderAction(String name, LibraryManager libraryManager, MainPanel mainPanel) {
+    public AddFolderAction(String name, LibraryManager libraryManager) {
         super(name);
         this.libraryManager = libraryManager;
-        this.mainPanel = mainPanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        List<File> folders = FileChooser.getInput(mainPanel, I18n.tr("Add Folder(s)"), I18n
+        List<File> folders = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Add Folder(s)"), I18n
                 .tr("Add Folder(s)"), FileChooser.getLastInputDirectory(),
                 JFileChooser.DIRECTORIES_ONLY, JFileChooser.APPROVE_OPTION, true,
                 new FileFilter() {

@@ -16,11 +16,11 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.util.FileChooser;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.util.FileUtils;
@@ -31,23 +31,20 @@ public class OpenFileAction extends AbstractAction {
     
     private final DownloadListManager downloadListManager;
 
-    private final MainPanel mainPanel;
-
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
 
     public OpenFileAction(Navigator navigator, String name, DownloadListManager downloadListManager,
-            MainPanel mainPanel, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+            SaveLocationExceptionHandler saveLocationExceptionHandler) {
         super(name);
         this.navigator = navigator;
         this.downloadListManager = downloadListManager;
-        this.mainPanel = mainPanel;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        List<File> files = FileChooser.getInput(mainPanel, I18n.tr("Open File"), I18n.tr("Open"),
+        List<File> files = FileChooser.getInput(GuiUtils.getMainFrame(), I18n.tr("Open File"), I18n.tr("Open"),
                 FileChooser.getLastInputDirectory(), JFileChooser.FILES_ONLY,
                 JFileChooser.APPROVE_OPTION, true, new FileFilter() {
                     @Override
