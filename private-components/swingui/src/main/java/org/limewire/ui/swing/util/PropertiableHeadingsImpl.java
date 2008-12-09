@@ -84,7 +84,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
             if (length != null) {
                 subheading = addLength(subheading, length, insertHyphen);
             } else {
-                Long fileSize = getFileSize(propertiable);
+                Long fileSize = getFileSizeLong(propertiable);
                 subheading = addFileSize(subheading, fileSize, insertHyphen);
             }
         }
@@ -92,7 +92,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         case VIDEO: {
             Long qualityScore = getQualityScore(propertiable);
             Long length = getLength(propertiable);
-            Long fileSize = getFileSize(propertiable);
+            Long fileSize = getFileSizeLong(propertiable);
 
             boolean insertHyphen = false;
             if (qualityScore != null) {
@@ -114,10 +114,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         }
             break;
         case PROGRAM: {
-            Long fileSize = getFileSize(propertiable);
-            if (fileSize != null) {
-                subheading = GuiUtils.toUnitbytes(fileSize);
-            }
+            subheading = getFileSize(propertiable);
         }
             break;
         case DOCUMENT:
@@ -127,7 +124,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
              subheading = subheading == null ? "" : subheading;
             // TODO add name of program used to open this file, not included in
             // 5.0
-            Long fileSize = getFileSize(propertiable);
+            Long fileSize = getFileSizeLong(propertiable);
             subheading = addFileSize(subheading, fileSize, !"".equals(subheading));
         }
         }
@@ -163,7 +160,15 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
     }
 
-    private Long getFileSize(PropertiableFile propertiable) {
+    private Long getFileSizeLong(PropertiableFile propertiable) {
         return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
+    }
+    
+    public String getFileSize(PropertiableFile propertiable) {
+        Long fileSize = getFileSizeLong(propertiable);
+        if (fileSize != null) {
+            return GuiUtils.toUnitbytes(fileSize);
+        }
+        return "";
     }
 }

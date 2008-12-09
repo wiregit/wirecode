@@ -21,5 +21,9 @@ public class MockPropertiableHeadings implements PropertiableHeadings {
         getSubHeadingCalledCount++;
         return subheading;
     }
-
+    
+    @Override
+    public String getFileSize(PropertiableFile propertiable) {
+        return null;
+    }
 }

@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.util.StringUtils;
 
 public abstract class Dialog extends LimeJDialog {
-
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("M/d/yyyy");
     private static final String AUTHOR = "Author";
     private static final String COMPANY = "Company";
     private static final String PLATFORM = "Platform";
@@ -306,7 +307,7 @@ public abstract class Dialog extends LimeJDialog {
     }
     
     private void configureProgramDetailsLayout() {
-        details.setLayout(new MigLayout("fillx, nocache", "[20%!][]", "[][][][][][]"));
+        details.setLayout(new MigLayout("fillx, nocache", "[30%!][]", "[][][][][][]"));
         details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "span, growx, wrap");
         details.add(newSmallLabel(PLATFORM));
@@ -343,12 +344,20 @@ public abstract class Dialog extends LimeJDialog {
                 addDimensionMetadata(str(propFile.getProperty(FilePropertyKey.WIDTH)), str(propFile.getProperty(FilePropertyKey.HEIGHT)), metadata);
                 break;
             case DOCUMENT:
-                addDateCreatedMetadata(str(propFile.getProperty(FilePropertyKey.DATE_CREATED)), metadata);
+                addDateCreatedMetadata(convertDate(propFile), metadata);
                 //TODO: parse TOPIC property
                 break;
         }
         addHashMetadata(propFile.getUrn(), metadata);
         setMetadataText(metadata);
+    }
+    
+    protected String convertDate(PropertiableFile propertiable) {
+        Object time = propertiable.getProperty(FilePropertyKey.DATE_CREATED);
+        if (time != null  && time instanceof Long) {
+            return DATE_FORMAT.format(new java.util.Date((Long) time));
+        }
+        return "";
     }
 
     protected String str(Object property) {
