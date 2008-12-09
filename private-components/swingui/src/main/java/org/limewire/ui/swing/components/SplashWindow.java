@@ -121,8 +121,7 @@ public class SplashWindow {
     public void setStatusText(final String text) {
         SwingUtils.invokeLater(new Runnable() {
             public void run() {
-                String msg = numberFormat.format(((double)progressBar.getValue() / (double)progressBar.getMaximum() * 100d)) + "% " + text;
-                textLabel.setText(msg);
+                textLabel.setText(text);
                 progressBar.setValue(progressBar.getValue() + 1);
                 // force a redraw so the status is shown immediately,
                 // even if we're currently in the Swing thread.
