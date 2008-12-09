@@ -4,8 +4,6 @@ import java.util.EventObject;
 
 import org.limewire.ui.swing.util.I18n;
 
-import com.growl.GrowlWrapper;
-
 class GrowlNotifier implements TrayNotifier {
     private static final String NOTIFY_USER = "NotifyUser";
     private GrowlWrapper wrapper;
