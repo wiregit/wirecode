@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
@@ -14,8 +13,7 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
     public static final int TYPE_COL = NAME_COL + 1;
     public static final int SIZE_COL = TYPE_COL + 1;
     public static final int FILE_COUNT_COL = SIZE_COL + 1;
-    public static final int MODIFIED_COL = FILE_COUNT_COL + 1;
-    public static final int ACTION_COL = MODIFIED_COL + 1;
+    public static final int ACTION_COL = FILE_COUNT_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
     @Override
@@ -33,8 +31,6 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return I18n.tr("Number of Files");
             case TYPE_COL:
                 return I18n.tr("Type");
-            case MODIFIED_COL:
-                return I18n.tr("Modified");
             case ACTION_COL:
                 return I18n.tr("Download");
         }
@@ -53,8 +49,6 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return 1999;
             case TYPE_COL:
                 return "Verbal description";
-            case MODIFIED_COL:
-                return new Date(baseObject.getLastModifiedTime());
             case ACTION_COL:
                 return baseObject;
         }
@@ -68,7 +62,7 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { MODIFIED_COL};
+        return new int[] { };
     }
 
     @Override

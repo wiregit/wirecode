@@ -16,7 +16,6 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
@@ -161,7 +160,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     /**
      * Creates a table for MyLibrary
      */
-    public <T extends FileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList) {
+    public <T extends LocalFileItem> LibraryTable<T> createMyTable(Category category, EventList<T> eventList) {
 
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
@@ -209,7 +208,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     /**
      * Creates a table when viewing a Friend's Library or performing a BrowseHost
      */
-    public <T extends FileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList, Friend friend) {
+    public <T extends RemoteFileItem> LibraryTable<T> createFriendTable(Category category, EventList<T> eventList, Friend friend) {
 
         LibraryTable<T> libTable;
         SortedList<T> sortedList = GlazedListsFactory.sortedList(eventList);
@@ -266,7 +265,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      * Creates a table for sharing files from your library with a friend.
      */
     @Override
-    public <T extends FileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList) {
+    public <T extends LocalFileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList) {
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
         

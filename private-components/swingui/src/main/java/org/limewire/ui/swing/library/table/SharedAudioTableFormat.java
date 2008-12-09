@@ -3,12 +3,13 @@ package org.limewire.ui.swing.library.table;
 import java.util.Comparator;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 
 /**
  * Table format for the Audio Table when it is in Sharing View
  */
-public class SharedAudioTableFormat<T extends FileItem> extends AudioTableFormat<T> {
+public class SharedAudioTableFormat<T extends LocalFileItem> extends AudioTableFormat<T> {
     private final LocalFileList localFileList;
     
     public SharedAudioTableFormat(LocalFileList localFileList) {

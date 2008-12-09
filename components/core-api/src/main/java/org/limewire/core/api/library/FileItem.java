@@ -19,11 +19,5 @@ public interface FileItem extends PropertiableFile {
     long getSize();
 
     long getCreationTime();
-
-    long getLastModifiedTime();
-
-    int getNumHits();
-
-    int getNumUploads();
     
 }

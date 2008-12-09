@@ -31,4 +31,13 @@ public interface LocalFileItem extends FileItem {
      * Sets the property of this file item to a new value.
      */
     void setProperty(FilePropertyKey key, Object value);
+    
+    /** Returns the last modified date of the file. */
+    long getLastModifiedTime();
+
+    /** Returns the number of times someone has searched for this file. */
+    int getNumHits();
+
+    /** Returns the number of uploads this has completed. */
+    int getNumUploads();    
 }

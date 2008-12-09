@@ -31,7 +31,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     private final Category category;
 
-    private volatile Map<FilePropertyKey, Object> propertiesMap;
+    private Map<FilePropertyKey, Object> propertiesMap;
 
     private final FileDesc fileDesc;
 
@@ -48,22 +48,19 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         this.doc = fileDesc.getXMLDocument();
         this.detailsFactory = detailsFactory;
         this.creationTimeCache = creationTimeCache;
-        this.category = getCategory(fileDesc.getFile());
+        this.category = CategoryConverter.categoryForFile(fileDesc.getFile());
     }
 
     /**
-     * Lazily builds the properties map for this local file item. Uses double
-     * checked locking to prevent multiple threads from creating this map.
+     * Lazily builds the properties map for this local file item.
      */
     private Map<FilePropertyKey, Object> getPropertiesMap() {
-        if (propertiesMap == null) {
-            synchronized (this) {
-                if (propertiesMap == null) {
-                    reloadProperties();
-                }
+        synchronized (this) {
+            if(propertiesMap == null) {
+                reloadProperties();
             }
+            return propertiesMap;
         }
-        return propertiesMap;
     }
 
     @Override
@@ -116,10 +113,6 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         return category;
     }
 
-    private static Category getCategory(File file) {
-        return CategoryConverter.categoryForFile(file);
-    }
-
     @Override
     public Object getProperty(FilePropertyKey key) {
         return getPropertiesMap().get(key);
@@ -136,6 +129,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         }
     }
 
+    @Override
     public FileMetaData toMetadata() {
         FileDetails details = getFileDetails();
         FileMetaDataImpl fileMetaData = new FileMetaDataImpl();
@@ -304,6 +298,14 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         return fileDesc;
     }
 
+    @Override
+    public int compareTo(Object obj) {
+        if (getClass() != obj.getClass()) {
+            return -1;
+        }
+        return getFileName().toLowerCase().compareTo(((CoreLocalFileItem) obj).getFileName().toLowerCase());
+    }
+    
     /**
      * Reloads the properties map to whatever values are stored in the
      * LimeXmlDocs for this file.
@@ -312,17 +314,8 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         synchronized (this) {
             Map<FilePropertyKey, Object> reloadedMap = Collections
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
-                    .lastModified(), fileDesc.getFileSize(), reloadedMap, doc);
+            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), getCreationTime(), fileDesc.getFileSize(), reloadedMap, doc);
             propertiesMap = reloadedMap;
         }
-    }
-
-    @Override
-    public int compareTo(Object obj) {
-        if (getClass() != obj.getClass()) {
-            return -1;
-        }
-        return getFileName().toLowerCase().compareTo(((CoreLocalFileItem) obj).getFileName().toLowerCase());
-    }
+    }    
 }

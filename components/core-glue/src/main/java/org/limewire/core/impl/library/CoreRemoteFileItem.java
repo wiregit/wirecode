@@ -25,18 +25,22 @@ public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
         return searchResult;
     }
     
+    @Override
     public String getName() {
         return (String)searchResult.getProperty(FilePropertyKey.NAME);
     }
     
+    @Override
     public String getFileName(){
         return getRfd().getFileName();
     }
-
+    
+    @Override
     public long getSize() {
         return searchResult.getSize();
     }
-
+    
+    @Override
     public long getCreationTime() {
         Long time = (Long)searchResult.getProperty(FilePropertyKey.DATE_CREATED);
         if(time == null)
@@ -45,22 +49,12 @@ public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
             return time;
     }
 
-    public long getLastModifiedTime() {
-        return 0;  // TODO
-    }
-
-    public int getNumHits() {
-        return 0;  // TODO
-    }
-
-    public int getNumUploads() {
-        return 0;  // TODO
-    }
-
+    @Override
     public Category getCategory() {
         return searchResult.getCategory();   
     }
 
+    @Override
     public Object getProperty(FilePropertyKey key) {
         return searchResult.getProperty(key);
     }

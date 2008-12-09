@@ -3,12 +3,13 @@ package org.limewire.ui.swing.library.table;
 import java.util.Comparator;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 
 /**
  * Table format for the Video Table when it is in Sharing View
  */
-public class SharedVideoTableFormat<T extends FileItem> extends VideoTableFormat<T> {
+public class SharedVideoTableFormat<T extends LocalFileItem> extends VideoTableFormat<T> {
     private final LocalFileList localFileList;
     
     public SharedVideoTableFormat(LocalFileList localFileList) {

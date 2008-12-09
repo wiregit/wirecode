@@ -4,12 +4,13 @@ import java.util.Comparator;
 import java.util.Date;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 
 /**
  * Table format for the Other Table when it is in My Library
  */
-public class OtherTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
+public class OtherTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
     public static final int SIZE_COL = TYPE_COL + 1;
@@ -42,7 +43,7 @@ public class OtherTableFormat<T extends FileItem> extends AbstractMyLibraryForma
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
+    public Object getColumnValue(T baseObject, int column) {
         switch (column) {
         case NAME_COL:
             return baseObject;  

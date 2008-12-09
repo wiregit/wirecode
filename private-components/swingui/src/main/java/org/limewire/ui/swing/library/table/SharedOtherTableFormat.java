@@ -3,12 +3,13 @@ package org.limewire.ui.swing.library.table;
 import java.util.Comparator;
 
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 
 /**
  * Table format for the Other Table when it is in Sharing View
  */
-public class SharedOtherTableFormat<T extends FileItem> extends OtherTableFormat<T> {
+public class SharedOtherTableFormat<T extends LocalFileItem> extends OtherTableFormat<T> {
     private final LocalFileList localFileList;
     
     public SharedOtherTableFormat(LocalFileList localFileList) {

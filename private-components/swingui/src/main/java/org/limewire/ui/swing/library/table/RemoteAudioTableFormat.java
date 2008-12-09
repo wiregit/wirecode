@@ -1,16 +1,16 @@
 package org.limewire.ui.swing.library.table;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.util.I18n;
 
 /**
  * Table format for the Audio Table for LW buddies and Browse hosts
  */
-public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
+public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL =0;
     public static final int ARTIST_COL = NAME_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
@@ -20,8 +20,7 @@ public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLi
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int TRACK_COL = SIZE_COL + 1;
     public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int MODIFIED_COL = YEAR_COL + 1;
-    public static final int ACTION_COL = MODIFIED_COL + 1;
+    public static final int ACTION_COL = YEAR_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
 
@@ -50,8 +49,6 @@ public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return I18n.tr("Track");
             case YEAR_COL:
                 return I18n.tr("Year");
-            case MODIFIED_COL:
-                return I18n.tr("Modified");
             case ACTION_COL:
                 return I18n.tr("Download");
         }
@@ -79,8 +76,6 @@ public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
             case YEAR_COL:
                 return baseObject.getProperty(FilePropertyKey.YEAR);
-            case MODIFIED_COL:
-                return new Date(baseObject.getLastModifiedTime());
             case ACTION_COL:
                 return baseObject;
         }
@@ -94,7 +89,7 @@ public class RemoteAudioTableFormat<T extends FileItem> extends AbstractRemoteLi
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { MODIFIED_COL, YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
+        return new int[] { YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
     }
 
     @Override

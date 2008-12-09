@@ -5,13 +5,14 @@ import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
 
 /**
  * Table format for the Audio Table when it is in My Library
  */
-public class AudioTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
+public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int ARTIST_COL = NAME_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
@@ -62,7 +63,7 @@ public class AudioTableFormat<T extends FileItem> extends AbstractMyLibraryForma
     }
 
     @Override
-    public Object getColumnValue(FileItem baseObject, int column) {
+    public Object getColumnValue(T baseObject, int column) {
         switch (column) {
         case NAME_COL:
             return baseObject;
