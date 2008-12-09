@@ -241,8 +241,8 @@ public class CoreDownloadListManager implements DownloadListManager {
 
 	/**
 	 * Adds the specified listener to the list that is notified when a 
-	 * property value changes.  Notification events are fired on the Swing UI 
-	 * thread. 
+	 * property value changes.  Listeners added from the Swing UI thread will 
+	 * always receive notification events on the Swing UI thread. 
 	 */
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
