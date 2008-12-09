@@ -44,7 +44,7 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
         String friendUsername = StringUtils.parseBareAddress(packet.getFrom());
         if(presence.getType() == Type.subscribe) {
             if(LOG.isDebugEnabled())
-                LOG.debug("subscribe from " + friendUsername + "(" + packet.getFrom() + ")");
+                LOG.debug("subscribe from " + friendUsername);
             // If this is a new friend request, ask the user what to do
             Roster roster = connection.getRoster();
             if(roster != null) {
@@ -53,25 +53,25 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
                     LOG.debug("it's a new subscription");
                     // Ask the user
                     friendRequestBroadcaster.broadcast(new FriendRequestEvent(
-                            new FriendRequest(friendUsername, packet.getFrom(), this),
+                            new FriendRequest(friendUsername, this),
                             FriendRequest.EventType.REQUESTED));
                 } else {
                     LOG.debug("it's a response to our subscription");
                     // Acknowledge the subscription
                     Presence subbed = new Presence(Presence.Type.subscribed);
-                    subbed.setTo(packet.getFrom());
+                    subbed.setTo(friendUsername);
                     connection.sendPacket(subbed);
                 }
             }
         } else if(presence.getType() == Type.subscribed) {
             if(LOG.isDebugEnabled())
-                LOG.debug("subscribed from " + friendUsername + "(" + packet.getFrom() + ")");
+                LOG.debug("subscribed from " + friendUsername);
         } else if(presence.getType() == Type.unsubscribe) {
             if(LOG.isDebugEnabled())
-                LOG.debug("unsubscribe from " + friendUsername + "(" + packet.getFrom() + ")");
+                LOG.debug("unsubscribe from " + friendUsername);
             // Acknowledge the unsubscription
             Presence unsubbed = new Presence(Presence.Type.unsubscribed);
-            unsubbed.setTo(packet.getFrom());
+            unsubbed.setTo(friendUsername);
             connection.sendPacket(unsubbed);
             // If this is a response, don't respond again
             Roster roster = connection.getRoster();
@@ -83,7 +83,7 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
                     LOG.debug("it's a new unsubscription");
                     // Unsubscribe from the friend
                     Presence unsub = new Presence(Presence.Type.unsubscribe);
-                    unsub.setTo(packet.getFrom());
+                    unsub.setTo(friendUsername);
                     connection.sendPacket(unsub);
                     // Remove the friend from the roster
                     try {
@@ -95,7 +95,7 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
             }
         } else if(presence.getType() == Type.unsubscribed) {
             if(LOG.isDebugEnabled())
-                LOG.debug("unsubscribed from " + friendUsername + "(" + packet.getFrom() + ")");
+                LOG.debug("unsubscribed from " + friendUsername);
         }
     }
 
@@ -112,24 +112,24 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
     }
 
     @Override
-    public void handleDecision(String friendJID, boolean accepted) {
+    public void handleDecision(String friendUsername, boolean accepted) {
         if(!connection.isConnected())
             return;
         if(accepted) {
             LOG.debug("user accepted");
             // Acknowledge the subscription
             Presence subbed = new Presence(Presence.Type.subscribed);
-            subbed.setTo(friendJID);
+            subbed.setTo(friendUsername);
             connection.sendPacket(subbed);
             // Subscribe to the friend
             Presence sub = new Presence(Presence.Type.subscribe);
-            sub.setTo(friendJID);
+            sub.setTo(friendUsername);
             connection.sendPacket(sub);
         } else {
             LOG.debug("user declined");
             // Refuse the subscription
             Presence unsubbed = new Presence(Presence.Type.unsubscribed);
-            unsubbed.setTo(friendJID);            
+            unsubbed.setTo(friendUsername);            
             connection.sendPacket(unsubbed);
         }
     }
