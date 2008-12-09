@@ -60,7 +60,7 @@ class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequest
                         @Override
                         public void run() {
                             request.getDecisionHandler().handleDecision(
-                                    request.getFriendUsername(), true);
+                                    request.getFriendJID(), true);
 
                         }
                     });
@@ -77,7 +77,7 @@ class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequest
                         @Override
                         public void run() {
                             request.getDecisionHandler().handleDecision(
-                                    request.getFriendUsername(), false);
+                                    request.getFriendJID(), false);
 
                         }
                     });
