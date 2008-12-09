@@ -9,6 +9,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -156,5 +157,16 @@ public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleL
      * or whether to overwrite the file. 
      */
     void handleSaveLocationException(DownloadAction downLoadAction, SaveLocationException sle, boolean supportsNewSaveDir);
+    
+    /**
+     * Validates with the user that the torrent upload should be cancelled. 
+     * There are various reasons the user will not want the cancel to go through. 
+     * 1) If the torrent is still downloading, the upload cannot be cancelled 
+     *    without cancelling the download.
+     * 2) If the torrent is seeding, but the seed ratio is low, the user may 
+     *    wish to seed to at least 100% to be a good samaritan. 
+     * @param torrent 
+     */
+    void promptTorrentUploadCancel(ManagedTorrent torrent);
 
 }

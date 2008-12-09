@@ -19,7 +19,6 @@ import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
-import org.limewire.ui.swing.mainframe.MainPanel;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -28,12 +27,10 @@ import com.google.inject.Singleton;
 @Singleton
 public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHandler {
 
-    private final MainPanel mainPanel;
     private final SaveLocationManager saveLocationManager;
     
     @Inject
-    public SaveLocationExceptionHandlerImpl(MainPanel mainPanel, SaveLocationManager saveLocationManager) {
-        this.mainPanel = mainPanel;
+    public SaveLocationExceptionHandlerImpl(SaveLocationManager saveLocationManager) {
         this.saveLocationManager = saveLocationManager;
     }
     
@@ -68,7 +65,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             }
         } else {
             if (supportNewSaveDir) {
-                saveFile = FileChooser.getSaveAsFile(mainPanel, I18n.tr("Save File As..."), sle
+                saveFile = FileChooser.getSaveAsFile(GuiUtils.getMainFrame(), I18n.tr("Save File As..."), sle
                         .getFile());
             } else {
                 saveFile = sle.getFile();
@@ -98,7 +95,6 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
             final SaveLocationException sle, final boolean supportNewSaveDir) {
 
         final JDialog dialog = new LimeJDialog();
-        dialog.setLocationRelativeTo(mainPanel);
         dialog.setModalityType(ModalityType.APPLICATION_MODAL);
 
         final MultiLineLabel message = new MultiLineLabel(I18n
@@ -137,6 +133,7 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         panel.add(cancelButton);
         dialog.setContentPane(panel);
         dialog.pack();
+        dialog.setLocationRelativeTo(GuiUtils.getMainFrame());
         dialog.setVisible(true);
     }
 }

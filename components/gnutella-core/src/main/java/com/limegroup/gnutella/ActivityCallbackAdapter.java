@@ -9,6 +9,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
 import com.google.inject.Singleton;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -142,6 +143,11 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     @Override
     public void handleSaveLocationException(DownloadAction downLoadAction,
             SaveLocationException sle, boolean supportsNewSaveDir) {
+    }
+
+    @Override
+    public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+        
     }
 
 }

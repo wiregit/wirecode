@@ -24,6 +24,9 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentEvent;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -53,11 +56,16 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     private final DownloadManager downloadManager;
     
+    private final TorrentManager torrentManager;
+    
     private GuiCallback guiCallback = null;
     
+    
+    
     @Inject
-    public GlueActivityCallback(DownloadManager downloadManager) {
+    public GlueActivityCallback(DownloadManager downloadManager, TorrentManager torrentManager) {
         this.downloadManager = downloadManager;
+        this.torrentManager = torrentManager;
         queryReplyListeners = new ConcurrentSkipListMap<byte[], List<QueryReplyListener>>(
                 GUID.GUID_BYTE_COMPARATOR);
     }
@@ -301,6 +309,27 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     @Override
     public void removeIncomingSearchListener(IncomingSearchListener listener) {
         monitorListeners.remove(listener);
+    }
+
+    @Override
+    public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+        if(guiCallback != null) {
+            if (!torrent.isActive())
+                return;
+            boolean approve = true;
+            if (!torrent.isComplete()) {
+                approve = guiCallback.promptTorrentDownloading();
+            } else if (torrent.getRatio() < 1.0f) {
+                approve = guiCallback.promptTorrentSeedRatioLow();
+            }
+    
+            if (approve && torrent.isActive()) {
+                torrentManager
+                        .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
+            }
+        } else {
+            throw new UnsupportedOperationException("TODO notify user");
+        }
     }
     
 }

@@ -85,12 +85,13 @@ public class TorrentManagerImpl implements TorrentManager {
     @Inject
     public TorrentManagerImpl(FileManager fileManager,
             @Named("backgroundExecutor") ScheduledExecutorService threadPool,
-            IncomingConnectionHandler incomingConnectionHandler) {
+            IncomingConnectionHandler incomingConnectionHandler, TorrentUploadCanceller torrentUploadCanceller) {
         this.incomingConnectionHandler = incomingConnectionHandler;
         this.fileManager = fileManager;
         this.threadPool = threadPool;
         // we are a torrent event listener too.
         listeners.add(this);
+        torrentUploadCanceller.register(this);
     }
     
     /**

@@ -27,8 +27,6 @@ class CoreUploadItem implements UploadItem {
 
     private Uploader uploader;
 
-    private boolean isStopped = false;
-
     private final PropertyChangeSupport support = new SwingSafePropertyChangeSupport(this);
     
     private Map<FilePropertyKey, Object> propertiesMap;
@@ -44,7 +42,6 @@ class CoreUploadItem implements UploadItem {
     @Override
     public void cancel() {
         uploader.stop();
-        isStopped = true;
         fireDataChanged();
     }
 
@@ -60,11 +57,9 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public UploadState getState() {
-        if (isStopped) {
-            return UploadState.CANCELED;
-        }
-
         switch (uploader.getState()) {
+        case CANCELLED:
+            return UploadState.CANCELED;
         case COMPLETE:
             return UploadState.DONE;
 

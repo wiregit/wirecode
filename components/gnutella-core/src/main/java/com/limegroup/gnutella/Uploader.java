@@ -18,6 +18,7 @@ import com.limegroup.gnutella.uploader.UploadType;
 public interface Uploader extends BandwidthTracker, Connectable {
     
     public static enum UploadStatus {
+        CANCELLED,
         CONNECTING,
         FREELOADER,
         LIMIT_REACHED,

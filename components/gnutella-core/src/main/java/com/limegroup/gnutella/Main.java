@@ -17,6 +17,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -292,6 +293,11 @@ public class Main {
         @Override
         public void handleSaveLocationException(DownloadAction downLoadAction,
                 SaveLocationException sle, boolean supportsNewSaveDir) {
+            
+        }
+
+        @Override
+        public void promptTorrentUploadCancel(ManagedTorrent torrent) {
             
         }
     }

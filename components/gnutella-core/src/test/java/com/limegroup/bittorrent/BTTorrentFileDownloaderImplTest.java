@@ -568,6 +568,12 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
                     SaveLocationException sle, boolean supportsNewSaveDir) {
                 
             }
+
+            @Override
+            public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+                
+            }
+
         });
         
         torrentFileDownloaderImpl.initDownloadInformation(uri, true);

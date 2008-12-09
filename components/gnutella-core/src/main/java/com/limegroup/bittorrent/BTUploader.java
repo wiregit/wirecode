@@ -5,6 +5,7 @@ import java.io.File;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.URN;
@@ -74,9 +75,15 @@ public class BTUploader implements Uploader, TorrentEventListener {
 	}
 
 	public UploadStatus getState() {
-		if (!_torrent.isActive()) {
-			if (_torrent.isComplete() && _torrent.getRatio() > 1)
+
+	    if(_torrent.getState() == TorrentState.STOPPED) {
+            return UploadStatus.CANCELLED;
+	    }
+	    
+	    if (!_torrent.isActive()) {
+			if (_torrent.isComplete() && _torrent.getRatio() > 1) {
 				return UploadStatus.COMPLETE;
+			} 
 			return UploadStatus.INTERRUPTED;
 		}
 		

@@ -8,6 +8,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.GUID;
 
 import com.google.inject.Singleton;
+import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -86,5 +87,10 @@ public class ActivityCallbackStub implements ActivityCallback {
     @Override
     public void handleSaveLocationException(DownloadAction downLoadAction,
             SaveLocationException sle, boolean supportsNewSaveDir) {
+    }
+
+    @Override
+    public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+        
     }
 }
