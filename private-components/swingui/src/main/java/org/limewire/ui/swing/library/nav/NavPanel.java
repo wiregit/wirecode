@@ -36,6 +36,8 @@ import net.miginfocom.swing.MigLayout;
 public class NavPanel extends JXPanel {
     
     @Resource private Icon removeLibraryIcon;
+    @Resource private Icon failedRemoveLibraryIcon;
+    @Resource private Icon failedRemoveLibraryHoverIcon;
     @Resource private Icon removeLibraryHoverIcon;
     
     @Resource private Color selectedBackground;
@@ -57,6 +59,8 @@ public class NavPanel extends JXPanel {
     
     private NavList parentList;
     private MouseListener removeListener;     
+    
+    private boolean failed;
 
     @AssistedInject
     NavPanel(@Assisted Action action,
@@ -87,7 +91,7 @@ public class NavPanel extends JXPanel {
         
         add(categoryLabel, "gapbefore 0, grow, push, alignx left");
         add(statusIcon, "alignx right, gapafter 4, hidemode 3, wrap");
-        unbusy();
+        unbusy(false);
         
         action.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -171,11 +175,16 @@ public class NavPanel extends JXPanel {
         statusIcon.setBusy(true);
     }
     
-    private void unbusy() {
+    private void unbusy(boolean failed) {
+        this.failed = failed;
         if(friend != null && friend.isAnonymous()) {
             statusIcon.setVisible(true);
             statusIcon.setBusy(false);
-            statusIcon.setIcon(removeLibraryIcon);
+            if (failed) {
+               statusIcon.setIcon(failedRemoveLibraryIcon);
+            } else {
+                statusIcon.setIcon(removeLibraryIcon);
+            }            
             addEjectListener();
         } else {
             removeEjectListener();
@@ -203,13 +212,21 @@ public class NavPanel extends JXPanel {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     super.mouseEntered(e);
-                    statusIcon.setIcon(removeLibraryHoverIcon);
+                    if (failed) {
+                        statusIcon.setIcon(failedRemoveLibraryHoverIcon);
+                    } else {
+                        statusIcon.setIcon(removeLibraryHoverIcon);
+                    }
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     super.mouseExited(e);
-                    statusIcon.setIcon(removeLibraryIcon);
+                    if (failed) {
+                        statusIcon.setIcon(failedRemoveLibraryIcon);
+                    } else {
+                        statusIcon.setIcon(removeLibraryIcon);
+                    }
                 }
             };
             statusIcon.addMouseListener(removeListener);
@@ -220,11 +237,11 @@ public class NavPanel extends JXPanel {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             categoryLabel.setFont(failedTextFont);
-            unbusy();
+            unbusy(true);
             break;
         case LOADED:
             categoryLabel.setFont(textFont);
-            unbusy();
+            unbusy(false);
             break;
         case LOADING:
             categoryLabel.setFont(textFont);
@@ -249,7 +266,7 @@ public class NavPanel extends JXPanel {
     
     public void removeBrowse() {
         if(libraryPanel != null) {
-            unbusy();
+            unbusy(false);
             libraryPanel.showLibraryCard();
         }
     }
