@@ -18,9 +18,8 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
     public static final int SIZE_COL = YEAR_COL + 1;
     public static final int RATING_COL = SIZE_COL + 1;
     public static final int COMMENTS_COL = RATING_COL + 1;
-    public static final int HEIGHT_COL = COMMENTS_COL + 1;
-    public static final int WIDTH_COL = HEIGHT_COL + 1;
-    public static final int ACTION_COL = WIDTH_COL + 1;
+    public static final int DIMENSION_COL = COMMENTS_COL + 1;
+    public static final int ACTION_COL = DIMENSION_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
 
@@ -45,12 +44,10 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return I18n.tr("Size");
             case COMMENTS_COL:
                 return I18n.tr("Comments");
-            case HEIGHT_COL:
-                return I18n.tr("Height");
+            case DIMENSION_COL:
+                return I18n.tr("Dimension");
             case ACTION_COL:
                 return I18n.tr("Download");    
-            case WIDTH_COL:
-                return I18n.tr("Width");  
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -73,10 +70,11 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return baseObject.getSize();
             case COMMENTS_COL:
                 return baseObject.getProperty(FilePropertyKey.COMMENTS);
-            case HEIGHT_COL:
-                return baseObject.getProperty(FilePropertyKey.HEIGHT); 
-            case WIDTH_COL:
-                return baseObject.getProperty(FilePropertyKey.WIDTH); 
+            case DIMENSION_COL:
+                if(baseObject.getProperty(FilePropertyKey.WIDTH) == null || baseObject.getProperty(FilePropertyKey.HEIGHT) == null)
+                    return null;
+                else
+                    return baseObject.getProperty(FilePropertyKey.WIDTH) + " X " + baseObject.getProperty(FilePropertyKey.HEIGHT);
             case ACTION_COL:
                 return baseObject;
         }
@@ -90,7 +88,7 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { WIDTH_COL, HEIGHT_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
+        return new int[] { DIMENSION_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
     }
 
     @Override

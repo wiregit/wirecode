@@ -22,9 +22,8 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int QUALITY_INDEX = 5;
     public static final int RATING_INDEX = 6;
     public static final int COMMENTS_INDEX = 7;
-    public static final int HEIGHT_INDEX = 8;
-    public static final int WIDTH_INDEX = 9;
-    public static final int SIZE_INDEX = 10;
+    public static final int DIMENSION_INDEX = 8;
+    public static final int SIZE_INDEX = 9;
 
     public VideoTableFormat() {
         super(QUALITY_INDEX,
@@ -36,17 +35,14 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Quality"), 
                 tr("Rating"),
                 tr("Comments"), 
-                tr("Height"), 
-                tr("Width"), 
+                tr("Dimension"), 
                 tr("Size"));
     }
 
     @Override
     public Class getColumnClass(int index) {
         return 
-            index == HEIGHT_INDEX ? Integer.class :
             index == RATING_INDEX ? Integer.class :
-            index == WIDTH_INDEX ? Integer.class :
             index == YEAR_INDEX ? Integer.class :
             index == FROM_INDEX ? VisualSearchResult.class :
             super.getColumnClass(index);
@@ -67,8 +63,11 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case FROM_INDEX: return vsr;
             case RATING_INDEX: return getProperty(FilePropertyKey.RATING);
             case COMMENTS_INDEX: return getProperty(FilePropertyKey.COMMENTS);
-            case HEIGHT_INDEX: return getProperty(FilePropertyKey.HEIGHT);
-            case WIDTH_INDEX: return getProperty(FilePropertyKey.WIDTH);
+            case DIMENSION_INDEX:
+                if(getProperty(FilePropertyKey.WIDTH) == null || getProperty(FilePropertyKey.HEIGHT) == null)
+                    return null;
+                else
+                    return (getProperty(FilePropertyKey.WIDTH) + " X " + getProperty(FilePropertyKey.HEIGHT));
             case SIZE_INDEX: return vsr.getSize();
             default: return null;
         }

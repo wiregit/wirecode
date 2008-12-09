@@ -20,9 +20,8 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public static final int RATING_COL = SIZE_COL + 1;
     public static final int COMMENTS_COL = RATING_COL + 1;
     public static final int MODIFIED_COL = COMMENTS_COL + 1;
-    public static final int HEIGHT_COL = MODIFIED_COL + 1;
-    public static final int WIDTH_COL = HEIGHT_COL + 1;
-    public static final int ACTION_COL = WIDTH_COL + 1;
+    public static final int DIMENSION_COL = MODIFIED_COL + 1;
+    public static final int ACTION_COL = DIMENSION_COL + 1;
     public static final int COLUMN_COUNT = ACTION_COL + 1;
 
     @Override
@@ -46,14 +45,12 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return I18n.tr("Size");
         case COMMENTS_COL:
             return I18n.tr("Comments");
-        case HEIGHT_COL:
-            return I18n.tr("Height");
+        case DIMENSION_COL:
+            return I18n.tr("Dimension");
         case MODIFIED_COL:
             return I18n.tr("Modified");
         case ACTION_COL:
             return I18n.tr("Sharing");    
-        case WIDTH_COL:
-            return I18n.tr("Width");  
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -76,10 +73,11 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return baseObject.getSize();
         case COMMENTS_COL:
             return baseObject.getProperty(FilePropertyKey.COMMENTS);
-        case HEIGHT_COL:
-            return baseObject.getProperty(FilePropertyKey.HEIGHT); 
-        case WIDTH_COL:
-            return baseObject.getProperty(FilePropertyKey.WIDTH); 
+        case DIMENSION_COL:
+            if(baseObject.getProperty(FilePropertyKey.WIDTH) == null || baseObject.getProperty(FilePropertyKey.HEIGHT) == null)
+                return null;
+            else
+                return baseObject.getProperty(FilePropertyKey.WIDTH) + " X " + baseObject.getProperty(FilePropertyKey.HEIGHT); 
         case MODIFIED_COL:
             return new Date(baseObject.getLastModifiedTime());
         case ACTION_COL:
@@ -95,7 +93,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { WIDTH_COL, HEIGHT_COL, MODIFIED_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
+        return new int[] { DIMENSION_COL, MODIFIED_COL, COMMENTS_COL, RATING_COL, SIZE_COL};
     }
 
     @Override
