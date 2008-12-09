@@ -16,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
@@ -127,7 +128,7 @@ public class MouseableTable extends StripedJXTable {
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 	    setTableHeaderRenderer();
-	    
+	    setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
 		
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
