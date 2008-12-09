@@ -60,7 +60,7 @@ public class SharingTarget {
         
         @Override
         public String getId() {
-            return "_@_internal_@_";
+            return "_@_GNUTELLA_@_";
         }
 
         @Override

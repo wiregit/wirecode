@@ -29,13 +29,22 @@ public class CategoryShareModel implements LibraryShareModel{
 
         switch (category) {
         case AUDIO:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewAudioAlways(true);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewAudioAlways(true);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewAudioAlways(true);
             break;
         case VIDEO:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewVideoAlways(true);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewVideoAlways(true);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewVideoAlways(true);
             break;
         case IMAGE:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewImageAlways(true);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewImageAlways(true);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewImageAlways(true);
             break;
         default:
             throw new IllegalStateException("Can not share " + category + " collection");
@@ -47,13 +56,22 @@ public class CategoryShareModel implements LibraryShareModel{
 
         switch (category) {
         case AUDIO:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewAudioAlways(false);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewAudioAlways(false);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewAudioAlways(false);
             break;
         case VIDEO:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewVideoAlways(false);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewVideoAlways(false);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewVideoAlways(false);
             break;
         case IMAGE:
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewImageAlways(false);
+            if(isGnutella(friend.getFriend().getId()))
+                shareListManager.getGnutellaShareList().setAddNewImageAlways(false);
+            else
+                shareListManager.getOrCreateFriendShareList(friend.getFriend()).setAddNewImageAlways(false);
             break;
         default:
             throw new IllegalStateException("Can not share " + category + " collection");
@@ -63,16 +81,28 @@ public class CategoryShareModel implements LibraryShareModel{
     public boolean isShared(SharingTarget friend) {
         switch (category) {
         case AUDIO:
-            return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewAudioAlways();
+            if(isGnutella(friend.getFriend().getId()))
+                return shareListManager.getGnutellaShareList().isAddNewAudioAlways();
+            else
+                return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewAudioAlways();
         case VIDEO:
-            return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewVideoAlways();
+            if(isGnutella(friend.getFriend().getId()))
+                return shareListManager.getGnutellaShareList().isAddNewVideoAlways();
+            else
+                return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewVideoAlways();
         case IMAGE:
-            return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewImageAlways();
+            if(isGnutella(friend.getFriend().getId()))
+                return shareListManager.getGnutellaShareList().isAddNewImageAlways(); 
+            else
+                return shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewImageAlways();
         default:
             throw new IllegalStateException("Can not share " + category + " collection");
         }
     }
 
+    private boolean isGnutella(String id) {
+        return id.equals(SharingTarget.GNUTELLA_SHARE.getFriend().getId());
+    }
 
     @Override
     public boolean isGnutellaNetworkSharable() {
