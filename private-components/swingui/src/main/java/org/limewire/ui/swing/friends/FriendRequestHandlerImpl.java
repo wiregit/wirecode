@@ -48,6 +48,7 @@ class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequest
             setLocationRelativeTo(GuiUtils.getMainFrame());
             setModalityType(ModalityType.MODELESS);
             setLayout(new MigLayout());
+            setResizable(false);
 
             final JLabel text = 
                 new JLabel(tr("{0} would like to add you as a friend",

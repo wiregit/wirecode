@@ -34,6 +34,7 @@ public class AddFriendDialog extends LimeJDialog {
         Objects.nonNull(connection, "XMPP connection");
         setModalityType(ModalityType.MODELESS);
         setLayout(new MigLayout());
+        setResizable(false);
 
         final JLabel usernameLabel = new JLabel(tr("Username:"));
         final JLabel nicknameLabel = new JLabel(tr("Nickname:"));
