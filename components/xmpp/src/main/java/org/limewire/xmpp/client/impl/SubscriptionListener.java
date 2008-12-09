@@ -51,11 +51,16 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
                 RosterEntry entry = roster.getEntry(friendUsername);
                 if(entry == null) {
                     LOG.debug("it's a new subscription");
+                    // Ask the user
                     friendRequestBroadcaster.broadcast(new FriendRequestEvent(
                             new FriendRequest(friendUsername, packet.getFrom(), this),
                             FriendRequest.EventType.REQUESTED));
                 } else {
                     LOG.debug("it's a response to our subscription");
+                    // Acknowledge the subscription
+                    Presence subbed = new Presence(Presence.Type.subscribed);
+                    subbed.setTo(packet.getFrom());
+                    connection.sendPacket(subbed);
                 }
             }
         } else if(presence.getType() == Type.subscribed) {

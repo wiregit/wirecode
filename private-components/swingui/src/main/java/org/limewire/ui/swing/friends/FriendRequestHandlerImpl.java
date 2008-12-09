@@ -12,10 +12,10 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.FriendRequest;
 import org.limewire.xmpp.api.client.FriendRequestEvent;
 
@@ -30,13 +30,9 @@ class FriendRequestHandlerImpl implements RegisteringEventListener<FriendRequest
         FriendRequestEventListenerSupport.addListener(this);
     }
 
+    @SwingEDTEvent
     public void handleEvent(final FriendRequestEvent event) {
-        SwingUtils.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new FriendRequestConfirmationDialog(event.getSource());
-            }
-        });
+        new FriendRequestConfirmationDialog(event.getSource());
     }
 
     private class FriendRequestConfirmationDialog extends LimeJDialog {
