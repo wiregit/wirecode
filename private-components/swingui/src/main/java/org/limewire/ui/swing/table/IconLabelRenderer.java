@@ -3,6 +3,7 @@ package org.limewire.ui.swing.table;
 import java.awt.BorderLayout;
 import java.awt.Component;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -28,6 +29,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
         super(new BorderLayout());
         this.iconManager = iconManager;
         
+        setBorder(BorderFactory.createEmptyBorder(0,2,0,2));
         label = new JLabel();        
         label.setIconTextGap(5);
         
