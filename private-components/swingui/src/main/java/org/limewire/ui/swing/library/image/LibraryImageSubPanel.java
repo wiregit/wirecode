@@ -3,9 +3,11 @@ package org.limewire.ui.swing.library.image;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -33,6 +36,7 @@ import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.Image
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -63,16 +67,28 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     private EventList<LocalFileItem> currentEventList;
     private EventList<LocalFileItem> listSelection;    
     
-    public LibraryImageSubPanel(String name, EventList<LocalFileItem> eventList, LocalFileList fileList, ImageLibraryPopupParams params) {       
+    public LibraryImageSubPanel(final File parentFolder, EventList<LocalFileItem> eventList, LocalFileList fileList, ImageLibraryPopupParams params) {       
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
+        
+        String name = parentFolder.getName();
         
         this.currentEventList = eventList;
         JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
         headerLabel.setForeground(mainLabelColor);
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
+        
+        
+        headerLabel.addMouseListener(new MouseAdapter() {
+           @Override
+            public void mouseClicked(MouseEvent e) {
+               if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                   NativeLaunchUtils.launchExplorer(parentFolder);
+               }
+            } 
+        });
         
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);

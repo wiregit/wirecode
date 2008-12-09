@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.image;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -45,11 +46,11 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     }
     
     @Override
-    public LibraryImageSubPanel createMyLibraryImageSubPanel(String name,
+    public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ImageLibraryPopupParams params, LibrarySharePanel sharePanel) {
 
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, params);
+        LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, params);
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
         panel.setImageEditor(enableMyLibraryEditor(sharePanel, panel));
@@ -60,10 +61,10 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     }
 
     @Override
-    public LibraryImageSubPanel createSharingLibraryImageSubPanel(String name,
+    public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
             ImageLibraryPopupParams params, LocalFileList currentFriendFileList) {
-        LibraryImageSubPanel panel = new LibraryImageSubPanel(name, eventList, fileList, params);
+        LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, params);
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableSharingRenderer(list, currentFriendFileList));
         panel.setImageEditor(enableSharingEditor(currentFriendFileList));

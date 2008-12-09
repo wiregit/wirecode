@@ -18,6 +18,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.library.Disposable;
@@ -25,7 +26,6 @@ import org.limewire.ui.swing.library.LibrarySelectable;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -56,13 +56,11 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     };
     
 
-    private final Map<String, LibraryImageSubPanel> panelMap;
+    private final Map<File, LibraryImageSubPanel> panelMap;
 
     private final LocalFileList fileList;
     private final LocalFileList currentFriendFileList;
     
-    private final String incomplete = I18n.tr("Incomplete Files");
-
     private ImageLibraryPopupParams params;
     
     private JScrollPane scrollPane;
@@ -88,7 +86,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         
         groupingList.addListEventListener(this);
 
-        panelMap = new ConcurrentHashMap<String, LibraryImageSubPanel>();
+        panelMap = new ConcurrentHashMap<File, LibraryImageSubPanel>();
     
         initList();
     }
@@ -109,7 +107,7 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
             if (listChanges.getType() == ListEvent.INSERT) {
                 // INSERT adds sublist to the GroupingList - UPDATEs are also
                 // fired for each file added to the sublist
-                final String parent = getParent(listChanges.getSourceList().get(listChanges.getIndex()).get(0));
+                final File parent = getParentFolder(listChanges.getSourceList().get(listChanges.getIndex()).get(0));
                 if (!panelMap.containsKey(parent)) {
                     final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
                     SwingUtils.invokeLater(new Runnable() {
@@ -125,14 +123,14 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
     
     private void initList() {
         for( List<LocalFileItem> fileItemList : groupingList) {
-            final String parent = getParent(fileItemList.get(0));
+            final File parent = getParentFolder(fileItemList.get(0));
             final EventList<LocalFileItem> newList = GlazedListsFactory.filterList(currentEventList, new DirectoryMatcher(parent));
             createSubPanel(parent, newList);
         }
     }
     
     
-    private void createSubPanel(String parent, EventList<LocalFileItem> list){
+    private void createSubPanel(File parent, EventList<LocalFileItem> list){
         LibraryImageSubPanel subPanel;
         if(sharePanel != null )
             subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, params, sharePanel);
@@ -143,22 +141,22 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         add(subPanel);
     }
         
-    private String getParent(LocalFileItem localFileItem){
-        return localFileItem.isIncomplete() ? incomplete : 
-            ((localFileItem.getFile() == null) ? incomplete : localFileItem.getFile().getParentFile().getName());
+    private File getParentFolder(LocalFileItem localFileItem){
+        return localFileItem.isIncomplete() ? SharingSettings.INCOMPLETE_DIRECTORY.getValue() : 
+            ((localFileItem.getFile() == null) ? SharingSettings.INCOMPLETE_DIRECTORY.getValue() : localFileItem.getFile().getParentFile());
     }
     
     private class DirectoryMatcher implements Matcher<LocalFileItem>{
         
-        private String parentDirectory;
+        private File parentDirectory;
 
-        public DirectoryMatcher(String parentDirectory){
+        public DirectoryMatcher(File parentDirectory){
             this.parentDirectory = parentDirectory;
         }
 
         @Override
         public boolean matches(LocalFileItem item) {
-            return getParent(item).equals(parentDirectory);
+            return getParentFolder(item).equals(parentDirectory);
         }
         
     }
