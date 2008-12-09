@@ -122,7 +122,12 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
             // happens during sign-off
             return;    
         }
-        final XMPPAddress address = (XMPPAddress) addressFeature.getFeature();
+        final XMPPAddress address;
+        if(!friendPresence.getFriend().isAnonymous()) {
+            address = (XMPPAddress) addressFeature.getFeature();    
+        } else {
+            address = null;
+        }
         browse.start(new BrowseListener() {
             public void handleBrowseResult(SearchResult searchResult) {
                 LOG.debugf("browse result: {0}, {1}", searchResult.getUrn(), searchResult.getSize());
