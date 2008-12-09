@@ -57,21 +57,26 @@ public class PlayerPanel extends JXPanel {
     @Resource private Icon backIcon;
     @Resource private Icon backIconPressed;
     @Resource private Icon backIconRollover; 
+    @Resource private Icon backIconDisabled;
     @Resource private Icon forwardIcon;
     @Resource private Icon forwardIconPressed;
     @Resource private Icon forwardIconRollover;
+    @Resource private Icon forwardIconDisabled;
     @Resource private Icon playIcon;
     @Resource private Icon playIconPressed;
     @Resource private Icon playIconRollover;
+    @Resource private Icon playIconDisabled;
     @Resource private Icon pauseIcon;
     @Resource private Icon pauseIconPressed;
     @Resource private Icon pauseIconRollover;
     @Resource private Icon volumeIcon;
     @Resource private Icon volumeIconPressed;
     @Resource private Icon volumeIconRollover;
+    @Resource private Icon volumeIconDisabled;
           
     @Resource private Font font;
     
+    private final JXPanel innerPanel;
     private final JButton backButton;
     private final JButton playButton;
     private final JButton pauseButton;
@@ -117,10 +122,12 @@ public class PlayerPanel extends JXPanel {
         backButton = new IconButton(backIcon, backIconRollover, backIconPressed);
         backButton.addActionListener(playerListener);
         backButton.setActionCommand(BACK);
+        backButton.setDisabledIcon(backIconDisabled);
         
         playButton = new IconButton(playIcon, playIconRollover, playIconPressed);
         playButton.addActionListener(playerListener);
         playButton.setActionCommand(PLAY);
+        playButton.setDisabledIcon(playIconDisabled);
 
         pauseButton = new IconButton(pauseIcon, pauseIconRollover, pauseIconPressed);
         pauseButton.addActionListener(playerListener);
@@ -133,11 +140,13 @@ public class PlayerPanel extends JXPanel {
         forwardButton = new IconButton(forwardIcon, forwardIconRollover, forwardIconPressed);
         forwardButton.addActionListener(playerListener);
         forwardButton.setActionCommand(FORWARD);
+        forwardButton.setDisabledIcon(forwardIconDisabled);
         
         volumeButton = new IconButton(volumeIcon, volumeIconRollover, volumeIconPressed);
         volumeButton.addActionListener(playerListener);
         volumeButton.setActionCommand(VOLUME);
-
+        volumeButton.setDisabledIcon(volumeIconDisabled);
+        
         volumeControlPopup = new JPopupMenu();
         volumeSlider = new JSlider(0,100);
         initVolumeControl();
@@ -152,7 +161,7 @@ public class PlayerPanel extends JXPanel {
         
         statusPanel = new JPanel(new MigLayout());
         
-        titleLabel = new JLabel("Lime Audio Previewer - Stopped");
+        titleLabel = new JLabel("Stopped");
         titleLabel.setFont(font);
         titleLabel.setMaximumSize(new Dimension(206, (int)titleLabel.getMaximumSize().getHeight()));
         titleLabel.setMinimumSize(new Dimension(206, (int)titleLabel.getMinimumSize().getHeight()));
@@ -170,7 +179,7 @@ public class PlayerPanel extends JXPanel {
         Dimension statusSize = new Dimension(buttonWidth, statusPanel.getPreferredSize().height);
         statusPanel.setPreferredSize(statusSize);
 
-        JXPanel innerPanel = new JXPanel(new MigLayout("insets 4 10 4 10, filly, gap 5, alignx center"));
+        innerPanel = new JXPanel(new MigLayout("insets 4 10 4 10, filly, gapy 5, alignx center"));
         innerPanel.setOpaque(false);
         innerPanel.setBackgroundPainter(createStatusBackgroundPainter());
         
@@ -180,9 +189,10 @@ public class PlayerPanel extends JXPanel {
         innerPanel.add(forwardButton, "gapright 3");
         innerPanel.add(statusPanel, "gapbottom 2, hidemode 2");
         innerPanel.add(volumeButton, "gapleft 2");
-                
-        add(innerPanel, "gaptop 2, gapbottom 2");
         
+        innerPanel.setVisible(false);
+        add(innerPanel, "gaptop 2, gapbottom 2");
+                
         EventAnnotationProcessor.subscribe(this);
 
         VolumeController volumeController = new VolumeController();
@@ -327,12 +337,15 @@ public class PlayerPanel extends JXPanel {
                songText = properties.get("author") + " - " + properties.get("title");
            }
             
+           
            volumeController.resetVolume();
            titleLabel.setText(songText);
-           titleLabel.setVisible(true);
            durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
            progressSlider.setMaximum(durationSecs);
            byteLength = (Integer)properties.get("audio.length.bytes");
+           
+           titleLabel.setVisible(true);
+           innerPanel.setVisible(true);
         }
 
         @Override
