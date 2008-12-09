@@ -309,7 +309,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    busyTimer = new Timer(15000, new ActionListener() {
+                    busyTimer = new Timer(60000, new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             putValue(TabActionMap.BUSY_KEY, Boolean.FALSE);
