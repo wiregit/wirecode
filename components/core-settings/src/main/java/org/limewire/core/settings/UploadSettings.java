@@ -20,7 +20,7 @@ public final class UploadSettings extends LimeProps {
         FACTORY.createIntSetting("MAX_PUSHES_PER_HOST", 5);
 
 	/**
-	 * Setting for the number of kilobytes/second to allow for all uploads.
+	 * The maximum percentage of estimated upload bandwidth to use for uploads.
 	 */
 	public static final IntSetting UPLOAD_SPEED =
 		FACTORY.createIntSetting("UPLOAD_SPEED", 100);

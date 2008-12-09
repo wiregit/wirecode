@@ -21,15 +21,15 @@ class ChatDocumentBuilder {
             "<head>" +
                 "<style>" +
                     "body { " +
+                        "font-family: sans-serif;" +
+                        "font-size: 9px;" +
                         "background-color: #ffffff;" +
                         "margin: 0 4px;}" +
                     ".me { " +
                         "color: #0D3065;" +
-                        "font-size: 105%;" +
                         "font-weight: bold;}" +
                     ".them { " +
                         "color: #771324;" + 
-                        "font-size: 105%;" +
                         "font-weight: bold;}" +
                     ".typing { " +
                         "font-size: 90%;" +
