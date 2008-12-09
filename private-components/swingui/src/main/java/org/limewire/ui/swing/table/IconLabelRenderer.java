@@ -9,6 +9,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -62,8 +63,8 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
         } else if (value instanceof VisualSearchResult){
             
             VisualSearchResult vsr = (VisualSearchResult)value;
-
-            label.setText(vsr.getHeading());
+            
+            label.setText(vsr.getPropertyString(FilePropertyKey.NAME));
             label.setIcon(iconManager.getIconForExtension(vsr.getFileExtension()));
 
             setAlpha(vsr.isSpam() ? 0.2f : 1.0f);

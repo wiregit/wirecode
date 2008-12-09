@@ -18,12 +18,12 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int NAME_INDEX = 1;
     public static final int EXTENSION_INDEX = 2;
     public static final int LENGTH_INDEX = 3;
-    public static final int YEAR_INDEX = 4;
+    public static final int SIZE_INDEX = 4;
     public static final int QUALITY_INDEX = 5;
     public static final int RATING_INDEX = 6;
     public static final int COMMENTS_INDEX = 7;
     public static final int DIMENSION_INDEX = 8;
-    public static final int SIZE_INDEX = 9;
+    public static final int YEAR_INDEX = 9;
 
     public VideoTableFormat() {
         super(QUALITY_INDEX,
@@ -31,12 +31,12 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Name"), 
                 tr("Extension"), 
                 tr("Length"), 
-                tr("Year"), 
+                tr("Size"), 
                 tr("Quality"), 
                 tr("Rating"),
                 tr("Comments"), 
                 tr("Dimension"), 
-                tr("Size"));
+                tr("Year"));
     }
 
     @Override
@@ -81,6 +81,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case EXTENSION_INDEX: return 60;
             case LENGTH_INDEX: return 60;
             case YEAR_INDEX: return 60;
+            case SIZE_INDEX: return 60;
             case QUALITY_INDEX: return 60;
             default: return 100;
         }
