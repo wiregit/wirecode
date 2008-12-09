@@ -5,7 +5,9 @@ import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 
 /**
  * Table format for the Document Table when it is in My Library
@@ -20,6 +22,22 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
 	public static final int ACTION_COL = MODIFIED_COL + 1;
 	private static final int COLUMN_COUNT = ACTION_COL + 1;
 
+	/** Icon manager used to find native file type information. */
+	private IconManager iconManager;
+    
+	/**
+	 * Constructs a DocumentTableFormat.
+	 */
+    public DocumentTableFormat() {
+    }
+	
+    /**
+     * Constructs a DocumentTableFormat with the specified icon manager.
+     */
+	public DocumentTableFormat(IconManager iconManager) {
+	    this.iconManager = iconManager;
+	}
+	
     @Override
     public int getColumnCount() {
         return COLUMN_COUNT;
@@ -52,9 +70,13 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
          case AUTHOR_COL:
              return baseObject.getProperty(FilePropertyKey.AUTHOR);
          case CREATED_COL:
-             return new Date(baseObject.getCreationTime());
+             // Return creation time if valid.
+             long creationTime = baseObject.getCreationTime();
+             return (creationTime >= 0) ? new Date(creationTime) : null;
          case MODIFIED_COL:
-             return new Date();
+             // Return last modified time. 
+             return (baseObject instanceof LocalFileItem) ?
+                 new Date(((LocalFileItem) baseObject).getLastModifiedTime()) : null;
          case NAME_COL:
              return baseObject;
          case ACTION_COL:
@@ -62,7 +84,10 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
          case SIZE_COL:
              return baseObject.getSize();
          case TYPE_COL:
-             return baseObject.getProperty(FilePropertyKey.TOPIC);     
+             // Use icon manager to return MIME description.
+             return (iconManager != null) ?
+                 iconManager.getMIMEDescription(baseObject) : 
+                 baseObject.getProperty(FilePropertyKey.TOPIC);
          }
          throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -74,7 +99,7 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[]{MODIFIED_COL, AUTHOR_COL, SIZE_COL};
+        return new int[] {AUTHOR_COL, SIZE_COL, CREATED_COL};
     }
 
     @Override
