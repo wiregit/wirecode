@@ -124,7 +124,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
     
     @Override
     public void uploadsCompleted() {
-        changeSupport.firePropertyChange("uploadsCompleted", false, true);
+        changeSupport.firePropertyChange(UPLOADS_COMPLETED, false, true);
     }
     
     // forces refresh

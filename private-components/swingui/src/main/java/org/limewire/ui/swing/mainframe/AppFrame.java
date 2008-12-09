@@ -299,7 +299,7 @@ public class AppFrame extends SingleFrameApplication {
             downloadsCompletedListener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if ("downloadsCompleted".equals(evt.getPropertyName())) {
+                    if (DownloadListManager.DOWNLOADS_COMPLETED.equals(evt.getPropertyName())) {
                         downloadsCompleted = true;
                         doDelayedShutdown();
                     }
@@ -314,7 +314,7 @@ public class AppFrame extends SingleFrameApplication {
             uploadsCompletedListener = new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {
-                    if ("uploadsCompleted".equals(evt.getPropertyName())) {
+                    if (UploadListManager.UPLOADS_COMPLETED.equals(evt.getPropertyName())) {
                         uploadsCompleted = true;
                         doDelayedShutdown();
                     }

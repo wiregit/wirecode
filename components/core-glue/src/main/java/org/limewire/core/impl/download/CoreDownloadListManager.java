@@ -302,7 +302,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         
         @Override
         public void downloadsCompleted() {
-            changeSupport.firePropertyChange("downloadsCompleted", false, true);
+            changeSupport.firePropertyChange(DOWNLOADS_COMPLETED, false, true);
         }
 
         private DownloadItem getDownloadItem(Downloader downloader) {
