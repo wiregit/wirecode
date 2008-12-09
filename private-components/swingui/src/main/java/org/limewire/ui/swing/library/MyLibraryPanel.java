@@ -113,18 +113,6 @@ public class MyLibraryPanel extends LibraryPanel {
         for(Category category : Category.getCategoriesInOrder()) {        
             CategorySelectionCallback callback = null;
             
-            
-            // Commented to show the audio player on every page 
-            //  to preview for Mike S 
-            /* if (category == Category.AUDIO) {
-                callback = new CategorySelectionCallback() {
-                    @Override
-                    public void categorySelected(Category category, boolean state) {
-                        playerPanel.setVisible(state);
-                    }
-                };
-            } */
-            
             FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
             addCategory(categoryIconManager.getIcon(category), category, 
                     createMyCategoryAction(category, filtered), filtered, callback);
