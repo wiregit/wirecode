@@ -257,8 +257,8 @@ class CoreUploadItem implements UploadItem {
             FileDesc fileDesc = uploader.getFileDesc();
             
             if(fileDesc != null) {
-                FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFile()
-                    .lastModified(), fileDesc.getFileSize(), reloadedMap, fileDesc.getXMLDocument());
+                FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), 
+                        fileDesc.getFile().lastModified(), reloadedMap, fileDesc.getXMLDocument());
             }
             propertiesMap = reloadedMap;
         }

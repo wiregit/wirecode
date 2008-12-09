@@ -314,7 +314,8 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
         synchronized (this) {
             Map<FilePropertyKey, Object> reloadedMap = Collections
                     .synchronizedMap(new HashMap<FilePropertyKey, Object>());
-            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), getCreationTime(), fileDesc.getFileSize(), reloadedMap, doc);
+            FilePropertyKeyPopulator.populateProperties(fileDesc.getFileName(), fileDesc.getFileSize(), 
+                    getCreationTime(), reloadedMap, doc);
             propertiesMap = reloadedMap;
         }
     }    
