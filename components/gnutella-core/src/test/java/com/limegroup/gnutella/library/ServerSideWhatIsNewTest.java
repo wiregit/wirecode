@@ -737,7 +737,7 @@ public class ServerSideWhatIsNewTest
         CreationTimeCache ctCache = creationTimeCache;
 
         File winInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        File linInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
+        File linInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnSetTest.java");
         File osxInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
 
         //  Gotta make use of the force-share folder for this test
@@ -754,9 +754,9 @@ public class ServerSideWhatIsNewTest
         File linDst = new File(LibraryUtils.PROGRAM_SHARE, "LimeWireLinux.bin");
         File osxDst = new File(LibraryUtils.PROGRAM_SHARE, "LimeWireOSX.dmg");
         
-        FileUtils.copy(winInstaller, winDst);
-        FileUtils.copy(linInstaller, linDst);
-        FileUtils.copy(osxInstaller, osxDst);
+        assertTrue(FileUtils.copy(winInstaller, winDst));
+        assertTrue(FileUtils.copy(linInstaller, linDst));
+        assertTrue(FileUtils.copy(osxInstaller, osxDst));
         
         winDst.deleteOnExit();
         linDst.deleteOnExit();

@@ -479,6 +479,16 @@ public final class FileUtilsTest extends BaseTestCase {
         }
     }
     
+    public void testCopyNonExistingFile() {
+        File nonexistent = new File("dkfdnslkdfa");
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        assertTrue(tmpDir.isDirectory());
+        assertTrue(!nonexistent.exists());
+        // TODO: what's the expected API behavior? return false if file to copy does not exist
+        // check usage of return value
+        assertFalse(FileUtils.copy(nonexistent, new File(tmpDir, nonexistent.getName()))); 
+    }
+    
     private void copyDirectoryClean() throws Exception {
         (new File("testfolder/test.props")).delete();
         (new File("testfolder/subfolder")).delete();
