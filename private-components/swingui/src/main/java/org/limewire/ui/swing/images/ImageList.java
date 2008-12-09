@@ -3,10 +3,12 @@ package org.limewire.ui.swing.images;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXList;
@@ -14,6 +16,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import ca.odell.glazedlists.EventList;
 
@@ -56,6 +59,20 @@ public class ImageList extends JXList {
         // inset spacing is the white space you will see between images
         setFixedCellHeight(imageBoxHeight + insetTop + insetBottom);
         setFixedCellWidth(imageBoxWidth + insetRight + insetLeft);
+        
+        //enable double click launching of image files.
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                    ImageList imageList = (ImageList)e.getComponent();
+                    int index = imageList.locationToIndex(e.getPoint());
+                    LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
+                    File file = val.getFile();
+                    NativeLaunchUtils.launchFile(file);
+                }
+            } 
+        });
     }
     
     /**
