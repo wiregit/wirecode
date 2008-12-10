@@ -42,9 +42,9 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
-import org.limewire.ui.swing.library.sharing.CategoryShareModel;
-import org.limewire.ui.swing.library.sharing.FileShareModel;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.CategoryShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.library.sharing.SingleFileShareWidget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -76,7 +76,7 @@ public class MyLibraryPanel extends LibraryPanel {
     private final LibraryManager libraryManager;
     private final Map<Category, LibraryOperable> selectableMap;
     
-    private LibrarySharePanel shareAllPanel = null;
+    private ShareWidget<Category> categoryShareWidget = null;
     
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -98,8 +98,7 @@ public class MyLibraryPanel extends LibraryPanel {
         this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
         
         getHeaderPanel().setText(I18n.tr("My Library"));
-        shareAllPanel = new LibrarySharePanel(allFriends);
-        shareAllPanel.setShareModel(new CategoryShareModel(shareListManager));
+        categoryShareWidget = new CategoryShareWidget(shareListManager, allFriends);
         createMyCategories(libraryManager.getLibraryManagedList().getSwingModel());
         
         selectFirst();
@@ -130,15 +129,14 @@ public class MyLibraryPanel extends LibraryPanel {
 
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {        
         //TODO: can this be a singleton??? 
-        final LibrarySharePanel sharePanel = new LibrarySharePanel(allFriends);
-        addDisposable(sharePanel);        
-        sharePanel.setShareModel(new FileShareModel(shareListManager));        
+        final ShareWidget<LocalFileItem> fileShareWidget = new SingleFileShareWidget(shareListManager, allFriends);
+        addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
         if (category != Category.IMAGE) {
-            LibraryTable table = tableFactory.createMyTable(category, filterList);
-            table.enableMyLibrarySharing(sharePanel);
+            LibraryTable<LocalFileItem> table = tableFactory.createMyTable(category, filterList);
+            table.enableMyLibrarySharing(fileShareWidget);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             selectableMap.put(category, table);
             scrollPane = new JScrollPane(table);
@@ -147,7 +145,7 @@ public class MyLibraryPanel extends LibraryPanel {
         } else { //Category.IMAGE 
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane, sharePanel);
+            LibraryImagePanel imagePanel = tableFactory.createImagePanel(filterList, scrollPane, fileShareWidget);
             selectableMap.put(category, imagePanel);
             scrollPane.setViewportView(imagePanel);
             scrollPane.setBorder(BorderFactory.createEmptyBorder());            
@@ -172,7 +170,7 @@ public class MyLibraryPanel extends LibraryPanel {
     public void dispose() {
         super.dispose();
         
-        shareAllPanel.dispose();
+        categoryShareWidget.dispose();
     }
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
@@ -222,11 +220,8 @@ public class MyLibraryPanel extends LibraryPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-          ((CategoryShareModel)shareAllPanel.getShareModel()).setCategory(category);
-          String catStr = category.toString();
-          shareAllPanel.setBottomLabel(
-                  I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", catStr, catStr.toLowerCase()));
-          shareAllPanel.show((JComponent)e.getSource());
+          categoryShareWidget.setShareable(category);
+          categoryShareWidget.show((JComponent)e.getSource());
         }
     }
     

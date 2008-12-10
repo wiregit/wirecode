@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.sharing;
+package org.limewire.ui.swing.library.sharing.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -6,6 +6,7 @@ import java.beans.PropertyChangeSupport;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 
 public class CategoryShareModel implements LibraryShareModel{
 

@@ -2,14 +2,15 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -23,7 +24,7 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
     private MyLibraryMultipleSelectionPopupMenu multiSelectPopupMenu;
 
     public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, List<SharingTarget> friendList,
+            ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Collection<Friend> friendList,
             PropertiesFactory<LocalFileItem> propertiesFactory) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareListManager, magnetFactory, table, friendList,

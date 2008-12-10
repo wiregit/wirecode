@@ -17,8 +17,7 @@ import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ThumbnailManager;
-import org.limewire.ui.swing.library.sharing.FileShareModel;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
@@ -52,12 +51,12 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ImageLibraryPopupParams params, LibrarySharePanel sharePanel) {
+            ImageLibraryPopupParams params, ShareWidget<LocalFileItem> shareWidget) {
 
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, params);
         ImageList list = panel.getImageList();
         list.setImageCellRenderer(enableMyLibraryRenderer(list));
-        panel.setImageEditor(enableMyLibraryEditor(sharePanel, panel));
+        panel.setImageEditor(enableMyLibraryEditor(shareWidget, panel));
         TransferHandler transferHandler = new MyLibraryTransferHandler(getSelectionModel(list), libraryManager.getLibraryManagedList());
         list.setTransferHandler(transferHandler);
         panel.setTransferHandler(transferHandler);
@@ -93,8 +92,8 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         return renderer;
     }
     
-    private TableRendererEditor enableMyLibraryEditor(LibrarySharePanel sharePanel, LibraryImageSubPanel parent){
-        ShareAction action = new ShareAction(I18n.tr("Sharing"), sharePanel, parent);
+    private TableRendererEditor enableMyLibraryEditor(ShareWidget<LocalFileItem> shareWidget, LibraryImageSubPanel parent){
+        ShareAction action = new ShareAction(I18n.tr("Sharing"), shareWidget, parent);
         ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(action);
         action.setEditor(shareEditor);
         shareEditor.setPreferredSize(subPanelDimension);
@@ -129,12 +128,12 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     private class ShareAction extends AbstractAction {
         private ShareTableRendererEditor shareEditor;
-        private LibrarySharePanel librarySharePanel;
+        private ShareWidget<LocalFileItem> shareWidget;
         private LibraryImageSubPanel parent;
 
-        public ShareAction(String text, LibrarySharePanel librarySharePanel, LibraryImageSubPanel parent){
+        public ShareAction(String text, ShareWidget<LocalFileItem> shareWidget, LibraryImageSubPanel parent){
             super(text);
-            this.librarySharePanel = librarySharePanel;
+            this.shareWidget = shareWidget;
             this.parent = parent;
         }
         
@@ -144,12 +143,12 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem(shareEditor.getLocalFileItem());
+            shareWidget.setShareable(shareEditor.getLocalFileItem());
           
             Point convertedLocation = 
                 SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), parent.getImageList());
             selectImage(convertedLocation);
-            librarySharePanel.show(shareEditor.getShareButton());
+            shareWidget.show(shareEditor.getShareButton());
             shareEditor.cancelCellEditing();
         }
         

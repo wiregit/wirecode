@@ -34,8 +34,7 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
-import org.limewire.ui.swing.library.sharing.FileShareModel;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -52,7 +51,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  * be files in your own library or remote files in someone else's library. 
  */
 public class LibraryTable<T extends FileItem> extends MouseableTable
-    implements Sharable, Disposable, LibraryOperable {
+    implements Sharable<LocalFileItem>, Disposable, LibraryOperable {
     
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
@@ -61,7 +60,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     
     private TableRendererEditor shareEditor;
-    private LibrarySharePanel librarySharePanel;
+    private ShareWidget<LocalFileItem> librarySharePanel;
     
     protected final int rowHeight = 20;
     
@@ -126,7 +125,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         return new TableColumnSelector(this, format).getPopupMenu();
     }
     
-    public void enableMyLibrarySharing(LibrarySharePanel librarySharePanel) {
+    public void enableMyLibrarySharing(ShareWidget<LocalFileItem> librarySharePanel) {
         this.librarySharePanel = librarySharePanel;
         shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
@@ -198,7 +197,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
             int selectedIndex = convertRowIndexToModel(getEditingRow());
             getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
             
-            ((FileShareModel)librarySharePanel.getShareModel()).setFileItem((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex));
+            librarySharePanel.setShareable((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex));
             librarySharePanel.show(shareEditor);
             shareEditor.cancelCellEditing();
         }

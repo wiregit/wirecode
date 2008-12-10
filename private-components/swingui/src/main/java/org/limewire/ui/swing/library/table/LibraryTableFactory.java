@@ -8,7 +8,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 
 import ca.odell.glazedlists.EventList;
 
@@ -27,7 +27,7 @@ public interface LibraryTableFactory {
     /**
      * Creates an image list for MyLibrary/Friends
      */
-    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, LibrarySharePanel sharePanel);
+    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, ShareWidget<LocalFileItem> sharePanel);
     
     /**
      * Creates a table for sharing files with a specified Friend

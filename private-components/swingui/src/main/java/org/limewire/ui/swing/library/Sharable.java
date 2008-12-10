@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.library;
 
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 
-public interface Sharable {
+public interface Sharable<T> {
     
-    public void enableMyLibrarySharing(LibrarySharePanel sharePanel);
+    public void enableMyLibrarySharing(ShareWidget<T> shareWidget);
 
 }

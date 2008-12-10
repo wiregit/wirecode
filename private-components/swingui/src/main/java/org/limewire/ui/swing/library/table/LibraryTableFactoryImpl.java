@@ -4,6 +4,7 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.DropMode;
@@ -15,24 +16,19 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
@@ -64,7 +60,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private AudioPlayer player;
 
     // only accessed on EDT
-    private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
+  //  private List<SharingTarget> friendList = new ArrayList<SharingTarget>();
 
     private DownloadListManager downloadListManager;
 
@@ -84,6 +80,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
 
+    private Collection<Friend> allFriends;
+
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
             LibraryManager libraryManager, 
@@ -95,6 +93,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
+            @Named("known") Collection<Friend> allFriends,
             ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
@@ -106,35 +105,37 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.remoteItemPropFactory = remoteItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.allFriends = allFriends;
+        
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager);
     }
 
-    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
-        knownFriends.addListener(new EventListener<FriendEvent>() {
-            @Override
-            @SwingEDTEvent
-            public void handleEvent(FriendEvent event) {
-                switch(event.getType()) {
-                case ADDED:
-                    friendList.add(new SharingTarget(event.getSource()));
-                    break;
-                case REMOVED:
-                    friendList.remove(new SharingTarget(event.getSource()));
-                    break;
-                }
-            }
-        });
-    }
-    
+//    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {
+//        knownFriends.addListener(new EventListener<FriendEvent>() {
+//            @Override
+//            @SwingEDTEvent
+//            public void handleEvent(FriendEvent event) {
+//                switch(event.getType()) {
+//                case ADDED:
+//                    friendList.add(new SharingTarget(event.getSource()));
+//                    break;
+//                case REMOVED:
+//                    friendList.remove(new SharingTarget(event.getSource()));
+//                    break;
+//                }
+//            }
+//        });
+//    }
+//    
     /**
      * Creates an panel that displays images as thumbnails.
      */
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, LibrarySharePanel sharePanel) {
+            JScrollPane scrollPane, ShareWidget<LocalFileItem> sharePanel) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
+                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory);
         
         LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
@@ -155,7 +156,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, LocalFileList currentFriendList) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, friendList, localItemPropFactory);
+                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory);
         return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(), scrollPane,
                 subPanelFactory, null, currentFriendList);
@@ -199,7 +200,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
-                category, libraryManager, shareListManager, magnetLinkFactory, friendList,
+                category, libraryManager, shareListManager, magnetLinkFactory, allFriends,
                 localItemPropFactory));
 
         EventListJXTableSorting.install(libTable, sortedList);
@@ -319,7 +320,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
-                    magnetLinkFactory, friendList, localItemPropFactory));
+                    magnetLinkFactory, allFriends, localItemPropFactory));
         
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);

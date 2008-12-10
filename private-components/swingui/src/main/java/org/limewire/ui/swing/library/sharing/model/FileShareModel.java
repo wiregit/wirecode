@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.sharing;
+package org.limewire.ui.swing.library.sharing.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -9,6 +9,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.ui.swing.library.sharing.SharingTarget;
 
 public class FileShareModel implements LibraryShareModel {
     private LocalFileItem fileItem;

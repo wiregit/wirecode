@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.List;
+import java.util.Collection;
 
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
@@ -21,7 +21,6 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.I18n;
@@ -45,7 +44,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     private JMenu friendSubMenu;
     
   //only accessed on EDT
-    private List<SharingTarget> friendList;
+    private Collection<Friend> friendList;
 
     private MagnetLinkFactory magnetFactory;
     
@@ -53,7 +52,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
     public MyLibraryPopupMenu(Category category, LibraryManager libraryManager,
             ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Component repaintComponent, 
-            List<SharingTarget> friendList, PropertiesFactory<LocalFileItem> propertiesFactory) {
+            Collection<Friend> friendList, PropertiesFactory<LocalFileItem> propertiesFactory) {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.magnetFactory = magnetFactory;
@@ -72,10 +71,10 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     
     private void resetFriends() {
        friendSubMenu.removeAll();
-       for (SharingTarget target : friendList){
-           JCheckBoxMenuItem item = new JCheckBoxMenuItem(I18n.tr("Share with {0}", target.getFriend().getRenderName()));
-           item.setSelected(shareListManager.getOrCreateFriendShareList(target.getFriend()).getSwingModel().contains(fileItem));
-           item.addItemListener(new FriendShareListener(target.getFriend()));
+       for (Friend friend : friendList){
+           JCheckBoxMenuItem item = new JCheckBoxMenuItem(I18n.tr("Share with {0}", friend.getRenderName()));
+           item.setSelected(shareListManager.getOrCreateFriendShareList(friend).getSwingModel().contains(fileItem));
+           item.addItemListener(new FriendShareListener(friend));
            friendSubMenu.add(item);
        }
        

@@ -23,7 +23,7 @@ import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NotImplementedException;
@@ -40,7 +40,7 @@ public class LibraryImagePanel extends JPanel
     implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibraryOperable {
     
     private LibraryImageSubPanelFactory factory;
-    private LibrarySharePanel sharePanel;
+    private ShareWidget<LocalFileItem> shareWidget;
     
     private final EventList<LocalFileItem> currentEventList;
 
@@ -70,7 +70,7 @@ public class LibraryImagePanel extends JPanel
     public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
-            LibrarySharePanel sharePanel,
+            ShareWidget<LocalFileItem> shareWidget,
             LocalFileList selectedFriendList) {       
         super(new VerticalLayout());
         
@@ -81,7 +81,7 @@ public class LibraryImagePanel extends JPanel
         this.params = params;
         this.scrollPane = scrollPane;
         this.factory = factory;
-        this.sharePanel = sharePanel;
+        this.shareWidget = shareWidget;
         this.currentFriendFileList = selectedFriendList;
         
         groupingList = GlazedListsFactory.groupingList(eventList, groupingComparator);
@@ -134,8 +134,8 @@ public class LibraryImagePanel extends JPanel
     
     private void createSubPanel(File parent, EventList<LocalFileItem> list){
         LibraryImageSubPanel subPanel;
-        if(sharePanel != null )
-            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, params, sharePanel);
+        if(shareWidget != null )
+            subPanel = factory.createMyLibraryImageSubPanel(parent, list, fileList, params, shareWidget);
         else {
             subPanel = factory.createSharingLibraryImageSubPanel(parent, list, fileList, params, currentFriendFileList);
         }

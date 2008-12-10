@@ -2,15 +2,16 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Component;
 import java.awt.Point;
+import java.util.Collection;
 import java.util.List;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanel;
-import org.limewire.ui.swing.library.sharing.SharingTarget;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
@@ -56,11 +57,11 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
         private LibraryManager libraryManager;
         private ShareListManager shareListManager;
         private MagnetLinkFactory magnetFactory;
-        private List<SharingTarget> friendList;
+        private Collection<Friend> friendList;
         private PropertiesFactory<LocalFileItem> propertiesFactory;
 
         public ImageLibraryPopupParams(LibraryManager libraryManager, ShareListManager shareListManager, 
-                MagnetLinkFactory magnetFactory, List<SharingTarget> friendList, PropertiesFactory<LocalFileItem> propertiesFactory){
+                MagnetLinkFactory magnetFactory, Collection<Friend> friendList, PropertiesFactory<LocalFileItem> propertiesFactory){
             this.libraryManager = libraryManager;
             this.shareListManager = shareListManager;
             this.magnetFactory = magnetFactory;

@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 
 import ca.odell.glazedlists.EventList;
@@ -15,7 +15,7 @@ import ca.odell.glazedlists.EventList;
 public interface LibraryImageSubPanelFactory {
 
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder, EventList<LocalFileItem> eventList, 
-            LocalFileList fileList, ImageLibraryPopupParams params, LibrarySharePanel sharePanel);
+            LocalFileList fileList, ImageLibraryPopupParams params, ShareWidget<LocalFileItem> shareWidget);
 
     public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, ImageLibraryPopupParams params, LocalFileList currentFriendList);
