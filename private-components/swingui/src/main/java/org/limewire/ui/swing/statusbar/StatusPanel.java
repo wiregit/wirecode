@@ -45,7 +45,6 @@ public class StatusPanel extends JXPanel {
         setBackgroundPainter(barPainterFactory.createStatusBarPainter());
  
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
-        connectionStatus.setBackgroundPainter(sectionPainter);
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
         
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
@@ -53,7 +52,7 @@ public class StatusPanel extends JXPanel {
         
         minDownloadPanel.setVisible(false);
         
-        add(connectionStatus, "growy, gapafter 4");
+        add(connectionStatus, "growy, gapbefore 2");
         add(sharedFileCountPanel, "growy, push");
         add(minDownloadPanel, "growy, gapafter 4, hidemode 3");
         add(miniPlayerPanel, "gapafter 4");
