@@ -122,6 +122,9 @@ public final class CreationTimeCache {
                 handleManagedListStatusEvent(event);
             }
         });
+        //TODO Currently creation time cache is used to get creation times for CoreLocalFileItem. 
+        //By only registering events for gnutella share list changes in CreationTimeCache, the creation time field for Non gnutella shared files is being set to -1. 
+        //In the future we will probably want to register for events on the managed fileList instead
         fileManager.getGnutellaFileList().addFileListListener(new EventListener<FileListChangedEvent>() {
             @Override
             public void handleEvent(FileListChangedEvent event) {
