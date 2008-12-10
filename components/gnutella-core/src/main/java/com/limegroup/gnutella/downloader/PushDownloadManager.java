@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -43,6 +41,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.RegisteringEventListener;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
@@ -937,6 +937,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 return true;
             }
         }
+        LOG.debugf("can't connect to {0}, local fwt {1}", address, networkManager.canDoFWT());
         return false;
     }
     
@@ -953,8 +954,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             if (NetworkUtils.isValidIpPort(firewalledAddress.getPrivateAddress())) {
                 return firewalledAddress.getFwtVersion();
             } else {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("inconsistent firewalled address: " + firewalledAddress);
+                LOG.debugf("inconsistent firewalled address: {0}", firewalledAddress);
                 throw new IllegalArgumentException("inconsistent firewalled address: " + firewalledAddress);
                  // return -1;
             }
