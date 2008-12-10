@@ -205,7 +205,7 @@ public class BrowseHostHandler {
             setState(EXCHANGING);
             HttpResponse response = makeHTTPRequest(socket, friendPresence);
             validateResponse(response);
-            readQueryRepliesFromStream(response);
+            readQueryRepliesFromStream(response, friendPresence);
         } finally {
             IOUtils.close(socket);
     		setState(FINISHED);
@@ -223,7 +223,10 @@ public class BrowseHostHandler {
                 AuthTokenFeature authTokenFeature = (AuthTokenFeature)feature;
                 String password = StringUtils.getUTF8String(authTokenFeature.getFeature());
                 client.setCredentials(new UsernamePasswordCredentials(username, password));
-            }            
+            } else {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("no auth token yet for: " + friendPresence);
+            }
         }
         // TODO
         // hardcoding to "http" should work;
@@ -279,7 +282,7 @@ public class BrowseHostHandler {
         }
     }
 
-    private void readQueryRepliesFromStream(HttpResponse response) {
+    private void readQueryRepliesFromStream(HttpResponse response, FriendPresence friendPresence) {
         if(response.getEntity() != null) {
             InputStream in;
             try {
@@ -307,7 +310,7 @@ public class BrowseHostHandler {
                     if(m instanceof QueryReply) {
                         _currentLength += m.getTotalLength();
                         if(LOG.isTraceEnabled())
-                            LOG.trace("BHH.browseExchange(): read QR:" + m);
+                            LOG.trace("BHH.browseExchange(): from " + friendPresence + " read QR:" + m);
                         QueryReply reply = (QueryReply)m;
                         reply.setGUID(_guid);
                         reply.setBrowseHostReply(true);
