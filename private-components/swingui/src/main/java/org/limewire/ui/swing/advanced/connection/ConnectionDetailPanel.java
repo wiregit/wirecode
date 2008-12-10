@@ -93,7 +93,7 @@ public class ConnectionDetailPanel extends JPanel {
         });
 
         // Add View Library action.
-        JMenuItem menuItem = new JMenuItem(I18n.tr("View Library"));
+        JMenuItem menuItem = new JMenuItem(I18n.tr("View Files"));
         menuItem.addActionListener(new ViewLibraryAction());
         popupMenu.add(menuItem);
         popupMenu.addSeparator();
