@@ -16,6 +16,9 @@ public interface LibraryNavigator {
     /** Selects a friend's library. */
     void selectFriendLibrary(Friend friend);
     
+    /** Selects the list of files currently shared with the friend */
+    void selectSharedWith(Friend friend);
+    
     /** Selects a specific item in your library. */
     void selectInLibrary(URN urn, Category category);
     

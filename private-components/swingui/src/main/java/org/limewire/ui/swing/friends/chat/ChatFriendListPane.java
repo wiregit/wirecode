@@ -56,7 +56,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -773,9 +772,9 @@ public class ChatFriendListPane extends JPanel {
         }
     }
     
-    private class ViewLibrary extends AbstractContextAction {
+    class ViewLibrary extends AbstractContextAction implements ItemNotifyable {
         public ViewLibrary(FriendContext context) {
-            super(I18n.tr("View Library"), context);
+            super("", context);
         }
         
         @Override
@@ -783,12 +782,25 @@ public class ChatFriendListPane extends JPanel {
             ChatFriend chatFriend = context.getFriend();
             return chatFriend != null && chatFriend.isSignedInToLimewire();
         }
+        
+        @Override
+        public void notifyItem(JMenuItem item) {
+            ChatFriend chatFriend = context.getFriend();
+            
+            if (chatFriend == null) {
+                return;
+            }
+            
+            item.setText(I18n.tr("Download from \"{0}\"", chatFriend.getFriend().getFirstName()));
+        }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
                 minimizeAction.actionPerformed(e);
+                //TODO: If they are not signed into LW, it should go to the lib view
+                //for what they are sharing with the entire network
                 libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
@@ -804,19 +816,8 @@ public class ChatFriendListPane extends JPanel {
             minimizeAction.actionPerformed(e);
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
+                libraryNavigator.selectSharedWith(chatFriend.getFriend());
             }
-        }
-
-        @Override
-        public boolean isEnabled() {
-            ChatFriend chatFriend = context.getFriend();
-            
-            if (chatFriend == null) {
-                return false;
-            }
-            
-            return getSharedFileCount(chatFriend) > 0 && chatFriend.isSignedInToLimewire();
         }
 
         @Override
@@ -827,21 +828,7 @@ public class ChatFriendListPane extends JPanel {
                 return;
             }
             
-            int sharedFileCount = getSharedFileCount(chatFriend);
-            item.setText(tr("View Files I'm sharing with them ({0})", sharedFileCount));
-            if (sharedFileCount == 0) {
-                item.setToolTipText(tr("{0} isn't using LimeWire. Tell them about it to see their Library", chatFriend.getName()));
-            }
-        }
-
-        private int getSharedFileCount(ChatFriend chatFriend) {
-            if (!chatFriend.isSignedInToLimewire()) {
-                return 0;
-            }
-            int sharedFileCount = 0;
-            FileList sharedFileList = libraryManager.getOrCreateFriendShareList(chatFriend.getFriend());
-            sharedFileCount = sharedFileList == null ? 0 : sharedFileList.size();
-            return sharedFileCount;
+            item.setText(tr("Share with \"{0}\"", chatFriend.getFriend().getFirstName()));
         }
     }
     
