@@ -66,7 +66,7 @@ public class SearchResultMenu extends JPopupMenu {
     }
 
     private void addSubmenu(final RemoteHost host, final RemoteHostActions fromActions) {
-        JMenu menu = new JMenu(host.getRenderName());
+        JMenu menu = new JMenu(host.getFriendPresence().getFriend().getRenderName());
 
         menu.add(new AbstractAction(tr("View library")) {
             public void actionPerformed(ActionEvent e) {

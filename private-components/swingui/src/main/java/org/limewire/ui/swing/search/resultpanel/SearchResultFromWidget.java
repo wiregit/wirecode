@@ -156,7 +156,7 @@ public class SearchResultFromWidget extends JPanel {
             if (person.isBrowseHostEnabled() || person.isChatEnabled()
                     || person.isSharingEnabled()) {
 
-                JMenu submenu = new JMenu(person.getRenderName());
+                JMenu submenu = new JMenu(person.getFriendPresence().getFriend().getRenderName());
                 assertParentProps(submenu);
 
                 if (person.isChatEnabled()) {

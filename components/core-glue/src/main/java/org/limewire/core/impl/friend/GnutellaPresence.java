@@ -2,13 +2,11 @@ package org.limewire.core.impl.friend;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.io.Address;
@@ -20,19 +18,19 @@ import org.limewire.io.Address;
  */
 public class GnutellaPresence implements FriendPresence {
 
-    private final Address address;
+    private final Friend friend;
     private final String id;
     
     /** Map of features supported by this presence. */
-    private final Map<URI, Feature> features = new HashMap<URI, Feature>();
+    private final Map<URI, Feature> features = new HashMap<URI, Feature>(1);
 
     /**
      * Constructs a GnutellaPresence with the specified address and id.
      */
     public GnutellaPresence(Address address, String id) {
-        this.address = address;
         this.id = id;
         this.features.put(AddressFeature.ID, new AddressFeature(address));
+        this.friend = new GnutellaFriend(address.getAddressDescription(), id, this);
     }
     
     @Override
@@ -52,51 +50,12 @@ public class GnutellaPresence implements FriendPresence {
 
     @Override
     public Friend getFriend() {
-        // Create a new Friend instance that provides the id and name.
-        return new Friend() {
-            @Override
-            public boolean isAnonymous() {
-                return true;
-            }
-            
-            @Override
-            public String getId() {
-                return id; 
-            }
-
-            @Override
-            public String getName() {
-                return address.getAddressDescription();
-            }
-
-            @Override
-            public String getRenderName() {
-                return getName();
-            }
-
-            @Override
-            public void setName(String name) {
-            }
-
-            @Override
-            public Network getNetwork() {
-                return null; 
-            }
-
-            public Map<String, FriendPresence> getFriendPresences() {
-                return Collections.emptyMap();
-            }
-
-            @Override
-            public String getFirstName() {
-                return getName();
-            }
-        };
+        return friend;
     }
 
     @Override
     public String getPresenceId() {
-        return getFriend().getId();
+        return id;
     }
 
     @Override

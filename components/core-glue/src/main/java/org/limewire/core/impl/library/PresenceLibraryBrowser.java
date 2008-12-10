@@ -134,8 +134,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                 RemoteFileDescAdapter remoteFileDescAdapter = (RemoteFileDescAdapter)searchResult;
                 if(!friendPresence.getFriend().isAnonymous()) {
                     // copy construct to add injectables and change address to xmpp address                    
-                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDescAdapter.getRfd(), address), new IpPortSet(remoteFileDescAdapter.getAlts()));
-                    remoteFileDescAdapter.setFriendPresence(friendPresence);
+                    remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDescAdapter.getRfd(), address), new IpPortSet(remoteFileDescAdapter.getAlts()), friendPresence);
                 }
                 RemoteFileItem file = new CoreRemoteFileItem(remoteFileDescAdapter);
                 presenceLibrary.addFile(file);

@@ -39,8 +39,7 @@ public class RemoteFileItemFactoryImpl implements RemoteFileItemFactory {
         RemoteFileDesc remoteFileDesc = createRfdFromChatResult(presence,
                fileMetaData);
         RemoteFileDescAdapter remoteFileDescAdapter = new RemoteFileDescAdapter(remoteFileDescDeserializer.createClone(remoteFileDesc,
-                (XMPPAddress)((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature()), IpPort.EMPTY_SET);
-        remoteFileDescAdapter.setFriendPresence(presence);
+                (XMPPAddress)((AddressFeature)presence.getFeature(AddressFeature.ID)).getFeature()), IpPort.EMPTY_SET, presence);
         return new CoreRemoteFileItem(remoteFileDescAdapter);
     }
     

@@ -44,7 +44,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
     @Override
     public void chatWith(RemoteHost person) {
-        LOG.debugf("chatWith: {0}", person.getRenderName());
+        LOG.debugf("chatWith: {0}", person.getFriendPresence().getFriend());
         Friend friend = person.getFriendPresence().getFriend();
         friendsPanel.setChatPanelVisible(true);
         friendsPane.fireConversationStarted(friend);
@@ -57,14 +57,14 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
     @Override
     public void showFilesSharedBy(RemoteHost person) {
-        LOG.debugf("showFilesSharedBy: {0}", person.getRenderName());
+        LOG.debugf("showFilesSharedBy: {0}", person.getFriendPresence().getFriend());
         Friend friend = person.getFriendPresence().getFriend();
         libraryNavigator.selectFriendLibrary(friend);
     }
 
     @Override
     public void viewLibraryOf(final RemoteHost person) {
-        LOG.debugf("viewLibraryOf: {0}", person.getRenderName());
+        LOG.debugf("viewLibraryOf: {0}", person.getFriendPresence().getFriend());
         remoteLibraryManager.addPresenceLibrary(person.getFriendPresence());
         // Run this later, to allow the library a bit of time to render the friend.
         SwingUtilities.invokeLater(new Runnable() {

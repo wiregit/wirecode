@@ -92,7 +92,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
             for (SearchResult result : vsr.getCoreSearchResults()) {
                 for (RemoteHost host : result.getSources()) {
-                    readOnlyInfoModel.addRow(new Object[] { host.getRenderName(),
+                    readOnlyInfoModel.addRow(new Object[] { host.getFriendPresence().getFriend().getRenderName(),
                             result.getFileName() });
                 }
             }

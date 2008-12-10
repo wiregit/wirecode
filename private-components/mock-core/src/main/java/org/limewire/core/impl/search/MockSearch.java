@@ -15,7 +15,10 @@ import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.api.search.sponsored.SponsoredResultTarget;
+import org.limewire.core.impl.friend.MockFriend;
+import org.limewire.core.impl.friend.MockFriendPresence;
 import org.limewire.core.impl.search.sponsored.MockSponsoredResult;
+
 
 public class MockSearch implements Search {
     public static final String SIMILAR_RESULT_PREFIX = "mock-similar-result-";
@@ -1193,7 +1196,7 @@ public class MockSearch implements Search {
     }
     static class MockRemoteHost implements RemoteHost {
         private final String description;
-
+        
         public MockRemoteHost(String description) {
             this.description = description;
         }
@@ -1215,12 +1218,7 @@ public class MockSearch implements Search {
 
         @Override
         public FriendPresence getFriendPresence() {
-            return null;
-        }
-
-        @Override
-        public String getRenderName() {
-            return description;
+            return new MockFriendPresence(new MockFriend(description));
         }
 
         @Override

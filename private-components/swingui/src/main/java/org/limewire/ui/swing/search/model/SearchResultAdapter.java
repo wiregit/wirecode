@@ -71,7 +71,7 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
                 boolean anonymous2 = o2.isAnonymous();
 
                 if (anonymous1 == anonymous2) {
-                    compare = o1.getRenderName().compareToIgnoreCase(o2.getRenderName());
+                    compare = o1.getFriendPresence().getFriend().getRenderName().compareToIgnoreCase(o2.getFriendPresence().getFriend().getRenderName());
                 } else if (anonymous1) {
                     compare = 1;
                 } else if (anonymous2) {

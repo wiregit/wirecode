@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.core.impl.friend;
 
 import java.util.Map;
 
@@ -31,12 +31,12 @@ public class MockFriend implements Friend {
 
     @Override
     public String getName() {
-        return localID;
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override
     public String getRenderName() {
-        return  localID;
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     @Override

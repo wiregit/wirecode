@@ -15,6 +15,8 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.ui.swing.friends.MockFriend;
+import org.limewire.ui.swing.friends.MockFriendPresence;
 import org.limewire.util.FileUtils;
 
 public class TestSearchResult implements SearchResult {
@@ -66,11 +68,6 @@ public class TestSearchResult implements SearchResult {
             UUID randomUUID = UUID.randomUUID();
 
             @Override
-            public String getRenderName() {
-                return randomUUID.toString();
-            }
-
-            @Override
             public boolean isBrowseHostEnabled() {
                 return false;
             }
@@ -87,7 +84,7 @@ public class TestSearchResult implements SearchResult {
 
             @Override
             public FriendPresence getFriendPresence() {
-                return null;
+                return new MockFriendPresence(new MockFriend(randomUUID.toString()));
             }
 
             @Override

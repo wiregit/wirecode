@@ -1,10 +1,7 @@
 package org.limewire.core.impl.search;
 
-import java.net.URI;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +11,11 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.endpoint.RemoteHost;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
-import org.limewire.core.api.friend.Network;
-import org.limewire.core.api.friend.feature.Feature;
-import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.URNImpl;
+import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
-import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
@@ -37,19 +30,25 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class RemoteFileDescAdapter implements SearchResult {
 
+    private final FriendPresence friendPresence;
     private final RemoteFileDesc rfd;
     private final List<IpPort> locs;
     private final Map<FilePropertyKey, Object> properties;    
     private final Category category;    
     private final String extension;
     private final String fileName;
-    
-    private volatile FriendPresence friendPresence; 
 
     public RemoteFileDescAdapter(RemoteFileDesc rfd,
                                  Set<? extends IpPort> locs) {
+        this(rfd, locs, new GnutellaPresence(rfd.getAddress(), GUID.toHexString(rfd.getClientGUID())));
+    }
+    
+    public RemoteFileDescAdapter(RemoteFileDesc rfd,
+            Set<? extends IpPort> locs,
+            FriendPresence friendPresence) {    
         this.rfd = rfd;
-        this.locs = new ArrayList<IpPort>(locs);        
+        this.locs = new ArrayList<IpPort>(locs);
+        this.friendPresence = friendPresence;
         this.properties = new HashMap<FilePropertyKey, Object>();
         fileName = rfd.getFileName();
         extension = FileUtils.getFileExtension(rfd.getFileName());
@@ -183,10 +182,6 @@ public class RemoteFileDescAdapter implements SearchResult {
     public FriendPresence getFriendPresence() {
         return friendPresence;
     }
-
-    public void setFriendPresence(FriendPresence friendPresence) {
-        this.friendPresence = friendPresence;
-    }    
     
     private final class RfdRemoteHost implements RemoteHost {
         @Override
@@ -196,7 +191,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public boolean isChatEnabled() {
-            if (friendPresence != null && !friendPresence.getFriend().isAnonymous()) {
+            if (!friendPresence.getFriend().isAnonymous()) {
                 return true;
             }
             return false;
@@ -204,7 +199,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public boolean isSharingEnabled() {
-            if (friendPresence != null && !friendPresence.getFriend().isAnonymous()) {
+            if (!friendPresence.getFriend().isAnonymous()) {
                 return true;
             }
 
@@ -212,100 +207,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         }
 
         public FriendPresence getFriendPresence() {
-            if (friendPresence != null) {
-                return friendPresence;
-            } else {
-                final Map<URI, Feature> features = new HashMap<URI, Feature>();
-                features.put(AddressFeature.ID, new AddressFeature(rfd.getAddress()));
-                // create dummy friend presence
-                return new FriendPresence() {
-
-                    @Override
-                    public Friend getFriend() {
-                        return new Friend() {
-                            @Override
-                            public boolean isAnonymous() {
-                                return true;
-                            }
-                            
-                            @Override
-                            public String getId() {
-                                return GUID.toHexString(rfd.getClientGUID()); 
-                            }
-
-                            @Override
-                            public String getName() {
-                                return rfd.getAddress().getAddressDescription();
-                            }
-
-                            @Override
-                            public String getRenderName() {
-                                return getName();
-                            }
-
-                            @Override
-                            public String getFirstName() {
-                                return getName();
-                            }
-
-                            @Override
-                            public void setName(String name) {
-
-                            }
-
-                            @Override
-                            public Network getNetwork() {
-                                return null; 
-                            }
-
-                            public Map<String, FriendPresence> getFriendPresences() {
-                                return Collections.emptyMap();
-                            }
-                        };
-                    }
-
-                    public Collection<Feature> getFeatures() {
-                        return features.values();
-                    }
-
-                    public Feature getFeature(URI id) {
-                        return features.get(id);
-                    }
-
-                    public void addFeature(Feature feature) {
-                        features.put(feature.getID(), feature);
-                    }
-
-                    public void removeFeature(URI id) {
-                        features.remove(id);
-                    }
-
-                    public boolean hasFeatures(URI... id) {
-                        for(URI uri : id) {
-                            if(getFeature(uri) == null) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-
-                    @Override
-                    public String getPresenceId() {
-                        return getFriend().getId();
-                    }
-
-                };
-            }
-        }
-
-        @Override
-        public String getRenderName() {
-            Friend friend = friendPresence != null ?
-                    friendPresence.getFriend() : null;
-            if (friend != null) {
-                return friend.getRenderName();
-            }
-            return rfd.getAddress().getAddressDescription();
+            return friendPresence;
         }
 
         @Override
@@ -316,19 +218,15 @@ public class RemoteFileDescAdapter implements SearchResult {
     
     
     private final class AltLocRemoteHost implements RemoteHost {
-        private final Map<URI, Feature> features;
-        private final IpPort ipPort;
-        private final Address address;        
+        private final FriendPresence presence;        
 
         private AltLocRemoteHost(int index) {
-            ipPort = locs.get(index - 1);
+            IpPort ipPort = locs.get(index - 1);
             if(ipPort instanceof Connectable) {
-                address = ((Connectable)ipPort);
+                this.presence = new GnutellaPresence((Connectable)ipPort, ipPort.getInetSocketAddress().toString());
             } else {
-                address = new ConnectableImpl(ipPort, false);
+                this.presence = new GnutellaPresence(new ConnectableImpl(ipPort, false), ipPort.getInetSocketAddress().toString());
             }
-            features = new HashMap<URI, Feature>(1);
-            features.put(AddressFeature.ID, new AddressFeature(address));
         }
 
         @Override
@@ -348,93 +246,7 @@ public class RemoteFileDescAdapter implements SearchResult {
 
         @Override
         public FriendPresence getFriendPresence() {
-            // create dummy friend presence
-            return new FriendPresence() {
-                @Override
-                public Friend getFriend() {
-                    return new Friend() {
-                        @Override
-                        public boolean isAnonymous() {
-                            return true;
-                        }
-
-                        @Override
-                        public String getId() {
-                            return ipPort.getInetSocketAddress().toString();
-                        }
-
-                        @Override
-                        public String getName() {
-                            return getRenderName();
-                        }
-
-                        @Override
-                        public String getRenderName() {
-                            return address.getAddressDescription();
-                        }
-
-                        @Override
-                        public String getFirstName() {
-                            return getRenderName();
-                        }
-                        
-
-                        @Override
-                        public void setName(String name) {
-
-                        }
-
-                        @Override
-                        public Network getNetwork() {
-                            return null;
-                        }
-
-                        public Map<String, FriendPresence> getFriendPresences() {
-                            return Collections.emptyMap();
-                        }
-                    };
-                }
-
-                @Override
-                public Collection<Feature> getFeatures() {
-                    return features.values();
-                }
-
-                @Override
-                public Feature getFeature(URI id) {
-                    return features.get(id);
-                }
-
-                @Override
-                public void addFeature(Feature feature) {
-                    features.put(feature.getID(), feature);
-                }
-
-                @Override
-                public void removeFeature(URI id) {
-                    features.remove(id);
-                }
-
-                @Override
-                public boolean hasFeatures(URI... id) {
-                    for(URI uri : id) {
-                        if(getFeature(uri) == null) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-
-                @Override
-                public String getPresenceId() {
-                    return getFriend().getId();
-                }
-            };
-        }
-
-        @Override
-        public String getRenderName() {
-            return address.getAddressDescription();
+            return presence;
         }
 
         @Override
