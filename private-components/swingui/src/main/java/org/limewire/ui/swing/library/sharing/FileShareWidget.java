@@ -9,11 +9,11 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.library.sharing.model.FileShareModel;
 import org.limewire.ui.swing.util.I18n;
 
-public class SingleFileShareWidget implements ShareWidget<LocalFileItem> {
+public class FileShareWidget implements ShareWidget<LocalFileItem> {
 
    private LibrarySharePanel sharePanel;
     
-    public SingleFileShareWidget(ShareListManager shareListManager, Collection<Friend> allFriends){
+    public FileShareWidget(ShareListManager shareListManager, Collection<Friend> allFriends){
         sharePanel = new LibrarySharePanel(allFriends);
         sharePanel.setShareModel(new FileShareModel(shareListManager));
     }

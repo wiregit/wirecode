@@ -44,7 +44,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.CategoryShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
-import org.limewire.ui.swing.library.sharing.SingleFileShareWidget;
+import org.limewire.ui.swing.library.sharing.FileShareWidget;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -129,7 +129,7 @@ public class MyLibraryPanel extends LibraryPanel {
 
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {        
         //TODO: can this be a singleton??? 
-        final ShareWidget<LocalFileItem> fileShareWidget = new SingleFileShareWidget(shareListManager, allFriends);
+        final ShareWidget<LocalFileItem> fileShareWidget = new FileShareWidget(shareListManager, allFriends);
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
