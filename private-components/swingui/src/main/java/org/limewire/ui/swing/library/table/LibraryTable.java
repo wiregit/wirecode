@@ -32,7 +32,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.Disposable;
-import org.limewire.ui.swing.library.LibrarySelectable;
+import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
@@ -51,7 +51,8 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  * Creates a table that is used when displaying library information. This may
  * be files in your own library or remote files in someone else's library. 
  */
-public class LibraryTable<T extends FileItem> extends MouseableTable implements Sharable, Disposable, LibrarySelectable {
+public class LibraryTable<T extends FileItem> extends MouseableTable
+    implements Sharable, Disposable, LibraryOperable {
     
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
@@ -319,5 +320,54 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
             }
         }
         ensureSelectionVisible();
+    }
+    
+    @Override
+    public File getNextItem(File file) {
+        LibraryTableModel<T> model = getLibraryTableModel();
+        for(int y=0; y < model.getRowCount()-1 ; y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(!(fileItem instanceof LocalFileItem)) {
+                break; // Never going to find it.
+            }
+            if(file.equals(((LocalFileItem)fileItem).getFile())) {
+                fileItem = model.getElementAt(y+1);
+                if (fileItem instanceof LocalFileItem) {
+                    return ((LocalFileItem) fileItem).getFile();
+                }
+
+                // No chance of success if we already found the next
+                //  and it is not a local file
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public File getPreviousItem(File file) {
+        LibraryTableModel<T> model = getLibraryTableModel();
+        for(int y=0; y < model.getRowCount() ; y++) {
+            FileItem fileItem = model.getElementAt(y);
+            if(!(fileItem instanceof LocalFileItem)) {
+                break; // Never going to find it.
+            }
+            if(file.equals(((LocalFileItem)fileItem).getFile())) {
+                // There is nothing before the first element.
+                if (y==0) {
+                    return null;
+                }
+                
+                fileItem = model.getElementAt(y-1);
+                if (fileItem instanceof LocalFileItem) {
+                    return ((LocalFileItem) fileItem).getFile();
+                }
+                
+                // No chance of success if we already found the previous
+                //  and it is not a local file
+                return null;
+            }
+        }
+        return null;
     }
 }

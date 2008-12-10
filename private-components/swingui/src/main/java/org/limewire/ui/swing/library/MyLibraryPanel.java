@@ -74,7 +74,7 @@ public class MyLibraryPanel extends LibraryPanel {
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
-    private final Map<Category, LibrarySelectable> selectableMap;
+    private final Map<Category, LibraryOperable> selectableMap;
     
     private LibrarySharePanel shareAllPanel = null;
     
@@ -95,7 +95,7 @@ public class MyLibraryPanel extends LibraryPanel {
         this.tableFactory = tableFactory;
         this.categoryIconManager = categoryIconManager;       
         this.playerPanel = player;
-        this.selectableMap = new EnumMap<Category, LibrarySelectable>(Category.class);
+        this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
         
         getHeaderPanel().setText(I18n.tr("My Library"));
         shareAllPanel = new LibrarySharePanel(allFriends);
@@ -361,6 +361,14 @@ public class MyLibraryPanel extends LibraryPanel {
     public void selectItem(File file, Category category) {
         select(category);
         selectableMap.get(category).selectAndScrollTo(file);
+    }
+
+    public File getNextItem(File file, Category category) {
+        return selectableMap.get(category).getNextItem(file);
+    }
+
+    public File getPreviousItem(File file, Category category) {
+        return selectableMap.get(category).getPreviousItem(file);
     }
 
     public void selectItem(URN urn, Category category) {

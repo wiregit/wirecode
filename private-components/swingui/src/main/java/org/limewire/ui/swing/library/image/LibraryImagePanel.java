@@ -22,10 +22,11 @@ import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
 import org.limewire.ui.swing.library.Disposable;
-import org.limewire.ui.swing.library.LibrarySelectable;
+import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -35,7 +36,8 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 
-public class LibraryImagePanel extends JPanel implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibrarySelectable {
+public class LibraryImagePanel extends JPanel
+    implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibraryOperable {
     
     private LibraryImageSubPanelFactory factory;
     private LibrarySharePanel sharePanel;
@@ -259,6 +261,16 @@ public class LibraryImagePanel extends JPanel implements ListEventListener<List<
         } else {
             return ((currentPosition / height) + 1) * height - currentPosition;
         }
+    }
+
+    @Override
+    public File getNextItem(File file) {
+        throw new NotImplementedException("Image library traversal not implemented");
+    }
+
+    @Override
+    public File getPreviousItem(File file) {
+        throw new NotImplementedException("Image library traversal not implemented");
     }
     
 }

@@ -306,6 +306,16 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         myLibraryPanel.selectItem(file, category);
     }
     
+    @Override
+    public File getPreviousInLibrary(File file, Category category) {
+        return myLibraryPanel.getPreviousItem(file, category);
+    }
+    
+    @Override
+    public File getNextInLibrary(File file, Category category) {
+        return myLibraryPanel.getNextItem(file, category);
+    }
+    
     private void ensureFriendVisible(Friend friend) {
         for(NavList list : allLists) {
             if(list.ensureFriendVisible(friend) != null) {

@@ -22,6 +22,12 @@ public interface LibraryNavigator {
     /** Selects a specific item in your library. */
     void selectInLibrary(File file, Category category);
     
+    /** Returns the file item before the one passed in your library. */
+    File getPreviousInLibrary(File file, Category category);
+    
+    /** Returns the file item after the one passed in your library. */
+    File getNextInLibrary(File file, Category category);
+    
     /**
      * Returns the selected friend in the library. 
      * Will return null if no friend is selected, 

@@ -56,7 +56,7 @@ public class StatusPanel extends JXPanel {
         add(connectionStatus, "growy, gapafter 4");
         add(sharedFileCountPanel, "growy, push");
         add(minDownloadPanel, "growy, gapafter 4, hidemode 3");
-        add(miniPlayerPanel, "");
+        add(miniPlayerPanel, "gapafter 4");
         
         add(friendStatusPanel.getComponent(), "gapbefore push, hidemode 3, dock east");
         

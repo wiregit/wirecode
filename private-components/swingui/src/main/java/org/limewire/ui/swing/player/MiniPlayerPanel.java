@@ -274,11 +274,30 @@ public class MiniPlayerPanel extends JPanel {
             setVisible(true);
             title = (String) properties.get("title");
             artist = (String) properties.get("author");
-            statusButton.setText(title + " - " + artist);
+            
+            if (title != null && artist != null) {
+                statusButton.setText(title + " - " + artist);
+            } 
+            else {
+                statusButton.setText(I18n.tr("Unknown"));
+            }
+            
             statusButton.start();
-            // "duration" is in microseconds
-            durationSecs = (int) (((Long) properties.get("duration")).longValue() / 1000 / 1000);
-            byteLength = (Integer) properties.get("audio.length.bytes");
+            
+            Object duration = properties.get("duration");
+            if (duration != null) {
+                durationSecs = (int)(((Long)duration).longValue()/1000/1000);
+            } 
+            else {
+                durationSecs = 0;
+            }
+            
+            if (properties.get("audio.length.bytes") != null) {
+                byteLength = (Integer)properties.get("audio.length.bytes");
+            } 
+            else {
+                byteLength = 0;
+            }
         }
 
         @Override

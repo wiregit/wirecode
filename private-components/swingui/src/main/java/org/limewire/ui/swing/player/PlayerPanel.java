@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -27,6 +28,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.Category;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
@@ -34,11 +36,11 @@ import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBarFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NotImplementedException;
 
 import com.google.inject.Inject;
 
@@ -91,6 +93,7 @@ public class PlayerPanel extends JXPanel {
     private final JLabel titleLabel;
     
     private final AudioPlayer player;
+    private final LibraryNavigator libraryNavigator;
     
     /**
      * length of the current audio in seconds
@@ -102,6 +105,11 @@ public class PlayerPanel extends JXPanel {
      */
     private int byteLength;
 
+    /**
+     * Pointer to the current songs file
+     */
+    private File file = null;
+    
     private static final String BACK = "BACK";
     private static final String PLAY = "PLAY";
     private static final String PAUSE = "PAUSE";
@@ -109,8 +117,9 @@ public class PlayerPanel extends JXPanel {
     private static final String VOLUME = "VOLUME";
 
     @Inject
-    public PlayerPanel(AudioPlayer player, LimeSliderBarFactory sliderBarFactory) {
+    public PlayerPanel(AudioPlayer player, LibraryNavigator libraryNavigator, LimeSliderBarFactory sliderBarFactory) {
         this.player = player;
+        this.libraryNavigator = libraryNavigator;
 
         GuiUtils.assignResources(this);
         
@@ -232,6 +241,28 @@ public class PlayerPanel extends JXPanel {
 
     }
 
+    private void previousSong() {
+        if (file != null) {
+            player.stop();
+            file = libraryNavigator.getPreviousInLibrary(file, Category.AUDIO);
+            if (file != null) {
+                player.loadSong(file);
+                player.playSong();
+            }
+        }
+    }
+    
+    private void nextSong() {
+        if (file != null) {
+            player.stop();
+            file = libraryNavigator.getNextInLibrary(file, Category.AUDIO);
+            if (file != null) {
+                player.loadSong(file);
+                player.playSong();
+            }
+        }
+    }
+    
     private class ButtonListener implements ActionListener {
         
         private long menuInvizTime = -1;
@@ -247,9 +278,9 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == PAUSE){
                 player.pause();
             } else if (e.getActionCommand() == FORWARD) {
-                throw new NotImplementedException();
+                nextSong();
             } else if (e.getActionCommand() == BACK) {
-                throw new NotImplementedException();
+                previousSong();
             } else if (e.getActionCommand() == VOLUME) {
                 if (System.currentTimeMillis() - menuInvizTime > 250f) {
                     volumeControlPopup.show(volumeButton, 0, 14);
@@ -327,6 +358,10 @@ public class PlayerPanel extends JXPanel {
 
         @Override
         public void songOpened(Map<String, Object> properties) {
+           
+           if (player.getCurrentSong() != null) {
+               file = player.getCurrentSong().getFile();
+           }
             
            String songText = null;
            
@@ -337,19 +372,36 @@ public class PlayerPanel extends JXPanel {
                songText = properties.get("author") + " - " + properties.get("title");
            }
             
-           
            volumeController.resetVolume();
            titleLabel.setText(songText);
-           durationSecs = (int)(((Long)properties.get("duration")).longValue()/1000/1000);
+        
+           Object duration = properties.get("duration");
+           if (duration != null) {
+               durationSecs = (int)(((Long)duration).longValue()/1000/1000);
+           } 
+           else {
+               durationSecs = 0;
+           }
+               
            progressSlider.setMaximum(durationSecs);
-           byteLength = (Integer)properties.get("audio.length.bytes");
            
+           if (properties.get("audio.length.bytes") != null) {
+               byteLength = (Integer)properties.get("audio.length.bytes");
+           } 
+           else {
+               byteLength = 0;
+           }
+                      
            titleLabel.setVisible(true);
            innerPanel.setVisible(true);
         }
 
         @Override
         public void stateChange(AudioPlayerEvent event) {
+            if (event.getState() == PlayerState.EOM) {
+                nextSong();
+            } 
+            
             if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
                 playButton.setVisible(false);
                 pauseButton.setVisible(true);
