@@ -47,7 +47,8 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractMyLibra
     public Object getColumnValue(LocalFileItem baseObject, int column) {
         switch (column) {
         case NAME_COL:
-            return baseObject.getFileName();
+            //must return FileItem, not String for IconRenderer to work
+            return baseObject;
         case PLATFORM_COL:
             return baseObject.getProperty(FilePropertyKey.PLATFORM);
         case COMPANY_COL:
