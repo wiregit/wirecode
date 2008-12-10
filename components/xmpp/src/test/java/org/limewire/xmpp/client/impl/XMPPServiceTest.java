@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -88,8 +87,8 @@ public class XMPPServiceTest extends BaseTestCase {
         service.login(bob);
         // Allow login, roster, presence, library messages to be sent, received
         Thread.sleep(SLEEP); // TODO wait()/notify()
-        assertEquals("another automatedtestfriend2 presence has been detected, test cannnot run", 1, aliceRosterListener.roster.get(USERNAME_2).size());
-        assertEquals("another automatedtestfriend1 presence has been detected, test cannnot run", 1, bobRosterListener.roster.get(USERNAME_1).size());
+        assertEquals("another automatedtestfriend2 presence has been detected, test cannnot run", 1, aliceRosterListener.countPresences(USERNAME_2));
+        assertEquals("another automatedtestfriend1 presence has been detected, test cannnot run", 1, bobRosterListener.countPresences(USERNAME_1));
     }
 
     protected Injector createInjector(Module... modules) {
@@ -129,13 +128,13 @@ public class XMPPServiceTest extends BaseTestCase {
      * Tests that two friends can see each other
      */
     public void testRosterIsPopulated() throws InterruptedException, UnknownHostException {
-        assertEquals(1, aliceRosterListener.roster.size());
-        assertEquals(USERNAME_2, aliceRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
+        assertEquals(1, aliceRosterListener.getRosterSize());
+        assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
 
-        assertEquals(1, bobRosterListener.roster.size());
-        assertEquals(USERNAME_1, bobRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
+        assertEquals(1, bobRosterListener.getRosterSize());
+        assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
     }
 
     /**
@@ -143,13 +142,13 @@ public class XMPPServiceTest extends BaseTestCase {
      */
     public void testSetName() throws InterruptedException {
         // Reset the name first, in case a previous test left it as "foo"
-        aliceRosterListener.users.get(USERNAME_2).setName("buddy2");
+        aliceRosterListener.getUser(USERNAME_2).setName("buddy2");
         Thread.sleep(SLEEP);
-        assertEquals("buddy2", aliceRosterListener.users.get(USERNAME_2).getName());
-        aliceRosterListener.users.get(USERNAME_2).setName("foo");
+        assertEquals("buddy2", aliceRosterListener.getUser(USERNAME_2).getName());
+        aliceRosterListener.getUser(USERNAME_2).setName("foo");
         Thread.sleep(SLEEP);
-        assertEquals("foo", aliceRosterListener.users.get(USERNAME_2).getName());
-        aliceRosterListener.users.get(USERNAME_2).setName("buddy2");
+        assertEquals("foo", aliceRosterListener.getUser(USERNAME_2).getName());
+        aliceRosterListener.getUser(USERNAME_2).setName("buddy2");
     }
 
     /**
@@ -157,21 +156,21 @@ public class XMPPServiceTest extends BaseTestCase {
      * and exchange addresses 
      */
     public void testAddresses() throws InterruptedException, UnknownHostException {
-        assertEquals(1, aliceRosterListener.roster.size());
-        assertEquals(USERNAME_2, aliceRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
+        assertEquals(1, aliceRosterListener.getRosterSize());
+        assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
 
-        assertEquals(1, bobRosterListener.roster.size());
-        assertEquals(USERNAME_1, bobRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
+        assertEquals(1, bobRosterListener.getRosterSize());
+        assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
-        Presence buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
+        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -187,8 +186,8 @@ public class XMPPServiceTest extends BaseTestCase {
         AuthTokenFeature authTokenFeature = (AuthTokenFeature)buddy2.getFeature(AuthTokenFeature.ID);
         assertNotNull(authTokenFeature);
 
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
-        Presence buddy1 = bobRosterListener.roster.get(USERNAME_1).get(0);
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
+        Presence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
@@ -220,15 +219,15 @@ public class XMPPServiceTest extends BaseTestCase {
      * Tests that friends receive one another's status updates
      */
     public void testStatusChanges() throws InterruptedException, UnknownHostException {
-        assertEquals(1, aliceRosterListener.roster.size());
-        assertEquals(USERNAME_2, aliceRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
+        assertEquals(1, aliceRosterListener.getRosterSize());
+        assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
 
-        assertEquals(1, bobRosterListener.roster.size());
-        assertEquals(USERNAME_1, bobRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
+        assertEquals(1, bobRosterListener.getRosterSize());
+        assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
-        Presence buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.available, buddy2.getMode());
 
@@ -240,7 +239,7 @@ public class XMPPServiceTest extends BaseTestCase {
 
         Thread.sleep(SLEEP); 
 
-        buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         assertEquals(Presence.Type.available, buddy2.getType());
         assertEquals(Presence.Mode.away, buddy2.getMode());
     }
@@ -250,7 +249,7 @@ public class XMPPServiceTest extends BaseTestCase {
      */
     public void testChat() throws InterruptedException, XMPPException, IOException {
         MessageReaderMock reader = new MessageReaderMock();
-        Presence automatedtestfriend2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        Presence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         MessageWriter writer = automatedtestfriend2.getUser().createChat(reader);
         writer.writeMessage("hello world");
 
@@ -275,14 +274,12 @@ public class XMPPServiceTest extends BaseTestCase {
      */
     public void testOfferFile() throws InterruptedException, IOException, XmlPullParserException {
 
-        HashMap<String, ArrayList<Presence>> roster1 = aliceRosterListener.roster;
-
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
-        Presence automatedtestfriend2 = roster1.get(USERNAME_2).get(0);
+        Presence automatedtestfriend2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         FileMetaDataImpl metaData = new FileMetaDataImpl();
         metaData.setId(new Random().nextInt() + "");
         metaData.setName("a_cool_file.txt");
@@ -306,21 +303,21 @@ public class XMPPServiceTest extends BaseTestCase {
      * updated addresses
      */
     public void testDetectAddressChanges() throws InterruptedException, UnknownHostException {
-        assertEquals(1, aliceRosterListener.roster.size());
-        assertEquals(USERNAME_2, aliceRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
+        assertEquals(1, aliceRosterListener.getRosterSize());
+        assertEquals(USERNAME_2, aliceRosterListener.getFirstRosterEntry());
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
 
-        assertEquals(1, bobRosterListener.roster.size());
-        assertEquals(USERNAME_1, bobRosterListener.roster.keySet().iterator().next());
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
+        assertEquals(1, bobRosterListener.getRosterSize());
+        assertEquals(USERNAME_1, bobRosterListener.getFirstRosterEntry());
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
 
         addressEventBroadcaster.listeners.broadcast(new AddressEvent(new ConnectableImpl("199.199.199.199", 2048, true),
                 Address.EventType.ADDRESS_CHANGED));
 
         Thread.sleep(SLEEP);
 
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
-        Presence buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
+        Presence buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         LimewireFeature limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -333,8 +330,8 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(2048, address.getPort());
         assertEquals(true, address.isTLSCapable());
 
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
-        Presence buddy1 = bobRosterListener.roster.get(USERNAME_1).get(0);
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
+        Presence buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
@@ -352,8 +349,8 @@ public class XMPPServiceTest extends BaseTestCase {
 
         Thread.sleep(SLEEP);
 
-        assertEquals(1, aliceRosterListener.roster.get(USERNAME_2).size());
-        buddy2 = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        assertEquals(1, aliceRosterListener.countPresences(USERNAME_2));
+        buddy2 = aliceRosterListener.getFirstPresence(USERNAME_2);
         limewireFeature = (LimewireFeature)buddy2.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy2.getType());
@@ -366,8 +363,8 @@ public class XMPPServiceTest extends BaseTestCase {
         assertEquals(5000, address.getPort());
         assertEquals(false, address.isTLSCapable());
 
-        assertEquals(1, bobRosterListener.roster.get(USERNAME_1).size());
-        buddy1 = bobRosterListener.roster.get(USERNAME_1).get(0);
+        assertEquals(1, bobRosterListener.countPresences(USERNAME_1));
+        buddy1 = bobRosterListener.getFirstPresence(USERNAME_1);
         limewireFeature = (LimewireFeature)buddy1.getFeature(LimewireFeature.ID);
         assertNotNull(limewireFeature);
         assertEquals(Presence.Type.available, buddy1.getType());
@@ -403,7 +400,7 @@ public class XMPPServiceTest extends BaseTestCase {
 
         // Simulate Alice talking to two presences of Bob
         MessageReaderMock aliceFromBob = new MessageReaderMock();
-        Presence bobPresence = aliceRosterListener.roster.get(USERNAME_2).get(0);
+        Presence bobPresence = aliceRosterListener.getFirstPresence(USERNAME_2);
         MessageWriter aliceToBob = bobPresence.getUser().createChat(aliceFromBob);
 
         // Alice writes a message to Bob

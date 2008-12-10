@@ -13,9 +13,8 @@ import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.User;
 
 public class RosterListenerMock implements EventListener<RosterEvent> {
-    // Lock 'this' while accessing or changing these maps
-    public HashMap<String, User> users = new HashMap<String, User>();
-    public HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
+    private HashMap<String, User> users = new HashMap<String, User>();
+    private HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
     IncomingChatListenerMock listener = new IncomingChatListenerMock();
     
     public void handleEvent(RosterEvent event) {
@@ -27,7 +26,29 @@ public class RosterListenerMock implements EventListener<RosterEvent> {
             userUpdated(event.getSource());
         }
     }
-
+    
+    public synchronized int getRosterSize() {
+        return roster.size();
+    }
+    
+    public synchronized String getFirstRosterEntry() {
+        return roster.keySet().iterator().next();
+    }
+    
+    public synchronized int countPresences(String username) {
+        ArrayList<Presence> presences = roster.get(username);
+        return presences == null ? 0 : presences.size();
+    }
+    
+    public synchronized Presence getFirstPresence(String username) {
+        ArrayList<Presence> presences = roster.get(username);
+        return presences == null ? null : presences.get(0);        
+    }
+    
+    public synchronized User getUser(String username) {
+        return users.get(username);
+    }
+    
     private synchronized void userAdded(User user) {
         System.out.println("user added: " + user.getId()); 
         users.put(user.getId(), user);
