@@ -1,9 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
-import java.util.Comparator;
-
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.util.I18n;
 
@@ -20,8 +17,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int TRACK_COL = SIZE_COL + 1;
     public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int ACTION_COL = YEAR_COL + 1;
-    public static final int COLUMN_COUNT = ACTION_COL + 1;
+    public static final int COLUMN_COUNT = YEAR_COL + 1;
 
 
     @Override
@@ -49,8 +45,6 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return I18n.tr("Track");
             case YEAR_COL:
                 return I18n.tr("Year");
-            case ACTION_COL:
-                return I18n.tr("Download");
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -76,15 +70,13 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
             case YEAR_COL:
                 return baseObject.getProperty(FilePropertyKey.YEAR);
-            case ACTION_COL:
-                return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
     @Override
     public int getActionColumn() {
-        return ACTION_COL;
+        return -1;
     }
 
     @Override
@@ -93,30 +85,12 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     }
 
     @Override
-    public boolean isEditable(T baseObject, int column) {
-        return column == ACTION_COL;
-    }
-
-    @Override
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
     }
-    
-    @Override
-    public Class getColumnClass(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return FileItem.class;
-        }
-        return super.getColumnClass(column);
-    }
 
     @Override
-    public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return new ActionComparator();
-        }
-        return super.getColumnComparator(column);
+    public boolean isEditable(T baseObject, int column) {
+        return false;
     }
 }

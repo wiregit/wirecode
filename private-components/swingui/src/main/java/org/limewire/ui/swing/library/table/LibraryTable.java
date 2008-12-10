@@ -29,7 +29,6 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
-import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.Disposable;
@@ -146,18 +145,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
 //        });
     }
     
-    public void enableDownloading(DownloadListManager downloadListManager, LibraryFileList fileList){
+    public void enableDownloading(DownloadListManager downloadListManager){
         LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
-        
-        LibraryDownloadRendererEditor downloadEditor = new LibraryDownloadRendererEditor(downloadAction, downloadListManager, fileList);
-        getColumnModel().getColumn(format.getActionColumn()).setCellEditor(downloadEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new LibraryDownloadRendererEditor(null, downloadListManager, fileList));
-        getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(downloadEditor.getPreferredSize().width);
-        getColumnModel().getColumn(format.getActionColumn()).setWidth(downloadEditor.getPreferredSize().width);
-        setRowHeight(rowHeight);
-        hideColumns();        
     }
     
     public void enableSharing() {

@@ -1,10 +1,8 @@
 package org.limewire.ui.swing.library.table;
 
-import java.util.Comparator;
 import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
-import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.util.I18n;
 
@@ -17,8 +15,7 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
     public static final int CREATED_COL = TYPE_COL + 1;
     public static final int SIZE_COL = CREATED_COL + 1;
     public static final int AUTHOR_COL = SIZE_COL + 1;
-    public static final int ACTION_COL = AUTHOR_COL + 1;
-    private static final int COLUMN_COUNT = ACTION_COL + 1;
+    private static final int COLUMN_COUNT = AUTHOR_COL + 1;
 
     @Override
     public int getColumnCount() {
@@ -34,8 +31,6 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
                  return I18n.tr("Created");
              case NAME_COL:
                  return I18n.tr("Filename");
-             case ACTION_COL:
-                 return I18n.tr("Download");
              case SIZE_COL:
                  return I18n.tr("Size");
              case TYPE_COL:
@@ -53,8 +48,6 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
                  return new Date(baseObject.getCreationTime());
              case NAME_COL:
                  return baseObject;
-             case ACTION_COL:
-                 return baseObject;
              case SIZE_COL:
                  return baseObject.getSize();
              case TYPE_COL:
@@ -65,7 +58,7 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
 
     @Override
     public int getActionColumn() {
-        return ACTION_COL;
+        return -1;
     }
 
     @Override
@@ -75,29 +68,11 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == ACTION_COL;
+        return false;
     }
 
     @Override
     public T setColumnValue(T baseObject, Object editedValue, int column) {
         return baseObject;
-    }
-    
-    @Override
-    public Class getColumnClass(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return FileItem.class;
-        }
-        return super.getColumnClass(column);
-    }
-
-    @Override
-    public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return new ActionComparator();
-        }
-        return super.getColumnComparator(column);
     }
 }
