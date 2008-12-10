@@ -81,9 +81,12 @@ class XMPPFirewalledAddressConnector implements AddressConnector, PushedSocketHa
     public boolean canConnect(Address address) {
         if (address instanceof XMPPFirewalledAddress) {
             XMPPFirewalledAddress xmppFirewalledAddress = (XMPPFirewalledAddress)address;
-            // let push download manager decide if we're locally capabable of connecting 
-            return pushDownloadManager.canConnect(xmppFirewalledAddress.getFirewalledAddress());
+            // let push download manager decide if we're locally capabable of connecting
+            boolean canConnect = pushDownloadManager.canConnect(xmppFirewalledAddress.getFirewalledAddress());
+            LOG.debugf("{0} connect remote address {1}, because PDM cannot connect {2}", (canConnect ? "can" : "can not"), address, xmppFirewalledAddress.getFirewalledAddress());
+            return canConnect;
         }
+        LOG.debugf("can not connect remote address {0}", address);
         return false;
     }
 

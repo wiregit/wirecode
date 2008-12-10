@@ -75,8 +75,12 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
         if (address instanceof FirewalledAddress) {
             if (areLocalAddressesKnown()) {
                 return isBehindThisNAT((FirewalledAddress)address);
+            } else {
+                LOG.debugf("can not resolve remote address {0} because local address is not known", address);
+                return false;
             }
         }
+        LOG.debugf("can not resolve remote address {0}", address);
         return false;
     }
 
@@ -118,6 +122,7 @@ public class SameNATAddressResolver implements AddressResolver, RegisteringEvent
     public void resolve(Address addr, AddressResolutionObserver observer) {
         FirewalledAddress address = (FirewalledAddress)addr;
         assert isBehindThisNAT(address) : "not behind same NAT: " + address;
+        LOG.debugf("resolved remote address {0} to {1}", address, address.getPrivateAddress());
         observer.resolved(address.getPrivateAddress());
     }
 

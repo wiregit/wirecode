@@ -68,11 +68,13 @@ public class XMPPAddressResolver implements AddressResolver {
             XMPPAddress friendIdAddress = (XMPPAddress)address;
             FriendPresence presence = getPresence(friendIdAddress);
             if (presence == null) {
-                LOG.debugf("no presence found for: {0}", friendIdAddress);
+                LOG.debugf("can not resolve remote address {0} because no presence was found}", friendIdAddress);
                 return false;
             }
+            LOG.debugf("can resolve remote address {0}", address);
             return true;
         }
+        LOG.debugf("can not resolve remote address {0}", address);
         return false;
     }
     
@@ -149,15 +151,15 @@ public class XMPPAddressResolver implements AddressResolver {
                     socketsManager.resolve(resolvedAddress, observer);
                 } else if (resolvedPresence.hasFeatures(ConnectBackRequestFeature.ID)) {
                     // else make it an xmpp firewalled address, so connect requests can be sent over xmpp
-                    LOG.debugf("resolving as xmpp firewalled address: {0}", address);
                     resolvedAddress = new XMPPFirewalledAddress(xmppAddress, (FirewalledAddress)resolvedAddress);
+                    LOG.debugf("resolved {0} as xmpp firewalled address {1}", address, resolvedAddress);
                     observer.resolved(resolvedAddress);
                 } else {
-                    LOG.debugf("resolving as firewalled address {0}", address);
+                    LOG.debugf("resolved {0} as firewalled address {1}", address, resolvedAddress);
                     observer.resolved(resolvedAddress);
                 }
             } else {
-                LOG.debugf("resolved as non-firewalled address {0}", address);
+                LOG.debugf("resolved {0} as non-firewalled address {1}", address, resolvedAddress);
                 observer.resolved(resolvedAddress);
             }
         }

@@ -4,9 +4,11 @@ import java.io.IOException;
 
 import org.limewire.io.Address;
 import org.limewire.io.Connectable;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.net.SocketsManager;
-import org.limewire.net.TLSManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.net.TLSManager;
 import org.limewire.net.address.AddressConnector;
 import org.limewire.nio.observer.ConnectObserver;
 
@@ -18,6 +20,8 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class ConnectableConnector implements AddressConnector {
+
+    private static final Log LOG = LogFactory.getLog(ConnectableConnector.class);
 
     private final SocketsManager socketsManager;
     private final TLSManager tlsManager;
@@ -31,7 +35,9 @@ public class ConnectableConnector implements AddressConnector {
 
     @Override
     public boolean canConnect(Address address) {
-        return address instanceof Connectable;
+        boolean canConnect = address instanceof Connectable;
+        LOG.debugf("{0} connect remote address {1}", (canConnect ? "can" : "can not"), address);
+        return canConnect;
     }
 
     @Override

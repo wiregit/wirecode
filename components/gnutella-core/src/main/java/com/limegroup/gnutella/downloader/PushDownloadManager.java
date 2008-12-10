@@ -927,15 +927,21 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     public boolean canConnect(Address address) {
         int fwtVersion = getFWTVersion(address);
         if (fwtVersion == -1) {
+            LOG.debug("cannot connect: remote address " + address + " cannot do fwt");
             return false;
         }
         if (hasValidLocalAddress()) {
             if (networkManager.acceptedIncomingConnection()) {
+                LOG.debug("can connect: local address accepted incoming connection");
                 return true;
             }
             if (networkManager.canDoFWT() && fwtVersion > 0) {
+                LOG.debug("can connect: local and remote address can do fwt");
                 return true;
             }
+            LOG.debug("can not connect: have not accepted incoming connection and can not do FWT");
+        } else {
+            LOG.debug(" can not connect: no local valid address");
         }
         LOG.debugf("can't connect to {0}, local fwt {1}", address, networkManager.canDoFWT());
         return false;
