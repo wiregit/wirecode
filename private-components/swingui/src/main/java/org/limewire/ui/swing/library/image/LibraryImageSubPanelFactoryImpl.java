@@ -20,6 +20,7 @@ import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.sharing.FileShareModel;
 import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
+import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
@@ -39,10 +40,13 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
 
     private LibraryManager libraryManager;
     
+    private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
+    
     @Inject
-    public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager) {
+    public LibraryImageSubPanelFactoryImpl(ThumbnailManager thumbnailManager, LibraryManager libraryManager, ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
         this.thumbnailManager = thumbnailManager;
         this.libraryManager = libraryManager;
+        this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
     }
     
     @Override
@@ -80,7 +84,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     private ImageCellRenderer enableMyLibraryRenderer(ImageList imageList) {
         ImageCellRenderer renderer = new LibraryImageCellRenderer(imageList.getFixedCellWidth(), imageList.getFixedCellHeight() - 2, thumbnailManager);
         renderer.setOpaque(false);
-        JComponent buttonRenderer = new ShareTableRendererEditor(null);
+        JComponent buttonRenderer = shareTableRendererEditorFactory.createShareTableRendererEditor(null);
         buttonRenderer.setOpaque(false);
         buttonRenderer.setPreferredSize(subPanelDimension);
         buttonRenderer.setSize(subPanelDimension);
@@ -91,7 +95,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     private TableRendererEditor enableMyLibraryEditor(LibrarySharePanel sharePanel, LibraryImageSubPanel parent){
         ShareAction action = new ShareAction(I18n.tr("Sharing"), sharePanel, parent);
-        ShareTableRendererEditor shareEditor = new ShareTableRendererEditor(action);
+        ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(action);
         action.setEditor(shareEditor);
         shareEditor.setPreferredSize(subPanelDimension);
         shareEditor.setSize(subPanelDimension);

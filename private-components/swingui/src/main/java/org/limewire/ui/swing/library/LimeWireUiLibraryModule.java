@@ -7,6 +7,8 @@ import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactoryImpl;
 import org.limewire.ui.swing.library.nav.LimeWireUiLibraryNavModule;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactoryImpl;
+import org.limewire.ui.swing.library.table.ShareTableRendererEditor;
+import org.limewire.ui.swing.library.table.ShareTableRendererEditorFactory;
 import org.limewire.ui.swing.library.table.menu.LocalFileItemPropertiesFactory;
 import org.limewire.ui.swing.library.table.menu.RemoteFileItemPropertiesFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -34,5 +36,8 @@ public class LimeWireUiLibraryModule extends AbstractModule {
         
         bind(new TypeLiteral<PropertiesFactory<LocalFileItem>>(){}).to(LocalFileItemPropertiesFactory.class);
         bind(new TypeLiteral<PropertiesFactory<RemoteFileItem>>(){}).to(RemoteFileItemPropertiesFactory.class);
+        
+        bind(ShareTableRendererEditorFactory.class).toProvider(
+                FactoryProvider.newFactory(ShareTableRendererEditorFactory.class, ShareTableRendererEditor.class));
     }
 }

@@ -10,8 +10,8 @@ import ca.odell.glazedlists.EventList;
 
 public class AudioLibraryTable<T extends LocalFileItem> extends LibraryTable<T> {
     
-    public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player, SaveLocationExceptionHandler saveLocationExceptionHandler) {
-        super(libraryItems, new AudioTableFormat<T>(), saveLocationExceptionHandler);
+    public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player, SaveLocationExceptionHandler saveLocationExceptionHandler, ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
+        super(libraryItems, new AudioTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
         
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(new PlayRendererEditor(this, player));
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor(this, player));

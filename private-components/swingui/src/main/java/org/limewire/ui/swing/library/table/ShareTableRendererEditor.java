@@ -13,12 +13,18 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.xmpp.api.client.XMPPService;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 public class ShareTableRendererEditor extends TableRendererEditor implements Configurable{
    // @Resource
@@ -36,9 +42,13 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private JLabel friendsLabel;
     private HyperLinkButton shareButton;
     private LocalFileItem fileItem;
-    public ShareTableRendererEditor(Action shareAction){
+    
+    private final XMPPService xmppService;
+    
+    @AssistedInject
+    public ShareTableRendererEditor(@Assisted Action shareAction, XMPPService xmppService){
         GuiUtils.assignResources(this);
-       
+        this.xmppService = xmppService;
         
        // gnutellaLabel = new JLabel(shareGnutellaIcon);
         friendsLabel = new JLabel();//(shareFriendsIcon);
@@ -86,7 +96,12 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         }
         friendsLabel.setVisible(friendCount > 0 && !item.isIncomplete());
         friendsLabel.setText(GuiUtils.toLocalizedInteger(item.getFriendShareCount()));
-       // shareButton.setVisible(item.isShareable() && !item.isIncomplete() && isRowSelected);
+        shareButton.setVisible(item.isShareable() && !item.isIncomplete());
+        
+        if(item.getCategory() == Category.DOCUMENT && (!LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() && !xmppService.isLoggedIn())) {
+            //if the share documents with gnutella option is unchecked, the user must be logged in for the share button to be enabled.
+            shareButton.setVisible(false);
+        }
     }
 
     public LocalFileItem getLocalFileItem() {

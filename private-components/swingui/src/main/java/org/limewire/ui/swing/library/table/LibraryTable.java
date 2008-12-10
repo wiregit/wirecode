@@ -58,17 +58,19 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     private final TableColors tableColors;
     private final EventList<T> listSelection;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     
     private TableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
     protected final int rowHeight = 20;
     
-    public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+    public LibraryTable(EventList<T> libraryItems, LibraryTableFormat<T> format, SaveLocationExceptionHandler saveLocationExceptionHandler, ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
         super(new LibraryTableModel<T>(libraryItems, format));
 
         this.format = format;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         
         tableColors = new TableColors();
         setStripesPainted(true);
@@ -126,9 +128,9 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     
     public void enableMyLibrarySharing(LibrarySharePanel librarySharePanel) {
         this.librarySharePanel = librarySharePanel;
-        shareEditor = new ShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
+        shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
-        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(new ShareTableRendererEditor(null));
+        getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(shareTableRendererEditorFactory.createShareTableRendererEditor(null));
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
         setRowHeight(rowHeight);
