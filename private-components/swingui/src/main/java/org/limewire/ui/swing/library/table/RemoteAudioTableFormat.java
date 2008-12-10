@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.table;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 
 /**
  * Table format for the Audio Table for LW buddies and Browse hosts
@@ -12,12 +13,16 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     public static final int ARTIST_COL = NAME_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
     public static final int LENGTH_COL = ALBUM_COL + 1;
-    public static final int GENRE_COL = LENGTH_COL + 1;
+    public static final int QUALITY_COL = LENGTH_COL + 1;
+    public static final int GENRE_COL = QUALITY_COL + 1;
     public static final int BITRATE_COL = GENRE_COL + 1;
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int TRACK_COL = SIZE_COL + 1;
     public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int COLUMN_COUNT = YEAR_COL + 1;
+    public static final int FILENAME_COL = YEAR_COL + 1;
+    public static final int EXTENSION_COL = FILENAME_COL + 1;
+    public static final int DESCRIPTION_COL = EXTENSION_COL + 1;
+    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
 
 
     @Override
@@ -35,6 +40,8 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return I18n.tr("Album");
             case LENGTH_COL:
                 return I18n.tr("Length");
+            case QUALITY_COL:
+                return I18n.tr("Quality");
             case GENRE_COL:
                 return I18n.tr("Genre");
             case BITRATE_COL:
@@ -45,6 +52,12 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return I18n.tr("Track");
             case YEAR_COL:
                 return I18n.tr("Year");
+            case FILENAME_COL:
+                return I18n.tr("Filename");
+            case EXTENSION_COL:
+                return I18n.tr("Extension");
+            case DESCRIPTION_COL:
+                return I18n.tr("Description");
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -60,6 +73,8 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return baseObject.getProperty(FilePropertyKey.ALBUM);
             case LENGTH_COL:
                 return baseObject.getProperty(FilePropertyKey.LENGTH);
+            case QUALITY_COL:
+                return "";
             case GENRE_COL:
                 return baseObject.getProperty(FilePropertyKey.GENRE);
             case BITRATE_COL:
@@ -70,6 +85,12 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
                 return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
             case YEAR_COL:
                 return baseObject.getProperty(FilePropertyKey.YEAR);
+            case FILENAME_COL:
+                return baseObject.getProperty(FilePropertyKey.NAME);
+            case EXTENSION_COL:
+                return FileUtils.getFileExtension(baseObject.getFileName());
+            case DESCRIPTION_COL:
+                return baseObject.getProperty(FilePropertyKey.COMMENTS);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -81,7 +102,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] { YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL};
+        return new int[] { DESCRIPTION_COL, EXTENSION_COL, FILENAME_COL, YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
     }
 
     @Override

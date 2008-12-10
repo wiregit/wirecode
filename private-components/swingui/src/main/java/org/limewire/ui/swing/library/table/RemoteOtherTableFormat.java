@@ -2,6 +2,7 @@ package org.limewire.ui.swing.library.table;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 
 /**
  * Table format for Other Table for LW buddies and Browse hosts
@@ -9,7 +10,8 @@ import org.limewire.ui.swing.util.I18n;
 public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
-    public static final int SIZE_COL = TYPE_COL + 1;
+    public static final int EXTENSION_COL = TYPE_COL + 1;
+    public static final int SIZE_COL = EXTENSION_COL + 1;
     public static final int COLUMN_COUNT = SIZE_COL + 1;
 
     @Override
@@ -25,6 +27,8 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return I18n.tr("Size");
             case TYPE_COL:
                 return I18n.tr("Type");
+            case EXTENSION_COL:
+                return I18n.tr("Extension");
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -39,6 +43,8 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
                 return baseObject.getSize();
             case TYPE_COL:
                 return "Verbal description";
+            case EXTENSION_COL:
+                return FileUtils.getFileExtension(baseObject.getFileName());
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

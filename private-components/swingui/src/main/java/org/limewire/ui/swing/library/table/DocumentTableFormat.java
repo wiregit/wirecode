@@ -8,7 +8,6 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
-import org.limewire.util.FileUtils;
 
 /**
  * Table format for the Document Table when it is in My Library
@@ -19,9 +18,8 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
 	public static final int CREATED_COL = TYPE_COL + 1;
 	public static final int SIZE_COL = CREATED_COL + 1;
 	public static final int AUTHOR_COL = SIZE_COL + 1;
-	public static final int MODIFIED_COL = AUTHOR_COL + 1;
-	public static final int EXTENSION_COL = MODIFIED_COL + 1;
-	public static final int ACTION_COL = EXTENSION_COL + 1;
+	public static final int DESCRIPTION_COL = AUTHOR_COL + 1;
+	public static final int ACTION_COL = DESCRIPTION_COL + 1;
 	private static final int COLUMN_COUNT = ACTION_COL + 1;
 
 	/** Icon manager used to find native file type information. */
@@ -51,13 +49,11 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
          case AUTHOR_COL:
              return I18n.tr("Author");
          case CREATED_COL:
-             return I18n.tr("Created");
-         case MODIFIED_COL:
+             return I18n.tr("Date Created");
+         case DESCRIPTION_COL:
              return I18n.tr("Modified");
          case NAME_COL:
              return I18n.tr("Filename");
-         case EXTENSION_COL:
-             return I18n.tr("Extension");
          case ACTION_COL:
              return I18n.tr("Sharing");
          case SIZE_COL:
@@ -77,13 +73,10 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
              // Return creation time if valid.
              long creationTime = baseObject.getCreationTime();
              return (creationTime >= 0) ? new Date(creationTime) : null;
-         case MODIFIED_COL:
-             // Return last modified time. 
-             return new Date(((LocalFileItem) baseObject).getLastModifiedTime());
+         case DESCRIPTION_COL:
+             return "";
          case NAME_COL:
              return baseObject;
-         case EXTENSION_COL:
-             return FileUtils.getFileExtension(baseObject.getFile());
          case ACTION_COL:
              return baseObject;
          case SIZE_COL:
@@ -104,7 +97,7 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] {EXTENSION_COL, AUTHOR_COL, SIZE_COL, CREATED_COL};
+        return new int[] {DESCRIPTION_COL, AUTHOR_COL, SIZE_COL};
     }
 
     @Override

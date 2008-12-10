@@ -27,6 +27,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int NAME_INDEX = 10;
     public static final int FILE_EXTENSION_INDEX = 11;
     public static final int SIZE_INDEX = 12;
+    public static final int DESCRIPTION_INDEX = 13;
 
     
     public AudioTableFormat() {
@@ -43,7 +44,8 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Year"),
                 tr("Filename"), 
                 tr("Extension"), 
-                tr("Size"));
+                tr("Size"),
+                tr("Description"));
     }
     
     @Override
@@ -73,6 +75,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case NAME_INDEX: return getProperty(FilePropertyKey.NAME);
             case FILE_EXTENSION_INDEX: return vsr.getFileExtension();
             case SIZE_INDEX: return vsr.getSize();
+            case DESCRIPTION_INDEX: return "";
             default: return null;
         }
     }

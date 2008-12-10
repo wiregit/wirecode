@@ -20,6 +20,8 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int FILE_EXTENSION_INDEX = 2;
     public static final int DATE_INDEX = 3;
     public static final int SIZE_INDEX = 4;
+    public static final int DESCRIPTION_INDEX = 5;
+    public static final int TITLE_INDEX = 6;
 
     public ImageTableFormat() {
         super(DATE_INDEX,
@@ -27,7 +29,9 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Filename"), 
                 tr("Extension"), 
                 tr("Date created"), 
-                tr("Size"));
+                tr("Size"),
+                tr("Description"),
+                tr("Title"));
     }
 
     @Override
@@ -49,6 +53,8 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case DATE_INDEX: return getProperty(FilePropertyKey.DATE_CREATED);
             case FROM_INDEX: return vsr;
             case SIZE_INDEX: return vsr.getSize();
+            case DESCRIPTION_INDEX: return "";
+            case TITLE_INDEX: return getProperty(FilePropertyKey.TITLE);
             default: return null;
         }
     }

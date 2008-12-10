@@ -16,17 +16,17 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
     public static final int FROM_INDEX = 0;
     public static final int NAME_INDEX = 1;
-    public static final int TYPE_INDEX = 2;
-    public static final int SIZE_INDEX = 3;
-    public static final int FILE_EXTENSION_INDEX = 4;
+    public static final int FILE_EXTENSION_INDEX = 2;
+    public static final int TYPE_INDEX = 3;
+    public static final int SIZE_INDEX = 4;
     
     public AllTableFormat() {
         super(SIZE_INDEX, 
               tr("From"),
               tr("Filename"), 
+              tr("Extension"),
               tr("Type"), 
-              tr("Size"), 
-              tr("Extension"));
+              tr("Size"));
     }
     
     @Override

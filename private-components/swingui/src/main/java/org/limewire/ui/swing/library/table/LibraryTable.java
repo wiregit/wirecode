@@ -151,6 +151,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
+        
+        hideColumns();
     }
     
     public void enableSharing() {

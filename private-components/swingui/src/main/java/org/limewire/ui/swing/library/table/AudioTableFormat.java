@@ -1,14 +1,12 @@
 package org.limewire.ui.swing.library.table;
 
 import java.util.Comparator;
-import java.util.Date;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
-import org.limewire.util.FileUtils;
 
 /**
  * Table format for the Audio Table when it is in My Library
@@ -23,12 +21,12 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public static final int BITRATE_COL = GENRE_COL + 1;
     public static final int SIZE_COL = BITRATE_COL + 1;
     public static final int FILENAME_COL = SIZE_COL + 1;
-    public static final int EXTENSION_COL = FILENAME_COL + 1;
-    public static final int TRACK_COL = EXTENSION_COL + 1;
+    public static final int TRACK_COL = FILENAME_COL + 1;
     public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int MODIFIED_COL = YEAR_COL + 1;
-    public static final int ACTION_COL = MODIFIED_COL + 1;
-    public static final int COLUMN_COUNT = ACTION_COL + 1;
+    public static final int QUALITY_COL = YEAR_COL + 1;
+    public static final int ACTION_COL = QUALITY_COL + 1;
+    public static final int DESCRIPTION_COL = ACTION_COL + 1;
+    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
 
     @Override
     public int getColumnCount() {
@@ -55,14 +53,14 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return I18n.tr("Size");
         case FILENAME_COL:
             return I18n.tr("Filename");
-        case EXTENSION_COL:
-            return I18n.tr("Extension");
         case TRACK_COL:
             return I18n.tr("Track");
         case YEAR_COL:
             return I18n.tr("Year");
-        case MODIFIED_COL:
-            return I18n.tr("Modified");
+        case QUALITY_COL:
+            return I18n.tr("Quality");
+        case DESCRIPTION_COL:
+            return I18n.tr("Description");
         case ACTION_COL:
             return I18n.tr("Sharing");
         }
@@ -90,17 +88,17 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case BITRATE_COL:
             return baseObject.getProperty(FilePropertyKey.BITRATE);
         case FILENAME_COL:
-            return baseObject.getProperty(FilePropertyKey.NAME);
-        case EXTENSION_COL:
-            return FileUtils.getFileExtension(baseObject.getFile());
+            return baseObject.getFileName();
         case SIZE_COL:
             return baseObject.getSize();
         case TRACK_COL:
             return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
         case YEAR_COL:
             return baseObject.getProperty(FilePropertyKey.YEAR);
-        case MODIFIED_COL:
-            return new Date(baseObject.getLastModifiedTime());
+        case QUALITY_COL:
+            return "";
+        case DESCRIPTION_COL: 
+            return baseObject.getProperty(FilePropertyKey.COMMENTS);
         case ACTION_COL:
             return baseObject;
         }
@@ -114,7 +112,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] {MODIFIED_COL, YEAR_COL, TRACK_COL, EXTENSION_COL, FILENAME_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
+        return new int[] {DESCRIPTION_COL, QUALITY_COL, YEAR_COL, TRACK_COL, FILENAME_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
     }
 
     @Override

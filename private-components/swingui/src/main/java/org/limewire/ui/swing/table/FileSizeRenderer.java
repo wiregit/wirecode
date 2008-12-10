@@ -16,7 +16,8 @@ public class FileSizeRenderer extends DefaultLibraryRenderer {
         
         if (value != null) {
             setText(GuiUtils.toUnitbytes((Long)value)); 
-        }
+        } else 
+            setText("");
         return this;
     }
 }

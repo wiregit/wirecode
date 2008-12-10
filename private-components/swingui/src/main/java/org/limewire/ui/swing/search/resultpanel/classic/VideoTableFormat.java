@@ -18,25 +18,27 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int NAME_INDEX = 1;
     public static final int EXTENSION_INDEX = 2;
     public static final int LENGTH_INDEX = 3;
-    public static final int SIZE_INDEX = 4;
+    public static final int MISC_INDEX = 4;
     public static final int QUALITY_INDEX = 5;
-    public static final int RATING_INDEX = 6;
-    public static final int COMMENTS_INDEX = 7;
+    public static final int SIZE_INDEX = 6;
+    public static final int RATING_INDEX = 7;
     public static final int DIMENSION_INDEX = 8;
     public static final int YEAR_INDEX = 9;
+    public static final int DESCRIPTION_INDEX = 10;
 
     public VideoTableFormat() {
-        super(QUALITY_INDEX,
+        super(SIZE_INDEX,
                 tr("From"), 
                 tr("Filename"), 
                 tr("Extension"), 
                 tr("Length"), 
-                tr("Size"), 
+                tr("Misc"),
                 tr("Quality"), 
+                tr("Size"),
                 tr("Rating"),
-                tr("Comments"), 
-                tr("Dimension"), 
-                tr("Year"));
+                tr("Resolution"), 
+                tr("Year"),
+                tr("Description"));
     }
 
     @Override
@@ -60,9 +62,10 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case LENGTH_INDEX: return getProperty(FilePropertyKey.LENGTH);
             case YEAR_INDEX: return getProperty(FilePropertyKey.YEAR);
             case QUALITY_INDEX: return getProperty(FilePropertyKey.QUALITY);
+            case MISC_INDEX: return getProperty(FilePropertyKey.COMMENTS);
+            case DESCRIPTION_INDEX: return "";
             case FROM_INDEX: return vsr;
             case RATING_INDEX: return getProperty(FilePropertyKey.RATING);
-            case COMMENTS_INDEX: return getProperty(FilePropertyKey.COMMENTS);
             case DIMENSION_INDEX:
                 if(getProperty(FilePropertyKey.WIDTH) == null || getProperty(FilePropertyKey.HEIGHT) == null)
                     return null;

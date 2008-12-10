@@ -76,6 +76,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     
     private final TimeRenderer timeRenderer = new TimeRenderer();
     private final FileSizeRenderer fileSizeRenderer = new FileSizeRenderer();
+    private final CalendarRenderer calendarRenderer = new CalendarRenderer();
     private final IconLabelRenderer iconLabelRenderer;
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
@@ -226,17 +227,19 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             break;
         case VIDEO:
             libTable = new LibraryTable<T>(sortedList, new RemoteVideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-            libTable.getColumnModel().getColumn(VideoTableFormat.LENGTH_COL).setCellRenderer(timeRenderer);
-            libTable.getColumnModel().getColumn(VideoTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
+            libTable.getColumnModel().getColumn(RemoteVideoTableFormat.LENGTH_COL).setCellRenderer(timeRenderer);
+            libTable.getColumnModel().getColumn(RemoteVideoTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
             break;
         case DOCUMENT:
             libTable = new LibraryTable<T>(sortedList, new RemoteDocumentTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
             libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.NAME_COL).setCellRenderer(iconLabelRenderer);
             libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
+            libTable.getColumnModel().getColumn(RemoteDocumentTableFormat.CREATED_COL).setCellRenderer(calendarRenderer);
             break;
         case IMAGE:
             libTable = new LibraryTable<T>(sortedList, new RemoteImageTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
             libTable.getColumnModel().getColumn(RemoteImageTableFormat.SIZE_COL).setCellRenderer(fileSizeRenderer);
+            libTable.getColumnModel().getColumn(RemoteImageTableFormat.CREATED_COL).setCellRenderer(calendarRenderer);
             break;
         case OTHER:
             libTable = new LibraryTable<T>(sortedList, new RemoteOtherTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);

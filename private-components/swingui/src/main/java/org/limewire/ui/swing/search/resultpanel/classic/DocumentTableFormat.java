@@ -19,20 +19,23 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     public static final int FROM_INDEX = 0;
     public static final int NAME_INDEX = 1;
     public static final int TYPE_INDEX = 2;
-    public static final int SIZE_INDEX = 3;
-    public static final int DATE_INDEX = 4;
-    public static final int FILE_EXTENSION_INDEX = 5;
+    public static final int FILE_EXTENSION_INDEX = 3;
+    public static final int SIZE_INDEX = 4;
+    public static final int DATE_INDEX = 5;
     public static final int AUTHOR_INDEX = 6;
+    public static final int DESCRIPTION_INDEX = 7;
     
     public DocumentTableFormat() {
-        super(FILE_EXTENSION_INDEX,
+        super(DATE_INDEX,
                 tr("From"),
                 tr("Filename"), 
                 tr("Type"), 
+                tr("Extension"),
                 tr("Size"), 
                 tr("Date created"), 
                 tr("Extension"), 
-                tr("Author"));
+                tr("Author"),
+                tr("Description"));
     }
 
     @Override
@@ -58,6 +61,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
             case FROM_INDEX: return vsr;
             case FILE_EXTENSION_INDEX: return fileExtension;
             case AUTHOR_INDEX: return getProperty(FilePropertyKey.AUTHOR);
+            case DESCRIPTION_INDEX: return "";
             default: return null;
         }
     }

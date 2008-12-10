@@ -18,21 +18,21 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public static final int FROM_INDEX = 0;
     public static final int NAME_INDEX = 1;
     public static final int SIZE_INDEX = 2;
-    public static final int PLATFORM_INDEX = 3;
-    public static final int COMPANY_INDEX = 4;
-    public static final int FILE_EXTENSION_INDEX = 5;
-    public static final int AUTHOR_INDEX = 6;
+    public static final int FILE_EXTENSION_INDEX = 3;
+    public static final int PLATFORM_INDEX = 4;
+    public static final int COMPANY_INDEX = 5;
+    public static final int DESCRIPTION_INDEX = 6;
 
     
     public ProgramTableFormat() {
-        super(FILE_EXTENSION_INDEX,
+        super(COMPANY_INDEX,
                 tr("From"),
                 tr("Filename"), 
                 tr("Size"), 
+                tr("Extension"),
                 tr("Platform"), 
                 tr("Company"),
-                tr("Extension"),
-                tr("Author"));
+                tr("Description"));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case COMPANY_INDEX: return getProperty(FilePropertyKey.COMPANY);
             case FILE_EXTENSION_INDEX: return fileExtension;
             case FROM_INDEX: return vsr;
-            case AUTHOR_INDEX: return getProperty(FilePropertyKey.AUTHOR);
+            case DESCRIPTION_INDEX: return "";
             default: return null;
         }
     }

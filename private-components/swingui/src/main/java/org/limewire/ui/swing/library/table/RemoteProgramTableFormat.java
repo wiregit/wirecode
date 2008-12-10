@@ -3,16 +3,19 @@ package org.limewire.ui.swing.library.table;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.FileUtils;
 
 /**
  * Table format for Programs Table for LW buddies and Browse hosts
  */
 public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
     public static final int NAME_COL = 0;
-    public static final int SIZE_COL = NAME_COL + 1;
+    public static final int EXTENSION_COL = NAME_COL + 1;
+    public static final int SIZE_COL = EXTENSION_COL + 1;
     public static final int PLATFORM_COL = SIZE_COL + 1;
     public static final int COMPANY_COL = PLATFORM_COL + 1;
-    public static final int COLUMN_COUNT = COMPANY_COL + 1;
+    public static final int DESCRIPTION_COL = COMPANY_COL + 1;
+    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
 
 
     @Override
@@ -30,6 +33,10 @@ public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemote
                 return I18n.tr("Platform");
             case COMPANY_COL:
                 return I18n.tr("Company");
+            case EXTENSION_COL:
+                return I18n.tr("Extension");
+            case DESCRIPTION_COL:
+                return I18n.tr("Description");
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -46,6 +53,10 @@ public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemote
                 return baseObject.getProperty(FilePropertyKey.COMPANY);
             case SIZE_COL:
                 return baseObject.getSize();
+            case EXTENSION_COL:
+                return FileUtils.getFileExtension(baseObject.getFileName());
+            case DESCRIPTION_COL:
+                return baseObject.getProperty(FilePropertyKey.COMMENTS);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -57,7 +68,7 @@ public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemote
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] {};
+        return new int[] {DESCRIPTION_COL};
     }
 
     @Override

@@ -62,7 +62,4 @@ class LibraryPanel extends AbstractFileListPanel {
             setText();
         }
     }        
-    
-    
-
 }

@@ -58,7 +58,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
             } else {
                 label.setIcon(iconManager.getIconForFile(((LocalFileItem) item).getFile()));
             }
-            label.setText(item.getPropertyString(FilePropertyKey.NAME));
+            label.setText(item.getFileName());
             
         } else if (value instanceof VisualSearchResult){
             
