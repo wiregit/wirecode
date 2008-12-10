@@ -3,11 +3,6 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -31,9 +26,6 @@ import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
-import org.limewire.core.api.connection.GnutellaConnectionManager;
-import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.impl.MockModule;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
@@ -87,22 +79,7 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private FramePositioner framePositioner;
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
-    @Inject private GnutellaConnectionManager gnutellaConnectionManager;
-    @Inject private DownloadListManager downloadListManager;
-    @Inject private UploadListManager uploadListManager;
-    
-    /** Indicates whether a disconnect was performed prior to shutdown. */    
-    private boolean disconnectOnShutdown;
-    /** Indicates whether a delayed shutdown has been initiated. */    
-    private boolean shutdownInitiated;
-    /** Indicates whether all file downloads are complete. */    
-    private boolean downloadsCompleted;
-    /** Indicates whether all file uploads are complete. */    
-    private boolean uploadsCompleted;
-    /** Listener for downloads completed event. */
-    private PropertyChangeListener downloadsCompletedListener;
-    /** Listener for uploads completed event. */
-    private PropertyChangeListener uploadsCompletedListener;
+    @Inject private DelayedShutdownHandler delayedShutdownHandler;
 
     /** Returns true if the UI has initialized & successfully been shown. */
     public static boolean isStarted() {
@@ -158,12 +135,8 @@ public class AppFrame extends SingleFrameApplication {
         trayNotifier.showTrayIcon();
         getMainFrame().setJMenuBar(limeMenuBar);
 
-        // Add listener to cancel delayed shutdown whenever UI is restored.
-        getMainFrame().addWindowListener(new WindowAdapter() {
-            public void windowDeiconified(WindowEvent e) {
-                cancelDelayedShutdown();
-            }
-        });
+        // Install handler for shutdown after transfers.
+        delayedShutdownHandler.install(this);
         
         addExitListener(new TrayExitListener(trayNotifier));
         addExitListener(new ShutdownListener(getMainFrame(), application));
@@ -267,107 +240,10 @@ public class AppFrame extends SingleFrameApplication {
 
     /**
      * Action method to exit the application after all transfers are completed.
-     * This performs the following tasks:
-     * <ul>
-     *   <li>Disconnects from Gnutella</li>
-     *   <li>Installs a listener for download completion</li>
-     *   <li>Installs a listener for upload completion</li>
-     *   <li>Minimizes the UI to the system tray</li>
-     * </ul>  
      */
     @Action
     public void shutdownAfterTransfers() { // DO NOT CHANGE THIS METHOD NAME!
-        // Skip if shutdown already initiated.
-        if (shutdownInitiated) {
-            return;
-        }
-        shutdownInitiated = true;
-        
-        // Disconnect from Gnutella, and save state for possible reconnect.
-        disconnectOnShutdown = gnutellaConnectionManager.isConnected();
-        if (disconnectOnShutdown) {
-            gnutellaConnectionManager.disconnect();
-        }
-        
-        // Initialize indicators.
-        downloadsCompleted = false;
-        uploadsCompleted = false;
-        
-        // Install listener for downloads completed event.  The event is
-        // handled by setting an indicator and performing the delayed shutdown.
-        if (downloadsCompletedListener == null) {
-            downloadsCompletedListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (DownloadListManager.DOWNLOADS_COMPLETED.equals(evt.getPropertyName())) {
-                        downloadsCompleted = true;
-                        doDelayedShutdown();
-                    }
-                }
-            };
-            downloadListManager.addPropertyChangeListener(downloadsCompletedListener);
-        }
-        
-        // Install listener for uploads completed event.  The event is
-        // handled by setting an indicator and performing the delayed shutdown.
-        if (uploadsCompletedListener == null) {
-            uploadsCompletedListener = new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    if (UploadListManager.UPLOADS_COMPLETED.equals(evt.getPropertyName())) {
-                        uploadsCompleted = true;
-                        doDelayedShutdown();
-                    }
-                }
-            };
-            uploadListManager.addPropertyChangeListener(uploadsCompletedListener);
-        }
-        
-        // Update state after installing listeners.  This generates events for 
-        // transfers that are already done.
-        downloadListManager.updateDownloadsCompleted();
-        uploadListManager.updateUploadsCompleted();
-        
-        // Minimize UI window.
-        minimizeToTray();
-    }
-
-    /**
-     * Performs delayed shutdown if all downloads and uploads are completed.
-     */
-    private void doDelayedShutdown() {
-        if (shutdownInitiated && downloadsCompleted && uploadsCompleted) {
-            // Exit using action to notify ExitListener instances.
-            exit(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Shutdown"));
-        }
-    }
-    
-    /**
-     * Cancels delayed shutdown after transfer operation.
-     */
-    private void cancelDelayedShutdown() {
-        // Reset indicator.
-        shutdownInitiated = false;
-        
-        // Remove download/upload listeners.
-        if (downloadsCompletedListener != null) {
-            downloadListManager.removePropertyChangeListener(downloadsCompletedListener);
-            downloadsCompletedListener = null;
-        }
-        if (uploadsCompletedListener != null) {
-            uploadListManager.removePropertyChangeListener(uploadsCompletedListener);
-            uploadsCompletedListener = null;
-        }
-
-        // Reset indicators.
-        downloadsCompleted = false;
-        uploadsCompleted = false;
-        
-        // Reconnect to Gnutella. 
-        if (disconnectOnShutdown) {
-            gnutellaConnectionManager.connect();
-            disconnectOnShutdown = false;
-        }
+        delayedShutdownHandler.shutdownAfterTransfers();
     }
     
     public Injector createUiInjector() {
