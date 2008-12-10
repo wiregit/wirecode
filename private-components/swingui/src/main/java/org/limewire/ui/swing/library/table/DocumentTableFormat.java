@@ -55,7 +55,7 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
          case MODIFIED_COL:
              return I18n.tr("Modified");
          case NAME_COL:
-             return I18n.tr("Name");
+             return I18n.tr("Filename");
          case EXTENSION_COL:
              return I18n.tr("Extension");
          case ACTION_COL:

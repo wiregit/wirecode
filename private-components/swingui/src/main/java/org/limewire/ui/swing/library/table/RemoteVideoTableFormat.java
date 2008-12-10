@@ -31,7 +31,7 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
     public String getColumnName(int column) {
         switch (column) {
             case NAME_COL:
-                return I18n.tr("Name");
+                return I18n.tr("Filename");
             case LENGTH_COL:
                 return I18n.tr("Length");
             case MISC_COL:

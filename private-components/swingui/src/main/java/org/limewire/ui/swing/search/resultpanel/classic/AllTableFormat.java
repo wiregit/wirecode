@@ -23,7 +23,7 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public AllTableFormat() {
         super(SIZE_INDEX, 
               tr("From"),
-              tr("Name"), 
+              tr("Filename"), 
               tr("Type"), 
               tr("Size"), 
               tr("Extension"));

@@ -33,7 +33,7 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
              case CREATED_COL:
                  return I18n.tr("Created");
              case NAME_COL:
-                 return I18n.tr("Name");
+                 return I18n.tr("Filename");
              case ACTION_COL:
                  return I18n.tr("Download");
              case SIZE_COL:

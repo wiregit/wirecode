@@ -23,7 +23,7 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
     public String getColumnName(int column) {
         switch (column) {
             case NAME_COL:
-                return I18n.tr("Name");        
+                return I18n.tr("Filename");        
             case SIZE_COL:
                 return I18n.tr("Size");
             case TYPE_COL:

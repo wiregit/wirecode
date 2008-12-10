@@ -27,7 +27,7 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
     public DocumentTableFormat() {
         super(FILE_EXTENSION_INDEX,
                 tr("From"),
-                tr("Name"), 
+                tr("Filename"), 
                 tr("Type"), 
                 tr("Size"), 
                 tr("Date created"), 

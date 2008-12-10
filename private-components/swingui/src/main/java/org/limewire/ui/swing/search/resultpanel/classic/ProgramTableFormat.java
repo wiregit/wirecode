@@ -27,7 +27,7 @@ public class ProgramTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public ProgramTableFormat() {
         super(FILE_EXTENSION_INDEX,
                 tr("From"),
-                tr("Name"), 
+                tr("Filename"), 
                 tr("Size"), 
                 tr("Platform"), 
                 tr("Company"),

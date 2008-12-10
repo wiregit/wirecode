@@ -24,7 +24,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public ImageTableFormat() {
         super(DATE_INDEX,
                 tr("From"),
-                tr("Name"), 
+                tr("Filename"), 
                 tr("Extension"), 
                 tr("Date created"), 
                 tr("Size"));

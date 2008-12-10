@@ -15,7 +15,8 @@ public class AudioLibraryTable<T extends LocalFileItem> extends LibraryTable<T> 
         
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(new PlayRendererEditor(this, player));
         getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor(this, player));
-        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(20);
+        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(14);
+        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMinWidth(14);
     }
     
     @Override

@@ -32,7 +32,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public AudioTableFormat() {
         super(QUALITY_INDEX,
                 tr("From"),
-                tr("Title"),
+                tr("Name"),
                 tr("Artist"), 
                 tr("Album"), 
                 tr("Length"), 
@@ -41,7 +41,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 tr("Genre"), 
                 tr("Track"), 
                 tr("Year"),
-                tr("Name"), 
+                tr("Filename"), 
                 tr("Extension"), 
                 tr("Size"));
     }

@@ -34,7 +34,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public String getColumnName(int column) {
         switch (column) {
         case NAME_COL:
-            return I18n.tr("Name");
+            return I18n.tr("Filename");
         case LENGTH_COL:
             return I18n.tr("Length");
         case MISC_COL:

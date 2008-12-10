@@ -28,7 +28,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     public VideoTableFormat() {
         super(QUALITY_INDEX,
                 tr("From"), 
-                tr("Name"), 
+                tr("Filename"), 
                 tr("Extension"), 
                 tr("Length"), 
                 tr("Size"), 

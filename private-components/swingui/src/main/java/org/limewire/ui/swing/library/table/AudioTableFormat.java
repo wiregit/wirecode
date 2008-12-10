@@ -40,7 +40,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case PLAY_COL:
             return "";
         case TITLE_COL:
-            return I18n.tr("Title");
+            return I18n.tr("Name");
         case ARTIST_COL:
             return I18n.tr("Artist");
         case ALBUM_COL:
@@ -54,7 +54,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case SIZE_COL:
             return I18n.tr("Size");
         case FILENAME_COL:
-            return I18n.tr("Name");
+            return I18n.tr("Filename");
         case EXTENSION_COL:
             return I18n.tr("Extension");
         case TRACK_COL:
@@ -75,7 +75,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case PLAY_COL:
             return baseObject;
         case TITLE_COL:
-            return baseObject.getProperty(FilePropertyKey.TITLE);
+            if(baseObject.getProperty(FilePropertyKey.TITLE) == null)
+                return baseObject.getProperty(FilePropertyKey.NAME);
+            else
+                return baseObject.getProperty(FilePropertyKey.TITLE);
         case ARTIST_COL:
             return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_COL:

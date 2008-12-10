@@ -26,7 +26,7 @@ public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemote
     public String getColumnName(int column) {
         switch (column) {
             case NAME_COL:
-                return I18n.tr("Name");
+                return I18n.tr("Filename");
             case SIZE_COL:
                 return I18n.tr("Size");
             case PLATFORM_COL:

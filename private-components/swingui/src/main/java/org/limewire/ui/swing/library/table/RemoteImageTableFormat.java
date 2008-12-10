@@ -26,7 +26,7 @@ public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRe
     public String getColumnName(int column) {
         switch(column) {
             case NAME_COL:
-                return I18n.tr("Name");
+                return I18n.tr("Filename");
             case SIZE_COL:
                 return I18n.tr("Size");
             case CREATED_COL:
