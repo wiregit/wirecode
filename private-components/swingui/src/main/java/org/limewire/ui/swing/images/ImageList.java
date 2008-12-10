@@ -61,18 +61,7 @@ public class ImageList extends JXList {
         setFixedCellWidth(imageBoxWidth + insetRight + insetLeft);
         
         //enable double click launching of image files.
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-                    ImageList imageList = (ImageList)e.getComponent();
-                    int index = imageList.locationToIndex(e.getPoint());
-                    LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
-                    File file = val.getFile();
-                    NativeLaunchUtils.launchFile(file);
-                }
-            } 
-        });
+        addMouseListener(new ImageDoubleClickMouseListener());
     }
     
     /**
@@ -115,5 +104,22 @@ public class ImageList extends JXList {
      */
     public ImageCellRenderer getImageCellRenderer() {
         return renderer;
+    }
+    
+    /**
+     * This class listens for double clicks inside of the ImageList.
+     * When a double click is detected, the relevant item in the list is launched.
+     */
+    private final class ImageDoubleClickMouseListener extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                ImageList imageList = (ImageList)e.getComponent();
+                int index = imageList.locationToIndex(e.getPoint());
+                LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
+                File file = val.getFile();
+                NativeLaunchUtils.launchFile(file);
+            }
+        }
     }
 }

@@ -81,14 +81,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         FontUtils.bold(headerLabel);
         
         
-        headerLabel.addMouseListener(new MouseAdapter() {
-           @Override
-            public void mouseClicked(MouseEvent e) {
-               if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-                   NativeLaunchUtils.launchExplorer(parentFolder);
-               }
-            } 
-        });
+        headerLabel.addMouseListener(new HeaderDoubleClickMouseListener(parentFolder));
         
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
@@ -152,6 +145,26 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         });
     }
     
+    /**
+     * This class listens for double clicks on the header item for each library sub panel.
+     * When a double click is detected it will explore the folder represented by this subpanel. 
+     */
+    private final class HeaderDoubleClickMouseListener extends MouseAdapter {
+        private final File parentFolder;
+
+        private HeaderDoubleClickMouseListener(File parentFolder) {
+            this.parentFolder = parentFolder;
+        }
+
+        @Override
+            public void mouseClicked(MouseEvent e) {
+               if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+                   NativeLaunchUtils.launchExplorer(parentFolder);
+               }
+            }
+    }
+
+
     public class MouseReaction implements MouseListener, MouseMotionListener {
 
         private ImageList imageList;
