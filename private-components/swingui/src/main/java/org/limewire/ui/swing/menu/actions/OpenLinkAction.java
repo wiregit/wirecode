@@ -25,8 +25,8 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.util.NotImplementedException;
 
 public class OpenLinkAction extends AbstractAction {
 

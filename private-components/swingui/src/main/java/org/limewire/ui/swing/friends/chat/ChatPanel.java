@@ -21,7 +21,7 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.ui.swing.util.NotImplementedException;
+import org.limewire.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;

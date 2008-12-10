@@ -26,8 +26,8 @@ import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;

@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import org.limewire.core.settings.URLHandlerSettings;
 import org.limewire.util.MediaType;
+import org.limewire.util.NotImplementedException;
 import org.limewire.util.OSUtils;
 import org.limewire.util.QuotedStringTokenizer;
 import org.limewire.util.StringUtils;

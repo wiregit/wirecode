@@ -14,7 +14,7 @@ import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.NotImplementedException;
+import org.limewire.util.NotImplementedException;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.browser.ExternalControl;

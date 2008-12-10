@@ -52,9 +52,9 @@ import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.NotImplementedException;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
+import org.limewire.util.NotImplementedException;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
 

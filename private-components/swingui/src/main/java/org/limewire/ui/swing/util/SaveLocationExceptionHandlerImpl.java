@@ -20,6 +20,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.util.FileUtils;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.util;
+package org.limewire.util;
 
 /** A simple exception for a feature that isn't supported. */
 public class NotImplementedException extends RuntimeException {

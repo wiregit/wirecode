@@ -35,6 +35,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
+import org.limewire.util.NotImplementedException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -804,8 +805,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         try {
             btMetaInfo = btMetaInfoFactory.createMetaInfo(torrentFile);
         } catch (IOException e) {
-            //TODO implement good user feedback
-            throw new UnsupportedOperationException("Need to implement good user feedback.");
+            throw new NotImplementedException("Need to implement good user feedback.");
         }
         return downloadTorrent(btMetaInfo, overwrite);
     }
