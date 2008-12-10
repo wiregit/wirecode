@@ -28,7 +28,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -37,11 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
-import javax.swing.Popup;
-import javax.swing.PopupFactory;
 import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -102,7 +97,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class ChatFriendListPane extends JPanel {
     
-    private static final Color MEDIUM_GRAY = new Color(183, 183, 183);
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     private static final int PREFERRED_WIDTH = 120;
@@ -121,9 +115,7 @@ public class ChatFriendListPane extends JPanel {
     private final ShareListManager libraryManager;
     private final LibraryNavigator libraryNavigator;
     private final JScrollPane scrollPane;
-    private final JLabel unseenMessageCountPopupLabel = new JLabel();
-    
-    private Popup unseenMessageCountPopup;
+
     private String myID;
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
@@ -147,12 +139,6 @@ public class ChatFriendListPane extends JPanel {
         addPopupMenus(friendsTable);
         
         scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.getViewport().addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                showUnseenMessageCountPopup();
-            }
-        });
         add(scrollPane);
         setPreferredSize(new Dimension(PREFERRED_WIDTH, 200));
         
@@ -377,7 +363,6 @@ public class ChatFriendListPane extends JPanel {
                 friendTimerMap.put(chatFriend, iconTimer);
                 iconTimer.start();
             }
-            showUnseenMessageCountPopup();
         }
     }
 
@@ -892,32 +877,5 @@ public class ChatFriendListPane extends JPanel {
 
     private void setTableCursor(boolean useHandCursor) {
         friendsTable.setCursor(useHandCursor ? HAND_CURSOR : DEFAULT_CURSOR);
-    }
-
-    private void showUnseenMessageCountPopup() {
-        if (unseenMessageCountPopup != null) {
-            unseenMessageCountPopup.hide();
-        }
-
-        int firstVisibleRow = friendsTable.rowAtPoint(new Point(0, scrollPane.getViewport().getViewRect().y));
-        int unseenMessageFriendsCount = 0;
-        EventTableModel model = (EventTableModel) friendsTable.getModel();
-        for(int row = 0; row < firstVisibleRow; row++) {
-            ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
-            if (chatFriend.isReceivingUnviewedMessages()) {
-                unseenMessageFriendsCount++;
-            }
-        }
-        
-        if (unseenMessageFriendsCount > 0) {
-            Point location = scrollPane.getLocationOnScreen();
-            unseenMessageCountPopupLabel.setText("+" + Integer.toString(unseenMessageFriendsCount));
-            unseenMessageCountPopupLabel.setBackground(MEDIUM_GRAY);
-            int popupX = location.x + (scrollPane.getWidth() / 2);
-            int popupY = location.y + 5;
-            PopupFactory factory = PopupFactory.getSharedInstance();
-            unseenMessageCountPopup = factory.getPopup(friendsTable, unseenMessageCountPopupLabel, popupX, popupY);
-            unseenMessageCountPopup.show();
-        }
     }
 }
