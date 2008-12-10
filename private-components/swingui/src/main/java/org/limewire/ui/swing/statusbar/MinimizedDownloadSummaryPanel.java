@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 public class MinimizedDownloadSummaryPanel extends JPanel{
     
     private DownloadSummaryPanel downloadSummaryPanel;
+    private JButton showButton;
 
     @Inject
     public MinimizedDownloadSummaryPanel(final DownloadSummaryPanel downloadSummaryPanel){
@@ -37,7 +38,7 @@ public class MinimizedDownloadSummaryPanel extends JPanel{
     }
     
     private JButton createShowButton() {
-        JButton showButton = new JXHyperlink();
+        showButton = new JXHyperlink();
         showButton.setText(I18n.tr("Downloads"));
         showButton.addActionListener(new ActionListener() {
 
@@ -51,6 +52,9 @@ public class MinimizedDownloadSummaryPanel extends JPanel{
     
     public void maybeSetVisible(boolean visible) {
         setVisible(downloadSummaryPanel.getDownloadCount() > 0 && visible);
+        if(isVisible()){
+            showButton.setText(I18n.tr("Downloads ({0})", downloadSummaryPanel.getDownloadCount()));
+        }
     }
 
 }
