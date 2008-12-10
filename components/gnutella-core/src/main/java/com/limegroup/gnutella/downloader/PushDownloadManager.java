@@ -927,7 +927,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     public boolean canConnect(Address address) {
         int fwtVersion = getFWTVersion(address);
         if (fwtVersion == -1) {
-            LOG.debug("cannot connect: remote address " + address + " cannot do fwt");
+            LOG.debugf("cannot connect: remote address {0} cannot do fwt", address);
             return false;
         }
         if (hasValidLocalAddress()) {
@@ -943,7 +943,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         } else {
             LOG.debug(" can not connect: no local valid address");
         }
-        LOG.debugf("can't connect to {0}, local fwt {1}", address, networkManager.canDoFWT());
+        LOG.debugf("cannot connect to {0}, local fwt {1}", address, networkManager.canDoFWT());
         return false;
     }
     
