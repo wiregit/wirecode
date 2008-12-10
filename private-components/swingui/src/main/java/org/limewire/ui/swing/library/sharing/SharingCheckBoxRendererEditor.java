@@ -14,8 +14,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.limewire.core.api.Category;
+import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.settings.LibrarySettings;
 
 public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCellRenderer, TableCellEditor {
 
@@ -27,7 +30,6 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     
     public SharingCheckBoxRendererEditor(final LocalFileList localFileList, final JTable table) {
         this.localFileList = localFileList;
-        
         addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -49,7 +51,7 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
             boolean hasFocus, int row, int column) {
 
         LocalFileItem fileItem = (LocalFileItem) value;
-        setSelected(localFileList.contains(fileItem.getUrn()));
+        updateCheckbox(fileItem);
         
         return this;
     }
@@ -58,9 +60,21 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
         currentItem = (LocalFileItem) value;
-        setSelected(localFileList.contains(currentItem.getUrn()));
-               
+        updateCheckbox(currentItem);
         return this;
+    }
+    
+    private void updateCheckbox(LocalFileItem fileItem) {
+        if(fileItem.getCategory() == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            setEnabled(false);
+            setSelected(false);
+        } else if(fileItem.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() && GnutellaFileList.class.isInstance(localFileList)) {
+            setEnabled(false);
+            setSelected(false);
+        } else {
+            setSelected(localFileList.contains(fileItem.getUrn()));
+            setEnabled(true);    
+        }
     }
 
     @Override

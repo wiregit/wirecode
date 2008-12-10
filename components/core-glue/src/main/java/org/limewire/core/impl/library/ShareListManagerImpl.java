@@ -15,6 +15,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.FriendShareListEvent;
+import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
@@ -44,7 +45,7 @@ class ShareListManagerImpl implements ShareListManager {
     
     private final CombinedShareList combinedShareList;
     
-    private final GnutellaFileList gnutellaFileList;    
+    private final GnutellaFileListImpl gnutellaFileList;    
     
     private final ConcurrentHashMap<String, FriendFileListImpl> friendLocalFileLists;
 
@@ -60,7 +61,7 @@ class ShareListManagerImpl implements ShareListManager {
         this.coreLocalFileItemFactory = coreLocalFileItemFactory;
         this.friendShareListEventListener = friendShareListEventListener;
         this.combinedShareList = new CombinedShareList();
-        this.gnutellaFileList = new GnutellaFileList(fileManager.getGnutellaFileList());
+        this.gnutellaFileList = new GnutellaFileListImpl(fileManager.getGnutellaFileList());
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
     }
 
@@ -107,12 +108,12 @@ class ShareListManagerImpl implements ShareListManager {
         }
     }
     
-    private class GnutellaFileList extends LocalFileListImpl implements FriendFileList {
+    private class GnutellaFileListImpl extends LocalFileListImpl implements GnutellaFileList {
         private final com.limegroup.gnutella.library.GnutellaFileList shareList;
 
         private final PropertyChangeSupport propertyChange = new PropertyChangeSupport(this);
         
-        public GnutellaFileList(com.limegroup.gnutella.library.GnutellaFileList shareList) {
+        public GnutellaFileListImpl(com.limegroup.gnutella.library.GnutellaFileList shareList) {
             super(combinedShareList.createMemberList(), coreLocalFileItemFactory);            
             this.shareList = shareList;
             this.shareList.addFileListListener(newEventListener());
