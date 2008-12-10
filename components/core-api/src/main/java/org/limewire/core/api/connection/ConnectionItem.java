@@ -48,6 +48,8 @@ public interface ConnectionItem {
     
     public int getNumSentMessagesDropped();
     
+    public int getPort();
+    
     public int getQueryRouteTableEmptyUnits();
     
     public double getQueryRouteTablePercentFull();

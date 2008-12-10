@@ -121,6 +121,11 @@ public class CoreConnectionItem implements ConnectionItem {
     }
     
     @Override
+    public int getPort() {
+        return routedConnection.getPort();
+    }
+    
+    @Override
     public int getQueryRouteTableEmptyUnits() {
         return routedConnection.getRoutedConnectionStatistics().getQueryRouteTableEmptyUnits();
     }

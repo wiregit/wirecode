@@ -67,6 +67,11 @@ public class MockConnectionItem implements ConnectionItem {
     public int getNumSentMessagesDropped() {
         return 0;
     }
+    
+    @Override
+    public int getPort() {
+        return 0;
+    }
 
     @Override
     public int getQueryRouteTableEmptyUnits() {
