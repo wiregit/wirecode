@@ -474,6 +474,8 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * read, connect, or write.
      */
     public final void handleIOException(IOException iox) {
+        if (LOG.isDebugEnabled())
+            LOG.debug(this, iox);
         shutdown();
     }
     
