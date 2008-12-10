@@ -36,7 +36,6 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private JLabel friendsLabel;
     private HyperLinkButton shareButton;
     private LocalFileItem fileItem;
-    
     public ShareTableRendererEditor(Action shareAction){
         GuiUtils.assignResources(this);
        
@@ -64,14 +63,14 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         configure((LocalFileItem)value, isSelected);
         return this;
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
         configure((LocalFileItem)value, true);
         return this;

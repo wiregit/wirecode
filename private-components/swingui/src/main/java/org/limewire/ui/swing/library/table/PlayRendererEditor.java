@@ -91,14 +91,14 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         update(value);
         return this;
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
         file = update(value);
         return this;

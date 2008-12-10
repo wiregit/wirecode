@@ -40,6 +40,7 @@ import org.limewire.ui.swing.library.sharing.LibrarySharePanel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
+import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -58,7 +59,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable implements 
     private final EventList<T> listSelection;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     
-    private ShareTableRendererEditor shareEditor;
+    private TableRendererEditor shareEditor;
     private LibrarySharePanel librarySharePanel;
     
     protected final int rowHeight = 20;

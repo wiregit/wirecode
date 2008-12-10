@@ -54,14 +54,14 @@ public class SharingCheckBoxEditor extends TableRendererEditor implements Config
     }
 
     @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
         configure((LocalFileItem)value, isSelected);
         return this;
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
+    public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
         configure((LocalFileItem)value, isSelected);
         return this;
