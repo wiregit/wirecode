@@ -41,4 +41,9 @@ public class LibraryChangedIQ extends IQ {
             return new LibraryChangedIQ(parser);
         }
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " from: " + getFrom();
+    }
 }

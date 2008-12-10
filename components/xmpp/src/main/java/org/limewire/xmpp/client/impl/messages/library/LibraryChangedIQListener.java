@@ -2,8 +2,6 @@ package org.limewire.xmpp.client.impl.messages.library;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
@@ -11,6 +9,8 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.listener.EventBroadcaster;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.api.client.LibraryChanged;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.User;
@@ -18,6 +18,7 @@ import org.limewire.xmpp.api.client.XMPPConnection;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class LibraryChangedIQListener implements PacketListener {
+    
     private static final Log LOG = LogFactory.getLog(LibraryChangedIQListener.class);
 
     private final EventBroadcaster<LibraryChangedEvent> libChangedBroadcaster;
@@ -37,6 +38,7 @@ public class LibraryChangedIQListener implements PacketListener {
             } else if(iq.getType().equals(IQ.Type.RESULT)) {
                 //handleResult(iq);
             } else if(iq.getType().equals(IQ.Type.SET)) {
+                LOG.debugf("received iq {0}", packet);
                 handleSet(iq);
             } else if(iq.getType().equals(IQ.Type.ERROR)) {
                 //handleError(iq);
