@@ -203,7 +203,7 @@ public class ConnectionTableFormat implements TableFormat<ConnectionItem> {
                 && ((System.currentTimeMillis() - connectionItem.getTime()) > 10000)) {
                      assignHostName(connectionItem);
             }
-            return connectionItem.getHostName();
+            return connectionItem.getHostName() + ":" + connectionItem.getPort();
 
         case STATUS_IDX:
             return getStatusText(connectionItem);
