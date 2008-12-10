@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import org.limewire.util.StringUtils;
+
 /** A default implementation of Connectable. */
 public class ConnectableImpl implements Connectable {
 
@@ -80,7 +82,7 @@ public class ConnectableImpl implements Connectable {
     
     @Override
     public String toString() {
-        return ipPort + ", tlsCapable: " + tlsCapable;
+        return StringUtils.toStringBlacklist(this, hashCode, INVALID_CONNECTABLE);
     }
     
     @Override
