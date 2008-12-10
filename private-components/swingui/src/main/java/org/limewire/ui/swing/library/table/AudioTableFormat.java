@@ -8,20 +8,23 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertyUtils;
+import org.limewire.util.FileUtils;
 
 /**
  * Table format for the Audio Table when it is in My Library
  */
 public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int ARTIST_COL = NAME_COL + 1;
+    public static final int PLAY_COL = 0;
+    public static final int TITLE_COL = PLAY_COL + 1;
+    public static final int ARTIST_COL = TITLE_COL + 1;
     public static final int ALBUM_COL = ARTIST_COL + 1;
     public static final int LENGTH_COL = ALBUM_COL + 1;
     public static final int GENRE_COL = LENGTH_COL + 1;
     public static final int BITRATE_COL = GENRE_COL + 1;
     public static final int SIZE_COL = BITRATE_COL + 1;
-    public static final int FILE_COL = SIZE_COL + 1;
-    public static final int TRACK_COL = FILE_COL + 1;
+    public static final int FILENAME_COL = SIZE_COL + 1;
+    public static final int EXTENSION_COL = FILENAME_COL + 1;
+    public static final int TRACK_COL = EXTENSION_COL + 1;
     public static final int YEAR_COL = TRACK_COL + 1;
     public static final int MODIFIED_COL = YEAR_COL + 1;
     public static final int ACTION_COL = MODIFIED_COL + 1;
@@ -34,8 +37,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     public String getColumnName(int column) {
         switch (column) {
-        case NAME_COL:
-            return I18n.tr("Name");
+        case PLAY_COL:
+            return "";
+        case TITLE_COL:
+            return I18n.tr("Title");
         case ARTIST_COL:
             return I18n.tr("Artist");
         case ALBUM_COL:
@@ -48,8 +53,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return I18n.tr("Bitrate");
         case SIZE_COL:
             return I18n.tr("Size");
-        case FILE_COL:
-            return I18n.tr("File Name");
+        case FILENAME_COL:
+            return I18n.tr("Name");
+        case EXTENSION_COL:
+            return I18n.tr("Extension");
         case TRACK_COL:
             return I18n.tr("Track");
         case YEAR_COL:
@@ -65,8 +72,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch (column) {
-        case NAME_COL:
+        case PLAY_COL:
             return baseObject;
+        case TITLE_COL:
+            return baseObject.getProperty(FilePropertyKey.TITLE);
         case ARTIST_COL:
             return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_COL:
@@ -77,8 +86,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
             return baseObject.getProperty(FilePropertyKey.GENRE);
         case BITRATE_COL:
             return baseObject.getProperty(FilePropertyKey.BITRATE);
-        case FILE_COL:
-            return baseObject.getFileName();
+        case FILENAME_COL:
+            return baseObject.getProperty(FilePropertyKey.NAME);
+        case EXTENSION_COL:
+            return FileUtils.getFileExtension(baseObject.getFile());
         case SIZE_COL:
             return baseObject.getSize();
         case TRACK_COL:
@@ -100,12 +111,12 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] {MODIFIED_COL, YEAR_COL, TRACK_COL, FILE_COL, SIZE_COL, BITRATE_COL};
+        return new int[] {MODIFIED_COL, YEAR_COL, TRACK_COL, EXTENSION_COL, FILENAME_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
     }
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == NAME_COL || column == ACTION_COL;
+        return column == PLAY_COL || column == ACTION_COL;
     }
 
     @Override
@@ -117,7 +128,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public Class getColumnClass(int column) {
         switch (column) {
             case ACTION_COL:
-            case NAME_COL:
+            case PLAY_COL:
                 return FileItem.class;
         }
         return super.getColumnClass(column);
@@ -126,7 +137,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     @Override
     public Comparator getColumnComparator(int column) {
         switch (column) {
-            case NAME_COL:
+            case PLAY_COL:
                 return new NameComparator();
             case ACTION_COL:
                 return new ActionComparator();

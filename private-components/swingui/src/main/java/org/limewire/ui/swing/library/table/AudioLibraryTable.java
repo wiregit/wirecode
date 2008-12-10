@@ -13,8 +13,9 @@ public class AudioLibraryTable<T extends LocalFileItem> extends LibraryTable<T> 
     public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player, SaveLocationExceptionHandler saveLocationExceptionHandler) {
         super(libraryItems, new AudioTableFormat<T>(), saveLocationExceptionHandler);
         
-        getColumnModel().getColumn(AudioTableFormat.NAME_COL).setCellEditor(new PlayRendererEditor(this, player));
-        getColumnModel().getColumn(AudioTableFormat.NAME_COL).setCellRenderer(new PlayRendererEditor(this, player));
+        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(new PlayRendererEditor(this, player));
+        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor(this, player));
+        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(20);
     }
     
     @Override

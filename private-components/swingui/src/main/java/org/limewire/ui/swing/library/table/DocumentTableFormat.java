@@ -8,18 +8,20 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.util.FileUtils;
 
 /**
  * Table format for the Document Table when it is in My Library
  */
-public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFormat<T> {
+public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
     public static final int NAME_COL = 0;
     public static final int TYPE_COL = NAME_COL + 1;
 	public static final int CREATED_COL = TYPE_COL + 1;
 	public static final int SIZE_COL = CREATED_COL + 1;
 	public static final int AUTHOR_COL = SIZE_COL + 1;
 	public static final int MODIFIED_COL = AUTHOR_COL + 1;
-	public static final int ACTION_COL = MODIFIED_COL + 1;
+	public static final int EXTENSION_COL = MODIFIED_COL + 1;
+	public static final int ACTION_COL = EXTENSION_COL + 1;
 	private static final int COLUMN_COUNT = ACTION_COL + 1;
 
 	/** Icon manager used to find native file type information. */
@@ -54,6 +56,8 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
              return I18n.tr("Modified");
          case NAME_COL:
              return I18n.tr("Name");
+         case EXTENSION_COL:
+             return I18n.tr("Extension");
          case ACTION_COL:
              return I18n.tr("Sharing");
          case SIZE_COL:
@@ -75,10 +79,11 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
              return (creationTime >= 0) ? new Date(creationTime) : null;
          case MODIFIED_COL:
              // Return last modified time. 
-             return (baseObject instanceof LocalFileItem) ?
-                 new Date(((LocalFileItem) baseObject).getLastModifiedTime()) : null;
+             return new Date(((LocalFileItem) baseObject).getLastModifiedTime());
          case NAME_COL:
              return baseObject;
+         case EXTENSION_COL:
+             return FileUtils.getFileExtension(baseObject.getFile());
          case ACTION_COL:
              return baseObject;
          case SIZE_COL:
@@ -99,7 +104,7 @@ public class DocumentTableFormat<T extends FileItem> extends AbstractMyLibraryFo
 
     @Override
     public int[] getDefaultHiddenColums() {
-        return new int[] {AUTHOR_COL, SIZE_COL, CREATED_COL};
+        return new int[] {EXTENSION_COL, AUTHOR_COL, SIZE_COL, CREATED_COL};
     }
 
     @Override

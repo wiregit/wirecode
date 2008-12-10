@@ -48,7 +48,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
         this.table = table;
         this.player = player;
         
-        setLayout(new MigLayout("aligny 50%, hidemode 3"));
+        setLayout(new MigLayout("insets 1, aligny 50%, hidemode 3"));
         
         playButton = new JToggleButton();
         playButton.setIcon(playIcon);
@@ -85,7 +85,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
         label = new JLabel();
         
         add(playButton);
-        add(label, "growx, wmin 10");
+//        add(label, "growx, wmin 10");
         
         player.addAudioPlayerListener(this);
     }
