@@ -288,8 +288,8 @@ public abstract class Dialog extends LimeJDialog {
         details.add(newSmallLabel(TRACK), "wrap");
         details.add(album, "growx");
         details.add(genre);
-        details.add(year);
-        details.add(track, "wrap");
+        details.add(year, "wmin 60");
+        details.add(track, "wrap, wmin 40");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
         
