@@ -222,7 +222,7 @@ public abstract class Dialog extends LimeJDialog {
     protected abstract void commit();
 
     protected void addHashMetadata(URN hash, Map<String, String> metadata) {
-        addMetadata(HASH, hash.toString(), metadata);
+        addMetadata(HASH, (hash != null) ? hash.toString() : null, metadata);
     }
 
     protected void addDateCreatedMetadata(String dateCreated, Map<String, String> metadata) {
