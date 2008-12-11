@@ -17,6 +17,9 @@ import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -27,10 +30,15 @@ import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+/**
+ * The search bar component at the top of the UI main window.  This includes
+ * the drop-down search category box, search input field, and search button.
+ */
 @Singleton
 public class SearchBar extends JXPanel {
 
@@ -91,6 +99,7 @@ public class SearchBar extends JXPanel {
         this.searchButton = new IconButton();
         this.searchButton.setName("SearchBar.searchButton");
         this.searchButton.setFocusPainted(false);
+        this.searchButton.setToolTipText(I18n.tr("Search P2P Network"));
         
         this.assertProgramCategory();
         
@@ -123,6 +132,29 @@ public class SearchBar extends JXPanel {
             public void settingChanged(SettingEvent evt) {
                 assertProgramCategory();
             }            
+        });
+    }
+    
+    /**
+     * Performs additional Guice injection tasks.  This method adds a listener
+     * to handle XMPP connection events.
+     */
+    @Inject
+    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                System.out.println(event);
+                switch (event.getType()) {
+                case CONNECTED:
+                    searchButton.setToolTipText(I18n.tr("Search P2P Network and Friends"));
+                    break;
+                default:
+                    searchButton.setToolTipText(I18n.tr("Search P2P Network"));
+                    break;
+                }
+            }
         });
     }
     
