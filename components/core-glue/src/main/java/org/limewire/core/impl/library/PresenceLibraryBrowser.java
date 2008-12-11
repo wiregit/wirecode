@@ -1,14 +1,18 @@
 package org.limewire.core.impl.library;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import net.jcip.annotations.GuardedBy;
 
 import org.limewire.collection.glazedlists.AbstractListEventListener;
+import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.browse.BrowseFactory;
 import org.limewire.core.api.browse.BrowseListener;
-import org.limewire.core.api.browse.Browse;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.library.FriendLibrary;
@@ -27,14 +31,15 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectivityChangeEvent;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.XMPPAddress;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 @Singleton
 class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
@@ -50,9 +55,22 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * Keeps track of libraries that could not be browsed yet, because the local peer didn't have
      * enough connection capabilities.
      */
-    private final List<PresenceLibrary> librariesToBrowse = Collections.synchronizedList(new ArrayList<PresenceLibrary>());
+    private final Set<PresenceLibrary> librariesToBrowse = Collections.synchronizedSet(new HashSet<PresenceLibrary>());
 
     private final XMPPRemoteFileDescDeserializer remoteFileDescDeserializer;
+    
+    /**
+     * Is incremented when a new connectivity change event is received, should
+     * only be modified holding the lock to {@link #librariesToBrowse}.
+     * 
+     * When address resolution fails, the revision that was used when resolution is started
+     * can be compared to the latest revision to see if the client's connectivity
+     * has changed in the meantime and resolution should be retried.
+     * 
+     * Still volatile, so it can be read without a lock.
+     */
+    @GuardedBy("librariesToBrowse")
+    private volatile int latestConnectivityEventRevision = 0;
 
     @Inject
     public PresenceLibraryBrowser(BrowseFactory browseFactory, RemoteLibraryManagerImpl remoteLibraryManager,
@@ -84,19 +102,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                         
                         new AbstractListEventListener<PresenceLibrary>() {
                             protected void itemAdded(PresenceLibrary presenceLibrary) {
-                                FriendPresence friendPresence = presenceLibrary.getPresence();
-                                AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
-                                if(addressFeature != null) {
-                                    Address address = addressFeature.getFeature();
-                                    synchronized (librariesToBrowse) {
-                                        if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                                            browse(presenceLibrary, friendPresence);
-                                        } else {
-                                            presenceLibrary.setState(LibraryState.LOADING);
-                                            librariesToBrowse.add(presenceLibrary);
-                                        }
-                                    }
-                                }
+                                tryToResolveAndBrowse(presenceLibrary, latestConnectivityEventRevision);
                             }
 
                             protected void itemRemoved(PresenceLibrary item) {
@@ -113,8 +119,9 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
         });
     }
 
-    private void browse(final PresenceLibrary presenceLibrary, final FriendPresence friendPresence) {
+    private void browse(final PresenceLibrary presenceLibrary) {
         presenceLibrary.setState(LibraryState.LOADING);
+        final FriendPresence friendPresence = presenceLibrary.getPresence();
         LOG.debugf("browsing {0} ...", friendPresence.getPresenceId());
         final Browse browse = browseFactory.createBrowse(friendPresence);
         AddressFeature addressFeature = ((AddressFeature)friendPresence.getFeature(AddressFeature.ID));
@@ -145,11 +152,85 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                     presenceLibrary.setState(LibraryState.LOADED);
                 } else {
                     presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
-                    librariesToBrowse.add(presenceLibrary);
                     LOG.debugf("browse failed: {0}", presenceLibrary);
                 }
             }
         });
+    }
+    
+    /**
+     * Tries to resolve the address of <code>presenceLibrary<code> and browse it
+     * after successful resolution and/or if it can connect to the address. Otherwise,
+     * it handle the failure by calling {@link #handleFailedResolution(PresenceLibrary, int)}.
+     * 
+     * @param presenceLibrary the presence library whose address should be resolved
+     * and browsed
+     * @param startConnectivityRevision the revisions of {@link #latestConnectivityEventRevision}
+     * when this method is called
+     */
+    private void tryToResolveAndBrowse(final PresenceLibrary presenceLibrary, final int startConnectivityRevision) {
+        presenceLibrary.setState(LibraryState.LOADING);
+        final FriendPresence friendPresence = presenceLibrary.getPresence();
+        AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
+        if (addressFeature == null) {
+            LOG.debug("no address feature");
+            handleFailedResolution(presenceLibrary, startConnectivityRevision);
+            return;
+        }
+        Address address = addressFeature.getFeature();
+        if (socketsManager.canResolve(address)) {
+            socketsManager.resolve(address, new AddressResolutionObserver() {
+                @Override
+                public void resolved(Address address) {
+                    if (socketsManager.canConnect(address)) {
+                        LOG.debugf("resolved {0} for {1} and can connect", address, friendPresence);
+                        browse(presenceLibrary);
+                    } else {
+                        LOG.debugf("resolved {0} for {1} and cannot connect", address, friendPresence);
+                        handleFailedResolution(presenceLibrary, startConnectivityRevision);
+                    }
+                }
+                @Override
+                public void handleIOException(IOException iox) {
+                    LOG.debug("resolve error", iox);
+                    handleFailedResolution(presenceLibrary, startConnectivityRevision);
+                }
+                @Override
+                public void shutdown() {
+                }
+            });
+        } else if (socketsManager.canConnect(address)) {
+            browse(presenceLibrary);
+        } else {
+            handleFailedResolution(presenceLibrary, startConnectivityRevision);
+        }
+    }
+ 
+    /**
+     * Called when resolution failed.
+     * 
+     * If {@link #latestConnectivityEventRevision} is greater then <code>startRevision</code>,
+     * a new attempt at resolving the presence address is started, otherwise <code>presenceLibrary</code>
+     * is queued up in libraries to browse.
+     * 
+     * @param presenceLibrary the library that could not be browsed
+     * @param startRevision the revision under which the address resolution attempt
+     * was started
+     */
+    private void handleFailedResolution(PresenceLibrary presenceLibrary, int startRevision) {
+        boolean retry;
+        synchronized (librariesToBrowse) {
+            retry = latestConnectivityEventRevision > startRevision;
+            if (!retry) {
+                assert(librariesToBrowse.add(presenceLibrary));
+            } else {
+                // copy value under lock
+                startRevision = latestConnectivityEventRevision;
+            }
+        }
+        if (retry) {
+            tryToResolveAndBrowse(presenceLibrary, startRevision);
+        }
     }
     
     /**
@@ -158,28 +239,24 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      */
     private class ConnectivityChangeListener implements EventListener<ConnectivityChangeEvent> {
 
+        /**
+         * Increments the {@link PresenceLibraryBrowser#latestConnectivityEventRevision}
+         * copies and empties {@link PresenceLibraryBrowser#librariesToBrowse} and
+         * tries calls {@link PresenceLibraryBrowser#tryToResolveAndBrowse(PresenceLibrary, int)}
+         * for each with the new revision.
+         */
         @Override
         public void handleEvent(ConnectivityChangeEvent event) {
             LOG.debug("connectivity change");
-            remoteLibraryManager.getReadWriteLock().writeLock().lock(); 
-            try {
-                synchronized (librariesToBrowse) {
-                    // calls in here need to be non-blocking 
-                    for (Iterator<PresenceLibrary> i = librariesToBrowse.iterator(); i.hasNext();) {
-                        PresenceLibrary presenceLibrary = i.next();
-                        FriendPresence friendPresence = presenceLibrary.getPresence();
-                        AddressFeature addressFeature = (AddressFeature)friendPresence.getFeature(AddressFeature.ID);
-                        if(addressFeature != null) {
-                            Address address = addressFeature.getFeature();
-                            if (socketsManager.canConnect(address) || socketsManager.canResolve(address)) {
-                                i.remove();
-                                browse(presenceLibrary, friendPresence);
-                            }
-                        }
-                    }
-                }
-            } finally {
-                remoteLibraryManager.getReadWriteLock().writeLock().unlock();
+            List<PresenceLibrary> copy;
+            int currentRevision;
+            synchronized (librariesToBrowse) {
+                currentRevision = ++latestConnectivityEventRevision;
+                copy = new ArrayList<PresenceLibrary>(librariesToBrowse);
+                librariesToBrowse.clear();
+            }
+            for (PresenceLibrary library : copy) {
+                tryToResolveAndBrowse(library, currentRevision);
             }
         }
     }
