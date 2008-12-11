@@ -90,6 +90,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeNav = navigator.createNavItem(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel);      
         JButton homeButton = new IconButton(NavigatorUtils.getNavAction(homeNav));
         homeButton.setName("WireframeTop.homeButton");
+        homeButton.setToolTipText(I18n.tr("Home"));
         homeButton.setText(null);
         homeButton.setIconTextGap(1);
         homeButton.addActionListener(new ActionListener() {
@@ -107,6 +108,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             storeButton = new IconButton();
         }
         storeButton.setName("WireframeTop.storeButton");
+        storeButton.setToolTipText(I18n.tr("LimeWire Store"));
         storeButton.setText(null);
         storeButton.setIconTextGap(1);
         storeButton.addActionListener(new ActionListener() {
@@ -130,12 +132,15 @@ class TopPanel extends JXPanel implements SearchNavigator {
             public void visibilityChanged(boolean visible) {
                 if(!visible) {
                     libraryButton.setIcon(libraryExpandIcon);
+                    libraryButton.setToolTipText(I18n.tr("Show Sidebar"));
                 } else {
                     libraryButton.setIcon(libraryCollapseIcon);
+                    libraryButton.setToolTipText(I18n.tr("Hide Sidebar"));
                 }
             }
         });
         libraryButton.setIcon(libraryCollapseIcon);
+        libraryButton.setToolTipText(I18n.tr("Hide Sidebar"));
         
         searchList = fancyTabListFactory.create();
         searchList.setName("WireframeTop.SearchList");
@@ -258,6 +263,10 @@ class TopPanel extends JXPanel implements SearchNavigator {
             }
         };
     }
+
+    public void goHome() {
+        homeNav.select();
+    }
     
     private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
@@ -331,9 +340,5 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
             });
         }
-    }
-
-    public void goHome() {
-        homeNav.select();
     }
 }
