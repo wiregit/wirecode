@@ -68,7 +68,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
             label.setIcon(iconManager.getIconForExtension(vsr.getFileExtension()));
 
             setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
-        } else {
+        } else if (value != null) {
             throw new IllegalArgumentException(value + " must be a FileItem or VisualSearchResult");
         }
         
