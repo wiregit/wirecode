@@ -1,25 +1,25 @@
 package org.limewire.ui.swing.action;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
-import org.limewire.xmpp.api.client.Presence.Mode;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.friends.login.FriendActions;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
-
+import org.limewire.xmpp.api.client.Presence.Mode;
 
 import com.google.inject.Inject;
 
@@ -28,22 +28,25 @@ import com.google.inject.Inject;
  * the users. These items are backed by a button group and JCheckBoxMenuItems
  */
 public class StatusActions {
+
     private final JCheckBoxMenuItem available;
 
     private final JCheckBoxMenuItem dnd;
 
     @Inject
-    public StatusActions(final XMPPService xmppService) {
-        available = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Available")) {
+    public StatusActions(final XMPPService xmppService, final IconLibrary iconLibrary) {
+        available = new JCheckBoxMenuItem(I18n.tr("Available"), iconLibrary.getAvailable());
+
+        available.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 xmppService.setMode(Mode.available);
                 XMPPSettings.XMPP_DO_NOT_DISTURB.setValue(false);
-
             }
         });
         available.setEnabled(false);
-        dnd = new JCheckBoxMenuItem(new AbstractAction(I18n.tr("Do Not Disturb")) {
+        dnd = new JCheckBoxMenuItem(I18n.tr("Do Not Disturb"), iconLibrary.getDoNotDisturb());
+        dnd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 xmppService.setMode(Mode.dnd);
@@ -51,6 +54,7 @@ public class StatusActions {
             }
         });
         dnd.setEnabled(false);
+        
         ButtonGroup group = new ButtonGroup();
         group.add(available);
         group.add(dnd);
