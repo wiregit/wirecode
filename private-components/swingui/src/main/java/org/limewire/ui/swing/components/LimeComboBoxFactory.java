@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 
 
 /**
- * Factory (and decorator for extending LimeComboBox) that creates the three
+ * Factory (and decorator used when extending LimeComboBox) that creates the three
  *  types of of "combo boxes" we use in the limewire ui.
  *  
  *  Types:
@@ -36,6 +36,8 @@ import com.google.inject.Singleton;
  *    Light - Use a ligher colour sheme.  These are usually found ontop of 
  *                        lightly coloured panels.  In this case mostly 
  *                        the top search bar
+ *                        
+ *                        
  *                        
  *  
  */
