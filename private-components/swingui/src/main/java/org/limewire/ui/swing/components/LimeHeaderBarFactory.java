@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 
+import javax.swing.JLabel;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.painter.BarPainterFactory;
@@ -49,7 +51,7 @@ public class LimeHeaderBarFactory {
     }
 
     public LimeHeaderBar createSpecial(String text) {
-        LimeHeaderBar bar = new LimeHeaderBar(text);
+        LimeHeaderBar bar = new LimeHeaderBar(new JLabel(text));
         this.decorateSpecial(bar);
         return bar;
     }
