@@ -6,6 +6,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.FilterList;
@@ -21,6 +22,11 @@ class LibraryPanel extends AbstractFileListPanel {
     @Override
     protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
         return headerBarFactory.createBasic();
+    }
+    
+    @Override
+    protected LimePromptTextField createFilterField(String prompt) {
+        return new LimePromptTextField(prompt);
     }
     
     @Override

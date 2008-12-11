@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.painter;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 
@@ -14,12 +15,20 @@ import org.limewire.util.NotImplementedException;
 
 public class ProgressBarForegroundPainter<X extends JComponent> extends AbstractPainter<X> {
     
+    private final boolean drawHandle;
+    
     private Paint foreground;
     private Paint disabledForeground;
 
     private int heightCache = 0;
     
     public ProgressBarForegroundPainter(Paint foreground, Paint disabledForeground) {
+        this(foreground, disabledForeground, false);
+    }
+    
+    public ProgressBarForegroundPainter(Paint foreground, Paint disabledForeground, boolean drawHandle) {
+        
+        this.drawHandle = drawHandle;
         
         this.foreground = foreground;
         this.disabledForeground = disabledForeground;
@@ -37,7 +46,7 @@ public class ProgressBarForegroundPainter<X extends JComponent> extends Abstract
             this.disabledForeground = PaintUtils.resizeGradient(this.disabledForeground, 0, height-2);
         }
         
-        int progress = (int) (width * getPercentComplete(object));
+        int progress = (int) ((width-3) * getPercentComplete(object));
                         
         if (object.isEnabled()) {
             g.setPaint(this.foreground);
@@ -46,8 +55,15 @@ public class ProgressBarForegroundPainter<X extends JComponent> extends Abstract
             g.setPaint(this.disabledForeground);
         }
         
-        g.fillRect(1, 1, progress-2, height-2);
+        g.fillRect(1, 1, progress, height-2);
         
+        if (drawHandle && object.getMousePosition() != null) {
+            if (progress == 0) {
+                progress++;
+            }
+            g.setPaint(Color.WHITE);
+            g.fillRect(progress, 0, 2, height);
+        }
     }
     
     /**

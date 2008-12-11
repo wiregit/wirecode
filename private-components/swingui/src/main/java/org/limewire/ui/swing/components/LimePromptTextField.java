@@ -68,6 +68,14 @@ public class LimePromptTextField extends JTextField implements FocusListener {
         this.init();
     }
     
+    
+    public LimePromptTextField(String promptText, AccentType accentType) {
+        this.promptText = promptText;
+        this.accentType = accentType;
+        
+        init();
+    }
+    
     public LimePromptTextField(String promptText, AccentType accentType, Paint border) {
         this.promptText = promptText;
         this.accentType = accentType;

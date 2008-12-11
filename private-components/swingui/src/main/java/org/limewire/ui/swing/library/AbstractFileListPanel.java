@@ -35,6 +35,7 @@ import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.components.Line;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -72,7 +73,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         setLayout(new MigLayout("fill, gap 0, insets 0", "[][][grow]", "[][grow]"));
 
         cardPanel.setLayout(cardLayout);              
-        filterField = new LimePromptTextField(I18n.tr("Search Library..."));
+        filterField = createFilterField(I18n.tr("Search Library..."));
         headerPanel = createHeaderBar(headerBarFactory);
         headerPanel.setLayout(new MigLayout("insets 0, gap 0, fill, alignx right"));
         headerPanel.add(filterField, "gapbefore push, cell 1 0, gapafter 10");
@@ -84,6 +85,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected abstract LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory);
+    protected abstract LimePromptTextField createFilterField(String prompt);
     
     protected LimeHeaderBar getHeaderPanel() {
         return headerPanel;
@@ -97,8 +99,17 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     protected void addButtonToHeader(Action action, ButtonDecorator buttonDecorator) {
+        
         JXButton shareButton = new JXButton(action);
         buttonDecorator.decorateDarkFullButton(shareButton);
+        headerPanel.add(shareButton, "cell 0 0, push");
+    }
+    
+    protected void addButtonToHeader(Action action, ButtonDecorator buttonDecorator, 
+            AccentType accentType) {
+        
+        JXButton shareButton = new JXButton(action);
+        buttonDecorator.decorateDarkFullButton(shareButton, accentType);
         headerPanel.add(shareButton, "cell 0 0, push");
     }
     

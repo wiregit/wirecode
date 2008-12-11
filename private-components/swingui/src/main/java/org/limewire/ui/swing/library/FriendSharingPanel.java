@@ -10,6 +10,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.I18n;
@@ -38,7 +39,7 @@ public class FriendSharingPanel extends SharingPanel {
         super(wholeLibraryList, friendFileList, categoryIconManager, tableFactory, headerBarFactory);
         this.friend = friend;
         
-        addButtonToHeader(new BackToLibraryAction(returnToLibraryPanel), buttonDecorator);
+        addButtonToHeader(new BackToLibraryAction(returnToLibraryPanel), buttonDecorator, AccentType.NONE);
         getHeaderPanel().setText(I18n.tr("Share with {0}", getFullPanelName()));
         
         createMyCategories(wholeLibraryList, friendFileList);

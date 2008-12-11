@@ -57,7 +57,7 @@ public class ProgressBarPainterFactory {
         
         ProgressBarForegroundPainter<JSlider> painter =  new ProgressBarForegroundPainter<JSlider>(
              new GradientPaint(0,0,mediaBarForegroundGradientTop,0,1,mediaBarForegroundGradientBottom),
-             Color.GRAY);
+             Color.GRAY, true);
         
         painter.setCacheable(false);
         

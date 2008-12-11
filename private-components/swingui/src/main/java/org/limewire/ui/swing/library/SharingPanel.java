@@ -43,11 +43,13 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
@@ -95,7 +97,12 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     
     @Override
     protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
-        return headerBarFactory.createSpecial(); 
+        return headerBarFactory.createSpecial();
+    }
+    
+    @Override
+    protected LimePromptTextField createFilterField(String prompt) {
+        return new LimePromptTextField(prompt, AccentType.NONE);
     }
     
     protected void createMyCategories(EventList<LocalFileItem> wholeLibraryList, LocalFileList friendFileList) {

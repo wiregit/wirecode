@@ -280,7 +280,14 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == FORWARD) {
                 nextSong();
             } else if (e.getActionCommand() == BACK) {
-                previousSong();
+                if (progressSlider.getValue() < 3) {
+                    previousSong();
+                }
+                else {
+                    player.stop();
+                    player.loadSong(file);
+                    player.playSong();
+                }
             } else if (e.getActionCommand() == VOLUME) {
                 if (System.currentTimeMillis() - menuInvizTime > 250f) {
                     volumeControlPopup.show(volumeButton, 0, 14);
