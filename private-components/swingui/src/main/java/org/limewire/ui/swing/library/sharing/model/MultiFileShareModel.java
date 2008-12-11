@@ -80,47 +80,49 @@ public class MultiFileShareModel implements LibraryShareModel {
  
     @Override
     public boolean isShared(SharingTarget friend) {
-        //returns true if all files are shared with friend
+        //always false.  
+        return false;
         
-        for (LocalFileItem item : fileItems) {
-            // Handle gnutella
-            if (friend.isGnutellaNetwork()) {
-                if (!gnutellaList.contains(item.getFile())){
-                    return false;
-                }
-            } else {
-
-                // check for share all settings
-                switch (item.getCategory()) {
-                case AUDIO:
-                    if (!shareListManager.getOrCreateFriendShareList(friend.getFriend())
-                            .isAddNewAudioAlways()) {
-                        return false;
-                    }
-                    break;
-                case VIDEO:
-                    if (!shareListManager.getOrCreateFriendShareList(friend.getFriend())
-                            .isAddNewVideoAlways()) {
-                        return false;
-                    }
-                    break;
-                case IMAGE:
-                    if (!shareListManager.getOrCreateFriendShareList(friend.getFriend())
-                            .isAddNewImageAlways()) {
-                        return false;
-                    }
-                    break;
-                }
-
-                // check individual file share settings
-                if (shareListManager.getOrCreateFriendShareList(friend.getFriend()).contains(
-                        item.getFile())) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
+//        //returned true if all files are shared with friend        
+//        for (LocalFileItem item : fileItems) {
+//            // Handle gnutella
+//            if (friend.isGnutellaNetwork()) {
+//                if (!gnutellaList.contains(item.getFile())){
+//                    return false;
+//                }
+//            } else {
+//
+//                // check for share all settings
+//                switch (item.getCategory()) {
+//                case AUDIO:
+//                    if (shareListManager.getOrCreateFriendShareList(friend.getFriend())
+//                            .isAddNewAudioAlways()) {
+//                        return true;
+//                    }
+//                    break;
+//                case VIDEO:
+//                    if (shareListManager.getOrCreateFriendShareList(friend.getFriend())
+//                            .isAddNewVideoAlways()) {
+//                        return true;
+//                    }
+//                    break;
+//                case IMAGE:
+//                    if (shareListManager.getOrCreateFriendShareList(friend.getFriend())
+//                            .isAddNewImageAlways()) {
+//                        return true;
+//                    }
+//                    break;
+//                }
+//
+//                // check individual file share settings
+//                if (!shareListManager.getOrCreateFriendShareList(friend.getFriend()).contains(
+//                        item.getFile())) {
+//                    return false;
+//                }
+//            }
+//        }
+//        
+//        return true;
     }
 
     @Override
