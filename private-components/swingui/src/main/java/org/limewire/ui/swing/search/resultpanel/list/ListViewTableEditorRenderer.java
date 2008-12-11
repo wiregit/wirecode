@@ -65,6 +65,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDi
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.OSUtils;
 
@@ -174,6 +175,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
         similarButton.setPressedIcon(similarDownIcon);
         similarButton.setIcon(similarUpIcon);
+        similarButton.setToolTipText(I18n.tr("Show similar files"));
         similarButton.setBorderPainted(false);
         similarButton.setContentAreaFilled(false);
         //This mouse listener is unfortunately necessary. Setting the icons for rollover
@@ -183,6 +185,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public void mouseClicked(MouseEvent e) {
                 similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
+                similarButton.setToolTipText(isShowingSimilarResults() ? 
+                        I18n.tr("Hide similar files") : I18n.tr("Show similar files"));
             }
 
             @Override
@@ -203,6 +207,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         optionsButton.setPressedIcon(optionsDownIcon);
         optionsButton.setRolloverIcon(optionsHoverIcon);
         optionsButton.setIcon(optionsUpIcon);
+        optionsButton.setToolTipText(I18n.tr("More options"));
         optionsButton.setBorderPainted(false);
         optionsButton.setContentAreaFilled(false);
         optionsButton.setFocusPainted(false);
@@ -312,6 +317,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             
             if (col == 1) {
                 similarButton.setIcon(isShowingSimilarResults() ? similarActiveIcon : similarUpIcon);
+                similarButton.setToolTipText(isShowingSimilarResults() ? 
+                        I18n.tr("Hide similar files") : I18n.tr("Show similar files"));
             }
         }
 
