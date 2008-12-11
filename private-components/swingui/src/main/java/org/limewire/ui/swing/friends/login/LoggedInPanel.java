@@ -37,6 +37,9 @@ import com.google.inject.Inject;
 
 class LoggedInPanel extends JXPanel {
 
+    /**
+     * The currentUser variable is used to display the logged in user. Also the users status is displayed as an icon set in the label.
+     */
     private final JLabel currentUser;
     private final JLabel loggingInLabel;
     private final JLabel statusMenuLabel;
