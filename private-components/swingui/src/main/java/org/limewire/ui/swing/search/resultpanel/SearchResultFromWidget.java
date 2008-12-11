@@ -23,6 +23,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
@@ -240,33 +241,24 @@ public class SearchResultFromWidget extends JPanel {
 
         // Now go back through our submenus & add them in.
         if (friends.size() > 0 && p2pUsers.size() > 0) {
-            comboBoxMenu.add(new JLabel(tr(" Friends")));
-            for (JMenuItem friend : friends) {
+            JLabel label = new JLabel(tr("Friends"));
+            label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+            comboBoxMenu.add(label);
+            for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
                 comboBoxMenu.add(friend);
             }
-            for (JMenuItem friend : friendsDisabled) {
-                comboBoxMenu.add(friend);
-            }
-            comboBoxMenu.add(new JLabel(tr(" P2P Users")));
-            for (JMenuItem p2pUser : p2pUsers) {
-                comboBoxMenu.add(p2pUser);
-            }
-            for (JMenuItem p2pUser : p2pUsersDisabled) {
+            label = new JLabel(tr("P2P Users"));
+            label.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 0));
+            comboBoxMenu.add(label);
+            for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                 comboBoxMenu.add(p2pUser);
             }
         } else if (friends.size() > 0) {
-            // Only friends, no need to add label.
-            for (JMenuItem friend : friends) {
-                comboBoxMenu.add(friend);
-            }
-            for (JMenuItem friend : friendsDisabled) {
+            for (JMenuItem friend : new MultiIterable<JMenuItem>(friends, friendsDisabled)) {
                 comboBoxMenu.add(friend);
             }
         } else if (p2pUsers.size() > 0) {
-            for (JMenuItem p2pUser : p2pUsers) {
-                comboBoxMenu.add(p2pUser);
-            }
-            for (JMenuItem p2pUser : p2pUsersDisabled) {
+            for (JMenuItem p2pUser : new MultiIterable<JMenuItem>(p2pUsers, p2pUsersDisabled)) {
                 comboBoxMenu.add(p2pUser);
             }
         }

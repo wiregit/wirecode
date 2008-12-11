@@ -30,6 +30,12 @@ public class IconButton extends JXButton {
         init();
     }
     
+    public IconButton(Icon icon, Icon rolloverIcon) {
+        super(icon);
+        init();
+        setRolloverIcon(rolloverIcon);
+    }
+    
     public IconButton(Icon icon, Icon rolloverIcon, Icon pressedIcon) {
         super(icon);
         init();

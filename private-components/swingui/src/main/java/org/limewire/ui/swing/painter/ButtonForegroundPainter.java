@@ -89,13 +89,17 @@ public class ButtonForegroundPainter extends AbstractPainter<JXButton> {
             }
         } 
         // TODO: should use a more OO solution in future
-        else if (object instanceof LimeComboBox) {
-            
-            LimeComboBox box = (LimeComboBox) object;
-            
-            if (box.getSelectedAction() != null) {
-                g.drawString((String)box.getSelectedAction().getValue(Action.NAME), object.getInsets().left, 
-                        textBaseline);
+        else if (object instanceof LimeComboBox) {            
+            LimeComboBox box = (LimeComboBox) object;            
+            Action action = box.getSelectedAction();
+            if (action != null) {
+                Icon actionIcon = (Icon)action.getValue(Action.SMALL_ICON);
+                int leftGap = object.getInsets().left;
+                if(actionIcon != null) {
+                    actionIcon.paintIcon(box, g, leftGap, (box.getHeight()- actionIcon.getIconHeight())/2);
+                    leftGap += actionIcon.getIconWidth() + 4;
+                }
+                g.drawString((String)action.getValue(Action.NAME), leftGap, textBaseline);
             }
             
             if (icon != null) {

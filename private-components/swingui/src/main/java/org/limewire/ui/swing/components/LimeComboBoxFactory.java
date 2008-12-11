@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 
 import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -69,7 +70,16 @@ public class LimeComboBoxFactory {
         box.setIcon(this.darkFullIcon);
         box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
         return box;
+    }    
+    
+    public LimeComboBox createDarkFullComboBox(List<Action> items, AccentType accentType) {
+        LimeComboBox box = new LimeComboBox(items);
+        buttonDecorator.decorateDarkFullButton(box, accentType);
+        box.setIcon(this.darkFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        return box;
     }
+        
     
     public LimeComboBox createLightFullComboBox(List<Action> items) {
         LimeComboBox box = new LimeComboBox(items);

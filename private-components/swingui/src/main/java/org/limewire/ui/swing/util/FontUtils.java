@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.util;
 
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextAttribute;
 import java.awt.geom.Rectangle2D;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 
 public class FontUtils {
@@ -91,9 +93,18 @@ public class FontUtils {
 
     public static Rectangle2D getLongestTextArea(Font font, Object... objects) {
         FontRenderContext frc = new FontRenderContext(null, false, false);
-        Rectangle2D largestRect = font.getStringBounds(unpackText(objects[0]), frc);
-        for (int i = 1; i < objects.length; i++) {
-            Rectangle2D currentRect = font.getStringBounds(unpackText(objects[i]), frc);
+        Rectangle2D largestRect = new Rectangle();
+        for (int i = 0; i < objects.length; i++) {
+            Object obj = objects[i];
+            Rectangle2D currentRect = font.getStringBounds(unpackText(obj), frc);
+            if(obj instanceof Action) {
+                Icon icon = (Icon)((Action)obj).getValue(Action.SMALL_ICON);
+                if(icon != null) {
+                    // add some whitespace around the icons.
+                    currentRect.setRect(currentRect.getX(), currentRect.getY(),
+                            currentRect.getWidth()+icon.getIconWidth() + 10, currentRect.getHeight());
+                }
+            }
             if (currentRect.getWidth() > largestRect.getWidth()) {
                 largestRect = currentRect;
             }

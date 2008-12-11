@@ -171,6 +171,12 @@ public class LimeComboBox extends JXButton {
     }
     
     
+    /** Get all actions. */
+    public List<Action> getActions() {
+        return actions;
+    }
+    
+    
     /** Sets the text this will display as the prompt. */
     @Override
     public void setText(String promptText) {
@@ -274,8 +280,6 @@ public class LimeComboBox extends JXButton {
         super.setFont(f);
         updateSize();
     }
-    
-    
     
     /**
      * Sets whether or not clicking the combobox forces the menu to display.
@@ -424,6 +428,16 @@ public class LimeComboBox extends JXButton {
         
         public SelectionActionWrapper(Action delegate) {
             this.delegate = delegate;
+        }
+        
+        @Override
+        public boolean isEnabled() {
+            return delegate.isEnabled();
+        }
+        
+        @Override
+        public void setEnabled(boolean newValue) {
+            delegate.setEnabled(newValue);
         }
         
         @Override 

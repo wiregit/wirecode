@@ -3,8 +3,10 @@ package org.limewire.ui.swing.friends.settings;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.core.api.xmpp.XMPPResourceFactory;
 import org.limewire.core.settings.XMPPSettings;
@@ -17,9 +19,10 @@ import com.google.inject.Singleton;
 public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigurationManager {
     
     private final PasswordManager passwordManager;
-    private HashMap<String,XMPPAccountConfiguration> configs; // Indexed by label
-    private XMPPAccountConfiguration autoLoginConfig = null;
+    private final Map<String,XMPPAccountConfiguration> configs; // Indexed by label
     private final String resource;
+    
+    private XMPPAccountConfiguration autoLoginConfig = null;
     
     @Inject
     public XMPPAccountConfigurationManagerImpl(PasswordManager passwordManager,
@@ -73,6 +76,18 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
     public XMPPAccountConfiguration getConfig(String label) {
         return configs.get(label);
     }
+    
+    @Override
+    public List<XMPPAccountConfiguration> getConfigurations() {
+        ArrayList<XMPPAccountConfiguration> configurations = new ArrayList<XMPPAccountConfiguration>(configs.values());
+        Collections.sort(configurations, new Comparator<XMPPAccountConfiguration>() {
+            @Override
+            public int compare(XMPPAccountConfiguration o1, XMPPAccountConfiguration o2) {
+                return o1.getLabel().compareToIgnoreCase(o2.getLabel());
+            }
+        });;
+        return configurations;
+    }    
     
     @Override
     public List<String> getLabels() {

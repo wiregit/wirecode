@@ -1,36 +1,47 @@
 package org.limewire.ui.swing.friends.login;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
-import org.limewire.ui.swing.components.ActionLabel;
+import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.LimeComboBoxFactory;
+import org.limewire.ui.swing.components.LimePromptPasswordField;
+import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -38,11 +49,6 @@ import org.limewire.xmpp.api.client.XMPPService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import net.miginfocom.swing.MigLayout;
-
-/**
- * @author Mario Aquino, Object Computing, Inc.
- */
 @Singleton
 class LoginPanel extends JXPanel implements SettingListener {
 
@@ -53,30 +59,56 @@ class LoginPanel extends JXPanel implements SettingListener {
 
     private static final String AUTHENTICATION_ERROR = tr("Incorrect username\nor password.");
     private static final String NETWORK_ERROR = tr("Network error.");
+    
+    private static final String CONFIG = "limewire.configProperty";
 
-    private JComboBox serviceComboBox;
-    private JLabel serviceLabel;
+    private LimeComboBox serviceComboBox;
     private JTextField serviceField;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
-    private JButton signInButton;
+    private JXButton signInButton;
     private final XMPPAccountConfigurationManager accountManager;
     private final XMPPService xmppService;
     private final SignInAction signinAction = new SignInAction();
+    
+    @Resource private Icon loginHide;
+    @Resource private Icon loginHideHover;
 
     @Inject
-    LoginPanel(XMPPAccountConfigurationManager accountManager, XMPPService xmppService) {
+    LoginPanel(XMPPAccountConfigurationManager accountManager,
+            XMPPService xmppService,
+            LimeComboBoxFactory comboFactory,
+            ButtonDecorator buttonDecorator,
+            BarPainterFactory barPainterFactory) {
         this.accountManager = accountManager;
         this.xmppService = xmppService;
         GuiUtils.assignResources(this);
         XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
-        initComponents();
+        initComponents(comboFactory, buttonDecorator, barPainterFactory);
+    }
+    
+    private Action getActionForConfig(XMPPAccountConfiguration config) {
+        for(Action action : serviceComboBox.getActions()) {
+            if(action.getValue(CONFIG).equals(config)) {
+                return action;
+            }
+        }
+        return null;
+    }
+    
+    private Action getActionForLabel(String label) {
+        for(Action action : serviceComboBox.getActions()) {
+            if(((XMPPAccountConfiguration)action.getValue(CONFIG)).getLabel().equals(label)) {
+                return action;
+            }
+        }
+        return null;
     }
 
     void autoLogin(XMPPAccountConfiguration auto) {
-        serviceComboBox.setSelectedItem(auto.getLabel());
+        serviceComboBox.setSelectedAction(getActionForConfig(auto));
         login(auto);
     }    
 
@@ -97,23 +129,28 @@ class LoginPanel extends JXPanel implements SettingListener {
         }
     }
 
-    private void initComponents() {
-        serviceComboBox = new JComboBox();
-        for(String label : accountManager.getLabels()) {
-            serviceComboBox.addItem(label);
-        }
-        serviceComboBox.addItemListener(new ItemListener() {
+    private void initComponents(LimeComboBoxFactory comboFactory, ButtonDecorator buttonDecorator,
+            BarPainterFactory barPainterFactory) {
+        List<Action> actions = new ArrayList<Action>();
+        for (XMPPAccountConfiguration config : accountManager.getConfigurations()) {
+            Action action = new AbstractAction(config.getLabel(), config.getIcon()) {            
+                @Override
+                public void actionPerformed(ActionEvent e) {}
+            };
+            action.putValue(CONFIG, config);
+            actions.add(action);
+        }        
+        serviceComboBox = comboFactory.createDarkFullComboBox(actions, AccentType.NONE);
+        serviceComboBox.addSelectionListener(new LimeComboBox.SelectionListener() {
             @Override
-            public void itemStateChanged(ItemEvent e) {
+            public void selectionChanged(Action item) {
                 populateInputs();
             }
         });
-        serviceComboBox.setRenderer(new Renderer());
         
-        serviceLabel = new JLabel(tr("Jabber Server"));
-        serviceField = new JTextField();
-        usernameField = new JTextField();
-        passwordField = new JPasswordField();
+        serviceField = new LimePromptTextField("Server", AccentType.NONE);
+        usernameField =  new LimePromptTextField("Username", AccentType.NONE);
+        passwordField = new LimePromptPasswordField("Password", AccentType.NONE);
         passwordField.setAction(signinAction);
 
         autoLoginCheckBox = new JCheckBox(tr("Remember me"));
@@ -131,53 +168,49 @@ class LoginPanel extends JXPanel implements SettingListener {
             }
         });
         autoLoginCheckBox.setOpaque(false);
-        autoLoginCheckBox.setMargin(new Insets(0, 0, 0, 0));
         autoLoginCheckBox.setBorder(BorderFactory.createEmptyBorder());
 
-        signInButton = new JButton(signinAction);
+        signInButton = new JXButton(signinAction);
+        buttonDecorator.decorateDarkFullButton(signInButton, AccentType.NONE);
         signInButton.setOpaque(false);
 
         authFailedLabel = new MultiLineLabel();
         authFailedLabel.setVisible(false);
         authFailedLabel.setForeground(Color.RED);
 
-        JLabel hideButton = new ActionLabel(new AbstractAction(("X")) {
+        JButton hideButton = new IconButton(loginHide, loginHideHover);
+        hideButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LoginPanel.this.setVisible(false);
             }
-        }, true, true);
+        });
 
-        setLayout(new MigLayout("gap 0, fill"));
-        add(hideButton, "alignx right, wrap");
-        add(new JLabel(tr("Using")), "alignx left, wrap");
-        add(serviceComboBox, "wmin 0, wrap");
-        add(serviceLabel, "alignx left, hidemode 3, wrap");
-        add(serviceField, "alignx left, hidemode 3, grow, wmin 0, wrap");
-        add(new JLabel(tr("Username")), "alignx left, wrap");
-        add(usernameField, "alignx left, grow, wmin 0, wrap");
-        add(new JLabel(tr("Password")), "alignx left, wrap");
-        add(passwordField, "alignx left, grow, wmin 0, wrap");
-        add(autoLoginCheckBox, "gaptop 2, alignx left, wmin 0, wrap");
-        add(authFailedLabel, "alignx left, wmin 0, hidemode 3, wrap");
-        add(signInButton, "gaptop 2, alignx left, wmin 0");
+        setLayout(new MigLayout("nocache, gap 0, fill"));
+        add(authFailedLabel, "alignx left, gapleft 2, wmin 0, hidemode 3");
+        add(hideButton, "alignx right, aligny top, gaptop 4, gapright 4, wrap");
+        add(new JLabel(tr("Sign in with")), "alignx left, gapleft 2, gapbottom 4, wrap");
+        add(serviceComboBox, "alignx left, gapbottom 8, wmin 0, wrap");
+        add(serviceField, "alignx left, gapbottom 8, hidemode 3, grow, wmin 0, wrap");
+        add(usernameField, "alignx left, gapbottom 8, grow, wmin 0, wrap");
+        add(passwordField, "alignx left, gapbottom 8, grow, wmin 0, wrap");
+        add(autoLoginCheckBox, "alignx left, gapbottom 8, wmin 0, wrap");
+        add(signInButton, "alignx left, wmin 0");
 
-        setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.LIGHT_GRAY, 0f, Color.LIGHT_GRAY));
+        setBackgroundPainter(barPainterFactory.createFriendsBarPainter());
 
-        serviceComboBox.setSelectedItem("Gmail");
+        serviceComboBox.setSelectedAction(getActionForLabel("GMail"));
         setSignInComponentsEnabled(true);
     }
 
     private void populateInputs() {
-        String label = (String)serviceComboBox.getSelectedItem();
-        if(label.equals("Jabber")) {
-            serviceLabel.setVisible(true);
+        XMPPAccountConfiguration config = (XMPPAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
+        if(config.getLabel().equals("Jabber")) {
             serviceField.setVisible(true);
         } else {
-            serviceLabel.setVisible(false);
             serviceField.setVisible(false);
         }
-        XMPPAccountConfiguration config = accountManager.getConfig(label);
+        
         if(config == accountManager.getAutoLoginConfig()) {
             serviceField.setText(config.getServiceName());
             usernameField.setText(config.getUserInputLocalID());
@@ -189,18 +222,22 @@ class LoginPanel extends JXPanel implements SettingListener {
             passwordField.setText("");
             autoLoginCheckBox.setSelected(false);
         }
+        validate();
+        repaint();
     }
 
     void disconnected(Exception reason) {
         setSignInComponentsEnabled(true);
         populateInputs();
-        if(reason.getMessage().contains("auth") || reason.getMessage().contains("Auth")) {
+        if(reason.getMessage().toLowerCase(Locale.US).contains("auth")) {
             authFailedLabel.setText(AUTHENTICATION_ERROR);
             passwordField.setText("");
         } else {
             authFailedLabel.setText(NETWORK_ERROR);
         }
         authFailedLabel.setVisible(true);
+        validate();
+        repaint();
     }
 
     private void setSignInComponentsEnabled(boolean isEnabled) {
@@ -220,6 +257,8 @@ class LoginPanel extends JXPanel implements SettingListener {
     private void login(final XMPPAccountConfiguration config) {
         setSignInComponentsEnabled(false);
         authFailedLabel.setVisible(false);
+        validate();
+        repaint();
         BackgroundExecutorService.execute(new Runnable() {
             public void run() {
                 try {
@@ -247,9 +286,8 @@ class LoginPanel extends JXPanel implements SettingListener {
             if(user.equals("") || password.equals("")) {
                 return;
             }            
-            String label = (String)serviceComboBox.getSelectedItem();
-            XMPPAccountConfiguration config = accountManager.getConfig(label);
-            if(label.equals("Jabber")) {
+            XMPPAccountConfiguration config = (XMPPAccountConfiguration)serviceComboBox.getSelectedAction().getValue(CONFIG);
+            if(config.getLabel().equals("Jabber")) {
                 String service = serviceField.getText().trim();
                 if(service.equals(""))
                     return;
@@ -265,21 +303,6 @@ class LoginPanel extends JXPanel implements SettingListener {
                 accountManager.setAutoLoginConfig(null);
             }
             login(config);
-        }
-    }
-
-    private class Renderer extends DefaultListCellRenderer {
-        public Component getListCellRendererComponent(JList list, Object value,
-                int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            XMPPAccountConfiguration config = accountManager.getConfig(value.toString());
-            if(config != null) {
-                setIcon(config.getIcon());
-            } else {
-                setIcon(null);
-            }
-            return this;
         }
     }
 

@@ -18,6 +18,11 @@ public interface XMPPAccountConfigurationManager {
      * order.
      */
     public List<String> getLabels();
+    
+    /**
+     * Returns all configurations.
+     */
+    public List<XMPPAccountConfiguration> getConfigurations();    
 
     /**
      * Returns the account configuration that should log in automatically when

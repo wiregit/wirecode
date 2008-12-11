@@ -87,7 +87,7 @@ public abstract class ButtonBackgroundPainter extends AbstractPainter<JXButton> 
     public void doPaint(Graphics2D g, JXButton object, int width, int height) {
         ButtonModel model = object.getModel();
         
-        if (!object.isEnabled()) {
+        if (!object.isEnabled() && disabledPainter != null) {
             this.disabledPainter.paint(g, object, width, height);
             return;
         }

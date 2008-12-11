@@ -11,6 +11,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
 
@@ -23,7 +24,7 @@ import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class LimePromptTextField extends JTextField implements FocusListener {
+public class LimePromptPasswordField extends JPasswordField implements FocusListener {
     
     private String promptText;
     
@@ -38,7 +39,7 @@ public class LimePromptTextField extends JTextField implements FocusListener {
     @Resource private Color bevelBottom;
     
     private Painter<JTextField> backgroundPainter;
-    private Painter<LimePromptTextField> promptPainter;
+    private Painter<LimePromptPasswordField> promptPainter;
     
     /**
      * Controls the visibility of the faint white accent bubble
@@ -52,28 +53,27 @@ public class LimePromptTextField extends JTextField implements FocusListener {
     private Paint workingBorder = null;  
     
     
-    public LimePromptTextField() {
+    public LimePromptPasswordField() {
         this.init();
     }
     
-    public LimePromptTextField(AccentType accentType) {
+    public LimePromptPasswordField(AccentType accentType) {
         this.accentType = accentType;
         this.init();
     }
     
-    public LimePromptTextField(String promptText) {
+    public LimePromptPasswordField(String promptText) {
         this.setPromptText(promptText);        
         this.init();
     }
     
-    public LimePromptTextField(String promptText, AccentType accentType) {
+    public LimePromptPasswordField(String promptText, AccentType accentType) {
         this.accentType = accentType;
         this.setPromptText(promptText);        
         this.init();
     }
     
-    
-    public LimePromptTextField(String promptText, AccentType accentType, Paint border) {
+    public LimePromptPasswordField(String promptText, AccentType accentType, Paint border) {
         this.promptText = promptText;
         this.accentType = accentType;
         this.workingBorder = border;        
@@ -81,9 +81,9 @@ public class LimePromptTextField extends JTextField implements FocusListener {
     }
     
     
-    public LimePromptTextField(String promptText, int columns) {
+    public LimePromptPasswordField(String promptText, int columns) {
         this.promptText = promptText;
-        this.setColumns(columns);        
+        this.setColumns(columns);
         init();
     }
     
@@ -145,7 +145,7 @@ public class LimePromptTextField extends JTextField implements FocusListener {
      * Sets the painter on this component that manages painting of 
      *  the prompt text when the text field is empty
      */
-    public void setPromptPainter(Painter<LimePromptTextField> painter) {
+    public void setPromptPainter(Painter<LimePromptPasswordField> painter) {
         this.promptPainter = painter;
     }
     
@@ -155,22 +155,19 @@ public class LimePromptTextField extends JTextField implements FocusListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-
-        this.backgroundPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
-        
-        super.paintComponent(g);
-    
-        if (!hasFocus() && getText().isEmpty() && this.promptText != null) {
+        this.backgroundPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());        
+        super.paintComponent(g);    
+        if (!hasFocus() && new String(getPassword()).isEmpty() && this.promptText != null) {
             this.promptPainter.paint((Graphics2D) g, this, this.getWidth(), this.getHeight());
         }
 
     }
     
-    private Painter<LimePromptTextField> createPromptPainter() {
-        AbstractPainter<LimePromptTextField> painter = new AbstractPainter<LimePromptTextField>() {
+    private Painter<LimePromptPasswordField> createPromptPainter() {
+        AbstractPainter<LimePromptPasswordField> painter = new AbstractPainter<LimePromptPasswordField>() {
 
             @Override
-            protected void doPaint(Graphics2D g, LimePromptTextField object, int width, int height) {
+            protected void doPaint(Graphics2D g, LimePromptPasswordField object, int width, int height) {
                 g.setColor(promptColour);
                 g.setFont(object.getFont());
                 
