@@ -175,7 +175,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             icon.setIcon(getIcon(propertiable));
             populateCommonFields(propertiable);
             populateCopyToClipboard(propertiable);
-            localFileLocation.setText(propertiable.getFile().getAbsolutePath());
+            fileLocation.setText(propertiable.getFile().getAbsolutePath());
             
             List<Friend> sharedWithList = getSharedWithList(propertiable);
             boolean isShared = sharedWithList.size() > 0;
@@ -203,11 +203,11 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
                 }
                 JScrollPane scroll = new JScrollPane(sharing);
                 scroll.setBorder(BorderFactory.createEmptyBorder());
-                add(box("Sharing with", scroll), "grow, cell 0 3, wmin 200");
+                mainPanel.add(box("Sharing with", scroll), "grow, cell 0 3, wmin 200");
             }
             
             location.setLayout(new MigLayout("", "[]10[]15[]", isShared ? "[][]" : "[]"));
-            location.add(localFileLocation, "push");
+            location.add(fileLocation, "push");
             location.add(locateOnDisk);
             location.add(locateInLibrary, isShared ? "wrap" : "");
 

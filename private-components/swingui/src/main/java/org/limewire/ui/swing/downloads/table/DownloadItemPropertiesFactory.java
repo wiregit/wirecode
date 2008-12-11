@@ -42,7 +42,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         private @Resource Font smallFont;
         private @Resource Font mediumFont;
         private @Resource Font largeFont;
-        private final JPanel download = new JPanel();
+        private final JPanel download = newPanel(new MigLayout("fill", "[]", "[]"));
         
         private DownloadItemProperties(PropertiableHeadings propertiableHeadings) {
             super(propertiableHeadings);
@@ -76,11 +76,10 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
                                                        propertiable.getDownloadingFile().getName() });
             }
             
-            download.setLayout(new MigLayout("fill", "[]", "[]"));
             readOnlyInfo.setShowGrid(true);
             download.add(new JScrollPane(readOnlyInfo));
             final JLabel completionLabel = new JLabel();
-            add(box(tr("Download from"), completionLabel, download), "wmin 250, grow, cell 1 3");
+            mainPanel.add(box(tr("Download from"), completionLabel, download), "wmin 250, grow, cell 1 3");
             propertiable.addPropertyChangeListener(new PropertyChangeListener() {
                 @Override
                 public void propertyChange(PropertyChangeEvent evt) {

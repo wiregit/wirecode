@@ -2,9 +2,11 @@ package org.limewire.ui.swing.properties;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
@@ -52,7 +54,6 @@ public abstract class Dialog extends LimeJDialog {
     protected final JLabel icon = new JLabel();
     protected final JLabel heading = newLabel();
     protected final JLabel filename = newLabel();
-    protected final JLabel subheading = newLabel();
     protected final JLabel fileSize = new JLabel();
     protected final JLabel metadata = newLabel();
     protected final JXHyperlink copyToClipboard = new JXHyperlink();
@@ -68,41 +69,55 @@ public abstract class Dialog extends LimeJDialog {
     protected final JComboBox platform = new JComboBox();
     protected final JTextField company = new JTextField();
     protected final DefaultTableModel readOnlyInfoModel = new ReadOnlyTableModel();
-    protected final JLabel localFileLocation = newLabel();
+    protected final JLabel fileLocation = newLabel();
     protected final JXHyperlink locateOnDisk = new JXHyperlink();
     protected final JXHyperlink locateInLibrary = new JXHyperlink();
     protected final JTable readOnlyInfo = new JTable(readOnlyInfoModel);
     
     protected final JPanel overview;
-    protected final JPanel details = new JPanel();
-    protected final JPanel location = new JPanel();
+    protected final JPanel details = newPanel();
+    protected final JPanel location = newPanel();
     protected Component detailsContainer;
+    protected final JPanel mainPanel;
     
     public Dialog() {
         GuiUtils.assignResources(this);
         
-        setFont(getMediumFont(), heading, filename, fileSize);
-        setFont(getSmallFont(), subheading, metadata, copyToClipboard, locateOnDisk, locateInLibrary,
-                title, genre, rating, year, description, artist, album, track, author, platform,
-                company, localFileLocation);
+        mainPanel = new JPanel(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
         
-        setLayout(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
-        JPanel buttons = new JPanel(new MigLayout("", "[][]", "[]"));
+        add(mainPanel);
+        mainPanel.setBackground(Color.LIGHT_GRAY);
+        
+        setFont(getMediumFont(), heading, filename, fileSize);
+        setFont(getSmallFont(), metadata, copyToClipboard, locateOnDisk, locateInLibrary,
+                title, genre, rating, year, description, artist, album, track, author, platform,
+                company, fileLocation);
+        
+        JPanel buttons = newPanel(new MigLayout("", "[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
         buttons.add(new JButton(new CancelAction()));
-        add(buttons, "cell 1 4");
+        mainPanel.add(buttons, "cell 1 4");
         
-        overview = new JPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
+        overview = newPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
 
         overview.add(icon);
         overview.add(heading);
-        overview.add(filename, "wrap");
-        overview.add(subheading, "cell 1 1");
-        overview.add(fileSize, "wrap");
+        overview.add(copyToClipboard, "wrap");
         overview.add(metadata, "cell 1 2");
-        overview.add(copyToClipboard);
 
         addOverview();
+    }
+    
+    protected JPanel newPanel(LayoutManager manager) {
+        JPanel panel = newPanel();
+        panel.setLayout(manager);
+        return panel;
+    }
+
+    protected JPanel newPanel() {
+        JPanel panel = new JPanel();
+        panel.setOpaque(false);
+        return panel;
     }
     
     protected abstract Font getSmallFont();
@@ -166,7 +181,7 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private void addOverview() {
-        add(box("Overview", overview), "cell 0 0, spanx 2");
+        mainPanel.add(box("Overview", overview), "cell 0 0, spanx 2");
     }
 
     protected Component box(String string, JComponent component) {
@@ -176,6 +191,7 @@ public abstract class Dialog extends LimeJDialog {
     protected Component box(String string, JComponent bannerComponent, JComponent bodyComponent) {
         
         JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]push[]", "[][][]"));
+        panel.setOpaque(false);
         JLabel label = new JLabel(tr(string));
         label.setFont(getLargeFont());
         panel.add(label, bannerComponent == null ? "wrap" : "");
@@ -189,11 +205,11 @@ public abstract class Dialog extends LimeJDialog {
 
     private void addDetails() {
         detailsContainer = box("Details", details);
-        add(detailsContainer, "cell 0 1, spanx 2");
+        mainPanel.add(detailsContainer, "cell 0 1, spanx 2");
     }
 
     private void addLocation() {
-        add(box("Location", location), "cell 0 2, spanx 2");
+        mainPanel.add(box("Location", location), "cell 0 2, spanx 2");
     }
 
     private class OKAction extends AbstractAction {

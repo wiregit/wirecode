@@ -19,31 +19,36 @@ import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSearchResult> {
-    private final CategoryIconManager iconManager;
+    private final CategoryIconManager categoryIconManager;
+    private final IconManager iconManager;
     
     @Inject
-    public SearchResultPropertiesFactory(CategoryIconManager iconManager) {
+    public SearchResultPropertiesFactory(CategoryIconManager categoryIconManager, IconManager iconManager) {
+        this.categoryIconManager = categoryIconManager;
         this.iconManager = iconManager;
     }
     
     @Override
     public Properties<VisualSearchResult> newProperties() {
-        return new SearchResultProperties(iconManager);
+        return new SearchResultProperties(categoryIconManager, iconManager);
     }
 
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
-        private final CategoryIconManager iconManager;
+        private final CategoryIconManager categoryIconManager;
+        private final IconManager iconManager;
         private @Resource Font smallFont;
         private @Resource Font mediumFont;
         private @Resource Font largeFont;
         
-        public SearchResultProperties(CategoryIconManager iconManager) {
+        public SearchResultProperties(CategoryIconManager categoryIconManager, IconManager iconManager) {
+            this.categoryIconManager = categoryIconManager;
             this.iconManager = iconManager;
             GuiUtils.assignResources(this);
             
@@ -72,10 +77,9 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
         @Override
         public void showProperties(VisualSearchResult vsr) {
-            icon.setIcon(iconManager.getIcon(vsr.getCategory()));
+            icon.setIcon(categoryIconManager.getIcon(vsr, iconManager));
             heading.setText(vsr.getHeading());
             filename.setText(vsr.getPropertyString(FilePropertyKey.NAME));
-            subheading.setText(vsr.getSubHeading());
             fileSize.setText(vsr.getPropertyString(FilePropertyKey.FILE_SIZE));
             genre.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.GENRE) }));
             rating.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.RATING) }));

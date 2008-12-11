@@ -1,8 +1,11 @@
 package org.limewire.core.impl.library;
 
+import java.util.List;
+
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.impl.search.RemoteFileDescAdapter;
@@ -59,6 +62,11 @@ public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
         return searchResult.getProperty(key);
     }
     
+    @Override
+    public List<RemoteHost> getSources() {
+        return searchResult.getSources();
+    }
+
     @Override
     public String getPropertyString(FilePropertyKey key) {
         Object value = getProperty(key);

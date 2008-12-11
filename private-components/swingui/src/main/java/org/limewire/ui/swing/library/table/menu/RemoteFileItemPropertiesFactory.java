@@ -2,8 +2,10 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Font;
 
-import javax.annotation.Resource;
+import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.properties.Properties;
@@ -74,8 +76,13 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
         @Override
         public void showProperties(RemoteFileItem propertiable) {
             icon.setIcon(categoryIconManager.getIcon(propertiable.getCategory()));
+            location.setLayout(new MigLayout("", "[]", "[]"));
+            location.add(fileLocation);
             populateCommonFields(propertiable);
             populateCopyToClipboard(propertiable);
+            for (RemoteHost host : propertiable.getSources()) {
+                fileLocation.setText(host.getFriendPresence().getFriend().getRenderName());
+            }
             showDialog(propertiable.getFileName(), propertiable.getCategory());
         }
     }
