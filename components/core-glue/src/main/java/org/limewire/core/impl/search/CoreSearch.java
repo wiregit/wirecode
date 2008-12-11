@@ -126,7 +126,7 @@ public class CoreSearch implements Search {
             }
         });        
         
-        if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {            
+        if (initial && PromotionSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue() && promotionSearcher.isEnabled()) {            
             final PromotionSearchResultsCallback callback = new PromotionSearchResultsCallback() {
                 @Override
                 public void process(PromotionMessageContainer result) {

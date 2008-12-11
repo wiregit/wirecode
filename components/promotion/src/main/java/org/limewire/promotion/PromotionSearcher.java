@@ -16,6 +16,8 @@ public interface PromotionSearcher {
      * user in the order they are expected to be shown. May call the callback
      * method more than once, but will not submit duplicate results.
      * 
+     * Will return silently if {@link #isEnabled()} returns false
+     * 
      * @param userLocation The current location of the user (best guess). If
      *        null, no location restrictions will be applied. If missing
      *        latitude/longitude, no radius restrictions will be applied. If
@@ -52,4 +54,9 @@ public interface PromotionSearcher {
      * Shuts down and releases any resources.
      */
     void shutDown();
+    
+    /**
+     * Returns whether the promotion searcher is enabled and works or not. 
+     */
+    boolean isEnabled();
 }

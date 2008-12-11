@@ -67,7 +67,9 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-        exec.execute(new Searcher(query, callback, userLocation));
+        if (isEnabled()) {
+            exec.execute(new Searcher(query, callback, userLocation));
+        }
     }
 
     public void init(final int maxNumberOfResults) throws InitializeException {
@@ -266,5 +268,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     public void shutDown() {
         searcherDatabase.shutDown();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return promotionServices.isRunning();
     }
 }
