@@ -121,10 +121,15 @@ implements PacketListener, PacketFilter, FriendRequestDecisionHandler {
             Presence subbed = new Presence(Presence.Type.subscribed);
             subbed.setTo(friendUsername);
             connection.sendPacket(subbed);
-            // Subscribe to the friend
-            Presence sub = new Presence(Presence.Type.subscribe);
-            sub.setTo(friendUsername);
-            connection.sendPacket(sub);
+            // Add the friend to the roster (this will subscribe to the friend)
+            Roster roster = connection.getRoster();
+            if(roster != null) {
+                try {
+                    roster.createEntry(friendUsername, friendUsername, null);
+                } catch(XMPPException x) {
+                    LOG.debug(x);
+                }
+            }
         } else {
             LOG.debug("user declined");
             // Refuse the subscription
