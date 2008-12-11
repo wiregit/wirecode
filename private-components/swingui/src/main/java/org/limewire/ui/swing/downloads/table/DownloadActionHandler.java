@@ -4,6 +4,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.util.NotImplementedException;
 
 import ca.odell.glazedlists.EventList;
 
@@ -19,6 +20,7 @@ public class DownloadActionHandler {
     public final static String LOCATE_COMMAND = "locate";
     public final static String PROPERTIES_COMMAND = "properties";
     public final static String LINK_COMMAND = "link";
+    public final static String SHARE_COMMAND = "share";
     
     private static final String ERROR_URL = "http://wiki.limewire.org/index.php?title=User_Guide_Download";
     
@@ -49,6 +51,8 @@ public class DownloadActionHandler {
             propertiesFactory.newProperties().showProperties(item);
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadItems.remove(item);
+        } else if (actionCommmand == SHARE_COMMAND){
+            throw new NotImplementedException("SHARE_COMMAND not implemented");
         }
     }
 }

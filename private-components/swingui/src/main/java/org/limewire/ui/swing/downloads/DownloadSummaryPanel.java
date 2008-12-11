@@ -358,7 +358,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	    private final JButton pauseButton;
 	    private final JButton resumeButton; 
         private final JXHyperlink launchButton; 
-        private final JXHyperlink shareButton;
         private final JXHyperlink tryAgainButton;
         private final JXHyperlink removeButton;
 
@@ -400,16 +399,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             launchButton.setClickedColor(blueForeground);
             launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
             FontUtils.bold(launchButton);
-            FontUtils.underline(launchButton);
-            
-            shareButton = new JXHyperlink();
-            shareButton.setText(I18n.tr("Share"));
-            shareButton.setUnclickedColor(blueForeground);
-            shareButton.setClickedColor(blueForeground);
-            //shareButton.setActionCommand(DownloadActionHandler.SHARE_COMMAND);
-            FontUtils.underline(shareButton);
-            FontUtils.bold(shareButton);
-            
+            FontUtils.underline(launchButton);            
+          
             tryAgainButton = new JXHyperlink();
             tryAgainButton.setText(I18n.tr("Try again"));
             tryAgainButton.setFont(itemFont);
@@ -428,7 +419,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             FontUtils.bold(removeButton);
             FontUtils.underline(removeButton);
 
-            linkButtons = new JButton[]{launchButton, shareButton, tryAgainButton, removeButton};
+            linkButtons = new JButton[]{launchButton, tryAgainButton, removeButton};
             buttons = new JButton[]{pauseButton, resumeButton};
                         
 			setOpaque(false);
@@ -466,7 +457,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             resumeButton.setVisible(item.getState() == DownloadState.PAUSED);
             tryAgainButton.setVisible(item.getState() == DownloadState.STALLED);
             launchButton.setVisible(item.getState() == DownloadState.DONE);
-            shareButton.setVisible(item.getState() == DownloadState.DONE);
             removeButton.setVisible(item.getState() == DownloadState.ERROR);
             
             statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);

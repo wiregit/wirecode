@@ -30,6 +30,7 @@ public class DownloadPopupHandler implements TablePopupHandler {
     private JMenuItem resumeMenuItem;
     private JMenuItem tryAgainMenuItem;
     private JMenuItem propertiesMenuItem;
+    private JMenuItem shareMenuItem;
 
     private MenuListener menuListener;
 
@@ -83,10 +84,14 @@ public class DownloadPopupHandler implements TablePopupHandler {
         propertiesMenuItem = new JMenuItem(I18n.tr("View File Info"));
         propertiesMenuItem.setActionCommand(DownloadActionHandler.PROPERTIES_COMMAND);
         propertiesMenuItem.addActionListener(menuListener);
-        
+
         previewMenuItem =  new JMenuItem(I18n.tr("Preview File"));
         previewMenuItem.setActionCommand(DownloadActionHandler.PREVIEW_COMMAND);
         previewMenuItem.addActionListener(menuListener);
+        
+        shareMenuItem =  new JMenuItem(I18n.tr("Share File"));
+        shareMenuItem.setActionCommand(DownloadActionHandler.SHARE_COMMAND);
+        shareMenuItem.addActionListener(menuListener);
     }
     
     @Override
@@ -113,6 +118,7 @@ public class DownloadPopupHandler implements TablePopupHandler {
             if (isLaunchable(menuItem)) {
                 popupMenu.add(launchMenuItem);
             }
+            popupMenu.add(shareMenuItem);
             popupMenu.add(locateMenuItem);
             popupMenu.add(removeMenuItem);
             break;
