@@ -171,6 +171,10 @@ class LoggedInPanel extends JXPanel {
             }
         });
         
+        /**
+         * TODO - Using a setting listener is really not the correct approach here. We need to build up the capability to get status
+         * changes as events coming from the core xmpp code.
+         */
         XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
            @Override
             public void settingChanged(SettingEvent evt) {
