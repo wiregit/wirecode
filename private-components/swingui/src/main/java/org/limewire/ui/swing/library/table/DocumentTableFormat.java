@@ -13,21 +13,39 @@ import org.limewire.ui.swing.util.IconManager;
  * Table format for the Document Table when it is in My Library
  */
 public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int TYPE_COL = NAME_COL + 1;
-	public static final int CREATED_COL = TYPE_COL + 1;
-	public static final int SIZE_COL = CREATED_COL + 1;
-	public static final int AUTHOR_COL = SIZE_COL + 1;
-	public static final int DESCRIPTION_COL = AUTHOR_COL + 1;
-	public static final int ACTION_COL = DESCRIPTION_COL + 1;
-	private static final int COLUMN_COUNT = ACTION_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 160),
+        TYPE(I18n.tr("Type"), true, true, 80),
+        CREATED(I18n.tr("Date Created"), true, true, 100),
+        SIZE(I18n.tr("Size"), false, true, 60),
+        AUTHOR(I18n.tr("Author"), false, true, 60),
+        DESCRIPTION(I18n.tr("Description"), false, true, 100),
+        ACTION(I18n.tr("Sharing"), true, false, 60);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
 	/** Icon manager used to find native file type information. */
 	private IconManager iconManager;
-    
-	/**
-	 * Constructs a DocumentTableFormat.
-	 */
+	
+    /**
+     * Constructs a DocumentTableFormat with the specified icon manager.
+     */
     public DocumentTableFormat() {
     }
 	
@@ -40,48 +58,28 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
 	
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
     @Override
     public String getColumnName(int column) {
-    	 switch (column) {
-         case AUTHOR_COL:
-             return I18n.tr("Author");
-         case CREATED_COL:
-             return I18n.tr("Date Created");
-         case DESCRIPTION_COL:
-             return I18n.tr("Modified");
-         case NAME_COL:
-             return I18n.tr("Filename");
-         case ACTION_COL:
-             return I18n.tr("Sharing");
-         case SIZE_COL:
-             return I18n.tr("Size");
-         case TYPE_COL:
-             return I18n.tr("Type");     
-         }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-    	 switch (column) {
-         case AUTHOR_COL:
-             return baseObject.getProperty(FilePropertyKey.AUTHOR);
-         case CREATED_COL:
+        Columns other = Columns.values()[column];
+        switch(other) {
+         case AUTHOR: return baseObject.getProperty(FilePropertyKey.AUTHOR);
+         case CREATED:
              // Return creation time if valid.
              long creationTime = baseObject.getCreationTime();
              return (creationTime >= 0) ? new Date(creationTime) : null;
-         case DESCRIPTION_COL:
-             return "";
-         case NAME_COL:
-             return baseObject;
-         case ACTION_COL:
-             return baseObject;
-         case SIZE_COL:
-             return baseObject.getSize();
-         case TYPE_COL:
+         case DESCRIPTION: return "";
+         case NAME: return baseObject;
+         case ACTION: return baseObject;
+         case SIZE: return baseObject.getSize();
+         case TYPE:
              // Use icon manager to return MIME description.
              return (iconManager != null) ?
                  iconManager.getMIMEDescription(baseObject) : 
@@ -92,17 +90,27 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
 
     @Override
     public int getActionColumn() {
-        return ACTION_COL;
+        return Columns.ACTION.ordinal();
+    }
+    
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
     }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] {DESCRIPTION_COL, AUTHOR_COL, SIZE_COL};
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-    	return column == ACTION_COL;
+        return Columns.ACTION.ordinal() == column;
     }
 
     @Override
@@ -112,18 +120,18 @@ public class DocumentTableFormat<T extends LocalFileItem> extends AbstractMyLibr
     
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return FileItem.class;
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION: return FileItem.class;
         }
         return super.getColumnClass(column);
     }
 
     @Override
     public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return new ActionComparator();
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION: return new ActionComparator();
         }
         return super.getColumnComparator(column);
     }

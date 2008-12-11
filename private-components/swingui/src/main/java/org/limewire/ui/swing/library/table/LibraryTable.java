@@ -98,6 +98,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         });       
         
         setupCellRenderers(format);
+        setupColumnWidths(format);
     }
     
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
@@ -108,6 +109,12 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
                 setCellRenderer(i, defaultRenderer);
             } 
         }   
+    }
+    
+    private void setupColumnWidths(LibraryTableFormat<T> format) {
+        for(int i = 0; i < format.getColumnCount(); i++) {
+            getColumn(i).setPreferredWidth(format.getInitialWidth(i));
+        }
     }
     
     protected void setCellRenderer(int column, TableCellRenderer cellRenderer) {
@@ -179,11 +186,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         super.setModel(newModel);
     }
     
-    //TODO: this is quite brittle.  only works if column indexes are in descending order - need to do it a different way
+    //only works if column indexes are in descending orde
     protected void hideColumns(){
-        int[] hiddenColumns = format.getDefaultHiddenColums();
-        for (int i = 0; i < hiddenColumns.length; i++) {
-            ((TableColumnExt) getColumnModel().getColumn(hiddenColumns[i])).setVisible(false);
+        for(int i = format.getColumnCount()-1; i > 0; i--) {
+            ((TableColumnExt) getColumnModel().getColumn(i)).setVisible(format.isColumnHiddenAtStartup(i));
         }
     }
     

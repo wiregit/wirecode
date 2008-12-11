@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.search.resultpanel.list;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
 
@@ -10,13 +8,6 @@ import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
  * that displays the list view of search results.
  */
 public class ListViewTableFormat extends ResultsTableFormat<VisualSearchResult> {
-
-//    static final int ACTIONS_WIDTH = 140;
-
-    public ListViewTableFormat() {
-//        super(3, 2, tr("not used"), tr("also not used"), tr("nor this"));
-        super(1, tr("not used"), tr("also not used"));
-    }
 
     @Override
     public Class getColumnClass(int index) {
@@ -30,15 +21,7 @@ public class ListViewTableFormat extends ResultsTableFormat<VisualSearchResult> 
     }
 
     @Override
-    public int getInitialColumnWidth(int index) {
-//        switch(index) {
-//        case 0:
-//            return 400;
-//        case 1:
-//            return 170;
-//        default:
-//            return ACTIONS_WIDTH;
-//        }
+    public int getInitialWidth(int index) {
         return index == 0 ? 400 : 170;
     }
 
@@ -51,5 +34,25 @@ public class ListViewTableFormat extends ResultsTableFormat<VisualSearchResult> 
     public int getNameColumn() {
         //no name column here
         return -1;
+    }
+
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return false;
+    }
+
+    @Override
+    public boolean isColumnHideable(int column) {
+        return false;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return 2;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return "";
     }
 }

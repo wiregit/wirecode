@@ -12,112 +12,100 @@ import org.limewire.ui.swing.util.PropertyUtils;
  * Table format for the Audio Table when it is in My Library
  */
 public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
-    public static final int PLAY_COL = 0;
-    public static final int TITLE_COL = PLAY_COL + 1;
-    public static final int ARTIST_COL = TITLE_COL + 1;
-    public static final int ALBUM_COL = ARTIST_COL + 1;
-    public static final int LENGTH_COL = ALBUM_COL + 1;
-    public static final int GENRE_COL = LENGTH_COL + 1;
-    public static final int BITRATE_COL = GENRE_COL + 1;
-    public static final int SIZE_COL = BITRATE_COL + 1;
-    public static final int FILENAME_COL = SIZE_COL + 1;
-    public static final int TRACK_COL = FILENAME_COL + 1;
-    public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int QUALITY_COL = YEAR_COL + 1;
-    public static final int ACTION_COL = QUALITY_COL + 1;
-    public static final int DESCRIPTION_COL = ACTION_COL + 1;
-    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
+    
+    public static enum Columns {
+        PLAY("", true, true, 25),
+        TITLE(I18n.tr("Name"), true, true, 260),
+        ARTIST(I18n.tr("Artist"), true, true, 120),
+        ALBUM(I18n.tr("Album"), true, true, 180),
+        LENGTH(I18n.tr("Length"), true, true, 60),
+        GENRE(I18n.tr("Genre"), false, true, 60),
+        BITRATE(I18n.tr("Bitrate"), false, true, 50),
+        SIZE(I18n.tr("Size"), false, true, 50),
+        FILENAME(I18n.tr("Filename"), false, true, 100),
+        TRACK(I18n.tr("Track"), false, true, 50),
+        YEAR(I18n.tr("Year"), false, true, 50),
+        QUALITY(I18n.tr("Quality"), false, true, 60),
+        DESCRIPTION(I18n.tr("Description"), false, true, 100),
+        ACTION(I18n.tr("Sharing"), true, false, 50);
+     
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
+    @Override
     public String getColumnName(int column) {
-        switch (column) {
-        case PLAY_COL:
-            return "";
-        case TITLE_COL:
-            return I18n.tr("Name");
-        case ARTIST_COL:
-            return I18n.tr("Artist");
-        case ALBUM_COL:
-            return I18n.tr("Album");
-        case LENGTH_COL:
-            return I18n.tr("Length");
-        case GENRE_COL:
-            return I18n.tr("Genre");
-        case BITRATE_COL:
-            return I18n.tr("Bitrate");
-        case SIZE_COL:
-            return I18n.tr("Size");
-        case FILENAME_COL:
-            return I18n.tr("Filename");
-        case TRACK_COL:
-            return I18n.tr("Track");
-        case YEAR_COL:
-            return I18n.tr("Year");
-        case QUALITY_COL:
-            return I18n.tr("Quality");
-        case DESCRIPTION_COL:
-            return I18n.tr("Description");
-        case ACTION_COL:
-            return I18n.tr("Sharing");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-        switch (column) {
-        case PLAY_COL:
-            return baseObject;
-        case TITLE_COL:
+        Columns other = Columns.values()[column];
+        switch(other) {
+        case PLAY: return baseObject;
+        case TITLE:
             if(baseObject.getProperty(FilePropertyKey.TITLE) == null)
                 return baseObject.getProperty(FilePropertyKey.NAME);
             else
                 return baseObject.getProperty(FilePropertyKey.TITLE);
-        case ARTIST_COL:
-            return baseObject.getProperty(FilePropertyKey.AUTHOR);
-        case ALBUM_COL:
-            return baseObject.getProperty(FilePropertyKey.ALBUM);
-        case LENGTH_COL:
-            return baseObject.getProperty(FilePropertyKey.LENGTH);
-        case GENRE_COL:
-            return baseObject.getProperty(FilePropertyKey.GENRE);
-        case BITRATE_COL:
-            return baseObject.getProperty(FilePropertyKey.BITRATE);
-        case FILENAME_COL:
-            return baseObject.getFileName();
-        case SIZE_COL:
-            return baseObject.getSize();
-        case TRACK_COL:
-            return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
-        case YEAR_COL:
-            return baseObject.getProperty(FilePropertyKey.YEAR);
-        case QUALITY_COL:
-            return "";
-        case DESCRIPTION_COL: 
-            return baseObject.getProperty(FilePropertyKey.COMMENTS);
-        case ACTION_COL:
-            return baseObject;
+        case ARTIST: return baseObject.getProperty(FilePropertyKey.AUTHOR);
+        case ALBUM: return baseObject.getProperty(FilePropertyKey.ALBUM);
+        case LENGTH: return baseObject.getProperty(FilePropertyKey.LENGTH);
+        case GENRE: return baseObject.getProperty(FilePropertyKey.GENRE);
+        case BITRATE: return baseObject.getProperty(FilePropertyKey.BITRATE);
+        case FILENAME: return baseObject.getFileName();
+        case SIZE: return baseObject.getSize();
+        case TRACK: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
+        case YEAR: return baseObject.getProperty(FilePropertyKey.YEAR);
+        case QUALITY: return "";
+        case DESCRIPTION: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        case ACTION: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
     @Override
     public int getActionColumn() {
-        return ACTION_COL;
+        return Columns.ACTION.ordinal();
+    }
+    
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
     }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] {DESCRIPTION_COL, QUALITY_COL, YEAR_COL, TRACK_COL, FILENAME_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == PLAY_COL || column == ACTION_COL;
+        return column == Columns.ACTION.ordinal();
     }
 
     @Override
@@ -127,9 +115,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case ACTION_COL:
-            case PLAY_COL:
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION:
+            case PLAY:
                 return FileItem.class;
         }
         return super.getColumnClass(column);
@@ -137,11 +126,10 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
 
     @Override
     public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case PLAY_COL:
-                return new NameComparator();
-            case ACTION_COL:
-                return new ActionComparator();
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case PLAY: return new NameComparator();
+            case ACTION: return new ActionComparator();
         }
         return super.getColumnComparator(column);
     }

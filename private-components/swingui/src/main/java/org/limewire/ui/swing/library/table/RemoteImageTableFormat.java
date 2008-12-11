@@ -9,53 +9,52 @@ import org.limewire.util.FileUtils;
  * Table format for the Image Table for LW buddies and Browse hosts
  */
 public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int EXTENSION_COL = NAME_COL + 1;
-    public static final int CREATED_COL = EXTENSION_COL + 1;
-    public static final int SIZE_COL = CREATED_COL + 1;
-    public static final int TITLE_COL = SIZE_COL + 1;
-    public static final int DESCRIPTION_COL = TITLE_COL + 1;
-    private static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 300),
+        EXTENSION(I18n.tr("Extension"), true, true, 60),
+        CREATED(I18n.tr("Date Created"), true, true, 100),
+        SIZE(I18n.tr("Size"), false, true, 60),
+        TITLE(I18n.tr("Title"), false, true, 120),
+        DESCRIPTION(I18n.tr("Description"), false, true, 150);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
     @Override
     public String getColumnName(int column) {
-        switch(column) {
-            case NAME_COL:
-                return I18n.tr("Filename");
-            case SIZE_COL:
-                return I18n.tr("Size");
-            case CREATED_COL:
-                return I18n.tr("Date Created");
-            case EXTENSION_COL:
-                return I18n.tr("Extension");
-            case TITLE_COL:
-                return I18n.tr("Title");
-            case DESCRIPTION_COL:
-                return I18n.tr("Description");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-        switch(column) {
-            case NAME_COL:
-                return baseObject.getName();
-            case SIZE_COL:
-                return baseObject.getSize();
-            case CREATED_COL:
-                return baseObject.getCreationTime();
-            case EXTENSION_COL:
-                return FileUtils.getFileExtension(baseObject.getFileName());
-            case TITLE_COL:
-                return baseObject.getProperty(FilePropertyKey.TITLE);
-            case DESCRIPTION_COL:
-                return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case NAME: return baseObject.getName();
+            case SIZE: return baseObject.getSize();
+            case CREATED: return baseObject.getCreationTime();
+            case EXTENSION: return FileUtils.getFileExtension(baseObject.getFileName());
+            case TITLE: return baseObject.getProperty(FilePropertyKey.TITLE);
+            case DESCRIPTION: return baseObject.getProperty(FilePropertyKey.COMMENTS);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -66,8 +65,18 @@ public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRe
     }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return  new int[]{DESCRIPTION_COL, TITLE_COL, SIZE_COL};
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
+    }
+
+    @Override
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override

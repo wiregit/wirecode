@@ -9,88 +9,66 @@ import org.limewire.util.FileUtils;
  * Table format for the Audio Table for LW buddies and Browse hosts
  */
 public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
-    public static final int NAME_COL =0;
-    public static final int ARTIST_COL = NAME_COL + 1;
-    public static final int ALBUM_COL = ARTIST_COL + 1;
-    public static final int LENGTH_COL = ALBUM_COL + 1;
-    public static final int QUALITY_COL = LENGTH_COL + 1;
-    public static final int GENRE_COL = QUALITY_COL + 1;
-    public static final int BITRATE_COL = GENRE_COL + 1;
-    public static final int SIZE_COL = BITRATE_COL + 1;
-    public static final int TRACK_COL = SIZE_COL + 1;
-    public static final int YEAR_COL = TRACK_COL + 1;
-    public static final int FILENAME_COL = YEAR_COL + 1;
-    public static final int EXTENSION_COL = FILENAME_COL + 1;
-    public static final int DESCRIPTION_COL = EXTENSION_COL + 1;
-    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
-
+    public static enum Columns {
+        NAME(I18n.tr("Name"), true, true, 260),
+        ARTIST(I18n.tr("Artist"), true, true, 120),
+        ALBUM(I18n.tr("Album"), true, true, 180),
+        LENGTH(I18n.tr("Length"), true, true, 60),
+        QUALITY(I18n.tr("Quality"), true, true, 60),
+        GENRE(I18n.tr("Genre"), false, true, 60),
+        BITRATE(I18n.tr("Bitrate"), false, true, 50),
+        SIZE(I18n.tr("Size"), false, true, 60),
+        TRACK(I18n.tr("Track"), false, true, 50),
+        YEAR(I18n.tr("Year"), false, true, 50),
+        FILENAME(I18n.tr("Filename"), false, true, 120),
+        EXTENSION(I18n.tr("Extension"), false, true, 60),
+        DESCRIPTION(I18n.tr("Description"), false, true, 100);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
+    @Override
     public String getColumnName(int column) {
-        switch (column) {
-            case NAME_COL:
-                return I18n.tr("Name");
-            case ARTIST_COL:
-                return I18n.tr("Artist");
-            case ALBUM_COL:
-                return I18n.tr("Album");
-            case LENGTH_COL:
-                return I18n.tr("Length");
-            case QUALITY_COL:
-                return I18n.tr("Quality");
-            case GENRE_COL:
-                return I18n.tr("Genre");
-            case BITRATE_COL:
-                return I18n.tr("Bitrate");
-            case SIZE_COL:
-                return I18n.tr("Size");
-            case TRACK_COL:
-                return I18n.tr("Track");
-            case YEAR_COL:
-                return I18n.tr("Year");
-            case FILENAME_COL:
-                return I18n.tr("Filename");
-            case EXTENSION_COL:
-                return I18n.tr("Extension");
-            case DESCRIPTION_COL:
-                return I18n.tr("Description");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-        switch (column) {
-            case NAME_COL:
-                return (baseObject.getProperty(FilePropertyKey.TITLE) == null) ? baseObject.getProperty(FilePropertyKey.NAME) : baseObject.getProperty(FilePropertyKey.TITLE);
-            case ARTIST_COL:
-                return baseObject.getProperty(FilePropertyKey.AUTHOR);
-            case ALBUM_COL:
-                return baseObject.getProperty(FilePropertyKey.ALBUM);
-            case LENGTH_COL:
-                return baseObject.getProperty(FilePropertyKey.LENGTH);
-            case QUALITY_COL:
-                return "";
-            case GENRE_COL:
-                return baseObject.getProperty(FilePropertyKey.GENRE);
-            case BITRATE_COL:
-                return baseObject.getProperty(FilePropertyKey.BITRATE);
-            case SIZE_COL:
-                return baseObject.getSize();
-            case TRACK_COL:
-                return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
-            case YEAR_COL:
-                return baseObject.getProperty(FilePropertyKey.YEAR);
-            case FILENAME_COL:
-                return baseObject.getProperty(FilePropertyKey.NAME);
-            case EXTENSION_COL:
-                return FileUtils.getFileExtension(baseObject.getFileName());
-            case DESCRIPTION_COL:
-                return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case NAME: return (baseObject.getProperty(FilePropertyKey.TITLE) == null) ? baseObject.getProperty(FilePropertyKey.NAME) : baseObject.getProperty(FilePropertyKey.TITLE);
+            case ARTIST: return baseObject.getProperty(FilePropertyKey.AUTHOR);
+            case ALBUM: return baseObject.getProperty(FilePropertyKey.ALBUM);
+            case LENGTH: return baseObject.getProperty(FilePropertyKey.LENGTH);
+            case QUALITY: return "";
+            case GENRE: return baseObject.getProperty(FilePropertyKey.GENRE);
+            case BITRATE: return baseObject.getProperty(FilePropertyKey.BITRATE);
+            case SIZE: return baseObject.getSize();
+            case TRACK: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
+            case YEAR: return baseObject.getProperty(FilePropertyKey.YEAR);
+            case FILENAME: return baseObject.getProperty(FilePropertyKey.NAME);
+            case EXTENSION: return FileUtils.getFileExtension(baseObject.getFileName());
+            case DESCRIPTION: return baseObject.getProperty(FilePropertyKey.COMMENTS);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -99,10 +77,20 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     public int getActionColumn() {
         return -1;
     }
+    
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
+    }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] { DESCRIPTION_COL, EXTENSION_COL, FILENAME_COL, YEAR_COL, TRACK_COL, SIZE_COL, BITRATE_COL, GENRE_COL};
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override

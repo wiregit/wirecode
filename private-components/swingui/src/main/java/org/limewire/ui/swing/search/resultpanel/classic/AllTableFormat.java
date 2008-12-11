@@ -1,12 +1,11 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import java.awt.Component;
 import java.util.Comparator;
 
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
+import org.limewire.ui.swing.util.I18n;
 
 /**
  * This class specifies the content of a table that contains
@@ -14,63 +13,86 @@ import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
  */
 public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
 
-    public static final int FROM_INDEX = 0;
-    public static final int NAME_INDEX = 1;
-    public static final int FILE_EXTENSION_INDEX = 2;
-    public static final int TYPE_INDEX = 3;
-    public static final int SIZE_INDEX = 4;
-    
-    public AllTableFormat() {
-        super(SIZE_INDEX, 
-              tr("From"),
-              tr("Filename"), 
-              tr("Extension"),
-              tr("Type"), 
-              tr("Size"));
+    public static enum Columns {
+        FROM(I18n.tr("From"), true, 55),
+        NAME(I18n.tr("Filename"), true, 550),
+        EXTENSION(I18n.tr("Extension"), true, 80),
+        TYPE(I18n.tr("Type"), true, 60),
+        SIZE(I18n.tr("Size"), true, 60);
+        
+        private final String columnName;
+        private boolean isShown;
+        private int initialWidth;
+        
+        Columns(String name, boolean isShown, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }
+        public int getInitialWidth() { return initialWidth; }
     }
     
     @Override
-    public Class getColumnClass(int index) {
-        return index == NAME_INDEX ? Component.class :
-            index == SIZE_INDEX ? Long.class :
-            index == FROM_INDEX ? VisualSearchResult.class :
-            super.getColumnClass(index);
+    public Class getColumnClass(int column) {
+        Columns other = Columns.values()[column];
+        switch(other) {
+        case NAME: return Component.class;
+        case SIZE: return Long.class;
+        case FROM: return VisualSearchResult.class;
+        }
+        return super.getColumnClass(column);
+    }
+    
+    @Override
+    public int getColumnCount() {
+        return Columns.values().length;
     }
 
     @Override
-    public Object getColumnValue(VisualSearchResult vsr, int index) {
+    public String getColumnName(int column) {
+        return Columns.values()[column].getColumnName();
+    }
+
+    @Override
+    public Object getColumnValue(VisualSearchResult vsr, int column) {
         this.vsr = vsr;
-
-        switch (index) {
-            case FROM_INDEX: return vsr;
-            case NAME_INDEX: return vsr;
-            case TYPE_INDEX: return vsr.getCategory();
-            case SIZE_INDEX: return vsr.getSize();
-            case FILE_EXTENSION_INDEX: return vsr.getFileExtension();
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case FROM: return vsr;
+            case NAME: return vsr;
+            case TYPE: return vsr.getCategory();
+            case SIZE: return vsr.getSize();
+            case EXTENSION: return vsr.getFileExtension();
             default: return null;
         }
     }
-
+    
     @Override
-    public int getInitialColumnWidth(int index) {
-        switch (index) {
-            case FROM_INDEX: return 55;
-            case NAME_INDEX: return 550;
-            case TYPE_INDEX: return 80;
-            case SIZE_INDEX: return 60;
-            case FILE_EXTENSION_INDEX: return 60;
-            default: return 100;
-        }
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
     }
 
     @Override
+    public boolean isColumnHideable(int column) {
+        return true;
+    }
+
+    @Override
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
+    }
+    
+    @Override
     public boolean isEditable(VisualSearchResult vsr, int column) {
-        return column == FROM_INDEX;
+        return column == Columns.FROM.ordinal();
     }
 
     @Override
     public int getNameColumn() {
-        return NAME_INDEX;
+        return Columns.NAME.ordinal();
     }
 
     /**
@@ -80,9 +102,9 @@ public class AllTableFormat extends ResultsTableFormat<VisualSearchResult> {
      */
     @Override
     public Comparator getColumnComparator(int index) {
-        switch (index) {
-            case FROM_INDEX:
-                return getFromComparator();
+        Columns other = Columns.values()[index];
+        switch(other) {
+            case FROM: return getFromComparator();
         }
         return super.getColumnComparator(index);
     }

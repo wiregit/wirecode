@@ -8,43 +8,49 @@ import org.limewire.util.FileUtils;
  * Table format for Other Table for LW buddies and Browse hosts
  */
 public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int TYPE_COL = NAME_COL + 1;
-    public static final int EXTENSION_COL = TYPE_COL + 1;
-    public static final int SIZE_COL = EXTENSION_COL + 1;
-    public static final int COLUMN_COUNT = SIZE_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 450),
+        TYPE(I18n.tr("Type"), true, true, 60),
+        EXTENSION(I18n.tr("Extension"), true, true, 60),
+        SIZE(I18n.tr("Size"), true, false, 60);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
+    @Override
     public String getColumnName(int column) {
-        switch (column) {
-            case NAME_COL:
-                return I18n.tr("Filename");        
-            case SIZE_COL:
-                return I18n.tr("Size");
-            case TYPE_COL:
-                return I18n.tr("Type");
-            case EXTENSION_COL:
-                return I18n.tr("Extension");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-        switch (column) {
-            case NAME_COL:
-                return baseObject;  
-            case SIZE_COL:
-                return baseObject.getSize();
-            case TYPE_COL:
-                return "Verbal description";
-            case EXTENSION_COL:
-                return FileUtils.getFileExtension(baseObject.getFileName());
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case NAME: return baseObject;  
+            case SIZE: return baseObject.getSize();
+            case TYPE: return "Verbal description";
+            case EXTENSION: return FileUtils.getFileExtension(baseObject.getFileName());
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -55,8 +61,18 @@ public class RemoteOtherTableFormat<T extends FileItem> extends AbstractRemoteLi
     }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] { };
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
+    }
+
+    @Override
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override

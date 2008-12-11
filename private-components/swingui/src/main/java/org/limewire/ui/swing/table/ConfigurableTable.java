@@ -10,13 +10,11 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.search.RowPresevationListener;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
@@ -26,7 +24,7 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     private final Log LOG = LogFactory.getLog(getClass());
     private EventList<E> eventList;
     private EventTableModel<E> tableModel;
-    private TableFormat<E> tableFormat;
+    private VisibleTableFormat<E> tableFormat;
     private E selectedRow;
 
     public ConfigurableTable(boolean showHeaders) {
@@ -77,15 +75,11 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public void setColumnWidth(int columnIndex, int width) {
         getColumnModel().getColumn(columnIndex).setPreferredWidth(width);
     }
-
-    /**
-     * Sets the visibility of a given column.
-     * @param columnIndex the column index
-     * @param visible true to be visible; false to hide
-     */
-    public void setColumnVisible(int columnIndex, boolean visible) {
-        TableColumnExt column = getColumnExt(columnIndex);
-        column.setVisible(visible);
+    
+    public void initColumnVisibility() {
+        for(int i = tableFormat.getColumnCount() -1; i >= 0; i--) {
+            getColumnExt(i).setVisible(tableFormat.isColumnHiddenAtStartup(i));
+        }
     }
 
     /**
@@ -101,7 +95,7 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
      * Set the object that controls the columns displayed in this table.
      * @param tableFormat the TableFormat
      */
-    public void setTableFormat(TableFormat<E> tableFormat) {
+    public void setTableFormat(VisibleTableFormat<E> tableFormat) {
         if (tableFormat == null) {
             throw new IllegalArgumentException("tableFormat can't be null");
         }

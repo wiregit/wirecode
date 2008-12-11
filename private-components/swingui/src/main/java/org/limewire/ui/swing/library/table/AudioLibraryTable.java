@@ -13,17 +13,17 @@ public class AudioLibraryTable<T extends LocalFileItem> extends LibraryTable<T> 
     public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player, SaveLocationExceptionHandler saveLocationExceptionHandler, ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
         super(libraryItems, new AudioTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
         
-        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellEditor(new PlayRendererEditor(this, player));
-        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setCellRenderer(new PlayRendererEditor(this, player));
-        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMaxWidth(14);
-        getColumnModel().getColumn(AudioTableFormat.PLAY_COL).setMinWidth(14);
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellEditor(new PlayRendererEditor(this, player));
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellRenderer(new PlayRendererEditor(this, player));
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setMaxWidth(14);
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setMinWidth(14);
     }
     
     @Override
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
         super.setupCellRenderers(format);
 
-        getColumnModel().getColumn(AudioTableFormat.LENGTH_COL).setCellRenderer(new TimeRenderer());
-        getColumnModel().getColumn(AudioTableFormat.SIZE_COL).setCellRenderer(new FileSizeRenderer());
+        getColumnModel().getColumn(AudioTableFormat.Columns.LENGTH.ordinal()).setCellRenderer(new TimeRenderer());
+        getColumnModel().getColumn(AudioTableFormat.Columns.SIZE.ordinal()).setCellRenderer(new FileSizeRenderer());
     }
 }

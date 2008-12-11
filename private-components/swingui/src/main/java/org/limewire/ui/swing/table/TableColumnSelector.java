@@ -23,7 +23,7 @@ public class TableColumnSelector {
     
     private final ColumnListener listener;
     
-    public TableColumnSelector(JXTable table, TableFormat format) {
+    public TableColumnSelector(JXTable table, VisibleTableFormat format) {
         popupMenu = new JPopupMenu();
         this.listener = new ColumnListener();
         this.table = table;
@@ -31,8 +31,10 @@ public class TableColumnSelector {
         addColumnHeader(format);
     }
     
-    private void addColumnHeader(TableFormat format) {
+    private void addColumnHeader(VisibleTableFormat format) {
         for(int i = 0; i < format.getColumnCount(); i++) {
+            if(!format.isColumnHideable(i))
+                continue;
             JMenuItem item = createMenuItem(format, i);
             item.addActionListener(listener);
             popupMenu.add(item);

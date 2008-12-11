@@ -4,9 +4,10 @@ import java.util.Comparator;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.table.AbstractAdvancedTableFormat;
+import org.limewire.ui.swing.table.VisibleTableFormat;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 
@@ -14,15 +15,9 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
  * This class is the base class for each of the TableFormat classes
  * that describe the various table views of search results.
  */
-public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<E> implements WritableTableFormat<E> {
+public abstract class ResultsTableFormat<E> implements VisibleTableFormat<E>, AdvancedTableFormat<E>, WritableTableFormat<E> {
 
     protected VisualSearchResult vsr;
-    private int lastVisibleColumnIndex;
-
-    protected ResultsTableFormat(int lastVisibleColumnIndex, String...columnNames) {
-        super(columnNames);
-        this.lastVisibleColumnIndex = lastVisibleColumnIndex;
-    }
 
     @Override
     public Class getColumnClass(int index) {
@@ -31,25 +26,6 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
 
     public Comparator getColumnComparator(int index) {
         return GlazedLists.comparableComparator();
-    }
-
-
-    /**
-     * Gets the initial column width of the column with a given index.
-     * @param index the column index
-     * @return the initial column width
-     */
-    public abstract int getInitialColumnWidth(int index);
-
-    /**
-     * Gets the index of the last column that should be visible by default.
-     * All columns past this start out hidden and
-     * can be shown by right-clicking on the column header
-     * and selecting the corresponding checkbox.
-     * @return the column index
-     */
-    public int getLastVisibleColumnIndex() {
-        return lastVisibleColumnIndex;
     }
 
     /**
@@ -74,9 +50,6 @@ public abstract class ResultsTableFormat<E> extends AbstractAdvancedTableFormat<
     abstract public int getNameColumn();
 
     abstract public boolean isEditable(VisualSearchResult vsr, int column);// {
-//        return false;
-//        return index == actionColumnIndex;
-//    }
 
     public VisualSearchResult setColumnValue(
         VisualSearchResult vsr, Object value, int index) {

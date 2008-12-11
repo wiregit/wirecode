@@ -11,71 +11,79 @@ import org.limewire.ui.swing.util.I18n;
  * Table format for the Program Table when it is in My Library
  */
 public class ProgramTableFormat<T extends LocalFileItem> extends AbstractMyLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int SIZE_COL = NAME_COL + 1;
-    public static final int PLATFORM_COL = SIZE_COL + 1;
-    public static final int COMPANY_COL = PLATFORM_COL + 1;
-    public static final int DESCRIPTION_COL = COMPANY_COL + 1;
-    public static final int ACTION_COL = DESCRIPTION_COL + 1;
-    public static final int COLUMN_COUNT = ACTION_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 250),
+        SIZE(I18n.tr("Size"), false, true, 60),
+        PLATFORM(I18n.tr("Type"), false, true, 120),
+        COMPANY(I18n.tr("Size"), true, true, 120),
+        DESCRIPTION(I18n.tr("Type"), false, true,120),
+        ACTION(I18n.tr("Sharing"), true, false, 60);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
+    @Override
     public String getColumnName(int column) {
-        switch (column) {
-        case NAME_COL:
-            return I18n.tr("Filename");
-        case SIZE_COL:
-            return I18n.tr("Size");
-        case PLATFORM_COL:
-            return I18n.tr("Platform");
-        case COMPANY_COL:
-            return I18n.tr("Company");
-        case DESCRIPTION_COL:
-            return I18n.tr("Description");
-        case ACTION_COL:
-            return I18n.tr("Sharing");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
-
 
     @Override
     public Object getColumnValue(LocalFileItem baseObject, int column) {
-        switch (column) {
-        case NAME_COL:
-            //must return FileItem, not String for IconRenderer to work
-            return baseObject;
-        case PLATFORM_COL:
-            return baseObject.getProperty(FilePropertyKey.PLATFORM);
-        case COMPANY_COL:
-        	return baseObject.getProperty(FilePropertyKey.COMPANY);
-        case SIZE_COL:
-            return baseObject.getSize();
-        case DESCRIPTION_COL:
-            return "";
-        case ACTION_COL:
-            return baseObject;
+        Columns other = Columns.values()[column];
+        switch(other) {
+        case NAME: return baseObject;
+        case PLATFORM: return baseObject.getProperty(FilePropertyKey.PLATFORM);
+        case COMPANY: return baseObject.getProperty(FilePropertyKey.COMPANY);
+        case SIZE: return baseObject.getSize();
+        case DESCRIPTION: return "";
+        case ACTION: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
 
     @Override
     public int getActionColumn() {
-        return ACTION_COL;
+        return Columns.ACTION.ordinal();
     }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] {PLATFORM_COL, DESCRIPTION_COL, SIZE_COL};
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
     }
 
+    @Override
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
+    }
+    
     @Override
     public boolean isEditable(T baseObject, int column) {
-        return column == ACTION_COL;
+        return column == Columns.ACTION.ordinal();
     }
 
     @Override
@@ -85,18 +93,18 @@ public class ProgramTableFormat<T extends LocalFileItem> extends AbstractMyLibra
     
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return FileItem.class;
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION: return FileItem.class;
         }
         return super.getColumnClass(column);
     }
 
     @Override
     public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return new ActionComparator();
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION: return new ActionComparator();
         }
         return super.getColumnComparator(column);
     }

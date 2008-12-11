@@ -9,72 +9,61 @@ import org.limewire.util.FileUtils;
  * Table format for the Video Table for LW buddies and Browse hosts
  */
 public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int EXTENSION_COL = NAME_COL + 1;
-    public static final int LENGTH_COL = EXTENSION_COL + 1;
-    public static final int MISC_COL = LENGTH_COL + 1;
-    public static final int QUALITY_COL = MISC_COL + 1;
-    public static final int SIZE_COL = QUALITY_COL + 1;
-    public static final int YEAR_COL = SIZE_COL + 1;
-    public static final int RATING_COL = YEAR_COL + 1;
-    public static final int DIMENSION_COL = RATING_COL + 1;
-    public static final int DESCRIPTION_COL = DIMENSION_COL + 1;
-    public static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 260),
+        EXTENSION(I18n.tr("Extension"), true, true, 60),
+        LENGTH(I18n.tr("Length"), true, true, 80),
+        MISC(I18n.tr("Misc"), true, true, 120),
+        QUALITY(I18n.tr("Quality"), true, true, 60),
+        SIZE(I18n.tr("Size"), true, true, 60),
+        YEAR(I18n.tr("Year"), false, false, 60),
+        RATING(I18n.tr("Rating"), false, true, 60),
+        DIMENSION(I18n.tr("Resolution"), false, true, 80),
+        DESCRIPTION(I18n.tr("Description"), false, true, 100),;
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
 
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
+    @Override
     public String getColumnName(int column) {
-        switch (column) {
-            case NAME_COL:
-                return I18n.tr("Filename");
-            case EXTENSION_COL:
-                return I18n.tr("Extension");
-            case LENGTH_COL:
-                return I18n.tr("Length");
-            case MISC_COL:
-                return I18n.tr("Misc");
-            case QUALITY_COL:
-                return I18n.tr("Quality");
-            case SIZE_COL:
-                return I18n.tr("Size");
-            case YEAR_COL:
-                return I18n.tr("Year");
-            case RATING_COL:
-                return I18n.tr("Rating");
-            case DIMENSION_COL:
-                return I18n.tr("Resolution");  
-            case DESCRIPTION_COL:
-                return I18n.tr("Description");
-        }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-        switch (column) {
-            case NAME_COL:
-                return baseObject.getName();
-            case EXTENSION_COL:
-                return FileUtils.getFileExtension(baseObject.getFileName());
-            case LENGTH_COL:
-                return baseObject.getProperty(FilePropertyKey.LENGTH);
-            case MISC_COL:
-                return baseObject.getProperty(FilePropertyKey.COMMENTS);
-            case QUALITY_COL:
-                return "";
-            case YEAR_COL:
-                return baseObject.getProperty(FilePropertyKey.YEAR);
-            case RATING_COL:
-                return baseObject.getProperty(FilePropertyKey.RATING);
-            case SIZE_COL:
-                return baseObject.getSize();
-            case DESCRIPTION_COL:
-                return baseObject.getProperty(FilePropertyKey.COMMENTS);
-            case DIMENSION_COL:
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case NAME: return baseObject.getName();
+            case EXTENSION: return FileUtils.getFileExtension(baseObject.getFileName());
+            case LENGTH: return baseObject.getProperty(FilePropertyKey.LENGTH);
+            case MISC: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case QUALITY: return "";
+            case YEAR: return baseObject.getProperty(FilePropertyKey.YEAR);
+            case RATING: return baseObject.getProperty(FilePropertyKey.RATING);
+            case SIZE: return baseObject.getSize();
+            case DESCRIPTION: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case DIMENSION:
                 if(baseObject.getProperty(FilePropertyKey.WIDTH) == null || baseObject.getProperty(FilePropertyKey.HEIGHT) == null)
                     return null;
                 else
@@ -87,10 +76,20 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
     public int getActionColumn() {
         return -1;
     }
+    
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
+    }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[] { DESCRIPTION_COL, DIMENSION_COL, RATING_COL, YEAR_COL};
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override

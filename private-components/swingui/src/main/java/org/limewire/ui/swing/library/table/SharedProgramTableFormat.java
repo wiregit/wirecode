@@ -18,9 +18,9 @@ public class SharedProgramTableFormat<T extends LocalFileItem> extends ProgramTa
     
     @Override
     public Comparator getColumnComparator(int column) {
-        switch (column) {
-            case ACTION_COL:
-                return new CheckBoxComparator();
+        Columns other = Columns.values()[column];
+        switch(other) {
+            case ACTION: return new CheckBoxComparator();
         }
         return super.getColumnComparator(column);
     }

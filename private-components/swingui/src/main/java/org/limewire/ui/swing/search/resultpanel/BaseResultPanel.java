@@ -176,12 +176,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
 
-        for(int columnIndex = 0; columnIndex < tableFormat.getLastVisibleColumnIndex() + 1; columnIndex++) {        
-            int initialColumnWidth = tableFormat.getInitialColumnWidth(columnIndex);
-            resultsList.setColumnWidth(columnIndex, initialColumnWidth);
+        // Set default width of all visible columns.
+        for (int i = 0; i < tableFormat.getColumnCount(); i++) {
+            resultsList.setColumnWidth(i, tableFormat.getInitialWidth(i));
         }
-        
-//        resultsList.getColumnModel().getColumn(2).setMaxWidth(ListViewTableFormat.ACTIONS_WIDTH);
         
         resultsList.setRowHeightEnabled(true);
         //add listener to table model to set row heights based on contents of the search results
@@ -263,8 +261,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         //link the jxtable column headers to the sorted list
         EventListJXTableSorting.install(resultsTable, sortedList);
-        
-        int columnCount = tableFormat.getColumnCount();
             
         setupCellRenderers(tableFormat);
 
@@ -274,17 +270,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this));
 
         // Set default width of all visible columns.
-        int lastVisibleColumnIndex = tableFormat.getLastVisibleColumnIndex();
-        for (int i = 0; i <= lastVisibleColumnIndex; i++) {
-            resultsTable.setColumnWidth(i, tableFormat.getInitialColumnWidth(i));
+        for (int i = 0; i < tableFormat.getColumnCount(); i++) {
+            resultsTable.setColumnWidth(i, tableFormat.getInitialWidth(i));
         }
-
-        // Make some columns invisible by default.
-        // We have to loop backwards because making a column invisible
-        // changes the index of the columns after it.
-        for (int i = columnCount - 1; i > lastVisibleColumnIndex; i--) {
-            resultsTable.setColumnVisible(i, false);
-        }
+        resultsTable.initColumnVisibility();
 
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
     }

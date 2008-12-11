@@ -9,58 +9,54 @@ import org.limewire.util.FileUtils;
  * Table format for the Document Table for LW buddies and Browse hosts
  */
 public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends AbstractRemoteLibraryFormat<T> {
-    public static final int NAME_COL = 0;
-    public static final int TYPE_COL = NAME_COL + 1;
-    public static final int EXTENSION_COL = TYPE_COL + 1;
-    public static final int SIZE_COL = EXTENSION_COL + 1;
-    public static final int CREATED_COL = SIZE_COL + 1;
-    public static final int AUTHOR_COL = CREATED_COL + 1;
-    public static final int DESCRIPTION_COL = AUTHOR_COL + 1;
-    private static final int COLUMN_COUNT = DESCRIPTION_COL + 1;
+    public static enum Columns {
+        NAME(I18n.tr("Filename"), true, true, 250),
+        TYPE(I18n.tr("Type"), true, true, 80),
+        EXTENSION(I18n.tr("Extension"), true, true, 60),
+        SIZE(I18n.tr("Size"), true, true, 60),
+        CREATED(I18n.tr("Date Created"), true, true, 100),
+        AUTHOR(I18n.tr("Author"), false, true, 120),
+        DESCRIPTION(I18n.tr("Description"), false, true, 120);
+        
+        private final String columnName;
+        private final boolean isShown;
+        private final boolean isHideable;
+        private final int initialWidth;
+        
+        Columns(String name, boolean isShown, boolean isHideable, int initialWidth) {
+            this.columnName = name;
+            this.isShown = isShown;
+            this.isHideable = isHideable;
+            this.initialWidth = initialWidth;
+        }
+        
+        public String getColumnName() { return columnName; }
+        public boolean isShown() { return isShown; }        
+        public boolean isHideable() { return isHideable; }
+        public int getInitialWidth() { return initialWidth; }
+    }
     
     @Override
     public int getColumnCount() {
-        return COLUMN_COUNT;
+        return Columns.values().length;
     }
 
     @Override
     public String getColumnName(int column) {
-         switch (column) {
-             case AUTHOR_COL:
-                 return I18n.tr("Author");
-             case CREATED_COL:
-                 return I18n.tr("Date Created");
-             case NAME_COL:
-                 return I18n.tr("Filename");
-             case SIZE_COL:
-                 return I18n.tr("Size");
-             case TYPE_COL:
-                 return I18n.tr("Type");     
-             case EXTENSION_COL:
-                 return I18n.tr("Extension");
-             case DESCRIPTION_COL:
-                 return I18n.tr("Description");
-         }
-        throw new IllegalArgumentException("Unknown column:" + column);
+        return Columns.values()[column].getColumnName();
     }
 
     @Override
     public Object getColumnValue(T baseObject, int column) {
-         switch (column) {
-             case AUTHOR_COL:
-                 return baseObject.getProperty(FilePropertyKey.AUTHOR);
-             case CREATED_COL:
-                 return baseObject.getCreationTime();
-             case NAME_COL:
-                 return baseObject;
-             case SIZE_COL:
-                 return baseObject.getSize();
-             case TYPE_COL:
-                 return baseObject.getProperty(FilePropertyKey.TOPIC);  
-             case EXTENSION_COL: 
-                 return FileUtils.getFileExtension(baseObject.getFileName());
-             case DESCRIPTION_COL:
-                 return "";
+        Columns other = Columns.values()[column];
+        switch(other) {
+             case AUTHOR: return baseObject.getProperty(FilePropertyKey.AUTHOR);
+             case CREATED: return baseObject.getCreationTime();
+             case NAME: return baseObject;
+             case SIZE: return baseObject.getSize();
+             case TYPE: return baseObject.getProperty(FilePropertyKey.TOPIC);  
+             case EXTENSION: return FileUtils.getFileExtension(baseObject.getFileName());
+             case DESCRIPTION: return "";
          }
          throw new IllegalArgumentException("Unknown column:" + column);
     }
@@ -69,10 +65,20 @@ public class RemoteDocumentTableFormat<T extends RemoteFileItem> extends Abstrac
     public int getActionColumn() {
         return -1;
     }
+    
+    @Override
+    public boolean isColumnHiddenAtStartup(int column) {
+        return Columns.values()[column].isShown();
+    }
+    
+    @Override
+    public boolean isColumnHideable(int column) {
+        return Columns.values()[column].isHideable();
+    }
 
     @Override
-    public int[] getDefaultHiddenColums() {
-        return new int[]{ DESCRIPTION_COL, AUTHOR_COL};
+    public int getInitialWidth(int column) {
+        return Columns.values()[column].getInitialWidth();
     }
 
     @Override
