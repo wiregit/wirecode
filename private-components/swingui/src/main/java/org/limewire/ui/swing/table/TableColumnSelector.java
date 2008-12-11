@@ -2,6 +2,9 @@ package org.limewire.ui.swing.table;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
@@ -32,10 +35,15 @@ public class TableColumnSelector {
     }
     
     private void addColumnHeader(VisibleTableFormat format) {
+        Map<String, Integer> map = new HashMap<String, Integer>();
         for(int i = 0; i < format.getColumnCount(); i++) {
             if(!format.isColumnHideable(i))
                 continue;
-            JMenuItem item = createMenuItem(format, i);
+            map.put(format.getColumnName(i), Integer.valueOf(i));
+        }
+        TreeSet<String> sortedSet = new TreeSet<String>(map.keySet());
+        for(String value : sortedSet) {
+            JMenuItem item = createMenuItem(format, map.get(value));
             item.addActionListener(listener);
             popupMenu.add(item);
         }
