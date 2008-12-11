@@ -33,6 +33,7 @@ public class LimeMozillaOverrides {
         prefService.getBranch("browser.download.").setCharPref("dir", downloadDir);
         prefService.getBranch("browser.download.manager.").setBoolPref("showWhenStarting", 0);
         prefService.getBranch("browser.download.manager.").setBoolPref("showAlertOnComplete", 0);
+        prefService.getBranch("general.useragent.extra.").setCharPref("firefox", "LimeWire");
         
         //prevents mozilla from beiing in offline mode inside of limewire.
         prefService.getBranch("browser.").setBoolPref("offline", 0);
