@@ -129,7 +129,7 @@ public class MyLibraryPanel extends LibraryPanel {
 
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {        
         //TODO: can this be a singleton??? 
-        final ShareWidget<LocalFileItem> fileShareWidget = new FileShareWidget(shareListManager, allFriends);
+        final ShareWidget<File> fileShareWidget = new FileShareWidget(shareListManager, allFriends);
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 

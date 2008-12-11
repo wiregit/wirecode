@@ -135,7 +135,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      */
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
-            JScrollPane scrollPane, ShareWidget<LocalFileItem> sharePanel) {
+            JScrollPane scrollPane, ShareWidget<File> sharePanel) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
                 shareListManager, magnetLinkFactory, allFriends, localItemPropFactory);
         

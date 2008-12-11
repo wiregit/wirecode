@@ -51,7 +51,7 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
  * be files in your own library or remote files in someone else's library. 
  */
 public class LibraryTable<T extends FileItem> extends MouseableTable
-    implements Sharable<LocalFileItem>, Disposable, LibraryOperable {
+    implements Sharable<File>, Disposable, LibraryOperable {
     
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
@@ -60,7 +60,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     
     private TableRendererEditor shareEditor;
-    private ShareWidget<LocalFileItem> librarySharePanel;
+    private ShareWidget<File> shareWidget;
     
     protected final int rowHeight = 20;
     
@@ -132,8 +132,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         return new TableColumnSelector(this, format).getPopupMenu();
     }
     
-    public void enableMyLibrarySharing(ShareWidget<LocalFileItem> librarySharePanel) {
-        this.librarySharePanel = librarySharePanel;
+    public void enableMyLibrarySharing(ShareWidget<File> shareWidget) {
+        this.shareWidget = shareWidget;
         shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(new ShareAction(I18n.tr("Share")));
         getColumnModel().getColumn(format.getActionColumn()).setCellEditor(shareEditor);
         getColumnModel().getColumn(format.getActionColumn()).setCellRenderer(shareTableRendererEditorFactory.createShareTableRendererEditor(null));
@@ -205,8 +205,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
             int selectedIndex = convertRowIndexToModel(getEditingRow());
             getSelectionModel().setSelectionInterval(selectedIndex, selectedIndex);
             
-            librarySharePanel.setShareable((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex));
-            librarySharePanel.show(shareEditor);
+            shareWidget.setShareable(((LocalFileItem) ((LibraryTableModel)getModel()).getElementAt(selectedIndex)).getFile());
+            shareWidget.show(shareEditor);
             shareEditor.cancelCellEditing();
         }
         

@@ -20,6 +20,10 @@ public class LimeWireUiDownloadsTableModule extends AbstractModule {
                 FactoryProvider.newFactory(
                         DownloadTableFactory.class, DownloadTable.class));
         
+        bind(DownloadActionHandlerFactory.class).toProvider(
+                FactoryProvider.newFactory(
+                        DownloadActionHandlerFactory.class, DownloadActionHandler.class));
+        
         bind(new TypeLiteral<PropertiesFactory<DownloadItem>>(){}).to(DownloadItemPropertiesFactory.class);
     }
 

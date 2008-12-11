@@ -1,10 +1,20 @@
 package org.limewire.ui.swing.downloads.table;
 
+import java.io.File;
+import java.util.Collection;
+
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
+import org.limewire.ui.swing.library.sharing.FileShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.util.NotImplementedException;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import com.google.inject.name.Named;
 
 import ca.odell.glazedlists.EventList;
 
@@ -26,10 +36,14 @@ public class DownloadActionHandler {
     
     private EventList<DownloadItem> downloadItems;
     private PropertiesFactory<DownloadItem> propertiesFactory;
+    private ShareWidget<File> shareWidget;
     
-    public DownloadActionHandler(EventList<DownloadItem> downloadItems, PropertiesFactory<DownloadItem> propertiesFactory){
+    @AssistedInject
+    public DownloadActionHandler(PropertiesFactory<DownloadItem> propertiesFactory, 
+            ShareListManager shareListManager, @Named("known") Collection<Friend> allFriends, @Assisted EventList<DownloadItem> downloadItems){
         this.downloadItems = downloadItems;
         this.propertiesFactory = propertiesFactory;
+        this.shareWidget = new FileShareWidget(shareListManager, allFriends);
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){
@@ -52,7 +66,10 @@ public class DownloadActionHandler {
         } else if (actionCommmand == REMOVE_COMMAND){
             downloadItems.remove(item);
         } else if (actionCommmand == SHARE_COMMAND){
-            throw new NotImplementedException("SHARE_COMMAND not implemented");
+            shareWidget.setShareable(item.getDownloadingFile());
+            shareWidget.show(null);
         }
     }
+    
+
 }

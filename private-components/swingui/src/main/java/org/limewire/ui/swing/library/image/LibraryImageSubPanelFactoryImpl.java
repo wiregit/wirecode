@@ -52,7 +52,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     @Override
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder,
             EventList<LocalFileItem> eventList, LocalFileList fileList,
-            ImageLibraryPopupParams params, ShareWidget<LocalFileItem> shareWidget) {
+            ImageLibraryPopupParams params, ShareWidget<File> shareWidget) {
 
         LibraryImageSubPanel panel = new LibraryImageSubPanel(parentFolder, eventList, fileList, params);
         ImageList list = panel.getImageList();
@@ -97,7 +97,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         return renderer;
     }
     
-    private TableRendererEditor enableMyLibraryEditor(ShareWidget<LocalFileItem> shareWidget, LibraryImageSubPanel parent){
+    private TableRendererEditor enableMyLibraryEditor(ShareWidget<File> shareWidget, LibraryImageSubPanel parent){
         ShareAction action = new ShareAction(I18n.tr("Sharing"), shareWidget, parent);
         ShareTableRendererEditor shareEditor = shareTableRendererEditorFactory.createShareTableRendererEditor(action);
         action.setEditor(shareEditor);
@@ -133,10 +133,10 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
     
     private class ShareAction extends AbstractAction {
         private ShareTableRendererEditor shareEditor;
-        private ShareWidget<LocalFileItem> shareWidget;
+        private ShareWidget<File> shareWidget;
         private LibraryImageSubPanel parent;
 
-        public ShareAction(String text, ShareWidget<LocalFileItem> shareWidget, LibraryImageSubPanel parent){
+        public ShareAction(String text, ShareWidget<File> shareWidget, LibraryImageSubPanel parent){
             super(text);
             this.shareWidget = shareWidget;
             this.parent = parent;
@@ -148,7 +148,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            shareWidget.setShareable(shareEditor.getLocalFileItem());
+            shareWidget.setShareable(shareEditor.getLocalFileItem().getFile());
           
             Point convertedLocation = 
                 SwingUtilities.convertPoint(shareEditor, shareEditor.getShareButton().getLocation(), parent.getImageList());

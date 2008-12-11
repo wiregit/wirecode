@@ -40,7 +40,7 @@ public class LibraryImagePanel extends JPanel
     implements ListEventListener<List<LocalFileItem>>, Disposable, Scrollable, LibraryOperable {
     
     private LibraryImageSubPanelFactory factory;
-    private ShareWidget<LocalFileItem> shareWidget;
+    private ShareWidget<File> shareWidget;
     
     private final EventList<LocalFileItem> currentEventList;
 
@@ -70,7 +70,7 @@ public class LibraryImagePanel extends JPanel
     public LibraryImagePanel(String name, ImageLibraryPopupParams params, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, JScrollPane scrollPane,
             LibraryImageSubPanelFactory factory,
-            ShareWidget<LocalFileItem> shareWidget,
+            ShareWidget<File> shareWidget,
             LocalFileList selectedFriendList) {       
         super(new VerticalLayout());
         

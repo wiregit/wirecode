@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.util;
 
+import java.io.File;
+
 import org.limewire.core.api.Category;
+import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
 public class CategoryUtils {
@@ -33,4 +36,11 @@ public class CategoryUtils {
 
         return Category.OTHER;
     }
+    
+    /** Returns the Category of the file. */
+    public static Category getCategory(File f) {
+        MediaType mt = MediaType.getMediaTypeForExtension(FileUtils.getFileExtension(f));
+        return getCategory(mt);
+    }
+    
 }

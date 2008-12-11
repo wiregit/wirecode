@@ -15,7 +15,7 @@ import ca.odell.glazedlists.EventList;
 public interface LibraryImageSubPanelFactory {
 
     public LibraryImageSubPanel createMyLibraryImageSubPanel(File parentFolder, EventList<LocalFileItem> eventList, 
-            LocalFileList fileList, ImageLibraryPopupParams params, ShareWidget<LocalFileItem> shareWidget);
+            LocalFileList fileList, ImageLibraryPopupParams params, ShareWidget<File> shareWidget);
 
     public LibraryImageSubPanel createSharingLibraryImageSubPanel(File parentFolder, EventList<LocalFileItem> eventList, 
             LocalFileList fileList, ImageLibraryPopupParams params, LocalFileList currentFriendList);

@@ -3,7 +3,6 @@ package org.limewire.ui.swing.downloads.table;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
-import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -24,12 +23,15 @@ public class DownloadTable extends AbstractDownloadTable {
     private DownloadTableModel model;
 
     @AssistedInject
-	public DownloadTable(DownloadTableCellFactory tableCellFactory, PropertiesFactory<DownloadItem> propertiesFactory,
-	        @Assisted EventList<DownloadItem> downloadItems) {		
+	public DownloadTable(DownloadTableCellFactory tableCellFactory, DownloadActionHandlerFactory downloadActionHandlerFactory, 
+	        @Assisted EventList<DownloadItem> downloadItems) {	
+        
 
         GuiUtils.assignResources(this);
         
-        initialise(downloadItems, propertiesFactory);
+        DownloadActionHandler actionHandler = downloadActionHandlerFactory.create(downloadItems);
+        
+        initialise(downloadItems, actionHandler);
         
         setShowGrid(false, false);
         this.setHighlighters();
@@ -38,7 +40,7 @@ public class DownloadTable extends AbstractDownloadTable {
         DownloadTableCell rendererMutator = tableCellFactory.create();
         
         DownloadTableEditor editor = new DownloadTableEditor(editorMutator);
-        editor.initialiseEditor(downloadItems, propertiesFactory);
+        editor.initialiseEditor(downloadItems, actionHandler);
         getColumnModel().getColumn(0).setCellEditor(editor);
         
         DownloadTableRenderer renderer = new DownloadTableRenderer(rendererMutator);
@@ -51,11 +53,11 @@ public class DownloadTable extends AbstractDownloadTable {
 	    return model.getDownloadItem(convertRowIndexToModel(row));
 	}
 
-    private void initialise(EventList<DownloadItem> downloadItems, PropertiesFactory<DownloadItem> propertiesFactory) {
+    private void initialise(EventList<DownloadItem> downloadItems, DownloadActionHandler actionHandler) {
         model = new DownloadTableModel(downloadItems);
         setModel(model);
 
-        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(downloadItems, propertiesFactory), this);
+        TablePopupHandler popupHandler = new DownloadPopupHandler(actionHandler, this);
 
         setPopupHandler(popupHandler);
 

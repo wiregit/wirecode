@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table;
 
+import java.io.File;
+
 import javax.swing.JScrollPane;
 
 import org.limewire.core.api.Category;
@@ -27,7 +29,7 @@ public interface LibraryTableFactory {
     /**
      * Creates an image list for MyLibrary/Friends
      */
-    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, ShareWidget<LocalFileItem> sharePanel);
+    LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList, JScrollPane scrollPane, ShareWidget<File> sharePanel);
     
     /**
      * Creates a table for sharing files with a specified Friend

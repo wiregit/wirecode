@@ -2,17 +2,18 @@ package org.limewire.ui.swing.library.sharing.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.File;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.ui.swing.library.sharing.SharingTarget;
+import org.limewire.ui.swing.util.CategoryUtils;
 
 public class FileShareModel implements LibraryShareModel {
-    private LocalFileItem fileItem;
+    private File file;
 
     private LocalFileList gnutellaList;
 
@@ -28,45 +29,46 @@ public class FileShareModel implements LibraryShareModel {
     @Override
     public void shareFriend(SharingTarget friend) {        
         if (friend.isGnutellaNetwork()) {
-            gnutellaList.addFile(fileItem.getFile());
+            gnutellaList.addFile(file);
         } else {
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).addFile(fileItem.getFile());
+            shareListManager.getOrCreateFriendShareList(friend.getFriend()).addFile(file);
         }
     }
     
     @Override
     public void unshareFriend(SharingTarget friend) {
         if (friend.isGnutellaNetwork()) {
-            gnutellaList.removeFile(fileItem.getFile());
+            gnutellaList.removeFile(file);
         } else {
             //TODO: need to handle share all settings here
-            shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(fileItem.getFile());
+            shareListManager.getOrCreateFriendShareList(friend.getFriend()).removeFile(file);
         }
     }
 
+
     /**
-     * @param fileItem  The LocalFileItem whose sharing info will be displayed
+     * @param file  The File whose sharing info will be displayed
      */
-    public void setFileItem(LocalFileItem fileItem){
-        LocalFileItem oldFileItem = this.fileItem;
-        this.fileItem = fileItem;
-        support.firePropertyChange("fileItem", oldFileItem, fileItem);
-    }  
+    public void setFile(File file){
+        File oldFile = this.file;
+        this.file = file;
+        support.firePropertyChange("file", oldFile, file);
+    } 
     
     @Override
     public boolean isGnutellaNetworkSharable() {
-        return (fileItem.getCategory() != Category.DOCUMENT || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
+        return (CategoryUtils.getCategory(file) != Category.DOCUMENT || LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
     }
  
     @Override
     public boolean isShared(SharingTarget friend){
         //Handle gnutella 
         if(friend.isGnutellaNetwork()){
-            return gnutellaList.contains(fileItem.getFile());
+            return gnutellaList.contains(file);
         }
         
         //check for share all settings
-        switch (fileItem.getCategory()) {
+        switch (CategoryUtils.getCategory(file)) {
         case AUDIO:
             if (shareListManager.getOrCreateFriendShareList(friend.getFriend()).isAddNewAudioAlways()){
                 return true;
@@ -85,7 +87,7 @@ public class FileShareModel implements LibraryShareModel {
         }
         
         //check individual file share settings
-        return shareListManager.getOrCreateFriendShareList(friend.getFriend()).contains(fileItem.getFile());
+        return shareListManager.getOrCreateFriendShareList(friend.getFriend()).contains(file);
     }
 
     @Override

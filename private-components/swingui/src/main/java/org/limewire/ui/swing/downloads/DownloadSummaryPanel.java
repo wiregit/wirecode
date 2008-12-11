@@ -39,6 +39,7 @@ import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.dnd.DownloadableTransferHandler;
 import org.limewire.ui.swing.downloads.table.AbstractDownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadActionHandler;
+import org.limewire.ui.swing.downloads.table.DownloadActionHandlerFactory;
 import org.limewire.ui.swing.downloads.table.DownloadPopupHandler;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTableCell;
@@ -51,7 +52,6 @@ import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.BarPainterFactory;
-import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.FontUtils;
@@ -113,8 +113,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
-	        Navigator navigator, PropertiesFactory<DownloadItem> propertiesFactory, 
-	        LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+	        Navigator navigator, LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
+	        DownloadActionHandlerFactory downloadActionHandlerFactory) {
 	    this.navigator = navigator;        
         this.progressBarFactory = progressBarFactory;
         this.allList = downloadMediator.getDownloadList();
@@ -162,11 +162,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         };
         editorPanel.setBackgroundPainter(mouseOverPainter);
         final DownloadTableEditor editor = new DownloadTableEditor(editorPanel);
-        editor.initialiseEditor(allList, propertiesFactory);
+        editor.initialiseEditor(allList, downloadActionHandlerFactory.create(allList));
         table.setDefaultEditor(DownloadItem.class, editor);
         
         table.setColumnDoubleClickHandler(new DownloadClickHandler());
-        TablePopupHandler popupHandler = new DownloadPopupHandler(new DownloadActionHandler(allList, propertiesFactory), table){
+        TablePopupHandler popupHandler = new DownloadPopupHandler(downloadActionHandlerFactory.create(allList), table){
             @Override
             protected int getPopupRow(int x, int y){
                 //columns and rows are reversed in this table
