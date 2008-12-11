@@ -36,7 +36,7 @@ public class FileMenu extends JMenu {
             SearchHandler searchHandler) {
         super(I18n.tr("File"));
         this.navigator = navigator;
-        add(new OpenFileAction(navigator, I18n.tr("&Open File..."), downloadListManager,
+        add(new OpenFileAction(navigator, I18n.tr("&Open Torrent..."), downloadListManager,
                 saveLocationExceptionHandler));
         add(new OpenLinkAction(navigator, I18n.tr("Open &Link..."), downloadListManager,
                 saveLocationExceptionHandler, magnetFactory, searchHandler));
