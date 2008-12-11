@@ -145,6 +145,10 @@ class LoggedInPanel extends JXPanel {
         loggingInLabel.setVisible(false);
     }
     
+    /**
+     * Registers this panel with xmpp connection events as well as changes to the XMPP_DO_NO_DISTURB setting.
+     * It uses these events to keep the status icon for the user up to date. 
+     */
     @Inject
     void register(FriendActions actions, ListenerSupport<XMPPConnectionEvent> event) {
         event.addListener(new EventListener<XMPPConnectionEvent>() {
