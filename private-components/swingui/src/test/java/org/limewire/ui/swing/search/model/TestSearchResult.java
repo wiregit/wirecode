@@ -86,11 +86,6 @@ public class TestSearchResult implements SearchResult {
             public FriendPresence getFriendPresence() {
                 return new MockFriendPresence(new MockFriend(randomUUID.toString()));
             }
-
-            @Override
-            public boolean isAnonymous() {
-                return true;
-            }
         });
         return sources;
     }

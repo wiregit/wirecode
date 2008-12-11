@@ -10,6 +10,11 @@ import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.feature.Feature;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.io.Address;
+import org.limewire.io.Connectable;
+import org.limewire.io.IpPort;
+import org.limewire.util.ByteUtils;
+
+import com.limegroup.gnutella.PushEndpoint;
 
 /**
  * An implementation of FriendPresence for a Gnutella address.  For example,
@@ -17,7 +22,7 @@ import org.limewire.io.Address;
  * the RemoteLibraryManager to add and browse the presence.
  */
 public class GnutellaPresence implements FriendPresence {
-
+    
     private final Friend friend;
     private final String id;
     
@@ -30,7 +35,16 @@ public class GnutellaPresence implements FriendPresence {
     public GnutellaPresence(Address address, String id) {
         this.id = id;
         this.features.put(AddressFeature.ID, new AddressFeature(address));
-        this.friend = new GnutellaFriend(address.getAddressDescription(), id, this);
+        this.friend = new GnutellaFriend(describe(address), id, this);
+    }
+    
+    private String describe(Address address) {
+        if(address instanceof Connectable || address instanceof PushEndpoint) {
+            // Convert IP addr into a #.
+            return Long.toString(ByteUtils.uint2long(ByteUtils.beb2int(((IpPort)address).getInetAddress().getAddress(), 0)));
+        } else {
+            return address.getAddressDescription();
+        }
     }
     
     @Override

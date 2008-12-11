@@ -4,13 +4,11 @@ import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.RemoteLibraryManager;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
-import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 
@@ -23,8 +21,6 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
     private final RemoteLibraryManager remoteLibraryManager;
 
-    private final ShareListManager shareListManager;
-
     private final ChatFramePanel friendsPanel;
     private final ChatFriendListPane friendsPane;
 
@@ -32,11 +28,10 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 
     @Inject
     public RemoteHostActionsImpl(RemoteLibraryManager remoteLibraryManager,
-            ShareListManager shareListManager, ChatFriendListPane friendsPane,
+            ChatFriendListPane friendsPane,
             ChatFramePanel friendsPanel,
             LibraryNavigator libraryNavigator, Navigator navigator) {
         this.remoteLibraryManager = remoteLibraryManager;
-        this.shareListManager = shareListManager;
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
         this.libraryNavigator = libraryNavigator;
@@ -59,7 +54,7 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
     public void showFilesSharedBy(RemoteHost person) {
         LOG.debugf("showFilesSharedBy: {0}", person.getFriendPresence().getFriend());
         Friend friend = person.getFriendPresence().getFriend();
-        libraryNavigator.selectFriendLibrary(friend);
+        libraryNavigator.selectFriendShareList(friend);
     }
 
     @Override
@@ -73,16 +68,5 @@ public class RemoteHostActionsImpl implements RemoteHostActions {
 				libraryNavigator.selectFriendLibrary(person.getFriendPresence().getFriend());
             }
         });
-    }
-
-    @Override
-    public int getNumberOfSharedFiles(RemoteHost person) {
-        Friend friend = person.getFriendPresence().getFriend();
-        FriendFileList friendFileList = shareListManager.getFriendShareList(friend);
-
-        if (friendFileList == null) {
-            return 0;
-        }
-        return friendFileList.size();
     }
 }

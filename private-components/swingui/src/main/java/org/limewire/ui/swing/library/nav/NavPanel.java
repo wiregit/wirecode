@@ -256,17 +256,16 @@ public class NavPanel extends JXPanel {
         libraryPanel.showLibraryPanel(friendLibrary.getSwingModel(), friendLibrary.getState());
     }
     
-    public void showSharing() {
-        select();
-        libraryPanel.showSharingCard();
-    }
-
     public boolean hasSelection() {
         return Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY));
     }
     
     public void select() { 
         action.actionPerformed(null);
+    }
+    
+    public void showSharingCard() {
+        libraryPanel.showSharingCard();
     }
     
     public void removeBrowse() {

@@ -13,11 +13,11 @@ public interface LibraryNavigator {
     /** Returns the renderable component. */
     JXPanel getComponent();
     
+    /** Selects a friend's sharelist. */
+    void selectFriendShareList(Friend friend);
+    
     /** Selects a friend's library. */
     void selectFriendLibrary(Friend friend);
-    
-    /** Selects the list of files currently shared with the friend */
-    void selectSharedWith(Friend friend);
     
     /** Selects a specific item in your library. */
     void selectInLibrary(URN urn, Category category);

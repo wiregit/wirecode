@@ -816,7 +816,7 @@ public class ChatFriendListPane extends JPanel {
             minimizeAction.actionPerformed(e);
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                libraryNavigator.selectSharedWith(chatFriend.getFriend());
+                libraryNavigator.selectFriendShareList(chatFriend.getFriend());
             }
         }
 

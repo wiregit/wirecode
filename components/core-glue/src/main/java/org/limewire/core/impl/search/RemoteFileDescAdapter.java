@@ -66,7 +66,7 @@ public class RemoteFileDescAdapter implements SearchResult {
     public int getRelevance() {
         int relevance = 0;
         for(RemoteHost remoteHost : getSources()) {
-            if(remoteHost.isAnonymous()) {
+            if(remoteHost.getFriendPresence().getFriend().isAnonymous()) {
                 if(remoteHost.isBrowseHostEnabled()) {
                     relevance += 5;
                 }
@@ -135,7 +135,7 @@ public class RemoteFileDescAdapter implements SearchResult {
         int numAdded = 0;
         
         for(RemoteHost remoteHost : buildSources()) {
-            boolean anonymous = remoteHost.isAnonymous();
+            boolean anonymous = remoteHost.getFriendPresence().getFriend().isAnonymous();
             if(!anonymous) {
                 remoteHosts.add(remoteHost);
             } else if(numAdded < maxToAdd) {
@@ -209,11 +209,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         public FriendPresence getFriendPresence() {
             return friendPresence;
         }
-
-        @Override
-        public boolean isAnonymous() {
-            return getFriendPresence().getFriend().isAnonymous();
-        }
     }
     
     
@@ -247,11 +242,6 @@ public class RemoteFileDescAdapter implements SearchResult {
         @Override
         public FriendPresence getFriendPresence() {
             return presence;
-        }
-
-        @Override
-        public boolean isAnonymous() {
-            return true;
         }
     }
 

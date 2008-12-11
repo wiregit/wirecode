@@ -295,10 +295,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     }
     
     @Override
-    public void selectSharedWith(Friend friend) {
-        NavPanel panel = limewireList.getPanelForFriend(friend);
-        if(panel != null) {
-            panel.showSharing();
+    public void selectFriendShareList(Friend friend) {
+        for(NavList list : allLists) {
+            if(list.selectFriendShareList(friend) != null) {
+                break;
+            }
         }
     }
 
