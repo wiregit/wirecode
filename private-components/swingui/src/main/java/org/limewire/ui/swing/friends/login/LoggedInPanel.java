@@ -8,24 +8,32 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.settings.XMPPSettings;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.friends.AddFriendDialog;
+import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
 
 import com.google.inject.Inject;
-
-import net.miginfocom.swing.MigLayout;
 
 class LoggedInPanel extends JXPanel {
 
@@ -37,20 +45,22 @@ class LoggedInPanel extends JXPanel {
     private final LimeComboBox optionsBox;
     private final LimeComboBox signoutBox;
     private final FriendActions friendActions;
+    private final IconLibrary iconLibrary;
 
     @Inject
     LoggedInPanel(LimeComboBoxFactory comboFactory,
             FriendActions friendActions, BarPainterFactory barPainterFactory,
             ButtonDecorator buttonDecorator,
-            StatusActions statusActions, XMPPService xmppService) {
+            StatusActions statusActions, XMPPService xmppService, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
 
         this.friendActions = friendActions;
+        this.iconLibrary = iconLibrary;
         optionsBox = comboFactory.createMiniComboBox();
         signoutBox = comboFactory.createMiniComboBox();
         statusMenuLabel = new JLabel();        
-        currentUser = new JLabel();
+        currentUser = new JLabel(iconLibrary.getEndChat());
         loggingInLabel = new JLabel(I18n.tr("Signing in..."));
         signInButton = new HyperLinkButton();
         buttonDecorator.decorateMiniButton(signInButton);
@@ -133,6 +143,38 @@ class LoggedInPanel extends JXPanel {
         signInButton.setVisible(false);
         switchUserButton.setVisible(false);
         loggingInLabel.setVisible(false);
+    }
+    
+    @Inject
+    void register(FriendActions actions, ListenerSupport<XMPPConnectionEvent> event) {
+        event.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch (event.getType()) {
+                case CONNECTED:
+                case CONNECTING:
+                    currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                    break;
+                case CONNECT_FAILED:
+                case DISCONNECTED:
+                    currentUser.setIcon(iconLibrary.getEndChat());
+                    break;
+                }
+            }
+        });
+        
+        XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
+           @Override
+            public void settingChanged(SettingEvent evt) {
+               SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentUser.setIcon(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? iconLibrary.getDoNotDisturb() : iconLibrary.getAvailable());
+                    } 
+               });
+            } 
+        });
     }
 
     private void setConfig(XMPPConnectionConfiguration config) {
