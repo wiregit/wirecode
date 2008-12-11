@@ -23,6 +23,7 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
@@ -321,7 +322,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         }
         
         
-        libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
+        libTable.setTransferHandler(new FriendLibraryNavTransferHandler(friendFileList));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
                     magnetLinkFactory, allFriends, localItemPropFactory));
         
