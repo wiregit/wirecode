@@ -12,7 +12,7 @@ public class PlayerUtils {
     @Inject
     private static AudioPlayer player;
 
-    public static void play(File audioFile){
+    private static void play(File audioFile){
         player.loadSong(audioFile);
         player.playSong();
     }
@@ -40,7 +40,7 @@ public class PlayerUtils {
             play(file);
             return true;
         } else {    
-            NativeLaunchUtils.launchFile(file);
+            NativeLaunchUtils.safeLaunchFile(file);
             return false;
         }
 

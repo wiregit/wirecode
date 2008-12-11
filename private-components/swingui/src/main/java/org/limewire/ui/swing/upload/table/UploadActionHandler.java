@@ -41,13 +41,9 @@ public class UploadActionHandler {
         } else if (actionCommmand == LIBRARY_COMMAND){
             libraryNavigator.selectInLibrary(item.getFile(), item.getCategory());
         } else if (actionCommmand == LAUNCH_COMMAND){
-            NativeLaunchUtils.launchFile(item.getFile());
+            NativeLaunchUtils.safeLaunchFile(item.getFile());
         } else if (actionCommmand == PLAY_COMMAND){
-            if(PlayerUtils.isPlayableFile(item.getFile())){
-                PlayerUtils.play(item.getFile());
-            } else {
-                NativeLaunchUtils.launchFile(item.getFile());
-            }
+            PlayerUtils.playOrLaunch(item.getFile());
         }
     }
 }

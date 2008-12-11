@@ -185,11 +185,7 @@ public class MyLibraryPanel extends LibraryPanel {
             File file = model.getFileItem(row).getFile();
             switch (model.getFileItem(row).getCategory()){
             case AUDIO:
-                if (PlayerUtils.isPlayableFile(file)){
-                    PlayerUtils.play(file);
-                } else {                
-                    NativeLaunchUtils.launchFile(file);
-                }
+                PlayerUtils.playOrLaunch(file);
                 break;
             case OTHER:
             case PROGRAM:
@@ -199,7 +195,7 @@ public class MyLibraryPanel extends LibraryPanel {
                 //TODO: image double click
             case VIDEO:
             case DOCUMENT:
-                NativeLaunchUtils.launchFile(file);
+                NativeLaunchUtils.safeLaunchFile(file);
             }
         }
     }

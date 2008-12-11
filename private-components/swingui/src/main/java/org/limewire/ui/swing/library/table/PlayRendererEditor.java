@@ -76,7 +76,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
                         player.playSong();
                     }
                 } else {                
-                    NativeLaunchUtils.launchFile(file);
+                    NativeLaunchUtils.safeLaunchFile(file);
                 }
                 cancelCellEditing();
             }

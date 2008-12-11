@@ -118,7 +118,7 @@ public class ImageList extends JXList {
                 int index = imageList.locationToIndex(e.getPoint());
                 LocalFileItem val = (LocalFileItem) imageList.getElementAt(index);
                 File file = val.getFile();
-                NativeLaunchUtils.launchFile(file);
+                NativeLaunchUtils.safeLaunchFile(file);
             }
         }
     }

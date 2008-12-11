@@ -127,7 +127,7 @@ public class MacEventHandler {
                 }
             }
         } else {
-            NativeLaunchUtils.launchFile(file);
+            NativeLaunchUtils.safeLaunchFile(file);
         }
     }
     

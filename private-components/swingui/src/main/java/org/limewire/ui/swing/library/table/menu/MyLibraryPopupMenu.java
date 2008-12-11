@@ -147,7 +147,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            NativeLaunchUtils.launchFile(getFile());
+            NativeLaunchUtils.safeLaunchFile(getFile());
         }
 
     };

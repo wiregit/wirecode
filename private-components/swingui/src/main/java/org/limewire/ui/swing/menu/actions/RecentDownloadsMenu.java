@@ -95,7 +95,7 @@ public class RecentDownloadsMenu extends JMenu {
                 case DOCUMENT:
                 case IMAGE:
                 case VIDEO:
-                    NativeLaunchUtils.launchFile(file);
+                    NativeLaunchUtils.safeLaunchFile(file);
                     break;
                 case PROGRAM:
                 case OTHER:

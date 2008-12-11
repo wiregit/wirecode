@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Locale;
 
+import org.limewire.core.api.Category;
 import org.limewire.core.settings.URLHandlerSettings;
 import org.limewire.util.MediaType;
 import org.limewire.util.NotImplementedException;
@@ -145,6 +146,19 @@ public final class NativeLaunchUtils {
 			throw new IOException();
 		}
 	}
+	
+	/**
+	 * Launches the specified file.  If the file's Category is PROGRAM or OTHER, this delegates to 
+	 * <code>launchExplorer(file)</code>
+	 */
+	public static void safeLaunchFile(File file){
+	    Category category = CategoryUtils.getCategory(file);
+	    if(category == Category.PROGRAM || category == Category.OTHER){
+	        launchExplorer(file);
+	    } else {
+            launchFile(file);
+        }
+	}
 
 	/**
 	 * Launches the file whose abstract path is specified in the <tt>File</tt>
@@ -158,7 +172,7 @@ public final class NativeLaunchUtils {
 	 *         can be represented (e.g. the file was launched through a native
 	 *         call)
 	 */
-	public static void launchFile(File file) {
+	private static void launchFile(File file) {
 	    try {
 	        launchFileImpl(file);
 	    } catch(LaunchException le) {
@@ -215,7 +229,7 @@ public final class NativeLaunchUtils {
      * 
      * @param file the file to show in explorer
      * @return null, if not supported by platform; the launched process otherwise
-     * @see #launchFile(File)
+     * @see #safeLaunchFile(File)
      */
     public static Process launchExplorer(File file) {
         try {
