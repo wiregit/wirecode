@@ -13,7 +13,6 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,6 +57,9 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     private JLabel fullStatusLabel;
     private LimeProgressBar fullProgressBar;
     private JLabel fullTimeLabel;
+    
+    private JLabel removeLinkSpacer;
+    private JXHyperlink removeLink;
    
     @Resource private Icon warningIcon;
     @Resource private int progressBarWidth;
@@ -90,6 +92,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         this.minButtonPanel.setActionListener(editorListener);
         this.fullButtonPanel.setActionListener(editorListener);
         this.minLinkButton.addActionListener(editorListener);
+        this.removeLink.addActionListener(editorListener);
     }
     
     public void update(DownloadItem item) {
@@ -155,7 +158,15 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullTimeLabel.setFont(statusFontPlainFull);
         
         fullButtonPanel = new DownloadButtonPanel(editorListener);
-        fullButtonPanel.setOpaque(false);
+        fullButtonPanel.setOpaque(false);        
+
+        removeLink = new JXHyperlink();
+        removeLink.setText("<html><u>" + I18n.tr("Remove") + "</u></html>");
+        removeLink.setForeground(linkColour);
+        removeLink.setFont(statusFontPlainMin);
+        removeLink.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
+        
+        removeLinkSpacer = new JLabel(I18n.tr(" - "));
         
         createFullView();
         createMinView();
@@ -186,7 +197,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.insets = new Insets(5,4,0,0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.CENTER;
-        gbc.gridx = 4;
+        gbc.gridx = 5;
         gbc.gridy = 0;
         gbc.weightx = 1;
         gbc.weighty = 0;
@@ -208,16 +219,23 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         gbc.insets = new Insets(0,0,0,0);
         gbc.gridx++;
         minPanel.add(minLinkButton, gbc);
+
+        gbc.gridx++;
+        minPanel.add(removeLinkSpacer, gbc);
         
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.gridwidth = 3;
-        gbc.gridheight = 0;
-        minPanel.add(Box.createHorizontalStrut(progressBarWidth-16), gbc);
+        gbc.gridx++;
+        minPanel.add(removeLink, gbc);
+        
+        //TODO: is this necessary?
+//        gbc.fill = GridBagConstraints.NONE;
+//        gbc.anchor = GridBagConstraints.WEST;
+//        gbc.gridx = 1;
+//        gbc.gridy = 2;
+//        gbc.weightx = 0;
+//        gbc.weighty = 0;
+//        gbc.gridwidth = 3;
+//        gbc.gridheight = 0;
+//        minPanel.add(Box.createHorizontalStrut(progressBarWidth-16), gbc);
             
     }
     
@@ -327,7 +345,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             
         }
         
-        editor.minStatusLabel.setText(getMessage(item));
+        editor.minStatusLabel.setText(getMessage(item));        
         
         updateButtonsMin(editor, item);      
     }
@@ -384,6 +402,10 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             default:
                 editor.minLinkButton.setVisible(false);
         }
+        
+
+        removeLink.setVisible(item.getState() == DownloadState.ERROR);
+        removeLinkSpacer.setVisible(removeLink.isVisible());
     }
     
     private void updateButtonsFull(DownloadTableCellImpl editor, DownloadItem item) {
