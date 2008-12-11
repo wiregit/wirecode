@@ -34,6 +34,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -68,7 +69,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
     
     /** True if TLS is supported for this session. */
-    private volatile boolean tlsSupported = true;
+    private volatile boolean tlsSupported = false;
     
     /** The Throwable that was the reason TLS failed. */
     @InspectablePrimitive("reason tls failed")
@@ -425,7 +426,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
     /** Whether or not incoming TLS is allowed. */
     public boolean isIncomingTLSEnabled() {
-        return tlsSupported && SSLSettings.TLS_INCOMING.getValue();
+        return tlsSupported && SSLSettings.TLS_INCOMING.getValue() && OSUtils.supportsTLS();
     }
 
     public void setIncomingTLSEnabled(boolean enabled) {
@@ -434,7 +435,7 @@ public class NetworkManagerImpl implements NetworkManager {
 
     /** Whether or not outgoing TLS is allowed. */
     public boolean isOutgoingTLSEnabled() {
-        return tlsSupported && SSLSettings.TLS_OUTGOING.getValue();
+        return tlsSupported && SSLSettings.TLS_OUTGOING.getValue() && OSUtils.supportsTLS();
     }
 
     public void setOutgoingTLSEnabled(boolean enabled) {

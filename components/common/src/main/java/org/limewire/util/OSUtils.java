@@ -340,4 +340,8 @@ public class OSUtils {
             return 1024 - 1;
         }
     }
+    
+    public static boolean supportsTLS() {
+        return !isMacOSX();
+    }
 }
