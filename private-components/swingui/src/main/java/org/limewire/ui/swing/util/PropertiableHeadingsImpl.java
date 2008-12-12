@@ -64,8 +64,8 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         switch (propertiable.getCategory()) {
         case AUDIO: {
             String albumTitle = getPropertyString(propertiable, FilePropertyKey.ALBUM);
-            Long qualityScore = getQualityScore(propertiable);
-            Long length = getLength(propertiable);
+            Long qualityScore = getQualityScoreLong(propertiable);
+            Long length = getLengthLong(propertiable);
 
             boolean insertHyphen = false;
             if (!StringUtils.isEmpty(albumTitle)) {
@@ -90,8 +90,8 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         }
             break;
         case VIDEO: {
-            Long qualityScore = getQualityScore(propertiable);
-            Long length = getLength(propertiable);
+            Long qualityScore = getQualityScoreLong(propertiable);
+            Long length = getLengthLong(propertiable);
             Long fileSize = getFileSizeLong(propertiable);
 
             boolean insertHyphen = false;
@@ -141,6 +141,18 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         }
         return subheading;
     }
+    
+    @Override
+    public String getLength(PropertiableFile propertiable) {
+        Long length = getLengthLong(propertiable);
+        return length != null ? CommonUtils.seconds2time(length) : null;
+    }
+    
+    @Override
+    public String getQualityScore(PropertiableFile propertiableFile) {
+        Long qualityScore = getQualityScoreLong(propertiableFile);
+        return qualityScore != null ? I18n.tr("{0} Quality", GuiUtils.toQualityString(qualityScore)) : null;
+    }
 
     private String addFileSize(String subheading, Long fileSize, boolean insertHyphen) {
         if (fileSize != null) {
@@ -152,11 +164,11 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         return subheading;
     }
 
-    private Long getLength(PropertiableFile propertiable) {
+    private Long getLengthLong(PropertiableFile propertiable) {
         return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.LENGTH));
     }
 
-    private Long getQualityScore(PropertiableFile propertiable) {
+    private Long getQualityScoreLong(PropertiableFile propertiable) {
         return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.QUALITY));
     }
 
@@ -164,6 +176,7 @@ class PropertiableHeadingsImpl implements PropertiableHeadings {
         return CommonUtils.parseLongNoException(getPropertyString(propertiable, FilePropertyKey.FILE_SIZE));
     }
     
+    @Override
     public String getFileSize(PropertiableFile propertiable) {
         Long fileSize = getFileSizeLong(propertiable);
         if (fileSize != null) {

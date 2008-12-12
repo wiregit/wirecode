@@ -34,6 +34,7 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.images.ThumbnailManager;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
+import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -52,13 +53,13 @@ import com.google.inject.name.Named;
 public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFileItem> {
     private final ThumbnailManager thumbnailManager;
     private final CategoryIconManager categoryIconManager;
-    private final IconManager iconManager;
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
     private final MetaDataManager metaDataManager;
     private final Collection<Friend> allFriends;
     private final ShareListManager shareListManager;
     private final Provider<LibraryNavigator> libraryNavigator; // provider to workaround circular ref
+    private final DialogParam dialogParam;
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager,
@@ -66,30 +67,29 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
             MetaDataManager metaDataManager, @Named("known") Collection<Friend> allFriends, 
             ShareListManager shareListManager,
-            Provider<LibraryNavigator> libraryNavigator) {
+            Provider<LibraryNavigator> libraryNavigator, DialogParam dialogParam) {
         this.thumbnailManager = thumbnailManager;
         this.categoryIconManager = categoryIconManager;
-        this.iconManager = iconManager;
         this.propertiableHeadings = propertiableHeadings;
         this.magnetLinkFactory = magnetLinkFactory;
         this.metaDataManager = metaDataManager;
         this.allFriends = allFriends;
         this.shareListManager = shareListManager;
         this.libraryNavigator = libraryNavigator;
+        this.dialogParam = dialogParam;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
-        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, iconManager, 
+        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, 
                 propertiableHeadings, magnetLinkFactory, metaDataManager, allFriends,
-                shareListManager, libraryNavigator.get());
+                shareListManager, libraryNavigator.get(), dialogParam);
     }
 
     private static class LocalFileItemProperties extends AbstractFileItemDialog implements
             Properties<LocalFileItem> {
         private final ThumbnailManager thumbnailManager;
         private final CategoryIconManager categoryIconManager;
-        private final IconManager iconManager;
         private final MetaDataManager metaDataManager;
         private final Map<FilePropertyKey, Object> changedProps = new HashMap<FilePropertyKey, Object>();
         private final Collection<Friend> allFriends;
@@ -104,15 +104,14 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private List<Friend> unsharedFriendList = new ArrayList<Friend>();
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager,
-                CategoryIconManager categoryIconManager, IconManager iconManager,
+                CategoryIconManager categoryIconManager,
                 PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
                 MetaDataManager metaDataManager, Collection<Friend> allFriends,
-                ShareListManager shareListManager, LibraryNavigator libraryNavigator) {
-            super(propertiableHeadings, magnetLinkFactory);
+                ShareListManager shareListManager, LibraryNavigator libraryNavigator, DialogParam dialogParam) {
+            super(propertiableHeadings, magnetLinkFactory, dialogParam);
             this.libraryNavigator = libraryNavigator;
             this.thumbnailManager = thumbnailManager;
             this.categoryIconManager = categoryIconManager;
-            this.iconManager = iconManager;
             this.metaDataManager = metaDataManager;
             this.allFriends = allFriends;
             this.shareListManager = shareListManager;

@@ -8,6 +8,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -20,18 +21,20 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
     private final CategoryIconManager categoryIconManager;
     private final PropertiableHeadings propertiableHeadings;
     private final MagnetLinkFactory magnetLinkFactory;
+    private final DialogParam dialogParam;
     
     @Inject
     public RemoteFileItemPropertiesFactory(CategoryIconManager categoryIconManager,
-            PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
+            PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory, DialogParam dialogParam) {
         this.categoryIconManager = categoryIconManager;
         this.propertiableHeadings = propertiableHeadings;
         this.magnetLinkFactory = magnetLinkFactory;
+        this.dialogParam = dialogParam;
     }
 
     @Override
     public Properties<RemoteFileItem> newProperties() {
-        return new RemoteFileItemProperties(categoryIconManager, propertiableHeadings, magnetLinkFactory);
+        return new RemoteFileItemProperties(categoryIconManager, propertiableHeadings, magnetLinkFactory, dialogParam);
     }
 
     private static class RemoteFileItemProperties extends AbstractFileItemDialog implements Properties<RemoteFileItem> {
@@ -41,8 +44,8 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
         private @Resource Font largeFont;
         
         public RemoteFileItemProperties(CategoryIconManager categoryIconManager,
-                PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory) {
-            super(propertiableHeadings, magnetLinkFactory);
+                PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory, DialogParam dialogParam) {
+            super(propertiableHeadings, magnetLinkFactory, dialogParam);
             this.categoryIconManager = categoryIconManager;
             GuiUtils.assignResources(this);
             

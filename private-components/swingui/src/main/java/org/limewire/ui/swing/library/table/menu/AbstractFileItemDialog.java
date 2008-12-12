@@ -7,6 +7,7 @@ import javax.swing.AbstractAction;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
+import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.PropertiableHeadings;
 
@@ -15,8 +16,8 @@ abstract class AbstractFileItemDialog extends AbstractPropertiableFileDialog {
     private final MagnetLinkFactory magnetLinkFactory;
 
     public AbstractFileItemDialog(PropertiableHeadings propertiableHeadings,
-            MagnetLinkFactory magnetLinkFactory) {
-        super(propertiableHeadings);
+            MagnetLinkFactory magnetLinkFactory, DialogParam dialogParam) {
+        super(propertiableHeadings, dialogParam);
         this.magnetLinkFactory = magnetLinkFactory;
     }
 

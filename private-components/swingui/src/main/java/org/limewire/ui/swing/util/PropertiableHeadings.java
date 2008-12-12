@@ -13,4 +13,8 @@ public interface PropertiableHeadings {
     String getSubHeading(PropertiableFile propertiable);
 
     String getFileSize(PropertiableFile propertiable);
+    
+    String getLength(PropertiableFile propertiable);
+    
+    String getQualityScore(PropertiableFile propertiableFile);
 }

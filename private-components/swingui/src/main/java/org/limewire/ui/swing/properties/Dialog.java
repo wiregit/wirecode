@@ -35,6 +35,8 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.util.PropertiableHeadings;
 import org.limewire.util.StringUtils;
 
 public abstract class Dialog extends LimeJDialog {
@@ -79,8 +81,12 @@ public abstract class Dialog extends LimeJDialog {
     protected final JPanel location = newPanel();
     protected Component detailsContainer;
     protected final JPanel mainPanel;
+    protected final IconManager iconManager;
+    protected final PropertiableHeadings propertiableHeadings;
     
-    public Dialog() {
+    public Dialog(DialogParam param) {
+        this.iconManager = param.getIconManager();
+        this.propertiableHeadings = param.getPropertiableHeadings();
         GuiUtils.assignResources(this);
         
         mainPanel = new JPanel(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
@@ -92,6 +98,9 @@ public abstract class Dialog extends LimeJDialog {
         setFont(getSmallFont(), metadata, copyToClipboard, locateOnDisk, locateInLibrary,
                 title, genre, rating, year, description, artist, album, track, author, platform,
                 company, fileLocation);
+        //Use the same border that a textfield uses - JTextAreas by default are not given a border
+        //This makes the look consistent with JTextField
+        description.setBorder(artist.getBorder());
         
         JPanel buttons = newPanel(new MigLayout("", "[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
@@ -236,13 +245,25 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     protected abstract void commit();
-
+    
+    protected void addLengthMetadata(String length, Map<String, String> metadata) {
+        addMetadata("Length", length, metadata);
+    }
+    
+    protected void addFileSizeMetadata(String fileSize, Map<String, String> metadata) {
+       addMetadata("Size", fileSize, metadata); 
+    }
+    
     protected void addHashMetadata(URN hash, Map<String, String> metadata) {
         addMetadata(HASH, (hash != null) ? hash.toString() : null, metadata);
     }
 
     protected void addDateCreatedMetadata(String dateCreated, Map<String, String> metadata) {
         addMetadata("Date Created", dateCreated, metadata);
+    }
+    
+    protected void addTypeMetadata(String str, Map<String, String> metadata) {
+        addMetadata("Type", str, metadata);
     }
 
     protected void addBitrateMetadata(String bitRate, Map<String, String> metadata) {
@@ -283,8 +304,8 @@ public abstract class Dialog extends LimeJDialog {
         details.add(newSmallLabel(GENRE));
         details.add(newSmallLabel(RATING));
         details.add(newSmallLabel(YEAR), "wrap");
-        details.add(genre);
-        details.add(rating);
+        details.add(genre, "wmin 90");
+        details.add(rating, "wmin 90");
         details.add(year, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
@@ -303,8 +324,8 @@ public abstract class Dialog extends LimeJDialog {
         details.add(newSmallLabel(YEAR));
         details.add(newSmallLabel(TRACK), "wrap");
         details.add(album, "growx");
-        details.add(genre);
-        details.add(year, "wmin 60");
+        details.add(genre, "wmin 90");
+        details.add(year, "wmin 90");
         details.add(track, "wrap, wmin 40");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
@@ -328,7 +349,7 @@ public abstract class Dialog extends LimeJDialog {
         details.add(title, "span, growx, wrap");
         details.add(newSmallLabel(PLATFORM));
         details.add(newSmallLabel(COMPANY), "wrap");
-        details.add(platform);
+        details.add(platform, "wmin 90");
         details.add(company, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
         details.add(description, "grow, span");
@@ -348,21 +369,28 @@ public abstract class Dialog extends LimeJDialog {
 
     protected void populateMetadata(PropertiableFile propFile) {
         Map<String, String> metadata = new LinkedHashMap<String, String>();
+        addFileSizeMetadata(propertiableHeadings.getFileSize(propFile), metadata);
+        
         switch(propFile.getCategory()) {
             case AUDIO:
-                addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
+                addLengthMetadata(propertiableHeadings.getLength(propFile), metadata);
+                String bitRate = str(propFile.getProperty(FilePropertyKey.BITRATE));
+                if (bitRate != null) {
+                    addBitrateMetadata(bitRate + " " + propertiableHeadings.getQualityScore(propFile), metadata);
+                }
                 break;
             case VIDEO:
-                addBitrateMetadata(str(propFile.getProperty(FilePropertyKey.BITRATE)), metadata);
                 addDimensionMetadata(str(propFile.getProperty(FilePropertyKey.WIDTH)), str(propFile.getProperty(FilePropertyKey.HEIGHT)), metadata);
                 break;
             case IMAGE:
-                addDimensionMetadata(str(propFile.getProperty(FilePropertyKey.WIDTH)), str(propFile.getProperty(FilePropertyKey.HEIGHT)), metadata);
+                addDateCreatedMetadata(convertDate(propFile), metadata);
                 break;
             case DOCUMENT:
                 addDateCreatedMetadata(convertDate(propFile), metadata);
                 //TODO: parse TOPIC property
-                break;
+                // Fall into OTHER for type metadata
+            case OTHER:
+                addTypeMetadata(iconManager.getMIMEDescription(propFile), metadata);
         }
         addHashMetadata(propFile.getUrn(), metadata);
         setMetadataText(metadata);

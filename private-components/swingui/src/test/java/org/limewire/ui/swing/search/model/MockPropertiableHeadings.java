@@ -26,4 +26,14 @@ public class MockPropertiableHeadings implements PropertiableHeadings {
     public String getFileSize(PropertiableFile propertiable) {
         return null;
     }
+
+    @Override
+    public String getLength(PropertiableFile propertiable) {
+        return null;
+    }
+
+    @Override
+    public String getQualityScore(PropertiableFile propertiableFile) {
+        return null;
+    }
 }

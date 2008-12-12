@@ -17,6 +17,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.io.Address;
 import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
+import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -28,14 +29,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class DownloadItemPropertiesFactory implements PropertiesFactory<DownloadItem> {
     private final PropertiableHeadings propertiableHeadings;
+    private final DialogParam dialogParam;
     
     @Inject
-    public DownloadItemPropertiesFactory(PropertiableHeadings propertiableHeadings) {
+    public DownloadItemPropertiesFactory(PropertiableHeadings propertiableHeadings, DialogParam dialogParam) {
         this.propertiableHeadings = propertiableHeadings;
+        this.dialogParam = dialogParam;
     }
 
     public Properties<DownloadItem> newProperties() {
-        return new DownloadItemProperties(propertiableHeadings);
+        return new DownloadItemProperties(propertiableHeadings, dialogParam);
     }
 
     private static class DownloadItemProperties extends AbstractPropertiableFileDialog implements Properties<DownloadItem>{
@@ -44,8 +47,8 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         private @Resource Font largeFont;
         private final JPanel download = newPanel(new MigLayout("fill", "[]", "[]"));
         
-        private DownloadItemProperties(PropertiableHeadings propertiableHeadings) {
-            super(propertiableHeadings);
+        private DownloadItemProperties(PropertiableHeadings propertiableHeadings, DialogParam dialogParam) {
+            super(propertiableHeadings, dialogParam);
             GuiUtils.assignResources(this);
         }
 

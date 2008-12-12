@@ -14,12 +14,12 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.properties.Dialog;
+import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,29 +27,28 @@ import com.google.inject.Singleton;
 @Singleton
 public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSearchResult> {
     private final CategoryIconManager categoryIconManager;
-    private final IconManager iconManager;
+    private final DialogParam dialogParam;
     
     @Inject
-    public SearchResultPropertiesFactory(CategoryIconManager categoryIconManager, IconManager iconManager) {
+    public SearchResultPropertiesFactory(CategoryIconManager categoryIconManager, DialogParam dialogParam) {
         this.categoryIconManager = categoryIconManager;
-        this.iconManager = iconManager;
+        this.dialogParam = dialogParam;
     }
     
     @Override
     public Properties<VisualSearchResult> newProperties() {
-        return new SearchResultProperties(categoryIconManager, iconManager);
+        return new SearchResultProperties(categoryIconManager, dialogParam);
     }
 
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager categoryIconManager;
-        private final IconManager iconManager;
         private @Resource Font smallFont;
         private @Resource Font mediumFont;
         private @Resource Font largeFont;
         
-        public SearchResultProperties(CategoryIconManager categoryIconManager, IconManager iconManager) {
+        public SearchResultProperties(CategoryIconManager categoryIconManager, DialogParam dialogParam) {
+            super(dialogParam);
             this.categoryIconManager = categoryIconManager;
-            this.iconManager = iconManager;
             GuiUtils.assignResources(this);
             
             disableEdit(genre, rating, platform);
