@@ -133,7 +133,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
         try {
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
             for (UploadItem item : uploadItems) {
-                if (item instanceof CoreUploadItem)
+                if (item.getState() != UploadState.DONE && item instanceof CoreUploadItem)
                     ((CoreUploadItem) item).fireDataChanged();
             }
         } finally {

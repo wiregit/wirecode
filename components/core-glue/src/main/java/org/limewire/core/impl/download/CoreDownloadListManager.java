@@ -115,7 +115,7 @@ public class CoreDownloadListManager implements DownloadListManager {
         try {
             // TODO use TransactionList for these for performance (requires using GlazedLists from head)
             for (DownloadItem item : downloadItems) {
-                if (item instanceof CoreDownloadItem)
+                if (item.getState() != DownloadState.DONE &&  item instanceof CoreDownloadItem)
                     ((CoreDownloadItem) item).fireDataChanged();
             }
         } finally {
