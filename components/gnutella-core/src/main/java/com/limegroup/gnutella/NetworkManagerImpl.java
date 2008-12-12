@@ -69,7 +69,7 @@ public class NetworkManagerImpl implements NetworkManager {
     
     
     /** True if TLS is supported for this session. */
-    private volatile boolean tlsSupported = false;
+    private volatile boolean tlsSupported = true;
     
     /** The Throwable that was the reason TLS failed. */
     @InspectablePrimitive("reason tls failed")
