@@ -37,7 +37,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                 headingColor, headingFont.getSize());
     }
 
-    public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean mouseOver, boolean isSpam) {
+    public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean isSpam) {
         StringBuilder bldr = new StringBuilder();
         bldr.append(documentStartHTML);
         if (isSpam) {
@@ -49,7 +49,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                     bldr.append(tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false)));
                 break;
             case NOT_STARTED:
-                bldr.append(wrapHeading(heading.getText(), mouseOver));
+                bldr.append(wrapHeading(heading.getText(), true));
                 break;
             case DOWNLOADED:
             case LIBRARY:
@@ -63,13 +63,13 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
         return bldr.toString();
     }
 
-    private String wrapHeading(String heading, boolean mouseOver) {
-        return "<span class=\"title\">" + downloadLink(heading, mouseOver) + "</span>";
+    private String wrapHeading(String heading, boolean underline) {
+        return "<span class=\"title\">" + downloadLink(heading, underline) + "</span>";
     }
 
-    private String downloadLink(String heading, boolean mouseOver) {
-        if (mouseOver) {
-            return "<a href=\"#download\">" + heading + "</a>";
+    private String downloadLink(String heading, boolean underline) {
+        if (underline) {
+            return "<a href=\"#download\" color=\"#2152a6\">" + heading + "</a>";
         }
         return heading;
     }

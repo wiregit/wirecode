@@ -509,7 +509,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 return truncatedHeading;
             }
         };
-        this.heading.setText(headingBuilder.getHeadingDocument(searchHeading, downloadState, isMouseOver, result.isSpam()));
+
+        this.heading.setText(headingBuilder.getHeadingDocument(searchHeading, downloadState, result.isSpam()));
         this.downloadSourceCount.setText(Integer.toString(vsr.getSources().size()));
     }
     
