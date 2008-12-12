@@ -76,17 +76,16 @@ public class StatusPanel extends JXPanel {
         
         switch(strength) {
             
-        case WEAK:
-        case MEDIUM:
-        case FULL:
-        case TURBO:
+        case DISCONNECTED:
+        case CONNECTING:
+        case NO_INTERNET:
             
-            sharingVisible = true;
+            sharingVisible = false;
             break;
             
         default:
 
-            sharingVisible = false;
+            sharingVisible = true;
             break;
         }
         
