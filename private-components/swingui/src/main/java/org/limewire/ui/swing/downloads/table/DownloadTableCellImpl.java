@@ -13,6 +13,7 @@ import java.awt.Insets;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -173,6 +174,12 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     }
     
     private void createMinView() {
+        //this is a bit hacky but easier than messing with the gridbag
+        JPanel removePanel = new JPanel();
+        removePanel.setOpaque(false);
+        removePanel.add(removeLinkSpacer);
+        removePanel.add(removeLink);
+        
         GridBagConstraints gbc = new GridBagConstraints();
 
         Insets insets = new Insets(0,10,0,0);
@@ -221,21 +228,18 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         minPanel.add(minLinkButton, gbc);
 
         gbc.gridx++;
-        minPanel.add(removeLinkSpacer, gbc);
+        minPanel.add(removePanel, gbc);
         
-        gbc.gridx++;
-        minPanel.add(removeLink, gbc);
-        
-        //TODO: is this necessary?
-//        gbc.fill = GridBagConstraints.NONE;
-//        gbc.anchor = GridBagConstraints.WEST;
-//        gbc.gridx = 1;
-//        gbc.gridy = 2;
-//        gbc.weightx = 0;
-//        gbc.weighty = 0;
-//        gbc.gridwidth = 3;
-//        gbc.gridheight = 0;
-//        minPanel.add(Box.createHorizontalStrut(progressBarWidth-16), gbc);
+        //puts the pause button in the right place for the connecting state
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.gridwidth = 3;
+        gbc.gridheight = 0;
+        minPanel.add(Box.createHorizontalStrut(progressBarWidth-16), gbc);
             
     }
     

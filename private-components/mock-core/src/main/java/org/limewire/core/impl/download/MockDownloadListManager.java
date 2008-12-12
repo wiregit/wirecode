@@ -89,11 +89,16 @@ public class MockDownloadListManager implements DownloadListManager {
 				DownloadState.LOCAL_QUEUED, Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("34.2.7.7"));
 		addDownload(item);
-		
+
         item = new MockDownloadItem("Psychology 101 Lecture 1", 55,
                 DownloadState.ERROR, Category.VIDEO);
         item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
         item.setErrorState(ErrorState.DISK_PROBLEM);
+        addDownload(item);
+        
+        item = new MockDownloadItem("Psychology 102 Lecture 1", 55,
+                DownloadState.CONNECTING, Category.VIDEO);
+        item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
         addDownload(item);
 
 	}
