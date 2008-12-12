@@ -145,7 +145,6 @@ public class SearchBar extends JXPanel {
             @Override
             @SwingEDTEvent
             public void handleEvent(XMPPConnectionEvent event) {
-                System.out.println(event);
                 switch (event.getType()) {
                 case CONNECTED:
                     searchButton.setToolTipText(I18n.tr("Search P2P Network and Friends"));
