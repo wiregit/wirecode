@@ -14,7 +14,7 @@ public interface ShareListManager {
     FileList<LocalFileItem> getCombinedShareList();
 
     /** Returns a {@link LocalFileList} for all files shared with Gnutella. */
-    FriendFileList getGnutellaShareList();
+    GnutellaFileList getGnutellaShareList();
 
     /** Gets a {@link LocalFileList} for the given friend, creating one if it doesn't exist.  */
     FriendFileList getOrCreateFriendShareList(Friend friend);

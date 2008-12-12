@@ -8,6 +8,8 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
@@ -25,11 +27,15 @@ public class SecurityOptionPanel extends OptionPanel {
     private WarningMessagesPanel warningMessagesPanel;
     private UnsafeTypesPanel unsafeTypesPanel;
     private FilteringPanel filteringPanel;
-    private SpamManager spamManager;
+    private final SpamManager spamManager;
+    private final LibraryManager libraryManager;
+    private final ShareListManager shareListManager;
     
     @Inject
-    public SecurityOptionPanel(SpamManager spamManager) {
+    public SecurityOptionPanel(SpamManager spamManager, LibraryManager libraryManager, ShareListManager shareListManager) {
         this.spamManager = spamManager;
+        this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getWarningMessagesPanel(), "pushx, growx");
@@ -121,7 +127,7 @@ public class SecurityOptionPanel extends OptionPanel {
         public UnsafeTypesPanel() {
             super(I18n.tr("Unsafe Categories"));
             
-          unsafeOptionPanel = new UnsafeTypeOptionPanel(new OKDialogAction());
+          unsafeOptionPanel = new UnsafeTypeOptionPanel(new OKDialogAction(), libraryManager, shareListManager);
             
             configureButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     unsafeOptionPanel, I18n.tr("Unsafe Categories"),

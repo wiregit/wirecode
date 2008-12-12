@@ -1,8 +1,9 @@
 package org.limewire.core.impl.library;
 
 import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.library.GnutellaFileList;
 
-public class FriendFileListAdapter extends FileListAdapter implements FriendFileList {
+public class FriendFileListAdapter extends FileListAdapter implements FriendFileList, GnutellaFileList {
 
     @Override
     public boolean isAddNewAudioAlways() {
@@ -37,6 +38,11 @@ public class FriendFileListAdapter extends FileListAdapter implements FriendFile
     @Override
     public void setAddNewVideoAlways(boolean value) {
         // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void removeDocuments() {
         
     }
 

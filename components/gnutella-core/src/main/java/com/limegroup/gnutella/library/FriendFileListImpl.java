@@ -38,17 +38,21 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     
     /**
      * Returns false if it's an {@link IncompleteFileDesc} or it's a store
-     * file.
+     * file. Or if it is a Program and program sharing is not allowed.
      */
     @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
+        String extension = FileUtils.getFileExtension(fileDesc.getFileName());
+        MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
+        
         if (fileDesc instanceof IncompleteFileDesc) {
             return false;
-        }
-        if( fileDesc.getLimeXMLDocuments().size() != 0 && 
+        } else if( fileDesc.getLimeXMLDocuments().size() != 0 && 
                 isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
             return false;
-        } 
+        } else if(MediaType.getProgramMediaType().equals(mediaType) && !data.isProgramManagingAllowed()) {
+            return false;
+        }
         return true;
     }
     

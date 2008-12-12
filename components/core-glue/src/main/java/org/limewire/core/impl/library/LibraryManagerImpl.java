@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
@@ -16,14 +17,14 @@ import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
+import ca.odell.glazedlists.BasicEventList;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.ManagedFileList;
-
-import ca.odell.glazedlists.BasicEventList;
 
 @Singleton
 class LibraryManagerImpl implements LibraryManager {
@@ -107,6 +108,13 @@ class LibraryManagerImpl implements LibraryManager {
         
         @Override
         public void setManagedExtensions(Collection<String> extensions) {
+            fileList.setManagedExtensions(extensions);
+        }
+
+        @Override
+        public void reload() {
+            Map<Category, Collection<String>> managedExtensionsPerCategory = getExtensionsPerCategory();
+            Collection<String> extensions = CollectionUtils.flatten(managedExtensionsPerCategory.values());
             fileList.setManagedExtensions(extensions);
         }
         

@@ -355,7 +355,7 @@ class LibraryFileData extends AbstractSettingsGroup {
         if(LibrarySettings.MANAGE_OTHER.getValue()) {
             categories.add(Category.OTHER);
         }
-        if(LibrarySettings.MANAGE_PROGRAMS.getValue()) {
+        if(LibrarySettings.MANAGE_PROGRAMS.getValue() && LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             categories.add(Category.PROGRAM);
         }
         if(LibrarySettings.MANAGE_VIDEO.getValue()) {
@@ -386,15 +386,7 @@ class LibraryFileData extends AbstractSettingsGroup {
      * what extensions are in what category.
      */
     Map<Category, Collection<String>> getExtensionsPerCategory() {
-        lock.readLock().lock();
-        Set<String> extensions = new HashSet<String>();        
-        try {
-            extensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
-            extensions.addAll(userExtensions);
-            extensions.removeAll(userRemoved);
-        } finally {
-            lock.readLock().unlock();
-        }
+        Set<String> extensions = getManagedExtensions();
         
         Map<Category, Collection<String>> extByCategory = new EnumMap<Category, Collection<String>>(Category.class);
         for(Category category : Category.values()) {
@@ -406,6 +398,22 @@ class LibraryFileData extends AbstractSettingsGroup {
         }
         
         return extByCategory;
+    }
+
+    /**
+     * Returns a new Set with all the currently managed extensions contained within. 
+     */
+    Set<String> getManagedExtensions() {
+        Set<String> extensions = new HashSet<String>();        
+        try {
+            lock.readLock().lock();
+            extensions.addAll(DEFAULT_MANAGED_EXTENSIONS);
+            extensions.addAll(userExtensions);
+            extensions.removeAll(userRemoved);
+        } finally {
+            lock.readLock().unlock();
+        }
+        return extensions;
     }
 
     /** Sets all extensions that should be managed. */
@@ -528,6 +536,10 @@ class LibraryFileData extends AbstractSettingsGroup {
 
     boolean isProgramManagingAllowed() {
         return LibrarySettings.ALLOW_PROGRAMS.getValue();
+    }
+    
+    boolean isGnutellaDocumentSharingAllowed() {
+        return LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue();
     }
     
     private Collection<String> lowercase(Collection<String> extensions) {

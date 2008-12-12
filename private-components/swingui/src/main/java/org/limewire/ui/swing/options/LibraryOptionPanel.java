@@ -20,6 +20,9 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
@@ -50,7 +53,7 @@ public class LibraryOptionPanel extends OptionPanel {
         add(getLibraryManagerPanel(), "pushx, growx");
     }
     
-    private OptionPanel getLibraryManagerPanel() {
+    private LibraryManagerOptionPanel getLibraryManagerPanel() {
         if(libraryManagerPanel == null) {
             libraryManagerPanel = new LibraryManagerOptionPanel(libraryManager.getLibraryData());
         }
@@ -133,11 +136,27 @@ public class LibraryOptionPanel extends OptionPanel {
             programCheckBox.setOpaque(false);
             programCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
             
+            LibrarySettings.ALLOW_PROGRAMS.addSettingListener( new SettingListener() {
+                @Override
+                 public void settingChanged(SettingEvent evt) {
+                    enablePrograms(LibrarySettings.ALLOW_PROGRAMS.getValue());
+                }
+             });
+            
             otherCheckBox = new JCheckBox(I18n.tr(Category.OTHER.toString()));
             otherCheckBox.setOpaque(false);
             otherCheckBox.setHorizontalTextPosition(SwingConstants.RIGHT);
         }
         
+        
+        public void enablePrograms(boolean enable) {
+            if(enable) {
+                programCheckBox.setEnabled(true);
+            } else {
+                programCheckBox.setSelected(false);
+                programCheckBox.setEnabled(false);
+            }
+        }
         private JPanel getCheckBoxPanel() {
             JPanel p = new JPanel();
             p.setOpaque(false);
@@ -211,9 +230,8 @@ public class LibraryOptionPanel extends OptionPanel {
             docCheckBox.setSelected(categories.contains(Category.DOCUMENT));
             imageCheckBox.setSelected(categories.contains(Category.IMAGE));
             programCheckBox.setSelected(categories.contains(Category.PROGRAM));
-            otherCheckBox.setSelected(categories.contains(Category.OTHER));
-            
             programCheckBox.setEnabled(libraryData.isProgramManagingAllowed());
+            otherCheckBox.setSelected(categories.contains(Category.OTHER));
         }
         
         private class AddDirectoryAction extends AbstractAction {

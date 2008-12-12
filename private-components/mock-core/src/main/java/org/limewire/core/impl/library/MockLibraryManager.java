@@ -12,6 +12,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.library.GnutellaFileList;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -132,7 +133,7 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     @Override
-    public FriendFileList getGnutellaShareList() {
+    public GnutellaFileList getGnutellaShareList() {
         return gnutellaList;
     }        
 
@@ -212,6 +213,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
 
         @Override
         public void setManagedExtensions(Collection<String> extensions) {
+        }
+
+        @Override
+        public void reload() {
+            
         }
         
     }

@@ -66,7 +66,7 @@ class ShareListManagerImpl implements ShareListManager {
     }
 
     @Override
-    public FriendFileList getGnutellaShareList() {
+    public GnutellaFileList getGnutellaShareList() {
         return gnutellaFileList;
     }
     
@@ -183,6 +183,16 @@ class ShareListManagerImpl implements ShareListManager {
         protected void videoCollectionUpdate(boolean value) {
             fireVideoCollectionChange(propertyChange, value);
             setSharing(value, Category.VIDEO);
+        }
+
+        @Override
+        public void removeDocuments() {
+            ThreadExecutor.startThread(new Runnable(){
+                @Override
+                public void run() {
+                    getCoreFileList().removeDocuments();
+                }
+            }, "Revalidating Share List");
         }
     }
     

@@ -7,6 +7,8 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.util.I18n;
 
@@ -15,8 +17,14 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     private JCheckBox programCheckBox;
     private JCheckBox documentCheckBox;
     private JButton okButton;
-    
-    public UnsafeTypeOptionPanel(Action okButtonAction) {
+    private final LibraryManager libraryManager;
+    private final ShareListManager shareListManager;
+   
+    public UnsafeTypeOptionPanel(Action okButtonAction, LibraryManager libraryManager,
+            ShareListManager shareListManager) {
+        this.libraryManager = libraryManager;
+        this.shareListManager = shareListManager;
+
         setLayout(new MigLayout("gapy 10"));
         
         programCheckBox = new JCheckBox(I18n.tr("Allow me to search for and share programs with the P2P Network and my friends"));
@@ -36,6 +44,14 @@ public class UnsafeTypeOptionPanel extends OptionPanel {
     boolean applyOptions() {
         LibrarySettings.ALLOW_PROGRAMS.setValue(programCheckBox.isSelected());
         LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(documentCheckBox.isSelected());
+
+        if(!programCheckBox.isSelected()) {
+            libraryManager.getLibraryData().reload();
+        }
+        
+        if (!documentCheckBox.isSelected()) {
+            shareListManager.getGnutellaShareList().removeDocuments();
+        }
         return false;
     }
 

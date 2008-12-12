@@ -62,4 +62,11 @@ public interface LibraryData {
 
     /** Returns true if this file is potentially manageable. */
     boolean isFileManageable(File f);
+
+    /**
+     * Reloads the library data taking into account any changes to the managed categories.
+     * 
+     * Currently done by calling setManagedOptions with the current set of options.
+     */
+    void reload();
 }

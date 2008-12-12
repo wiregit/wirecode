@@ -393,7 +393,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                     String ext = FileUtils.getFileExtension(fd.getFile()).toLowerCase(Locale.US);                                
                     if(removedDirs.contains(parent)) {
                         remove = true;
-                    } else if(managedDirectories.contains(parent) && removedExtensions.contains(ext)) {
+                    } else if(removedExtensions.contains(ext)) {
                         remove = true;
                     }
                     if(remove) {

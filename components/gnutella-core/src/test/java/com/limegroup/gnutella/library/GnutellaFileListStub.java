@@ -77,4 +77,9 @@ public class GnutellaFileListStub extends AbstractFileListStub implements Gnutel
     @Override
     public void setAddNewVideoAlways(boolean value) {
     }
+
+    @Override
+    public void removeDocuments() {
+        
+    }
 }

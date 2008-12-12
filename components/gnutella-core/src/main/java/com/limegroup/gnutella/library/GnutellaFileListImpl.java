@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.limewire.util.FileUtils;
+import org.limewire.util.MediaType;
 
 
 class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileList {
@@ -88,19 +89,17 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     }
     
     /**
-     * Returns true if this list is allowed to add this FileDesc
-     * @param fileDesc - FileDesc to be added
+     * This method delegates to the FriendFileListImpl isFileAddable method. However it does add the additional check from 
+     * files of type document, that gnutellaDocumentSharing must be allowed for the file ot be allowed.
      */
     @Override
     protected boolean isFileAddable(FileDesc fileDesc) {
-        if(fileDesc instanceof IncompleteFileDesc) {
+        String extension = FileUtils.getFileExtension(fileDesc.getFileName());
+        MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
+        if( MediaType.getDocumentMediaType().equals(mediaType) && !data.isGnutellaDocumentSharingAllowed()) {
             return false;
-        } else if (fileDesc.getLimeXMLDocuments().size() != 0
-                && isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
-            return false;
-        } else {
-            return true;
         }
+        return super.isFileAddable(fileDesc);
     }
     
     @Override
@@ -144,5 +143,16 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     public List<FileDesc> getFilesInDirectory(File directory) {
         // TODO Auto-generated method stub
         return super.getFilesInDirectory(directory);
+    }
+
+    @Override
+    public void removeDocuments() {
+            for( FileDesc fileDesc : pausableIterable()) {
+                String extension = FileUtils.getFileExtension(fileDesc.getFileName());
+                MediaType mediaType = MediaType.getMediaTypeForExtension(extension);
+                if(MediaType.getDocumentMediaType().equals(mediaType)) {
+                    remove(fileDesc);
+                }
+            }
     }
 }

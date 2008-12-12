@@ -33,4 +33,8 @@ public interface GnutellaFileList extends FriendFileList {
      */
     List<FileDesc> getFilesInDirectory(File directory);
 
+    /**
+     * Removes all files of type document from this list.
+     */
+    void removeDocuments();
 }
