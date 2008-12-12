@@ -56,7 +56,10 @@ class DownloadMediator {
 		            finishedItems.add(item);
 		        }
 		    }
-		    commonBaseList.removeAll(finishedItems);
+		    
+		    for (DownloadItem item : finishedItems) {
+                commonBaseList.remove(item);
+            }
 		} finally {
 		    commonBaseList.getReadWriteLock().writeLock().unlock();
 		}
