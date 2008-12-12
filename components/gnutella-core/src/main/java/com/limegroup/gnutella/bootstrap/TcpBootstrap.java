@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -27,6 +25,8 @@ import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -117,6 +117,7 @@ public class TcpBootstrap {
     public synchronized boolean fetchHosts(TcpBootstrapListener listener) {
         // If the order has possibly changed, resort.
         if(dirty) {
+            LOG.debug("shuffling hosts");
             Collections.shuffle(hosts);
             dirty = false;
         }
@@ -131,12 +132,15 @@ public class TcpBootstrap {
             if(attemptedHosts.contains(host))
                 continue;
             
+            LOG.debugf("creating request for {0}", host);
+            
             HttpUriRequest request = newRequest(host);
             requests.add(request);
             requestToHost.put(request, host);
         }
         
         if(requests.isEmpty()) {
+            LOG.debug("all hosts tried");
             return false;
         }
         
@@ -192,6 +196,7 @@ public class TcpBootstrap {
         if(!endpoints.isEmpty()) {
             return listener.handleHosts(endpoints);
         } else {
+            LOG.debug("no endpoints sent");
             return 0;
         }
 
@@ -243,9 +248,12 @@ public class TcpBootstrap {
      * Adds a new hostcache to this.
      */
     public synchronized boolean add(URI e) {
-        if (hostsSet.contains(e))
+        if (hostsSet.contains(e)) {
+            LOG.debugf("already knows about {0}", e);
             return false;
+        }
         
+        LOG.debugf("adding host {0}", e);
         // just insert.  we'll sort later.
         hosts.add(e);
         hostsSet.add(e);
