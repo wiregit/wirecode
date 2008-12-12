@@ -234,27 +234,46 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             // note that the minimum search quality will always be greater
             // than -1, so -1 qualities (the impossible case) are never
             // displayed
-            if(qr.calculateQualityOfService() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
-                LOG.debug("Ignoring because low quality");
+            if(qr.calculateQualityOfService()
+                    < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
+                LOG.debug("Ignoring reply with low quality");
                 return;
             }
-            if(qr.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
-                LOG.debug("Ignoring because low speed");
+            if(qr.getSpeed()
+                    < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
+                LOG.debug("Ignoring reply with low speed");
                 return;
             }
             // if the other side is firewalled AND
             // we're not on close IPs AND
             // (we are firewalled OR we are a private IP) AND 
             // no chance for FW transfer then drop the reply.
-            if(qr.isFirewalled() && 
-               !networkInstanceUtils.isVeryCloseIP(qr.getIPBytes()) &&               
-               (!networkManager.acceptedIncomingConnection() ||
-                       networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&
-               !(networkManager.canDoFWT() && 
-                 qr.getSupportsFWTransfer())
-               )  {
-               LOG.debug("Ignoring from firewall funkiness");
-               return;
+            if(qr.isFirewalled()) {
+                LOG.debug("The responder is firewalled");
+                if(!networkInstanceUtils.isVeryCloseIP(qr.getIPBytes())) {
+                    LOG.debug("...and the responder isn't on a very close IP");
+                    boolean weAreFirewalled =
+                        !networkManager.acceptedIncomingConnection();
+                    if(weAreFirewalled)
+                        LOG.debug("...and we're firewalled");
+                    byte[] ourAddress = networkManager.getAddress();
+                    boolean weArePrivate =
+                        networkInstanceUtils.isPrivateAddress(ourAddress);
+                    if(weArePrivate)
+                        LOG.debug("...and we have a private IP");
+                    if(weAreFirewalled || weArePrivate) {
+                        boolean weCanDoFWT = networkManager.canDoFWT();
+                        if(!weCanDoFWT)
+                            LOG.debug("...and we can't do FWT");
+                        boolean theyCanDoFWT = qr.getSupportsFWTransfer();
+                        if(!theyCanDoFWT)
+                            LOG.debug("...and the responder can't do FWT");
+                        if(!(weCanDoFWT && theyCanDoFWT)) {
+                            LOG.debug("...so we're ignoring the reply");
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -269,6 +288,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
         // throw away results that aren't secure.
         Status secureStatus = qr.getSecureStatus();
         if(secureStatus == Status.FAILED) {
+            LOG.debug("Ignoring secure result that failed verification");
             return;
         }
         
@@ -284,11 +304,20 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
                 continue;
             }
             
-            // If there was an action, only allow it if it's a secure message.
-            LimeXMLDocument doc = response.getDocument();
-            if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-               doc != null && !"".equals(doc.getAction()) && secureStatus != Status.SECURE) {
+            // Filter responses with no URNs, unless they're secure results
+            if(secureStatus != Status.SECURE && response.getUrns().isEmpty()) {
+                LOG.debug("Ignoring insecure result with no URNs");
                 continue;
+            }
+            
+            // If there was an action, only allow it if it's a secure message.
+            if(secureStatus != Status.SECURE
+                    && ApplicationSettings.USE_SECURE_RESULTS.getValue()) {
+                LimeXMLDocument doc = response.getDocument();
+                if(doc != null && !"".equals(doc.getAction())) {
+                    LOG.debug("Ignoring insecure result with XML action");
+                    continue;
+                }
             }
             
             // we'll be showing the result to the user, count it
@@ -337,7 +366,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
     private void accountAndUpdateDynamicQueriers(final QueryReply qr,
                                                  final int numGoodSentToFrontEnd) {
 
-        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         // we should execute if results were consumed
         if (numGoodSentToFrontEnd > 0) {
             // get the correct GuidCount
@@ -349,14 +377,12 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
                 return;
             
             // update the object
-            LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
             gc.increment(numGoodSentToFrontEnd);
 
             // inform proxying Ultrapeers....
             if (connectionServices.isShieldedLeaf()) {
                 if (!gc.isFinished() && 
                     (gc.getNumResults() > gc.getNextReportNum())) {
-                    LOG.trace("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
                     gc.tallyReport();
                     if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
                         gc.markAsFinished();
@@ -373,7 +399,6 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
 
             }
         }
-        LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");
     }
 
 

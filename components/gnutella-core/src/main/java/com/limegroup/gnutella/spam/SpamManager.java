@@ -13,11 +13,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 public class SpamManager {
 
 	/**
-	 * Initial rating for a RemoteFileDesc without a SHA1 URN 
-	 */
-	private static final float NO_SHA1_URN_RATING = 0.5f;
-
-	/**
 	 * Initial rating for a file that appears from its name to be incomplete
 	 */
 	private static final float INCOMPLETE_FILE_RATING = 0.8f;
@@ -57,10 +52,6 @@ public class SpamManager {
         float rating = 0;
 		// TODO: these results should probably be ignored (possibly using the
         // filters package) rather than treated as spam
-		if(rfd.getSHA1Urn() == null && rfd.getXMLDocument() != null &&
-           rfd.getXMLDocument().getAction().length() == 0) {
-			rating = 1 - (1 - rating) * (1 - NO_SHA1_URN_RATING);
-        }
 		if(isIncompleteFile(rfd.getFileName().toLowerCase(Locale.US))) {
 			rating = 1 - (1 - rating) * (1 - INCOMPLETE_FILE_RATING);
 		}
