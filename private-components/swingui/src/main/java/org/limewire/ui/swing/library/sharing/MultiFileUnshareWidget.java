@@ -6,14 +6,15 @@ import java.util.Collection;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.MultiFileUnshareModel;
 import org.limewire.ui.swing.util.I18n;
 
 public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     private LibrarySharePanel unsharePanel;
     
-    public MultiFileUnshareWidget(ShareListManager shareListManager, Collection<Friend> allFriends){
-        unsharePanel = new LibrarySharePanel(allFriends);
+    public MultiFileUnshareWidget(ShareListManager shareListManager, Collection<Friend> allFriends, ShapeDialog shapeDialog){
+        unsharePanel = new LibrarySharePanel(allFriends, shapeDialog);
         unsharePanel.setShareModel(new MultiFileUnshareModel(shareListManager));
         unsharePanel.setComboBoxVisible(false);
     }
@@ -31,6 +32,7 @@ public class MultiFileUnshareWidget implements ShareWidget<LocalFileItem[]>{
     @Override
     public void setShareable(LocalFileItem[] files) {
         ((MultiFileUnshareModel)unsharePanel.getShareModel()).setFileItem(files);
-        unsharePanel.setTitleLabel(I18n.tr("Unshare {0} {1} files", files.length, files[0].getCategory().toString()));    
+        unsharePanel.setTitleLabel(I18n.tr("Unshare {0} files", files.length));    
+        unsharePanel.setTopLabel("with the following people");    
     }
 }

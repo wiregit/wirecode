@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -30,11 +29,9 @@ import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -42,9 +39,8 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
-import org.limewire.ui.swing.library.sharing.CategoryShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
-import org.limewire.ui.swing.library.sharing.FileShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -64,17 +60,15 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
 public class MyLibraryPanel extends LibraryPanel {
     
-    private final Collection<Friend> allFriends;
-    private final ShareListManager shareListManager;
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
     private final Map<Category, LibraryOperable> selectableMap;
+    private ShareWidgetFactory shareFactory;
     
     private ShareWidget<Category> categoryShareWidget = null;
     
@@ -83,22 +77,20 @@ public class MyLibraryPanel extends LibraryPanel {
                           IconManager iconManager,
                           LibraryTableFactory tableFactory,
                           CategoryIconManager categoryIconManager,
-                          ShareListManager shareListManager,
-                          @Named("known") Collection<Friend> allFriends,
+                          ShareWidgetFactory shareFactory,
                           LimeHeaderBarFactory headerBarFactory,
                           PlayerPanel player) {
         super(headerBarFactory);
         
         this.libraryManager = libraryManager;
-        this.shareListManager = shareListManager;
-        this.allFriends = allFriends;
         this.tableFactory = tableFactory;
-        this.categoryIconManager = categoryIconManager;       
+        this.categoryIconManager = categoryIconManager;    
+        this.shareFactory = shareFactory;
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
         
         getHeaderPanel().setText(I18n.tr("My Library"));
-        categoryShareWidget = new CategoryShareWidget(shareListManager, allFriends);
+        categoryShareWidget = shareFactory.createCategoryShareWidget();
         createMyCategories(libraryManager.getLibraryManagedList().getSwingModel());
         
         selectFirst();
@@ -129,7 +121,7 @@ public class MyLibraryPanel extends LibraryPanel {
 
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered) {        
         //TODO: can this be a singleton??? 
-        final ShareWidget<File> fileShareWidget = new FileShareWidget(shareListManager, allFriends);
+        final ShareWidget<File> fileShareWidget = shareFactory.createFileShareWidget();
         addDisposable(fileShareWidget);             
         JScrollPane scrollPane;        
         EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 

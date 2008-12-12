@@ -2,21 +2,17 @@ package org.limewire.ui.swing.library.table.menu;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
 import org.limewire.core.api.Category;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.sharing.MultiFileShareWidget;
-import org.limewire.ui.swing.library.sharing.MultiFileUnshareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -29,8 +25,6 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
     final private LibraryManager libraryManager;
 
-    final private ShareListManager shareListManager;
-
     private ShareWidget<LocalFileItem[]> unshareWidget;
     private ShareWidget<LocalFileItem[]> shareWidget;
 
@@ -42,14 +36,13 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
 
     //private Component repaintComponent;
 
-    private Collection<Friend> friendList;
+private ShareWidgetFactory shareFactory;
 
     public MyLibraryMultipleSelectionPopupMenu(Category category, LibraryManager libraryManager,
-            ShareListManager shareListManager, Component repaintComponent, Collection<Friend> friendList) {
+            ShareWidgetFactory shareFactory, Component repaintComponent) {
         this.libraryManager = libraryManager;
-        this.shareListManager = shareListManager;
+        this.shareFactory = shareFactory;
         //this.repaintComponent = repaintComponent;
-        this.friendList = friendList;
     
         
 //        gnutellaShareItem = new JMenuItem(gnutellaShareAction);
@@ -109,7 +102,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
         public void actionPerformed(ActionEvent e) {
             final LocalFileItem[] fileItemArray = createFileItemArray();
             if(unshareWidget == null){                
-                unshareWidget = new MultiFileUnshareWidget(shareListManager, friendList);
+                unshareWidget = shareFactory.createMultiFileUnshareWidget();
             }
             unshareWidget.setShareable(fileItemArray);
             unshareWidget.show(GuiUtils.getMainFrame());
@@ -127,7 +120,7 @@ public class MyLibraryMultipleSelectionPopupMenu extends JPopupMenu {
             final LocalFileItem[] fileItemArray = createFileItemArray();
 
             if(shareWidget == null){                
-                shareWidget = new MultiFileShareWidget(shareListManager, friendList);
+                shareWidget = shareFactory.createMultiFileShareWidget();
             }
             shareWidget.setShareable(fileItemArray);
             shareWidget.show(GuiUtils.getMainFrame());

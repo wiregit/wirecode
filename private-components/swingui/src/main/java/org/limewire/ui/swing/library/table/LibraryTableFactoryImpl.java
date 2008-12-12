@@ -29,6 +29,7 @@ import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
@@ -84,6 +85,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     private Collection<Friend> allFriends;
 
+    private ShareWidgetFactory shareFactory;
+
     @Inject
     public LibraryTableFactoryImpl(IconManager iconManager,
             LibraryManager libraryManager, 
@@ -96,7 +99,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             @Named("known") Collection<Friend> allFriends,
-            ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
+            ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
+            ShareWidgetFactory shareFactory) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -108,6 +112,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.allFriends = allFriends;
+        this.shareFactory = shareFactory;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager);
@@ -137,7 +142,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory);
+                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory, shareFactory);
         
         LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
@@ -158,7 +163,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, LocalFileList currentFriendList) {
         ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory);
+                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory, shareFactory);
         return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
                 libraryManager.getLibraryManagedList(), scrollPane,
                 subPanelFactory, null, currentFriendList);
@@ -203,7 +208,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory, allFriends,
-                localItemPropFactory));
+                localItemPropFactory, shareFactory));
 
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);
@@ -324,7 +329,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         
         libTable.setTransferHandler(new FriendLibraryNavTransferHandler(friendFileList));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
-                    magnetLinkFactory, allFriends, localItemPropFactory));
+                    magnetLinkFactory, allFriends, localItemPropFactory, shareFactory));
         
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);

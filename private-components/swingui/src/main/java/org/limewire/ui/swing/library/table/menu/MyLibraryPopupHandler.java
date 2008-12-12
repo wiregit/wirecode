@@ -11,6 +11,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -25,12 +26,11 @@ public class MyLibraryPopupHandler implements TablePopupHandler {
 
     public MyLibraryPopupHandler(LibraryTable<LocalFileItem> table, Category category, LibraryManager libraryManager,
             ShareListManager shareListManager, MagnetLinkFactory magnetFactory, Collection<Friend> friendList,
-            PropertiesFactory<LocalFileItem> propertiesFactory) {
+            PropertiesFactory<LocalFileItem> propertiesFactory, ShareWidgetFactory shareFactory) {
         this.table = table;
         this.popupMenu = new MyLibraryPopupMenu(category, libraryManager, shareListManager, magnetFactory, table, friendList,
                 propertiesFactory);
-        this.multiSelectPopupMenu = new MyLibraryMultipleSelectionPopupMenu(category, libraryManager, shareListManager, table, friendList);
-
+        this.multiSelectPopupMenu = new MyLibraryMultipleSelectionPopupMenu(category, libraryManager, shareFactory, table);
     }
 
     @Override

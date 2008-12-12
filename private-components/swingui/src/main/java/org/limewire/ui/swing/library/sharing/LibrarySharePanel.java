@@ -1,16 +1,9 @@
 package org.limewire.ui.swing.library.sharing;
 
-import java.awt.AWTEvent;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.event.AWTEventListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -19,8 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
@@ -31,9 +22,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ComboBoxEditor;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -45,14 +36,18 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
-import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.components.ShapeDialogComponent;
 import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -75,13 +70,17 @@ import ca.odell.glazedlists.swing.EventTableModel;
 /**
  * This is used internally by ShareWidget.  Needs refactoring.
  */
-class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable {
+class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable, ShapeDialogComponent {
 
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
     private static final int HGAP = 5;
     //TODO: move this to properties
     private static final int WIDTH = 300;
+    
+    private JXPanel titlePanel;
+    private JXPanel topPanel;
+    private JXPanel bottomPanel;
     
     private LibraryShareModel shareModel;
     
@@ -114,10 +113,11 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private JLabel titleLabel;
     
     private JXPanel mainPanel;
+    private JButton closeButton;
     
    // private ShapePainter shapePainter;    
     
-    private JDialog dialog;
+    private ShapeDialog dialog;
     
     private ComboPopup comboPopup;
     
@@ -161,11 +161,11 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             }
         }
     };
-    private AWTEventListener eventListener;
     
     
-    public LibrarySharePanel(Collection<Friend> allFriends) {
+    public LibrarySharePanel(Collection<Friend> allFriends, ShapeDialog dialog) {
         this.allFriends = allFriends;
+        this.dialog = dialog;
         initialize();
     }
   
@@ -185,8 +185,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 //        setBackgroundPainter(shapePainter);
         setBorder(new LineBorder(Color.BLACK));
         
-        mainPanel = new JXPanel(new GridBagLayout());
-        mainPanel.setOpaque(false);
+
 
         initializeLists();
 
@@ -195,6 +194,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         initializeComboBox();
         
         initializeLabels();
+        
+        initializePanels();
+        
+        initializeButton();
         
         addComponents();
         
@@ -205,20 +208,44 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         addComponentListener(); 
     }
   
+    private void initializeButton() {
+        closeButton = new JButton("X");
+    }
+
+
+    private void initializePanels(){
+        //TODO use correct colors, gradients and move to properties
+        mainPanel = new JXPanel(new VerticalLayout());
+        mainPanel.setOpaque(false);
+
+        titlePanel = new JXPanel(new MigLayout());
+        titlePanel.setBackground(Color.WHITE);
+       // titlePanel.setOpaque(false);
+        
+        topPanel = new JXPanel(new MigLayout());
+        topPanel.setBackground(new Color(249, 253, 243));
+        //topPanel.setOpaque(false);
+        
+        bottomPanel = new JXPanel(new MigLayout());
+        bottomPanel.setBackground(Color.BLACK);
+       // bottomPanel.setOpaque(false);
+    }
 
     private void initializeLabels() {
         titleLabel = new JLabel();
         FontUtils.bold(titleLabel);
         topLabel = new JLabel(I18n.tr("Currently sharing with"));
         friendLabel = new JLabel(I18n.tr("Start typing a friend's name"));
+        friendLabel.setForeground(Color.WHITE);
         
         Dimension labelSize = friendLabel.getPreferredSize().width > topLabel.getPreferredSize().width ? 
                 friendLabel.getPreferredSize() : topLabel.getPreferredSize();
         friendLabel.setPreferredSize(labelSize);
         
-        topLabel.setPreferredSize(labelSize);
+       // topLabel.setPreferredSize(labelSize);
         
         bottomLabel = new MultiLineLabel("", WIDTH);
+        bottomLabel.setForeground(Color.WHITE);
     }
 
 
@@ -226,13 +253,14 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (dialog.isVisible()) {
-                    dialog.pack();
+                if (isVisible()) {
+                    dialog.revalidate();
                 }
             }
 
             @Override
             public void componentShown(ComponentEvent e) {
+                System.out.println("shown");
                 inputField.requestFocusInWindow();
             }
         });
@@ -265,35 +293,50 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     private void addComponents() {
-        GridBagConstraints gbc = new GridBagConstraints();
+//        GridBagConstraints gbc = new GridBagConstraints();
+//        
+//        gbc.weightx = 1.0;
+//        gbc.weighty = 0;
+//        gbc.fill = GridBagConstraints.BOTH;
+//        gbc.insets = new Insets(0, HGAP, 0, HGAP);
+//
+//        gbc.gridy = 0;
+//        gbc.weighty = 0;
+//        mainPanel.add(titleLabel, gbc);
+//        
+//        gbc.gridy++;
+//        gbc.weighty = 0;
+//        mainPanel.add(topLabel, gbc);
+//        
+//        gbc.gridy++;
+//        gbc.weighty = 1.0;
+//        mainPanel.add(shareScroll, gbc);
+//       
+//        gbc.gridy++;
+//        mainPanel.add(friendLabel, gbc);
+//        
+//        gbc.gridy++;
+//        gbc.weighty = 1.0;
+//        mainPanel.add(friendCombo, gbc);
+//
+//        gbc.gridy++;
+//        mainPanel.add(bottomLabel, gbc);
         
-        gbc.weightx = 1.0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(0, HGAP, 0, HGAP);
+        titlePanel.add(titleLabel, "hidemode 3, wrap");
+        titlePanel.add(topLabel, "hidemode 3");
+        titlePanel.add(closeButton, "dock east, aligny top");
+        
+        topPanel.add(shareScroll);
+        
+        bottomPanel.add(friendLabel, "wrap");
+        bottomPanel.add(friendCombo, "growx, wrap");
+        bottomPanel.add(bottomLabel);
+        
 
-        gbc.gridy = 0;
-        gbc.weighty = 0;
-        mainPanel.add(titleLabel, gbc);
+        mainPanel.add(titlePanel);
+        mainPanel.add(topPanel);
+        mainPanel.add(bottomPanel);
         
-        gbc.gridy++;
-        gbc.weighty = 0;
-        mainPanel.add(topLabel, gbc);
-        
-        gbc.gridy++;
-        gbc.weighty = 1.0;
-        mainPanel.add(shareScroll, gbc);
-       
-        gbc.gridy++;
-        mainPanel.add(friendLabel, gbc);
-        
-        gbc.gridy++;
-        gbc.weighty = 1.0;
-        mainPanel.add(friendCombo, gbc);
-
-        gbc.gridy++;
-        mainPanel.add(bottomLabel, gbc);
-                
         add(mainPanel); 
     }
 
@@ -377,7 +420,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     private void initializeShareTable() {
-        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(1)));
+        final int actionCol = 0;
+        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(actionCol)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){
@@ -391,10 +435,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         //do nothing ColorHighlighter eliminates default striping
         shareTable.setHighlighters(new ColorHighlighter());
         shareTable.setRowHeight(removeEditor.getPreferredSize().height);
-        shareTable.getColumnModel().getColumn(1).setCellEditor(removeEditor);
-        shareTable.getColumnModel().getColumn(1).setPreferredWidth(removeEditor.getPreferredSize().width);    
-        shareTable.getColumnModel().getColumn(1).setMaxWidth(removeEditor.getPreferredSize().width);    
-        shareTable.getColumnModel().getColumn(1).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
+        shareTable.getColumnModel().getColumn(actionCol).setCellEditor(removeEditor);
+        shareTable.getColumnModel().getColumn(actionCol).setPreferredWidth(removeEditor.getPreferredSize().width);    
+        shareTable.getColumnModel().getColumn(actionCol).setMaxWidth(removeEditor.getPreferredSize().width);    
+        shareTable.getColumnModel().getColumn(actionCol).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
         shareTable.setShowGrid(false);       
         shareTable.setOpaque(false);
         shareTable.setColumnSelectionAllowed(false);
@@ -404,36 +448,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         shareScroll = new JScrollPane(shareTable);
         shareScroll.setBorder(new EmptyBorder(0, shareTableIndent, 0, 0));
         shareScroll.setOpaque(false);
+        shareScroll.getViewport().setOpaque(false);
     
     }
 
-    private void initializeEventListener() {
-        // make sharePanel disappear when the user clicks elsewhere
-        eventListener = new AWTEventListener() {
-            @Override
-            public void eventDispatched(AWTEvent event) {
-                if (dialog.isVisible()) {
-                    
-                    if ((event.getID() == MouseEvent.MOUSE_PRESSED)) {
-                        MouseEvent e = (MouseEvent) event;
-                        
-                        if (LibrarySharePanel.this != e.getComponent()
-                                && !contains(e.getComponent())) {
-                            dialog.setVisible(false);
-                        }
-                        
-                    } else if (event.getID() == KeyEvent.KEY_TYPED) {
-                        KeyEvent e = (KeyEvent) event;
-                        
-                        if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
-                            dialog.setVisible(false);
-                        }
-                    }
-                    
-                }
-            }
-        }; 
-    }
     
     public void setTitleLabel(String text){
         titleLabel.setText(text);
@@ -447,26 +465,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         bottomLabel.setText(text);
     }
     
-    private void createDialog(){
-        dialog = new LimeJDialog(GuiUtils.getMainFrame());
-        dialog.setUndecorated(true);
-        dialog.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowActivated(WindowEvent e) {
-                addCloseListener();
-            }
-        });
-        
-        dialog.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentHidden(ComponentEvent e) {
-                removeCloseListener();
-            }
-        });
-        
-        dialog.setLayout(new BorderLayout());
-        dialog.add(this);
-    }
 
     private void adjustFriendLabelVisibility() {
         friendLabel.setVisible(shareFriendList.size() == 0 && friendCombo.isVisible());
@@ -505,19 +503,23 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     
-    public void show(Component c) {
-        if(dialog == null){
-            createDialog();
-        }
+    public void show(Component c) {       
         inputField.setText(null);
         if (noShareFilterList.size() > 0) {
             friendCombo.setSelectedIndex(0);
         }
         reloadSharedBuddies();
         adjustSize();
-        dialog.setLocationRelativeTo(c);
-        dialog.setVisible(true);
-        dialog.toFront();
+        dialog.show(this);
+    }
+    
+    public boolean contains(Component c) {
+        for (; c != null; c = c.getParent()) {
+            if (c == this || c == comboPopup) {
+                return true;
+            }
+        }
+        return false;
     }
     
  
@@ -584,14 +586,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
        // adjustPainter();
     }
     
-    public boolean contains(Component c) {
-        for (; c != null; c = c.getParent()) {
-            if (c == this || c == comboPopup) {
-                return true;
-            }
-        }
-        return false;
-    }
+    
     
     public void dispose() {
         if (noShareFriendList instanceof TransformedList) {
@@ -627,18 +622,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         return shareModel.isShared(friend);
     }   
     
-    private void addCloseListener() {
-        if(eventListener == null){
-            initializeEventListener();
-        }
-        
-        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
-        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.KEY_EVENT_MASK);
-    }
-
-    private void removeCloseListener() {
-        Toolkit.getDefaultToolkit().removeAWTEventListener(eventListener);
-    }
             
     private static class LibraryShareTableFormat implements WritableTableFormat<SharingTarget> {
         private int editColumn;

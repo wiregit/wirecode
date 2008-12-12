@@ -1,22 +1,18 @@
 package org.limewire.ui.swing.downloads.table;
 
 import java.io.File;
-import java.util.Collection;
 
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.friend.Friend;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.downloads.DownloadItemUtils;
-import org.limewire.ui.swing.library.sharing.FileShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import com.google.inject.name.Named;
-
-import ca.odell.glazedlists.EventList;
 
 public class DownloadActionHandler {
     
@@ -40,10 +36,10 @@ public class DownloadActionHandler {
     
     @AssistedInject
     public DownloadActionHandler(PropertiesFactory<DownloadItem> propertiesFactory, 
-            ShareListManager shareListManager, @Named("known") Collection<Friend> allFriends, @Assisted EventList<DownloadItem> downloadItems){
+            ShareWidgetFactory shareFactory, @Assisted EventList<DownloadItem> downloadItems){
         this.downloadItems = downloadItems;
         this.propertiesFactory = propertiesFactory;
-        this.shareWidget = new FileShareWidget(shareListManager, allFriends);
+        this.shareWidget = shareFactory.createFileShareWidget();
     }
 
     public void performAction(final String actionCommmand, final DownloadItem item){

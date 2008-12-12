@@ -20,6 +20,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.Resizable;
+import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.nav.Navigator;
@@ -42,7 +43,7 @@ public class LimeWireSwingUI extends JPanel {
             StatusPanel statusPanel, Navigator navigator,
             SearchHandler searchHandler, ChatFramePanel friendsPanel,
             AudioPlayer player, DownloadSummaryPanel downloadSummaryPanel,
-            Application application,  ProNag proNag) {
+            Application application, ProNag proNag, ShapeDialog shapeDialog) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
@@ -83,6 +84,8 @@ public class LimeWireSwingUI extends JPanel {
             layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
             proNag.loadContents();
         }
+        layeredPane.add(shapeDialog, JLayeredPane.MODAL_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
         add(layeredPane, gbc);
                 
         JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);
