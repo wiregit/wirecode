@@ -39,21 +39,21 @@ public class SearchHeadingDocumentBuilderImplTest extends TestCase {
     
     public void testDownloadingHeadingDocument() {
         String expected = 
-            bldr.documentStartHTML + "You are <a href=\"#downloading\">downloading</a> <span class=\"title\">Night life</span>" + DOCUMENT_END;
+            bldr.documentStartHTML + "<a href=\"#downloading\">Downloading</a> <span class=\"title\">Night life</span>..." + DOCUMENT_END;
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADING, false, false));
 
     }
     
     public void testFileInLibraryHeadingDocument() {
         String expected = 
-            bldr.documentStartHTML + "<span class=\"title\">Night life</span> is in <a href=\"#library\">Your Library</a>" + DOCUMENT_END;
+            bldr.documentStartHTML + "<span class=\"title\">Night life</span> is in <a href=\"#library\">My Library</a>." + DOCUMENT_END;
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.LIBRARY, false, false));
         assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADED, false, false));
     }
 
     public void testHandleSpam() {
         String expected = 
-            bldr.documentStartHTML + "<span class=\"title\">Night life</span> is Spam" + DOCUMENT_END;
+            bldr.documentStartHTML + "<span class=\"title\">Night life</span> is marked as spam." + DOCUMENT_END;
        assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.NOT_STARTED, false, true));
        assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADING, false, true));
        assertEquals(expected, bldr.getHeadingDocument(heading, BasicDownloadState.DOWNLOADED, false, true));

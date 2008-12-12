@@ -41,11 +41,11 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
         StringBuilder bldr = new StringBuilder();
         bldr.append(documentStartHTML);
         if (isSpam) {
-            bldr.append(tr("{0} is Spam", wrapHeading(heading.getText(), false)));
+            bldr.append(tr("{0} is marked as spam.", wrapHeading(heading.getText(), false)));
         } else {
             switch(downloadState) {
             case DOWNLOADING:
-                String downloadMessage = "You are <a href=\"#downloading\">downloading</a> {0}";
+                String downloadMessage = "<a href=\"#downloading\">Downloading</a> {0}...";
                     bldr.append(tr(downloadMessage, wrapHeading(heading.getText(downloadMessage), false)));
                 break;
             case NOT_STARTED:
@@ -53,7 +53,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                 break;
             case DOWNLOADED:
             case LIBRARY:
-                String message = "{0} is in <a href=\"#library\">Your Library</a>";
+                String message = "{0} is in <a href=\"#library\">My Library</a>.";
                     String content = tr(message, wrapHeading(heading.getText(message), false));
                 bldr.append(content);
                 break;
