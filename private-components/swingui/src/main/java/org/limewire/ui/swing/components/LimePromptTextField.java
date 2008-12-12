@@ -122,6 +122,10 @@ public class LimePromptTextField extends JTextField implements FocusListener {
      */
     @Override
     public void focusGained(FocusEvent e) {
+        // Select all text if focus gained from another component.
+        if (e.getOppositeComponent() != null) {
+            selectAll();
+        }
         repaint();
     }
     
