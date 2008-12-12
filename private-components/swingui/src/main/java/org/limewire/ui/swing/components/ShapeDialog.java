@@ -11,6 +11,7 @@ import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
@@ -31,6 +32,8 @@ public class ShapeDialog extends JXPanel implements Resizable {
     private Component component;
 
     private Color shadowColor = new Color(0,0,0, 125);
+    
+    private ComponentListener componentListener;
 
     public ShapeDialog() {
         super(new MigLayout());
@@ -40,12 +43,12 @@ public class ShapeDialog extends JXPanel implements Resizable {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent e) {
-                addCloseListener();
+                addListeners();
             }
 
             @Override
             public void componentHidden(ComponentEvent e) {
-                removeCloseListener();
+                removeListeners();
             }
         });
         
@@ -60,6 +63,13 @@ public class ShapeDialog extends JXPanel implements Resizable {
                 g2.dispose();
             }
         });
+        
+        componentListener = new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resize();
+            }
+        };
     }
 
     public void show(Component c) {
@@ -70,17 +80,23 @@ public class ShapeDialog extends JXPanel implements Resizable {
         resize();
     }
 
-    private void addCloseListener() {
+    private void addListeners() {
         if (eventListener == null) {
             initializeEventListener();
         }
 
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.KEY_EVENT_MASK);
+        if(component!=null){
+            component.addComponentListener(componentListener);
+        }
     }
 
-    private void removeCloseListener() {
+    private void removeListeners() {
         Toolkit.getDefaultToolkit().removeAWTEventListener(eventListener);
+        if(component!=null){
+            component.addComponentListener(componentListener);
+        }
     }
 
     private void initializeEventListener() {

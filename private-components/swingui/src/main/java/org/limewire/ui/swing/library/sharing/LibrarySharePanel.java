@@ -41,7 +41,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
@@ -215,18 +214,18 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private void initializePanels(){
         //TODO use correct colors, gradients and move to properties
-        mainPanel = new JXPanel(new VerticalLayout());
+        mainPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         mainPanel.setOpaque(false);
 
-        titlePanel = new JXPanel(new MigLayout());
+        titlePanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         titlePanel.setBackground(Color.WHITE);
        // titlePanel.setOpaque(false);
         
-        topPanel = new JXPanel(new MigLayout());
+        topPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         topPanel.setBackground(new Color(249, 253, 243));
         //topPanel.setOpaque(false);
         
-        bottomPanel = new JXPanel(new MigLayout());
+        bottomPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         bottomPanel.setBackground(Color.BLACK);
        // bottomPanel.setOpaque(false);
     }
@@ -333,9 +332,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         bottomPanel.add(bottomLabel);
         
 
-        mainPanel.add(titlePanel);
-        mainPanel.add(topPanel);
-        mainPanel.add(bottomPanel);
+        mainPanel.add(titlePanel, "growx, wrap");
+        mainPanel.add(topPanel, "growx, wrap");
+        mainPanel.add(bottomPanel, "growx");
         
         add(mainPanel); 
     }
