@@ -563,13 +563,11 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
             RowDisplayResult result = rowHeightRule.getDisplayResult(vsr, searchText);
             
-            populateHeading(result, vsr.getDownloadState(), false);
+            organizeSearchResultLayout(result.getConfig());
             
-            populateSearchResultTextPanel(result.getConfig());
-
+            populateHeading(result, vsr.getDownloadState(), false);
             populateSubheading(result);
             populateOther(result);
-            
             
         } else if (column == 1) {
             similarButton.setVisible(getSimilarResultsCount() > 0);
@@ -588,7 +586,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         return categoryIconManager.getIcon(vsr, iconManager);
     }
 
-    private void populateSearchResultTextPanel(RowDisplayConfig config) {
+    private void organizeSearchResultLayout(RowDisplayConfig config) {
         String labelPadding = OSUtils.isMacOSX() ? "" : "pad -6 4 0 0,";
         switch(config) {
         case HeadingOnly:
