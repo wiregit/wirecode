@@ -247,11 +247,11 @@ public abstract class Dialog extends LimeJDialog {
     protected abstract void commit();
     
     protected void addLengthMetadata(String length, Map<String, String> metadata) {
-        addMetadata("Length", length, metadata);
+        addMetadata(tr("Length"), length, metadata);
     }
     
     protected void addFileSizeMetadata(String fileSize, Map<String, String> metadata) {
-       addMetadata("Size", fileSize, metadata); 
+       addMetadata(tr("Size"), fileSize, metadata); 
     }
     
     protected void addHashMetadata(URN hash, Map<String, String> metadata) {
@@ -259,26 +259,26 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     protected void addDateCreatedMetadata(String dateCreated, Map<String, String> metadata) {
-        addMetadata("Date Created", dateCreated, metadata);
+        addMetadata(tr("Date Created"), dateCreated, metadata);
     }
     
     protected void addTypeMetadata(String str, Map<String, String> metadata) {
-        addMetadata("Type", str, metadata);
+        addMetadata(tr("Type"), str, metadata);
     }
 
     protected void addBitrateMetadata(String bitRate, Map<String, String> metadata) {
-        addMetadata("Bitrate", bitRate, metadata);
+        addMetadata(tr("Bitrate"), bitRate, metadata);
     }
 
     protected void addDimensionMetadata(String width, Object height, Map<String, String> metadata) {
         if (height != null && width != null) {
-            addMetadata("Dimensions", tr("({0}px X {1}px)", width, height), metadata);
+            addMetadata(tr("Dimensions"), tr("({0}px X {1}px)", width, height), metadata);
         }
     }
 
     private void addMetadata(String label, String value, Map<String, String> metadata) {
         if (!StringUtils.isEmpty(value)) {
-            metadata.put(tr(label), value);
+            metadata.put(label, value);
         }
     }
 
