@@ -187,12 +187,7 @@ class ShareListManagerImpl implements ShareListManager {
 
         @Override
         public void removeDocuments() {
-            ThreadExecutor.startThread(new Runnable(){
-                @Override
-                public void run() {
-                    getCoreFileList().removeDocuments();
-                }
-            }, "Revalidating Share List");
+            getCoreFileList().removeDocuments();
         }
     }
     
