@@ -93,14 +93,18 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
     @Override
     public Component doTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-        update(value);
+        if(value != null) {
+            update(value);
+        }
         return this;
     }
 
     @Override
     public Component doTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
-        file = update(value);
+        if(value != null) {
+            file = update(value);
+        }
         return this;
     }
     
@@ -121,7 +125,7 @@ public class PlayRendererEditor extends TableRendererEditor implements AudioPlay
                 return file;
             }      
         } else {
-            throw new IllegalStateException(value + " must be LocalFileItem");
+            throw new IllegalStateException(value.getClass() + " must be LocalFileItem");
         }
     }
 
