@@ -11,11 +11,17 @@ public enum ConnectionStrength {
     /** You are attempting to connect to Gnutella. */
     CONNECTING,
     
-    /** You have a week connection to Gnutella. */
+    /** You have a weak connection to Gnutella. */
     WEAK,
+    
+    /** You have a slightly better than weak connection to Gnutella **/
+    WEAK_PLUS,
     
     /** Your connection to Gnutella is OK, but could be better. */
     MEDIUM, 
+    
+    /** Your connection to Gnutella is a little better than OK, but still, it could be better. */
+    MEDIUM_PLUS,
     
     /** You are fully connected to Gnutella. */
     FULL, 

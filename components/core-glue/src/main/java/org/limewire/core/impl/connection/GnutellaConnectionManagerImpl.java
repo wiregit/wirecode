@@ -185,12 +185,14 @@ public class GnutellaConnectionManagerImpl
             preferred = Math.max(1, preferred); // prevent div by 0
 
             double percent = (double)stable / (double)preferred;
-            if(percent <= 0.25) {
+            if(percent <= 0.15) {
                 strength = ConnectionStrength.WEAK;
+            } else if(percent <= 0.30) {
+                strength = ConnectionStrength.WEAK_PLUS;
             } else if(percent <= 0.5) {
                 strength = ConnectionStrength.MEDIUM;
             } else if(percent <= 0.75) {
-                strength = ConnectionStrength.MEDIUM;
+                strength = ConnectionStrength.MEDIUM_PLUS;
             } else if(percent <= 1) {
                 strength = ConnectionStrength.FULL;
             } else /* if(percent > 1) */ {
