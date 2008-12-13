@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.util.TestUtils;
@@ -106,6 +107,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.setValue(true);
         
         setSettings();
     }
