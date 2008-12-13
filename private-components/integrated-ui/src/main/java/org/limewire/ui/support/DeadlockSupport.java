@@ -4,6 +4,7 @@ import java.lang.management.LockInfo;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,7 @@ public class DeadlockSupport {
                         Thread.sleep(DEADLOCK_CHECK_INTERVAL);
                     } catch (InterruptedException ignored) {}
                     LOG.trace("deadlock check start");
-                    long [] ids = ManagementFactory.getThreadMXBean().findDeadlockedThreads();
+                    long [] ids = findDeadlockedThreads(ManagementFactory.getThreadMXBean());
                     
                     if (ids == null) {
                         LOG.trace("no deadlocks found");
@@ -78,7 +79,15 @@ public class DeadlockSupport {
         t.setName("Deadlock Detection Thread");
         t.start();
     }
-    
+
+    private static long[] findDeadlockedThreads(ThreadMXBean threadMXBean) {
+        if(threadMXBean.isSynchronizerUsageSupported()) {
+            return threadMXBean.findDeadlockedThreads();
+        } else {
+            return threadMXBean.findMonitorDeadlockedThreads();
+        }
+    }
+
     /** Add locked synchronizers data. */
     private static void addLockedSynchronizers(ThreadInfo info, StringBuilder sb) {
         LockInfo[] lockInfo = info.getLockedSynchronizers();
