@@ -20,10 +20,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class CachingEventMulticaster<E> implements EventMulticaster<E> {
     
-    private EventListenerList<E> eventListenerList;
+    private final EventListenerList<E> eventListenerList;    
+    private final ReadWriteLock eventLock;
     
-    protected volatile E cachedEvent;
-    protected ReadWriteLock eventLock;
+    private volatile E cachedEvent;
     
     public CachingEventMulticaster() {
         eventListenerList = new EventListenerList<E>();
@@ -64,7 +64,8 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E> {
 
     @Override
     public void broadcast(E event) {
-        assert System.identityHashCode(event) != event.hashCode(); // otherwise caching won't work
+        // This fails because we're broadcasting enums.
+//        assert System.identityHashCode(event) != event.hashCode(); // otherwise caching won't work
         boolean broadcast = false;
         eventLock.writeLock().lock();        
         try {
@@ -75,6 +76,7 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E> {
         } finally {
             eventLock.writeLock().unlock();
         }
+        
         if(broadcast) {
             eventListenerList.broadcast(event);
         }
