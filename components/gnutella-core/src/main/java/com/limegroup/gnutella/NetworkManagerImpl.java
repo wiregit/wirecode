@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.Set;
 
-import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.LimeProps;
@@ -111,11 +111,11 @@ public class NetworkManagerImpl implements NetworkManager {
     }
     
     @Inject
-    void register(ListenerSupport<FirewallStatus> firewallStatusSupport,
+    void register(ListenerSupport<FirewallStatusEvent> firewallStatusSupport,
                   ListenerSupport<FirewallTransferStatusEvent> firewallTransferStatusSupport) {
-        firewallStatusSupport.addListener(new EventListener<FirewallStatus>() {
+        firewallStatusSupport.addListener(new EventListener<FirewallStatusEvent>() {
             @Override
-            public void handleEvent(FirewallStatus event) {
+            public void handleEvent(FirewallStatusEvent event) {
                 // TODO use event
                 maybeFireNewDirectConnectionAddress();
             }

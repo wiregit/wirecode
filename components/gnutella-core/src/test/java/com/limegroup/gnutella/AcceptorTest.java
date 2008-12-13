@@ -14,12 +14,14 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 
-import junit.framework.Test;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.io.IOUtils;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
@@ -27,13 +29,15 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.util.OSUtils;
-import org.limewire.listener.EventListener;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 public class AcceptorTest extends LimeTestCase {
     
@@ -72,6 +76,8 @@ public class AcceptorTest extends LimeTestCase {
                 
             }
         });
+
+       injector.getInstance(Key.get(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){})).addListener(activityCallback);
 
         connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         socketsManager = injector.getInstance(SocketsManager.class);
@@ -463,15 +469,15 @@ public class AcceptorTest extends LimeTestCase {
         }
     }
     
-    private static class StubAC extends ActivityCallbackAdapter implements EventListener<Boolean> {
+    private static class StubAC extends ActivityCallbackAdapter implements EventListener<FirewallStatusEvent> {
         private volatile int changes = 0;
         private volatile boolean lastStatus = false;
         private volatile CountDownLatch latch;
         
         @Override
-        public void handleEvent(Boolean event) {
+        public void handleEvent(FirewallStatusEvent event) {
             changes++;
-            lastStatus = !event;
+            lastStatus = event.getSource() == FirewallStatus.NOT_FIREWALLED;
             if(latch != null)
                 latch.countDown();
         }

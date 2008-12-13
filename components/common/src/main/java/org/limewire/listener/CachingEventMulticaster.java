@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * 2. When broadcast(E event) and handleEvent(E event) are called
  * on the CacheingEventMulticaster, the event is only broadcast
- * if it is not to the cached event.  Event classes should override equals()
+ * if it is not equal to the cached event.  Event classes should override equals()
  * for this to provide any meaningful implementation
  *
  * @param <E>

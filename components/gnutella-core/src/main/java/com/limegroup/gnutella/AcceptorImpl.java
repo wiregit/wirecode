@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.i18n.I18nMarker;
@@ -138,7 +139,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final Provider<MulticastService> multicastService;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final EventBroadcaster<FirewallStatus> firewallBroadcaster;
+    private final EventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
@@ -153,7 +154,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventBroadcaster<FirewallStatus> firewallBroadcaster,
+            EventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,
@@ -595,9 +596,9 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         
 	    _acceptedIncoming = canReceiveIncoming;
         if(canReceiveIncoming) {
-            firewallBroadcaster.broadcast(FirewallStatus.NOT_FIREWALLED);           
+            firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.NOT_FIREWALLED));
         } else {
-            firewallBroadcaster.broadcast(FirewallStatus.FIREWALLED); 
+            firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.FIREWALLED)); 
         }
         return true;
 	}

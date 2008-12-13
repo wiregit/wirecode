@@ -11,7 +11,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
-import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallStatusEvent;
 import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.http.LimeWireHttpModule;
@@ -378,9 +378,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         
-        EventMulticaster<FirewallStatus> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatus>(); 
-        bind(new TypeLiteral<EventBroadcaster<FirewallStatus>>(){}).toInstance(firewalledStatusMulticaster);
-        bind(new TypeLiteral<ListenerSupport<FirewallStatus>>(){}).toInstance(firewalledStatusMulticaster);
+        EventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatusEvent>(); 
+        bind(new TypeLiteral<EventBroadcaster<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         
         // These are bound because they are Singletons & Services, and must be started.
         bind(Statistics.class);
