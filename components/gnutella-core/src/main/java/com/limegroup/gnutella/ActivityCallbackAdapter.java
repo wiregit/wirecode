@@ -28,10 +28,6 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         
     }
 
-    public void acceptedIncomingChanged(boolean status) {
-        
-    }
-
     public void addUpload(Uploader u) {
         
     }

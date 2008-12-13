@@ -9,6 +9,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.Set;
 
+import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SearchSettings;
@@ -20,8 +22,10 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.CachingEventMulticaster;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.EventListenerList;
+import org.limewire.listener.EventMulticaster;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -32,8 +36,6 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.BooleanSetting;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -59,7 +61,6 @@ public class NetworkManagerImpl implements NetworkManager {
     private final OutOfBandStatistics outOfBandStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
     private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
-    private final SettingListener fwtListener = new FWTChangeListener();
     private final Provider<ByteBufferCache> bbCache;
     
     private final Object addressLock = new Object();
@@ -76,10 +77,11 @@ public class NetworkManagerImpl implements NetworkManager {
     @SuppressWarnings({"unused", "FieldCanBeLocal", "UnusedDeclaration"})
     private volatile String tlsDisabledReason;
     
-    private final EventListenerList<AddressEvent> listeners =
-        new EventListenerList<AddressEvent>(getClass());
+    private final EventMulticaster<AddressEvent> listeners =
+        new CachingEventMulticaster<AddressEvent>();
     private final ApplicationServices applicationServices;
-    
+    private volatile boolean started;
+
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
             Provider<Acceptor> acceptor,
@@ -108,9 +110,28 @@ public class NetworkManagerImpl implements NetworkManager {
         registry.register(this);
     }
     
+    @Inject
+    void register(ListenerSupport<FirewallStatus> firewallStatusSupport,
+                  ListenerSupport<FirewallTransferStatusEvent> firewallTransferStatusSupport) {
+        firewallStatusSupport.addListener(new EventListener<FirewallStatus>() {
+            @Override
+            public void handleEvent(FirewallStatus event) {
+                // TODO use event
+                maybeFireNewDirectConnectionAddress();
+            }
+        });    
+        firewallTransferStatusSupport.addListener(new EventListener<FirewallTransferStatusEvent>() {
+            @Override
+            public void handleEvent(FirewallTransferStatusEvent event) {
+                if(started) {
+                    updateCapabilities();
+                }
+            }
+        });
+    }
+    
 
-    public void start() {
-        ConnectionSettings.CANNOT_DO_FWT.addSettingListener(fwtListener);
+    public void start() {        
         if(isIncomingTLSEnabled() || isOutgoingTLSEnabled()) {
             SSLEngineTest sslTester = new SSLEngineTest(SSLUtils.getTLSContext(), SSLUtils.getTLSCipherSuites(), bbCache.get());
             if(!sslTester.go()) {
@@ -120,12 +141,13 @@ public class NetworkManagerImpl implements NetworkManager {
                     ErrorService.error(t);
             }
         }
+        started = true;
     }
 
 
     public void stop() {
+        started = false;
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
-        ConnectionSettings.CANNOT_DO_FWT.removeSettingListener(fwtListener);
     }
     
     public void initialize() {
@@ -308,10 +330,6 @@ public class NetworkManagerImpl implements NetworkManager {
         maybeFireNewDirectConnectionAddress();
     }
 
-    public void acceptedIncomingConnectionChanged() {
-        maybeFireNewDirectConnectionAddress();
-    }
-
     public void newPushProxies(Set<Connectable> pushProxies) {
         FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(canDoFWT()), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
         boolean changed = false;
@@ -440,13 +458,6 @@ public class NetworkManagerImpl implements NetworkManager {
 
     public void setOutgoingTLSEnabled(boolean enabled) {
         SSLSettings.TLS_OUTGOING.setValue(enabled);
-    }
-
-    private class FWTChangeListener implements SettingListener {
-        public void settingChanged(SettingEvent evt) {
-            if (evt.getEventType() == SettingEvent.EventType.VALUE_CHANGED)
-                updateCapabilities();
-        }
     }
 
     public void addListener(EventListener<AddressEvent> listener) {

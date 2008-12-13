@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.core.api.connection.FirewallStatus;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.NetworkSettings;
 import org.limewire.i18n.I18nMarker;
@@ -27,6 +28,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.net.AsyncConnectionDispatcher;
 import org.limewire.net.BlockingConnectionDispatcher;
 import org.limewire.net.ConnectionAcceptor;
@@ -136,7 +138,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final Provider<MulticastService> multicastService;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final Provider<ActivityCallback> activityCallback;
+    private final EventBroadcaster<FirewallStatus> firewallBroadcaster;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
@@ -151,7 +153,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<ActivityCallback> activityCallback,
+            EventBroadcaster<FirewallStatus> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,
@@ -161,7 +163,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         this.multicastService = multicastService;
         this.connectionDispatcher = connectionDispatcher;
         this.backgroundExecutor = backgroundExecutor;
-        this.activityCallback = activityCallback;
+        this.firewallBroadcaster = firewallBroadcaster;
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;
         this.connectionServices = connectionServices;
@@ -592,8 +594,11 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             return false;
         
 	    _acceptedIncoming = canReceiveIncoming;
-        networkManager.acceptedIncomingConnectionChanged();
-        activityCallback.get().acceptedIncomingChanged(canReceiveIncoming);        
+        if(canReceiveIncoming) {
+            firewallBroadcaster.broadcast(FirewallStatus.NOT_FIREWALLED);           
+        } else {
+            firewallBroadcaster.broadcast(FirewallStatus.FIREWALLED); 
+        }
         return true;
 	}
 	

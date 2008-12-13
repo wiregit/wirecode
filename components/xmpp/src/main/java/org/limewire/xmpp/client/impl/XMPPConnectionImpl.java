@@ -18,12 +18,11 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
-import org.limewire.io.Address;
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventRebroadcaster;
+import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
@@ -55,7 +54,7 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListene
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
 
-public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection, EventListener<AddressEvent> {
+public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection {
 
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
 
@@ -69,15 +68,14 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final EventMulticaster<FeatureEvent> featureSupport;
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
-    
+    private final ListenerSupport<AddressEvent> addressListenerSupport;
+
     private final EventListenerList<RosterEvent> rosterListeners;
     private final Map<String, UserImpl> users;
     private final SmackConnectionListener smackConnectionListener;
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
 
     private volatile org.jivesoftware.smack.XMPPConnection connection;
-    private volatile AddressIQListener addressIQListener;
-    private volatile AddressEvent lastEvent;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -88,7 +86,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                        AddressFactory addressFactory, XMPPAuthenticator authenticator,
                        EventMulticaster<FeatureEvent> featureSupport,
                        EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
-                       XMPPAddressRegistry xmppAddressRegistry) {
+                       XMPPAddressRegistry xmppAddressRegistry, 
+                       ListenerSupport<AddressEvent> addressListenerSupport) {
         this.configuration = configuration;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.friendRequestBroadcaster = friendRequestBroadcaster;
@@ -99,7 +98,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         this.featureSupport = featureSupport;
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.xmppAddressRegistry = xmppAddressRegistry;
-        
+        this.addressListenerSupport = addressListenerSupport;
+
         rosterListeners = new EventListenerList<RosterEvent>();
         // FIXME: this is only used by tests
         if(configuration.getRosterListener() != null) {
@@ -352,16 +352,6 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }
     }
 
-    public void handleEvent(AddressEvent event) {
-        LOG.debugf("handling address event: {0}", event.getSource());
-        synchronized (this) {
-            lastEvent = event;
-            if(addressIQListener != null) {
-                addressIQListener.handleEvent(event);    
-            }
-        }
-    }
-
     @Override
     public User getUser(String id) {
         synchronized (users) { 
@@ -426,13 +416,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             rosterListeners.addListener(discoInfoListener.getRosterListener());
             connection.addPacketListener(discoInfoListener, discoInfoListener.getPacketFilter());
 
-            synchronized (XMPPConnectionImpl.this) {
-                Address address = null;
-                if(lastEvent != null) {
-                    address = lastEvent.getSource();
-                }
-                addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, address, discoInfoListener, xmppAddressRegistry);
-            }
+            AddressIQListener addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, discoInfoListener, xmppAddressRegistry);
+            addressListenerSupport.addListener(addressIQListener);
             connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 
             FileTransferIQListener fileTransferIQListener = new FileTransferIQListener(fileOfferBroadcaster);

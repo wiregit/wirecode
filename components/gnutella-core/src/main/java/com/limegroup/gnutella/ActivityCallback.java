@@ -124,13 +124,8 @@ public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleL
 	 * @return true if the callback handles the magnet links
 	 */
 	public boolean handleMagnets(MagnetOptions[] magnets);
-	
-	/**
-	 * Indicates that the firewalled state of this has changed. 
-	 */
-	public void acceptedIncomingChanged(boolean status);
-	
-	/** Try to download the torrent file */
+
+    /** Try to download the torrent file */
 	public void handleTorrent(File torrentFile);
 
     /**

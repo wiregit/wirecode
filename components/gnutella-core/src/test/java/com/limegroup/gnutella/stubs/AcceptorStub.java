@@ -2,6 +2,8 @@ package com.limegroup.gnutella.stubs;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
@@ -9,7 +11,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.AcceptorImpl;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.MulticastService;
@@ -27,12 +28,12 @@ public class AcceptorStub extends AcceptorImpl {
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<ActivityCallback> activityCallback,
+            EventBroadcaster<FirewallStatus> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
              Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
             Provider<UPnPManager> upnpManager) {
         super(networkManager, udpService, multicastService, connectionDispatcher, backgroundExecutor,
-                activityCallback, connectionManager, ipFilter, connectionServices, upnpManager);
+                firewallBroadcaster, connectionManager, ipFilter, connectionServices, upnpManager);
     }
 
     @Override

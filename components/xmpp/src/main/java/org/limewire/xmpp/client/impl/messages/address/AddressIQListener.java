@@ -14,6 +14,7 @@ import org.limewire.core.api.friend.feature.FeatureRegistry;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.friend.feature.features.LimewireFeature;
 import org.limewire.io.Address;
+import org.limewire.listener.EventListener;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.address.AddressEvent;
@@ -23,7 +24,7 @@ import org.limewire.xmpp.api.client.XMPPAddress;
 import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 import org.limewire.xmpp.client.impl.XMPPConnectionImpl;
 
-public class AddressIQListener implements PacketListener {
+public class AddressIQListener implements PacketListener, EventListener<AddressEvent> {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
     private final XMPPConnectionImpl connection;
@@ -34,12 +35,10 @@ public class AddressIQListener implements PacketListener {
 
     public AddressIQListener(XMPPConnectionImpl connection,
                              AddressFactory factory,
-                             Address address,
                              FeatureRegistry featureRegistry,
                              XMPPAddressRegistry addressRegistry) {
         this.connection = connection;
         this.factory = factory;
-        this.address = address;
         this.addressRegistry = addressRegistry;
         this.pendingAddresses = new HashMap<String, Address>();
         new AddressIQFeatureInitializer().register(featureRegistry);
@@ -84,6 +83,7 @@ public class AddressIQListener implements PacketListener {
         };
     }
     
+    @Override
     public void handleEvent(AddressEvent event) {
         if (event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
             // TODO async?

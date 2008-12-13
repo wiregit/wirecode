@@ -256,10 +256,6 @@ public class NetworkManagerStub implements NetworkManager {
         
     }
 
-    public void acceptedIncomingConnectionChanged() {
-        
-    }
-
     @Override
     public void newPushProxies(Set<Connectable> pushProxies) {
     }

@@ -45,7 +45,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent>, ConnectBackRequestSender {
+public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
 
@@ -60,11 +60,11 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     private final EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster;
     private final XMPPAddressRegistry xmppAddressRegistry;
     private final JabberSettings jabberSettings;
-    
+    private final ListenerSupport<AddressEvent> addressListenerSupport;
+
     // Connections that are logged in or logging in
     private final List<XMPPConnectionImpl> connections;
-    private boolean multipleConnectionsAllowed;    
-    private AddressEvent lastAddressEvent;
+    private boolean multipleConnectionsAllowed;   
 
     @Inject
     public XMPPServiceImpl(Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster,
@@ -76,7 +76,8 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             EventMulticaster<FeatureEvent> featureSupport,
             EventBroadcaster<ConnectBackRequestedEvent> connectRequestEventBroadcaster,
             XMPPAddressRegistry xmppAddressRegistry,
-            JabberSettings jabberSettings) {
+            JabberSettings jabberSettings,
+            ListenerSupport<AddressEvent> addressListenerSupport) {
         this.rosterBroadcaster = rosterBroadcaster;
         this.fileOfferBroadcaster = fileOfferBroadcaster;
         this.friendRequestBroadcaster = friendRequestBroadcaster;
@@ -88,6 +89,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
         this.connectRequestEventBroadcaster = connectRequestEventBroadcaster;
         this.xmppAddressRegistry = xmppAddressRegistry;
         this.jabberSettings = jabberSettings;
+        this.addressListenerSupport = addressListenerSupport;
 
         connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
         multipleConnectionsAllowed = false;
@@ -99,11 +101,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
-    }
-
-    @Inject
-    void register(ListenerSupport<AddressEvent> registry) {
-        registry.addListener(this);
     }
 
     @Override
@@ -157,10 +154,9 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
                     libraryChangedBroadcaster.get(),
                     connectionBroadcaster.get(),
                     addressFactory, authenticator, featureSupport,
-                    connectRequestEventBroadcaster, xmppAddressRegistry);
-            if(lastAddressEvent != null) {
-                connection.handleEvent(lastAddressEvent);
-            }
+                    connectRequestEventBroadcaster, 
+                    xmppAddressRegistry,
+                    addressListenerSupport);
             try {
                 connections.add(connection);
                 connection.login();
@@ -213,16 +209,6 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Addr
             } catch(IndexOutOfBoundsException ioobe) {
                 return null; // possible because connections is CoW
             }
-        }
-    }
-
-    @Override
-    public void handleEvent(AddressEvent event) {
-        LOG.debugf("handling address event: {0}", event.getSource().toString());
-        synchronized(this) {
-            for(XMPPConnectionImpl connection : connections)
-                connection.handleEvent(event);
-            lastAddressEvent = event;
         }
     }
 

@@ -11,6 +11,8 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ListeningExecutorService;
 import org.limewire.concurrent.ScheduledListeningExecutorService;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.core.api.connection.FirewallStatus;
+import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.api.download.SaveLocationManager;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
@@ -18,6 +20,9 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
@@ -368,7 +373,15 @@ public class LimeWireCoreModule extends AbstractModule {
         bindAll(Names.named("dhtExecutor"), ListeningExecutorService.class, DHTExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("messageExecutor"), ListeningExecutorService.class, MessageExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
-                        
+        
+        EventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticaster<FirewallTransferStatusEvent>(); 
+        bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
+        
+        EventMulticaster<FirewallStatus> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatus>(); 
+        bind(new TypeLiteral<EventBroadcaster<FirewallStatus>>(){}).toInstance(firewalledStatusMulticaster);
+        bind(new TypeLiteral<ListenerSupport<FirewallStatus>>(){}).toInstance(firewalledStatusMulticaster);
+        
         // These are bound because they are Singletons & Services, and must be started.
         bind(Statistics.class);
         bind(CoreRandomGlue.class);

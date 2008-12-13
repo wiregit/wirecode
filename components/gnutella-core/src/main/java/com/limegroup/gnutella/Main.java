@@ -276,9 +276,7 @@ public class Main {
         }
     
     	public void handleTorrent(File torrentFile){}
-        
-        public void acceptedIncomingChanged(boolean status) { }
-    
+
         public void handleAddressStateChanged() {
         }
         

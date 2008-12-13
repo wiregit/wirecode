@@ -16,6 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.connection.FWTStatusReason;
+import org.limewire.core.api.connection.FirewallTransferStatus;
+import org.limewire.core.api.connection.FirewallTransferStatusEvent;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
@@ -24,6 +27,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
 import org.limewire.security.AddressSecurityToken;
@@ -39,11 +43,11 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 
 /**
@@ -169,7 +173,8 @@ public class UDPService implements ReadWriteObserver {
     private final MessageFactory messageFactory;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
-    
+    private final EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster;
+
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
     
@@ -192,7 +197,8 @@ public class UDPService implements ReadWriteObserver {
             ConnectionServices connectionServices,
             MessageFactory messageFactory,
             PingRequestFactory pingRequestFactory,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -205,6 +211,7 @@ public class UDPService implements ReadWriteObserver {
         this.messageFactory = messageFactory;
         this.pingRequestFactory = pingRequestFactory;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.fwtStatusBroadcaster = fwtStatusBroadcaster;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -654,16 +661,35 @@ public class UDPService implements ReadWriteObserver {
 	 */
 	public boolean canDoFWT(){
 	    // this does not affect EVER_DISABLED_FWT.
-	    if (!canReceiveSolicited()) 
+	    if (!canReceiveSolicited()) { 
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                    FWTStatusReason.NO_SOLICITED_INCOMING_MESSAGES));
 	        return false;
+        }
 
 	    boolean canDoFWTSetting = !ConnectionSettings.CANNOT_DO_FWT.getValue();
-	    if (!connectionServices.isConnected())
-	        return canDoFWTSetting;
+	    if (!connectionServices.isConnected()) {
+            if(canDoFWTSetting) {
+                fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                        FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+            } else {
+                fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                        FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+            }
+            return canDoFWTSetting;
+        }
 	    
 	    synchronized(this) {
-	        if (_numReceivedIPPongs < 1) 
-	            return canDoFWTSetting;
+	        if (_numReceivedIPPongs < 1) {
+                if(canDoFWTSetting) {
+                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                            FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+                } else {
+                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                            FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+                }
+                return canDoFWTSetting;
+            }	            
 	    }
 	    
 	    updateFWTState();
@@ -672,6 +698,7 @@ public class UDPService implements ReadWriteObserver {
 	
 	private void updateFWTState() {
 	    boolean newFWTSetting = true;
+        FWTStatusReason reason = FWTStatusReason.UNKNOWN;
 	    synchronized(this) {     	
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
@@ -683,16 +710,28 @@ public class UDPService implements ReadWriteObserver {
 	                            networkManager.getExternalAddress()));
 	        }
 	        
-	        newFWTSetting= 
-	            NetworkUtils.isValidAddress(networkManager.getExternalAddress()) && 
-	            _portStable;
-	        
+	        if(!NetworkUtils.isValidAddress(networkManager.getExternalAddress())) {
+                reason = FWTStatusReason.INVALID_EXTERNAL_ADDRESS;
+                newFWTSetting = false;
+            }
+            if(!_portStable) {
+                reason = FWTStatusReason.PORT_UNSTABLE;
+                newFWTSetting = false;
+            }            
+            
 	        if (_numReceivedIPPongs == 1){
 	            newFWTSetting = newFWTSetting &&
 	            (_lastReportedPort == acceptor.get().getPort(false) ||
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
+        if(newFWTSetting) {
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                    FWTStatusReason.UNKNOWN));
+        } else {
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                    reason));
+        }
 	    ConnectionSettings.CANNOT_DO_FWT.setValue(!newFWTSetting);
 	}
 	

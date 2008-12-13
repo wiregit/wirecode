@@ -78,8 +78,8 @@ public class ActivityCallbackStub implements ActivityCallback {
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
 	}
-	public void acceptedIncomingChanged(boolean status) { }
-	public void handleTorrent(File torrentFile) {
+
+    public void handleTorrent(File torrentFile) {
 	}
     public boolean handleDAAPConnectionError(Throwable t) { return false; }
     public String translate(String s) { return s;}

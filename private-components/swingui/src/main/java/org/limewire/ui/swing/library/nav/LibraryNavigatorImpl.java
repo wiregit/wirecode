@@ -14,8 +14,6 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.collection.glazedlists.AbstractListEventListener;
@@ -31,6 +29,8 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
@@ -52,6 +52,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import net.miginfocom.swing.MigLayout;
+
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     
@@ -70,6 +72,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final NavPanelFactory navPanelFactory;
     
     private Friend selectedFriend = null;
+    private static final Log LOG = LogFactory.getLog(LibraryNavigatorImpl.class);
 
     @Inject
     LibraryNavigatorImpl(Navigator navigator,
@@ -147,10 +150,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         new AbstractListEventListener<FriendLibrary>() {
             @Override
             protected void itemAdded(FriendLibrary item) {
+                LOG.debugf("friend library {0} added ...", item.getFriend().getId());  
                 NavPanel panel = getPanelForFriend(item.getFriend());
                 if(panel != null) {
+                    LOG.debugf("... removing existing friend library {0}", item.getFriend().getId());  
                     panel.getParentList().removePanel(panel);
                 } else {
+                    LOG.debugf("... creating new friend nav panel {0}", item.getFriend().getId()); 
                     panel = createFriendNavPanel(item.getFriend());
                 }
                 
@@ -160,6 +166,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             
             @Override
             protected void itemRemoved(FriendLibrary item) {
+                LOG.debugf("friend library {0} removed ...", item.getFriend().getId()); 
                 Friend friend = item.getFriend();
                 if(friend.isAnonymous()) {
                     NavPanel panel = limewireList.removePanelForFriend(item.getFriend());
@@ -169,21 +176,28 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 } else {
                     NavPanel panel = limewireList.getPanelForFriend(item.getFriend());
                     if(panel != null && panel.getFriendLibrary() == item) {
+                        LOG.debugf("... removing matching friend library {0}", item.getFriend().getId()); 
                         // extra check is needed b/c when
                         // glazedlist batches up updates, add/remove events
                         // can get dispatched out of order
                         limewireList.removePanel(panel);
                         panel.removeBrowse();
                         onlineList.addNavPanel(panel); // Assume still online.
-                    } // else probably signed off & cleared the lists.
+                    } else {
+                        // else probably signed off & cleared the lists.
+                        LOG.debugf("... friend library {0} was already removed", item.getFriend().getId()); 
+                    }
                 }
             }
             
             @Override
             protected void itemUpdated(FriendLibrary item) {
-                NavPanel panel = limewireList.getPanelForFriend(item.getFriend());
+                NavPanel panel = limewireList.getPanelForFriend(item.getFriend());                
                 if(panel != null) {
+                    LOG.debugf("updating navpanel for {0} to state {1}", item.getFriend().getId(), item.getState());  
                     updatePanel(item, panel);
+                } else {
+                    LOG.debugf("null navpanel for {0}", item.getFriend().getId());    
                 }
             }
             
@@ -223,12 +237,14 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 switch(event.getType()) {
                 case ADDED:
                     if(panel == null) {
+                        LOG.debugf("creating new friend nav panel {0}", event.getSource().getId()); 
                         panel = createFriendNavPanel(event.getSource());
                         offlineList.addNavPanel(panel);
                     }
                     break;
                 case REMOVED:
                     if(panel != null) {
+                        LOG.debugf("removing matching friend library {0}", event.getSource().getId()); 
                         panel.getParentList().removePanel(panel);
                         disposeNavPanel(panel);
                     }

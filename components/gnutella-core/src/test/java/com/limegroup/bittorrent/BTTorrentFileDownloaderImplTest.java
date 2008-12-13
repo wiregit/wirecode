@@ -446,11 +446,6 @@ public class BTTorrentFileDownloaderImplTest extends LimeTestCase {
             }
 
             @Override
-            public void acceptedIncomingChanged(boolean status) {
-                
-            }
-
-            @Override
             public void addUpload(Uploader u) {
                 
             }

@@ -27,6 +27,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.nio.ssl.TLSNIOSocket;
 import org.limewire.util.OSUtils;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -462,15 +463,15 @@ public class AcceptorTest extends LimeTestCase {
         }
     }
     
-    private static class StubAC extends ActivityCallbackAdapter {
+    private static class StubAC extends ActivityCallbackAdapter implements EventListener<Boolean> {
         private volatile int changes = 0;
         private volatile boolean lastStatus = false;
         private volatile CountDownLatch latch;
         
         @Override
-        public void acceptedIncomingChanged(boolean status) {
+        public void handleEvent(Boolean event) {
             changes++;
-            lastStatus = status;
+            lastStatus = !event;
             if(latch != null)
                 latch.countDown();
         }

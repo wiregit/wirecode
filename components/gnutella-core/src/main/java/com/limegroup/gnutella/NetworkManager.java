@@ -91,12 +91,6 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent>, 
     public void portChanged();
 
     /**
-     * used to notify the <code>NetworkManager</code> that
-     * an incoming connection has been accepted
-     */
-    public void acceptedIncomingConnectionChanged();
-
-    /**
      * used to notify the <code>NetworkManager</code> of a new
      * <code>MediatorAddress</code> (i.e., push proxy)
      */

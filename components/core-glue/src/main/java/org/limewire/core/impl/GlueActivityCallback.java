@@ -111,13 +111,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     }
 
-    @Override
-    public void acceptedIncomingChanged(boolean status) {
-        // TODO Auto-generated method stub
 
-    }
-
-    
     @Override
     public void chatErrorMessage(InstantMessenger chatter, String str) {
         // TODO Auto-generated method stub
