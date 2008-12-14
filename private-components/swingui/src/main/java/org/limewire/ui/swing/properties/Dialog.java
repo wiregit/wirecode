@@ -102,10 +102,10 @@ public abstract class Dialog extends LimeJDialog {
         //This makes the look consistent with JTextField
         description.setBorder(artist.getBorder());
         
-        JPanel buttons = newPanel(new MigLayout("", "[][]", "[]"));
+        JPanel buttons = newPanel(new MigLayout("", "push[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
         buttons.add(new JButton(new CancelAction()));
-        mainPanel.add(buttons, "cell 1 4");
+        mainPanel.add(buttons, "alignx right, cell 1 4");
         
         overview = newPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
 
