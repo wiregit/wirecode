@@ -579,9 +579,12 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private Icon getIcon(VisualSearchResult vsr) {
         if (vsr.isSpam()) {
             return spamIcon;
-        } else if (vsr.getDownloadState() == BasicDownloadState.DOWNLOADING) {
+        } 
+        switch (vsr.getDownloadState()) {
+        case DOWNLOADING:
             return downloadingIcon;
-        } else if (vsr.getDownloadState() == BasicDownloadState.LIBRARY) {
+        case DOWNLOADED:
+        case LIBRARY:
             return libraryIcon;
         }
         return categoryIconManager.getIcon(vsr, iconManager);

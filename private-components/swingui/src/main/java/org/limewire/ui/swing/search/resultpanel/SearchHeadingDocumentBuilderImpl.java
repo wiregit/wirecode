@@ -21,20 +21,21 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
                         "font-family: {0};" +
                         "color: {1};" +
                         "font-size: {2};'}'" +
+                    "a '{' color: {3};'}'" +
                 "</style>" +
             "</head>" +
             "<body>";
     static final String DOCUMENT_END = "</body></html>";
     
     private @Resource Font headingFont;
-    private @Resource String headingColor;
+    private @Resource String linkColor;
     final String documentStartHTML;
     
     public SearchHeadingDocumentBuilderImpl() {
         GuiUtils.assignResources(this);
         
         documentStartHTML = MessageFormat.format(DOCUMENT_START, headingFont.getFamily(), 
-                headingColor, headingFont.getSize());
+                linkColor, headingFont.getSize(), linkColor);
     }
 
     public String getHeadingDocument(SearchHeading heading, BasicDownloadState downloadState, boolean isSpam) {
@@ -69,7 +70,7 @@ public class SearchHeadingDocumentBuilderImpl implements SearchHeadingDocumentBu
 
     private String downloadLink(String heading, boolean underline) {
         if (underline) {
-            return "<a href=\"#download\" color=\"#2152a6\">" + heading + "</a>";
+            return "<a href=\"#download\">" + heading + "</a>";
         }
         return heading;
     }
