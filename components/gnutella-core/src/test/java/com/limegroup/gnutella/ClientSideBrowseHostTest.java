@@ -16,8 +16,6 @@ import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.Test;
-
 import org.limewire.core.api.browse.BrowseListener;
 import org.limewire.core.api.friend.feature.features.AddressFeature;
 import org.limewire.core.api.search.SearchResult;
@@ -26,7 +24,6 @@ import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.Base32;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
@@ -37,6 +34,8 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+
+import junit.framework.Test;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -77,12 +76,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setPort(SERVER_PORT);
         networkManagerStub.setExternalAddress(new byte[] { (byte)129, 1, 4, 10 });
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class, new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(NetworkManager.class).toInstance(networkManagerStub);
-            }
-        });
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class,
+                new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         callback = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
         searchServices = injector.getInstance(SearchServices.class);

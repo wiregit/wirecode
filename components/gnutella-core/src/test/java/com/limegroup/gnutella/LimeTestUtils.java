@@ -22,12 +22,16 @@ import org.limewire.io.IpPort;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
 import org.limewire.util.Base32;
+import org.limewire.net.TLSManager;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
 import com.google.inject.util.Modules;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
@@ -219,6 +223,8 @@ public class LimeTestUtils {
         @Override
         protected void configure() {
             bind(NetworkManager.class).toInstance(networkManagerStub);
+            bind(TLSManager.class).toInstance(networkManagerStub);
+            bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(networkManagerStub);
         }
     }
     

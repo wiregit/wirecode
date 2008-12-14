@@ -13,10 +13,12 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.net.address.AddressEvent;
+import org.limewire.net.TLSManager;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.limegroup.gnutella.NetworkManager;
 
 @Singleton
@@ -25,6 +27,8 @@ public class NetworkManagerStub implements NetworkManager {
     public static final Module MODULE = new AbstractModule() {
         protected void configure() {
             bind(NetworkManager.class).to(NetworkManagerStub.class);
+            bind(TLSManager.class).to(NetworkManagerStub.class);
+            bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).to(NetworkManagerStub.class);
         }
     };
     
