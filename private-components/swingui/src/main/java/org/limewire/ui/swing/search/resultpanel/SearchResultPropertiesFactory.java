@@ -5,6 +5,7 @@ import static org.limewire.ui.swing.util.I18n.tr;
 import java.awt.Font;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
@@ -51,14 +52,20 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             this.categoryIconManager = categoryIconManager;
             GuiUtils.assignResources(this);
             
-            disableEdit(genre, rating, platform);
-            disableEdit(album, author, artist, company, year, title, track, description);
+            disableEdit(album, author, artist, company, year, title, track);
+            disableComponent(description, genre, rating, platform);
             
             location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
         }
         
+        protected void disableComponent(JComponent... comps) {
+            for(JComponent comp : comps) {
+                comp.setEnabled(false);
+            }
+        }
+
         @Override
         protected Font getSmallFont() {
             return smallFont;

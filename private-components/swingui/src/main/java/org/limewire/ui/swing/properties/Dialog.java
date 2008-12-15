@@ -92,7 +92,7 @@ public abstract class Dialog extends LimeJDialog {
         mainPanel = new JPanel(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
         
         add(mainPanel);
-        mainPanel.setBackground(Color.LIGHT_GRAY);
+        mainPanel.setBackground(Color.decode("#f9f9f9"));
         
         setFont(getMediumFont(), heading, filename, fileSize);
         setFont(getSmallFont(), metadata, copyToClipboard, locateOnDisk, locateInLibrary,
@@ -376,7 +376,7 @@ public abstract class Dialog extends LimeJDialog {
                 addLengthMetadata(propertiableHeadings.getLength(propFile), metadata);
                 String bitRate = str(propFile.getProperty(FilePropertyKey.BITRATE));
                 if (bitRate != null) {
-                    addBitrateMetadata(bitRate + " " + propertiableHeadings.getQualityScore(propFile), metadata);
+                    addBitrateMetadata(bitRate + " (" + propertiableHeadings.getQualityScore(propFile) + ")", metadata);
                 }
                 break;
             case VIDEO:
@@ -386,9 +386,10 @@ public abstract class Dialog extends LimeJDialog {
                 addDateCreatedMetadata(convertDate(propFile), metadata);
                 break;
             case DOCUMENT:
+                addTypeMetadata(iconManager.getMIMEDescription(propFile), metadata);
                 addDateCreatedMetadata(convertDate(propFile), metadata);
                 //TODO: parse TOPIC property
-                // Fall into OTHER for type metadata
+                break;
             case OTHER:
                 addTypeMetadata(iconManager.getMIMEDescription(propFile), metadata);
         }
@@ -414,12 +415,6 @@ public abstract class Dialog extends LimeJDialog {
         }
     }
 
-    protected void disableEdit(JComboBox... combos) {
-        for(JComboBox combo : combos) {
-            combo.setEditable(false);
-        }
-    }
-    
     private static class ReadOnlyTableModel extends DefaultTableModel {
 
         @Override

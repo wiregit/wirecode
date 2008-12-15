@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table.menu;
+package org.limewire.ui.swing.library;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;

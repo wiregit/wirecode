@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library.table.menu;
+package org.limewire.ui.swing.library;
 
 import java.awt.event.ActionEvent;
 
@@ -22,7 +22,7 @@ abstract class AbstractFileItemDialog extends AbstractPropertiableFileDialog {
     }
 
     protected void populateCopyToClipboard(final FileItem propertiable) {
-        copyToClipboard.setAction(new AbstractAction(I18n.tr("Copy Link to Clipboard")) {
+        copyToClipboard.setAction(new AbstractAction(I18n.tr("Copy Link")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new MagnetLinkCopier().copyLinkToClipBoard(propertiable, magnetLinkFactory);
