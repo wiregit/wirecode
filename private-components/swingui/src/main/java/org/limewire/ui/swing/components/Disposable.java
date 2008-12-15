@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.library;
+package org.limewire.ui.swing.components;
 
 public interface Disposable {
     

@@ -16,8 +16,6 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
@@ -31,6 +29,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -50,6 +49,8 @@ import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
@@ -179,7 +180,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
 
     @Override
     public SearchNavItem addSearch(
-        String title, JComponent searchPanel, final Search search) {
+        String title, final JComponent searchPanel, final Search search) {
         
         final NavItem item = navigator.createNavItem(
             NavCategory.SEARCH, title, searchPanel);
@@ -204,6 +205,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
             public void itemRemoved() {
                 searchList.removeTabActionMap(actionMap);
                 search.stop();
+                ((Disposable)searchPanel).dispose();
             }
 
             @Override

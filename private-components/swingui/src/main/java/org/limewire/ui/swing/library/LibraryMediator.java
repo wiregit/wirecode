@@ -6,6 +6,8 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.components.Disposable;
+
 class LibraryMediator extends JPanel implements Disposable {
 
     private static final String LIBRRY_CARD = "LIBRARY_CARD";

@@ -31,7 +31,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
-import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;

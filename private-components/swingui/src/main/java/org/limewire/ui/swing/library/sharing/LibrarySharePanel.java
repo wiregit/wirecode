@@ -51,7 +51,7 @@ import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.components.ShapeDialogComponent;
-import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;

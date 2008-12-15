@@ -31,11 +31,11 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryNavTransferHandler;
 import org.limewire.ui.swing.friends.login.FriendsSignInPanel;
 import org.limewire.ui.swing.library.AllFriendsLibraryPanel;
-import org.limewire.ui.swing.library.Disposable;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.library.FriendLibraryMediatorFactory;
 import org.limewire.ui.swing.library.MyLibraryPanel;
@@ -48,12 +48,11 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import ca.odell.glazedlists.EventList;
 import net.miginfocom.swing.MigLayout;
 
 @Singleton

@@ -21,7 +21,7 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
-import org.limewire.ui.swing.library.Disposable;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
