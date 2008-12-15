@@ -4,7 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
@@ -42,10 +44,10 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
@@ -61,6 +63,7 @@ import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.ResizeUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -99,16 +102,16 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
     @Override
     protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
-        JPanel headerTitlePanel = new JPanel(new BorderLayout());
+        JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 6, fill, aligny center"));
         headerTitlePanel.setOpaque(false);
         
         JLabel titleTextLabel = new JLabel();
         
-        backButtonSlot = new JPanel();
+        backButtonSlot = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         backButtonSlot.setOpaque(false);
         
-        headerTitlePanel.add(backButtonSlot, BorderLayout.WEST);
-        headerTitlePanel.add(titleTextLabel, BorderLayout.EAST);
+        headerTitlePanel.add(backButtonSlot);
+        headerTitlePanel.add(titleTextLabel);
         
         LimeHeaderBar bar = headerBarFactory.createSpecial(headerTitlePanel, titleTextLabel);
                 
@@ -122,7 +125,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     
     protected void addBackButton(Action action, ButtonDecorator decorator) {
         JXButton button = new JXButton(action);
-        decorator.decorateDarkFullButton(button, AccentType.GREEN_SHADOW);
+        decorator.decorateDarkFullImageButton(button, AccentType.GREEN_SHADOW);
+        button.setMargin(new Insets(0,0,2,0));
+        ResizeUtils.forceSize(button, new Dimension(26,22));
         backButtonSlot.add(button);
     }
     

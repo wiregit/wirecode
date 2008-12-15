@@ -30,4 +30,10 @@ public class ResizeUtils {
         comp.setSize(new Dimension(width, (int)comp.getSize().getHeight()));
     }
     
+    public static void forceSize(Component comp, Dimension d) {
+        comp.setMaximumSize(d);
+        comp.setMaximumSize(d);
+        comp.setPreferredSize(d);
+        comp.setSize(d);
+    }
 }
