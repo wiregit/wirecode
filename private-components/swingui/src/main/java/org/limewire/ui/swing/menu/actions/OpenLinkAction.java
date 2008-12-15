@@ -3,7 +3,6 @@
  */
 package org.limewire.ui.swing.menu.actions;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -54,12 +53,10 @@ public class OpenLinkAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         // Get owner frame.
-        Frame frame = GuiUtils.getMainFrame();
-        
         // Create dialog.
-        final LocationDialog locationDialogue = new LocationDialog(frame);
+        final LocationDialog locationDialogue = new LocationDialog();
         locationDialogue.setTitle(I18n.tr("Open Link"));
-        locationDialogue.setLocationRelativeTo(frame);
+        locationDialogue.setLocationRelativeTo(GuiUtils.getMainFrame());
         locationDialogue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
