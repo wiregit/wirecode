@@ -47,6 +47,7 @@ public class LimeHeaderBarFactory {
     
     public LimeHeaderBar createBasic(Component comp) {
         LimeHeaderBar bar = new LimeHeaderBar(comp);
+        bar.setDefaultComponentHeight(defaultComponentHeight);
         decorateBasic(bar);
         return bar;
     }
