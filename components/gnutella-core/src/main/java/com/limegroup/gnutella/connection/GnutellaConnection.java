@@ -1367,11 +1367,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
 
         public void shutdown() {
+            LOG.debug("shutdown");
             observer.shutdown();
         }
 
         // ignored.
         public void handleIOException(IOException iox) {
+            LOG.debug("", iox);
         }
     }
 

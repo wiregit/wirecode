@@ -104,7 +104,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	 * the Response class.
 	 */
 	public void testLegacyResponseUnitTest() throws Exception {
-        Response r = responseFactoryImpl.createResponse(3, 4096, "A.mp3");
+        Response r = responseFactoryImpl.createResponse(3, 4096, "A.mp3", UrnHelper.SHA1);
         assertEquals("A.mp3", r.getName());
         assertNull(r.getDocument());
 
@@ -152,8 +152,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         LimeXMLDocument d2 = null;
         d1 = factory.createLimeXMLDocument(xml1);
         d2 = factory.createLimeXMLDocument(xml2);
-        Response ra = responseFactoryImpl.createResponse(12, 231, "def1.txt", d1);
-        Response rb = responseFactoryImpl.createResponse(13, 232, "def2.txt", d2);
+        Response ra = responseFactoryImpl.createResponse(12, 231, "def1.txt", d1, UrnHelper.SHA1);
+        Response rb = responseFactoryImpl.createResponse(13, 232, "def2.txt", d2, UrnHelper.SHA1);
 		assertEquals("problem with doc constructor", d1, ra.getDocument());
 		assertEquals("problem with doc constructor", d2, rb.getDocument());
 	}
@@ -822,35 +822,35 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testHashCode() {
-        Response r1 = responseFactoryImpl.createResponse(0, 0, "name");
-        Response r2 = responseFactoryImpl.createResponse(0, 1, "name");
+        Response r1 = responseFactoryImpl.createResponse(0, 0, "name", UrnHelper.SHA1);
+        Response r2 = responseFactoryImpl.createResponse(0, 1, "name", UrnHelper.SHA1);
         assertNotEquals(r1.hashCode(), r2.hashCode());
         
-        Response r3 = responseFactoryImpl.createResponse(1, 0, "name");
+        Response r3 = responseFactoryImpl.createResponse(1, 0, "name", UrnHelper.SHA1);
         assertNotEquals(r1.hashCode(), r3.hashCode());
         assertNotEquals(r2.hashCode(), r3.hashCode());
         
-        assertEquals(r1.hashCode(), responseFactoryImpl.createResponse(0, 0, "name").hashCode());
+        assertEquals(r1.hashCode(), responseFactoryImpl.createResponse(0, 0, "name", UrnHelper.SHA1).hashCode());
         
         // max int values
         r1 = responseFactoryImpl
-                .createResponse(Integer.MAX_VALUE, Integer.MAX_VALUE, "name");
-        r2 = responseFactoryImpl.createResponse(0, Integer.MAX_VALUE, "name");
+                .createResponse(Integer.MAX_VALUE, Integer.MAX_VALUE, "name", UrnHelper.SHA1);
+        r2 = responseFactoryImpl.createResponse(0, Integer.MAX_VALUE, "name", UrnHelper.SHA1);
         assertNotEquals(r1.hashCode(), r2.hashCode());
     }
     
     public void testIllegalFilenamesInInputStream() throws Exception {
         // illegal filename
-        Response resp = responseFactoryImpl.createResponse(1, 2, "a;lksdflkfj../");
+        Response resp = responseFactoryImpl.createResponse(1, 2, "a;lksdflkfj../", UrnHelper.SHA1);
         assertResponseParsingFails(resp);
-        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "s;lkdf\n\n\n"));
-        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3"));
-        assertResponseParsingFails(responseFactoryImpl.createResponse(4545, 3454, ""));
-        assertResponseParsingFails(responseFactoryImpl.createResponse(1454, 3245, "dlksdf\r"));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "s;lkdf\n\n\n", UrnHelper.SHA1));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1, 4545, "../../index.html HTTP/1.0\r\n\r\nfoobar.mp3", UrnHelper.SHA1));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(4545, 3454, "", UrnHelper.SHA1));
+        assertResponseParsingFails(responseFactoryImpl.createResponse(1454, 3245, "dlksdf\r", UrnHelper.SHA1));
     }
     
     public void testLargeFiles() throws Exception {
-        Response resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE, "asdf");
+        Response resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE, "asdf", UrnHelper.SHA1);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         resp.writeToStream(baos);
         byte [] data = baos.toByteArray();
@@ -872,7 +872,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // if the file is too large, we do not construct
         try {
-            resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE + 1, "asdf");
+            resp = responseFactoryImpl.createResponse(1, Constants.MAX_FILE_SIZE + 1, "asdf", UrnHelper.SHA1);
             fail("constructed too large file");
         } catch (IllegalArgumentException expected){}
         

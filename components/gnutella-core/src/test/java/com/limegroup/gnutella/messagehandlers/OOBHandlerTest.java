@@ -29,6 +29,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -719,7 +720,7 @@ public class OOBHandlerTest extends BaseTestCase {
             byte[] addr, SecurityToken token, int offset, boolean needsPush) {
         Response[] res = new Response[numResults];
         for (int j = 0; j < res.length; j++)
-            res[j] = responseFactory.createResponse(10, 10, "susheel" + j + offset);
+            res[j] = responseFactory.createResponse(10, 10, "susheel" + j + offset, UrnHelper.SHA1);
 
         return queryReplyFactory.createQueryReply(guid, (byte) 1, 1,
                 addr, 0, res, GUID.makeGuid(), new byte[0], needsPush, false,

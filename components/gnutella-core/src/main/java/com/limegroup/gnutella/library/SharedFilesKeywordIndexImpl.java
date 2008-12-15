@@ -577,26 +577,23 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         for (LimeXMLDocument currDoc : documents) {
             File file = currDoc.getIdentifier();// returns null if none
             Response res = null;
-            if (file == null) { // pure metadata (no file)
-                res = responseFactory.get().createPureMetadataResponse();
-            } else { // meta-data about a specific file
-                FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(file);
-                if (fd == null) {
-                    // fd == null is bad -- would mean MetaFileManager is out of
-                    // sync.
-                    // fd incomplete should never happen, but apparently is
-                    // somehow...
-                    // fd is store file, shouldn't be returning query hits for
-                    // it then..
-                    continue;
-                } else { // we found a file with the right name
-                    res = responseFactory.get().createResponse(fd);
-                    res.setDocument(null);
-                    fd.incrementHitCount();
-                    activityCallback.handleSharedFileUpdate(fd.getFile());
-                }
+            assert(file != null);
+            FileDesc fd = fileManager.getGnutellaFileList().getFileDesc(file);
+            if (fd == null) {
+                // fd == null is bad -- would mean MetaFileManager is out of
+                // sync.
+                // fd incomplete should never happen, but apparently is
+                // somehow...
+                // fd is store file, shouldn't be returning query hits for
+                // it then..
+                continue;
+            } else { // we found a file with the right name
+                res = responseFactory.get().createResponse(fd);
+                res.setDocument(null);
+                fd.incrementHitCount();
+                activityCallback.handleSharedFileUpdate(fd.getFile());
             }
-
+        
             res.setDocument(currDoc);
             responses.add(res);
         }
