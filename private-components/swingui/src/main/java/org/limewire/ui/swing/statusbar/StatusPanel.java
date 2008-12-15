@@ -40,7 +40,7 @@ public class StatusPanel extends JXPanel {
         this.sharedFileCountPanel = sharedFileCountPanel;
         
         setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill, nogrid"));
-        assertSize(this);
+        forceDefaultHeight(this);
         
         setBackgroundPainter(barPainterFactory.createStatusBarPainter());
  
@@ -54,7 +54,7 @@ public class StatusPanel extends JXPanel {
         
         Component friendPanel = friendStatusPanel.getComponent();
         friendPanel.setVisible(false);
-        assertSize(friendPanel);
+        forceDefaultHeight(friendPanel);
         
         add(connectionStatus, "growy, gapbefore 2, gaptop 2");
         add(sharedFileCountPanel, "growy, gaptop 2");
@@ -96,7 +96,7 @@ public class StatusPanel extends JXPanel {
         
     }
     
-    private void assertSize(Component comp) {
+    private void forceDefaultHeight(Component comp) {
         comp.setMinimumSize(new Dimension(0, height));
         comp.setMaximumSize(new Dimension((int)comp.getMaximumSize().getWidth(), height));
         comp.setPreferredSize(new Dimension((int)comp.getPreferredSize().getWidth(), height));
