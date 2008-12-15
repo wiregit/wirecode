@@ -1,12 +1,10 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.AWTEvent;
-import java.awt.Color;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.ComponentAdapter;
@@ -15,10 +13,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.painter.Painter;
 
 import com.google.inject.Singleton;
 
@@ -31,12 +26,12 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
     private Component component;
 
-    private Color shadowColor = new Color(0,0,0, 125);
+   // private Color shadowColor = new Color(0,0,0, 125);
     
     private ComponentListener componentListener;
 
     public ShapeDialog() {
-        super(new MigLayout());
+        super(new BorderLayout());
         setOpaque(false);
         setVisible(false);
 
@@ -52,17 +47,17 @@ public class ShapeDialog extends JXPanel implements Resizable {
             }
         });
         
-        setBackgroundPainter(new Painter() {
-            @Override
-            public void paint(Graphics2D g, Object object, int width, int height) {
-                Graphics2D g2 = (Graphics2D)g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(shadowColor);
-                g2.fillRoundRect(0, 0, width, height, 10, 10);
-                g2.dispose();
-            }
-        });
+//        setBackgroundPainter(new Painter() {
+//            @Override
+//            public void paint(Graphics2D g, Object object, int width, int height) {
+//                Graphics2D g2 = (Graphics2D)g.create();
+//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+//                        RenderingHints.VALUE_ANTIALIAS_ON);
+//                g2.setColor(shadowColor);
+//                g2.fillRoundRect(0, 0, width, height, 10, 10);
+//                g2.dispose();
+//            }
+//        });
         
         componentListener = new ComponentAdapter() {
             @Override
@@ -74,7 +69,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
     public void show(Component c) {
         removeAll();
-        add(c, "alignx 50%, aligny 50%");
+        add(c);
         this.component = c;
         setVisible(true);
         resize();

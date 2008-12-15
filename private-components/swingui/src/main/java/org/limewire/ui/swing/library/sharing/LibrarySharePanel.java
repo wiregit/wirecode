@@ -1,9 +1,12 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -30,7 +33,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -42,8 +44,10 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.components.ShapeDialogComponent;
@@ -73,7 +77,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private static final int SHARED_ROW_COUNT = 20;
     private static final int BORDER_INSETS = 10;
-    private static final int HGAP = 5;
+  //  private static final int HGAP = 5;
     //TODO: move this to properties
     private static final int WIDTH = 300;
     
@@ -105,6 +109,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private JXTable shareTable;
     private JComboBox friendCombo;
+    private JXPanel comboPanel;
 
     private JLabel friendLabel;
     private JLabel topLabel;
@@ -182,7 +187,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 //        shapePainter.setHorizontalAlignment(HorizontalAlignment.LEFT);
 //        shapePainter.setVerticalAlignment(VerticalAlignment.TOP);
 //        setBackgroundPainter(shapePainter);
-        setBorder(new LineBorder(Color.BLACK));
+    //    setBorder(new LineBorder(Color.BLACK));
         
 
 
@@ -209,6 +214,11 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
   
     private void initializeButton() {
         closeButton = new JButton("X");
+        closeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                dialog.setVisible(false);
+            }
+        });
     }
 
 
@@ -218,16 +228,35 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         mainPanel.setOpaque(false);
 
         titlePanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
-        titlePanel.setBackground(Color.WHITE);
-       // titlePanel.setOpaque(false);
+       // titlePanel.setBackground(Color.WHITE);
+        titlePanel.setOpaque(false);
         
-        topPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
-        topPanel.setBackground(new Color(249, 253, 243));
-        //topPanel.setOpaque(false);
+        topPanel = new JXPanel(new BorderLayout());
+        topPanel.setOpaque(false);
         
         bottomPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
-        bottomPanel.setBackground(Color.BLACK);
-       // bottomPanel.setOpaque(false);
+      //  bottomPanel.setBackground(Color.GRAY);
+        bottomPanel.setOpaque(false);
+        
+        //TODO: sizes and shapes
+        setBackgroundPainter(new Painter() {
+            @Override
+            public void paint(Graphics2D g, Object object, int width, int height) {
+                int arc = 10;
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+//                g2.setColor(new Color(0, 0, 0, 125));
+//                g2.fillRoundRect(0, 0, width, height, arc, arc);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth(),
+                        mainPanel.getHeight() + 2, arc, arc);
+                g2.setColor(Color.BLACK);
+                g2.drawRoundRect(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth(),
+                        mainPanel.getHeight() + 2, arc, arc);
+                g2.dispose();
+            }
+        });
     }
 
     private void initializeLabels() {
@@ -292,7 +321,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     private void addComponents() {
-//        GridBagConstraints gbc = new GridBagConstraints();
+//        GridBagConstraints gbc = new GridBagConstraints();//        mainPanel.setLayout(new GridBagLayout());
 //        
 //        gbc.weightx = 1.0;
 //        gbc.weighty = 0;
@@ -328,7 +357,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         topPanel.add(shareScroll);
         
         bottomPanel.add(friendLabel, "wrap");
-        bottomPanel.add(friendCombo, "growx, wrap");
+        bottomPanel.add(comboPanel, "growx, gap left 5, gap right 5, wrap");
         bottomPanel.add(bottomLabel);
         
 
@@ -336,19 +365,39 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         mainPanel.add(topPanel, "growx, wrap");
         mainPanel.add(bottomPanel, "growx");
         
-        add(mainPanel); 
+        add(mainPanel, "growx, gap left " + BORDER_INSETS + ", gap right " + BORDER_INSETS + ", gap above " + BORDER_INSETS + ", gap below " + BORDER_INSETS); 
     }
 
     private void initializeComboBox() {
         friendCombo = new JComboBox(new EventComboBoxModel<SharingTarget>(noShareFilterList));
         initializeInputField();
-        ShareComboBoxUI comboUI = new ShareComboBoxUI();
+        ShareComboBoxUI comboUI = new ShareComboBoxUI(); 
         
         friendCombo.setUI(comboUI);
         friendCombo.setEditor(new ShareComboBoxEditor());
         friendCombo.setEditable(true);
+        friendCombo.setOpaque(false);
+        friendCombo.setBorder(new EmptyBorder(0, 0, 0, 0));
         
-        comboPopup = comboUI.getPopup();        
+        comboPopup = comboUI.getPopup();     
+        
+        comboPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        comboPanel.setOpaque(false);
+        comboPanel.setBackgroundPainter(new Painter() {
+            public void paint(Graphics2D g, Object object, int width, int height) {
+                Graphics2D g2 = (Graphics2D)g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, width - 1, height - 1, 5, height - 1);
+                g2.setColor(Color.BLACK);
+                g2.drawRoundRect(0, 0, width - 1, height - 1, 5, height - 1);
+                g2.dispose();
+            }
+        });
+        
+        comboPanel.add(friendCombo, "gap left 3, growx");
+        
  
         
         // mouseClicked does not register on the combo box popup so we have to
@@ -374,7 +423,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     //must be called after friendCombo is initialized
     private void initializeInputField() {
         inputField = new JTextField(12);
-        inputField.setBorder(null);
+        inputField.setBorder(new EmptyBorder(0, 0, 0, 0));
+        inputField.setOpaque(false);
         inputField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -580,8 +630,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             prefWidth = Math.max(prefWidth, c.getPreferredSize().width);
         }
         
-         mainPanel.setSize(WIDTH, height);
-         setSize(mainPanel.getSize().width + 2 * HGAP, mainPanel.getSize().height + BORDER_INSETS);
+         mainPanel.setPreferredSize(new Dimension(WIDTH, height)); 
+         mainPanel.setSize(mainPanel.getPreferredSize());
+         setPreferredSize(new Dimension(WIDTH + BORDER_INSETS * 2, height + BORDER_INSETS * 2));
+         setSize(getPreferredSize());
        // adjustPainter();
     }
     
@@ -719,8 +771,23 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
     
     private static class ShareComboBoxUI extends BasicComboBoxUI {
+        @Resource private Icon arrowIcon;
+        @Resource private Icon rolloverArrowIcon;
+        @Resource private Icon downArrowIcon;
+        
+        public ShareComboBoxUI(){
+            GuiUtils.assignResources(this);
+        }
+        
         public ComboPopup getPopup(){
             return popup;
+        }
+        
+        @Override
+        protected JButton createArrowButton() {
+            JButton button = new IconButton(arrowIcon, rolloverArrowIcon, downArrowIcon);
+            button.setName("ComboBox.arrowButton");
+            return button;
         }
     }
 
