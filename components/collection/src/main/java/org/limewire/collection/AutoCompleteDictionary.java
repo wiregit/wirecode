@@ -9,7 +9,7 @@
 
 package org.limewire.collection;
 
-import java.util.Iterator;
+import java.util.Collection;
 
 /**
  * Defines the interface for an auto-complete dictionary. Implementations 
@@ -52,16 +52,9 @@ public interface AutoCompleteDictionary extends Iterable<String> {
     public String lookup(String s);
 
     /**
-     * Returns all available entries in dictionary
-     *
-     */
-    public Iterator<String> iterator();
-
-    /**
      * Returns an iterator of potential matches from the given string.
-     *
      */
-    public Iterator<String> iterator(String s);
+    public Collection<String> getPrefixedBy(String s);
     
     /**
      * Clears the dictionary.

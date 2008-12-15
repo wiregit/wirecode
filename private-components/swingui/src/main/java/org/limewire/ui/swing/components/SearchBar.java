@@ -29,7 +29,6 @@ import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -48,7 +47,7 @@ public class SearchBar extends JXPanel {
     private final LimePromptTextField searchField;
     private final JButton searchButton;
     
-    private final DropDownListAutoCompleteControl dropDownListAutoCompleteControl;
+    private final BasicAutoCompleter autoCompleter;
     private final FriendAutoCompleters friendLibraries;
     
     private SearchCategory categoryToSearch; 
@@ -63,6 +62,7 @@ public class SearchBar extends JXPanel {
         GuiUtils.assignResources(this);
 
         this.friendLibraries = friendLibraries;
+        this.autoCompleter = new BasicAutoCompleter();
         
         this.categoryToSearch = SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         
@@ -101,26 +101,29 @@ public class SearchBar extends JXPanel {
         this.searchButton.setFocusPainted(false);
         this.searchButton.setToolTipText(I18n.tr("Search P2P Network"));
         
-        this.assertProgramCategory();
+        this.configureProgramCategory();
         
-        this.dropDownListAutoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, 
-                friendLibraries.getDictionary(this.categoryToSearch));
-        this.dropDownListAutoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
-        SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.addSettingListener(new SettingListener() {
-
-            @Override
-            public void settingChanged(SettingEvent evt) {
-                SwingUtils.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        dropDownListAutoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
-                    }
-                });
-            }
-        });
+        final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, autoCompleter);
+        autoCompleteControl.setAutoComplete(true);
+        // TODO: this setting doesn't exist in options right now
+//        SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.addSettingListener(new SettingListener() {
+//            @Override
+//            public void settingChanged(SettingEvent evt) {
+//                SwingUtils.invokeLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        autoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
+//                    }
+//                });
+//            }
+//        });
         
-        if (actionToSelect != null)
+        if (actionToSelect != null) {
+            autoCompleter.setDictionary(friendLibraries.getDictionary(categoryToSearch));
             this.comboBox.setSelectedAction(actionToSelect);
+        } else {
+            autoCompleter.setDictionary(friendLibraries.getDictionary(SearchCategory.ALL));
+        }
         
         this.setOpaque(false);
         this.add(this.comboBox);
@@ -130,7 +133,7 @@ public class SearchBar extends JXPanel {
         LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {            
             @Override
             public void settingChanged(SettingEvent evt) {
-                assertProgramCategory();
+                configureProgramCategory();
             }            
         });
     }
@@ -157,7 +160,7 @@ public class SearchBar extends JXPanel {
         });
     }
     
-    private void assertProgramCategory() {
+    private void configureProgramCategory() {
         if (!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             this.comboBox.removeAction(this.programAction);
         } else {
@@ -200,9 +203,8 @@ public class SearchBar extends JXPanel {
         
         @Override
         public void actionPerformed(ActionEvent arg0) {
-            categoryToSearch = category;
-            
-            dropDownListAutoCompleteControl.setDictionary(friendLibraries.getDictionary(category));
+            categoryToSearch = category;            
+            autoCompleter.setDictionary(friendLibraries.getDictionary(category));
         }
     }
 }

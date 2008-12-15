@@ -1,7 +1,6 @@
 package org.limewire.core.impl.library;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -27,12 +26,9 @@ public class FriendSearcher {
             Set<RemoteFileItem> results = new HashSet<RemoteFileItem>();
             StringTokenizer st = new StringTokenizer(searchDetails.getSearchQuery());
             while(st.hasMoreElements()) {
-                Iterator<RemoteFileItem> resultsForWord = libraries.iterator(st.nextToken(), searchDetails.getSearchCategory(), true);
-                while (resultsForWord.hasNext()) {
-                    results.add(resultsForWord.next());
-                }
+                libraries.getMatchingItems(st.nextToken(), searchDetails.getSearchCategory(), results);
             }
-            listener.handleFriendResults(results.iterator());
+            listener.handleFriendResults(results);
         }
     }
 }

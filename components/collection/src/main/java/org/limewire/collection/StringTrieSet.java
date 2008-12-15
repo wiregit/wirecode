@@ -1,8 +1,11 @@
 package org.limewire.collection;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.SortedMap;
 
 /**
  * Provides a set-like interface designed specifically for <code>String</code>s.
@@ -24,15 +27,14 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
     /**
      * The backing map. A binary-sorted Trie.
      */
-    private final transient StringTrie<String> map;
+    private final transient Trie<String, String> map;
 
-    /**
-     * This constructor sets up a dictionary where case IS significant
-     * but whose sort order is binary based.
-     * All Strings are stored with the case of the last entry added.
-     */
-    public StringTrieSet(boolean caseSensitive) {
-        map = new StringTrie<String>(caseSensitive);
+    public StringTrieSet(boolean ignoreCase) {
+        if(ignoreCase) {
+            map = new CaseIgnoredTrie<String>();
+        } else {
+            map = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
+        }
     }
 
     /**
@@ -43,7 +45,7 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
      */
     public void addEntry(String data) {
         if (!contains(data))    //disallow adding duplicates
-            map.add(data, data);
+            map.put(data, data);
     }
 
     /**
@@ -59,15 +61,15 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
      * @return <tt>true</tt> if a value was actually removed.
      */
     public boolean removeEntry(String data) {
-        return map.remove(data);
+        return map.remove(data) != null;
     }
 
     /**
      * Return all the Strings that can be prefixed by this String.
      * All values returned by the iterator have their case preserved.
      */
-    public Iterator getPrefixedBy(String data) {
-        return map.getPrefixedBy(data);
+    public Collection<String> getPrefixedBy(String data) {
+        return map.getPrefixedBy(data).values();
     }
 
     /**
@@ -76,7 +78,7 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
      * Return null if no such String exist in the current set.
      */
     public String lookup(String data) {
-        Iterator<String> it = map.getPrefixedBy(data);
+        Iterator<String> it = map.getPrefixedBy(data).values().iterator();
         if (!it.hasNext())
             return null;
         return it.next();
@@ -86,14 +88,7 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
      * Returns all values (entire TrieSet)
      */
     public Iterator<String> iterator() {
-        return map.getIterator();
-    }
-
-    /**
-     * Returns all potential matches off the given String.
-     */
-    public Iterator<String> iterator(String s) {
-        return map.getPrefixedBy(s);
+        return map.values().iterator();
     }
     
     /**
@@ -107,5 +102,82 @@ public class StringTrieSet implements AutoCompleteDictionary, Iterable<String> {
         for (String string : l) {
             removeEntry(string);
         }
+    }
+    
+    private static class CaseIgnoredTrie<V> extends PatriciaTrie<String, V> {        
+        public CaseIgnoredTrie() {
+            super(new CharSequenceKeyAnalyzer());
+        }
+        
+        private String canonicalize(final String s) {
+            return s.toUpperCase(Locale.US).toLowerCase(Locale.US);
+        }
+
+        @Override
+        public boolean containsKey(Object k) {
+            return super.containsKey(canonicalize((String)k));
+        }
+
+        @Override
+        public V get(Object k) {
+            return super.get(canonicalize((String)k));
+        }
+
+        @Override
+        public SortedMap<String, V> getPrefixedBy(String key, int offset, int length) {
+            return super.getPrefixedBy(canonicalize(key), offset, length);
+        }
+
+        @Override
+        public SortedMap<String, V> getPrefixedBy(String key, int length) {
+            return super.getPrefixedBy(canonicalize(key), length);
+        }
+
+        @Override
+        public SortedMap<String, V> getPrefixedBy(String key) {
+            return super.getPrefixedBy(canonicalize(key));
+        }
+
+        @Override
+        public SortedMap<String, V> getPrefixedByBits(String key, int bitLength) {
+            return super.getPrefixedByBits(canonicalize(key), bitLength);
+        }
+
+        @Override
+        public SortedMap<String, V> headMap(String toKey) {
+            return super.headMap(canonicalize(toKey));
+        }
+
+        @Override
+        public V put(String key, V value) {
+            return super.put(canonicalize(key), value);
+        }
+
+        @Override
+        public V remove(Object k) {
+            return super.remove(canonicalize((String)k));
+        }
+
+        @Override
+        public Entry<String, V> select(String key, Cursor<? super String, ? super V> cursor) {
+            return super.select(canonicalize(key), cursor);
+        }
+
+        @Override
+        public V select(String key) {
+            return super.select(canonicalize(key));
+        }
+
+        @Override
+        public SortedMap<String, V> subMap(String fromKey, String toKey) {
+            return super.subMap(canonicalize(fromKey), canonicalize(toKey));
+        }
+
+        @Override
+        public SortedMap<String, V> tailMap(String fromKey) {
+            return super.tailMap(canonicalize(fromKey));
+        }
+        
+        
     }
 }

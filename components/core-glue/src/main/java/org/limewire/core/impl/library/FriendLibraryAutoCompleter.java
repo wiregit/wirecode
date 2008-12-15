@@ -1,9 +1,9 @@
 package org.limewire.core.impl.library;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.limewire.collection.AutoCompleteDictionary;
-import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.search.SearchCategory;
 
 public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
@@ -15,40 +15,27 @@ public class FriendLibraryAutoCompleter implements AutoCompleteDictionary {
         this.category = category;
     }
     
-    public void addEntry(String s) {
+    public void addEntry(String entry) {
         throw new UnsupportedOperationException();
     }
 
-    public boolean removeEntry(String s) {
+    public boolean removeEntry(String entry) {
         throw new UnsupportedOperationException();
     }
 
-    public String lookup(String s) {
-        Iterator<String> it = iterator(s);
+    public String lookup(String prefix) {
+        Iterator<String> it = getPrefixedBy(prefix).iterator();
         if (!it.hasNext())
             return null;
         return it.next();
     }
 
     public Iterator<String> iterator() {
-        return iterator(null);
+        return getPrefixedBy("").iterator();
     }
 
-    public Iterator<String> iterator(String s) {
-        final Iterator<RemoteFileItem> files = friendLibraries.iterator(s, category, false);
-        return new Iterator<String>() {
-            public boolean hasNext() {
-                return files.hasNext();
-            }
-
-            public String next() {
-                return files.next().getName();
-            }
-
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
+    public Collection<String> getPrefixedBy(String prefix) {
+        return friendLibraries.getSuggestions(prefix, category);
     }
 
     public void clear() {

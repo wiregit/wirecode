@@ -35,6 +35,7 @@ import org.limewire.net.address.AddressResolutionObserver;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.XMPPAddress;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -101,16 +102,18 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
                         final FriendLibrary friendLibrary = listChanges.getSourceList().get(listChanges.getIndex());
                         
                         new AbstractListEventListener<PresenceLibrary>() {
-                            protected void itemAdded(PresenceLibrary presenceLibrary) {
+                            @Override
+                            protected void itemAdded(PresenceLibrary presenceLibrary, int idx, EventList<PresenceLibrary> source) {
                                 tryToResolveAndBrowse(presenceLibrary, latestConnectivityEventRevision);
                             }
 
-                            protected void itemRemoved(PresenceLibrary item) {
+                            @Override
+                            protected void itemRemoved(PresenceLibrary item, int idx, EventList<PresenceLibrary> source) {
                                 librariesToBrowse.remove(item);
                             }
 
                             @Override
-                            protected void itemUpdated(PresenceLibrary item) {
+                            protected void itemUpdated(PresenceLibrary item, PresenceLibrary prior, int idx, EventList<PresenceLibrary> source) {
                             }
                         }.install(friendLibrary.getPresenceLibraryList());
                     }

@@ -28,7 +28,7 @@ import java.util.Arrays;
  */
 public class MultiCollection<T> extends MultiIterable<T> implements Collection<T> {
 	
-	private final Iterable<Collection<? extends T>> collections;
+	private final Iterable<? extends Collection<? extends T>> collections;
 
 	public MultiCollection(Collection<? extends T> i1, Collection<? extends T> i2) {
 		super(i1, i2);
@@ -44,6 +44,11 @@ public class MultiCollection<T> extends MultiIterable<T> implements Collection<T
 		List<Collection<? extends T>> l = new ArrayList<Collection<? extends T>>(collections.length);
         l.addAll(Arrays.asList(collections));
 		this.collections = l;
+	}
+	
+	public MultiCollection(Iterable<? extends Collection<? extends T>> collections) {
+	    super(collections);
+	    this.collections = collections;
 	}
 	
 	public boolean add(T o) {

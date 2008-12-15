@@ -48,6 +48,8 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -149,7 +151,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
 
         new AbstractListEventListener<FriendLibrary>() {
             @Override
-            protected void itemAdded(FriendLibrary item) {
+            protected void itemAdded(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
                 LOG.debugf("friend library {0} added ...", item.getFriend().getId());  
                 NavPanel panel = getPanelForFriend(item.getFriend());
                 if(panel != null) {
@@ -165,7 +167,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
             
             @Override
-            protected void itemRemoved(FriendLibrary item) {
+            protected void itemRemoved(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
                 LOG.debugf("friend library {0} removed ...", item.getFriend().getId()); 
                 Friend friend = item.getFriend();
                 if(friend.isAnonymous()) {
@@ -191,7 +193,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
             
             @Override
-            protected void itemUpdated(FriendLibrary item) {
+            protected void itemUpdated(FriendLibrary item, FriendLibrary prior, int idx, EventList<FriendLibrary> source) {
                 NavPanel panel = limewireList.getPanelForFriend(item.getFriend());                
                 if(panel != null) {
                     LOG.debugf("updating navpanel for {0} to state {1}", item.getFriend().getId(), item.getState());  

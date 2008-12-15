@@ -1,7 +1,7 @@
 package org.limewire.core.impl.search;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -224,10 +224,9 @@ public class CoreSearch implements Search {
     }
 
     private class FriendSearchListenerImpl implements FriendSearchListener {
-        public void handleFriendResults(Iterator<RemoteFileItem> results) {
-            while(results.hasNext()) {
-                CoreRemoteFileItem remoteFileItem = (CoreRemoteFileItem)results.next();
-                SearchResult searchResult = remoteFileItem.getSearchResult();
+        public void handleFriendResults(Collection<RemoteFileItem> results) {
+            for(RemoteFileItem remoteFileItem : results) {
+                SearchResult searchResult = ((CoreRemoteFileItem)remoteFileItem).getSearchResult();
                 for (SearchListener listener : searchListeners) {
                     listener.handleSearchResult(searchResult);
                 }

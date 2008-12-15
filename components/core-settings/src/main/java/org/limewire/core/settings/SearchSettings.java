@@ -423,12 +423,6 @@ public final class SearchSettings extends LimeProps {
         FACTORY.createBooleanSetting("POPULATE_SEARCH_BAR_FRIEND_FILES", true);
     
     /**
-     * Setting for how many suggestions from friends files to display.
-     */
-    public static final IntSetting POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES =
-        FACTORY.createIntSetting("POPULATE_SEARCH_BAR_NUMBER_FRIEND_FILES", 4);
-    
-    /**
      * Setting for whether to display old searches as search tips. If true,
      * old search will be displayed as tips, if false they won't be displayed
      */
