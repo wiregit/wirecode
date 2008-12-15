@@ -256,7 +256,8 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
 
     @Override
     public File getFile() {
-        return getFileDesc().getFile();
+        FileDesc fileDesc = getFileDesc();
+        return fileDesc != null ? fileDesc.getFile() : null;
     }
     
     @Override
