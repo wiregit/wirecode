@@ -2,6 +2,7 @@ package org.limewire.core.impl.library;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -85,6 +86,7 @@ public class FriendLibraries {
         });
     }
 
+    /** Returns all suggestions for search terms based on the given prefix. */
     public Collection<String> getSuggestions(String prefix, SearchCategory category) {
         Set<String> contained = new HashSet<String>();
         for(Library library : libraries.values()) {
@@ -119,31 +121,47 @@ public class FriendLibraries {
         return false;
     }
 
-    public Collection<RemoteFileItem> getMatchingItems(String prefix, SearchCategory category, Collection<RemoteFileItem> storage) {
-        if(storage == null) {
-            storage = new HashSet<RemoteFileItem>();
+    /** Returns all RemoteFileItems that match the query. */
+    public Collection<RemoteFileItem> getMatchingItems(String query, SearchCategory category) {
+        StringTokenizer st = new StringTokenizer(query);
+        Set<RemoteFileItem> matches = null;
+        while(st.hasMoreElements()) {
+            Set<RemoteFileItem> keywordMatches = new HashSet<RemoteFileItem>();
+            String keyword = st.nextToken();
+            for(Library library : libraries.values()) {                
+                library.keywordsIndex.lock.readLock().lock();
+                try {
+                    insertMatchingItemsInto(library.keywordsIndex.getPrefixedBy(keyword).values(), category, keywordMatches, matches);
+                } finally {
+                    library.keywordsIndex.lock.readLock().unlock();
+                }           
+            }
+            
+            // If this is the first keyword, just assign matches to it.
+            if(matches == null) {
+                matches = keywordMatches;
+            } else {
+                // Otherwise, we're looking for additional keywords -- retain only matched ones.
+                matches.retainAll(keywordMatches);
+            }
+            
+            // Optimization: If nothing matched this keyword, nothing can be added.
+            if(matches.isEmpty()) {
+                return Collections.emptySet();
+            }
         }
         
-        for(Library library : libraries.values()) {
-            library.keywordsIndex.lock.readLock().lock();
-            try {
-                insertMatchingItemsInto(library.keywordsIndex.getPrefixedBy(prefix).values(), category, storage);
-            } finally {
-                library.keywordsIndex.lock.readLock().unlock();
-            }           
-        }
-        return storage;
+        return matches;
     }
 
-    private void insertMatchingItemsInto(Collection<Collection<RemoteFileItem>> prefixedBy, SearchCategory category, Collection<RemoteFileItem> storage) {
+    private void insertMatchingItemsInto(Collection<Collection<RemoteFileItem>> prefixedBy, SearchCategory category,
+                                         Set<RemoteFileItem> storage, Set<RemoteFileItem> allowedItems) {
         for(Collection<RemoteFileItem> remoteFileItems : prefixedBy) {
-            if(category == SearchCategory.ALL) {
-                storage.addAll(remoteFileItems);
-            } else {
-                for(RemoteFileItem file : remoteFileItems) {
-                    if(category == SearchCategory.forCategory(file.getCategory())) {
-                        storage.add(file);    
-                    }
+            for(RemoteFileItem item : remoteFileItems) {
+                boolean allowCategory = category == SearchCategory.ALL || category == SearchCategory.forCategory(item.getCategory());
+                boolean allowItem = allowedItems == null || allowedItems.contains(item);
+                if(allowCategory && allowItem) {
+                    storage.add(item);    
                 }
             }
         }

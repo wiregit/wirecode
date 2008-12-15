@@ -93,7 +93,7 @@ public class CoreRemoteFileItem implements RemoteFileItem, Comparable {
         if (getClass() != obj.getClass()) {
             return -1;
         }
-        return getFileName().toLowerCase().compareTo(((CoreRemoteFileItem) obj).getFileName().toLowerCase());
+        return getFileName().compareToIgnoreCase(((CoreRemoteFileItem) obj).getFileName());
     }
 
 }
