@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-08 11:30-0500\n"
+"POT-Creation-Date: 2008-12-15 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,7 +63,7 @@ msgid "No problems."
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:19
-msgid "There is a disk problem."
+msgid "There is a disk problem"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
@@ -71,7 +71,7 @@ msgid "The file is corrupted"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:21
-msgid "The File is not shareable"
+msgid "This file is not shareable"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
@@ -238,14 +238,14 @@ msgstr ""
 msgid "DHT Peer Publisher"
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:294
+#: core/com/limegroup/gnutella/AcceptorImpl.java:297
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:392
+#: core/com/limegroup/gnutella/AcceptorImpl.java:395
 msgid "Connection Listener"
 msgstr ""
 
@@ -273,22 +273,22 @@ msgstr ""
 msgid "Gnutella Connections"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:201
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:202
 msgid "Old Downloads"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:225
 msgid "Download Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:273
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:274
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:275
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:276
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -315,7 +315,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:134
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:157
 msgid "Network Management"
 msgstr ""
 
@@ -635,20 +635,6 @@ msgstr ""
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 
-#: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:36
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:501
-msgid ""
-"If you stop this upload, the torrent download will stop. Are you sure you "
-"want to do this?"
-msgstr ""
-
-#: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:39
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:506
-msgid ""
-"This upload is a torrent and it hasn't seeded enough. You should let it "
-"upload some more. Are you sure you want to stop it?"
-msgstr ""
-
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
 msgstr ""
@@ -796,7 +782,7 @@ msgstr ""
 #. * String to be displayed in title bar of LW client.
 #.
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:81
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:264
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:263
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
 msgstr ""
@@ -1044,8 +1030,8 @@ msgstr ""
 msgid "Ethernet"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:119
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1525
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:118
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1524
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
 "firewall is blocking LimeWire from accessing the internet. LimeWire will "
@@ -1053,39 +1039,39 @@ msgid ""
 "\"Disconnect\" from the File menu."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 msgid "&Monitor"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 msgid "&Connections"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "&Library"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:132
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "C&onsole"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:133
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:132
 msgid "Lo&gging"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:150
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:174
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:149
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:173
 #, java-format
 msgid "Display the {0} Screen"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:432
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:436
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:431
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:435
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -1096,7 +1082,7 @@ msgid ""
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:533
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:532
 msgid ""
 "LimeWire is unable to find a license for this file. Download the file "
 "anyway?\n"
@@ -1105,20 +1091,20 @@ msgid ""
 "network. Please respect your local copyright laws."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1432
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1431
 #, java-format
 msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1451
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1474
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1450
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1473
 msgid "LimeWire will not launch the specified file for security reasons."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1453
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1476
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1452
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1475
 #, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
@@ -1126,8 +1112,8 @@ msgid ""
 "Executed command: {0}."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1456
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1479
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1455
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1478
 msgid "LimeWire could not launch the specified file."
 msgstr ""
 
@@ -2573,27 +2559,39 @@ msgstr ""
 msgid "Get LimeWire PRO Later"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:284
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:285
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:74
 msgid "Complete"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:489
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:490
 #, java-format
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:588
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:502
+msgid ""
+"If you stop this upload, the torrent download will stop. Are you sure you "
+"want to do this?"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:507
+msgid ""
+"This upload is a torrent and it hasn't seeded enough. You should let it "
+"upload some more. Are you sure you want to stop it?"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:578
 msgid ""
 "<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
 "b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
 "limewire.com</a> and download the newest official version of LimeWire.</html>"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:607
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:597
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a Microsoft patch is required or a firewall is "
@@ -2602,7 +2600,7 @@ msgid ""
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:620
+#: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:610
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a firewall is blocking access. To continue using "
