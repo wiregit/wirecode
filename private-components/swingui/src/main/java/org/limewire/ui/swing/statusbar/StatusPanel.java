@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.statusbar;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,10 +39,9 @@ public class StatusPanel extends JXPanel {
         
         this.sharedFileCountPanel = sharedFileCountPanel;
         
-        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill"));
-        setMinimumSize(new Dimension(0, height + 2));
-        setMaximumSize(new Dimension(Short.MAX_VALUE, height + 2));
-        setPreferredSize(new Dimension(Short.MAX_VALUE, height + 2));
+        setLayout(new MigLayout("insets 0, gap 0, hidemode 3, fill, nogrid"));
+        assertSize(this);
+        
         setBackgroundPainter(barPainterFactory.createStatusBarPainter());
  
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
@@ -52,12 +52,15 @@ public class StatusPanel extends JXPanel {
         
         minDownloadPanel.setVisible(false);
         
-        add(connectionStatus, "growy, gapbefore 2");
-        add(sharedFileCountPanel, "growy");
+        Component friendPanel = friendStatusPanel.getComponent();
+        friendPanel.setVisible(false);
+        assertSize(friendPanel);
+        
+        add(connectionStatus, "growy, gapbefore 2, gaptop 2");
+        add(sharedFileCountPanel, "growy, gaptop 2");
         add(minDownloadPanel, "growy, gapafter 4, hidemode 2, push");
         add(miniPlayerPanel, "gapafter 4");
-        
-        add(friendStatusPanel.getComponent(), "gapbefore push, hidemode 3, dock east");
+        add(friendPanel, "gapbefore push, hidemode 2, dock east");
         
         connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -91,5 +94,11 @@ public class StatusPanel extends JXPanel {
         
         this.sharedFileCountPanel.setVisible(sharingVisible);
         
+    }
+    
+    private void assertSize(Component comp) {
+        comp.setMinimumSize(new Dimension(0, height));
+        comp.setMaximumSize(new Dimension((int)comp.getMaximumSize().getWidth(), height));
+        comp.setPreferredSize(new Dimension((int)comp.getPreferredSize().getWidth(), height));
     }
 }
