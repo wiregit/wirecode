@@ -111,7 +111,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         backButtonSlot.setOpaque(false);
         
         headerTitlePanel.add(backButtonSlot);
-        headerTitlePanel.add(titleTextLabel);
+        headerTitlePanel.add(titleTextLabel, "gapbottom 2");
         
         LimeHeaderBar bar = headerBarFactory.createSpecial(headerTitlePanel, titleTextLabel);
                 
