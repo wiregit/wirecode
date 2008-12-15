@@ -1,9 +1,12 @@
 package org.limewire.ui.swing.friends.chat;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -39,6 +42,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.html.FormSubmitEvent;
 import javax.swing.text.html.HTMLEditorKit;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.limewire.concurrent.FutureEvent;
 import org.limewire.concurrent.ListeningFuture;
@@ -59,7 +63,6 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.xmpp.RemoteFileItemFactory;
-import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -74,8 +77,7 @@ import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.DNDUtils;
-import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -94,7 +96,6 @@ import com.google.inject.name.Named;
  *
  */
 public class ConversationPane extends JPanel implements Displayable {
-    private static final String DISABLED_LIBRARY_TOOLTIP = I18nMarker.marktr("{0} isn't using LimeWire. Tell them about it to see their Library");
     private static final Log LOG = LogFactory.getLog(ConversationPane.class);
     private static final Color DEFAULT_BACKGROUND = new Color(224, 224, 224);
     private static final Color BACKGROUND_COLOR = Color.WHITE;
@@ -112,12 +113,14 @@ public class ConversationPane extends JPanel implements Displayable {
     private final ShareListManager shareListManager;
     private final IconManager iconManager;
     private final LibraryNavigator libraryNavigator;
-    private JXButton libraryButton;
+    private JXButton downloadButton;
     private ResizingInputPanel inputPanel;
     private ChatState currentChatState;
     private final ResultDownloader downloader;
     private final RemoteFileItemFactory remoteFileItemFactory;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
+    @Resource(key="ChatConversation.buttonBarColor") private Color buttonBarColor;
+    @Resource(key="ChatConversation.buttonFont") private Font buttonFont;
     
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
@@ -137,6 +140,8 @@ public class ConversationPane extends JPanel implements Displayable {
         this.libraryNavigator = libraryNavigator;
         this.downloader = downloader;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
+        
+        GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
 
@@ -243,9 +248,9 @@ public class ConversationPane extends JPanel implements Displayable {
 
         if (feature.getID().equals(LimewireFeature.ID)) {
             if (featureEventType == FeatureEvent.Type.ADDED) {
-                libraryButton.setEnabled(true);
+                downloadButton.setEnabled(true);
             } else if (featureEventType == FeatureEvent.Type.REMOVED) {
-                libraryButton.setEnabled(false);
+                downloadButton.setEnabled(false);
             }
         }
     }
@@ -316,13 +321,16 @@ public class ConversationPane extends JPanel implements Displayable {
     private JPanel footerPanel(MessageWriter writer, ChatFriend chatFriend) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BACKGROUND_COLOR);
-        libraryButton = new JXButton(new LibraryAction());
-        if (!chatFriend.isSignedInToLimewire()) {
-            libraryButton.setEnabled(false);
-            libraryButton.setToolTipText(I18n.tr(DISABLED_LIBRARY_TOOLTIP, chatFriend.getName()));
-        }
-        panel.add(libraryButton, BorderLayout.NORTH);
+        downloadButton = new JXButton(new DownloadFromFriendLibraryAction());
+        downloadButton.setFont(buttonFont);
+        JPanel buttonBar = new JPanel(new BorderLayout());
+        buttonBar.setBackground(buttonBarColor);
+        buttonBar.add(downloadButton, BorderLayout.WEST);
+        JButton shareButton = new JButton(new ShareAction());
+        shareButton.setFont(buttonFont);
+        buttonBar.add(shareButton, BorderLayout.EAST);
         inputPanel = new ResizingInputPanel(writer);
+        panel.add(buttonBar, BorderLayout.NORTH);
         panel.add(inputPanel, BorderLayout.CENTER);
 
         JTextComponent inputComponent = inputPanel.getInputComponent();
@@ -336,18 +344,29 @@ public class ConversationPane extends JPanel implements Displayable {
     public void handleDisplay() {
         editor.invalidate();
         editor.repaint();
-        libraryButton.repaint();
+        downloadButton.repaint();
         inputPanel.handleDisplay();
     }
 
-    private class LibraryAction extends AbstractAction {
-        public LibraryAction() {
-            super(tr("Library"));
+    private class DownloadFromFriendLibraryAction extends AbstractAction {
+        public DownloadFromFriendLibraryAction() {
+            super(tr("Download"));
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
+        }
+    }
+
+    private class ShareAction extends AbstractAction {
+        public ShareAction() {
+            super(tr("Share"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            libraryNavigator.selectFriendShareList(chatFriend.getFriend());
         }
     }
 

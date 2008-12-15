@@ -776,13 +776,7 @@ public class ChatFriendListPane extends JPanel {
         public ViewLibrary(FriendContext context) {
             super("", context);
         }
-        
-        @Override
-        public boolean isEnabled() {
-            ChatFriend chatFriend = context.getFriend();
-            return chatFriend != null && chatFriend.isSignedInToLimewire();
-        }
-        
+                
         @Override
         public void notifyItem(JMenuItem item) {
             ChatFriend chatFriend = context.getFriend();
@@ -799,8 +793,6 @@ public class ChatFriendListPane extends JPanel {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
                 minimizeAction.actionPerformed(e);
-                //TODO: If they are not signed into LW, it should go to the lib view
-                //for what they are sharing with the entire network
                 libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
