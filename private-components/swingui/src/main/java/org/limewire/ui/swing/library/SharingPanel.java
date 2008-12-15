@@ -31,6 +31,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
 import org.jdesktop.jxlayer.plaf.ext.LockableUI;
+import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
@@ -54,6 +55,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
+import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -75,6 +77,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     private final Map<Category, LockableUI> locked = new EnumMap<Category, LockableUI>(Category.class);
     private final Map<Category, SharingSelectionPanel> listeners = new EnumMap<Category, SharingSelectionPanel>(Category.class);
     
+    private JPanel backButtonSlot;
+    
     SharingPanel(EventList<LocalFileItem> wholeLibraryList,
                  FriendFileList friendFileList,
                  CategoryIconManager categoryIconManager,
@@ -86,24 +90,40 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         this.tableFactory = tableFactory;
         this.friendFileList = friendFileList;        
         this.friendFileList.addPropertyChangeListener(this);
-
-        //TODO: fix this. Turns text to Black for the time being till we get some sort of color spec
-        getHeaderPanel().setForeground(Color.BLACK);
     }
     
     /** Returns the full name of the panel, which may be very long. */
     abstract String getFullPanelName();
     /** Returns a shorter more concise version of the panel name. */
     abstract String getShortPanelName();
-    
+        
     @Override
     protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
-        return headerBarFactory.createSpecial();
+        JPanel headerTitlePanel = new JPanel(new BorderLayout());
+        headerTitlePanel.setOpaque(false);
+        
+        JLabel titleTextLabel = new JLabel();
+        
+        backButtonSlot = new JPanel();
+        backButtonSlot.setOpaque(false);
+        
+        headerTitlePanel.add(backButtonSlot, BorderLayout.WEST);
+        headerTitlePanel.add(titleTextLabel, BorderLayout.EAST);
+        
+        LimeHeaderBar bar = headerBarFactory.createSpecial(headerTitlePanel, titleTextLabel);
+                
+        return bar;
     }
     
     @Override
     protected LimePromptTextField createFilterField(String prompt) {
-        return new LimePromptTextField(prompt, AccentType.NONE);
+        return new LimePromptTextField(prompt, AccentType.GREEN_SHADOW);
+    }
+    
+    protected void addBackButton(Action action, ButtonDecorator decorator) {
+        JXButton button = new JXButton(action);
+        decorator.decorateDarkFullButton(button, AccentType.GREEN_SHADOW);
+        backButtonSlot.add(button);
     }
     
     protected void createMyCategories(EventList<LocalFileItem> wholeLibraryList, LocalFileList friendFileList) {

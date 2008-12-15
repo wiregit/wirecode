@@ -19,11 +19,12 @@ public class BarPainterFactory {
 
     @Resource private Color headerBarGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color headerBarGradientBottom = PainterUtils.TRASPARENT;
-    
-    // TODO: Talk to Anthony about where this is visable and not
-    //        possibly make new painter creation function
-    @Resource private Color headerBarBorderTop1 = PainterUtils.TRASPARENT;
 
+    @Resource private Color specialHeaderBarGradientTop = PainterUtils.TRASPARENT;
+    @Resource private Color specialHeaderBarGradientBottom = PainterUtils.TRASPARENT;
+    @Resource private Color specialHeaderBarTopBorder1 = PainterUtils.TRASPARENT;
+    @Resource private Color specialHeaderBarBottomBorder1 = PainterUtils.TRASPARENT;
+    
     @Resource private Color topBarGradientTop = PainterUtils.TRASPARENT;
     @Resource private Color topBarGradientBottom = PainterUtils.TRASPARENT;
     @Resource private Color topBarBorderTop1 = PainterUtils.TRASPARENT;
@@ -50,12 +51,11 @@ public class BarPainterFactory {
             PainterUtils.TRASPARENT, PainterUtils.TRASPARENT);
     }
     
-    // TODO: Get a real non florescent scheme
     public GenericBarPainter<LimeHeaderBar> createSpecialHeaderBarPainter() {
         return new GenericBarPainter<LimeHeaderBar>(
-                new GradientPaint(0,0,new Color(209,247,144),0,1,new Color(209,247,144)), 
-                this.headerBarBorderTop1, PainterUtils.TRASPARENT,
-                PainterUtils.TRASPARENT, PainterUtils.TRASPARENT);
+                new GradientPaint(0,0, specialHeaderBarGradientTop,0,1, specialHeaderBarGradientBottom), 
+                specialHeaderBarTopBorder1, PainterUtils.TRASPARENT,
+                specialHeaderBarBottomBorder1, PainterUtils.TRASPARENT);
     }
     
     public GenericBarPainter<JXPanel> createFriendsBarPainter() {
