@@ -70,12 +70,6 @@ public class GnutellaFileListStub extends AbstractFileListStub implements Gnutel
     public void setAddNewAudioAlways(boolean value) {
     }
 
-    public void load() {
-    }
-
-    public void unload() {
-    }
-
     @Override
     public void setAddNewImageAlways(boolean value) {
     }

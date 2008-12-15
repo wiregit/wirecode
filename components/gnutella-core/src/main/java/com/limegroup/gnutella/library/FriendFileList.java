@@ -4,19 +4,6 @@ public interface FriendFileList extends SharedFileList {
 
     /** Adds the FileDesc to this list. */
     boolean add(FileDesc fileDesc);
-
-
-    /**
-     * Populates the list from current record of managed files if necessary
-     */
-    void load();
-
-    /**
-     * Does not remove or clear files from the list.  Unloading the list makes the sharing
-     * characteristics of the files in the list invisible externally (files are still in list,
-     * but do not have the appearance of being shared)
-     */
-    void unload();
     
     /**
      * Changes the smart sharing value for images. If true, all new images added to

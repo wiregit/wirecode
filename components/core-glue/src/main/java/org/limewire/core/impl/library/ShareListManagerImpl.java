@@ -22,7 +22,6 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -74,13 +73,9 @@ class ShareListManagerImpl implements ShareListManager {
 
         knownListeners.addListener(new EventListener<FriendEvent>() {
             @Override
-            @SwingEDTEvent
             public void handleEvent(FriendEvent event) {
                 Friend friend = event.getSource();
                 switch (event.getType()) {
-                    case ADDED:
-                        loadFilesForFriend(friend);
-                        break;
                     case REMOVED:
                         unloadFilesForFriend(friend);
                         break;
@@ -89,13 +84,12 @@ class ShareListManagerImpl implements ShareListManager {
         });
     }
 
-    private void loadFilesForFriend(Friend friend) {
-        fileManager.loadFilesForFriend(friend.getId());
-
-    }
-
     private void unloadFilesForFriend(Friend friend) {
         fileManager.unloadFilesForFriend(friend.getId());
+        FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
+        if(list != null) {
+            list.dispose();
+        }
     }
 
     @Override

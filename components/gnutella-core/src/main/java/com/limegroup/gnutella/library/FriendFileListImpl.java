@@ -29,6 +29,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         addNewAudioAlways = LibrarySettings.containsFriendShareNewAudio(id);
         addNewImagesAlways = LibrarySettings.containsFriendShareNewImages(id);
         addNewVideoAlways = LibrarySettings.containsFriendShareNewVideo(id);
+        initialize();
     }
     
     @Override
@@ -36,22 +37,14 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         return super.add(fileDesc);
     }
 
-    @Override
-    public void load() {
+    void initialize() {
 
-        // add files from the MASTER list which are for the current friend, if not already added
+        // add files from the MASTER list which are for the current friend
         managedList.getReadLock().lock();
         try {
-            loadManagedListListener();
-
             for (FileDesc fd : managedList) {
                 if(isPending(fd.getFile(), fd)) {
-                    // file is for the friend represented by this list. add if necessary
-                    if (contains(fd)) {
-                        fd.incrementShareListCount();
-                    } else {
-                        add(fd);
-                    }
+                    add(fd);
                 }
             }
         } finally {
@@ -59,7 +52,11 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         }
     }
 
-    @Override
+    /**
+     * Unloading the list makes the sharing
+     * characteristics of the files in the list invisible externally (files are still in list,
+     * but do not have the appearance of being shared)
+     */
     public void unload() {
         // for each file in the friend list, decrement its' file share count
         getReadLock().lock();
@@ -70,7 +67,6 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         } finally {
             getReadLock().unlock();
         }
-        unloadManagedListListener();
     }
     
     /**
