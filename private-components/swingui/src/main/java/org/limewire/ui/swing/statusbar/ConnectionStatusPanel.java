@@ -26,6 +26,11 @@ import com.google.inject.Singleton;
 class ConnectionStatusPanel extends JXPanel {
    
     private final String connectingText = I18n.tr("Connecting");
+    private final String firewallPositiveText = I18n.tr("You are behind a firewall");
+    private final String firewallNegativeText = I18n.tr("LimeWire has not detected a firewall");
+    
+    private final String ultrapeerRawPluralText = "You are connected to {0} ultrapeers";
+    private final String ultrapeerRawSingularText = "You are connected to {0} ultrapeer";
     
     private ConnectionStrength currentStrength;
     
@@ -147,8 +152,25 @@ class ConnectionStatusPanel extends JXPanel {
         connectionStrengthLabel.setIcon(strengthIcon);
         
         setToolTipText(tooltipText);
-        connectionStatusLabel.setToolTipText(tooltipText);
-        connectionStrengthLabel.setToolTipText(tooltipText);
+    }
+
+    @Override
+    public void setToolTipText(String text) {
+        StringBuffer totalBuffer = new StringBuffer("<html>");
+        totalBuffer.append(text);
+        totalBuffer.append("<br><br>");
+        // TODO: ?
+        totalBuffer.append("You might be connected to a firewall");
+        totalBuffer.append("<br><br>");
+        // TODO: ?
+        totalBuffer.append(I18n.trn(ultrapeerRawSingularText, ultrapeerRawPluralText, 99 ));
+        totalBuffer.append("<html>");
+        
+        String totalText = totalBuffer.toString();
+        
+        super.setToolTipText(totalText);
+        connectionStatusLabel.setToolTipText(totalText);
+        connectionStrengthLabel.setToolTipText(totalText);
     }
     
     private void hideStatusLater() {
