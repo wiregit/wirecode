@@ -9,7 +9,7 @@ public class SearchCategoryUtils {
         
     public static String getName(SearchCategory category) {
         switch(category) {
-        case ALL:      return I18n.tr("All Categories");
+        case ALL:      return I18n.tr("All");
         case AUDIO:    return I18n.tr("Audio"); 
         case DOCUMENT: return I18n.tr("Documents"); 
         case IMAGE:    return I18n.tr("Images"); 
