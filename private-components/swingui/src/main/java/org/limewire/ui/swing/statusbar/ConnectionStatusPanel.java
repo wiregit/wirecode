@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.statusbar;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +10,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.Timer;
 
@@ -16,6 +18,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
+import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -35,6 +38,7 @@ class ConnectionStatusPanel extends JXPanel {
      */
     private Timer animateTimer = null;
     
+    private final JButton tryAgainButton;
     private final JLabel connectionStrengthLabel;
     private final JLabel connectionStatusLabel;
     
@@ -48,9 +52,10 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Icon full;
     @Resource private Icon turbo;
     @Resource private Font font;
+    @Resource private Color linkForeground;
 
     @Inject
-    ConnectionStatusPanel(GnutellaConnectionManager gnutellaConnectionManager) {
+    ConnectionStatusPanel(final GnutellaConnectionManager gnutellaConnectionManager) {
         
         GuiUtils.assignResources(this);
              
@@ -58,15 +63,27 @@ class ConnectionStatusPanel extends JXPanel {
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,3));
         
-        this.connectionStrengthLabel = new JLabel();
-        this.connectionStrengthLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
-        this.connectionStatusLabel = new JLabel();
-        this.connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
-        this.connectionStatusLabel.setFont(font);
-        this.connectionStatusLabel.setForeground(this.getForeground());
+        connectionStrengthLabel = new JLabel();
+        connectionStrengthLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        connectionStatusLabel = new JLabel();
+        connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
+        connectionStatusLabel.setFont(font);
+        connectionStatusLabel.setForeground(this.getForeground());
+        tryAgainButton = new HyperLinkButton("Try Again");
+        tryAgainButton.setFont(font);
+        tryAgainButton.setVisible(false);
+        tryAgainButton.setForeground(linkForeground);
+        
+        tryAgainButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gnutellaConnectionManager.restart();
+            }
+        });
         
         this.add(this.connectionStrengthLabel,BorderLayout.WEST);
         this.add(this.connectionStatusLabel,BorderLayout.CENTER);
+        this.add(this.tryAgainButton, BorderLayout.EAST);
                 
         gnutellaConnectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
@@ -76,14 +93,21 @@ class ConnectionStatusPanel extends JXPanel {
                 }
             }
         });
-        setConnectionStrength(gnutellaConnectionManager.getConnectionStrength());
+        
+        // Assume that the program is connecting on startup until 
+        //  notified otherwise -- avoids blank status or false positive on
+        //  disconnected state 
+        setConnectionStrength(ConnectionStrength.CONNECTING);
     }
     
     private void setConnectionStrength(ConnectionStrength strength) {
         
+        currentStrength = strength;
+        
         String statusMessage = "";
         String tooltipText = "";
         boolean shouldHideStatusLater = false;
+        boolean showTryAgain = false;
         Icon strengthIcon = null;
         
         switch(strength) {
@@ -93,10 +117,10 @@ class ConnectionStatusPanel extends JXPanel {
             strengthIcon = noInternet;
             break;
         case DISCONNECTED:
-            // TODO: disconnected visualisation and actions
-            tooltipText = "??";
-            statusMessage = "";
+            tooltipText = "Couldn't connect - ";
+            statusMessage = "You couldn't connect to LimeWire";
             strengthIcon = disconnected;
+            showTryAgain = true;
             break;
         case CONNECTING:
             statusMessage = connectingText;
@@ -137,8 +161,7 @@ class ConnectionStatusPanel extends JXPanel {
             strengthIcon = turbo; 
             break;
         }
-        
-       
+               
         if (shouldHideStatusLater) {
             hideStatusLater();
         }
@@ -146,6 +169,7 @@ class ConnectionStatusPanel extends JXPanel {
         connectionStatusLabel.setVisible(true);
         connectionStatusLabel.setText(statusMessage);
         connectionStrengthLabel.setIcon(strengthIcon);
+        tryAgainButton.setVisible(showTryAgain);
         
         setToolTipText(tooltipText);
     }
@@ -187,7 +211,7 @@ class ConnectionStatusPanel extends JXPanel {
         if (animateTimer != null) {
             animateTimer.stop();
         }
-        
+
         animateTimer = new Timer(500, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
