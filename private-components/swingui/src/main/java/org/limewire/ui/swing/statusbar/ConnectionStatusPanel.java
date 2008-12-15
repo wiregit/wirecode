@@ -24,13 +24,8 @@ import com.google.inject.Singleton;
 
 @Singleton
 class ConnectionStatusPanel extends JXPanel {
-   
+       
     private final String connectingText = I18n.tr("Connecting");
-    private final String firewallPositiveText = I18n.tr("You are behind a firewall");
-    private final String firewallNegativeText = I18n.tr("LimeWire has not detected a firewall");
-    
-    private final String ultrapeerRawPluralText = "You are connected to {0} ultrapeers";
-    private final String ultrapeerRawSingularText = "You are connected to {0} ultrapeer";
     
     private ConnectionStrength currentStrength;
     
@@ -55,9 +50,10 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Font font;
 
     @Inject
-    ConnectionStatusPanel(GnutellaConnectionManager connectionManager) {
+    ConnectionStatusPanel(GnutellaConnectionManager gnutellaConnectionManager) {
+        
         GuiUtils.assignResources(this);
-       
+             
         this.setLayout(new BorderLayout());
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,3));
@@ -72,7 +68,7 @@ class ConnectionStatusPanel extends JXPanel {
         this.add(this.connectionStrengthLabel,BorderLayout.WEST);
         this.add(this.connectionStatusLabel,BorderLayout.CENTER);
                 
-        connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
+        gnutellaConnectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().equals("strength")) {
@@ -80,7 +76,7 @@ class ConnectionStatusPanel extends JXPanel {
                 }
             }
         });
-        setConnectionStrength(connectionManager.getConnectionStrength());
+        setConnectionStrength(gnutellaConnectionManager.getConnectionStrength());
     }
     
     private void setConnectionStrength(ConnectionStrength strength) {
@@ -155,19 +151,7 @@ class ConnectionStatusPanel extends JXPanel {
     }
 
     @Override
-    public void setToolTipText(String text) {
-        StringBuffer totalBuffer = new StringBuffer("<html>");
-        totalBuffer.append(text);
-        totalBuffer.append("<br><br>");
-        // TODO: ?
-        totalBuffer.append("You might be connected to a firewall");
-        totalBuffer.append("<br><br>");
-        // TODO: ?
-        totalBuffer.append(I18n.trn(ultrapeerRawSingularText, ultrapeerRawPluralText, 99 ));
-        totalBuffer.append("<html>");
-        
-        String totalText = totalBuffer.toString();
-        
+    public void setToolTipText(String totalText) {
         super.setToolTipText(totalText);
         connectionStatusLabel.setToolTipText(totalText);
         connectionStrengthLabel.setToolTipText(totalText);
