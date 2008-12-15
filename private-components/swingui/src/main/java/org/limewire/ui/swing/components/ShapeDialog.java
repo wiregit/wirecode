@@ -128,9 +128,9 @@ public class ShapeDialog extends JXPanel implements Resizable {
         if (isVisible() && component != null) {
             Rectangle parentBounds = getParent().getBounds();
             Dimension childPreferredSize = getPreferredSize();
-            int w = childPreferredSize.width;
-            int h = childPreferredSize.height;
-            setBounds(parentBounds.width / 2 - w / 2, parentBounds.height / 2 - h, w, h);
+            int w = childPreferredSize.width +  buffer * 2;
+            int h = childPreferredSize.height + buffer * 2;
+            setBounds(parentBounds.width / 2 - w / 2, parentBounds.height / 2 - h /2 , w, h);
         }
     }
 
