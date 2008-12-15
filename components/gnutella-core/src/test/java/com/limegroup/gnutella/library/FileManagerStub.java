@@ -53,7 +53,12 @@ public class FileManagerStub implements FileManager {
     
     @Override
     public void stop() {}
-    
-    
+
+    public void loadFilesForFriend(String name) { }
+
+
+    public void unloadFilesForFriend(String name) { }
+
+
 }
 

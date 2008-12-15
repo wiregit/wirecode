@@ -35,6 +35,43 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     public boolean add(FileDesc fileDesc) {
         return super.add(fileDesc);
     }
+
+    @Override
+    public void load() {
+
+        // add files from the MASTER list which are for the current friend, if not already added
+        managedList.getReadLock().lock();
+        try {
+            loadManagedListListener();
+
+            for (FileDesc fd : managedList) {
+                if(isPending(fd.getFile(), fd)) {
+                    // file is for the friend represented by this list. add if necessary
+                    if (contains(fd)) {
+                        fd.incrementShareListCount();
+                    } else {
+                        add(fd);
+                    }
+                }
+            }
+        } finally {
+            managedList.getReadLock().unlock();
+        }
+    }
+
+    @Override
+    public void unload() {
+        // for each file in the friend list, decrement its' file share count
+        getReadLock().lock();
+        try {
+            for (FileDesc fd : this) {
+                fd.decrementShareListCount();
+            }
+        } finally {
+            getReadLock().unlock();
+        }
+        unloadManagedListListener();
+    }
     
     /**
      * Returns false if it's an {@link IncompleteFileDesc} or it's a store

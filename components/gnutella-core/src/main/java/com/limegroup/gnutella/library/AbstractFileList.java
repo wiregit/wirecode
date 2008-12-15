@@ -53,7 +53,14 @@ abstract class AbstractFileList implements SharedFileList {
         this.fileDescIndexes = new IntSet(); 
         this.listenerSupport = new EventMulticasterImpl<FileListChangedEvent>();
         this.managedListListener = new ManagedListSynchronizer();
+    }
+
+    protected void loadManagedListListener() {
         this.managedList.addFileListListener(managedListListener);
+    }
+
+    protected void unloadManagedListListener() {
+        this.managedList.removeFileListListener(managedListListener);
     }
     
     @Override
@@ -421,7 +428,7 @@ abstract class AbstractFileList implements SharedFileList {
     }
 
     public void dispose() {
-        managedList.removeFileListListener(managedListListener);
+        unloadManagedListListener();
     }
     
     /**

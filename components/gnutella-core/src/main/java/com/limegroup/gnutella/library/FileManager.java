@@ -13,6 +13,20 @@ public interface FileManager {
     void start();
 
     void stop();
+
+    /**
+     * Initialize and populate the file list for a friend
+     * @param id friend id
+     */
+    public void loadFilesForFriend(String id);
+
+    /**
+     * Unload files in friend's file list. This has the effect of making the file sharing
+     * characteristics invisible externally.
+     *
+     * @param id friend id
+     */
+    public void unloadFilesForFriend(String id);
     
     /**
      * Returns the Managed file list.

@@ -27,6 +27,7 @@ class GnutellaFileListImpl extends FriendFileListImpl implements GnutellaFileLis
     public GnutellaFileListImpl(LibraryFileData data, ManagedFileListImpl managedList) {
         super(data, managedList, "_@_GNUTELLA_@_"); // @'s added to avoid clashes with xmpp ids.
         this.numBytes = new AtomicLong();
+        loadManagedListListener();
     }
     
     @Override

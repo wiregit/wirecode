@@ -19,6 +19,7 @@ class IncompleteFileListImpl extends AbstractFileList implements IncompleteFileL
     public IncompleteFileListImpl(ManagedFileListImpl managedList) {
         super(managedList);
         this.managedList = managedList;
+        loadManagedListListener();
     }
 
     public void addIncompleteFile(File incompleteFile, Set<? extends URN> urns, String name,

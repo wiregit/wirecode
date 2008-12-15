@@ -11,6 +11,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FileList;
 import org.limewire.core.api.library.FriendFileList;
@@ -20,6 +21,8 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
@@ -31,6 +34,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
@@ -63,6 +67,35 @@ class ShareListManagerImpl implements ShareListManager {
         this.combinedShareList = new CombinedShareList();
         this.gnutellaFileList = new GnutellaFileListImpl(fileManager.getGnutellaFileList());
         this.friendLocalFileLists = new ConcurrentHashMap<String, FriendFileListImpl>();
+    }
+
+    @Inject
+    void register(@Named("known")ListenerSupport<FriendEvent> knownListeners) {
+
+        knownListeners.addListener(new EventListener<FriendEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(FriendEvent event) {
+                Friend friend = event.getSource();
+                switch (event.getType()) {
+                    case ADDED:
+                        loadFilesForFriend(friend);
+                        break;
+                    case REMOVED:
+                        unloadFilesForFriend(friend);
+                        break;
+                }
+            }
+        });
+    }
+
+    private void loadFilesForFriend(Friend friend) {
+        fileManager.loadFilesForFriend(friend.getId());
+
+    }
+
+    private void unloadFilesForFriend(Friend friend) {
+        fileManager.unloadFilesForFriend(friend.getId());
     }
 
     @Override
