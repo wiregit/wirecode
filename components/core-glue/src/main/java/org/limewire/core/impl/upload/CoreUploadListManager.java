@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.UploadServices;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.Uploader.UploadStatus;
 
 @Singleton
 public class CoreUploadListManager implements UploadListener, UploadListManager{
@@ -109,7 +108,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
 
     @Override
     public void uploadAdded(Uploader uploader) {
-        if (uploader.getState() != UploadStatus.BROWSE_HOST) {
+        if (!uploader.getUploadType().isInternal()) {
             UploadItem item = new CoreUploadItem(uploader);
             uploadItems.add(item);
             item.addPropertyChangeListener(new UploadPropertyListener(item));
