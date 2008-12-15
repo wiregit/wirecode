@@ -34,33 +34,19 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class FriendLibraries {
-    private final Map<String, Library> libraries;
     private static final Log LOG = LogFactory.getLog(FriendLibraries.class);
+    
+    private final Map<String, Library> libraries;
 
     FriendLibraries() {
         this.libraries = new ConcurrentHashMap<String, Library>();
     }
     
-    private class Library {
-        private final LockableStringTrie<Collection<RemoteFileItem>> fileIndex = new LockableStringTrie<Collection<RemoteFileItem>>();
-        private final LockableStringTrie<Collection<RemoteFileItem>> metaDataIndex = new LockableStringTrie<Collection<RemoteFileItem>>();
-        public void readLock() {
-            fileIndex.getLock().readLock().lock();
-            metaDataIndex.getLock().readLock().lock();
-        }
-        public void readUnlock() {
-            fileIndex.getLock().readLock().unlock();
-            metaDataIndex.getLock().readLock().unlock();
-        }
-        public void writeLock() {
-            fileIndex.getLock().writeLock().lock();
-            metaDataIndex.getLock().writeLock().lock();
-        }
-        public void writeUnlock() {
-            fileIndex.getLock().writeLock().unlock();
-            metaDataIndex.getLock().writeLock().unlock();
-        }
+    private static class Library {
+        private final LockableStringTrie<Collection<RemoteFileItem>> suggestionsIndex = new LockableStringTrie<Collection<RemoteFileItem>>();
+        private final LockableStringTrie<Collection<RemoteFileItem>> keywordsIndex = new LockableStringTrie<Collection<RemoteFileItem>>();
     }
+    
     @Inject
     void register(RemoteLibraryManager remoteLibraryManager) {
         remoteLibraryManager.getFriendLibraryList().addListEventListener(new ListEventListener<FriendLibrary>() {
@@ -74,7 +60,7 @@ public class FriendLibraries {
                             private final Map<String, LibraryListener> listeners = new HashMap<String, LibraryListener>();
                             
                             @Override
-                            protected void itemAdded(PresenceLibrary item, int idx, EventList source) {
+                            protected void itemAdded(PresenceLibrary item, int idx, EventList<PresenceLibrary> source) {
                                 Library library = new Library();
                                 LOG.debugf("adding library for presence {0} to index", item.getPresence().getPresenceId());
                                 libraries.put(item.getPresence().getPresenceId(), library);
@@ -83,14 +69,14 @@ public class FriendLibraries {
                                 item.getModel().addListEventListener(listener);
                             }
                             @Override
-                            protected void itemRemoved(PresenceLibrary item, int idx, EventList source) {
+                            protected void itemRemoved(PresenceLibrary item, int idx, EventList<PresenceLibrary> source) {
                                 LOG.debugf("removing library for presence {0} from index", item.getPresence().getPresenceId());
                                 libraries.remove(item.getPresence().getPresenceId());
                                 LibraryListener listener = listeners.remove(item.getPresence().getPresenceId());
                                 item.getModel().removeListEventListener(listener);
                             }
                             @Override
-                            protected void itemUpdated(PresenceLibrary item, PresenceLibrary priorItem, int idx, EventList source) {
+                            protected void itemUpdated(PresenceLibrary item, PresenceLibrary priorItem, int idx, EventList<PresenceLibrary> source) {
                             }                            
                         }.install(friendLibrary.getPresenceLibraryList());
                     }
@@ -99,76 +85,14 @@ public class FriendLibraries {
         });
     }
 
-    private class LibraryListener implements ListEventListener<RemoteFileItem> {
-
-        private final String presenceId;
-        private final Library library;
-
-        LibraryListener(String presenceId, Library library) {
-            this.presenceId = presenceId;
-            this.library = library;
-        }
-
-        public void listChanged(ListEvent<RemoteFileItem> listChanges) {
-            while(listChanges.next()) {
-                if(listChanges.getType() == ListEvent.INSERT) {
-                    RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
-                    index(newFile);
-                }
-            }
-        }
-
-        private void index(RemoteFileItem newFile) {
-            String fileName = newFile.getName();
-            indexSentence(library.fileIndex, newFile, fileName);
-            
-            for(FilePropertyKey filePropertyKey : FilePropertyKey.getIndexableKeys()) {
-                Object property = newFile.getProperty(filePropertyKey);
-                if(property != null) {
-                    String sentence = property.toString();
-                    indexSentence(library.metaDataIndex, newFile, sentence);
-                }
-            }
-        }
-
-        private void indexSentence(LockableStringTrie<Collection<RemoteFileItem>> index, RemoteFileItem newFile, String sentence) {
-            LOG.debugf("adding file {0} for {1}, indexing under:", newFile.getName(), presenceId);
-            addToIndex(index, newFile, sentence);
-            StringTokenizer st = new StringTokenizer(sentence);
-            if(st.countTokens() > 1) {
-                while (st.hasMoreElements()) {
-                    String word = st.nextToken();
-                    addToIndex(index, newFile, word);
-                }
-            }
-        }
-
-        private void addToIndex(LockableStringTrie<Collection<RemoteFileItem>> index, RemoteFileItem newFile, String word) {
-            LOG.debugf("\t {0}", word);
-            Collection<RemoteFileItem> filesForWord;            
-            library.writeLock();
-            try {
-                filesForWord = index.get(word);
-                if (filesForWord == null) {
-                    filesForWord = new ArrayList<RemoteFileItem>();
-                    index.put(word, filesForWord);
-                }
-                filesForWord.add(newFile);
-            } finally {
-                library.writeUnlock();
-            }
-        }
-    }
-
     public Collection<String> getSuggestions(String prefix, SearchCategory category) {
         Set<String> contained = new HashSet<String>();
         for(Library library : libraries.values()) {
-            library.readLock();
+            library.suggestionsIndex.lock.readLock().lock();
             try {
-                insertMatchingKeysInto(library.fileIndex.getPrefixedBy(prefix), category, contained);
-                insertMatchingKeysInto(library.metaDataIndex.getPrefixedBy(prefix), category, contained);
+                insertMatchingKeysInto(library.suggestionsIndex.getPrefixedBy(prefix), category, contained);
             } finally {
-                library.readUnlock();
+                library.suggestionsIndex.lock.readLock().unlock();
             }           
         }
         return contained;
@@ -199,13 +123,13 @@ public class FriendLibraries {
         if(storage == null) {
             storage = new HashSet<RemoteFileItem>();
         }
+        
         for(Library library : libraries.values()) {
-            library.readLock();
+            library.keywordsIndex.lock.readLock().lock();
             try {
-                insertMatchingItemsInto(library.fileIndex.getPrefixedBy(prefix).values(), category, storage);
-                insertMatchingItemsInto(library.metaDataIndex.getPrefixedBy(prefix).values(), category, storage);
+                insertMatchingItemsInto(library.keywordsIndex.getPrefixedBy(prefix).values(), category, storage);
             } finally {
-                library.readUnlock();
+                library.keywordsIndex.lock.readLock().unlock();
             }           
         }
         return storage;
@@ -306,5 +230,70 @@ public class FriendLibraries {
             return super.tailMap(canonicalize(fromKey));
         }
     }
+
+    private static class LibraryListener implements ListEventListener<RemoteFileItem> {
+        private final String presenceId;
+        private final Library library;
+
+        LibraryListener(String presenceId, Library library) {
+            this.presenceId = presenceId;
+            this.library = library;
+        }
+
+        public void listChanged(ListEvent<RemoteFileItem> listChanges) {
+            while(listChanges.next()) {
+                if(listChanges.getType() == ListEvent.INSERT) {
+                    RemoteFileItem newFile = listChanges.getSourceList().get(listChanges.getIndex());
+                    index(newFile);
+                }
+            }
+        }
+
+        private void index(RemoteFileItem newFile) {
+            String fileName = newFile.getName();
+            indexPhrase(newFile, fileName);
+            
+            for(FilePropertyKey filePropertyKey : FilePropertyKey.getIndexableKeys()) {
+                Object property = newFile.getProperty(filePropertyKey);
+                if(property != null) {
+                    String sentence = property.toString();
+                    indexPhrase(newFile, sentence);
+                }
+            }
+        }
+
+        private void indexPhrase(RemoteFileItem newFile, String phrase) {
+            LOG.debugf("adding file {0} for {1}, indexing under:", newFile.getName(), presenceId);
+            
+            library.suggestionsIndex.lock.writeLock().lock();
+            try {
+                addToIndex(library.suggestionsIndex, newFile, phrase);
+            } finally {
+                library.suggestionsIndex.lock.writeLock().unlock();
+            }
+            
+            library.keywordsIndex.lock.writeLock().lock();
+            try {
+                StringTokenizer st = new StringTokenizer(phrase);
+                while (st.hasMoreElements()) {
+                    String word = st.nextToken();
+                    addToIndex(library.keywordsIndex, newFile, word);
+                }
+            } finally {
+                library.keywordsIndex.lock.writeLock().unlock();
+            }
+        }
+
+        private void addToIndex(LockableStringTrie<Collection<RemoteFileItem>> index, RemoteFileItem newFile, String word) {
+            LOG.debugf("\t {0}", word);
+            Collection<RemoteFileItem> filesForWord;
+            filesForWord = index.get(word);
+            if (filesForWord == null) {
+                filesForWord = new ArrayList<RemoteFileItem>();
+                index.put(word, filesForWord);
+            }
+            filesForWord.add(newFile);
+        }
+    }    
 }
 
