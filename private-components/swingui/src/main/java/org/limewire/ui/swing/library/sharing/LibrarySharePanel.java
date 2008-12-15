@@ -10,8 +10,6 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -218,8 +216,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         setKeyStrokes(this);
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField); 
-     
-        addComponentListener(); 
     }
   
     private void initializeButton() {
@@ -310,24 +306,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         
         bottomLabel = new MultiLineLabel("", panelWidth);
         bottomLabel.setForeground(Color.WHITE);
-    }
-
-
-    private void addComponentListener() {
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if (isVisible()) {
-                    dialog.revalidate();
-                }
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-                System.out.println("shown");
-                inputField.requestFocusInWindow();
-            }
-        });
     }
 
     private void initializeLists() {
@@ -544,6 +522,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         reloadSharedBuddies();
         adjustSize();
         dialog.show(this);
+        inputField.requestFocusInWindow();
     }
     
     public boolean contains(Component c) {
@@ -595,7 +574,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         adjustFriendLabelVisibility();
         inputField.setVisible(noShareFriendList.size() > 1);
         
-        int oldVisibleRows = shareTable.getVisibleRowCount();
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
         shareScroll.setVisible(visibleRows > 0);
@@ -603,10 +581,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
         if (dialog != null) {
             dialog.revalidate();
-            //gets rid of artifacts below dialog 
-            if (true || visibleRows < oldVisibleRows) {
-                repaint();
-            }
+            // gets rid of artifacts below dialog
+            repaint();
         }
     }
     
