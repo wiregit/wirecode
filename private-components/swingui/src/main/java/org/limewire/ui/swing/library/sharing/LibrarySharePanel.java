@@ -157,6 +157,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private Color shadowColor;
     @Resource
     private Color dividerColor;
+    @Resource
+    private Color borderColor;
     
     private Action up = new AbstractAction() {
         @Override
@@ -277,12 +279,17 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 g2.setColor(shadowColor);
                 g2.fill(shadowArea);
                 g2.setColor(Color.WHITE);
-                g2.fill(panelArea);           
-                bottomGradient = new GradientPaint(0, bottomLocation.y, bottomPanelTopGradient, 0, bottomLocation.y + bottomPanel.getHeight() ,bottomPanelBottomGradient);
-                g2.setPaint(bottomGradient);
-                g2.fill(bottomArea);
-                g2.setColor(dividerColor);
-                g2.drawLine((int)panelShape.x, bottomLocation.y, (int)(panelShape.x + panelShape.getWidth()), bottomLocation.y);
+                g2.fill(panelArea);        
+                if (bottomPanel.isVisible()) {
+                    bottomGradient = new GradientPaint(0, bottomLocation.y, bottomPanelTopGradient,
+                            0, bottomLocation.y + bottomPanel.getHeight(),
+                            bottomPanelBottomGradient);
+                    g2.setPaint(bottomGradient);
+                    g2.fill(bottomArea);
+                    g2.setColor(dividerColor);
+                    g2.drawLine((int)panelShape.x, bottomLocation.y, (int)(panelShape.x + panelShape.getWidth()), bottomLocation.y);
+                }
+                g2.setColor(borderColor);
                 g2.draw(panelShape);
                 panelShape.x++;
                 panelShape.y++;
@@ -353,7 +360,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
         mainPanel.add(titlePanel, "growx, gaptop 5, wrap");
         mainPanel.add(topPanel, "growx, wrap");
-        mainPanel.add(bottomPanel, "growx");
+        mainPanel.add(bottomPanel, "growx, hidemode 3");
         
         add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
     }
@@ -397,7 +404,6 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                     dialog.setVisible(false);
                 } else if (friendCombo.getSelectedIndex() >= 0) {
                     shareSelectedFriend();
-                    friendCombo.hidePopup();
                 }
             }
         });
@@ -493,6 +499,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 inputField.setText(null);
             }
             resetRowSelection(index);
+
+            if (noShareFriendList.size() > 0) {
+                comboPopup.show();
+            }
         }
     }
     
@@ -576,7 +586,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     
     private void adjustSize(){
         adjustFriendLabelVisibility();
-        inputField.setVisible(noShareFriendList.size() > 1);
+        bottomPanel.setVisible(noShareFriendList.size() > 0);
         
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
