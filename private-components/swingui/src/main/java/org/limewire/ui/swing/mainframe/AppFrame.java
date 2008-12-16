@@ -109,7 +109,6 @@ public class AppFrame extends SingleFrameApplication {
         
         GuiUtils.assignResources(this);        
 
-        
         initUIDefaults();
         
         // Because we use a browser heavily, which is heavyweight,
@@ -271,7 +270,6 @@ public class AppFrame extends SingleFrameApplication {
     public static void main(String[] args) {
         launch(AppFrame.class, args);
     }
-
     
     /**
      * Sets the custom default UI colour and behaviour properties
@@ -307,7 +305,7 @@ public class AppFrame extends SingleFrameApplication {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             
             // Put the menu bar back at the top of the screen
-            UIManager.put("apple.laf.useScreenMenuBar", true);
+            System.setProperty("apple.laf.usescreenmenubar", "true");
         } 
         catch (ClassNotFoundException e) {
         }
