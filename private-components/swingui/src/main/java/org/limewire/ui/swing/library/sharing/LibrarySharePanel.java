@@ -42,6 +42,7 @@ import javax.swing.plaf.basic.ComboPopup;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
@@ -55,6 +56,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.components.ShapeDialogComponent;
 import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
+import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -122,9 +124,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private JComboBox friendCombo;
     private LimeEditableComboBox comboPanel;
 
-    private JLabel friendLabel;
+    private JXLabel friendLabel;
     private JLabel topLabel;
-    private JLabel bottomLabel;
+    private JXLabel bottomLabel;
     private JLabel titleLabel;
     
     private JXPanel mainPanel;
@@ -295,8 +297,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         titleLabel = new JLabel();
         FontUtils.bold(titleLabel);
         topLabel = new JLabel(I18n.tr("Currently sharing with"));
-        friendLabel = new JLabel(I18n.tr("Start typing a friend's name"));
+        friendLabel = new JXLabel(I18n.tr("Start typing a friend's name"));
         friendLabel.setForeground(Color.WHITE);
+        friendLabel.setForegroundPainter(new TextShadowPainter());
         
         Dimension labelSize = friendLabel.getPreferredSize().width > topLabel.getPreferredSize().width ? 
                 friendLabel.getPreferredSize() : topLabel.getPreferredSize();
@@ -306,6 +309,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         
         bottomLabel = new MultiLineLabel("", panelWidth);
         bottomLabel.setForeground(Color.WHITE);
+        bottomLabel.setForegroundPainter(new TextShadowPainter());
     }
 
     private void initializeLists() {
