@@ -611,12 +611,16 @@ public class HostCatcher implements Service {
      * @return true iff pr was actually added 
      */
     public boolean add(PingReply pr) {
-        // if over UDP, verify GUIDs
-        if (pr.isUDP()) {
+        // Discard UDP pongs with unknown GUIDs, unless they're from local
+        // sources, in which case they might be replies to multicast pings 
+        boolean local = networkInstanceUtils.isVeryCloseIP(pr.getInetAddress());
+        if(pr.isUDP() && !local) {
             GUID g = new GUID(pr.getGUID());
-            if (!g.equals(PingRequest.UDP_GUID) && 
-                    !g.equals(udpService.get().getSolicitedGUID())) 
+            if(!g.equals(PingRequest.UDP_GUID)
+                    && !g.equals(udpService.get().getSolicitedGUID())) {
+                LOG.debug("Discarding UDP pong with unknown GUID");
                 return false;
+            }
         } 
         
         //Convert to endpoint
@@ -638,7 +642,7 @@ public class HostCatcher implements Service {
             endpoint.setUDPHostCache(true);
         }
         
-        if(!isValidHost(endpoint)) {
+        if(!isValidHost(endpoint) && !local) {
             return false;
         }
         
