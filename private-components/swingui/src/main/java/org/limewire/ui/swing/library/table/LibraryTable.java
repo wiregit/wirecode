@@ -23,7 +23,6 @@ import javax.swing.table.TableModel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.table.TableColumnExt;
 import org.limewire.core.api.URN;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
@@ -35,6 +34,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
@@ -62,6 +62,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     
     private TableRendererEditor shareEditor;
     private ShareWidget<File> shareWidget;
+    private ColumnStateHandler columnStateHandler;
     
     protected final int rowHeight = 20;
     
@@ -99,7 +100,14 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         });       
         
         setupCellRenderers(format);
-        setupColumnWidths(format);
+        setupColumnHandler();
+    }
+
+    /**
+     * Creates a column handler that handles saving column state
+     */
+    private void setupColumnHandler() {
+        columnStateHandler = new ColumnStateHandler(this, getTabelFormat());
     }
     
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
@@ -112,12 +120,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         }   
     }
     
-    private void setupColumnWidths(LibraryTableFormat<T> format) {
-        for(int i = 0; i < format.getColumnCount(); i++) {
-            getColumn(i).setPreferredWidth(format.getInitialWidth(i));
-        }
-    }
-    
     protected void setCellRenderer(int column, TableCellRenderer cellRenderer) {
         TableColumnModel tcm = this.getColumnModel();
         TableColumn tc = tcm.getColumn(column);
@@ -127,6 +129,10 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     public void showHeaderPopupMenu(Point p) {
         JPopupMenu menu = createColumnMenu();
         menu.show(getTableHeader(), p.x, p.y);
+    }
+    
+    public LibraryTableFormat<T> getTabelFormat() {
+        return format;
     }
     
     public JPopupMenu createColumnMenu() {
@@ -141,18 +147,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         getColumnModel().getColumn(format.getActionColumn()).setPreferredWidth(shareEditor.getPreferredSize().width);
         getColumnModel().getColumn(format.getActionColumn()).setWidth(shareEditor.getPreferredSize().width);
         setRowHeight(rowHeight);
-        hideColumns();
-        
-        //this isn't necessary if we aren't showing "share" on mouse over
-//        removeMouseMotionListener(mouseOverEditorListener);
-//        addMouseMotionListener(new MouseMotionAdapter(){
-//            @Override
-//            public void mouseMoved(MouseEvent e) {
-//                int editRow = rowAtPoint(e.getPoint());
-//                editCellAt(editRow, convertColumnIndexToView(format.getActionColumn()));
-//            }
-//            
-//        });
+        setSavedColumnSettings();
     }
     
     public void enableDownloading(DownloadListManager downloadListManager){
@@ -160,16 +155,17 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
-        hideColumns();
+        setSavedColumnSettings();
     }
     
     public void enableSharing() {
-        hideColumns();
+        setSavedColumnSettings();
     }
     
     public void dispose() {
         ((EventSelectionModel)getSelectionModel()).dispose();
         ((EventTableModel)getModel()).dispose();
+        columnStateHandler.removeListeners();
     }
     
     @SuppressWarnings("unchecked")
@@ -188,11 +184,17 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         super.setModel(newModel);
     }
     
-    //only works if column indexes are in descending orde
-    protected void hideColumns(){
-        for(int i = format.getColumnCount()-1; i > 0; i--) {
-            ((TableColumnExt) getColumnModel().getColumn(i)).setVisible(format.isColumnHiddenAtStartup(i));
-        }
+    /**
+	 * Loads the saved state of the columns. 
+     *
+	 * NOTE: currently this must be called after the renderers and editors
+     * have been loaded. The order in which width/visiblity/order are called
+     * is also expected to be in that order.
+ 	 */
+    protected void setSavedColumnSettings(){
+        columnStateHandler.setupColumnWidths();
+        columnStateHandler.setupColumnVisibility();
+        columnStateHandler.setupColumnOrder();
     }
     
     private class ShareAction extends AbstractAction {

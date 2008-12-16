@@ -55,6 +55,7 @@ import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
+import org.limewire.ui.swing.table.VisibleTableFormat;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -121,16 +122,15 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
             final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
-        resultsList = new ListViewTable();
-        resultsList.setShowGrid(true, false);
-        preserver.addRowPreservationListener(resultsList);
         
+        ListViewTableFormat tableFormat = new ListViewTableFormat();        
         final RangeList<VisualSearchResult> maxSizedList = new RangeList<VisualSearchResult>(eventList);
         maxSizedList.setHeadRange(0, MAX_DISPLAYED_RESULT_SIZE + 1);
         
-        resultsList.setEventList(maxSizedList);
-        ListViewTableFormat tableFormat = new ListViewTableFormat();
-        resultsList.setTableFormat(tableFormat);
+        resultsList = new ListViewTable(maxSizedList, tableFormat);
+        resultsList.setShowGrid(true, false);
+        preserver.addRowPreservationListener(resultsList);
+        
         
         // Represents display limits for displaying search results in list view.
         // The limits are introduced to avoid a performance penalty caused by
@@ -178,7 +178,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         // Set default width of all visible columns.
         for (int i = 0; i < tableFormat.getColumnCount(); i++) {
-            resultsList.setColumnWidth(i, tableFormat.getInitialWidth(i));
+            resultsList.getColumnModel().getColumn(i).setPreferredWidth(tableFormat.getInitialWidth(i));
         }
         
         resultsList.setRowHeightEnabled(true);
@@ -253,11 +253,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private void configureTable(EventList<VisualSearchResult> eventList,
         final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator, RemoteHostActions remoteHostActions,
         PropertiesFactory<VisualSearchResult> properties) {
-        resultsTable = new ConfigurableTable<VisualSearchResult>(true);
-        
+
         SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(eventList);
-        resultsTable.setEventList(sortedList);
-        resultsTable.setTableFormat(tableFormat);
+        resultsTable = new ConfigurableTable<VisualSearchResult>(sortedList, tableFormat, true);
         
         //link the jxtable column headers to the sorted list
         EventListJXTableSorting.install(resultsTable, sortedList);
@@ -269,13 +267,9 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, remoteHostActions, properties));
         resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this));
 
-        // Set default width of all visible columns.
-        for (int i = 0; i < tableFormat.getColumnCount(); i++) {
-            resultsTable.setColumnWidth(i, tableFormat.getInitialWidth(i));
-        }
-        resultsTable.initColumnVisibility();
-
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);
+        
+        resultsTable.setupColumnHandler();
     }
 
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
@@ -395,8 +389,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     public static class ListViewTable extends ConfigurableTable<VisualSearchResult> {
         private boolean ignoreRepaints;
         
-        public ListViewTable() {
-            super(false);
+        public ListViewTable(EventList<VisualSearchResult> eventList, VisibleTableFormat<VisualSearchResult> tableFormat) {
+            super(eventList, tableFormat, false);
             
             setGridColor(Color.decode("#EBEBEB"));
         }
