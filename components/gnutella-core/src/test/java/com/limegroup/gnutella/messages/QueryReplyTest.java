@@ -570,7 +570,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                                           new HashSet(), null).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
-        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
+        assertEquals((23+11+16) // header
+                +(8+10+2 +41) // first response, 41 for sha1
+                +(8+14+2 + 41) // second response
+                +(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
         assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
         assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
