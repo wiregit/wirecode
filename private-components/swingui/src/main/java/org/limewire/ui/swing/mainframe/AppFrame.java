@@ -305,7 +305,7 @@ public class AppFrame extends SingleFrameApplication {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             
             // Put the menu bar back at the top of the screen
-            System.setProperty("apple.laf.usescreenmenubar", "true");
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
         } 
         catch (ClassNotFoundException e) {
         }
