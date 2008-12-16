@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -131,8 +130,7 @@ public class IntentDialog extends LimeJDialog {
     }
     
     public boolean confirmLegal(){
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setLocation((screenSize.width - getWidth()) / 2, (screenSize.height - getHeight()) / 2);
+        setLocationRelativeTo(null);
         setVisible(true);
         return agreed;
     }
