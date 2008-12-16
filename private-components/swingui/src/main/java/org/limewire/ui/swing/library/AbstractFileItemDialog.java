@@ -9,16 +9,14 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
 import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.util.I18n;
-import org.limewire.ui.swing.util.PropertiableHeadings;
 
 abstract class AbstractFileItemDialog extends AbstractPropertiableFileDialog {
 
     private final MagnetLinkFactory magnetLinkFactory;
 
-    public AbstractFileItemDialog(PropertiableHeadings propertiableHeadings,
-            MagnetLinkFactory magnetLinkFactory, DialogParam dialogParam) {
-        super(propertiableHeadings, dialogParam);
-        this.magnetLinkFactory = magnetLinkFactory;
+    public AbstractFileItemDialog(DialogParam dialogParam) {
+        super(dialogParam);
+        this.magnetLinkFactory = dialogParam.getMagnetLinkFactory();
     }
 
     protected void populateCopyToClipboard(final FileItem propertiable) {

@@ -2,15 +2,12 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import java.awt.Font;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
@@ -27,29 +24,24 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSearchResult> {
-    private final CategoryIconManager categoryIconManager;
     private final DialogParam dialogParam;
     
     @Inject
-    public SearchResultPropertiesFactory(CategoryIconManager categoryIconManager, DialogParam dialogParam) {
-        this.categoryIconManager = categoryIconManager;
+    public SearchResultPropertiesFactory(DialogParam dialogParam) {
         this.dialogParam = dialogParam;
     }
     
     @Override
     public Properties<VisualSearchResult> newProperties() {
-        return new SearchResultProperties(categoryIconManager, dialogParam);
+        return new SearchResultProperties(dialogParam);
     }
 
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager categoryIconManager;
-        private @Resource Font smallFont;
-        private @Resource Font mediumFont;
-        private @Resource Font largeFont;
         
-        public SearchResultProperties(CategoryIconManager categoryIconManager, DialogParam dialogParam) {
+        public SearchResultProperties(DialogParam dialogParam) {
             super(dialogParam);
-            this.categoryIconManager = categoryIconManager;
+            this.categoryIconManager = dialogParam.getCategoryIconManager();
             GuiUtils.assignResources(this);
             
             disableEdit(album, author, artist, company, year, title, track);
@@ -64,21 +56,6 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             for(JComponent comp : comps) {
                 comp.setEnabled(false);
             }
-        }
-
-        @Override
-        protected Font getSmallFont() {
-            return smallFont;
-        }
-
-        @Override
-        protected Font getLargeFont() {
-            return largeFont;
-        }
-
-        @Override
-        protected Font getMediumFont() {
-            return mediumFont;
         }
 
         @Override

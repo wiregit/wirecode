@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library;
 
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -24,11 +23,9 @@ import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -38,52 +35,39 @@ import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.PropertiableHeadings;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
 public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFileItem> {
     private final ThumbnailManager thumbnailManager;
-    private final CategoryIconManager categoryIconManager;
-    private final PropertiableHeadings propertiableHeadings;
-    private final MagnetLinkFactory magnetLinkFactory;
     private final MetaDataManager metaDataManager;
     private final Collection<Friend> allFriends;
     private final ShareListManager shareListManager;
-    private final Provider<LibraryNavigator> libraryNavigator; // provider to workaround circular ref
     private final DialogParam dialogParam;
 
     @Inject
     public LocalFileItemPropertiesFactory(ThumbnailManager thumbnailManager,
-            CategoryIconManager categoryIconManager, IconManager iconManager,
-            PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
+            IconManager iconManager,
             MetaDataManager metaDataManager, @Named("known") Collection<Friend> allFriends, 
             ShareListManager shareListManager,
-            Provider<LibraryNavigator> libraryNavigator, DialogParam dialogParam) {
+            DialogParam dialogParam) {
         this.thumbnailManager = thumbnailManager;
-        this.categoryIconManager = categoryIconManager;
-        this.propertiableHeadings = propertiableHeadings;
-        this.magnetLinkFactory = magnetLinkFactory;
         this.metaDataManager = metaDataManager;
         this.allFriends = allFriends;
         this.shareListManager = shareListManager;
-        this.libraryNavigator = libraryNavigator;
         this.dialogParam = dialogParam;
     }
 
     @Override
     public Properties<LocalFileItem> newProperties() {
-        return new LocalFileItemProperties(thumbnailManager, categoryIconManager, 
-                propertiableHeadings, magnetLinkFactory, metaDataManager, allFriends,
-                shareListManager, libraryNavigator.get(), dialogParam);
+        return new LocalFileItemProperties(thumbnailManager, metaDataManager, allFriends,
+                shareListManager, dialogParam);
     }
 
     private static class LocalFileItemProperties extends AbstractFileItemDialog implements
@@ -98,39 +82,18 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
         private final JPanel sharing = new JPanel();
         private LocalFileItem displayedItem;
 
-        private @Resource Font smallFont;
-        private @Resource Font mediumFont;
-        private @Resource Font largeFont;
         private List<Friend> unsharedFriendList = new ArrayList<Friend>();
 
         private LocalFileItemProperties(ThumbnailManager thumbnailManager,
-                CategoryIconManager categoryIconManager,
-                PropertiableHeadings propertiableHeadings, MagnetLinkFactory magnetLinkFactory,
                 MetaDataManager metaDataManager, Collection<Friend> allFriends,
-                ShareListManager shareListManager, LibraryNavigator libraryNavigator, DialogParam dialogParam) {
-            super(propertiableHeadings, magnetLinkFactory, dialogParam);
-            this.libraryNavigator = libraryNavigator;
+                ShareListManager shareListManager, DialogParam dialogParam) {
+            super(dialogParam);
+            this.libraryNavigator = dialogParam.getLibraryNavigator();
             this.thumbnailManager = thumbnailManager;
-            this.categoryIconManager = categoryIconManager;
+            this.categoryIconManager = dialogParam.getCategoryIconManager();
             this.metaDataManager = metaDataManager;
             this.allFriends = allFriends;
             this.shareListManager = shareListManager;
-            GuiUtils.assignResources(this);
-        }
-
-        @Override
-        protected Font getSmallFont() {
-            return smallFont;
-        }
-
-        @Override
-        protected Font getLargeFont() {
-            return largeFont;
-        }
-
-        @Override
-        protected Font getMediumFont() {
-            return mediumFont;
         }
 
         @Override
