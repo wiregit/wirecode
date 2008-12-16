@@ -1543,35 +1543,32 @@ public class HostCatcher implements Service {
         /**
          * The next allowed multicast time.
          */
-        private long nextAllowedMulticastTime = 0;
+        private long nextAllowedMulticastTime = 0; // Immediately
         
         /**
          * The next time we're allowed to udp fetch.
          * Incremented after each succesful udp fetch.
          */
-        private long nextAllowedUdpTime = 0;
+        private long nextAllowedUdpTime = 0; // Immediately
         
         /**
          * The next time we're allowed to tcp fetch.
          * Incremeneted after each succesful tcp fetch.
          */
-        private long nextAllowedTcpTime = 0;
+        private long nextAllowedTcpTime = Long.MAX_VALUE; // Not just yet
         
-        /** How long we must wait after contacting TCP before we can try again. */
-        private static final int POST_TCP_DELAY = 5 * 60 * 1000;        
-        
-        /** How long we must wait after contacting UDP before we can try again. */
-        private static final int POST_UDP_DELAY = 30 * 1000;
-        
-        /** The delay after a UDP ping before we can send a TCP ping. */
-        private static final int POST_UDP_PRE_TCP_DELAY = 10 * 1000;
-        
-        /**
-         * How long we must wait after each multicast ping before
-         * we attempt a newer multicast ping.
-         */
-        private static final int POST_MULTICAST_DELAY = 60 * 1000;
+        /** Milliseconds to wait between multicast fetches. */
+        private static final int MULTICAST_INTERVAL = 50 * 1000;
 
+        /** Milliseconds to wait between UDP fetches. */
+        private static final int UDP_INTERVAL = 30 * 1000;
+        
+        /** Milliseconds to wait after trying UDP before falling back to TCP. */
+        private static final int TCP_FALLBACK_DELAY = 40 * 1000;
+        
+        /** Milliseconds to wait between TCP fetches. */
+        private static final int TCP_INTERVAL = 60 * 1000;        
+        
         /**
          * Determines whether or not it is time to get more hosts,
          * and if we need them, gets them.
@@ -1581,18 +1578,21 @@ public class HostCatcher implements Service {
                 LOG.debug("Not bootstrapping");
                 return;
             }
-            
+
             // If no one's waiting for an endpoint, don't get any.
             if(_catchersWaiting.isEmpty()) {
                 LOG.debug("No catchers waiting");
                 return;
             }
-            
-            //if we don't need hosts, exit.
-            if(!needsHosts())
-                return;
-            
-            getHosts(System.currentTimeMillis());
+
+            // If we need endpoints, try any bootstrapping methods that
+            // haven't been tried too recently
+            if(needsHosts()) {
+                long now = System.currentTimeMillis();
+                multicastFetch(now);
+                udpHostCacheFetch(now);
+                tcpHostCacheFetch(now);
+            }
         }
         
         /**
@@ -1602,7 +1602,7 @@ public class HostCatcher implements Service {
         void resetFetchTime() {
             nextAllowedUdpTime = 0;
             nextAllowedMulticastTime = 0;
-            nextAllowedTcpTime = 0;
+            nextAllowedTcpTime = Long.MAX_VALUE;
         }
         
         /**
@@ -1616,25 +1616,6 @@ public class HostCatcher implements Service {
         }
         
         /**
-         * Fetches more hosts, updating the next allowed time to fetch.
-         */
-        synchronized void getHosts(long now) {
-            // alway try multicast first.
-            if(multicastFetch(now))
-                return;
-                
-            // then try udp host caches.
-            if(udpHostCacheFetch(now))
-                return;
-            
-            // then try tcp host caches.
-            if(tcpHostCacheFetch(now))
-                return;
-                
-            // :-(
-        }
-        
-        /**
          * Attempts to fetch via multicast, returning true
          * if it was able to.
          */
@@ -1644,7 +1625,7 @@ public class HostCatcher implements Service {
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = pingRequestFactory.createMulticastPing();
                 multicastService.get().send(pr);
-                nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
+                nextAllowedMulticastTime = now + MULTICAST_INTERVAL;
                 return true;
             }
             LOG.trace("Not fetching via multicast");
@@ -1656,11 +1637,12 @@ public class HostCatcher implements Service {
          * if it was able to.
          */
         private boolean udpHostCacheFetch(long now) {
-            // if we had udp host caches to fetch from, use them.
             if(nextAllowedUdpTime < now && udpHostCache.fetchHosts()) {
                 LOG.trace("Fetching via UDP");
-                nextAllowedUdpTime = now + POST_UDP_DELAY;
-                nextAllowedTcpTime = Math.max(nextAllowedTcpTime, nextAllowedUdpTime + POST_UDP_PRE_TCP_DELAY);
+                nextAllowedUdpTime = now + UDP_INTERVAL;
+                // If this is the first UDP fetch, set the TCP fallback time
+                if(nextAllowedTcpTime == Long.MAX_VALUE)
+                    nextAllowedTcpTime = now + TCP_FALLBACK_DELAY;
                 return true;
             }
             LOG.trace("Not fetching via UDP");
@@ -1668,11 +1650,10 @@ public class HostCatcher implements Service {
         }
         
         private boolean tcpHostCacheFetch(long now) {
-            // if we had tcp host caches to fetch from, use them.
-            if(nextAllowedTcpTime < now &&
-                    tcpBootstrap.fetchHosts(new BootstrapListener())) {
+            if(nextAllowedTcpTime < now
+                    && tcpBootstrap.fetchHosts(new BootstrapListener())) {
                 LOG.trace("Fetching via TCP");
-                nextAllowedTcpTime = now + POST_TCP_DELAY;
+                nextAllowedTcpTime = now + TCP_INTERVAL;
                 return true;
             }
             LOG.trace("Not fetching via TCP");
