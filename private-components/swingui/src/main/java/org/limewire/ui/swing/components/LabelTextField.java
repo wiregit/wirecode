@@ -78,7 +78,6 @@ public class LabelTextField extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if(e.getClickCount() == 2) {
-                    System.out.println("action");
                     action.actionPerformed(null);
                 }
             }
