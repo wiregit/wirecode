@@ -97,13 +97,15 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
     @Override
     protected LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory) {
-        JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 6, fill, aligny center"));
+        JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         headerTitlePanel.setOpaque(false);
         
         JLabel titleTextLabel = new JLabel();
         
         backButtonSlot = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
         backButtonSlot.setOpaque(false);
+        
+        backButtonSlot.setVisible(false);
         
         headerTitlePanel.add(backButtonSlot);
         headerTitlePanel.add(titleTextLabel, "gapbottom 2");
@@ -119,7 +121,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }
     
     protected void addBackButton(JButton button) {
-        backButtonSlot.add(button);
+        backButtonSlot.add(button, "gapafter 6");
+        backButtonSlot.setVisible(true);
     }
     
     protected void createMyCategories(EventList<LocalFileItem> wholeLibraryList, LocalFileList friendFileList) {
