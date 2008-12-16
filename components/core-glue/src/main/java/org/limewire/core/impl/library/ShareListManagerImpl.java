@@ -84,6 +84,15 @@ class ShareListManagerImpl implements ShareListManager {
         });
     }
 
+    /**
+     * Similar to {@link #removeFriendShareList}, but does not save.
+     * 
+     * 1. Removes managedFilelist listener
+     * 2. Removes lists associated with this friend from maps
+     * 3. Clears the files from the list, decrement share count for each file
+     *
+     * @param friend
+     */
     private void unloadFilesForFriend(Friend friend) {
         fileManager.unloadFilesForFriend(friend.getId());
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());

@@ -37,6 +37,12 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         return super.add(fileDesc);
     }
 
+    /**
+     * This method initializes the friend file list.  It adds the files
+     * that are shared with the friend represented by this list.  This
+     * is necessary because friend file lists are populated/unpopulated when
+     * needed, not upon startup.
+     */
     void initialize() {
 
         // add files from the MASTER list which are for the current friend
@@ -67,6 +73,8 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         } finally {
             getReadLock().unlock();
         }
+        clear();
+        dispose();
     }
     
     /**

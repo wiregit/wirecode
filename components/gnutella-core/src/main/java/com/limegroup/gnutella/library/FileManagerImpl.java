@@ -145,15 +145,18 @@ class FileManagerImpl implements FileManager, Service {
     }
 
 
-    public synchronized void unloadFilesForFriend(String friendName) {
-        FriendFileListImpl removeFileList = friendFileLists.get(friendName);
+    public void unloadFilesForFriend(String friendName) {
+        FriendFileListImpl removeFileList = null;
 
-        if (removeFileList != null) {
-            removeFileList.unload();
-            removeFileList.clear();
-            removeFileList.dispose();
+        synchronized (this) {
+            removeFileList = friendFileLists.get(friendName);
+
+            if (removeFileList == null) {
+                return;
+            }
             friendFileLists.remove(friendName);
         }
+        removeFileList.unload();
 
     }
 
