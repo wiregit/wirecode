@@ -21,7 +21,6 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
-import org.limewire.util.NotImplementedException;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -90,6 +89,9 @@ public class ChatPanel extends JPanel implements Displayable {
         return panel;
     }
 
+    /**
+     * A listener for hyperlink events in the chat messages pane.
+     */
     private static class HyperlinkHandler implements HyperlinkListener {
         
         public HyperlinkHandler() {
@@ -99,9 +101,6 @@ public class ChatPanel extends JPanel implements Displayable {
         public void hyperlinkUpdate(HyperlinkEvent e) {
             if (EventType.ACTIVATED == e.getEventType()) {
                 LOG.debugf("Hyperlink clicked: {0}", e.getDescription());
-                if (e.getDescription().equals("all_friends_share_list")) {
-                    throw new NotImplementedException();
-                }
             }
         }
     }
