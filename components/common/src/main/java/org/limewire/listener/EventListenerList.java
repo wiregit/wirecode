@@ -23,11 +23,13 @@ import org.limewire.util.Objects;
  * ensures that the event is dispatched appropriately, according to the 
  * annotation on the delegate listener.
  */
-public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E> {
+public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaster<E>, EventBean<E> {
     
     private final Log log;
     
     private final List<ListenerProxy<E>> listenerList = new CopyOnWriteArrayList<ListenerProxy<E>>();
+    
+    private volatile E lastEvent;
 
     public EventListenerList() {
         log = null;        
@@ -77,6 +79,7 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
         if(log != null) {
             log.debugf("broadcasting event {0}", event);
         }
+        lastEvent = event;
         for(EventListener<E> listener : listenerList) {
             listener.handleEvent(event);
         }
@@ -85,6 +88,11 @@ public class EventListenerList<E> implements ListenerSupport<E>, EventBroadcaste
     /** Returns the size of the list. */
     public int size() {
         return listenerList.size();
+    }
+    
+    @Override
+    public E getLastEvent() {
+        return lastEvent;
     }
     
     private static final class ListenerProxy<E> implements EventListener<E> {

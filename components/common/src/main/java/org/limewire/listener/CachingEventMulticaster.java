@@ -1,7 +1,5 @@
 package org.limewire.listener;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * A Multicaster that caches the last event it handles or broadcasts.
@@ -18,16 +16,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @param <E>
  */
-public class CachingEventMulticaster<E> implements EventMulticaster<E> {
+public class CachingEventMulticaster<E> implements EventMulticaster<E>, EventBean<E> {
     
-    private final EventListenerList<E> eventListenerList;    
-    private final ReadWriteLock eventLock;
+    private final EventListenerList<E> eventListenerList;
+    private final Object LOCK = new Object();
     
     private volatile E cachedEvent;
     
     public CachingEventMulticaster() {
         eventListenerList = new EventListenerList<E>();
-        eventLock = new ReentrantReadWriteLock();
     }
 
     @Override
@@ -36,20 +33,10 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E> {
      * most recent Event, if any.
      */
     public void addListener(EventListener<E> eEventListener) {
-        boolean broadcast = false;
-        eventLock.readLock().lock();        
-        try {
-            if(cachedEvent != null) {
-                broadcast = true;
-            }
-            eventListenerList.addListener(eEventListener);
-        } finally {
-            eventLock.readLock().unlock();
-        }
-        // race condtion here
-        if(broadcast) {
+        if(cachedEvent != null) {
             EventListenerList.dispatch(eEventListener, cachedEvent);
         }
+        eventListenerList.addListener(eEventListener);
     }
 
     @Override
@@ -66,19 +53,22 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E> {
     public void broadcast(E event) {
         // This fails because we're broadcasting enums.
 //        assert System.identityHashCode(event) != event.hashCode(); // otherwise caching won't work
+        
         boolean broadcast = false;
-        eventLock.writeLock().lock();        
-        try {
+        synchronized(LOCK) {
             if(cachedEvent == null || !cachedEvent.equals(event)) {
                 cachedEvent = event;
                 broadcast = true;             
             }
-        } finally {
-            eventLock.writeLock().unlock();
         }
         
         if(broadcast) {
             eventListenerList.broadcast(event);
         }
+    }
+    
+    @Override
+    public E getLastEvent() {
+        return cachedEvent;
     }
 }
