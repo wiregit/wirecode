@@ -58,10 +58,6 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
         }
     }
     
-    private void save() {
-        TablesHandler.instance().save();
-    }
-    
     @Override
     public void columnAdded(TableColumnModelEvent e) {}
 
@@ -75,8 +71,6 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
         
         // wait till after the mouse was released to save new column ordering
         columnMoved = true;
-        saveColumnOrder();
-        save();
     }
 
     @Override
@@ -104,7 +98,6 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
             columnMoved = false;
 
             saveColumnOrder();
-            save();
         }
     }
     
@@ -125,13 +118,11 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     }
     
     public void revertToDefault() {
-        stopListening();
+//        stopListening();
 
         //TODO: revert to defaults
 
-        startListening();
-
-        save();
+//        startListening();
     }
     
     public void setupColumnWidths() {
