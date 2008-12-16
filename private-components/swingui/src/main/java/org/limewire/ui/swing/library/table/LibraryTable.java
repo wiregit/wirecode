@@ -45,6 +45,7 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
  * Creates a table that is used when displaying library information. This may
@@ -168,6 +169,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     
     public void dispose() {
         ((EventSelectionModel)getSelectionModel()).dispose();
+        ((EventTableModel)getModel()).dispose();
     }
     
     @SuppressWarnings("unchecked")

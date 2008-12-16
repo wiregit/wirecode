@@ -9,16 +9,27 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import ca.odell.glazedlists.EventList;
 
 public class AudioLibraryTable<T extends LocalFileItem> extends LibraryTable<T> {
-    
+    private final PlayRendererEditor playEditor;
+    private final PlayRendererEditor playRenderer;
+
     public AudioLibraryTable(EventList<T> libraryItems, AudioPlayer player, SaveLocationExceptionHandler saveLocationExceptionHandler, ShareTableRendererEditorFactory shareTableRendererEditorFactory) {
         super(libraryItems, new AudioTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
-        
-        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellEditor(new PlayRendererEditor(this, player));
-        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellRenderer(new PlayRendererEditor(this, player));
+
+        playEditor = new PlayRendererEditor(this, player);
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellEditor(playEditor);
+        playRenderer = new PlayRendererEditor(this, player);
+        getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setCellRenderer(playRenderer);
         getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setMaxWidth(14);
         getColumnModel().getColumn(AudioTableFormat.Columns.PLAY.ordinal()).setMinWidth(14);
     }
-    
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        playEditor.dispose();
+        playRenderer.dispose();
+    }
+
     @Override
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
         super.setupCellRenderers(format);

@@ -60,10 +60,10 @@ class LibraryMediator extends JPanel implements Disposable {
     }
 
     @Override
-    public void dispose() {
-        removeAll();
+    public void dispose() {        
         for(Component component : getComponents()) {
             ((Disposable)component).dispose();
         }
+        removeAll();
     }
 }
