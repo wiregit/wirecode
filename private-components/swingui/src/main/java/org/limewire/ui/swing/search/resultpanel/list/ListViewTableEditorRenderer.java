@@ -243,19 +243,17 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                     actionButtonPanel.startDownload();
                     table.editingStopped(new ChangeEvent(table));
                 } else if(SwingUtilities.isRightMouseButton(e)) {
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, remoteHostActions, properties);
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);
                     searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                 } 
             }
         });
         
-        heading.addMouseListener( new MouseAdapter() {
+        optionsButton.addMouseListener( new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if(SwingUtilities.isRightMouseButton(e)) {
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, remoteHostActions, properties);
-                    searchResultMenu.show(heading, e.getX(), e.getY());
-                }
+                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);
+                searchResultMenu.show(optionsButton, e.getX(), e.getY());
             }
         });
 
@@ -340,21 +338,13 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         return vsr != null && getSimilarResultsCount() > 0 && vsr.isChildrenVisible();
     }
 
-    private JPanel makeFromPanel(final PropertiesFactory<VisualSearchResult> properties) {
+    private JPanel makeFromPanel() {
         similarButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                boolean toggleVisibility = !isShowingSimilarResults();
-                vsr.setChildrenVisible(toggleVisibility);
+                vsr.toggleChildrenVisibility();
             }
         });
         
-        optionsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                properties.newProperties().showProperties(vsr);
-            }
-        });
-
         JXPanel panel = new JXPanel(new MigLayout("", "0[][][]8[]", "5[]")) {
             @Override
             public void setBackground(Color color) {
@@ -450,7 +440,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator, PropertiesFactory<VisualSearchResult> properties) {
         leftPanel = makeIndentablePanel(makeLeftPanel(navigator, libraryNavigator));
 
-        fromPanel = makeFromPanel(properties);
+        fromPanel = makeFromPanel();
 
         lastRowPanel = new JPanel(new MigLayout("insets 10 30 0 0", "[]", "[]"));
         lastRowPanel.setOpaque(false);

@@ -45,6 +45,8 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile {
     
     void setChildrenVisible(boolean childrenVisible);
     
+    void toggleChildrenVisibility();
+    
     boolean isSpam();
     
     void setSpam(boolean spam);

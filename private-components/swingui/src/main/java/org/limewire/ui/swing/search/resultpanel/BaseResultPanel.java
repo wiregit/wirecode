@@ -243,7 +243,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
                     // Display a SearchResultMenu for the VisualSearchResult.
                     JComponent component = (JComponent) e.getSource();
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, remoteHostActions, properties);
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, properties);
                     searchResultMenu.show(component, e.getX(), e.getY());
                 }
             }
@@ -264,7 +264,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         resultsTable.setDefaultEditor(VisualSearchResult.class, new FromTableCellRenderer(factory.create(remoteHostActions, true)));
         
-        resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, remoteHostActions, properties));
+        resultsTable.setPopupHandler(new SearchPopupHandler(resultsTable, this, properties));
         resultsTable.setDoubleClickHandler(new ClassicDoubleClickHandler(resultsTable, this));
 
         resultsTable.setRowHeight(TABLE_ROW_HEIGHT);

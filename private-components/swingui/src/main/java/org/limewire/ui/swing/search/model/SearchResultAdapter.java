@@ -251,6 +251,15 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     }
 
     @Override
+    public void toggleChildrenVisibility() {
+        setChildrenVisible(!isShowingSimilarResults());
+    }
+
+    private boolean isShowingSimilarResults() {
+        return getSimilarResults().size() > 0 && isChildrenVisible();
+    }
+
+    @Override
     public URN getUrn() {
         return coreResults.get(0).getUrn();
     }
