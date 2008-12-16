@@ -223,7 +223,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     @Override
     protected <T extends FileItem> void addCategorySizeListener(Category category,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredAllFileList, filteredList);
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredAllFileList, filteredList, friendFileList);
         filteredAllFileList.addListEventListener(listener);
         filteredList.addListEventListener(listener);
         addDisposable(listener);
@@ -234,17 +234,27 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         private final Action action;
         private final FilterList<T> allFileList;
         private final FilterList<T> list;
+        private final FriendFileList friendList;
         
-        private ButtonSizeListener(Category category, Action action, FilterList<T> allFileList, FilterList<T> list) {
+        private ButtonSizeListener(Category category, Action action, FilterList<T> allFileList, FilterList<T> list, FriendFileList friendList) {
             this.category = category;
             this.action = action;
             this.allFileList = allFileList;
             this.list = list;
+            this.friendList = friendList;
             setText();
         }
 
         private void setText() {
-            action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + "/" + allFileList.size() + ")");
+            if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
+                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+            } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
+                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+            } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
+                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+            } else {
+                action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + "/" + allFileList.size() + ")");
+            }
             if(category == Category.OTHER) {
                 action.setEnabled(allFileList.size() > 0);
             }
