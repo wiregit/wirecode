@@ -9,6 +9,7 @@ package org.limewire.listener;
  */
 public interface EventBean<E> {
     
+    /** Returns the most recent event that was broadcast. */
     E getLastEvent();
 
 }
