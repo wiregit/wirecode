@@ -3,6 +3,7 @@ package org.limewire.ui.swing.mainframe;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -105,7 +106,9 @@ public class AppFrame extends SingleFrameApplication {
         changeSessionStorage(getContext(), new NullSessionStorage(getContext()));
         
         GuiUtils.assignResources(this);        
-        initColors();
+
+        
+        initUIDefaults();
         
         // Because we use a browser heavily, which is heavyweight,
         // we must disable all lightweight popups.
@@ -113,9 +116,6 @@ public class AppFrame extends SingleFrameApplication {
             JPopupMenu.setDefaultLightWeightPopupEnabled(false);
             ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
         }
-        
-        // Necessary to allow popups to behave normally.
-        UIManager.put("PopupMenu.consumeEventOnClose", false);
         
         isStartup = args.length > 0 && STARTUP.equals(args[0]);
     }
@@ -270,11 +270,30 @@ public class AppFrame extends SingleFrameApplication {
         launch(AppFrame.class, args);
     }
 
+    
     /**
-     * Changes all default background colors equal to Panel.background to the
+     * Sets the custom default UI colour and behaviour properties
+     */
+    private void initUIDefaults() {
+       
+        initBackgrounds();
+        
+        // Set the menu item highlight colours
+        Paint highlight = new Color(0xdaf2b5);
+        UIManager.put("Menu.selectionBackground", highlight);
+        UIManager.put("MenuItem.selectionBackground", highlight);
+        UIManager.put("CheckBoxMenuItem.selectionBackground", highlight);
+        UIManager.put("RadioButtonMenuItem.selectionBackground", highlight);
+    
+        // Necessary to allow popups to behave normally.
+        UIManager.put("PopupMenu.consumeEventOnClose", false);
+    }
+    
+    /**
+     * Changes all default background colors that are equal to Panel.background to the
      * bgColor set in properties. Also sets Table.background.
      */
-    private void initColors() {
+    private void initBackgrounds() {
         ColorUIResource bgColorResource = new ColorUIResource(bgColor);
         Color oldBgColor = UIManager.getDefaults().getColor("Panel.background");
         UIDefaults uiDefaults = UIManager.getDefaults();
