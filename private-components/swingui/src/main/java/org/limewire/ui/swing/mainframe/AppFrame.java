@@ -283,12 +283,20 @@ public class AppFrame extends SingleFrameApplication {
         initBackgrounds();
         
         // Set the menu item highlight colours
-        Paint highlight = new Color(0xdaf2b5);
-        UIManager.put("Menu.selectionBackground", highlight);
-        UIManager.put("MenuItem.selectionBackground", highlight);
-        UIManager.put("CheckBoxMenuItem.selectionBackground", highlight);
-        UIManager.put("RadioButtonMenuItem.selectionBackground", highlight);
-    
+        Paint highlightBackground = new Color(0xdaf2b5);
+        UIManager.put("Menu.selectionBackground", highlightBackground);
+        UIManager.put("MenuItem.selectionBackground", highlightBackground);
+        UIManager.put("CheckBoxMenuItem.selectionBackground", highlightBackground);
+        UIManager.put("RadioButtonMenuItem.selectionBackground", highlightBackground);
+        
+        // Set the menu item highlight colours to avoid contrast issues with
+        //  new highlight background in default XP theme
+        Color highlightForeground = Color.BLACK;
+        UIManager.put("Menu.selectionForeground", highlightForeground);
+        UIManager.put("MenuItem.selectionForeground", highlightForeground);
+        UIManager.put("CheckBoxMenuItem.selectionForeground", highlightForeground);
+        UIManager.put("RadioButtonMenuItem.selectionForeground", highlightForeground);
+        
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
     }
