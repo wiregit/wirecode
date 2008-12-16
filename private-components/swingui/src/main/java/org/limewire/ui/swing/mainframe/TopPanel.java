@@ -188,13 +188,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         search.addSearchListener(action);
 
         final Action moreTextAction = new NoOpAction();
-        final Action repeat = new AbstractAction(I18n.tr("Repeat search")) {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                search.repeat();
-            }
-        };
-        
+        final RepeatSearchAction repeat = new RepeatSearchAction(search);
+        search.addSearchListener(repeat);
+
         final TabActionMap actionMap = new TabActionMap(
             action, action, moreTextAction, Collections.singletonList(repeat));
         
@@ -340,5 +336,35 @@ class TopPanel extends JXPanel implements SearchNavigator {
                 }
             });
         }
+    }
+
+    /**
+     * Action which repeats a search.  Since it makes no sense to
+     * repeat an unstarted search, this class only enables searches to be
+     * repeated if they have already started.
+     */
+    private class RepeatSearchAction extends AbstractAction implements SearchListener {
+
+        private final Search search;
+
+        RepeatSearchAction(Search search) {
+            super(I18n.tr("Repeat search"));
+            this.search = search;
+            setEnabled(false);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent event) {
+            search.repeat();
+        }
+
+        @Override
+        public void searchStarted() {
+            setEnabled(true);
+        }
+
+        @Override public void searchStopped() { }
+        @Override public void handleSponsoredResults(List<SponsoredResult> sponsoredResults) { }
+        @Override public void handleSearchResult(SearchResult searchResult) {}
     }
 }
