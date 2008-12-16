@@ -34,6 +34,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
@@ -72,17 +73,18 @@ import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.action.CopyAction;
 import org.limewire.ui.swing.action.CopyAllAction;
 import org.limewire.ui.swing.action.PopupUtil;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.RuntimeTopicEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.util.FileUtils;
-import org.limewire.util.NotImplementedException;
 import org.limewire.xmpp.api.client.ChatState;
 import org.limewire.xmpp.api.client.FileMetaData;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -407,9 +409,11 @@ public class ConversationPane extends JPanel implements Displayable {
                         }
                     }, sle, true); 
                 } catch (InvalidDataException ide) {
-                    // not exactly broken, but need better behavior --
                     // this means the FileMetaData we received isn't well-formed.
-                    throw new NotImplementedException(ide);
+                    LOG.warn("Unable to access remote file", ide);
+                    FocusJOptionPane.showMessageDialog(ConversationPane.this, 
+                            I18n.tr("Unable to access remote file"), 
+                            I18n.tr("Hyperlink"), JOptionPane.WARNING_MESSAGE);
                 } catch(UnsupportedEncodingException uee) {
                     throw new RuntimeException(uee); // impossible
                 }
