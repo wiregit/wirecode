@@ -577,13 +577,11 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
         shareTable.setVisibleRowCount(visibleRows);
         shareScroll.setVisible(visibleRows > 0);
-        topLabel.setVisible(visibleRows > 0);        
-
-        if (dialog != null) {
-            dialog.revalidate();
-            // gets rid of artifacts below dialog
-            repaint();
-        }
+        topLabel.setVisible(visibleRows > 0); 
+        
+        setSize(getPreferredSize());
+        
+        repaint();
     }
     
     
@@ -660,7 +658,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     }
     
-    private class SharingTargetComparator implements Comparator<SharingTarget>{
+    private static class SharingTargetComparator implements Comparator<SharingTarget>{
 
         @Override
         public int compare(SharingTarget o1, SharingTarget o2) {

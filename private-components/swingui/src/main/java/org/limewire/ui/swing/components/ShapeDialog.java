@@ -26,8 +26,6 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
     private Component component;
 
-   // private Color shadowColor = new Color(0,0,0, 125);
-    
     private ComponentListener componentListener;
 
     public ShapeDialog() {
@@ -46,23 +44,14 @@ public class ShapeDialog extends JXPanel implements Resizable {
                 removeListeners();
             }
         });
-        
-//        setBackgroundPainter(new Painter() {
-//            @Override
-//            public void paint(Graphics2D g, Object object, int width, int height) {
-//                Graphics2D g2 = (Graphics2D)g.create();
-//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-//                        RenderingHints.VALUE_ANTIALIAS_ON);
-//                g2.setColor(shadowColor);
-//                g2.fillRoundRect(0, 0, width, height, 10, 10);
-//                g2.dispose();
-//            }
-//        });
-        
+              
         componentListener = new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                resize();
+                //TODO: better way of handling this
+                if (component != null) {
+                    setSize(component.getPreferredSize());
+                }
             }
         };
     }
@@ -81,16 +70,16 @@ public class ShapeDialog extends JXPanel implements Resizable {
         }
 
         Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.MOUSE_EVENT_MASK);
-        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.KEY_EVENT_MASK);
-        if(component!=null){
+        Toolkit.getDefaultToolkit().addAWTEventListener(eventListener, AWTEvent.KEY_EVENT_MASK);   
+        if (component != null) {
             component.addComponentListener(componentListener);
         }
     }
 
     private void removeListeners() {
         Toolkit.getDefaultToolkit().removeAWTEventListener(eventListener);
-        if(component!=null){
-            component.addComponentListener(componentListener);
+        if (component != null) {
+            component.removeComponentListener(componentListener);
         }
     }
 
@@ -103,8 +92,8 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
                     if ((event.getID() == MouseEvent.MOUSE_PRESSED)) {
                         MouseEvent e = (MouseEvent) event;
-                        // TODO: this isn't quite right
-                        if (component != e.getComponent()
+                        
+                        if ((getMousePosition() == null || !contains(getMousePosition())) && component != e.getComponent()
                                 && (!(component instanceof ShapeDialogComponent) || !((ShapeDialogComponent) component)
                                         .contains(e.getComponent()))) {
                             setVisible(false);
