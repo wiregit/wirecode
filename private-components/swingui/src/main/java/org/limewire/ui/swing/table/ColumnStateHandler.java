@@ -54,7 +54,7 @@ public class ColumnStateHandler implements TableColumnModelListener, MouseListen
     public void removeListeners() {
         stopListening();
         for(int i = 0; i < format.getColumnCount(); i++) {
-            table.getColumnExt(i).removePropertyChangeListener(this);
+            table.getColumnExt(format.getColumnName(i)).removePropertyChangeListener(this);
         }
     }
     
