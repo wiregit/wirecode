@@ -138,6 +138,8 @@ public class MouseableTable extends StripedJXTable {
 		                colors.getOddHighLighter(),
 		                new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,  colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
 		
+		setGridColor(colors.getGridColor());
+		
 		//so that mouseovers will work within table		
 		mouseOverEditorListener = new MouseMotionAdapter() {
             @Override
@@ -341,6 +343,8 @@ public class MouseableTable extends StripedJXTable {
 	    public Color selectionForeground;
 	    @Resource
 	    private Color disabledForegroundColor;
+	    @Resource
+	    private Color gridColor;
 	    
 	    private ColorHighlighter evenHighLighter;
 	    
@@ -363,6 +367,10 @@ public class MouseableTable extends StripedJXTable {
 	    
 	    public Color getDisabledForegroundColor() {
 	        return disabledForegroundColor;
+	    }
+	    
+	    public Color getGridColor() {
+	        return gridColor;
 	    }
 	}
 	
