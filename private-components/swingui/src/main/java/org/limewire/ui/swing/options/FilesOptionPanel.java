@@ -12,7 +12,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -20,6 +19,7 @@ import org.limewire.core.api.daap.DaapManager;
 import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LabelTextField;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
@@ -187,7 +187,7 @@ public class FilesOptionPanel extends OptionPanel {
         private String currentSaveDirectory;
         private LWSFileNamingOptionPanel storeOptionPanel;
         
-        private JTextField storePathTextField;
+        private LabelTextField storePathTextField;
         private JButton browseStorePathButton;
         private JButton configureNamingButton;
         
@@ -197,9 +197,12 @@ public class FilesOptionPanel extends OptionPanel {
             storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(), new CancelDialogAction());
             storeOptionPanel.setPreferredSize(new Dimension(350, 140));
             
-            storePathTextField = new JTextField(40);
+            storePathTextField = new LabelTextField();
             storePathTextField.setEditable(false);
-            browseStorePathButton = new JButton(new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField));
+            
+            BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField);
+            storePathTextField.addMouseListener(directoryAction);
+            browseStorePathButton = new JButton(directoryAction);
             configureNamingButton = new JButton(new DialogDisplayAction(FilesOptionPanel.this,
                     storeOptionPanel,I18n.tr("LimeWire Store File Organization"),
                     I18n.tr("Configure file naming..."),I18n.tr("Configure how files are automatically named")));

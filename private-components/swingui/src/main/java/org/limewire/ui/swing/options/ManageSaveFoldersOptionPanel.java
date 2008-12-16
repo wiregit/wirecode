@@ -6,7 +6,6 @@ import java.io.File;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
@@ -15,6 +14,7 @@ import org.limewire.core.api.Category;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.setting.FileSetting;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.LabelTextField;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -28,17 +28,17 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
-    private DisplayTextField audioTextField;
+    private LabelTextField audioTextField;
 
-    private DisplayTextField videoTextField;
+    private LabelTextField videoTextField;
 
-    private DisplayTextField imageTextField;
+    private LabelTextField imageTextField;
 
-    private DisplayTextField documentTextField;
+    private LabelTextField documentTextField;
 
-    private DisplayTextField programTextField;
+    private LabelTextField programTextField;
 
-    private DisplayTextField otherTextField;
+    private LabelTextField otherTextField;
 
     private JButton audioBrowseButton;
 
@@ -66,19 +66,25 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
         setLayout(new MigLayout("gapy 10"));
 
-        audioTextField = new DisplayTextField();
-        videoTextField = new DisplayTextField();
-        imageTextField = new DisplayTextField();
-        documentTextField = new DisplayTextField();
-        programTextField = new DisplayTextField();
-        otherTextField = new DisplayTextField();
+        audioTextField = new LabelTextField();
+        videoTextField = new LabelTextField();
+        imageTextField = new LabelTextField();
+        documentTextField = new LabelTextField();
+        programTextField = new LabelTextField();
+        otherTextField = new LabelTextField();
 
         audioBrowseButton = new JButton(new BrowseDirectoryAction(this, audioTextField));
+        audioTextField.addMouseListener(audioBrowseButton.getAction());
         videoBrowseButton = new JButton(new BrowseDirectoryAction(this, videoTextField));
+        videoTextField.addMouseListener(videoBrowseButton.getAction());
         imageBrowseButton = new JButton(new BrowseDirectoryAction(this, imageTextField));
+        imageTextField.addMouseListener(imageBrowseButton.getAction());
         documentBrowseButton = new JButton(new BrowseDirectoryAction(this, documentTextField));
+        documentTextField.addMouseListener(documentBrowseButton.getAction());
         programBrowseButton = new JButton(new BrowseDirectoryAction(this, programTextField));
+        programTextField.addMouseListener(programBrowseButton.getAction());
         otherBrowseButton = new JButton(new BrowseDirectoryAction(this, otherTextField));
+        otherTextField.addMouseListener(otherBrowseButton.getAction());
 
         cancelAction.setOptionPanel(this);
 
@@ -141,11 +147,11 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         return false;
     }
     
-    private void revertToDefault(JTextField textField) {
+    private void revertToDefault(LabelTextField textField) {
         textField.setText(SharingSettings.getSaveDirectory().getAbsolutePath());
     }
 
-    private void applyOption(MediaType mediaType, DisplayTextField textField) {
+    private void applyOption(MediaType mediaType, LabelTextField textField) {
         if(hasChanged(mediaType, textField)) {
             FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
             String newSaveDirString = textField.getText();
@@ -164,7 +170,7 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
                 || hasChanged(MediaType.getOtherMediaType(), otherTextField);
     }
 
-    private boolean hasChanged(MediaType mediaType, DisplayTextField textField) {
+    private boolean hasChanged(MediaType mediaType, LabelTextField textField) {
         FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
         File saveDir = saveDirSetting.getValue();
         String oldSaveDirString = saveDir.getAbsolutePath();
@@ -182,19 +188,11 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
         initField(MediaType.getOtherMediaType(), otherTextField);
     }
 
-    private void initField(MediaType mediaType, DisplayTextField textField) {
+    private void initField(MediaType mediaType, LabelTextField textField) {
         FileSetting saveDirSetting = SharingSettings.getFileSettingForMediaType(mediaType);
         File saveDir = saveDirSetting.getValue();
         String saveDirString = saveDir.getAbsolutePath();
         textField.setText(saveDirString);
-    }
-
-    private class DisplayTextField extends JTextField {
-        public DisplayTextField() {
-            setEditable(false);
-            //setBackground(Color.WHITE);
-            setColumns(40);
-        }
     }
     
     private class DefaultAction extends AbstractAction {

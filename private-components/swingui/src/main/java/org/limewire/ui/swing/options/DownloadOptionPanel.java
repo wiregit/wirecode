@@ -10,7 +10,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -18,6 +17,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.iTunesSettings;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LabelTextField;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
@@ -138,7 +138,7 @@ public class DownloadOptionPanel extends OptionPanel {
         private String currentSaveDirectory;
         
         private JCheckBox clearDownloadsCheckBox;
-        private JTextField downloadSaveTextField;
+        private LabelTextField downloadSaveTextField;
         private JButton browseSaveLocationButton;
         private JCheckBox autoRenameDuplicateFilesCheckBox;
         
@@ -147,10 +147,12 @@ public class DownloadOptionPanel extends OptionPanel {
             
             clearDownloadsCheckBox = new JCheckBox(I18n.tr("Clear downloads from list when finished"));
             clearDownloadsCheckBox.setContentAreaFilled(false);
-            downloadSaveTextField = new JTextField();
+            downloadSaveTextField = new LabelTextField();
             downloadSaveTextField.setEditable(false);
-            //downloadSaveTextField.setBackground(Color.WHITE);
-            browseSaveLocationButton = new JButton(new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField));
+
+            BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField);
+            downloadSaveTextField.addMouseListener(directoryAction);
+            browseSaveLocationButton = new JButton(directoryAction);
             autoRenameDuplicateFilesCheckBox = new JCheckBox(I18n.tr("If the file already exists, download it with a different name"));
             autoRenameDuplicateFilesCheckBox.setContentAreaFilled(false);
             
