@@ -877,7 +877,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // find where the ggep starts
         int firstNull = 8;
+        // skip to first 0x0 to find extension bytes
         while(data[firstNull++] != 0x0);
+        // inside extension bytes skip over sha1, to ggep
+        while(data[firstNull++] != 0x1c);
         GGEP g = new GGEP(data, firstNull);
         assertEquals(Constants.MAX_FILE_SIZE, g.getLong(GGEPKeys.GGEP_HEADER_LARGE_FILE));
         
