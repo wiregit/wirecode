@@ -407,7 +407,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
      */
     private Set<? extends IpPort> getAsIpPorts(
             AlternateLocationCollection<DirectAltLoc> col) {
-        if (col == null || !col.hasAlternateLocations())
+        if (!col.hasAlternateLocations())
             return Collections.emptySet();
 
         long now = System.currentTimeMillis();
