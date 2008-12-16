@@ -301,15 +301,20 @@ public class AppFrame extends SingleFrameApplication {
      */
     private void initMacUIDefaults() {
         try {
-          
             // Put the menu bar back at the top of the screen
             System.setProperty("apple.laf.useScreenMenuBar", "true");            
             
+            // Set the application name to be displayed on the Mac menu bar
+            // TODO: get program name from central place
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "LimeWire 5 Alpha");
+            
+            // Save the Mac menu bar UI before we wipe out the settings
             Object originalMenuUI = UIManager.get("MenuBarUI");
             
             // Attempt to override the Mac default look and feel
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             
+            // Restore the menu bar
             UIManager.put("MenuBarUI", originalMenuUI);
         } 
         catch (ClassNotFoundException e) {
