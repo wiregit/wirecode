@@ -27,7 +27,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
-import org.limewire.ui.swing.search.LocalAndFriendAutoCompleter;
+import org.limewire.ui.swing.search.HistoryAndFriendAutoCompleter;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -50,7 +50,7 @@ public class SearchBar extends JXPanel {
     private final LimePromptTextField searchField;
     private final JButton searchButton;
     
-    private final LocalAndFriendAutoCompleter autoCompleter;
+    private final HistoryAndFriendAutoCompleter autoCompleter;
     private final FriendAutoCompleters friendLibraries;
     
     private SearchCategory categoryToSearch; 
@@ -65,7 +65,7 @@ public class SearchBar extends JXPanel {
         GuiUtils.assignResources(this);
 
         this.friendLibraries = friendLibraries;
-        this.autoCompleter = new LocalAndFriendAutoCompleter();
+        this.autoCompleter = new HistoryAndFriendAutoCompleter();
         
         this.categoryToSearch = SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         

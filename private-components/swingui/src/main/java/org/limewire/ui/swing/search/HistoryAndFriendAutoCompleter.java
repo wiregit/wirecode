@@ -31,7 +31,7 @@ import org.limewire.ui.swing.components.SideLineBorder;
 import org.limewire.ui.swing.util.FontUtils;
 
 /** An autocompleter that shows its suggestions in a list and can have new suggestions added. */
-public class LocalAndFriendAutoCompleter implements AutoCompleter {
+public class HistoryAndFriendAutoCompleter implements AutoCompleter {
     
     private final JPanel entryPanel;
     
@@ -43,11 +43,11 @@ public class LocalAndFriendAutoCompleter implements AutoCompleter {
     
     private final AutoCompleteList entryList;
     
-    public LocalAndFriendAutoCompleter() {
+    public HistoryAndFriendAutoCompleter() {
         this(new StringTrieSet(true));
     }
     
-    public LocalAndFriendAutoCompleter(AutoCompleteDictionary dictionary) {
+    public HistoryAndFriendAutoCompleter(AutoCompleteDictionary dictionary) {
         this.suggestionDictionary = dictionary;
         
         entryPanel = new JPanel(new MigLayout("insets 0, gap 0, fill"));
