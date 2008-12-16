@@ -303,19 +303,22 @@ public class ConversationPane extends JPanel implements Displayable {
             if (component instanceof JButton) {
                 JButton button = (JButton)component;
                 String buttonText = button.getText();
+
+                // Using end of button text to determine whether button shouild be disabled
+                // then disable it.  This is because JEditorPane does not disable buttons
+                // disabled in the form html
+                if (buttonText.endsWith(":disabled")) {
+                    buttonText = buttonText.substring(0, buttonText.lastIndexOf(":disabled"));
+                    button.setText(buttonText);
+                    button.setEnabled(false);
+                }
+
                 String extension = FileUtils.getFileExtension(buttonText);
                 if (!extension.isEmpty()) {
                     Icon icon = iconManager.getIconForExtension(extension);
                     button.setIcon(icon);
                 }
 
-                // Using end of button text to determine whether button shouild be disabled
-                // then disable it.  This is because JEditorPane does not disable buttons
-                // disabled in the form html
-                if (buttonText.endsWith(":disabled")) {
-                    button.setText(buttonText.substring(0, buttonText.lastIndexOf(":disabled")));
-                    button.setEnabled(false);
-                }
             }
         }
     }
