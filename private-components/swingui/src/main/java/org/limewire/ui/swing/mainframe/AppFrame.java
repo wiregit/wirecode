@@ -16,6 +16,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
@@ -45,6 +46,7 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import org.limewire.ui.swing.wizard.SetupWizard;
+import org.limewire.util.OSUtils;
 import org.mozilla.browser.MozillaInitialization;
 import org.mozilla.browser.MozillaInitialization.InitStatus;
 
@@ -276,6 +278,10 @@ public class AppFrame extends SingleFrameApplication {
      */
     private void initUIDefaults() {
        
+        if (OSUtils.isAnyMac()) {
+            initMacUIDefaults();
+        }
+        
         initBackgrounds();
         
         // Set the menu item highlight colours
@@ -288,6 +294,31 @@ public class AppFrame extends SingleFrameApplication {
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
     }
+    
+    /**
+     * Sets some mac only UI settings.
+     *   
+     * Importantly, first it overrides the default Mac L&F to give 
+     *  us a little more freedom with colouring
+     */
+    private void initMacUIDefaults() {
+        try {
+            // Attempt to override the Mac default look and feel
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            
+            // Put the menu bar back at the top of the screen
+            UIManager.put("apple.laf.useScreenMenuBar", true);
+        } 
+        catch (ClassNotFoundException e) {
+        }
+        catch (InstantiationException e) {
+        }
+        catch (IllegalAccessException e) {
+        } 
+        catch (UnsupportedLookAndFeelException e) {
+        }
+    }
+   
     
     /**
      * Changes all default background colors that are equal to Panel.background to the
