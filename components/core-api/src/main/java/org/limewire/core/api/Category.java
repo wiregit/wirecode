@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.i18n.I18nMarker;
-import org.limewire.ui.swing.util.I18n;
 
 
 public enum Category {
@@ -26,12 +25,12 @@ public enum Category {
     }
     
     public String getSingularName() {
-        return I18n.tr(singular);
+        return singular;
     }
     
     @Override
     public String toString() {
-        return I18n.tr(plural);
+        return plural;
     }
     
     public static List<Category> getCategoriesInOrder() {
