@@ -350,7 +350,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
     private class DownloadFromFriendLibraryAction extends AbstractAction {
         public DownloadFromFriendLibraryAction() {
-            super(tr("Download"));
+            super(tr("View Files"));
         }
 
         @Override
