@@ -6,6 +6,7 @@ import javax.swing.AbstractAction;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.MagnetLinkFactory;
+import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.properties.AbstractPropertiableFileDialog;
 import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.util.I18n;
@@ -26,5 +27,6 @@ abstract class AbstractFileItemDialog extends AbstractPropertiableFileDialog {
                 new MagnetLinkCopier().copyLinkToClipBoard(propertiable, magnetLinkFactory);
             }
         });
+        moreFileInfo.setAction(new BitziLookupAction(propertiable));
     }
 }

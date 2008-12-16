@@ -11,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
+import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.Properties;
@@ -68,9 +69,9 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             rating.setModel(new DefaultComboBoxModel(new String[]{ vsr.getPropertyString(FilePropertyKey.RATING) }));
             populateMetadata(vsr);
             copyToClipboard.setAction(new CopyMagnetLinkToClipboardAction(vsr));
+            moreFileInfo.setAction(new BitziLookupAction(vsr));
             album.setText(vsr.getPropertyString(FilePropertyKey.ALBUM));
             title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
-            
             year.setText(vsr.getPropertyString(FilePropertyKey.YEAR));
             description.setText(vsr.getPropertyString(FilePropertyKey.COMMENTS));
 

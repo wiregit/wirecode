@@ -58,7 +58,6 @@ public abstract class Dialog extends LimeJDialog {
     protected final JLabel filename = newLabel();
     protected final JLabel fileSize = new JLabel();
     protected final JLabel metadata = newLabel();
-    protected final JXHyperlink copyToClipboard = new JXHyperlink();
     protected final JTextField title = new JTextField();
     protected final JComboBox genre = new JComboBox();
     protected final JComboBox rating = new JComboBox();
@@ -74,6 +73,8 @@ public abstract class Dialog extends LimeJDialog {
     protected final JLabel fileLocation = newLabel();
     protected final JXHyperlink locateOnDisk;
     protected final JXHyperlink locateInLibrary;
+    protected final JXHyperlink copyToClipboard;
+    protected final JXHyperlink moreFileInfo;
     protected final JTable readOnlyInfo = new JTable(readOnlyInfoModel);
     protected final Font smallFont;
     protected final Font mediumFont;
@@ -96,14 +97,17 @@ public abstract class Dialog extends LimeJDialog {
         this.largeFont = param.getLargeFont();
         
         mainPanel = new JPanel(new MigLayout("insets 0 3 3 0", "[fill]push[]", "[][][][]push[]"));
-        locateOnDisk = newHyperlink(param.getLinkColor());
-        locateInLibrary = newHyperlink(param.getLinkColor());
+        Color hyperlinkColor = param.getLinkColor();
+        locateOnDisk = newHyperlink(hyperlinkColor);
+        locateInLibrary = newHyperlink(hyperlinkColor);
+        copyToClipboard = newHyperlink(hyperlinkColor);
+        moreFileInfo = newHyperlink(hyperlinkColor);
         
         add(mainPanel);
         mainPanel.setBackground(param.getBackgroundColor());
         
         setFont(mediumFont, heading, filename, fileSize);
-        setFont(smallFont, metadata, copyToClipboard, locateOnDisk, locateInLibrary,
+        setFont(smallFont, metadata, copyToClipboard, moreFileInfo, locateOnDisk, locateInLibrary,
                 title, genre, rating, year, description, artist, album, track, author, platform,
                 company, fileLocation);
         //Use the same border that a textfield uses - JTextAreas by default are not given a border
@@ -121,6 +125,7 @@ public abstract class Dialog extends LimeJDialog {
         overview.add(heading);
         overview.add(copyToClipboard, "wrap");
         overview.add(metadata, "cell 1 2");
+        overview.add(moreFileInfo);
 
         addOverview();
     }
