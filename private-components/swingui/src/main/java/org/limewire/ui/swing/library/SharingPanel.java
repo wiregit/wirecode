@@ -185,7 +185,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         }
         
         if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-            LockableUI blurUI = new LockedUI(category.toString());
+            LockableUI blurUI = new LockedUI(category);
             JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
             
             if(category == Category.AUDIO && this.friendFileList.isAddNewAudioAlways()) {
@@ -409,17 +409,17 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         private JLabel label;
         private JLabel minLabel;
         
-        public LockedUI(String category, LayerEffect... lockedEffects) {
+        public LockedUI(Category category, LayerEffect... lockedEffects) {
             super(lockedEffects);
             
             messagePanel = new JPanel(new MigLayout("insets 5, gapy 10, wrap, alignx 50%"));
             messagePanel.setBackground(new Color(209,247,144));
             
-            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category, getFullPanelName()));
+            label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category.getSingularName(), getFullPanelName()));
             FontUtils.setSize(label, 12);
             FontUtils.bold(label);
             
-            minLabel = new JLabel(I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", category, category.toLowerCase()));
+            minLabel = new JLabel(I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", category.getSingularName(), category.getSingularName().toLowerCase()));
             FontUtils.setSize(minLabel, 10);
             
             panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));

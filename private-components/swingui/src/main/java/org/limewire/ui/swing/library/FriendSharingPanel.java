@@ -80,7 +80,7 @@ public class FriendSharingPanel extends SharingPanel {
         public BackToLibraryAction(LibraryMediator basePanel) {
             this.basePanel = basePanel;
             
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Returns to what's being shared with you."));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
         }
         
         @Override
