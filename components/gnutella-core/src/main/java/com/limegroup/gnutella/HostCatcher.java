@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -66,7 +65,6 @@ import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.util.ClassCNetworks;
-
 
 /**
  * The host catcher.  This peeks at pong messages coming on the
@@ -965,17 +963,24 @@ public class HostCatcher implements Service {
      */
     private boolean isValidHost(Endpoint host) {
         // caches will validate for themselves.
-        if(host.isUDPHostCache())
+        if(host.isUDPHostCache()) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(host + " is valid: UDP host cache");
             return true;
+        }
         
         byte[] addr;
         try {
             addr = host.getHostBytes();
         } catch(UnknownHostException uhe) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(host + " is invalid: unknown host exception");
             return false;
         }
         
         if(networkInstanceUtils.isPrivateAddress(addr)) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(host + " is invalid: private address");
             return false;
         }
 
@@ -984,32 +989,48 @@ public class HostCatcher implements Service {
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
-        if (networkInstanceUtils.isMe(addr, host.getPort()))
+        if(networkInstanceUtils.isMe(addr, host.getPort())) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(host + " is invalid: own address");
             return false;
+        }
 
         //Skip if this host is banned.
-        if (!ipFilter.get().allow(addr))
-            return false;  
+        if(!ipFilter.get().allow(addr)) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(host + " is invalid: blacklisted");
+            return false;
+        }
         
         synchronized(this) {
             // Don't add this host if it has previously failed.
             if(EXPIRED_HOSTS.contains(host)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug(host + " is invalid: expired");
                 return false;
             }
             
             // Don't add this host if it has previously rejected us.
             if(PROBATION_HOSTS.contains(host)) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug(host + " is invalid: on probation");
                 return false;
             }
         }
         
+        if(LOG.isDebugEnabled())
+            LOG.debug(host + " is valid");
         return true;
     }
     
     /** Returns true if the given IpPort is TLS-capable. */
     public boolean isHostTLSCapable(IpPort ipp) {
-        if(ipp instanceof Connectable)
-            return ((Connectable)ipp).isTLSCapable();
+        if(ipp instanceof Connectable) {
+            boolean capable = ((Connectable)ipp).isTLSCapable();
+            if(LOG.isDebugEnabled())
+                LOG.debug(ipp + (capable ? " is" : " is not") + " TLS capable: connectable");
+            return capable;
+        }
         
         // No need to check if it's an endpoint already, because all Endpoints
         // already implement HostInfo.
@@ -1024,10 +1045,16 @@ public class HostCatcher implements Service {
                 ee = FREE_LEAF_SLOTS_SET.get(p);
         }
         
-        if(ee == null)
+        if(ee == null) {
+            if(LOG.isDebugEnabled())
+                LOG.debug(ipp + " is not TLS capable: no extended endpoint data");
             return false;
-        else
-            return ee.isTLSCapable();
+        } else {
+            boolean capable = ee.isTLSCapable();
+            if(LOG.isDebugEnabled())
+                LOG.debug(ipp + (capable ? " is" : " is not") + " TLS capable: extended endpoint");
+            return capable;
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////
@@ -1550,11 +1577,14 @@ public class HostCatcher implements Service {
          * and if we need them, gets them.
          */
         public synchronized void run() {            
-            if (ConnectionSettings.DO_NOT_BOOTSTRAP.getValue())
+            if(ConnectionSettings.DO_NOT_BOOTSTRAP.getValue()) {
+                LOG.debug("Not bootstrapping");
                 return;
-
+            }
+            
             // If no one's waiting for an endpoint, don't get any.
             if(_catchersWaiting.isEmpty()) {
+                LOG.debug("No catchers waiting");
                 return;
             }
             
@@ -1610,13 +1640,14 @@ public class HostCatcher implements Service {
          */
         private boolean multicastFetch(long now) {
             if(nextAllowedMulticastTime < now && 
-               !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
+                    !ConnectionSettings.DO_NOT_MULTICAST_BOOTSTRAP.getValue()) {
                 LOG.trace("Fetching via multicast");
                 PingRequest pr = pingRequestFactory.createMulticastPing();
                 multicastService.get().send(pr);
                 nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
                 return true;
             }
+            LOG.trace("Not fetching via multicast");
             return false;
         }
         
@@ -1632,16 +1663,19 @@ public class HostCatcher implements Service {
                 nextAllowedTcpTime = Math.max(nextAllowedTcpTime, nextAllowedUdpTime + POST_UDP_PRE_TCP_DELAY);
                 return true;
             }
+            LOG.trace("Not fetching via UDP");
             return false;
         }
         
         private boolean tcpHostCacheFetch(long now) {
             // if we had tcp host caches to fetch from, use them.
-            if(nextAllowedTcpTime < now && tcpBootstrap.fetchHosts(new BootstrapListener())) {
+            if(nextAllowedTcpTime < now &&
+                    tcpBootstrap.fetchHosts(new BootstrapListener())) {
                 LOG.trace("Fetching via TCP");
                 nextAllowedTcpTime = now + POST_TCP_DELAY;
                 return true;
             }
+            LOG.trace("Not fetching via TCP");
             return false;
         }
     }
