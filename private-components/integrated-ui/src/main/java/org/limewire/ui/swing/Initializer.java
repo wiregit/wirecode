@@ -134,7 +134,7 @@ public final class Initializer {
 //        showAlphaInfo();
         
         //must agree not to use LW for copyright infringement on first running
-        confirmIntent();
+        confirmIntent(awtSplash);
 
         // Move from the AWT splash to the Swing splash & start early core.
         //assuming not showing splash screen if there are program arguments
@@ -193,8 +193,14 @@ public final class Initializer {
 //    }
     
     
-    /** shows legal stuff and exits if the user does not agree */
-    private void confirmIntent() {
+    /** 
+     * Shows legal conditions and exits if the user does not agree to them.
+     * 
+     *  Takes a parameter for the splash screen so it can hide it if
+     *   the intent dialogue needs to be shown to avoid a troublesome situation
+     *   where the splash screen actually covers the shown intent dialogue. 
+     */
+    private void confirmIntent(final Frame awtSplash) {
         File versionFile = new File(CommonUtils.getUserSettingsDir(), "versions.props");
         Properties properties = new Properties();        
         FileInputStream inputStream = null;
@@ -211,13 +217,15 @@ public final class Initializer {
             SwingUtils.invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
+                    awtSplash.setVisible(false);
                     boolean confirmed = new IntentDialog().confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }
                 }
             });
-
+            awtSplash.setVisible(true);
+            
             properties.put(LimeWireUtils.getLimeWireVersion(), "true");
             FileOutputStream outputStream = null;
             try {
