@@ -324,7 +324,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             countClassC(qr,response);
             RemoteFileDesc rfd;
             try {
-                rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory, pushEndpointFactory);
+                rfd = response.toRemoteFileDesc(qr, null, remoteFileDescFactory, pushEndpointFactory);
             } catch (UnknownHostException e) {
                 throw new RuntimeException("should not have happened", e);
             }

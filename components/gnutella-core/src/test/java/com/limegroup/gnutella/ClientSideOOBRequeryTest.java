@@ -332,7 +332,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, null, remoteFileDescFactory, pushEndpointFactory);
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
         
@@ -450,7 +450,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should not be empty since the query is still alive
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, null, remoteFileDescFactory, pushEndpointFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
@@ -575,7 +575,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, remoteFileDescFactory, pushEndpointFactory);
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply, null, remoteFileDescFactory, pushEndpointFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());

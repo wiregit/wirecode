@@ -13,11 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.core.settings.MessageSettings;
+import org.limewire.io.Address;
 import org.limewire.io.Connectable;
 import org.limewire.io.GGEP;
+import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -29,6 +33,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.LocalIPFilter;
@@ -60,6 +65,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     private LimeXMLDocumentHelper limeXMLDocumentHelper;
     private Injector injector;
     private FileDescFactory fileDescFactory;
+    private Mockery context;
+    private RemoteFileDescFactory remoteFileDescFactory;
+    private PushEndpointFactory pushEndpointFactory;
     
     /**
 	 * Constructs a new test instance for responses.
@@ -81,6 +89,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	
 	@Override
 	protected void setUp() throws Exception {
+	    context = new Mockery();
 	    injector = LimeTestUtils.createInjector();
 	    queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
 	    responseFactoryImpl = (ResponseFactoryImpl) injector.getInstance(ResponseFactory.class);
@@ -88,6 +97,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
 	    alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 	    fileDescFactory = injector.getInstance(FileDescFactory.class);
+	    remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
+	    pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
 	    
 	    final CountDownLatch latch = new CountDownLatch(1);
 	    injector.getInstance(LocalIPFilter.class).refreshHosts(new IPFilterCallback() {
@@ -1022,6 +1033,34 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // go through the data, make sure its in HUGE
         String s = StringUtils.getASCIIString(data);
         assertTrue(s.toLowerCase().contains("ttroot"));
+    }
+    
+    /**
+     * Ensures the given address is used when creating the rfd.
+     */
+    public void testUsesGivenAddressForRemoteFileDesc() throws Exception {
+        Response response = responseFactoryImpl.createResponse(100, 200, "hello", UrnHelper.SHA1);
+        Address address = context.mock(Address.class);
+        final QueryReply queryReply = context.mock(QueryReply.class);
+        context.checking(new Expectations() {{
+            one(queryReply).getClientGUID();
+            will(returnValue(GUID.makeGuid()));
+            one(queryReply).getSpeed();
+            will(returnValue(5));
+            one(queryReply).getSupportsChat();
+            will(returnValue(true));
+            one(queryReply).calculateQualityOfService();
+            will(returnValue(0));
+            one(queryReply).getSupportsBrowseHost();
+            will(returnValue(true));
+            one(queryReply).isReplyToMulticastQuery();
+            will(returnValue(false));
+            one(queryReply).getVendor();
+            will(returnValue("vendor"));
+        }});
+        RemoteFileDesc rfd = response.toRemoteFileDesc(queryReply, address, remoteFileDescFactory, pushEndpointFactory);
+        assertSame(address, rfd.getAddress());
+        context.assertIsSatisfied();
     }
     
     public void testIsMetaFileWithAllLocales() throws Exception {
