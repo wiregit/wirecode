@@ -217,14 +217,20 @@ public final class Initializer {
             SwingUtils.invokeAndWait(new Runnable() {
                 @Override
                 public void run() {
-                    awtSplash.setVisible(false);
+                    if (awtSplash != null) {
+                        awtSplash.setVisible(false);
+                    }
+                    
                     boolean confirmed = new IntentDialog().confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }
+                    
+                    if (awtSplash != null) {
+                        awtSplash.setVisible(true);
+                    }
                 }
             });
-            awtSplash.setVisible(true);
             
             properties.put(LimeWireUtils.getLimeWireVersion(), "true");
             FileOutputStream outputStream = null;
