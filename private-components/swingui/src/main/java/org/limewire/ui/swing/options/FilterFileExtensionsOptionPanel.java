@@ -15,30 +15,31 @@ import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.spam.SpamManager;
 import org.limewire.core.settings.FilterSettings;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.swing.EventTableModel;
 
 /**
- * Creates a table to manage which words will not show up in search results.
+ * Creates a table to manage which file extensions will not show up in search results
  */
-public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
-
+public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
+    private JButton defaultButton;
     private JButton okButton;
     private JTextField keywordTextField;
     private JButton addKeywordButton;
     private FilterTable filterTable;
     private SpamManager spamManager;
     
-    public FilterKeywordOptionPanel(SpamManager spamManager, Action okAction) {
+    public FilterFileExtensionsOptionPanel(SpamManager spamManager, Action okAction) {
         this.spamManager = spamManager;
         setLayout(new MigLayout("gapy 10"));
         
         keywordTextField = new JTextField(30);
-        addKeywordButton = new JButton(I18n.tr("Add Keyword"));
+        addKeywordButton = new JButton(I18n.tr("Add Extension"));
         
-        filterTable = new FilterTable(new EventTableModel<String>(eventList, new FilterTableFormat(I18n.tr("Keyword"))));
+        filterTable = new FilterTable(new EventTableModel<String>(eventList, new FilterTableFormat(I18n.tr("Extensions"))));
         okButton = new JButton(okAction);
         addKeywordButton.addActionListener(new ActionListener(){
             @Override
@@ -47,31 +48,36 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
                 if(text == null || text.trim().length() == 0)
                     return;
                 if(!eventList.contains(text)) {
+                    if(text.charAt(0) != '.')
+                        text = "." + text;
                     eventList.add(text);
                 }
                 keywordTextField.setText("");
             }
         });
         
-        add(new MultiLineLabel(I18n.tr("LimeWire will not show files with the following keywords in your search results"), 300), "span, wrap");
+        defaultButton = new JButton(new DefaultAction());
+        
+        add(new MultiLineLabel(I18n.tr("LimeWire will not show files with the following extensions in your search results"), 300), "span, wrap");
         add(keywordTextField, "gapright 10");
         add(addKeywordButton,"wrap");
         add(new JScrollPane(filterTable), "span 2, grow, wrap");
         
-        add(okButton, "skip 1, alignx right");
+        add(defaultButton, "alignx left");
+        add(okButton, "alignx right");
     }
     
     @Override
     boolean applyOptions() {
         String[] values = eventList.toArray(new String[eventList.size()]);
-        FilterSettings.BANNED_WORDS.setValue(values);
+        FilterSettings.BANNED_EXTENSIONS.setValue(values);
         spamManager.adjustSpamFilters();
         return false;
     }
 
     @Override
     boolean hasChanged() {
-        List model = Arrays.asList(FilterSettings.BANNED_WORDS.getValue());
+        List model = Arrays.asList(FilterSettings.BANNED_EXTENSIONS.getValue());
         String[] values = eventList.toArray(new String[eventList.size()]);
         
         return model.equals(new ArrayList<String>(Arrays.asList(values)));
@@ -79,7 +85,25 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
 
     @Override
     public void initOptions() {
-        String[] bannedWords = FilterSettings.BANNED_WORDS.getValue();
+        String[] bannedWords = FilterSettings.BANNED_EXTENSIONS.getValue();
         eventList.addAll(new ArrayList<String>(Arrays.asList(bannedWords)));
+    }
+    
+    /**
+	 * Reverts the extensions not shown in search results to the default setting
+     */
+    private class DefaultAction extends AbstractAction {
+        public DefaultAction() {
+            putValue(Action.NAME, I18n.tr("Use Default"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Revert to default settings"));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            FilterSettings.BANNED_EXTENSIONS.revertToDefault();
+            String[] bannedWords = FilterSettings.BANNED_EXTENSIONS.getValue();
+            eventList.clear();
+            eventList.addAll(new ArrayList<String>(Arrays.asList(bannedWords)));
+        }
     }
 }

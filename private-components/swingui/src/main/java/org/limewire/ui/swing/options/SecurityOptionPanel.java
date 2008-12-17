@@ -161,9 +161,11 @@ public class SecurityOptionPanel extends OptionPanel {
     private class FilteringPanel extends OptionPanel {
 
         private FilterKeywordOptionPanel filterKeywordPanel;
+        private FilterFileExtensionsOptionPanel filterFileExtensionPanel;
         
         private JCheckBox adultContentCheckBox;
         private JButton filterKeywordsButton;
+        private JButton filterFileExtensionsButton;
         
         public FilteringPanel() {
             super(I18n.tr("Filtering"));
@@ -171,35 +173,45 @@ public class SecurityOptionPanel extends OptionPanel {
             filterKeywordPanel = new FilterKeywordOptionPanel(spamManager, new OKDialogAction());
             filterKeywordPanel.setPreferredSize(new Dimension(300,400));
             
+            filterFileExtensionPanel = new FilterFileExtensionsOptionPanel(spamManager, new OKDialogAction());
+            filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
+            
             adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content"));
             adultContentCheckBox.setContentAreaFilled(false);
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
                     I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
             
+            filterFileExtensionsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
+                    filterFileExtensionPanel, I18n.tr("Filter File Extensions"),
+                    I18n.tr("Filter File Extensions..."), I18n.tr("Restrict files with certain extensions from being displayed in search results")));
+            
             add(new JLabel(I18n.tr("In search results...")), "wrap");
             
             add(adultContentCheckBox, "split, gapleft 20, wrap");
             
-            add(filterKeywordsButton);
+            add(filterKeywordsButton, "split, gapright 10");
+            add(filterFileExtensionsButton);
         }
         
         @Override
         boolean applyOptions() {
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
-            return filterKeywordPanel.applyOptions();
+            return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
             return  FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
-                    || filterKeywordPanel.hasChanged();
+                    || filterKeywordPanel.hasChanged()
+                    || filterFileExtensionPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
             adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
             filterKeywordPanel.initOptions();
+            filterFileExtensionPanel.initOptions();
         }
     }
 }
