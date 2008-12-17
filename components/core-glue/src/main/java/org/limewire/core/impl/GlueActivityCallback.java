@@ -19,6 +19,7 @@ import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.upload.UploadListener;
 import org.limewire.core.impl.upload.UploadListenerList;
+import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 
@@ -311,13 +312,14 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
             if (!torrent.isActive())
                 return;
             boolean approve = true;
-            if (!torrent.isComplete()) {
+            
+            if(!torrent.isComplete()) {
                 approve = guiCallback.promptTorrentDownloading();
-            } else if (torrent.getRatio() < 1.0f) {
+            } else if (QuestionsHandler.WARN_TORRENT_SEED_MORE.getValue() && torrent.getRatio() < 1.0f) {
                 approve = guiCallback.promptTorrentSeedRatioLow();
             }
     
-            if (approve && torrent.isActive()) {
+            if(approve && torrent.isActive()) {
                 torrentManager
                         .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
             }
