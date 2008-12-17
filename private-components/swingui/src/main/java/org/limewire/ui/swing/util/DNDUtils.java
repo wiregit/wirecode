@@ -60,6 +60,13 @@ public class DNDUtils {
                 || transferSupport.isDataFlavorSupported(URIFlavor)
                 || transferSupport.isDataFlavorSupported(LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR);
     }
+    
+    /**
+     * Returns array of all flavors we consider to be file flavors. 
+     */
+    public static DataFlavor[] getFileFlavors() {
+        return new DataFlavor[] {DataFlavor.javaFileListFlavor, URIFlavor, LocalFileTransferable.LOCAL_FILE_DATA_FLAVOR};
+    }
 
     /**
      * Extracts the array of files from a transferable
@@ -105,6 +112,18 @@ public class DNDUtils {
         } catch (ClassNotFoundException cnfe) {
             return null;
         }
+    }
+
+    /**
+     * Returns true if the supplied flavor is what we consider to be a file flavor. 
+     */
+    public static boolean isFileFlavor(DataFlavor flavor) {
+        for(DataFlavor dataFlavor : getFileFlavors()) {
+            if(dataFlavor.equals(flavor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
