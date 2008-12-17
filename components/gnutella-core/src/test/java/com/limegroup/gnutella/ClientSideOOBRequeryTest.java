@@ -876,7 +876,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         { // send back a query request, the TestUploader should service upload
             rfd = makeRFD(urn, UPLOADER_PORT + 1);
-            Response[] res = new Response[] { responseFactory.createResponse(10, 10, "whatever", UrnHelper.SHA1) };
+            Response[] res = new Response[] { responseFactory.createResponse(10, 10, "whatever", urn) };
             m = queryReplyFactory.createQueryReply(urnQueryGUID, (byte) 1,
                     UPLOADER_PORT+1, myIP(), 0, res, GUID.makeGuid(),
                     new byte[0], false, false, true, true, false, false, null);
