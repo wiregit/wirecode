@@ -305,7 +305,7 @@ public class AppFrame extends SingleFrameApplication {
      * Sets some mac only UI settings.
      */
     private void initMacUIDefaults() {
-        UIManager.put("MenuItemUI", javax.swing.plaf.multi.MultiMenuItemUI.class);
+        UIManager.put("MenuItemUI", "javax.swing.plaf.multi.MultiMenuItemUI");
     }
    
     
