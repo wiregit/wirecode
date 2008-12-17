@@ -11,6 +11,7 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.api.spam.SpamManager;
+import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
@@ -163,6 +164,7 @@ public class SecurityOptionPanel extends OptionPanel {
         private FilterKeywordOptionPanel filterKeywordPanel;
         private FilterFileExtensionsOptionPanel filterFileExtensionPanel;
         
+        private JCheckBox copyrightContentCheckBox;
         private JCheckBox adultContentCheckBox;
         private JButton filterKeywordsButton;
         private JButton filterFileExtensionsButton;
@@ -176,8 +178,12 @@ public class SecurityOptionPanel extends OptionPanel {
             filterFileExtensionPanel = new FilterFileExtensionsOptionPanel(spamManager, new OKDialogAction());
             filterFileExtensionPanel.setPreferredSize(new Dimension(300,400));
             
-            adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content"));
+            copyrightContentCheckBox = new JCheckBox(I18n.tr("Don't let me download or upload files copyright owners request not be shared"));
+            copyrightContentCheckBox.setContentAreaFilled(false);
+            
+            adultContentCheckBox = new JCheckBox(I18n.tr("Don't show adult content in search results"));
             adultContentCheckBox.setContentAreaFilled(false);
+            
             filterKeywordsButton = new JButton(new DialogDisplayAction( SecurityOptionPanel.this,
                     filterKeywordPanel, I18n.tr("Filter Keywords"),
                     I18n.tr("Filter Keywords..."),I18n.tr("Restrict files with certain words from being displayed in search results")));
@@ -188,6 +194,7 @@ public class SecurityOptionPanel extends OptionPanel {
             
             add(new JLabel(I18n.tr("In search results...")), "wrap");
             
+            add(copyrightContentCheckBox, "split, gapleft 20, wrap");
             add(adultContentCheckBox, "split, gapleft 20, wrap");
             
             add(filterKeywordsButton, "split, gapright 10");
@@ -196,19 +203,25 @@ public class SecurityOptionPanel extends OptionPanel {
         
         @Override
         boolean applyOptions() {
+            ContentSettings.USER_WANTS_MANAGEMENTS.setValue(copyrightContentCheckBox.isSelected());
+            ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(copyrightContentCheckBox.isSelected());
+            
             FilterSettings.FILTER_ADULT.setValue(adultContentCheckBox.isSelected());
             return filterKeywordPanel.applyOptions() || filterFileExtensionPanel.applyOptions();
         }
 
         @Override
         boolean hasChanged() {
-            return  FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
+            return  ContentSettings.USER_WANTS_MANAGEMENTS.getValue() != copyrightContentCheckBox.isSelected()
+                    ||  ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue() != copyrightContentCheckBox.isSelected()
+                    ||FilterSettings.FILTER_ADULT.getValue() != adultContentCheckBox.isSelected()
                     || filterKeywordPanel.hasChanged()
                     || filterFileExtensionPanel.hasChanged();
         }
 
         @Override
         public void initOptions() {
+            copyrightContentCheckBox.setSelected(ContentSettings.USER_WANTS_MANAGEMENTS.getValue() && ContentSettings.CONTENT_MANAGEMENT_ACTIVE.getValue());
             adultContentCheckBox.setSelected(FilterSettings.FILTER_ADULT.getValue());
             filterKeywordPanel.initOptions();
             filterFileExtensionPanel.initOptions();
