@@ -1,8 +1,8 @@
 package org.limewire.ui.swing.wizard;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
@@ -25,13 +25,13 @@ public class AutoDirectoryManageConfig {
     /**
      * Determines the OS specific list of directories to manage by default
      */
-    public static Collection<File> getManagedDirectories() {
-        Collection<File> dirs = new LinkedList<File>();
+    public static Set<File> getManagedDirectories() {
+        Set<File> dirs = new HashSet<File>();
 
         if (OSUtils.isWindows()) {
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
-        } else if (OSUtils.isAnyMac()) {
+        } else {
         
             String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);
             
@@ -43,18 +43,15 @@ public class AutoDirectoryManageConfig {
             dirs.add(new File(homePath + "/Pictures"));
             dirs.add(new File(homePath + "/Public"));
         }
-        else {
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.HOME)));
-        }
-        
+                
         return dirs;
     }
     
     /**
      * Determines the OS specific list of directories to exclude
      */
-    public static  Collection<File> getExcludedDirectories() {
-        Collection<File> dirs = new LinkedList<File>();
+    public static  Set<File> getExcludedDirectories() {
+        Set<File> dirs = new HashSet<File>();
                 
         return dirs;
     }
