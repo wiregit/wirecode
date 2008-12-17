@@ -25,18 +25,18 @@ import org.limewire.listener.ListenerSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 
-import ca.odell.glazedlists.CompositeList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.matchers.Matcher;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileListChangedEvent;
 import com.limegroup.gnutella.library.FileManager;
+
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 @Singleton
 class ShareListManagerImpl implements ShareListManager {
@@ -79,13 +79,16 @@ class ShareListManagerImpl implements ShareListManager {
                     case REMOVED:
                         unloadFilesForFriend(friend);
                         break;
+                    case DELETE:
+                        deleteFriendShareList(friend);
+                        break;
                 }
             }
         });
     }
 
     /**
-     * Similar to {@link #removeFriendShareList}, but does not save.
+     * Similar to {@link #deleteFriendShareList}, but does not save.
      * 
      * 1. Removes managedFilelist listener
      * 2. Removes lists associated with this friend from maps
@@ -93,12 +96,13 @@ class ShareListManagerImpl implements ShareListManager {
      *
      * @param friend
      */
-    private void unloadFilesForFriend(Friend friend) {
-        fileManager.unloadFilesForFriend(friend.getId());
+    private void unloadFilesForFriend(Friend friend) {        
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
+            friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
             list.dispose();
         }
+        fileManager.unloadFilesForFriend(friend.getId());
     }
 
     @Override
@@ -134,14 +138,13 @@ class ShareListManagerImpl implements ShareListManager {
         return friendLocalFileLists.get(friend.getId());
     }
 
-    @Override    
-    public void removeFriendShareList(Friend friend) {
-        fileManager.removeFriendFileList(friend.getId());
+    private void deleteFriendShareList(Friend friend) {        
         FriendFileListImpl list = friendLocalFileLists.remove(friend.getId());
         if(list != null) {
-            friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_REMOVED, list, friend));
+            friendShareListEventListener.handleEvent(new FriendShareListEvent(FriendShareListEvent.Type.FRIEND_SHARE_LIST_DELETED, list, friend));
             list.dispose();
         }
+        fileManager.removeFriendFileList(friend.getId());
     }
     
     private class GnutellaFileListImpl extends LocalFileListImpl implements GnutellaFileList {

@@ -142,12 +142,12 @@ public class LibraryImagePanel extends JPanel
         add(subPanel);
     }
         
-    private File getParentFolder(LocalFileItem localFileItem){
+    private static File getParentFolder(LocalFileItem localFileItem){
         return localFileItem.isIncomplete() ? SharingSettings.INCOMPLETE_DIRECTORY.getValue() : 
             ((localFileItem.getFile() == null) ? SharingSettings.INCOMPLETE_DIRECTORY.getValue() : localFileItem.getFile().getParentFile());
     }
     
-    private class DirectoryMatcher implements Matcher<LocalFileItem>{
+    private static class DirectoryMatcher implements Matcher<LocalFileItem>{
         
         private File parentDirectory;
 

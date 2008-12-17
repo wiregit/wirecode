@@ -285,7 +285,7 @@ public class BrowseHostHandler {
 
     private void readQueryRepliesFromStream(HttpResponse response, FriendPresence friendPresence) {
         Address address = ((AddressFeature)friendPresence.getFeature(AddressFeature.ID)).getFeature();
-        if(response.getEntity() != null) {
+        if(response.getEntity() != null && address != null) { // addres can be null if either party is concurrently logging out
             InputStream in;
             try {
                 in = response.getEntity().getContent();

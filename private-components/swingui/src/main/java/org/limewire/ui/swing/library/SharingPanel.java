@@ -25,8 +25,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.effect.LayerEffect;
@@ -53,8 +51,8 @@ import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
-import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.MouseableTable.TableColors;
+import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -67,6 +65,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
+import net.miginfocom.swing.MigLayout;
 
 abstract class SharingPanel extends AbstractFileListPanel implements PropertyChangeListener {
     private final LibraryTableFactory tableFactory;
@@ -139,24 +138,14 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }
     
     private JComponent createMyCategoryAction(Category category, EventList<LocalFileItem> filtered, final LocalFileList friendFileList) {
-        EventList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
+        FilterList<LocalFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<LocalFileItem>(getFilterTextField(), new LibraryTextFilterator<LocalFileItem>()));
+        addDisposable(filterList);
 
-        Comparator<LocalFileItem> c = new java.util.Comparator<LocalFileItem>() {
-            @Override
-            public int compare(LocalFileItem fileItem1, LocalFileItem fileItem2) {
-                boolean containsF1 = friendFileList.contains(fileItem1.getFile());
-                boolean containsF2 = friendFileList.contains(fileItem2.getFile());
-                if(containsF1 && containsF2)
-                    return 0;
-                else if(containsF1 && !containsF2)
-                    return -1;
-                else
-                    return 1;
-            }
-        };
+        Comparator<LocalFileItem> c = new LocalFileItemComparator(friendFileList);
         
         SortedList<LocalFileItem> sortedList = new SortedList<LocalFileItem>(filterList, c);
+        addDisposable(sortedList);
 
         JScrollPane scrollPane;
         
@@ -482,6 +471,26 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         } else if(evt.getPropertyName().equals("imageCollection")) {
             locked.get(Category.IMAGE).setLocked((Boolean)evt.getNewValue());
             listeners.get(Category.IMAGE).setSelect((Boolean)evt.getNewValue());
+        }
+    }
+
+    private static class LocalFileItemComparator implements Comparator<LocalFileItem> {
+        private final LocalFileList friendFileList;
+
+        public LocalFileItemComparator(LocalFileList friendFileList) {
+            this.friendFileList = friendFileList;
+        }
+
+        @Override
+            public int compare(LocalFileItem fileItem1, LocalFileItem fileItem2) {
+            boolean containsF1 = friendFileList.contains(fileItem1.getFile());
+            boolean containsF2 = friendFileList.contains(fileItem2.getFile());
+            if(containsF1 && containsF2)
+                return 0;
+            else if(containsF1 && !containsF2)
+                return -1;
+            else
+                return 1;
         }
     }
 }

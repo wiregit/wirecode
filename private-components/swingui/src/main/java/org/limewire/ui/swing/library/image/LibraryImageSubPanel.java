@@ -19,13 +19,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
@@ -44,8 +43,9 @@ import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+import net.miginfocom.swing.MigLayout;
 
-public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem> {
+public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem>, Disposable {
     
     @Resource
     private Color lineColor;
@@ -114,7 +114,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         //third row
         add(layer, "span 2, grow");
 
-        eventList.addListEventListener(this);
+        currentEventList.addListEventListener(this);
     }
     
     public void setImageEditor(TableRendererEditor editor) {
@@ -165,7 +165,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     }
 
 
-    public class MouseReaction implements MouseListener, MouseMotionListener {
+    private static class MouseReaction implements MouseListener, MouseMotionListener {
 
         private ImageList imageList;
         private TableRendererEditor hoverComponent;
@@ -226,5 +226,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
   
     public void dispose() {
         ((ImageListModel)imageList.getModel()).dispose();
+        currentEventList.removeListEventListener(this);
     }
 }
