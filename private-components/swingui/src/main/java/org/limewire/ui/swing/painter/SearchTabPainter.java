@@ -1,45 +1,50 @@
 package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.painter.AbstractPainter;
+import org.jdesktop.swingx.util.PaintUtils;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
+public class SearchTabPainter extends AbstractPainter<FancyTab> {
     
-    @Resource private Color topBevelBackground;
-    @Resource private Color topBevelBorder;
-    @Resource private Color backgroundTopGradient;
-    @Resource private Color backgroundBottomGradient;
+    private final Paint topBevelBackground;
+    private final Paint topBevelBorder;
     
-    private final GradientPaint gradient;
+    private Paint background;
+    
+    private final Paint bottomRow;
     
     private Area tabAreaCache   = null;
     private int  tabWidthCache  = 0;
     private int  tabHeightCache = 0;
     
-    public SearchTabSelectionPainter() {
+    public SearchTabPainter(Paint topBevelBackground, Paint topBevelBorder, Paint background,
+            Paint bottomRow) {
+        
         GuiUtils.assignResources(this);
         
         this.setAntialiasing(true);
         this.setCacheable(true);
         
-        gradient = new GradientPaint(0, 0, this.backgroundTopGradient, 0, 1, this.backgroundBottomGradient);
+        this.topBevelBackground = topBevelBackground;
+        this.topBevelBorder = topBevelBorder;
+        this.background = background;
+        this.bottomRow = bottomRow;
     }
 
     
     private void cacheTabArea(int width, int height) {
         if (this.tabWidthCache == width && this.tabHeightCache == height)  return;        
         
-        // System.out.println("Hard Miss: " + this);
+        background = PaintUtils.resizeGradient(background, 0, height);
         
         Area compound = new Area(new RoundRectangle2D.Float(10, 3, width-1-20, height-1, 20, 20));
         
@@ -55,29 +60,33 @@ public class SearchTabSelectionPainter extends AbstractPainter<FancyTab> {
     
     @Override
     protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
-        // System.out.println("Soft Miss: " + this);
         
         cacheTabArea(width, height);
 
         // Draw top bevel
-        g.setColor(this.topBevelBackground);
+        g.setPaint(this.topBevelBackground);
         g.fillRoundRect(10, 0, width-2-20, 20, 20, 20);
         
         // Draw top border
-        g.setColor(this.topBevelBorder);
+        g.setPaint(this.topBevelBorder);
         g.drawRoundRect(10, 0, width-2-20, 20, 20, 20);
         
         // Draw tab
-        g.setPaint(gradient);
+        g.setPaint(background);
         g.fill(this.tabAreaCache);
         
-        // Hack for Anthony to correct the antialiasing for the bottom border and tab mixing
-        g.setColor(new Color(0xca,0xca,0xca));
-        g.drawLine(0,height-2,0,height-2);
-        g.drawLine(width-1,height-2,width-1,height-2);
-        g.setColor(new Color(0xab,0xab,0xab));
-        g.drawLine(1,height-2,1,height-2);
-        g.drawLine(width-2,height-2,width-2,height-2);
+        if (bottomRow == null) {        
+            // Hack for Anthony to correct the antialiasing for the bottom border and tab mixing
+            g.setPaint(new Color(0xca,0xca,0xca));
+            g.drawLine(0,height-2,0,height-2);
+            g.drawLine(width-1,height-2,width-1,height-2);
+            g.setPaint(new Color(0xab,0xab,0xab));
+            g.drawLine(1,height-2,1,height-2);
+            g.drawLine(width-2,height-2,width-2,height-2);
+        }
+        else {
+            g.setPaint(bottomRow);
+            g.drawLine(0, height-1, width-1, height-1);
+        }
     }
-
 }

@@ -16,6 +16,8 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.Search;
@@ -23,13 +25,13 @@ import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.FancyTabListFactory;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.NoOpAction;
 import org.limewire.ui.swing.components.SearchBar;
 import org.limewire.ui.swing.components.TabActionMap;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
@@ -38,7 +40,7 @@ import org.limewire.ui.swing.nav.NavSelectable;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.BarPainterFactory;
-import org.limewire.ui.swing.painter.SearchTabSelectionPainter;
+import org.limewire.ui.swing.painter.SearchTabPainterFactory;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
 import org.limewire.ui.swing.search.SearchNavigator;
@@ -49,8 +51,6 @@ import org.mozilla.browser.MozillaInitialization;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class TopPanel extends JXPanel implements SearchNavigator {
@@ -74,7 +74,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
                     final LeftPanel leftPanel,
                     SearchBar searchBar,
                     FancyTabListFactory fancyTabListFactory,
-                    BarPainterFactory barPainterFactory) {        
+                    BarPainterFactory barPainterFactory,
+                    SearchTabPainterFactory tabPainterFactory) {        
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;        
@@ -149,8 +150,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setCloseOneText(I18n.tr("Close search"));
         searchList.setCloseOtherText(I18n.tr("Close other searches"));
         searchList.setRemovable(true);
-        searchList.setSelectionPainter(new SearchTabSelectionPainter());
-        searchList.setHighlightPainter(null);
+        searchList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
+        searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
         searchList.setTabInsets(new Insets(0,10,3,10));
 
 //        Line line = Line.createVerticalLine(Color.GRAY);

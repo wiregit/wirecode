@@ -305,10 +305,11 @@ public class AppFrame extends SingleFrameApplication {
      * Sets some mac only UI settings.
      */
     private void initMacUIDefaults() {
-        UIManager.put("MenuItemUI", "javax.swing.plaf.multi.MultiMenuItemUI");
+        UIManager.put("MenuItemUI", "javax.swing.plaf.basic.BasicMenuItemUI");
+        UIManager.put("CheckBoxMenuItemUI", "javax.swing.plaf.basic.BasicCheckBoxMenuItemUI");
+        UIManager.put("RadioButtonMenuItemUI", "javax.swing.plaf.basic.BasicRadioButtonMenuItemUI");
     }
-   
-    
+        
     /**
      * Changes all default background colors that are equal to Panel.background to the
      * bgColor set in properties. Also sets Table.background.
