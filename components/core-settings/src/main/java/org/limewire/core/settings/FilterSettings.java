@@ -113,7 +113,7 @@ public class FilterSettings extends LimeProps {
      * search results.
      */
     public static final StringArraySetting BANNED_EXTENSIONS =
-        FACTORY.createStringArraySetting("BANNED_EXTENSIONS", new String[]{".vbs",".asf",".asx",".wmv"});
+        FACTORY.createStringArraySetting("BANNED_EXTENSIONS", new String[]{".vbs",".asf",".asx",".wmv",".html",".htm"});
     
     /**
      * Whether to filter queries containing hashes.

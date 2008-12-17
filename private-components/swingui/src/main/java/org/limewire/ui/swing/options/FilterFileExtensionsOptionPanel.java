@@ -85,6 +85,7 @@ public class FilterFileExtensionsOptionPanel extends AbstractFilterOptionPanel {
 
     @Override
     public void initOptions() {
+        eventList.clear();
         String[] bannedWords = FilterSettings.BANNED_EXTENSIONS.getValue();
         eventList.addAll(new ArrayList<String>(Arrays.asList(bannedWords)));
     }
