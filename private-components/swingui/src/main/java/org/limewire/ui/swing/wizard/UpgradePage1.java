@@ -1,11 +1,15 @@
 package org.limewire.ui.swing.wizard;
 
+import java.io.File;
+import java.util.Collection;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.library.LibraryData;
+import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 
@@ -54,8 +58,12 @@ public class UpgradePage1 extends WizardPage {
     
     @Override
     public void applySettings() {
-        // TODO Auto-generated method stub
+        InstallSettings.SCAN_FILES.setValue(AutoDirectoryManageConfig.shouldScanFiles());
         
+        Collection<File> manage = AutoDirectoryManageConfig.getManagedDirectories();
+        Collection<File> exclude = AutoDirectoryManageConfig.getExcludedDirectories();
+        
+        libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());        
     }
 
     @Override

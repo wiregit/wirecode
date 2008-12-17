@@ -73,14 +73,21 @@ public class SetupPage1 extends WizardPage {
         add(label, "gaptop 10, gapleft 10, wrap");
         add(learnMoreButton, "gapleft 76, wrap");
         
-        label = new JLabel(associationsAndStartupTitle);
-        decorator.decorateHeadingText(label);
-        add(label, "gaptop 20, gapleft 14, wrap");
+        if (LimeAssociations.isMagnetAssociationSupported() 
+               || LimeAssociations.isTorrentAssociationSupported()
+               || shouldShowStartOnStartupWindow()) {
+            label = new JLabel(associationsAndStartupTitle);
+            decorator.decorateHeadingText(label);
+            add(label, "gaptop 20, gapleft 14, wrap");
+        }
         
-        add(associationCheck, "gaptop 10, gapleft 40");
-        label = new MultiLineLabel(associationsText, 500);
-        decorator.decorateNormalText(label);       
-        add(label, "gaptop 10, gapleft 10, wrap");
+        if (LimeAssociations.isMagnetAssociationSupported() 
+                || LimeAssociations.isTorrentAssociationSupported()) {
+            add(associationCheck, "gaptop 10, gapleft 40");
+            label = new MultiLineLabel(associationsText, 500);
+            decorator.decorateNormalText(label);       
+            add(label, "gaptop 10, gapleft 10, wrap");
+        }
         
         if (shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);

@@ -135,10 +135,21 @@ public class SetupPage2 extends WizardPage {
     
     @Override
     public void applySettings() {
-        InstallSettings.SCAN_FILES.setValue(true);
-        LibraryManagerModel model = treeTable.getLibraryModel();
-        Collection<File> manage = model.getManagedDirectories();
-        Collection<File> exclude = model.getExcludedDirectories();
+        InstallSettings.SCAN_FILES.setValue(AutoDirectoryManageConfig.shouldScanFiles());
+        
+        Collection<File> manage;
+        Collection<File> exclude;
+        
+        if (autoButton.isSelected()) {
+            LibraryManagerModel model = treeTable.getLibraryModel();
+            manage = model.getManagedDirectories();
+            exclude = model.getExcludedDirectories();
+        } 
+        else {
+            manage = AutoDirectoryManageConfig.getManagedDirectories();
+            exclude = AutoDirectoryManageConfig.getExcludedDirectories();
+        }
+        
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());
     }
     
