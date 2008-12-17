@@ -327,4 +327,13 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
             }
         }
     }
+
+    /**
+     * Recalls init options on all created panels.
+     */
+    public void initOptions() {
+        for(OptionPanel optionPanel : panels.values()) {
+            optionPanel.initOptions();
+        }
+    }
 }

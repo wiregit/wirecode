@@ -206,6 +206,7 @@ public class AppFrame extends SingleFrameApplication {
     @EventSubscriber
     public void handleShowOptionsDialog(OptionsDisplayEvent event) {
         if (!options.isVisible()) {
+            options.initOptions();
             options.setLocationRelativeTo(GuiUtils.getMainFrame());
             options.setVisible(true);
         }

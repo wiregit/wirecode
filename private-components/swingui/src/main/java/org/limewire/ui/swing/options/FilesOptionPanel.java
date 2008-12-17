@@ -329,7 +329,7 @@ public class FilesOptionPanel extends OptionPanel {
             }
             
             //enable daap setting
-            DaapSettings.DAAP_ENABLED.setValue(requirePassWordCheckBox.isSelected());
+            DaapSettings.DAAP_ENABLED.setValue(shareWithITunesCheckBox.isSelected());
             
             //save password value
             if (!DaapSettings.DAAP_PASSWORD.equals(password)) {
@@ -381,13 +381,14 @@ public class FilesOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            shareWithITunesCheckBox.setSelected(DaapSettings.DAAP_ENABLED.getValue() && 
-                    daapManager.isServerRunning());
+            shareWithITunesCheckBox.setSelected(DaapSettings.DAAP_ENABLED.getValue());
 
             requirePassWordCheckBox.setSelected(DaapSettings.DAAP_REQUIRES_PASSWORD.getValue());
             if(requirePassWordCheckBox.isSelected()) {
                 passwordField.setText(DaapSettings.DAAP_PASSWORD.getValue());
             }
+            
+            setPasswordVisible(shareWithITunesCheckBox.isSelected());
         }
         
         private void setPasswordVisible(boolean value) {
