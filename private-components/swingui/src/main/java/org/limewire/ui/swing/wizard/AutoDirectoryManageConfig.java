@@ -27,13 +27,31 @@ public class AutoDirectoryManageConfig {
      */
     public static Collection<File> getManagedDirectories() {
         Collection<File> dirs = new LinkedList<File>();
-        
+
         if (OSUtils.isWindows()) {
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
-        } 
+        } else if (OSUtils.isAnyMac()) {
+        
+            String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);
+            
+            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
+            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
+            dirs.add(new File(homePath + "/Downloads"));
+            dirs.add(new File(homePath + "/Movies"));
+            dirs.add(new File(homePath + "/Music"));
+            dirs.add(new File(homePath + "/Pictures"));
+            dirs.add(new File(homePath + "/Public"));
+        }
         else {
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.HOME)));
+        }
+
+        // Remove any bad directories to be safe
+        for ( File testDir : dirs ) {
+            if (!testDir.exists()) {
+                dirs.remove(testDir);
+            }
         }
         
         return dirs;
@@ -44,11 +62,7 @@ public class AutoDirectoryManageConfig {
      */
     public static  Collection<File> getExcludedDirectories() {
         Collection<File> dirs = new LinkedList<File>();
-        
-        if (OSUtils.isAnyMac()) {
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.APPLICATION_DATA)));
-        }
-        
+                
         return dirs;
     }
 }

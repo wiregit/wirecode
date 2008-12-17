@@ -140,7 +140,7 @@ public class SetupPage2 extends WizardPage {
         Collection<File> manage;
         Collection<File> exclude;
         
-        if (autoButton.isSelected()) {
+        if (manualButton.isSelected()) {
             LibraryManagerModel model = treeTable.getLibraryModel();
             manage = model.getManagedDirectories();
             exclude = model.getExcludedDirectories();
