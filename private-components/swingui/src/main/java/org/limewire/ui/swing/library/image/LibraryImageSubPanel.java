@@ -39,10 +39,8 @@ import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 import net.miginfocom.swing.MigLayout;
 
 public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem>, Disposable {
@@ -65,7 +63,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     private  JXLayer<JComponent> layer;
 
     private EventList<LocalFileItem> currentEventList;
-    private EventList<LocalFileItem> listSelection;    
     
     public LibraryImageSubPanel(final File parentFolder, EventList<LocalFileItem> eventList, LocalFileList fileList, ImageLibraryPopupParams params) {       
         GuiUtils.assignResources(this); 
@@ -86,11 +83,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
-        imageList = new ImageList(currentEventList, fileList);
-        EventSelectionModel<LocalFileItem> model = new EventSelectionModel<LocalFileItem>(currentEventList);
-        imageList.setSelectionModel(model);
-        model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        this.listSelection = model.getSelected();
+        imageList = new ImageList(currentEventList, fileList);        
         //imageList.setTransferHandler(transferHandler);
         imageList.setPopupHandler(new MyImageLibraryPopupHandler(this, params));
         
@@ -114,7 +107,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         //third row
         add(layer, "span 2, grow");
 
-        currentEventList.addListEventListener(this);
+        eventList.addListEventListener(this);
     }
     
     public void setImageEditor(TableRendererEditor editor) {
@@ -131,7 +124,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     }
     
     public List<LocalFileItem> getSelectedItems(){
-        return new ArrayList<LocalFileItem>(listSelection);
+        return new ArrayList<LocalFileItem>(imageList.getListSelection());
     }
 
     
@@ -165,7 +158,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
     }
 
 
-    private static class MouseReaction implements MouseListener, MouseMotionListener {
+    public class MouseReaction implements MouseListener, MouseMotionListener {
 
         private ImageList imageList;
         private TableRendererEditor hoverComponent;
@@ -225,7 +218,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
 
   
     public void dispose() {
-        ((ImageListModel)imageList.getModel()).dispose();
+        imageList.dispose();
         currentEventList.removeListEventListener(this);
     }
 }
