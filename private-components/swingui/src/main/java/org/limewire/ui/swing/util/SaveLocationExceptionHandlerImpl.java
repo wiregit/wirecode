@@ -11,7 +11,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -57,19 +56,13 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
     public void handleSaveLocationException(final DownloadAction downLoadAction,
             final SaveLocationException sle, final boolean supportNewSaveDir) {
         
-        if (SwingUtilities.isEventDispatchThread()) {
-            handleException(downLoadAction, sle, supportNewSaveDir);
-            
-        } else {
-            // Post Runnable on event queue to execute on UI thread.  This is
-            // necessary if the handler method has been invoked from a
-            // background thread.
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    handleException(downLoadAction, sle, supportNewSaveDir);
-                }
-            });
-        }
+        // Create Runnable to execute task on UI thread.  This is necessary
+        // if the handler method has been invoked from a background thread.
+        SwingUtils.invokeLater(new Runnable() {
+            public void run() {
+                handleException(downLoadAction, sle, supportNewSaveDir);
+            }
+        });
     }
 
     /**
@@ -87,14 +80,13 @@ public class SaveLocationExceptionHandlerImpl implements SaveLocationExceptionHa
         if ((sle.getErrorCode() != SaveLocationException.LocationCode.FILE_ALREADY_EXISTS)
             && (sle.getErrorCode() != SaveLocationException.LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO)) {
             // Create user message.
-            StringBuilder buf = new StringBuilder(I18n.tr("Unable to download"));
-            buf.append(": ").append(sle.getErrorCode());
-            buf.append("\nfile ").append(sle.getFile());
+            String message = I18n.tr("Unable to download: {0}\nfile {1}", 
+                    sle.getErrorCode(), sle.getFile());
             
             // Log exception and display user message.
-            LOG.error(buf.toString(), sle);
+            LOG.error(message, sle);
             FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
-                    buf.toString(), I18n.tr("Download"), 
+                    message, I18n.tr("Download"), 
                     JOptionPane.INFORMATION_MESSAGE);
             return;
         }
