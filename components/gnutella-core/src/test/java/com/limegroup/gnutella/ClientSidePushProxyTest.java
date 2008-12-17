@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -381,7 +382,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
           
                BufferedReader reader = new BufferedReader(new InputStreamReader(push.getInputStream())); 
                String currLine = reader.readLine(); 
-               assertEquals("GET /get/10/boalt.org HTTP/1.1", currLine); 
+               assertEquals(MessageFormat.format("GET /uri-res/N2R?{0} HTTP/1.1", UrnHelper.SHA1), currLine); 
            } finally { 
                push.close(); 
            }
