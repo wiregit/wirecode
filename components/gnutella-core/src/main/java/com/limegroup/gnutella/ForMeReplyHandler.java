@@ -50,7 +50,7 @@ import com.limegroup.gnutella.xml.LimeXMLUtils;
  * sent whose reply is for me.
  */
 @Singleton
-public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
+public class ForMeReplyHandler implements ReplyHandler, SecureMessageCallback {
     
     private static final Log LOG = LogFactory.getLog(ForMeReplyHandler.class);
     
