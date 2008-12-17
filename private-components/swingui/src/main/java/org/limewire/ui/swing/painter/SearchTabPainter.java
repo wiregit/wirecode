@@ -8,12 +8,12 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.util.PaintUtils;
-import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.util.GuiUtils;
 
-public class SearchTabPainter extends AbstractPainter<FancyTab> {
+public class SearchTabPainter extends AbstractPainter<JXPanel> {
     
     private final Paint topBevelBackground;
     private final Paint topBevelBorder;
@@ -39,8 +39,7 @@ public class SearchTabPainter extends AbstractPainter<FancyTab> {
         this.background = background;
         this.bottomRow = bottomRow;
     }
-
-    
+  
     private void cacheTabArea(int width, int height) {
         if (this.tabWidthCache == width && this.tabHeightCache == height)  return;        
         
@@ -59,7 +58,7 @@ public class SearchTabPainter extends AbstractPainter<FancyTab> {
     }
     
     @Override
-    protected void doPaint(Graphics2D g, FancyTab object, int width, int height) {
+    protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
         
         cacheTabArea(width, height);
 

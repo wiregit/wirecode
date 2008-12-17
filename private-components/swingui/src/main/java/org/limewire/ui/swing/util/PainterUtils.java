@@ -71,8 +71,6 @@ public class PainterUtils {
     }
     
     public static Color appendAlpha(Color c, double opacity) {
-        System.out.println( Math.round(opacity*255));
-        
         return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int) Math.round(opacity*255));
     }
     
