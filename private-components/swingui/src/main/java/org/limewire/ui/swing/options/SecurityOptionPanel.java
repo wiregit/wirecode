@@ -94,7 +94,7 @@ public class SecurityOptionPanel extends OptionPanel {
             super(I18n.tr("Warning Messages"));
             
             warningMessagesPanel = new WarningMessagesOptionPanel(new OKDialogAction(), new CancelDialogAction());
-            warningMessagesPanel.setPreferredSize(new Dimension(400,130));
+            warningMessagesPanel.validate();
             
             settingsButton = new JButton(new DialogDisplayAction(SecurityOptionPanel.this ,
                     warningMessagesPanel, I18n.tr("Warning Messages"),
