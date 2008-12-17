@@ -1,12 +1,11 @@
-/**
- * 
- */
 package org.limewire.ui.swing.menu.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.URI;
+
+import javax.swing.JOptionPane;
 
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
@@ -16,6 +15,7 @@ import org.limewire.core.api.magnet.MagnetFactory;
 import org.limewire.core.api.magnet.MagnetLink;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
@@ -25,8 +25,11 @@ import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
-import org.limewire.util.NotImplementedException;
 
+/**
+ * An action to prompt the user to open and download a link.  Two link types
+ * are supported: magnet links and torrent links.
+ */
 public class OpenLinkAction extends AbstractAction {
 
     private final Navigator navigator;
@@ -65,7 +68,9 @@ public class OpenLinkAction extends AbstractAction {
                     if (magnetFactory.isMagnetLink(uri)) {
                         MagnetLink[] magnetLinks = magnetFactory.parseMagnetLink(uri);
                         if (magnetLinks.length == 0) {
-                            throw new NotImplementedException("need user feedback");
+                            FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
+                                I18n.tr("Magnet link contains no options."), 
+                                I18n.tr("Open Link"), JOptionPane.INFORMATION_MESSAGE);
                         }
 
                         for (final MagnetLink magnet : magnetLinks) {
@@ -76,9 +81,12 @@ public class OpenLinkAction extends AbstractAction {
                                 searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(magnet
                                         .getQueryString(), SearchCategory.ALL));
                             } else {
-                                throw new NotImplementedException("need user feedback");
+                                FocusJOptionPane.showMessageDialog(GuiUtils.getMainFrame(), 
+                                    I18n.tr("Invalid magnet option."), 
+                                    I18n.tr("Open Link"), JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
+                        
                     } else {
                         downloadTorrent(downloadListManager, saveLocationExceptionHandler,
                                  uri);
