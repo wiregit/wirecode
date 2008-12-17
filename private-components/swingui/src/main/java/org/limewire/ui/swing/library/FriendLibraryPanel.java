@@ -6,6 +6,7 @@ import javax.swing.Action;
 
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -26,6 +27,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
     
     @AssistedInject
     public FriendLibraryPanel(@Assisted Friend friend,
+                    @Assisted FriendFileList friendFileList,
                     @Assisted EventList<RemoteFileItem> eventList, 
                     @Assisted FriendLibraryMediator mediator,
                     CategoryIconManager categoryIconManager, 
@@ -34,7 +36,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
                     LibraryManager libraryManager,
                     LimeHeaderBarFactory headerBarFactory,
                     ButtonDecorator buttonDecorator) {
-        super(eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory);
+        super(friend, friendFileList, eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory);
         
         this.friend = friend;
 
@@ -43,7 +45,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
             addButtonToHeader(new ViewSharedLibraryAction(mediator), buttonDecorator);
         }
         
-        createMyCategories(eventList, friend);
+        createMyCategories(eventList);
         selectFirst();
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
     }

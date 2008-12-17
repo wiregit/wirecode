@@ -38,6 +38,7 @@ import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
@@ -91,16 +92,18 @@ public class MyLibraryPanel extends LibraryPanel {
         
         getHeaderPanel().setText(I18n.tr("My Library"));
         categoryShareWidget = shareFactory.createCategoryShareWidget();
-        createMyCategories(libraryManager.getLibraryManagedList().getSwingModel());
+        createMyCategories(libraryManager.getLibraryManagedList());
         
         selectFirst();
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
-        playerPanel.setPreferredSize(new Dimension(999,999));        
+        playerPanel.setPreferredSize(new Dimension(999,999));
+        setTransferHandler(new LocalFileListTransferHandler(libraryManager.getLibraryManagedList()));
+        
     }
     
-    private void createMyCategories(EventList<LocalFileItem> eventList) {
+    private void createMyCategories(LibraryFileList libraryFileList) {
         for(Category category : Category.getCategoriesInOrder()) {        
             CategorySelectionCallback callback = null;
             if (category == Category.AUDIO) {
@@ -112,7 +115,7 @@ public class MyLibraryPanel extends LibraryPanel {
                 };
             }
             
-            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(eventList, new CategoryFilter(category));
+            FilterList<LocalFileItem> filtered = GlazedListsFactory.filterList(libraryFileList.getSwingModel(), new CategoryFilter(category));
             addCategory(categoryIconManager.getIcon(category), category, 
                     createMyCategoryAction(category, filtered), filtered, callback);
             addDisposable(filtered);

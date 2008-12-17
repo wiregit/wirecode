@@ -13,7 +13,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.dnd.FriendLibraryNavTransferHandler;
+import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
@@ -73,7 +73,7 @@ public class LibraryImageSubPanelFactoryImpl implements LibraryImageSubPanelFact
         list.setImageCellRenderer(enableSharingRenderer(list, currentFriendFileList));
         panel.setImageEditor(enableSharingEditor(currentFriendFileList));
         
-        TransferHandler transferHandler = new FriendLibraryNavTransferHandler(currentFriendFileList);
+        TransferHandler transferHandler = new LocalFileListTransferHandler(currentFriendFileList);
         list.setTransferHandler(transferHandler);
         panel.setTransferHandler(transferHandler);
         

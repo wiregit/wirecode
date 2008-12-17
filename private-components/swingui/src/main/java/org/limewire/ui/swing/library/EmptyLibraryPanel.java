@@ -10,8 +10,10 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.I18n;
 
@@ -28,7 +30,8 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private final FriendLibraryMediator mediator;
         
     @AssistedInject
-    public EmptyLibraryPanel(@Assisted Friend friend,  
+    public EmptyLibraryPanel(@Assisted Friend friend,
+            @Assisted FriendFileList friendFileList,
             @Assisted FriendLibraryMediator mediator, 
             @Assisted JComponent messageComponent,
             LimeHeaderBarFactory headerBarFactory,
@@ -40,7 +43,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
         addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
         createEmptyPanel(messageComponent);
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
-        
+        setTransferHandler(new LocalFileListTransferHandler(friendFileList));
     }
     
     protected String getFullPanelName() {

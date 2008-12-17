@@ -4,6 +4,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -26,6 +27,7 @@ public class FriendLibraryMediator extends LibraryMediator {
     private final ShareListManager shareListManager;
 
     private final Friend friend;
+    private final FriendFileList friendFileList;
     private EventList<RemoteFileItem> eventList;
     
     @AssistedInject
@@ -37,22 +39,22 @@ public class FriendLibraryMediator extends LibraryMediator {
         this.emptyFactory = emptyFactory;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
-        
-        setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new OffLineMessageComponent()));
+        this.friendFileList = shareListManager.getOrCreateFriendShareList(friend);
+        setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new OffLineMessageComponent()));
     }
     
     public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             this.eventList = null;
-            setLibraryCard(emptyFactory.createEmptyLibrary(friend, this, new ConnectionErrorComponent()));
+            setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent()));
             showLibraryCard();
             break;
         case LOADED:
         case LOADING:
             if(this.eventList != eventList) {
                 this.eventList = eventList;
-                setLibraryCard(factory.createFriendLibrary(friend, eventList, this));
+                setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                 showLibraryCard();
             }
             break;

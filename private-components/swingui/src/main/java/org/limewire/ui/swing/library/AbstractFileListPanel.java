@@ -22,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
@@ -31,11 +32,11 @@ import org.jdesktop.swingx.JXButton;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.components.Line;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -384,5 +385,19 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         public JButton getButton() {
             return button;
         }
-    }    
+    }
+    
+    /**
+     * Sets the transfer handler for the header panel card panel and selection panel.
+     * The transfer handler for the library and image lists may already be set at creation time in 
+     * the LibraryFactory. My Library needs a special transfer handler for example to allow dragging 
+     * and dropping from my library to other people.
+     */
+    @Override
+    public void setTransferHandler(TransferHandler newHandler) {
+        super.setTransferHandler(newHandler);
+        headerPanel.setTransferHandler(newHandler);
+        selectionPanel.setTransferHandler(newHandler);
+        cardPanel.setTransferHandler(newHandler);
+    }
 }

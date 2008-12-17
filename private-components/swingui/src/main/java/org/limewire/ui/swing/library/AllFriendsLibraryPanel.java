@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.util.ButtonDecorator;
@@ -21,12 +22,13 @@ public class AllFriendsLibraryPanel extends AbstractFriendLibraryPanel {
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
                     LimeHeaderBarFactory headerBarFactory,
-                    ButtonDecorator buttonDecorator) {
-        super(remoteLibraryManager.getAllFriendsFileList().getSwingModel(), 
+                    ButtonDecorator buttonDecorator,
+                    ShareListManager shareListManager) {
+        super(null, null, remoteLibraryManager.getAllFriendsFileList().getSwingModel(), 
                 categoryIconManager, tableFactory, downloadListManager,
                 libraryManager, headerBarFactory);
         
-        createMyCategories(remoteLibraryManager.getAllFriendsFileList().getSwingModel(), null);
+        createMyCategories(remoteLibraryManager.getAllFriendsFileList().getSwingModel());
         selectFirst();
         getHeaderPanel().setText(I18n.tr("Download from all friends"));
     }

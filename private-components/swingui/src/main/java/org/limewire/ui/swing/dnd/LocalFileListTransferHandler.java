@@ -11,11 +11,11 @@ import javax.swing.TransferHandler;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.util.DNDUtils;
 
-public class FriendLibraryNavTransferHandler extends TransferHandler {
+public class LocalFileListTransferHandler extends TransferHandler {
 
     private final LocalFileList fileList;
 
-    public FriendLibraryNavTransferHandler(LocalFileList fileList) {
+    public LocalFileListTransferHandler(LocalFileList fileList) {
         this.fileList = fileList;
     }
 
