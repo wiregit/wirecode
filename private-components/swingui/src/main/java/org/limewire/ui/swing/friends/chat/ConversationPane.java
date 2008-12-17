@@ -413,7 +413,7 @@ public class ConversationPane extends JPanel implements Displayable {
                     }, sle, true); 
                 } catch (InvalidDataException ide) {
                     // this means the FileMetaData we received isn't well-formed.
-                    LOG.warn("Unable to access remote file", ide);
+                    LOG.error("Unable to access remote file", ide);
                     FocusJOptionPane.showMessageDialog(ConversationPane.this, 
                             I18n.tr("Unable to access remote file"), 
                             I18n.tr("Hyperlink"), JOptionPane.WARNING_MESSAGE);
