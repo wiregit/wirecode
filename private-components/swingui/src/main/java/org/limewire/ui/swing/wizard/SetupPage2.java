@@ -148,6 +148,19 @@ public class SetupPage2 extends WizardPage {
         else {
             manage = AutoDirectoryManageConfig.getManagedDirectories();
             exclude = AutoDirectoryManageConfig.getExcludedDirectories();
+            
+            // Remove any bad directories to be safe
+            for ( File testDir : manage ) {
+                if (!libraryData.isDirectoryAllowed(testDir)) {
+                    manage.remove(testDir);
+                }
+            }
+            
+            for ( File testDir : exclude ) {
+                if (!libraryData.isDirectoryAllowed(testDir)) {
+                    exclude.remove(testDir);
+                }
+            }
         }
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());

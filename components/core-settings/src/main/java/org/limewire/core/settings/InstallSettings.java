@@ -70,5 +70,9 @@ public final class InstallSettings extends LimeWireSettings {
     /** Whether the association option has been asked */
     public static final BooleanSetting EXTENSION_OPTION =
         FACTORY.createBooleanSetting("EXTENSION_OPTION", false);
+    
+    /** The name of the last completed install */
+    public static final BooleanSetting NEEDS_5_UPGRADE =
+        FACTORY.createBooleanSetting("NEEDS_5_UPGRADE", true);
 
 }

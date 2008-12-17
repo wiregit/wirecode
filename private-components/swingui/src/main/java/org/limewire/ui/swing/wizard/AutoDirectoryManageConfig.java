@@ -46,13 +46,6 @@ public class AutoDirectoryManageConfig {
         else {
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.HOME)));
         }
-
-        // Remove any bad directories to be safe
-        for ( File testDir : dirs ) {
-            if (!testDir.exists()) {
-                dirs.remove(testDir);
-            }
-        }
         
         return dirs;
     }

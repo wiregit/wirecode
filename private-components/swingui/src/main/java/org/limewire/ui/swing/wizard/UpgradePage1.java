@@ -58,10 +58,29 @@ public class UpgradePage1 extends WizardPage {
     
     @Override
     public void applySettings() {
+        
+        // Make sure the user consents to scanning new directories before enabling it
+        if (!autoCheck.isSelected()) {
+            return;
+        }
+        
         InstallSettings.SCAN_FILES.setValue(AutoDirectoryManageConfig.shouldScanFiles());
         
         Collection<File> manage = AutoDirectoryManageConfig.getManagedDirectories();
         Collection<File> exclude = AutoDirectoryManageConfig.getExcludedDirectories();
+        
+        // Remove any bad directories to be safe
+        for ( File testDir : manage ) {
+            if (!libraryData.isDirectoryAllowed(testDir)) {
+                manage.remove(testDir);
+            }
+        }
+        
+        for ( File testDir : exclude ) {
+            if (!libraryData.isDirectoryAllowed(testDir)) {
+                exclude.remove(testDir);
+            }
+        }
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());        
     }
