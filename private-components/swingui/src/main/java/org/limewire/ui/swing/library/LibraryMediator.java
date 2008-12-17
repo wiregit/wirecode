@@ -9,6 +9,13 @@ import javax.swing.JPanel;
 import org.limewire.ui.swing.components.Disposable;
 
 class LibraryMediator extends JPanel implements Disposable {
+    
+    // Important implementation note:
+    // This class disposes of Disposables whereever possible.
+    // However, it is EXTREMELY IMPORTANT that the dispose is called
+    // after the components are removed from the UI.
+    // Otherwise, the act of removing them may require bits of the
+    // disposed code, and cause exceptions.
 
     private static final String LIBRRY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
@@ -26,6 +33,7 @@ class LibraryMediator extends JPanel implements Disposable {
     
     protected void setLibraryCard(JComponent panel) {
         if(libraryComponent != null) {
+            // Important: rm before dispose -- see note at top of class
             remove(libraryComponent);
             ((Disposable)libraryComponent).dispose();
             libraryComponent = null;
@@ -40,6 +48,7 @@ class LibraryMediator extends JPanel implements Disposable {
     
     protected void setSharingCard(JComponent panel) {
         if(sharingComponent != null) {
+            // Important: rm before dispose -- see note at top of class
             remove(sharingComponent);
             ((Disposable)sharingComponent).dispose();
             sharingComponent = null;
@@ -61,6 +70,7 @@ class LibraryMediator extends JPanel implements Disposable {
 
     @Override
     public void dispose() {        
+        // Important: rm before dispose -- see note at top of class
         Component[] components = getComponents();
         removeAll();
         for(Component component : components) {
