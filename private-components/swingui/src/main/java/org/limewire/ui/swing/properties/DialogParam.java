@@ -19,6 +19,7 @@ public class DialogParam {
     @Inject private LibraryNavigator libraryNavigator;
     @Inject private MagnetLinkFactory magnetLinkFactory;
     @Inject private CategoryIconManager categoryIconManager;
+    @Inject private FilterList filterList;
     @Resource private Color linkColor;
     @Resource private Color backgroundColor;
     @Resource private Font smallFont;
@@ -67,5 +68,9 @@ public class DialogParam {
 
     public Font getLargeFont() {
         return largeFont;
+    }
+
+    public FilterList getFilterList() {
+        return filterList;
     }
 }

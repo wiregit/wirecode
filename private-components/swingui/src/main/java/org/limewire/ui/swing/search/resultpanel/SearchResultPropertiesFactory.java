@@ -2,9 +2,16 @@ package org.limewire.ui.swing.search.resultpanel;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -14,6 +21,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.action.BitziLookupAction;
 import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.properties.DialogParam;
+import org.limewire.ui.swing.properties.FilterList;
 import org.limewire.ui.swing.properties.Properties;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -39,10 +47,12 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
 
     public static class SearchResultProperties extends Dialog implements Properties<VisualSearchResult> {
         private final CategoryIconManager categoryIconManager;
+        private final FilterList filterList;
         
         public SearchResultProperties(DialogParam dialogParam) {
             super(dialogParam);
             this.categoryIconManager = dialogParam.getCategoryIconManager();
+            this.filterList = dialogParam.getFilterList();
             GuiUtils.assignResources(this);
             
             disableEdit(album, author, artist, company, year, title, track);
@@ -84,13 +94,33 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
                             result.getFileName() });
                 }
             }
+            
+            readOnlyInfo.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(final MouseEvent e) {
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        JPopupMenu blockingMenu = new JPopupMenu();
+                        blockingMenu.add(new AbstractAction(tr("Block Address")) {
+                            @Override
+                            public void actionPerformed(ActionEvent actionEvent) {
+                                int blockRow = readOnlyInfo.rowAtPoint(e.getPoint());
+                                Object value = readOnlyInfoModel.getValueAt(blockRow, 0);
+                                if (value != null) {
+                                    filterList.addIPToFilter(value.toString());
+                                }
+                            }
+                        });
+                        blockingMenu.show(readOnlyInfo, e.getX(), e.getY());
+                    }
+                }
+            });
 
             showDialog(vsr.getPropertyString(FilePropertyKey.NAME), vsr.getCategory());
         }
         
         @Override
         protected void commit() {
-            // TODO
+            // no-op
         }
     }
 }
