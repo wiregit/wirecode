@@ -79,6 +79,7 @@ public class FilterKeywordOptionPanel extends AbstractFilterOptionPanel {
 
     @Override
     public void initOptions() {
+        eventList.clear();
         String[] bannedWords = FilterSettings.BANNED_WORDS.getValue();
         eventList.addAll(new ArrayList<String>(Arrays.asList(bannedWords)));
     }
