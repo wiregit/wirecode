@@ -242,14 +242,31 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
                 if(SwingUtilities.isLeftMouseButton(e)) {
                     actionButtonPanel.startDownload();
                     table.editingStopped(new ChangeEvent(table));
-                } else if(SwingUtilities.isRightMouseButton(e)) {
+                } else {
+                    handlePopupMouseEvent(e); 
+                }
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                handlePopupMouseEvent(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                handlePopupMouseEvent(e);
+            }
+
+            private void handlePopupMouseEvent(MouseEvent e) {
+                if(e.isPopupTrigger()) {
                     SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);
                     searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
-                } 
+                }
             }
         });
         
         optionsButton.addMouseListener( new MouseAdapter() {
+            
             @Override
             public void mousePressed(MouseEvent e) {
                 SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);

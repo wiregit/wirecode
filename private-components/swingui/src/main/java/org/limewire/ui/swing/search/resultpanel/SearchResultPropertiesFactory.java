@@ -3,7 +3,6 @@ package org.limewire.ui.swing.search.resultpanel;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
@@ -11,7 +10,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -19,6 +17,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.action.BitziLookupAction;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.properties.Dialog;
 import org.limewire.ui.swing.properties.DialogParam;
 import org.limewire.ui.swing.properties.FilterList;
@@ -95,23 +94,21 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
                 }
             }
             
-            readOnlyInfo.addMouseListener(new MouseAdapter() {
+            readOnlyInfo.addMouseListener(new MousePopupListener() {
                 @Override
-                public void mousePressed(final MouseEvent e) {
-                    if (SwingUtilities.isRightMouseButton(e)) {
-                        JPopupMenu blockingMenu = new JPopupMenu();
-                        blockingMenu.add(new AbstractAction(tr("Block Address")) {
-                            @Override
-                            public void actionPerformed(ActionEvent actionEvent) {
-                                int blockRow = readOnlyInfo.rowAtPoint(e.getPoint());
-                                Object value = readOnlyInfoModel.getValueAt(blockRow, 0);
-                                if (value != null) {
-                                    filterList.addIPToFilter(value.toString());
-                                }
+                public void handlePopupMouseEvent(final MouseEvent e) {
+                    JPopupMenu blockingMenu = new JPopupMenu();
+                    blockingMenu.add(new AbstractAction(tr("Block Address")) {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            int blockRow = readOnlyInfo.rowAtPoint(e.getPoint());
+                            Object value = readOnlyInfoModel.getValueAt(blockRow, 0);
+                            if (value != null) {
+                                filterList.addIPToFilter(value.toString());
                             }
-                        });
-                        blockingMenu.show(readOnlyInfo, e.getX(), e.getY());
-                    }
+                        }
+                    });
+                    blockingMenu.show(readOnlyInfo, e.getX(), e.getY());
                 }
             });
 

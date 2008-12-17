@@ -34,6 +34,7 @@ import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
@@ -232,20 +233,17 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         resultsList.addMouseListener(new ResultDownloaderAdaptor());
 
-        resultsList.addMouseListener(new MouseAdapter() {
+        resultsList.addMouseListener(new MousePopupListener() {
             @Override
-            public void mousePressed(MouseEvent e) {
-                // If a right-click has occurred ...
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    // Get the VisualSearchResult that was selected.
-                    int row = resultsList.rowAtPoint(e.getPoint());
-                    VisualSearchResult vsr = maxSizedList.get(row);
+            public void handlePopupMouseEvent(MouseEvent e) {
+                // Get the VisualSearchResult that was selected.
+                int row = resultsList.rowAtPoint(e.getPoint());
+                VisualSearchResult vsr = maxSizedList.get(row);
 
-                    // Display a SearchResultMenu for the VisualSearchResult.
-                    JComponent component = (JComponent) e.getSource();
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, properties);
-                    searchResultMenu.show(component, e.getX(), e.getY());
-                }
+                // Display a SearchResultMenu for the VisualSearchResult.
+                JComponent component = (JComponent) e.getSource();
+                SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, properties);
+                searchResultMenu.show(component, e.getX(), e.getY());
             }
         });
     }
