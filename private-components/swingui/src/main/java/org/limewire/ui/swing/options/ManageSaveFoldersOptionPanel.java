@@ -20,6 +20,7 @@ import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 
@@ -27,7 +28,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 public class ManageSaveFoldersOptionPanel extends OptionPanel {
-
+    
     private LabelTextField audioTextField;
 
     private LabelTextField videoTextField;
@@ -60,18 +61,18 @@ public class ManageSaveFoldersOptionPanel extends OptionPanel {
 
     @AssistedInject
     public ManageSaveFoldersOptionPanel(CategoryIconManager categoryIconManager,
-            @Assisted Action okAction, @Assisted CancelDialogAction cancelAction) {
+            @Assisted Action okAction, @Assisted CancelDialogAction cancelAction, IconManager iconManager) {
 
         GuiUtils.assignResources(this);
 
         setLayout(new MigLayout("gapy 10"));
 
-        audioTextField = new LabelTextField();
-        videoTextField = new LabelTextField();
-        imageTextField = new LabelTextField();
-        documentTextField = new LabelTextField();
-        programTextField = new LabelTextField();
-        otherTextField = new LabelTextField();
+        audioTextField = new LabelTextField(iconManager);
+        videoTextField = new LabelTextField(iconManager);
+        imageTextField = new LabelTextField(iconManager);
+        documentTextField = new LabelTextField(iconManager);
+        programTextField = new LabelTextField(iconManager);
+        otherTextField = new LabelTextField(iconManager);
 
         audioBrowseButton = new JButton(new BrowseDirectoryAction(this, audioTextField));
         audioTextField.addMouseListener(audioBrowseButton.getAction());

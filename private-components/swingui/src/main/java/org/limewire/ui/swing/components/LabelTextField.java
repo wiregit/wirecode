@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -9,11 +10,13 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 
 /**
  * Behaves like a TextField. Adds an icon within the textField that
@@ -36,20 +39,26 @@ public class LabelTextField extends JPanel {
     
     private MouseListener mouseListener;
     
-    public LabelTextField() {
+    private IconManager iconManager;
+    
+    public LabelTextField(IconManager iconManager) {
         GuiUtils.assignResources(this);
         
+        this.iconManager = iconManager;
+        
         label = new JLabel(folderIcon);
+        label.setOpaque(false);
         textField = new JTextField();
         textField.setEditable(false);
+        textField.setBorder(BorderFactory.createEmptyBorder());
         
         setLayout(new MigLayout("insets 2, gap 3, fillx"));
         add(label);
         add(textField, "growx");
         
-        setBackground(textField.getBackground());
-        setBorder(textField.getBorder());
-        textField.setBorder(BorderFactory.createEmptyBorder());
+        // use the colors from the textfield to paint the panel
+        setBackground(UIManager.getColor("TextField.disabledBackground"));
+        setBorder(UIManager.getBorder("TextField.border"));
     }
     
     @Override
@@ -67,6 +76,15 @@ public class LabelTextField extends JPanel {
     
     public void setText(String text) {
         textField.setText(text);
+        try {
+            Icon icon = iconManager.getIconForFile(new File(text));
+            if(icon != null)
+                label.setIcon(icon);
+            else
+                label.setIcon(folderIcon);
+        } catch(Exception e) {
+            label.setIcon(folderIcon);
+        }
     }
     
     public void addMouseListener(final Action action) {
@@ -77,7 +95,7 @@ public class LabelTextField extends JPanel {
         mouseListener = new MouseListener(){
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(e.getClickCount() == 2) {
+                if(e.getClickCount() == 1) {
                     action.actionPerformed(null);
                 }
             }

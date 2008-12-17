@@ -25,6 +25,7 @@ import org.limewire.ui.swing.options.actions.CancelDialogAction;
 import org.limewire.ui.swing.options.actions.DialogDisplayAction;
 import org.limewire.ui.swing.options.actions.OKDialogAction;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 
@@ -36,6 +37,7 @@ public class FilesOptionPanel extends OptionPanel {
     private final ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory;
     private final ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel;
     private final DaapManager daapManager;
+    private final IconManager iconManager;
     
     private ManageExtensionsPanel manageExtensionsPanel;
     private SaveFoldersPanel saveFoldersPanel;
@@ -44,11 +46,13 @@ public class FilesOptionPanel extends OptionPanel {
     
     @Inject
     FilesOptionPanel(ManageSaveFoldersOptionPanelFactory manageFoldersOptionPanelFactory, 
-            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager) { 
+            ManageFileExtensionsOptionPanel manageFileExtensionsOptionPanel, DaapManager daapManager,
+            IconManager iconManager) { 
         
         this.manageFoldersOptionPanelFactory = manageFoldersOptionPanelFactory;
         this.manageFileExtensionsOptionPanel = manageFileExtensionsOptionPanel;
         this.daapManager = daapManager;
+        this.iconManager = iconManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
     
@@ -197,7 +201,7 @@ public class FilesOptionPanel extends OptionPanel {
             storeOptionPanel = new LWSFileNamingOptionPanel(new OKDialogAction(), new CancelDialogAction());
             storeOptionPanel.setPreferredSize(new Dimension(350, 140));
             
-            storePathTextField = new LabelTextField();
+            storePathTextField = new LabelTextField(iconManager);
             storePathTextField.setEditable(false);
             
             BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(FilesOptionPanel.this, storePathTextField);

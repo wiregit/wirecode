@@ -18,6 +18,7 @@ import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LabelTextField;
 import org.limewire.ui.swing.options.actions.BrowseDirectoryAction;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveDirectoryHandler;
 import org.limewire.util.OSUtils;
 
@@ -28,11 +29,15 @@ import com.google.inject.Inject;
  */
 public class DownloadOptionPanel extends OptionPanel {
 
+    private final IconManager iconManager;
+    
     private SavingPanel savingPanel;
     private JCheckBox clearDownloadsCheckBox;
     
     @Inject
-    public DownloadOptionPanel() {
+    public DownloadOptionPanel(IconManager iconManager) {
+        this.iconManager = iconManager;
+        
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
         add(getSavingPanel(), "pushx, growx");
@@ -83,7 +88,7 @@ public class DownloadOptionPanel extends OptionPanel {
         public SavingPanel() {
             super(I18n.tr("Saving"));
             
-            downloadSaveTextField = new LabelTextField();
+            downloadSaveTextField = new LabelTextField(iconManager);
             downloadSaveTextField.setEditable(false);
 
             BrowseDirectoryAction directoryAction = new BrowseDirectoryAction(DownloadOptionPanel.this, downloadSaveTextField);
