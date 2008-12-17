@@ -17,6 +17,9 @@ public class FileShareWidget implements ShareWidget<File> {
     public FileShareWidget(ShareListManager shareListManager, Collection<Friend> allFriends, ShapeDialog shapeDialog){
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
         sharePanel.setShareModel(new FileShareModel(shareListManager));
+        sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
+        sharePanel.setComboLabelText(I18n.tr("Start typing a friend's name"));
+        sharePanel.setTitleLabel(I18n.tr("Share one file"));
     }
     
     public void show(Component c) {
@@ -25,7 +28,6 @@ public class FileShareWidget implements ShareWidget<File> {
     
     public void setShareable(File file){
         ((FileShareModel)sharePanel.getShareModel()).setFile(file);
-        sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
     }
 
     @Override

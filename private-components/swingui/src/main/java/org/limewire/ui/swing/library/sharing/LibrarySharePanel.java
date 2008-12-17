@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.sharing;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -87,7 +86,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private int panelWidth;
     
     private JXPanel titlePanel;
-    private JXPanel topPanel;
+    private JXPanel tablePanel;
     private JXPanel bottomPanel;
     @Resource
     private Color bottomPanelTopGradient;
@@ -123,6 +122,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private JXTable shareTable;
     private JComboBox friendCombo;
     private LimeEditableComboBox comboPanel;
+    
+    private boolean bottomPanelHidden = false;
+    private boolean tableHidden = false;
 
     private JXLabel friendLabel;
     private JLabel topLabel;
@@ -188,7 +190,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 }
             }
         }
-    };
+    };    
     
     
     public LibrarySharePanel(Collection<Friend> allFriends, ShapeDialog dialog) {
@@ -237,19 +239,20 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         setLayout(new MigLayout());
         setOpaque(false);
         
-        mainPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 5 0 5 , gap 0! 0!, novisualpadding"));
+        mainPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 6 0 6 , gap 0! 0!, novisualpadding"));
         mainPanel.setOpaque(false);
 
         titlePanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         titlePanel.setOpaque(false);
         
-        topPanel = new JXPanel(new BorderLayout());
-        topPanel.setOpaque(false);
+        tablePanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
+        tablePanel.setOpaque(false);
         
         bottomPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         bottomPanel.setOpaque(false);
-        
+
         mainPanel.setMinimumSize(new Dimension(panelWidth, 0));
+        mainPanel.setMaximumSize(new Dimension(panelWidth, Integer.MAX_VALUE));
     }
     
     private void initializePainters(){
@@ -260,7 +263,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             @Override
             public void paint(Graphics2D g, Object object, int width, int height) {
                 int arc = 10;
-                Area shadowArea = new Area(new RoundRectangle2D.Float(mainPanel.getLocation().x - BORDER_INSETS, mainPanel.getLocation().y - BORDER_INSETS, mainPanel.getWidth() + BORDER_INSETS * 2, mainPanel.getHeight() + BORDER_INSETS * 2, arc, arc));
+                Area shadowArea = new Area(new RoundRectangle2D.Float(mainPanel.getLocation().x - BORDER_INSETS, mainPanel.getLocation().y - BORDER_INSETS, mainPanel.getWidth() + BORDER_INSETS * 3, mainPanel.getHeight() + BORDER_INSETS * 3, arc, arc));
                 RoundRectangle2D.Float panelShape = new RoundRectangle2D.Float(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth(),
                         mainPanel.getHeight() + 2, arc, arc);
                 Area panelArea = new Area(panelShape);
@@ -297,7 +300,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 g2.dispose();
             }
         });
-
+        
     }
 
     private void initializeLabels() {
@@ -316,7 +319,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         
         bottomLabel = new MultiLineLabel("", panelWidth);
         bottomLabel.setForeground(Color.WHITE);
-        bottomLabel.setForegroundPainter(new TextShadowPainter());
+     //   bottomLabel.setForegroundPainter(new TextShadowPainter());
     }
 
     private void initializeLists() {
@@ -347,19 +350,19 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private void addComponents() {
         
-        titlePanel.add(titleLabel, "hidemode 3, wrap");
-        titlePanel.add(topLabel, "hidemode 3");
-        titlePanel.add(closeButton, "dock east, aligny top");
+        titlePanel.add(titleLabel, "aligny top, alignx left");
+        titlePanel.add(closeButton, "aligny top, alignx right");
         
-        topPanel.add(shareScroll);
+        tablePanel.add(topLabel, "hidemode 3, wrap");        
+        tablePanel.add(shareScroll, "gaptop 6, gapbottom 6, growx");
         
-        bottomPanel.add(friendLabel, "wrap");
-        bottomPanel.add(comboPanel, "growx, wrap");
-        bottomPanel.add(bottomLabel, "gapbottom 5");
+        bottomPanel.add(friendLabel, "gaptop 6, hidemode 3, wrap");
+        bottomPanel.add(comboPanel, "growx, gaptop 4, gapbottom 6, hidemode 3, wrap");
+        bottomPanel.add(bottomLabel, "gapbottom 6, hidemode 3");
         
 
-        mainPanel.add(titlePanel, "growx, gaptop 5, wrap");
-        mainPanel.add(topPanel, "growx, wrap");
+        mainPanel.add(titlePanel, "growx, gaptop 6, gapbottom 6, wrap");
+        mainPanel.add(tablePanel, "growx, wrap, hidemode 3");
         mainPanel.add(bottomPanel, "growx, hidemode 3");
         
         add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
@@ -367,6 +370,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private void initializeComboBox() {
         comboPanel = new LimeEditableComboBox();
+        comboPanel.setPreferredSize(new Dimension(230, 24));
+        comboPanel.setMaximumSize(comboPanel.getPreferredSize());   
+        comboPanel.setMinimumSize(comboPanel.getPreferredSize());
         friendCombo = comboPanel.getComboBox();
         friendCombo.setModel(new EventComboBoxModel<SharingTarget>(noShareFilterList));
         initializeInputField();       
@@ -454,10 +460,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         removeEditor.setOpaque(false);
         //do nothing ColorHighlighter eliminates default striping
         shareTable.setHighlighters(new ColorHighlighter());
-        shareTable.setRowHeight(removeEditor.getPreferredSize().height);
+        shareTable.setRowHeight(removeEditor.getPreferredSize().height + 4);
         shareTable.getColumnModel().getColumn(actionCol).setCellEditor(removeEditor);
-        shareTable.getColumnModel().getColumn(actionCol).setPreferredWidth(removeEditor.getPreferredSize().width);    
-        shareTable.getColumnModel().getColumn(actionCol).setMaxWidth(removeEditor.getPreferredSize().width);    
+        shareTable.getColumnModel().getColumn(actionCol).setPreferredWidth(removeEditor.getPreferredSize().width + 4);    
+        shareTable.getColumnModel().getColumn(actionCol).setMaxWidth(removeEditor.getPreferredSize().width + 4);    
         shareTable.getColumnModel().getColumn(actionCol).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
         shareTable.setShowGrid(false);   
         shareTable.setIntercellSpacing(new Dimension(0, 0));
@@ -481,6 +487,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     public void setTopLabel(String text){
         topLabel.setText(text);
     }
+    
+    public void setComboLabelText(String text){
+        friendLabel.setText(text);
+    }
 
     public void setBottomLabel(String text){
         bottomLabel.setText(text);
@@ -488,7 +498,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     
 
     private void adjustFriendLabelVisibility() {
-        friendLabel.setVisible(shareFriendList.size() == 0 && friendCombo.isVisible());
+        friendLabel.setVisible(friendCombo.isVisible());
     }
     
     private void shareSelectedFriend() {
@@ -507,7 +517,14 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
     
     public void setComboBoxVisible(boolean visible){
-        friendCombo.setVisible(visible);
+        bottomPanel.setVisible(visible);
+        bottomPanelHidden = !visible;
+    }
+    
+
+    public void setTableVisible(boolean visible) {
+        tableHidden = !visible;
+        tablePanel.setVisible(visible);
     }
 
     public void setShareModel(LibraryShareModel shareModel){
@@ -572,6 +589,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         shareModel.shareFriend(friend);
         
         adjustSize();
+        //bit heavy handed here but it ensures that changes are reflected everywhere
+        GuiUtils.getMainFrame().repaint();
     }
     
     
@@ -582,20 +601,21 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         shareModel.unshareFriend(friend);
         
         adjustSize();
+      //bit heavy handed here but it ensures that changes are reflected everywhere
+        GuiUtils.getMainFrame().repaint();
     }
     
     private void adjustSize(){
         adjustFriendLabelVisibility();
-        bottomPanel.setVisible(noShareFriendList.size() > 0);
+        bottomPanel.setVisible(!bottomPanelHidden && noShareFriendList.size() > 0);
         
-        int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
-        shareTable.setVisibleRowCount(visibleRows);
-        shareScroll.setVisible(visibleRows > 0);
-        topLabel.setVisible(visibleRows > 0); 
+        if (!tableHidden ) {
+            int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
+            shareTable.setVisibleRowCount(visibleRows);
+            tablePanel.setVisible(visibleRows > 0);
+        }
         
-        setSize(getPreferredSize());
-        
-        repaint();
+        setSize(getPreferredSize());        
     }
     
     
@@ -695,9 +715,5 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         // the share model file or category has changed - reload friends.
         reloadSharedBuddies();
     }
-    
-    
-  
-
     
 }

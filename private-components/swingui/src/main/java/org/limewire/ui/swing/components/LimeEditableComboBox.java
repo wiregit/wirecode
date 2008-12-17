@@ -52,7 +52,7 @@ public class LimeEditableComboBox extends JXPanel{
         setOpaque(false);
         
         setLayout(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
-        add(comboBox, "gapleft 5, gaptop 2, gapbottom 2, growx");
+        add(comboBox, "gapleft 6, gapright 6, aligny 50%, growx");
     }
     
     
