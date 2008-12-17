@@ -26,8 +26,8 @@ class LibraryMediator extends JPanel implements Disposable {
     
     protected void setLibraryCard(JComponent panel) {
         if(libraryComponent != null) {
-            ((Disposable)libraryComponent).dispose();
             remove(libraryComponent);
+            ((Disposable)libraryComponent).dispose();
             libraryComponent = null;
         }
         libraryComponent = panel;
@@ -40,8 +40,8 @@ class LibraryMediator extends JPanel implements Disposable {
     
     protected void setSharingCard(JComponent panel) {
         if(sharingComponent != null) {
-            ((Disposable)sharingComponent).dispose();
             remove(sharingComponent);
+            ((Disposable)sharingComponent).dispose();
             sharingComponent = null;
         }
         sharingComponent = panel;
@@ -61,9 +61,10 @@ class LibraryMediator extends JPanel implements Disposable {
 
     @Override
     public void dispose() {        
-        for(Component component : getComponents()) {
+        Component[] components = getComponents();
+        removeAll();
+        for(Component component : components) {
             ((Disposable)component).dispose();
         }
-        removeAll();
     }
 }
