@@ -53,6 +53,8 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
+        
+       //All friends panel gives a null friend
         if(friend != null) {
             setTransferHandler(new LocalFileListTransferHandler(friendFileList));
         }
