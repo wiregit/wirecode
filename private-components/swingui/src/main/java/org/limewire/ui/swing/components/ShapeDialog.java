@@ -20,7 +20,6 @@ import com.google.inject.Singleton;
 @Singleton
 public class ShapeDialog extends JXPanel implements Resizable {
 
-    private int buffer = 10;
 
     private AWTEventListener eventListener;
 
@@ -117,20 +116,20 @@ public class ShapeDialog extends JXPanel implements Resizable {
         if (isVisible() && component != null) {
             Rectangle parentBounds = getParent().getBounds();
             Dimension childPreferredSize = getPreferredSize();
-            int w = childPreferredSize.width +  buffer * 2;
-            int h = childPreferredSize.height + buffer * 2;
+            int w = childPreferredSize.width;
+            int h = childPreferredSize.height;
             setBounds(parentBounds.width / 2 - w / 2, parentBounds.height / 2 - h /2 , w, h);
         }
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        if (component != null) {
-            Dimension dim = component.getPreferredSize();
-            return new Dimension(dim.width + buffer * 2, dim.height + buffer * 2);
-        } else {
-            return new Dimension(0, 0);
-        }
-    }
+//    @Override
+//    public Dimension getPreferredSize() {
+//        if (component != null) {
+//            Dimension dim = component.getPreferredSize();
+//            return new Dimension(dim.width + buffer * 2, dim.height + buffer * 2);
+//        } else {
+//            return new Dimension(0, 0);
+//        }
+//    }
 
 }

@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -422,6 +423,18 @@ public class MouseableTable extends StripedJXTable {
             }
         } else {
             super.setDefaultRenderer(clazz, renderer);
+        }
+    }
+    
+    /**
+     * Ensures the given row is visible.
+     */
+    public void ensureRowVisible(int row) {
+        if(row != -1) {
+            Rectangle cellRect = getCellRect(row, 0, false);
+            Rectangle visibleRect = getVisibleRect();
+            if( !visibleRect.intersects(cellRect) )
+                scrollRectToVisible(cellRect);
         }
     }
     

@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.table;
 
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -275,17 +274,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         return super.isCellEditable(row, column) && !isRowDisabled(row);
     }
     
-    /**
-     * Ensures the given row is visible.
-     */
-    public void ensureRowVisible(int row) {
-        if(row != -1) {
-            Rectangle cellRect = getCellRect(row, 0, false);
-            Rectangle visibleRect = getVisibleRect();
-            if( !visibleRect.intersects(cellRect) )
-                scrollRectToVisible(cellRect);
-        }
-    }
     
     public boolean isRowDisabled(int row) {
         FileItem item = getLibraryTableModel().getFileItem(convertRowIndexToModel(row));

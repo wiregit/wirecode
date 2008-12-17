@@ -43,7 +43,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -64,12 +63,15 @@ import org.limewire.ui.swing.util.I18n;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.MatcherEditor.Event;
 import ca.odell.glazedlists.swing.EventComboBoxModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 
@@ -104,7 +106,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     /**
      * all unshared friends
      */    
-    private EventList<SharingTarget> noShareFriendList;
+    private SortedList<SharingTarget> noShareFriendList;
     /**
      * filtered list of unshared friends
      */
@@ -113,13 +115,15 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
      * list of shared friends
      */
     private EventList<SharingTarget> shareFriendList;
-    
+
     /** list of all friends */
     private Collection<Friend> allFriends;
+    /** list of all friends */
+    private SortedList<SharingTarget> allFriendsSorted;
 
     private JScrollPane shareScroll;
 
-    private JXTable shareTable;
+    private MouseableTable shareTable;
     private JComboBox friendCombo;
     private LimeEditableComboBox comboPanel;
     
@@ -323,18 +327,19 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     private void initializeLists() {
-        shareFriendList = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
+        allFriendsSorted = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
+        
+        shareFriendList = new BasicEventList<SharingTarget>();
         shareFriendList.addListEventListener(new ListEventListener<SharingTarget>() {
             @Override
             public void listChanged(ListEvent<SharingTarget> listChanges) {
                 adjustFriendLabelVisibility();
             }
         });
-
         
         noShareFriendList = GlazedListsFactory.sortedList(new BasicEventList<SharingTarget>(), new SharingTargetComparator());
-        
-      //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
+
+        //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
         TextFilterator<SharingTarget> textFilter = new TextFilterator<SharingTarget>() {
             @Override
@@ -344,7 +349,33 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             }
         };
         textMatcher = new TextMatcherEditor<SharingTarget>(textFilter);
-        noShareFilterList = GlazedListsFactory.filterList(noShareFriendList, textMatcher);        
+        
+        final Matcher<SharingTarget> alwaysIncludeGnutellaMatcher = new Matcher<SharingTarget>() {
+            @Override
+            public boolean matches(SharingTarget item) {
+                if (item.isGnutellaNetwork()) {
+                    return true;
+                }
+                return textMatcher.getMatcher().matches(item);
+            }
+        };
+        
+        noShareFilterList = GlazedListsFactory.filterList(noShareFriendList, alwaysIncludeGnutellaMatcher);    
+        
+      
+        
+          
+
+        // force list to filter and sort when textMatcher is updated
+        textMatcher.addMatcherEditorListener(new MatcherEditor.Listener<SharingTarget>() {
+            @Override
+            public void changedMatcher(Event<SharingTarget> matcherEvent) {
+                noShareFilterList.setMatcher(alwaysIncludeGnutellaMatcher);
+                Comparator<SharingTarget> comparator = (inputField.getText() == null || inputField.getText().equals("")) ? 
+                        new SharingTargetComparator() : new FilteredSharingTargetComparator();
+                noShareFriendList.setComparator(comparator);
+            }
+        });
 
     }
 
@@ -435,14 +466,21 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 textMatcher.setFilterText(inputField.getText().split(" "));
                 if (noShareFilterList.size() > 0) {
                     friendCombo.setSelectedIndex(0);
-                    if (friendCombo.isVisible()) {
-                        friendCombo.showPopup();
-                    }
+                  showPopup();
                 }
             }
             
         });
     }
+
+    //ensures popup is correct size when list filter is relaxed
+    private void showPopup() {
+        if (friendCombo.isShowing()) {
+            friendCombo.hidePopup();
+            friendCombo.showPopup();
+        }
+    }
+
 
     private void initializeShareTable() {
         final int actionCol = 0;
@@ -511,7 +549,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             resetRowSelection(index);
 
             if (noShareFriendList.size() > 0) {
-                comboPopup.show();
+                showPopup();
             }
         }
     }
@@ -589,6 +627,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         shareModel.shareFriend(friend);
         
         adjustSize();
+        if (shareScroll.getVerticalScrollBar().isShowing()){
+            shareTable.ensureRowVisible(shareTable.getRowCount() - 1);
+        }
         //bit heavy handed here but it ensures that changes are reflected everywhere
         GuiUtils.getMainFrame().repaint();
     }
@@ -621,24 +662,30 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     
     
     public void dispose() {
-        if (noShareFriendList instanceof TransformedList) {
-            ((TransformedList) noShareFriendList).dispose();
-        }       
+        noShareFriendList.dispose();
+        noShareFilterList.dispose();
+        allFriendsSorted.dispose();
         
         ((EventTableModel)shareTable.getModel()).dispose();
+        ((EventComboBoxModel)comboPanel.getComboBox().getModel()).dispose();
     }
     
     
     private void reloadSharedBuddies() {
         shareFriendList.clear();
         noShareFriendList.clear();
+        allFriendsSorted.clear();
 
         if (shareModel.isGnutellaNetworkSharable()) {
             loadFriend(SharingTarget.GNUTELLA_SHARE);
         }
         
         for (Friend friend : allFriends) {
-            loadFriend(new SharingTarget(friend));
+            allFriendsSorted.add(new SharingTarget(friend));
+        }
+        
+        for (SharingTarget target : allFriendsSorted){            
+            loadFriend(target);
         }
     }
     
@@ -704,6 +751,24 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             }
             if(o2.isGnutellaNetwork()){
                 return 1;
+            }
+            return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
+        }
+        
+    }
+    
+    private static class FilteredSharingTargetComparator implements Comparator<SharingTarget>{
+
+        @Override
+        public int compare(SharingTarget o1, SharingTarget o2) {
+            if (o1 == o2){
+                return 0;
+            }
+            if(o1.isGnutellaNetwork()){
+                return 1;
+            }
+            if (o2.isGnutellaNetwork()) {
+                    return -1;
             }
             return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
         }
