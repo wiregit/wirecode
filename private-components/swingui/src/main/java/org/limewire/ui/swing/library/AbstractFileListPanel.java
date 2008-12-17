@@ -22,7 +22,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.TransferHandler;
 import javax.swing.text.JTextComponent;
 
 import net.miginfocom.swing.MigLayout;
@@ -385,19 +384,5 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         public JButton getButton() {
             return button;
         }
-    }
-    
-    /**
-     * Sets the transfer handler for the header panel card panel and selection panel.
-     * The transfer handler for the library and image lists may already be set at creation time in 
-     * the LibraryFactory. My Library needs a special transfer handler for example to allow dragging 
-     * and dropping from my library to other people.
-     */
-    @Override
-    public void setTransferHandler(TransferHandler newHandler) {
-        super.setTransferHandler(newHandler);
-        headerPanel.setTransferHandler(newHandler);
-        selectionPanel.setTransferHandler(newHandler);
-        cardPanel.setTransferHandler(newHandler);
     }
 }
