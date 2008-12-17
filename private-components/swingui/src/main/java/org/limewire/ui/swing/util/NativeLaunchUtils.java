@@ -181,13 +181,13 @@ public final class NativeLaunchUtils {
 	    try {
 	        launchFileImpl(file);
         } catch (LaunchException lex) {
-            logException(I18n.tr("Unable to open file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to open file: {0}", file.getName()),
                     I18n.tr("Open File"), lex);
         } catch (IOException iox) {
-            logException(I18n.tr("Unable to open file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to open file: {0}", file.getName()),
                     I18n.tr("Open File"), iox);
         } catch (SecurityException ex) {
-            logException(I18n.tr("Unable to open file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to open file: {0}", file.getName()),
                     I18n.tr("Open File"), ex);
         }
     }
@@ -243,15 +243,15 @@ public final class NativeLaunchUtils {
         try {
             return launchExplorerImpl(file);
         } catch (LaunchException lex) {
-            logException(I18n.tr("Unable to locate file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
                     I18n.tr("Locate File"), lex);
             return null;
         } catch (SecurityException ex) {
-            logException(I18n.tr("Unable to locate file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
                     I18n.tr("Locate File"), ex);
             return null;
         } catch (IOException iox) {
-            logException(I18n.tr("Unable to locate file") + ": " + file.getName(),
+            logException(I18n.tr("Unable to locate file: {0}", file.getName()),
                     I18n.tr("Locate File"), iox);
             return null;
         }
