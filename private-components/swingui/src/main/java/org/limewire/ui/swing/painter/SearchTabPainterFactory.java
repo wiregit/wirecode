@@ -25,7 +25,6 @@ public class SearchTabPainterFactory {
     @Resource private Color highlightTopBevelBorder;
     @Resource private Color highlightBackgroundTopGradient;
     @Resource private Color highlightBackgroundBottomGradient;
-    @Resource private Color highlightBottomBorderHack;
     
     @Inject
     public SearchTabPainterFactory() {
@@ -37,7 +36,7 @@ public class SearchTabPainterFactory {
         return new SearchTabPainter(selectionTopBevelBackground, 
                     selectionTopBevelBorder,
                     new GradientPaint(0, 0, selectionBackgroundTopGradient, 
-                        0, 1, selectionBackgroundBottomGradient), null);
+                        0, 1, selectionBackgroundBottomGradient));
     }
     
     public SearchTabPainter createHighlightPainter() {
@@ -45,7 +44,7 @@ public class SearchTabPainterFactory {
         return new SearchTabPainter(highlightTopBevelBackground, 
                 highlightTopBevelBorder,
                     new GradientPaint(0, 0, highlightBackgroundTopGradient, 
-                        0, 1, highlightBackgroundBottomGradient), highlightBottomBorderHack);
+                        0, 1, highlightBackgroundBottomGradient), true);
     }
     
 }

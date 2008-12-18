@@ -17,17 +17,27 @@ public class SearchTabPainter extends AbstractPainter<JXPanel> {
     
     private final Paint topBevelBackground;
     private final Paint topBevelBorder;
+    private final boolean raiseBottomClip;
     
     private Paint background;
-    
-    private final Paint bottomRow;
     
     private Area tabAreaCache   = null;
     private int  tabWidthCache  = 0;
     private int  tabHeightCache = 0;
     
+    public SearchTabPainter(Paint topBevelBackground, Paint topBevelBorder, Paint background) {
+        this(topBevelBackground, topBevelBorder, background, false);
+    }
+    
+    /**
+     * raiseBottomClip can be used to clip painting one pixel earlier.  This is necessary
+     *  since currently tabs are painted over top of the bottom border of the top bar.  
+     *  highlighted tabs are clipped early to use the top bar bottom border as a
+     *  high contrast bottom edge that makes them look "behind" any other front tab which 
+     *  run over the same border and have no hard edge.
+     */
     public SearchTabPainter(Paint topBevelBackground, Paint topBevelBorder, Paint background,
-            Paint bottomRow) {
+            boolean raiseBottomClip) {
         
         GuiUtils.assignResources(this);
         
@@ -36,8 +46,10 @@ public class SearchTabPainter extends AbstractPainter<JXPanel> {
         
         this.topBevelBackground = topBevelBackground;
         this.topBevelBorder = topBevelBorder;
+        this.raiseBottomClip = raiseBottomClip;
+        
+        
         this.background = background;
-        this.bottomRow = bottomRow;
     }
   
     private void cacheTabArea(int width, int height) {
@@ -62,6 +74,10 @@ public class SearchTabPainter extends AbstractPainter<JXPanel> {
         
         cacheTabArea(width, height);
 
+        if (raiseBottomClip) {
+            g.setClip(0,0,width,height-1);
+        }
+        
         // Draw top bevel
         g.setPaint(this.topBevelBackground);
         g.fillRoundRect(10, 0, width-2-20, 20, 20, 20);
@@ -74,7 +90,7 @@ public class SearchTabPainter extends AbstractPainter<JXPanel> {
         g.setPaint(background);
         g.fill(this.tabAreaCache);
         
-        if (bottomRow == null) {        
+        if (!raiseBottomClip) {        
             // Hack for Anthony to correct the antialiasing for the bottom border and tab mixing
             g.setPaint(new Color(0xca,0xca,0xca));
             g.drawLine(0,height-2,0,height-2);
@@ -82,10 +98,6 @@ public class SearchTabPainter extends AbstractPainter<JXPanel> {
             g.setPaint(new Color(0xab,0xab,0xab));
             g.drawLine(1,height-2,1,height-2);
             g.drawLine(width-2,height-2,width-2,height-2);
-        }
-        else {
-            g.setPaint(bottomRow);
-            g.drawLine(0, height-1, width-1, height-1);
         }
     }
 }
