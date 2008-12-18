@@ -39,18 +39,13 @@ public class MacEventHandler {
     }
 
     private volatile File lastFileOpened = null;
-
     private volatile boolean enabled;
 
-    private volatile ExternalControl externalControl = null;
-
-    private volatile Initializer initializer = null;
-
-    private volatile DownloadManager downloadManager = null;
-
-    private volatile LifeCycleManager lifecycleManager = null;
-
-    private volatile ActivityCallback activityCallback = null;
+    @Inject private volatile ExternalControl externalControl = null;
+    @Inject private volatile Initializer initializer = null;
+    @Inject private volatile DownloadManager downloadManager = null;
+    @Inject private volatile LifeCycleManager lifecycleManager = null;
+    @Inject private volatile ActivityCallback activityCallback = null;
 
     /** Creates a new instance of MacEventHandler */
     private MacEventHandler() {
@@ -82,15 +77,9 @@ public class MacEventHandler {
     }
 
     @Inject
-    public void enable(ExternalControl externalControl, Initializer initializer,
-            DownloadManager downloadManager, LifeCycleManager lifecycleManager,
-            ActivityCallback activityCallback) {
-        this.externalControl = externalControl;
-        this.initializer = initializer;
+    public void startup() {
         this.enabled = true;
-        this.downloadManager = downloadManager;
-        this.lifecycleManager = lifecycleManager;
-        this.activityCallback = activityCallback;
+        
         if (lastFileOpened != null) {
             runFileOpen(lastFileOpened);
         }
