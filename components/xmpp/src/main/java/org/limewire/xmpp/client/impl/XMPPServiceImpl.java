@@ -9,6 +9,7 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
+import org.limewire.core.settings.XMPPSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
@@ -23,6 +24,7 @@ import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
+import org.limewire.xmpp.activity.ActivityEvent;
 import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.FriendRequestEvent;
@@ -101,6 +103,28 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
+    }
+    
+    /**
+     * Sets the connection mode to idle (extended away) after receiving activity
+     * events triggered by periods of inactivity
+     * @param listenerSupport
+     */
+    @Inject
+    void register(ListenerSupport<ActivityEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<ActivityEvent>() {
+            @Override
+            public void handleEvent(ActivityEvent event) {
+                switch(event.getSource()) {
+                case Idle:
+                    setMode(Mode.xa);
+                    break;
+                case Active:
+                    //TODO Reimplement to not use XMPPSettings  :-(
+                    setMode(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? Mode.dnd : Mode.available);
+                }
+            }
+        });
     }
 
     @Override
