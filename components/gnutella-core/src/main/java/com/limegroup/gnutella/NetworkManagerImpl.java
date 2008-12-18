@@ -116,8 +116,10 @@ public class NetworkManagerImpl implements NetworkManager {
         firewallStatusSupport.addListener(new EventListener<FirewallStatusEvent>() {
             @Override
             public void handleEvent(FirewallStatusEvent event) {
-                // TODO use event
-                maybeFireNewDirectConnectionAddress();
+                if(started) {
+                    // TODO use event
+                    maybeFireNewDirectConnectionAddress();
+                }
             }
         });    
         firewallTransferStatusSupport.addListener(new EventListener<FirewallTransferStatusEvent>() {

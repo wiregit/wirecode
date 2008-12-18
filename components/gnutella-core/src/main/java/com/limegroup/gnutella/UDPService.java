@@ -216,6 +216,10 @@ public class UDPService implements ReadWriteObserver {
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
+        // TODO convert this to a Service and move this
+        // TODO initialize()
+        fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(
+                FirewallTransferStatus.DOES_NOT_SUPPORT_FWT, FWTStatusReason.UNKNOWN));
     }
     
     /**
