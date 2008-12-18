@@ -2,14 +2,12 @@ package org.limewire.ui.swing.painter;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
-import java.awt.Paint;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
-import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,6 +37,8 @@ public class BarPainterFactory {
     @Resource private Color downloadSummaryBarBottomGradient = PainterUtils.TRASPARENT;
     @Resource private Color downloadSummaryBarTopBorder1 = PainterUtils.TRASPARENT;
     
+    @Resource private Color friendBarTopBorder1 = PainterUtils.TRASPARENT;
+    
     @Inject
     BarPainterFactory() {
         GuiUtils.assignResources(this);
@@ -61,19 +61,14 @@ public class BarPainterFactory {
     public GenericBarPainter<JXPanel> createFriendsBarPainter() {
         return new GenericBarPainter<JXPanel>(
             new GradientPaint(0,0,this.topBarGradientTop,0,1,this.topBarGradientBottom), 
-            this.topBarBorderTop1, PainterUtils.TRASPARENT, 
+            this.friendBarTopBorder1, PainterUtils.TRASPARENT, 
             this.topBarBorderBottom1, PainterUtils.TRASPARENT);
     }
     
     public GenericBarPainter<JXPanel> createTopBarPainter() {
-        Paint topBorderOSSpecific = this.topBarBorderTop1;
-        if (OSUtils.isAnyMac()) {
-            topBorderOSSpecific = PainterUtils.TRASPARENT;
-        }            
-        
         return new GenericBarPainter<JXPanel>(
             new GradientPaint(0,0,this.topBarGradientTop,0,1,this.topBarGradientBottom), 
-            topBorderOSSpecific, PainterUtils.TRASPARENT, 
+            this.topBarBorderTop1, PainterUtils.TRASPARENT, 
             this.topBarBorderBottom1, PainterUtils.TRASPARENT);
     }
     
