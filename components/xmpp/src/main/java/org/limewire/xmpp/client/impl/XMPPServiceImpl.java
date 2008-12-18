@@ -9,7 +9,6 @@ import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.core.api.friend.feature.features.ConnectBackRequestFeature;
-import org.limewire.core.settings.XMPPSettings;
 import org.limewire.io.Connectable;
 import org.limewire.io.GUID;
 import org.limewire.lifecycle.Asynchronous;
@@ -120,8 +119,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                     setMode(Mode.xa);
                     break;
                 case Active:
-                    //TODO Reimplement to not use XMPPSettings  :-(
-                    setMode(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue() ? Mode.dnd : Mode.available);
+                    setMode(jabberSettings.isDoNotDisturbSet() ? Mode.dnd : Mode.available);
                 }
             }
         });
