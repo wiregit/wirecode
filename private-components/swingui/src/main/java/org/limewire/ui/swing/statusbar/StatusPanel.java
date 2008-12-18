@@ -13,6 +13,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.StatusBarSectionPainter;
 import org.limewire.ui.swing.player.MiniPlayerPanel;
@@ -31,7 +32,7 @@ public class StatusPanel extends JXPanel {
     
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
-            FriendStatusPanel friendStatusPanel, 
+            FriendStatusPanel friendStatusPanel, LibraryNavigator libraryNavigator,
             ConnectionStatusPanel connectionStatus, SharedFileCountPanel sharedFileCountPanel,
             BarPainterFactory barPainterFactory, MinimizedDownloadSummaryPanel minDownloadPanel) {
         
@@ -47,7 +48,7 @@ public class StatusPanel extends JXPanel {
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
         
-        MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player);
+        MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player, libraryNavigator);
         miniPlayerPanel.setVisible(false);
         
         minDownloadPanel.setVisible(false);
