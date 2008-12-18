@@ -22,8 +22,7 @@ import org.limewire.core.impl.upload.UploadListenerList;
 import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
+import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -49,8 +48,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         DownloadListenerList, UploadListenerList, 
         IncomingSearchListenerList, GuiCallbackService {
 
-    private static final Log LOG = LogFactory.getLog(GlueActivityCallback.class);
-    
     private final SortedMap<byte[], List<QueryReplyListener>> queryReplyListeners;
 
     private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
@@ -286,7 +283,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
         if(guiCallback != null) {
             guiCallback.handleSaveLocationException(downLoadAction, sle, supportsNewSaveDir);
         } else {
-            LOG.error("Error handling SaveLocationException. GuiCallBack not yet initialized.", sle);
+            ErrorService.error(sle, "Error handling SaveLocationException. GuiCallBack not yet initialized.");
         }
     }
 
