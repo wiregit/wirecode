@@ -226,7 +226,7 @@ public class BrowseHostHandler {
                 client.setCredentials(new UsernamePasswordCredentials(username, password));
             } else {
                 if (LOG.isDebugEnabled())
-                    LOG.debug("no auth token yet for: " + friendPresence);
+                    LOG.debug("no auth token for: " + friendPresence);
             }
         }
         // TODO
