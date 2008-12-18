@@ -47,7 +47,7 @@ public class IdleStatusMonitorTest extends TestCase {
     }
 
     private void sendConnectionEvent(org.limewire.xmpp.api.client.XMPPConnectionEvent.Type connectionState) {
-        connectionSupport.listener.handleEvent(new XMPPConnectionEvent(new MockXMPPConnection(null), connectionState));
+        connectionSupport.listener.handleEvent(new XMPPConnectionEvent(new MockXMPPConnection2(), connectionState));
     }
     
     public void testIdleStateIfInactiveAfter20Min() {
