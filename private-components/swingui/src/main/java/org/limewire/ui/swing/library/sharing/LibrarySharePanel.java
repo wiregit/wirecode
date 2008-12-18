@@ -9,6 +9,8 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -80,7 +82,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  */
 class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable, ShapeDialogComponent {
 
-    private static final int SHARED_ROW_COUNT = 20;
+    private static final int SHARED_ROW_COUNT = 10;
     private static final int BORDER_INSETS = 5;
     private static final int BORDER_BUFFER = BORDER_INSETS + 4;
   //  private static final int HGAP = 5;
@@ -226,6 +228,35 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         setKeyStrokes(this);
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField); 
+        
+        addComponentListener(new ComponentListener(){
+
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (friendCombo.isPopupVisible()) {
+                    friendCombo.showPopup();
+                }                
+            }
+       
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+                // TODO Auto-generated method stub
+                
+            }});
     }
   
     private void initializeButton() {
@@ -466,7 +497,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 textMatcher.setFilterText(inputField.getText().split(" "));
                 if (noShareFilterList.size() > 0) {
                     friendCombo.setSelectedIndex(0);
-                  showPopup();
+                    fixPopupSize();
                 }
             }
             
@@ -474,7 +505,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     //ensures popup is correct size when list filter is relaxed
-    private void showPopup() {
+    private void fixPopupSize() {
         if (friendCombo.isShowing()) {
             friendCombo.hidePopup();
             friendCombo.showPopup();
@@ -549,7 +580,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             resetRowSelection(index);
 
             if (noShareFriendList.size() > 0) {
-                showPopup();
+                friendCombo.showPopup();
             }
         }
     }
@@ -654,6 +685,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             int visibleRows = (shareTable.getRowCount() < SHARED_ROW_COUNT) ? shareTable.getRowCount() : SHARED_ROW_COUNT;
             shareTable.setVisibleRowCount(visibleRows);
             tablePanel.setVisible(visibleRows > 0);
+            
+            //prevent flashing scrollbar
+            int scrollPolicy = shareTable.getRowCount() > visibleRows ? JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED : JScrollPane.VERTICAL_SCROLLBAR_NEVER;
+            shareScroll.setVerticalScrollBarPolicy(scrollPolicy);
         }
         
         setSize(getPreferredSize());        
