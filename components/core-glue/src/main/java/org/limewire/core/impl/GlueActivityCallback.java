@@ -308,23 +308,21 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     @Override
     public void promptTorrentUploadCancel(ManagedTorrent torrent) {
+        boolean approve = true;//default to true
         if(guiCallback != null) {
-            if (!torrent.isActive())
+            if (!torrent.isActive()) {
                 return;
-            boolean approve = true;
+            }
             
             if(!torrent.isComplete()) {
                 approve = guiCallback.promptTorrentDownloading();
             } else if (QuestionsHandler.WARN_TORRENT_SEED_MORE.getValue() && torrent.getRatio() < 1.0f) {
                 approve = guiCallback.promptTorrentSeedRatioLow();
             }
-    
-            if(approve && torrent.isActive()) {
-                torrentManager
-                        .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
-            }
-        } else {
-            throw new UnsupportedOperationException("TODO notify user");
+        } 
+        if(approve && torrent.isActive()) {
+            torrentManager
+                    .dispatchEvent(new TorrentEvent(this, TorrentEvent.Type.STOP_APPROVED, torrent));
         }
     }
     
