@@ -24,7 +24,6 @@ public class CoreGlueXMPPModule extends AbstractModule {
         bind(XMPPFirewalledAddressConnector.class).asEagerSingleton();
         bind(XMPPRemoteFileDescCreator.class).asEagerSingleton();
         bind(IdleTime.class).to(IdleTimeImpl.class);
-        bind(ThreadSleeper.class).to(ThreadSleeperImpl.class);
         bind(IdleStatusMonitor.class);
     }
 }

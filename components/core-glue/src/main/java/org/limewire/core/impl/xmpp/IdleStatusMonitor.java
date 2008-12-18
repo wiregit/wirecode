@@ -21,16 +21,14 @@ class IdleStatusMonitor {
     private static final int TWENTY_MINUTES_IN_MILLIS = 1200000;
     private final IdleTime idleTime;
     private final ScheduledExecutorService backgroundExecutor;
-    private final ThreadSleeper sleeper;
     private final EventBroadcaster<ActivityEvent> activityBroadcaster;
-    private boolean isXMPPConnected;
+    private volatile boolean isXMPPConnected;
 
     @Inject
     public IdleStatusMonitor(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, 
-            IdleTime idleTime, ThreadSleeper sleeper, EventBroadcaster<ActivityEvent> activityBroadcaster) {
+            IdleTime idleTime, EventBroadcaster<ActivityEvent> activityBroadcaster) {
         this.backgroundExecutor = backgroundExecutor;
         this.idleTime = idleTime;
-        this.sleeper = sleeper;
         this.activityBroadcaster = activityBroadcaster;
     }
 
@@ -47,11 +45,11 @@ class IdleStatusMonitor {
 
             @Override
             public void start() {
-                backgroundExecutor.schedule(new Runnable() {
+                backgroundExecutor.scheduleAtFixedRate(new Runnable() {
                     private boolean hasBecomeInactive;
                     @Override
                     public void run() {
-                        while(idleTime.supportsIdleTime() && isXMPPConnected) {
+                        if (idleTime.supportsIdleTime() && isXMPPConnected) {
                             if (idleTime.getIdleTime() > TWENTY_MINUTES_IN_MILLIS) {
                                 activityBroadcaster.broadcast(new ActivityEvent(ActivityState.Idle));
                                 hasBecomeInactive = true;
@@ -59,14 +57,9 @@ class IdleStatusMonitor {
                                 activityBroadcaster.broadcast(new ActivityEvent(ActivityState.Active));
                                 hasBecomeInactive = false;
                             }
-                            try {
-                                sleeper.sleep(1000);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
                         }
                     }
-                }, 0, TimeUnit.MILLISECONDS);
+                }, 0, 1, TimeUnit.SECONDS);
             }
 
             @Override

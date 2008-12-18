@@ -21,17 +21,17 @@ class MockScheduledExecutorService implements ScheduledExecutorService {
         return null;
     }
 
-    public Runnable scheduleRunnable;
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        scheduleRunnable = command;
+        // TODO Auto-generated method stub
         return null;
     }
 
+    public Runnable scheduleAtFixedRateCommand;
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay,
             long period, TimeUnit unit) {
-        // TODO Auto-generated method stub
+        scheduleAtFixedRateCommand = command;
         return null;
     }
 

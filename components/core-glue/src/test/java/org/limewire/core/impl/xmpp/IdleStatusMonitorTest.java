@@ -9,7 +9,6 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
     private MockIdleTime idleTime;
-    private MockThreadSleeper sleeper;
     private Runnable monitorRunnable;
     private MockActivityEventBroadcaster activityBroadcaster;
     private MockListenerSupport connectionSupport;
@@ -18,10 +17,9 @@ public class IdleStatusMonitorTest extends TestCase {
     protected void setUp() throws Exception {
         MockScheduledExecutorService backgroundExecutor = new MockScheduledExecutorService();
         idleTime = new MockIdleTime();
-        sleeper = new MockThreadSleeper();
         activityBroadcaster = new MockActivityEventBroadcaster();
         connectionSupport = new MockListenerSupport();
-        IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, sleeper, activityBroadcaster);
+        IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, activityBroadcaster);
         MockServiceRegistry registry = new MockServiceRegistry();
         
         //trigger the monitoring code
@@ -29,21 +27,21 @@ public class IdleStatusMonitorTest extends TestCase {
         monitor.register(connectionSupport);
         Service service = registry.registeredService;
         service.start();
-        monitorRunnable = backgroundExecutor.scheduleRunnable;
+        monitorRunnable = backgroundExecutor.scheduleAtFixedRateCommand;
     }
 
     public void testIdleTimeNotSupported() {
         idleTime.supportsIdleTimeReturn = false;
         monitorRunnable.run();
-        assertTrue("No event ever fired if system does not support idle time", activityBroadcaster.events.isEmpty());
+        assertNull("No event ever fired if system does not support idle time", activityBroadcaster.event);
     }
 
     public void testXMPPNotConnected() {
         idleTime.supportsIdleTimeReturn = true;
         monitorRunnable.run();
-        assertTrue("No event ever fired if system does not support idle time", activityBroadcaster.events.isEmpty());
+        assertNull("No event ever fired if system does not support idle time", activityBroadcaster.event);
         sendConnectionEvent(XMPPConnectionEvent.Type.DISCONNECTED);
-        assertTrue("No event ever fired if system does not support idle time", activityBroadcaster.events.isEmpty());
+        assertNull("No event ever fired if system does not support idle time", activityBroadcaster.event);
     }
 
     private void sendConnectionEvent(org.limewire.xmpp.api.client.XMPPConnectionEvent.Type connectionState) {
@@ -53,13 +51,17 @@ public class IdleStatusMonitorTest extends TestCase {
     public void testIdleStateIfInactiveAfter20Min() {
         idleTime.supportsIdleTimeReturn = true;
         sendConnectionEvent(XMPPConnectionEvent.Type.CONNECTED);
-        idleTime.getIdleTimeReturn.add(0l);
-        idleTime.getIdleTimeReturn.add(Long.MAX_VALUE);
-        idleTime.getIdleTimeReturn.add(0l);
+        
         idleTime.getIdleTimeReturn.add(0l);
         monitorRunnable.run();
-        assertEquals(2, activityBroadcaster.events.size());
-        assertEquals(ActivityEvent.ActivityState.Idle, activityBroadcaster.events.get(0).getSource());
-        assertEquals(ActivityEvent.ActivityState.Active, activityBroadcaster.events.get(1).getSource());
+        assertNull("No event broadcast if hasn't been idle before", activityBroadcaster.event);
+        
+        idleTime.getIdleTimeReturn.add(Long.MAX_VALUE);
+        monitorRunnable.run();
+        assertEquals(ActivityEvent.ActivityState.Idle, activityBroadcaster.event.getSource());
+        
+        idleTime.getIdleTimeReturn.add(0l);
+        monitorRunnable.run();
+        assertEquals(ActivityEvent.ActivityState.Active, activityBroadcaster.event.getSource());
     }
 }

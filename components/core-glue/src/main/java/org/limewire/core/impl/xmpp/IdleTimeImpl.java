@@ -5,7 +5,7 @@ import org.limewire.util.SystemUtils;
 import com.google.inject.Singleton;
 
 @Singleton
-public class IdleTimeImpl implements IdleTime {
+class IdleTimeImpl implements IdleTime {
 
     @Override
     public long getIdleTime() {
