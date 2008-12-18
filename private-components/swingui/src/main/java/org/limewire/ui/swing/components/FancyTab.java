@@ -58,24 +58,21 @@ public class FancyTab extends JXPanel {
     
     private TabState currentState;
     
-    @Resource
-    private Icon removeActiveIcon;
-    
-    @Resource
-    private Icon removeInactiveIcon;
-
-    @Resource
-    private Icon removeRolloverIcon;
-    
-    private Icon removeArmedIcon;
     private Icon removeEmptyIcon;
+    @Resource private Icon removeActiveIcon;
+    @Resource private Icon removeActiveRolloverIcon;
+    @Resource private Icon removeActivePressedIcon;
+    @Resource private Icon removeInactiveIcon;
+    @Resource private Icon removeInactiveRolloverIcon;
+    @Resource private Icon removeInactivePressedIcon;
 
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
             FancyTabProperties fancyTabProperties) {
         GuiUtils.assignResources(this);
-        removeArmedIcon = new ShiftedIcon(1, 1, removeRolloverIcon);
-        removeEmptyIcon = new EmptyIcon(removeActiveIcon.getIconWidth(), removeActiveIcon.getIconHeight());
+        
+        removeEmptyIcon = new EmptyIcon(removeActiveIcon.getIconWidth(),
+                removeActiveIcon.getIconHeight());
         
         this.tabActions = actionMap;
         this.props = fancyTabProperties;
@@ -207,14 +204,15 @@ public class FancyTab extends JXPanel {
     
     JButton createRemoveButton() {
         JButton button = new JButton();
+
+        button.setIcon(removeEmptyIcon);
+        button.setRolloverIcon(removeActiveRolloverIcon);
+        button.setPressedIcon(removeActivePressedIcon);
+        
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setRolloverEnabled(true);
-        button.setIcon(removeEmptyIcon);
-        button.setSelectedIcon(removeActiveIcon);
-        button.setRolloverIcon(removeRolloverIcon);
-        button.setPressedIcon(removeArmedIcon);
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setAction(tabActions.getRemoveAction());
         button.setActionCommand(TabActionMap.REMOVE_COMMAND);
@@ -352,6 +350,8 @@ public class FancyTab extends JXPanel {
                 additionalText.setForeground(props.getSelectionColor());
                 this.setBackgroundPainter(props.getSelectedPainter());
                 removeButton.setIcon(removeActiveIcon);
+                removeButton.setRolloverIcon(removeActiveRolloverIcon);
+                removeButton.setPressedIcon(removeActivePressedIcon);
                 break;
             case BACKGROUND:
                 underline.setVisible(props.isUnderlineEnabled());
@@ -366,6 +366,8 @@ public class FancyTab extends JXPanel {
                 underline.setColor(props.getUnderlineHoverColor());
                 setBackgroundPainter(props.getHighlightPainter());
                 removeButton.setIcon(removeInactiveIcon);
+                removeButton.setRolloverIcon(removeInactiveRolloverIcon);
+                removeButton.setPressedIcon(removeInactivePressedIcon);
                 break;
             }
         }

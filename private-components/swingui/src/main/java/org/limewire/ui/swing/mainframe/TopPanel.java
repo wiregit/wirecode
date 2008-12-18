@@ -152,20 +152,13 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setRemovable(true);
         searchList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
         searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
-        searchList.setTabInsets(new Insets(0,10,3,10));
+        searchList.setTabInsets(new Insets(0,10,2,10));
 
-//        Line line = Line.createVerticalLine(Color.GRAY);
-//        Line lineShadow = Line.createVerticalLine(Color.WHITE);
-        
         setLayout(new MigLayout("gap 0, insets 0, filly, alignx leading"));        
-        add(homeButton, "gaptop 2");
-        add(storeButton, "gaptop 2");
-//        add(line, "growy, gapleft 5, gaptop 4, gapbottom 3");
-//        add(lineShadow, "growy, gaptop 4, gapbottom 3");
-//        add(libraryButton, "gaptop 2, gapleft 8");
-        
+        add(homeButton, "gapbottom 2, gaptop 0");
+        add(storeButton, "gapbottom 2, gaptop 0");
 
-        add(searchBar, "gapleft 70");
+        add(searchBar, "gapleft 70, gapbottom 2, gaptop 0");
         add(searchList, "gapleft 10, gaptop 3, gapbottom 1, growy");
         
         // Do not show store if mozilla failed to load.

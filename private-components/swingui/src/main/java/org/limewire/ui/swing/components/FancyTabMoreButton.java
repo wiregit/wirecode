@@ -112,7 +112,7 @@ public class FancyTabMoreButton extends LimeComboBox {
         @Override
         public void mouseEntered(MouseEvent e) {
             panel.setBackgroundPainter(null);
-            removeButton.setIcon(removeButton.getSelectedIcon());
+            removeButton.setIcon(removeButton.getPressedIcon());
         }
         
         @Override
