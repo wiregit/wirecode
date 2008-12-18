@@ -323,6 +323,9 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
                     magnetLinkFactory, allFriends, localItemPropFactory, shareFactory));
         
+
+        libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));
+
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);
         
@@ -344,7 +347,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         return (EventSelectionModel<LocalFileItem>) table.getSelectionModel();
     }
 
-
+    /**
+     * Drops with this handler will add the file to the ManagedLibrary and share
+     * with this friend
+     */
     private class FriendLibraryTransferHandler extends TransferHandler {
 
         private LibraryTable table;
@@ -385,6 +391,67 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
                     shareListManager.getFriendShareList(friend).addFolder(file);
                 } else {
                     shareListManager.getFriendShareList(friend).addFile(file);
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public Transferable createTransferable(JComponent comp) {
+            int indices[] = table.getSelectedRows();
+            List<RemoteFileItem> files = new ArrayList<RemoteFileItem>();
+            for (int i = 0; i < indices.length; i++) {
+                files.add((RemoteFileItem) ((LibraryTableModel) table.getModel())
+                        .getFileItem(indices[i]));
+            }
+            return new RemoteFileTransferable(files);
+        }
+    }
+    
+    /**
+     * Drops with this handler will add the file to the ManagedLibrary and share
+     * with the owner of this LocalFileList
+     */
+    private class SharingLibraryTransferHandler extends TransferHandler {
+
+        private LibraryTable table;
+
+        private LocalFileList friendFileList;
+
+        public SharingLibraryTransferHandler(LibraryTable table, LocalFileList friendFileList) {
+            this.table = table;
+            this.friendFileList = friendFileList;
+        }
+
+        @Override
+        public int getSourceActions(JComponent comp) {
+            return COPY;
+        }
+
+        @Override
+        public boolean canImport(TransferHandler.TransferSupport info) {
+            return DNDUtils.containsFileFlavors(info);
+        }
+
+        @Override
+        public boolean importData(TransferHandler.TransferSupport info) {
+            if (!info.isDrop()) {
+                return false;
+            }
+
+            Transferable t = info.getTransferable();
+
+            final List<File> fileList;
+            try {
+                fileList = Arrays.asList(DNDUtils.getFiles(t));
+            } catch (Exception e) {
+                return false;
+            }
+            for (File file : fileList) {
+                if (file.isDirectory()) {
+                    friendFileList.addFolder(file);
+                } else {
+                    friendFileList.addFile(file);
                 }
             }
             return true;
