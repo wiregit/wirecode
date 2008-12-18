@@ -21,7 +21,6 @@ import javax.swing.plaf.basic.BasicHTML;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
-import org.limewire.core.api.lifecycle.LifeCycleManager;
 import org.limewire.core.impl.mozilla.LimeMozillaOverrides;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
@@ -52,7 +51,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.limegroup.gnutella.ActiveLimeWireCheck;
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
@@ -150,7 +148,7 @@ public final class Initializer {
         // and hide the splash screen & display the UI.
         loadUI();
         
-        enablePreferences();
+        enablePreferences(injector);
         
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
@@ -391,8 +389,8 @@ public final class Initializer {
         if(OSUtils.isMacOSX()) {
             GURLHandler.getInstance().enable(externalControl);
             stopwatch.resetAndLog("Enable GURL");
-            MacEventHandler.instance().enable(externalControl, this, injector.getInstance(DownloadManager.class), 
-                    injector.getInstance(LifeCycleManager.class));
+            MacEventHandler macEventHandler = injector.getInstance(MacEventHandler.class);
+            macEventHandler.runExternalChecks();
             stopwatch.resetAndLog("Enable macEventHandler");
         }
         
@@ -528,9 +526,10 @@ public final class Initializer {
         });
     }  
     
-    private void enablePreferences() {        
+    private void enablePreferences(Injector injector) {        
         if (OSUtils.isMacOSX()) {
-            MacEventHandler.instance().enablePreferences();
+            MacEventHandler macEventHandler = injector.getInstance(MacEventHandler.class);
+            macEventHandler.enablePreferences();
         }
     }
     
