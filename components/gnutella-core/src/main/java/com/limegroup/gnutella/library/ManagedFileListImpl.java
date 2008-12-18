@@ -310,12 +310,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         libraryData.setDirectoriesToExcludeFromManaging(foldersToExclude);
         libraryData.setManagedCategories(categoriesToManage);
         
-        
-        
-        for ( File a : recursiveFoldersToManage) {
-            System.out.println(a.toString());
-        }
-        
         final int startRevision = revision.get();
         fireLoading();
         return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
