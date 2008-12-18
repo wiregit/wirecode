@@ -64,7 +64,7 @@ public class UpgradePage1 extends WizardPage {
             return;
         }
         
-        InstallSettings.SCAN_FILES.setValue(AutoDirectoryManageConfig.shouldScanFiles());
+        InstallSettings.SCAN_FILES.setValue(true);
         
         Collection<File> manage = AutoDirectoryManageConfig.getManagedDirectories();
         Collection<File> exclude = AutoDirectoryManageConfig.getExcludedDirectories();

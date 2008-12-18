@@ -15,20 +15,14 @@ import org.limewire.util.SystemUtils.SpecialLocations;
  */
 public class AutoDirectoryManageConfig {
     
-    /**
-     * Whether scanning files should be turned on by default 
-     */
-    public static boolean shouldScanFiles() {
-        return true;
-    }
-    
+   
     /**
      * Determines the OS specific list of directories to manage by default
      */
     public static Set<File> getManagedDirectories() {
         Set<File> dirs = new HashSet<File>();
 
-        if (OSUtils.isWindows()) {
+        if (OSUtils.isWindows() && !OSUtils.isWindowsVista()) {
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
             dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
         } else {

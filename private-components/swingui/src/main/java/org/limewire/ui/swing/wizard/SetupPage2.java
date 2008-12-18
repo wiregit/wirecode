@@ -135,7 +135,7 @@ public class SetupPage2 extends WizardPage {
     
     @Override
     public void applySettings() {
-        InstallSettings.SCAN_FILES.setValue(AutoDirectoryManageConfig.shouldScanFiles());
+        InstallSettings.SCAN_FILES.setValue(true);
         
         Collection<File> manage;
         Collection<File> exclude;
