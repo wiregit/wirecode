@@ -30,9 +30,9 @@ public class SetupWizard {
         if (shouldShowWizard()) {
             wizard.showDialogIfNeeded(owner);
             
-            // Reset the upgrade flag after the setup wizard
+            // Sets the upgraded flag after the setup wizard
             //  completes
-            InstallSettings.NEEDS_5_UPGRADE.setValue(false);
+            InstallSettings.UPGRADED_TO_5.setValue(true);
         }
     }
         
@@ -43,25 +43,21 @@ public class SetupWizard {
         
         wizard = new Wizard(decorator);
         
-        boolean needFullSetup = false;
-        
         if(needsPage1()){
-            needFullSetup = true;
             wizard.addPage(new SetupPage1(decorator));
         }        
 
-        if(needsPage2()){
-            needFullSetup = true;
-            wizard.addPage(new SetupPage2(decorator, libraryData));
-        }
-        
-        if (!needFullSetup && needsUpgrade()) {
+        if (needsUpgrade()) {
             wizard.addPage(new UpgradePage1(decorator, libraryData));
+        } 
+        else if(needsPage2()){
+            wizard.addPage(new SetupPage2(decorator, libraryData));
         }
     }
     
     private boolean needsUpgrade() {
-        return InstallSettings.NEEDS_5_UPGRADE.getValue();
+        return !InstallSettings.UPGRADED_TO_5.getValue() 
+            && InstallSettings.SCAN_FILES.getValue();
     }
     
     private boolean needsPage1() {
