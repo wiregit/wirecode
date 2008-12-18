@@ -148,7 +148,7 @@ public final class Initializer {
         // and hide the splash screen & display the UI.
         loadUI();
         
-        enablePreferences(injector);
+        enablePreferences();
         
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
@@ -306,8 +306,8 @@ public final class Initializer {
             SystemUtils.setOpenFileLimit(1024);
             stopwatch.resetAndLog("Open file limit raise");     
 
-//            MacEventHandler.instance();
-//            stopwatch.resetAndLog("MacEventHandler instance");
+            MacEventHandler.instance();
+            stopwatch.resetAndLog("MacEventHandler instance");
         }
     }
     
@@ -389,8 +389,7 @@ public final class Initializer {
         if(OSUtils.isMacOSX()) {
             GURLHandler.getInstance().enable(externalControl);
             stopwatch.resetAndLog("Enable GURL");
-            MacEventHandler macEventHandler = injector.getInstance(MacEventHandler.class);
-            macEventHandler.runExternalChecks();
+            injector.injectMembers(MacEventHandler.instance());
             stopwatch.resetAndLog("Enable macEventHandler");
         }
         
@@ -526,10 +525,9 @@ public final class Initializer {
         });
     }  
     
-    private void enablePreferences(Injector injector) {        
+    private void enablePreferences() {        
         if (OSUtils.isMacOSX()) {
-            MacEventHandler macEventHandler = injector.getInstance(MacEventHandler.class);
-            macEventHandler.enablePreferences();
+            MacEventHandler.instance().enablePreferences();
         }
     }
     

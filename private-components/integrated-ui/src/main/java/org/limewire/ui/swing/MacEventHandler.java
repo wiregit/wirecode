@@ -8,23 +8,17 @@ import net.roydesign.event.ApplicationEvent;
 import net.roydesign.mac.MRJAdapter;
 
 import org.limewire.core.api.download.DownloadAction;
-import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.lifecycle.LifeCycleManager;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.event.ExitApplicationEvent;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
-import org.limewire.ui.swing.nav.NavCategory;
-import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
-import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.browser.ExternalControl;
 
 /**
@@ -33,8 +27,16 @@ import com.limegroup.gnutella.browser.ExternalControl;
  * "Quit" option from the Mac file menu, and the dropping of a file on LimeWire
  * on the Mac, which LimeWire would be expected to handle in some way.
  */
-@Singleton
 public class MacEventHandler {
+
+    private static MacEventHandler INSTANCE;
+
+    public static synchronized MacEventHandler instance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MacEventHandler();
+        }
+        return INSTANCE;
+    }
 
     private volatile File lastFileOpened = null;
 
@@ -44,28 +46,15 @@ public class MacEventHandler {
 
     private volatile Initializer initializer = null;
 
+    private volatile DownloadManager downloadManager = null;
+
     private volatile LifeCycleManager lifecycleManager = null;
 
-    private volatile Navigator navigator;
-
-    private volatile DownloadListManager downloadListManager;
-
-    private volatile SaveLocationExceptionHandler saveLocationExceptionHandler;
+    private volatile ActivityCallback activityCallback = null;
 
     /** Creates a new instance of MacEventHandler */
-    @Inject
-    private MacEventHandler(ExternalControl externalControl, Initializer initializer,
-            DownloadListManager downloadListManager, LifeCycleManager lifecycleManager,
-            Navigator navigator, SaveLocationExceptionHandler saveLocationExceptionHandler) {
+    private MacEventHandler() {
 
-        this.externalControl = externalControl;
-        this.initializer = initializer;
-        this.enabled = true;
-        this.downloadListManager = downloadListManager;
-        this.lifecycleManager = lifecycleManager;
-        this.navigator = navigator;
-        this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        
         MRJAdapter.addAboutListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 new AboutDisplayEvent().publish();
@@ -92,7 +81,16 @@ public class MacEventHandler {
         });
     }
 
-    public void runExternalChecks() {
+    @Inject
+    public void enable(ExternalControl externalControl, Initializer initializer,
+            DownloadManager downloadManager, LifeCycleManager lifecycleManager,
+            ActivityCallback activityCallback) {
+        this.externalControl = externalControl;
+        this.initializer = initializer;
+        this.enabled = true;
+        this.downloadManager = downloadManager;
+        this.lifecycleManager = lifecycleManager;
+        this.activityCallback = activityCallback;
         if (lastFileOpened != null) {
             runFileOpen(lastFileOpened);
         }
@@ -127,7 +125,7 @@ public class MacEventHandler {
         }
     }
 
-    private void runFileOpen(final File file) {
+    private void runFileOpen(File file) {
         String filename = file.getPath();
         if (filename.endsWith("limestart")) {
             initializer.setStartup();
@@ -136,20 +134,16 @@ public class MacEventHandler {
                 externalControl.enqueueControlRequest(file.getAbsolutePath());
             } else {
                 try {
-                    DownloadItem item = downloadListManager.addTorrentDownload(file, null, false);
-                    navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).select(
-                            SimpleNavSelectable.create(item));
-                } catch (SaveLocationException sle) {
-                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
+                    downloadManager.downloadTorrent(file, false);
+                } catch (SaveLocationException e) {
+                    activityCallback.handleSaveLocationException(new DownloadAction() {
                         @Override
                         public void download(File saveFile, boolean overwrite)
                                 throws SaveLocationException {
-                            DownloadItem item = downloadListManager.addTorrentDownload(file,
-                                    saveFile, overwrite);
-                            navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME)
-                                    .select(SimpleNavSelectable.create(item));
+                            downloadManager.downloadTorrent(saveFile, overwrite);
                         }
-                    }, sle, false);
+                    }, e, false);
+
                 }
             }
         } else {
