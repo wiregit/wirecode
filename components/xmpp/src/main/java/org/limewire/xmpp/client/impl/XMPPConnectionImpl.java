@@ -380,6 +380,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     
     private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
         private DiscoInfoListener discoInfoListener;
+        private AddressIQListener addressIQListener;
 
         @Override
         public void connectionCreated(XMPPConnection connection) {
@@ -416,7 +417,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             rosterListeners.addListener(discoInfoListener.getRosterListener());
             connection.addPacketListener(discoInfoListener, discoInfoListener.getPacketFilter());
 
-            AddressIQListener addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, discoInfoListener, xmppAddressRegistry);
+            addressIQListener = new AddressIQListener(XMPPConnectionImpl.this, addressFactory, discoInfoListener, xmppAddressRegistry);
             addressListenerSupport.addListener(addressIQListener);
             connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
 
@@ -462,8 +463,12 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         }
         
         void cleanup() {
+            ChatStateManager.remove(connection);
             if(discoInfoListener != null) {
                 rosterListeners.removeListener(discoInfoListener.getRosterListener());
+            }
+            if(addressIQListener != null) {
+                addressListenerSupport.removeListener(addressIQListener);    
             }
         }
     }

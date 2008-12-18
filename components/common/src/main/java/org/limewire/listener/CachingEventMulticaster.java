@@ -19,12 +19,18 @@ package org.limewire.listener;
 public class CachingEventMulticaster<E> implements EventMulticaster<E>, EventBean<E> {
     
     private final EventListenerList<E> eventListenerList;
+    private final BroadcastPolicy broadcastPolicy;
     private final Object LOCK = new Object();
     
     private volatile E cachedEvent;
     
     public CachingEventMulticaster() {
+        this(BroadcastPolicy.ALWAYS);    
+    }
+    
+    public CachingEventMulticaster(BroadcastPolicy broadcastPolicy) {
         eventListenerList = new EventListenerList<E>();
+        this.broadcastPolicy = broadcastPolicy;
     }
 
     @Override
@@ -51,12 +57,13 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E>, EventBea
 
     @Override
     public void broadcast(E event) {
-        // This fails because we're broadcasting enums.
-//        assert System.identityHashCode(event) != event.hashCode(); // otherwise caching won't work
+        assert eventConsistentWithBroadcastPolicy(event);
         
         boolean broadcast = false;
         synchronized(LOCK) {
-            if(cachedEvent == null || !cachedEvent.equals(event)) {
+            if(cachedEvent == null ||
+                    broadcastPolicy == BroadcastPolicy.ALWAYS ||
+                    !cachedEvent.equals(event)) {
                 cachedEvent = event;
                 broadcast = true;             
             }
@@ -66,7 +73,13 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E>, EventBea
             eventListenerList.broadcast(event);
         }
     }
-    
+
+    private boolean eventConsistentWithBroadcastPolicy(E event) {
+        return broadcastPolicy == BroadcastPolicy.ALWAYS ||
+                event.getClass().isEnum() ||
+                System.identityHashCode(event) != event.hashCode(); // other case caching won't work
+    }
+
     @Override
     public E getLastEvent() {
         return cachedEvent;

@@ -4,7 +4,7 @@ package org.limewire.listener;
  * An implementation of an event multicaster.
  * This forwards all received events to all listeners.
  */
-public class EventMulticasterImpl<E> implements EventMulticaster<E>, EventBean<E> {
+public class EventMulticasterImpl<E> implements EventMulticaster<E> {
 
     private final EventListenerList<E> listeners = new EventListenerList<E>();
     
@@ -26,10 +26,5 @@ public class EventMulticasterImpl<E> implements EventMulticaster<E>, EventBean<E
     @Override
     public boolean removeListener(EventListener<E> eventListener) {
         return listeners.removeListener(eventListener);        
-    }
-    
-    @Override
-    public E getLastEvent() {
-        return listeners.getLastEvent();
     }
 }

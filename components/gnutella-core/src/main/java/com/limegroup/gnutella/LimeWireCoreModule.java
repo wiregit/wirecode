@@ -24,6 +24,7 @@ import org.limewire.listener.CachingEventMulticaster;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.BroadcastPolicy;
 import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
@@ -374,12 +375,12 @@ public class LimeWireCoreModule extends AbstractModule {
         bindAll(Names.named("messageExecutor"), ListeningExecutorService.class, MessageExecutorProvider.class, Executor.class, ExecutorService.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
         
-        CachingEventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticaster<FirewallTransferStatusEvent>();
+        CachingEventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticaster<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         
-        CachingEventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatusEvent>();
+        CachingEventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
