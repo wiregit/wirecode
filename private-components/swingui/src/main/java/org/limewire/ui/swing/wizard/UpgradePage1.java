@@ -80,12 +80,16 @@ public class UpgradePage1 extends WizardPage {
         
         dirlist = exclude.toArray(new File[exclude.size()]);
         for ( File testDir : dirlist ) {
-            synchronized (testDir) {
-                if (!libraryData.isDirectoryAllowed(testDir)) {
-                    exclude.remove(testDir);
-                }
+            if (!libraryData.isDirectoryAllowed(testDir)) {
+                exclude.remove(testDir);
             }
         }
+        
+        
+        
+        
+        manage.addAll(libraryData.getDirectoriesToManageRecursively());
+        exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());        
     }

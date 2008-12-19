@@ -160,10 +160,8 @@ public class SetupPage2 extends WizardPage {
             
             dirlist = exclude.toArray(new File[exclude.size()]);
             for ( File testDir : dirlist ) {
-                synchronized (testDir) {
-                    if (!libraryData.isDirectoryAllowed(testDir)) {
-                        exclude.remove(testDir);
-                    }
+                if (!libraryData.isDirectoryAllowed(testDir)) {
+                    exclude.remove(testDir);
                 }
             }
         }
