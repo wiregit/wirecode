@@ -119,7 +119,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     }
     
     public void createSelectionPanel() {
-        selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap", "[125!]", ""));
+        selectionPanel.setLayout(new MigLayout("insets 0, gap 0, fillx, wrap, hidemode 3", "[125!]", ""));
     }
     
     protected void select(Category id) {        

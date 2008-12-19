@@ -39,6 +39,9 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -220,7 +223,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         addDisposable(listener);
     }
     
-    private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T> {
+    private static class ButtonSizeListener<T> implements Disposable, ListEventListener<T>, SettingListener {
         private final Category category;
         private final Action action;
         private final FilterList<T> allFileList;
@@ -234,6 +237,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             this.list = list;
             this.friendList = friendList;
             setText();
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
+            }
         }
 
         private void setText() {
@@ -248,6 +254,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             }
             if(category == Category.OTHER) {
                 action.setEnabled(allFileList.size() > 0);
+            } else if(category == Category.PROGRAM) {// hide program category is not enabled
+                action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
             }
         }
         
@@ -255,10 +263,18 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         public void dispose() {
             list.removeListEventListener(this);
             allFileList.removeListEventListener(this);
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.removeSettingListener(this);
+            }
         }
 
         @Override
         public void listChanged(ListEvent<T> listChanges) {
+            setText();
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
             setText();
         }
     }    
