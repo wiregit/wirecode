@@ -21,7 +21,7 @@ public class MultiFileShareWidget implements ShareWidget<LocalFileItem[]>{
     
     @Override
     public void show(Component c) {
-        sharePanel.show(c);
+        sharePanel.show(null);
     }
     
     @Override

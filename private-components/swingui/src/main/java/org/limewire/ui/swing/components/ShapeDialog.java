@@ -4,6 +4,7 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
@@ -13,7 +14,11 @@ import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
+import javax.swing.SwingUtilities;
+
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Singleton;
 
@@ -27,8 +32,16 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
     private ComponentListener componentListener;
 
+    private Component owner;
+    
+
+    @Resource
+    private boolean isPositionedRelativeToOwner;
+
     public ShapeDialog() {
         super(new BorderLayout());
+        GuiUtils.assignResources(this);
+        
         setOpaque(false);
         setVisible(false);
 
@@ -55,13 +68,20 @@ public class ShapeDialog extends JXPanel implements Resizable {
         };
     }
 
-    public void show(Component c) {
+    public void show(Component c, Component owner) {
         removeAll();
         add(c);
         this.component = c;
+        this.owner = owner;
         setVisible(true);
         resize();
     }
+    
+    private void positionRelativeToOwner(){
+        Point ownerLocation = SwingUtilities.convertPoint(owner.getParent(), owner.getLocation(), getParent());            
+        setBounds(ownerLocation.x + owner.getWidth() - component.getWidth(), ownerLocation.y + owner.getHeight(), component.getPreferredSize().width, component.getPreferredSize().height);
+    }
+
 
     private void addListeners() {
         if (eventListener == null) {
@@ -114,22 +134,16 @@ public class ShapeDialog extends JXPanel implements Resizable {
     @Override
     public void resize() {
         if (isVisible() && component != null) {
-            Rectangle parentBounds = getParent().getBounds();
-            Dimension childPreferredSize = getPreferredSize();
-            int w = childPreferredSize.width;
-            int h = childPreferredSize.height;
-            setBounds(parentBounds.width / 2 - w / 2, parentBounds.height / 2 - h /2 , w, h);
+            if (!isPositionedRelativeToOwner || owner == null) {
+                Rectangle parentBounds = getParent().getBounds();
+                Dimension childPreferredSize = getPreferredSize();
+                int w = childPreferredSize.width;
+                int h = childPreferredSize.height;
+                setBounds(parentBounds.width / 2 - w / 2, parentBounds.height / 2 - h / 2, w, h);
+            } else {
+                positionRelativeToOwner();
+            }
         }
     }
-
-//    @Override
-//    public Dimension getPreferredSize() {
-//        if (component != null) {
-//            Dimension dim = component.getPreferredSize();
-//            return new Dimension(dim.width + buffer * 2, dim.height + buffer * 2);
-//        } else {
-//            return new Dimension(0, 0);
-//        }
-//    }
 
 }

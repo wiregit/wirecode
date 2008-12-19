@@ -20,7 +20,7 @@ private LibrarySharePanel sharePanel;
     
     @Override
     public void show(Component c) {
-        sharePanel.show(c);
+        sharePanel.show(null);
     }
     
 

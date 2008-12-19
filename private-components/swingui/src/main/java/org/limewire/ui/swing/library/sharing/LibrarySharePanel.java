@@ -9,8 +9,8 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -47,6 +47,7 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.Painter;
+import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.LimeEditableComboBox;
@@ -83,9 +84,13 @@ import ca.odell.glazedlists.swing.EventTableModel;
 class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable, ShapeDialogComponent {
 
     private static final int SHARED_ROW_COUNT = 10;
-    private static final int BORDER_INSETS = 5;
-    private static final int BORDER_BUFFER = BORDER_INSETS + 4;
+    private static final int SHADOW_INSETS = 5;
+    
+    public static enum ShadowMode {SHADOW, NO_SHADOW};
+    
+    private ShadowMode shadowMode = ShadowMode.SHADOW;
   //  private static final int HGAP = 5;
+    
     @Resource
     private int panelWidth;
     
@@ -160,9 +165,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     @Resource
     private Icon removeIconPressed;   
     @Resource
-    private int shareTableIndent = 15;
-    @Resource
-    private Color shadowColor;
+    private int shareTableIndent = 15;   
     @Resource
     private Color dividerColor;
     @Resource
@@ -198,10 +201,15 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         }
     };    
     
-    
+
     public LibrarySharePanel(Collection<Friend> allFriends, ShapeDialog dialog) {
+        this(allFriends, dialog, ShadowMode.SHADOW);
+    }
+    
+    public LibrarySharePanel(Collection<Friend> allFriends, ShapeDialog dialog, ShadowMode shadowMode) {
         this.allFriends = allFriends;
         this.dialog = dialog;
+        this.shadowMode = shadowMode;
         initialize();
     }
   
@@ -229,20 +237,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         setKeyStrokes(mainPanel);
         setKeyStrokes(inputField); 
         
-        addComponentListener(new ComponentListener(){
-
-
-            @Override
-            public void componentHidden(ComponentEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
+        addComponentListener(new ComponentAdapter(){
 
             @Override
             public void componentResized(ComponentEvent e) {
@@ -250,13 +245,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                     friendCombo.showPopup();
                 }                
             }
-       
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-                // TODO Auto-generated method stub
-                
-            }});
+       });
     }
   
     private void initializeButton() {
@@ -271,7 +260,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private void initializePanels(){        
         
-        setLayout(new MigLayout());
+        setLayout(new MigLayout("nocache, fill, ins 0 0 0 0 , gap 0! 0!, novisualpadding"));
         setOpaque(false);
         
         mainPanel = new JXPanel(new MigLayout("nocache, fill, ins 0 6 0 6 , gap 0! 0!, novisualpadding"));
@@ -298,24 +287,35 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             @Override
             public void paint(Graphics2D g, Object object, int width, int height) {
                 int arc = 10;
-                Area shadowArea = new Area(new RoundRectangle2D.Float(mainPanel.getLocation().x - BORDER_INSETS, mainPanel.getLocation().y - BORDER_INSETS, mainPanel.getWidth() + BORDER_INSETS * 3, mainPanel.getHeight() + BORDER_INSETS * 3, arc, arc));
-                RoundRectangle2D.Float panelShape = new RoundRectangle2D.Float(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth(),
-                        mainPanel.getHeight() + 2, arc, arc);
+               
+                RoundRectangle2D.Float panelShape = new RoundRectangle2D.Float(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth()-2,
+                        mainPanel.getHeight()-2, arc, arc);
                 Area panelArea = new Area(panelShape);
                 Point bottomLocation = SwingUtilities.convertPoint(mainPanel, bottomPanel.getLocation(), LibrarySharePanel.this);
                 Area bottomArea = new Area(new Rectangle2D.Float(0, bottomLocation.y, getWidth(), 1000));
                
                 bottomArea.intersect(panelArea);
-                shadowArea.subtract(panelArea);
                 
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                         RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setRenderingHint(RenderingHints.KEY_RENDERING,
                         RenderingHints.VALUE_RENDER_SPEED);
-                //TODO it's a pretty crappy shadow but good enough for now
-                g2.setColor(shadowColor);
-                g2.fill(shadowArea);
+                
+                if (shadowMode == ShadowMode.SHADOW) {
+                    // TODO it's a pretty crappy shadow but good enough for now
+//                    Area shadowArea = new Area(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, arc, arc));
+//                    shadowArea.subtract(panelArea);
+                    
+                 //   g2.setColor(shadowColor);
+                  //  g2.fill(shadowArea);
+                    ShadowPathEffect shadow = new ShadowPathEffect();
+                    shadow.setEffectWidth(14);
+                    shadow.setOffset(new Point(0, 0));
+                    shadow.setBrushSteps(5);
+                    shadow.apply(g2, panelArea, width, height);
+                }
+                
                 g2.setColor(Color.WHITE);
                 g2.fill(panelArea);        
                 if (bottomPanel.isVisible()) {
@@ -334,7 +334,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 g2.draw(panelShape);
                 g2.dispose();
             }
-        });
+        });        
         
     }
 
@@ -420,14 +420,16 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         
         bottomPanel.add(friendLabel, "gaptop 6, hidemode 3, wrap");
         bottomPanel.add(comboPanel, "growx, gaptop 4, gapbottom 6, hidemode 3, wrap");
-        bottomPanel.add(bottomLabel, "gapbottom 6, hidemode 3");
+        bottomPanel.add(bottomLabel, "growy, gapbottom 6, hidemode 3");
         
 
         mainPanel.add(titlePanel, "growx, gaptop 6, gapbottom 6, wrap");
         mainPanel.add(tablePanel, "growx, wrap, hidemode 3");
         mainPanel.add(bottomPanel, "growx, hidemode 3");
         
-        add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
+     //   add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
+        int inset = shadowMode == ShadowMode.SHADOW ? SHADOW_INSETS : 0;
+        add(mainPanel, "alignx 50%, aligny 50%, gapleft " + inset + ", gapright " + inset + ", gaptop " + inset + ", gapbottom " + inset); 
     }
 
     private void initializeComboBox() {
@@ -614,14 +616,14 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
 
     
-    public void show(Component c) {       
+    public void show(Component owner) {       
         inputField.setText(null);
         if (noShareFilterList.size() > 0) {
             friendCombo.setSelectedIndex(0);
         }
         reloadSharedBuddies();
         adjustSize();
-        dialog.show(this);
+        dialog.show(this, owner);
         inputField.requestFocusInWindow();
     }
     

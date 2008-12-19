@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
+import org.limewire.ui.swing.library.sharing.LibrarySharePanel.ShadowMode;
 import org.limewire.ui.swing.library.sharing.model.FileShareModel;
 import org.limewire.ui.swing.util.I18n;
 
@@ -15,7 +16,7 @@ public class FileShareWidget implements ShareWidget<File> {
    private LibrarySharePanel sharePanel;
     
     public FileShareWidget(ShareListManager shareListManager, Collection<Friend> allFriends, ShapeDialog shapeDialog){
-        sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
+        sharePanel = new LibrarySharePanel(allFriends, shapeDialog, ShadowMode.SHADOW);
         sharePanel.setShareModel(new FileShareModel(shareListManager));
         sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
         sharePanel.setComboLabelText(I18n.tr("Start typing a friend's name"));
