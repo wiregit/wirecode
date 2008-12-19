@@ -27,7 +27,7 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_IMAGE_NAME", I18n.tr("Name"), 540, true, true),     
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_IMAGE_EXTENSION", I18n.tr("Extension"), 60, true, true), 
                 new ColumnStateInfo(DATE_INDEX, "CLASSIC_SEARCH_IMAGE_DATE", I18n.tr("Date Created"), 100, true, true), 
-                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_IMAGE_SIZE", I18n.tr("Size"), 100, true, true), 
+                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_IMAGE_SIZE", I18n.tr("Size"), 100, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_IMAGE_DESCRIPTION", I18n.tr("Description"), 80, false, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_IMAGE_TITLE", I18n.tr("Title"), 80, false, true)
         });

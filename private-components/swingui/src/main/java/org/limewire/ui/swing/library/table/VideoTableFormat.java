@@ -23,7 +23,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         super(ACTION_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "LIBRARY_VIDEO_NAME", I18n.tr("Name"), 260, true, true), 
                 new ColumnStateInfo(LENGTH_INDEX, "LIBRARY_VIDEO_LENGTH", I18n.tr("Length"), 100, true, true), 
-                new ColumnStateInfo(MISC_INDEX, "LIBRARY_VIDEO_MISC", I18n.tr("Misc"), 100, true, true), 
+                new ColumnStateInfo(MISC_INDEX, "LIBRARY_VIDEO_MISC", I18n.tr("Misc"), 100, false, true), 
                 new ColumnStateInfo(YEAR_INDEX, "LIBRARY_VIDEO_YEAR", I18n.tr("Year"), 80, false, true), 
                 new ColumnStateInfo(SIZE_INDEX, "LIBRARY_VIDEO_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(RATING_INDEX, "LIBRARY_VIDEO_RATING", I18n.tr("Rating"), 60, false, true), 

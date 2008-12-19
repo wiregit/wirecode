@@ -31,7 +31,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(FROM_INDEX, "CLASSIC_SEARCH_AUDIO_FROM", I18n.tr("From"), 55, true, true), 
                 new ColumnStateInfo(TITLE_INDEX, "CLASSIC_SEARCH_AUDIO_TITLE", I18n.tr("Name"), 550, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "CLASSIC_SEARCH_AUDIO_ARTIST", I18n.tr("Artist"), 80, true, true), 
-                new ColumnStateInfo(ALBUM_INDEX, "CLASSIC_SEARCH_AUDIO_ALBUM", I18n.tr("Album"), 60, false, true), 
+                new ColumnStateInfo(ALBUM_INDEX, "CLASSIC_SEARCH_AUDIO_ALBUM", I18n.tr("Album"), 60, true, true), 
                 new ColumnStateInfo(LENGTH_INDEX, "CLASSIC_SEARCH_AUDIO_LENGTH", I18n.tr("Length"), 60, true, true), 
                 new ColumnStateInfo(QUALITY_INDEX, "CLASSIC_SEARCH_AUDIO_QUALITY", I18n.tr("Quality"), 55, true, true), 
                 new ColumnStateInfo(BITRATE_INDEX, "CLASSIC_SEARCH_AUDIO_BITRATE", I18n.tr("Bitrate"), 55, false, true), 
@@ -40,7 +40,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(YEAR_INDEX, "CLASSIC_SEARCH_AUDIO_YEAR", I18n.tr("Year"), 60, false, true), 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_AUDIO_NAME", I18n.tr("Filename"), 550, false, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_AUDIO_EXTENSION", I18n.tr("Extension"), 60, false, true), 
-                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_AUDIO_SIZE", I18n.tr("Size"), 80, true, true), 
+                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_AUDIO_SIZE", I18n.tr("Size"), 80, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_AUDIO_DESCRIPTION", I18n.tr("Description"), 60, false, true)
         });
     }
