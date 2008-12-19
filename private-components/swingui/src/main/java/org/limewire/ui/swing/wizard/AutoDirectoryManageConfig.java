@@ -17,7 +17,10 @@ public class AutoDirectoryManageConfig {
     
    
     /**
-     * Determines the OS specific list of directories to manage by default
+     * Determines the OS specific list of directories to manage by default.
+     *  Note, this list is not for certain as no checks are performed so  any results
+     *  should be considered as best guesses.  
+     *  
      */
     public static Set<File> getManagedDirectories() {
         Set<File> dirs = new HashSet<File>();

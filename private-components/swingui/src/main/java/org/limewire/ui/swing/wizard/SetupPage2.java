@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -151,17 +152,17 @@ public class SetupPage2 extends WizardPage {
 
             // Remove any bad directories to be safe
             
-            File[] dirlist = manage.toArray(new File[manage.size()]);
-            for ( File testDir : dirlist ) {
-                if (!libraryData.isDirectoryAllowed(testDir)) {
-                    manage.remove(testDir);
+            for( Iterator<File> iter = manage.iterator() ; iter.hasNext() ; ) {
+                File i = iter.next();
+                if(!libraryData.isDirectoryAllowed(i)) {
+                    iter.remove();
                 }
             }
             
-            dirlist = exclude.toArray(new File[exclude.size()]);
-            for ( File testDir : dirlist ) {
-                if (!libraryData.isDirectoryAllowed(testDir)) {
-                    exclude.remove(testDir);
+            for( Iterator<File> iter = exclude.iterator() ; iter.hasNext() ; ) {
+                File i = iter.next();
+                if(!libraryData.isDirectoryAllowed(i)) {
+                    iter.remove();
                 }
             }
         }

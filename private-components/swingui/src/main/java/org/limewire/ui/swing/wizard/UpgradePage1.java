@@ -2,6 +2,7 @@ package org.limewire.ui.swing.wizard;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -71,23 +72,22 @@ public class UpgradePage1 extends WizardPage {
         
         // Remove any bad directories to be safe
         
-        File[] dirlist = manage.toArray(new File[manage.size()]);
-        for ( File testDir : dirlist ) {
-            if (!libraryData.isDirectoryAllowed(testDir)) {
-                manage.remove(testDir);
+        for( Iterator<File> iter = manage.iterator() ; iter.hasNext() ; ) {
+            File i = iter.next();
+            if(!libraryData.isDirectoryAllowed(i)) {
+                iter.remove();
             }
         }
         
-        dirlist = exclude.toArray(new File[exclude.size()]);
-        for ( File testDir : dirlist ) {
-            if (!libraryData.isDirectoryAllowed(testDir)) {
-                exclude.remove(testDir);
+        for( Iterator<File> iter = exclude.iterator() ; iter.hasNext() ; ) {
+            File i = iter.next();
+            if(!libraryData.isDirectoryAllowed(i)) {
+                iter.remove();
             }
         }
         
-        
-        
-        
+        // Add old directories to the list because this is an upgrade and we
+        //  want to preserve old settings as much as possible
         manage.addAll(libraryData.getDirectoriesToManageRecursively());
         exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         
