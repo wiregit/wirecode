@@ -206,7 +206,7 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private void addOverview() {
-        mainPanel.add(box("Overview", overview), "cell 0 0, spanx 2");
+        mainPanel.add(box(tr("Overview"), overview), "cell 0 0, spanx 2");
     }
 
     protected Component box(String string, JComponent component) {
@@ -217,7 +217,7 @@ public abstract class Dialog extends LimeJDialog {
         
         JPanel panel = new JPanel(new MigLayout("insets 3 3 3 3, fillx", "[fill]push[]", "[][][]"));
         panel.setOpaque(false);
-        JLabel label = new JLabel(tr(string));
+        JLabel label = new JLabel(string);
         label.setFont(largeFont);
         panel.add(label, bannerComponent == null ? "wrap" : "");
         if (bannerComponent != null) {
@@ -229,12 +229,12 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private void addDetails() {
-        detailsContainer = box("Details", details);
+        detailsContainer = box(tr("Details"), details);
         mainPanel.add(detailsContainer, "cell 0 1, spanx 2");
     }
 
     private void addLocation() {
-        mainPanel.add(box("Location", location), "cell 0 2, spanx 2");
+        mainPanel.add(box(tr("Location"), location), "cell 0 2, spanx 2");
     }
 
     private class OKAction extends AbstractAction {

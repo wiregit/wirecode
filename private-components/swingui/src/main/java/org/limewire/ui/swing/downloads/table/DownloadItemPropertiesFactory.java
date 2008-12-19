@@ -90,7 +90,7 @@ public class DownloadItemPropertiesFactory implements PropertiesFactory<Download
         }
 
         private void addDownloadingFileLocation(final DownloadItem propertiable) {
-            location.setLayout(new MigLayout("", "[]10[]15[]", "[]"));
+            location.setLayout(new MigLayout("", "[]10[]15[]", "[top]"));
             location.add(fileLocation, "push");
             location.add(locateOnDisk);
             location.add(locateInLibrary);
