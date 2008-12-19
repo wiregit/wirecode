@@ -40,6 +40,7 @@ class LibraryMediator extends JPanel implements Disposable {
         }
         libraryComponent = panel;
         add(panel, LIBRRY_CARD);
+        revalidate();
     }
     
     protected boolean isSharingCardSet() {
