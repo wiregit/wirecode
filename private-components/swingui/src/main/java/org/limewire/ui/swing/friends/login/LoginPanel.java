@@ -38,6 +38,7 @@ import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPException;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -146,9 +147,13 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         
         serviceField = new LimePromptTextField(tr("Domain"), AccentType.NONE);
-        usernameField =  new LimePromptTextField(tr("Username"), AccentType.NONE);
+        
+        usernameField = new LimePromptTextField(tr("Username"), AccentType.NONE);
         passwordField = new LimePromptPasswordField(tr("Password"), AccentType.NONE);
         passwordField.setAction(signinAction);
+        
+        ResizeUtils.forceWidth(usernameField, 139);
+        ResizeUtils.forceWidth(passwordField, 139);
 
         autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
         autoLoginCheckBox.addItemListener(new ItemListener() {
@@ -184,15 +189,15 @@ class LoginPanel extends JXPanel implements SettingListener {
         });
         hideButton.setName("LoginPanel.hideButton");
 
-        setLayout(new MigLayout("nocache, gap 0, insets 4 11 8 4, fill"));
+        setLayout(new MigLayout("nocache, nogrid, gap 0, insets 4 5 8 4, fill"));
         
         add(titleLabel, "alignx left, gaptop 1, gapleft 2, gapbottom 4");
-        add(hideButton, "alignx right, aligny top, wrap");
+        add(hideButton, "alignx right, aligny top, gapbefore push, wrap");
         add(authFailedLabel, "alignx left, gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
         add(serviceComboBox, "alignx left, gapbottom 8, wmin 0, wrap");
         add(serviceField, "alignx left, gapbottom 8, hidemode 3, grow, wmin 0, wrap");
-        add(usernameField, "alignx left, gapbottom 8, gapright 3, grow, wmin 0, wrap");
-        add(passwordField, "alignx left, gapbottom 4, gapright 3, grow, wmin 0, wrap");
+        add(usernameField, "alignx left, gapbottom 8, grow, wrap");
+        add(passwordField, "alignx left, gapbottom 4, grow, wrap");
         add(autoLoginCheckBox, "alignx left, gapleft 1, gapbottom 3, wmin 0, wrap");
         add(signInButton, "alignx left, wmin 0");
 
