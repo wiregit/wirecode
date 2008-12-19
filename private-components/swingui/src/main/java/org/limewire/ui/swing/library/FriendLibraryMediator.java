@@ -1,22 +1,27 @@
 package org.limewire.ui.swing.library;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
+import net.miginfocom.swing.MigLayout;
+
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
+import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-
-import ca.odell.glazedlists.EventList;
-import net.miginfocom.swing.MigLayout;
 
 public class FriendLibraryMediator extends LibraryMediator {
 
@@ -40,7 +45,7 @@ public class FriendLibraryMediator extends LibraryMediator {
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
         this.friendFileList = shareListManager.getOrCreateFriendShareList(friend);
-        setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new OffLineMessageComponent()));
+        setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new OffLineMessageComponent(friendFileList.getSwingModel())));
     }
     
     public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
@@ -64,32 +69,83 @@ public class FriendLibraryMediator extends LibraryMediator {
     /**
      * Message to display when a friend is offline
      */
-    private class OffLineMessageComponent extends JPanel {
-        public OffLineMessageComponent() {
-            setLayout(new MigLayout());
+    public class OffLineMessageComponent extends JXPanel implements ListEventListener<LocalFileItem>, Disposable {
+        private EventList<LocalFileItem> friendList;
+        private JLabel secondLabel;
+        
+        public OffLineMessageComponent(EventList<LocalFileItem> friendList) {
+            this.friendList = friendList;
+            this.friendList.addListEventListener(this);
+            setLayout(new MigLayout("insets 16")); 
             
-            JLabel label = new JLabel(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
+            JLabel label = new JLabel(I18n.tr("{0} is offline", friend.getFirstName()));
             FontUtils.bold(label);
-//            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getFirstName()));
-          
+            secondLabel = new JLabel();
+            setMessage();
+            
             add(label, "wrap");
-//            add(secondLabel, "gaptop 10");
+            add(secondLabel, "gaptop 10");
+        }
+        
+        private void setMessage() {
+            if(friendList.size() > 0) {
+                secondLabel.setText(I18n.tr("You're sharing {0} files with {1}.", friendFileList.size(), friend.getFirstName()));
+            } else {
+                secondLabel.setText(I18n.tr("Share with {0} for when they sign on LimeWire.", friend.getFirstName()));
+            }  
+        }
+        
+        public boolean isOnTop() {
+            return friendList.size() == 0;
+        }
+
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            setMessage();
+            super.revalidate();
+        }
+
+        @Override
+        public void dispose() {
+            friendList.removeListEventListener(this);
         }
     }
     
     /**
      * Message to display when a friend is on LW but couldn't perform a browse
      */
-    private class ConnectionErrorComponent extends JPanel {
+    private class ConnectionErrorComponent extends JXPanel implements ListEventListener<LocalFileItem>, Disposable {
+        private EventList<LocalFileItem> friendList;
+        private JLabel secondLabel;
+        
         public ConnectionErrorComponent() {
-            setLayout(new MigLayout());
+            setLayout(new MigLayout("insets 16"));
             
-            JLabel label = new JLabel(I18n.tr("{0} is on LimeWire but there were problems viewing their library", friend.getRenderName()));
+            JLabel label = new JLabel(I18n.tr("{0} is on LimeWire but there were problems viewing their library", friend.getFirstName()));
             FontUtils.bold(label);
-//            JLabel secondLabel = new JLabel(I18n.tr("You're sharing {0} files with {1}", "?", friend.getFirstName()));
-          
+            secondLabel = new JLabel();
+            setMessage();
+            
             add(label, "wrap");
-//            add(secondLabel, "gaptop 10");
+            add(secondLabel, "gaptop 10");
+        }
+        
+        private void setMessage() {
+            if(friendList.size() > 0) {
+                secondLabel.setText(I18n.tr("You're sharing {0} files with {1}. Chat about signing into LimeWire 5.", friendFileList.size(), friend.getFirstName()));
+            } else {
+                secondLabel.setText(I18n.tr("Share files with {0} and chat about signing into LimeWire 5.", friend.getFirstName()));
+            }  
+        }
+
+        @Override
+        public void listChanged(ListEvent<LocalFileItem> listChanges) {
+            setMessage();
+        }
+
+        @Override
+        public void dispose() {
+            friendList.removeListEventListener(this);
         }
     }
 
