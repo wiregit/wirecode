@@ -12,24 +12,25 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.JOptionPane;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.components.LimeJDialog;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.options.actions.ApplyOptionAction;
 import org.limewire.ui.swing.options.actions.CancelOptionAction;
 import org.limewire.ui.swing.options.actions.HelpAction;
 import org.limewire.ui.swing.options.actions.TabAction;
+import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -41,10 +42,6 @@ import com.google.inject.Provider;
  */
 public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
-    @Resource
-    private Color headerColor;
-    @Resource
-    private Color dividerColor;
     @Resource
     private Color backgroundColor;
     @Resource
@@ -83,7 +80,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
-    private JPanel headerPanel;
+    private JXPanel headerPanel;
     private JPanel footerPanel;
     
     private JButton helpButton;
@@ -94,7 +91,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     public OptionsDialog(Provider<LibraryOptionPanel> libraryOptionPanel, Provider<SearchOptionPanel> searchOptionPanel,
             Provider<DownloadOptionPanel> downloadOptionPanel, Provider<SecurityOptionPanel> securityOptionPanel,
             Provider<MiscOptionPanel> miscOptionPanel, Provider<AdvancedOptionPanel> advancedOptionPanel,
-            AppFrame appFrame) {
+            AppFrame appFrame, BarPainterFactory barPainterFactory) {
         super(appFrame.getMainFrame(), I18n.tr("Options"), true);
 
         GuiUtils.assignResources(this); 
@@ -106,13 +103,13 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
 
-        setSize(700,600);
-        setPreferredSize(new Dimension(700,600));
+        setSize(700,620);
+        setPreferredSize(new Dimension(700,620));
         setResizable(false);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         
-        createComponents();
+        createComponents(barPainterFactory);
         
         pack();
     }
@@ -135,15 +132,15 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
 
     }
     
-    private void createComponents() {
-        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[50!, fill][fill][40!, fill]"));
+    private void createComponents(BarPainterFactory barPainterFactory) {
+        setLayout(new MigLayout("gap 0, insets 0 0 0 0, fill", "fill", "[63!][fill][40!, fill]"));
         
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
         cardPanel.setLayout(cardLayout);
         
-        headerPanel = new JPanel();
-        headerPanel.setBackground(headerColor);
+        headerPanel = new JXPanel();
+        headerPanel.setBackgroundPainter(barPainterFactory.createTopBarPainter());
                 
         footerPanel = new JPanel();
         
@@ -159,8 +156,6 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     
     private void createHeader() {
         headerPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0"));
-        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, dividerColor));
-        
         
         MoveDown down = new MoveDown();
         MoveUp up = new MoveUp();
@@ -210,14 +205,11 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         footerPanel.setBackground(backgroundColor);
         
         helpButton = new JButton(new HelpAction());
-        helpButton.setPreferredSize(new Dimension(50,30));
         
         okButton = new JButton(I18n.tr("OK"));
-        okButton.setPreferredSize(new Dimension(60,30));
         okButton.addActionListener(new ApplyOptionAction(this));
         
         cancelButton = new JButton(I18n.tr("Cancel"));
-        cancelButton.setPreferredSize(new Dimension(60,30));
         cancelButton.addActionListener(new CancelOptionAction(this));
         
         footerPanel.add(helpButton, "push");
