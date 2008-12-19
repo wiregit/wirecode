@@ -76,6 +76,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     private final AtomicBoolean loggingIn = new AtomicBoolean(false);
 
     private volatile org.jivesoftware.smack.XMPPConnection connection;
+    private volatile DiscoInfoListener discoInfoListener;
 
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        EventBroadcaster<RosterEvent> rosterBroadcaster,
@@ -206,7 +207,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                 Roster roster = connection.getRoster();
                 for(String id : addedIds) {
                     RosterEntry rosterEntry = roster.getEntry(id);
-                    UserImpl user = new UserImpl(id, rosterEntry, configuration, connection);
+                    UserImpl user = new UserImpl(id, rosterEntry, configuration, connection, discoInfoListener);
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("user " + user + " added");
                     }
@@ -225,7 +226,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     UserImpl user = users.get(id);
                     if(user == null) {
                         // should never happen ?
-                        user = new UserImpl(id, rosterEntry, configuration, connection);
+                        user = new UserImpl(id, rosterEntry, configuration, connection, discoInfoListener);
                         users.put(id, user);
                     } else {
                         user.setRosterEntry(rosterEntry);
@@ -379,8 +380,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
     }
     
     private class SmackConnectionListener implements ConnectionListener, ConnectionCreationListener {
-        private DiscoInfoListener discoInfoListener;
-        private AddressIQListener addressIQListener;
+        private volatile AddressIQListener addressIQListener;
 
         @Override
         public void connectionCreated(XMPPConnection connection) {
