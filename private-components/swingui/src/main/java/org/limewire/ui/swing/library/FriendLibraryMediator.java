@@ -52,7 +52,7 @@ public class FriendLibraryMediator extends LibraryMediator {
         switch(libraryState) {
         case FAILED_TO_LOAD:
             this.eventList = null;
-            setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent()));
+            setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent(friendFileList.getSwingModel())));
             showLibraryCard();
             break;
         case LOADED:
@@ -94,10 +94,6 @@ public class FriendLibraryMediator extends LibraryMediator {
                 secondLabel.setText(I18n.tr("Share with {0} for when they sign on LimeWire.", friend.getFirstName()));
             }  
         }
-        
-        public boolean isOnTop() {
-            return friendList.size() == 0;
-        }
 
         @Override
         public void listChanged(ListEvent<LocalFileItem> listChanges) {
@@ -118,7 +114,9 @@ public class FriendLibraryMediator extends LibraryMediator {
         private EventList<LocalFileItem> friendList;
         private JLabel secondLabel;
         
-        public ConnectionErrorComponent() {
+        public ConnectionErrorComponent(EventList<LocalFileItem> friendList) {
+            this.friendList = friendList;
+            this.friendList.addListEventListener(this);
             setLayout(new MigLayout("insets 16"));
             
             JLabel label = new JLabel(I18n.tr("{0} is on LimeWire but there were problems viewing their library", friend.getFirstName()));
