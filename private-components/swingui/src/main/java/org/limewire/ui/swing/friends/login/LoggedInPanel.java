@@ -78,15 +78,15 @@ class LoggedInPanel extends JXPanel {
     private void initComponents(final StatusActions statusActions,
                                 final XMPPService xmppService) {
         JPopupMenu optionsMenu = new JPopupMenu(); 
-        optionsMenu.add(new AbstractAction(I18n.tr("Add Friend")) {
+        optionsMenu.add(optionsBox.createMenuItem(new AbstractAction(I18n.tr("Add Friend")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new AddFriendDialog(LoggedInPanel.this,
                         xmppService.getActiveConnection());
             }
-        });
+        }));
         optionsMenu.addSeparator();
-        optionsMenu.add(new JLabel(I18n.tr("Show:")));
+        optionsMenu.add(optionsBox.decorateMenuComponent(new JLabel(I18n.tr("Show:"))));
         final JCheckBoxMenuItem showOfflineFriends = new JCheckBoxMenuItem(I18n.tr("Offline Friends"));
         showOfflineFriends.setSelected(XMPPSettings.XMPP_SHOW_OFFLINE.getValue());
         showOfflineFriends.addActionListener(new ActionListener() {
@@ -96,11 +96,11 @@ class LoggedInPanel extends JXPanel {
             } 
         });
 
-        optionsMenu.add(showOfflineFriends);
+        optionsMenu.add(optionsBox.decorateMenuComponent(showOfflineFriends));
         optionsMenu.addSeparator();
-        optionsMenu.add(statusMenuLabel);
-        optionsMenu.add(statusActions.getAvailableAction());
-        optionsMenu.add(statusActions.getDnDAction());
+        optionsMenu.add(optionsBox.decorateMenuComponent(statusMenuLabel));
+        optionsMenu.add(optionsBox.decorateMenuComponent(statusActions.getAvailableAction()));
+        optionsMenu.add(optionsBox.decorateMenuComponent(statusActions.getDnDAction()));
         optionsBox.overrideMenu(optionsMenu);
         optionsBox.setText(I18n.tr("Options"));
 

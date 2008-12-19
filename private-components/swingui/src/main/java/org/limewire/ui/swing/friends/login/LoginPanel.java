@@ -2,7 +2,6 @@ package org.limewire.ui.swing.friends.login;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,23 +12,20 @@ import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeCheckBox;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimePromptPasswordField;
@@ -66,16 +62,13 @@ class LoginPanel extends JXPanel implements SettingListener {
     private JTextField serviceField;
     private JTextField usernameField;
     private JPasswordField passwordField;
-    private JCheckBox autoLoginCheckBox;
+    private LimeCheckBox autoLoginCheckBox;
     private JLabel authFailedLabel;
     private JXButton signInButton;
     private final XMPPAccountConfigurationManager accountManager;
     private final XMPPService xmppService;
     private final SignInAction signinAction = new SignInAction();
     
-    @Resource private Icon loginHide;
-    @Resource private Icon loginHideHover;
-
     @Inject
     LoginPanel(XMPPAccountConfigurationManager accountManager,
             XMPPService xmppService,
@@ -131,6 +124,10 @@ class LoginPanel extends JXPanel implements SettingListener {
 
     private void initComponents(LimeComboBoxFactory comboFactory, ButtonDecorator buttonDecorator,
             BarPainterFactory barPainterFactory) {
+        
+        JLabel titleLabel = new JLabel(tr("Sign in with"));
+        titleLabel.setName("LoginPanel.titleLabel");
+        
         List<Action> actions = new ArrayList<Action>();
         for (XMPPAccountConfiguration config : accountManager.getConfigurations()) {
             Action action = new AbstractAction(config.getLabel(), config.getIcon()) {            
@@ -153,7 +150,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         passwordField = new LimePromptPasswordField(tr("Password"), AccentType.NONE);
         passwordField.setAction(signinAction);
 
-        autoLoginCheckBox = new JCheckBox(tr("Remember me"));
+        autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -167,34 +164,36 @@ class LoginPanel extends JXPanel implements SettingListener {
                 }
             }
         });
+        autoLoginCheckBox.setName("LoginPanel.autoLoginCheckBox");
         autoLoginCheckBox.setOpaque(false);
-        autoLoginCheckBox.setBorder(BorderFactory.createEmptyBorder());
+        autoLoginCheckBox.setTextPainter(LimeCheckBox.NORMAL_TEXT_PAINTER);
 
         signInButton = new JXButton(signinAction);
         buttonDecorator.decorateDarkFullButton(signInButton, AccentType.NONE);
-        signInButton.setOpaque(false);
 
         authFailedLabel = new MultiLineLabel();
         authFailedLabel.setVisible(false);
-        authFailedLabel.setForeground(Color.RED);
+        authFailedLabel.setName("LoginPanel.authFailedLabel");
 
-        JButton hideButton = new IconButton(loginHide, loginHideHover);
+        JButton hideButton = new IconButton();
         hideButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 LoginPanel.this.setVisible(false);
             }
         });
+        hideButton.setName("LoginPanel.hideButton");
 
-        setLayout(new MigLayout("nocache, gap 0, fill"));
-        add(authFailedLabel, "alignx left, gapleft 2, wmin 0, hidemode 3");
-        add(hideButton, "alignx right, aligny top, gaptop 4, gapright 4, wrap");
-        add(new JLabel(tr("Sign in with")), "alignx left, gapleft 2, gapbottom 4, wrap");
+        setLayout(new MigLayout("nocache, gap 0, insets 4 8 8 4, fill"));
+        
+        add(titleLabel, "alignx left, gaptop 1, gapleft 2, gapbottom 4");
+        add(hideButton, "alignx right, aligny top, wrap");
+        add(authFailedLabel, "alignx left, gapleft 2, wmin 0, hidemode 3, gapbottom 3, wrap");
         add(serviceComboBox, "alignx left, gapbottom 8, wmin 0, wrap");
         add(serviceField, "alignx left, gapbottom 8, hidemode 3, grow, wmin 0, wrap");
         add(usernameField, "alignx left, gapbottom 8, grow, wmin 0, wrap");
-        add(passwordField, "alignx left, gapbottom 8, grow, wmin 0, wrap");
-        add(autoLoginCheckBox, "alignx left, gapbottom 8, wmin 0, wrap");
+        add(passwordField, "alignx left, gapbottom 4, grow, wmin 0, wrap");
+        add(autoLoginCheckBox, "alignx left, gapleft 1, gapbottom 3, wmin 0, wrap");
         add(signInButton, "alignx left, wmin 0");
 
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter());
