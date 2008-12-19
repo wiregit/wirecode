@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,6 +37,7 @@ import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.Image
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SwingUtils;
 
@@ -74,15 +76,19 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         
         this.currentEventList = eventList;
 
+        //icon
         JLabel iconHeaderLabel = new JLabel(panelIcon);
         iconHeaderLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));        
         iconHeaderLabel.addMouseListener(new HeaderClickMouseListener(parentFolder));
         
+        //text
         JLabel headerLabel = new JLabel(name);
         headerLabel.setForeground(mainLabelColor);
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
        
+        JButton shareFolderButton = new JButton(I18n.tr("Share Folder"));
+        
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
@@ -96,7 +102,8 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
                 "[::30] [] [grow][grow]" ));    // row constraints
         
         add(iconHeaderLabel, "split 2, gapbottom 4");
-        add(headerLabel, "gapbottom 4, push, wrap");       // first row
+        add(headerLabel, "gapbottom 4, push");       // first row
+        add(shareFolderButton, "gapbottom 4, wrap");
        // add(unShareButtonLabel, "gapbottom 2, split 2");
         
         // second row

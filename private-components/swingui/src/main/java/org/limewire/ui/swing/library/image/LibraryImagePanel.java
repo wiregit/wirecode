@@ -210,7 +210,7 @@ public class LibraryImagePanel extends JPanel
         if (getParent() == null)
             return dimension;
         if (dimension.height > scrollPane.getSize().height){
-            return new Dimension(scrollPane.getWidth(), dimension.height);
+            return new Dimension(scrollPane.getWidth() -20, dimension.height);
         } else {
             return scrollPane.getSize(); 
         }
