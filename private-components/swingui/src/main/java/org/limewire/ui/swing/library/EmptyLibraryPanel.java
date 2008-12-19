@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
@@ -17,7 +16,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
-import org.jdesktop.swingx.util.PaintUtils;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -25,6 +23,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -90,10 +89,14 @@ public class EmptyLibraryPanel extends LibraryPanel {
         createSelectionPanel();
         JPanel p = new JPanel(new MigLayout("nocache, insets 0, gap 0, fill", "[125!][][fill]", "[fill]"));
         JXPanel leftPanel = new JXPanel();
-        leftPanel.setBackgroundPainter(new BackgroundPainter<JXPanel>(new GradientPaint(0,0, innerNavTopGradient, 0, 1, innerNavBottomGradient, false)));
+        leftPanel.setBackgroundPainter(new GenericBarPainter<JXPanel>(
+                new GradientPaint(0,0, innerNavTopGradient, 
+                        0, 1, innerNavBottomGradient, false)));
         
         JXPanel rightPanel = new JXPanel();
-        rightPanel.setBackgroundPainter(new BackgroundPainter<JXPanel>(new GradientPaint(0,0, mainPanelTopGradient, 0, 1, mainPanelBottomGradient, false)));
+        rightPanel.setBackgroundPainter(new GenericBarPainter<JXPanel>(
+                new GradientPaint(0,0, mainPanelTopGradient,
+                0, 1, mainPanelBottomGradient, false)));
         
         component.setOpaque(false);
         component.setBackgroundPainter(new BackgroundMessagePainter());
@@ -120,34 +123,6 @@ public class EmptyLibraryPanel extends LibraryPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             mediator.showSharingCard();
-        }
-    }
-
-    /**
-     * Paints the gradient on the empty screen
-     */
-    private class BackgroundPainter<X> extends AbstractPainter<JXPanel> {        
-        private Paint gradient;
-        private int cachedHeight = 0;
-        
-        public BackgroundPainter(Paint gradient) {
-            this.gradient = gradient;
-            this.setCacheable(true);
-        }
-
-        @Override
-        protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
-            
-            // Update gradient size if height has changed
-            if (this.cachedHeight != height) {
-                this.cachedHeight = height;
-                
-                this.gradient = PaintUtils.resizeGradient(gradient, 0, height);
-            }
-            
-            //paint the gradient
-            g.setPaint(this.gradient);
-            g.fillRect(0, 0, width, height);
         }
     }
     
