@@ -705,7 +705,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         callback.clearGUID();
-        downloader.stop();
+        downloader.stop(false);
 
         Thread.sleep(1000);
 
@@ -1026,7 +1026,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         callback.clearGUID();
-        downloader.stop();
+        downloader.stop(false);
 
         Thread.sleep(1000);
 
@@ -1130,7 +1130,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         }
 
         callback.clearGUID();  // isQueryAlive == false 
-        downloader.stop();
+        downloader.stop(false);
 
         Thread.sleep(500);
 
@@ -1139,7 +1139,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             assertByPassedResultsCacheHasSize(qr.getGUID(), 1);
         }
 
-        downloader2.stop();
+        downloader2.stop(false);
         Thread.sleep(1000);
 
         {
@@ -1331,7 +1331,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 
         callback.clearGUID();
-        downloader.stop();
+        downloader.stop(false);
 
         Thread.sleep(1000);
 

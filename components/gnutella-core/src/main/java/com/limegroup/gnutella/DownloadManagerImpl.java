@@ -348,7 +348,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             CoreDownloader d = iter.next();
             if (d.getDownloadType() == DownloaderType.INNETWORK  && 
                     !urns.contains(d.getSha1Urn().httpStringValue())) 
-                d.stop();
+                d.stop(false);
         }
         
         Set<String> hopeless = UpdateSettings.FAILED_UPDATES.getValue();
@@ -568,7 +568,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             waiting.clear();
         }
         for(CoreDownloader md : buf ) { 
-            md.stop();
+            md.stop(false);
             fireEvent(md, DownloadManagerEvent.Type.REMOVED);
         }
     }
