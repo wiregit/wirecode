@@ -148,9 +148,9 @@ class LoginPanel extends JXPanel implements SettingListener {
             }
         });
         
-        serviceField = new LimePromptTextField("Server", AccentType.NONE);
-        usernameField =  new LimePromptTextField("Username", AccentType.NONE);
-        passwordField = new LimePromptPasswordField("Password", AccentType.NONE);
+        serviceField = new LimePromptTextField(tr("Domain"), AccentType.NONE);
+        usernameField =  new LimePromptTextField(tr("Username"), AccentType.NONE);
+        passwordField = new LimePromptPasswordField(tr("Password"), AccentType.NONE);
         passwordField.setAction(signinAction);
 
         autoLoginCheckBox = new JCheckBox(tr("Remember me"));
