@@ -2,12 +2,12 @@ package org.limewire.xmpp.activity;
 
 import org.limewire.listener.AbstractSourcedEvent;
 
-public class ActivityEvent extends AbstractSourcedEvent<ActivityEvent.ActivityState>{
+public class XmppActivityEvent extends AbstractSourcedEvent<XmppActivityEvent.ActivityState>{
     public static enum ActivityState {
         Active, Idle
     }
 
-    public ActivityEvent(ActivityState source) {
+    public XmppActivityEvent(ActivityState source) {
         super(source);
     }
 }

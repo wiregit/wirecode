@@ -23,7 +23,7 @@ import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.util.DebugRunnable;
-import org.limewire.xmpp.activity.ActivityEvent;
+import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.ConnectBackRequestSender;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.FriendRequestEvent;
@@ -110,10 +110,10 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
      * @param listenerSupport
      */
     @Inject
-    void register(ListenerSupport<ActivityEvent> listenerSupport) {
-        listenerSupport.addListener(new EventListener<ActivityEvent>() {
+    void register(ListenerSupport<XmppActivityEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<XmppActivityEvent>() {
             @Override
-            public void handleEvent(ActivityEvent event) {
+            public void handleEvent(XmppActivityEvent event) {
                 switch(event.getSource()) {
                 case Idle:
                     setMode(Mode.xa);

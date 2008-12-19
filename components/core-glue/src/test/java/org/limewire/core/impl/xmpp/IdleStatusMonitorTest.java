@@ -4,7 +4,7 @@ package org.limewire.core.impl.xmpp;
 import junit.framework.TestCase;
 
 import org.limewire.lifecycle.Service;
-import org.limewire.xmpp.activity.ActivityEvent;
+import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 public class IdleStatusMonitorTest extends TestCase {
@@ -58,10 +58,10 @@ public class IdleStatusMonitorTest extends TestCase {
         
         idleTime.getIdleTimeReturn.add(Long.MAX_VALUE);
         monitorRunnable.run();
-        assertEquals(ActivityEvent.ActivityState.Idle, activityBroadcaster.event.getSource());
+        assertEquals(XmppActivityEvent.ActivityState.Idle, activityBroadcaster.event.getSource());
         
         idleTime.getIdleTimeReturn.add(0l);
         monitorRunnable.run();
-        assertEquals(ActivityEvent.ActivityState.Active, activityBroadcaster.event.getSource());
+        assertEquals(XmppActivityEvent.ActivityState.Active, activityBroadcaster.event.getSource());
     }
 }

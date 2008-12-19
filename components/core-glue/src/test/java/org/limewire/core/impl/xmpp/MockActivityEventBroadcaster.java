@@ -1,13 +1,13 @@
 package org.limewire.core.impl.xmpp;
 
 import org.limewire.listener.EventBroadcaster;
-import org.limewire.xmpp.activity.ActivityEvent;
+import org.limewire.xmpp.activity.XmppActivityEvent;
 
-public class MockActivityEventBroadcaster implements EventBroadcaster<ActivityEvent> {
+public class MockActivityEventBroadcaster implements EventBroadcaster<XmppActivityEvent> {
 
-    public ActivityEvent event;
+    public XmppActivityEvent event;
     @Override
-    public void broadcast(ActivityEvent event) {
+    public void broadcast(XmppActivityEvent event) {
         this.event = event;
     }
 }

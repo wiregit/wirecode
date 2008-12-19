@@ -76,6 +76,7 @@ public class ImageList extends JXList implements Disposable{
         ((EventSelectionModel)getSelectionModel()).dispose();
     }
 
+    @SuppressWarnings("unchecked")
     public EventList<LocalFileItem> getListSelection() {
         return ((EventSelectionModel<LocalFileItem>)getSelectionModel()).getSelected();
     }

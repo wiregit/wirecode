@@ -8,8 +8,8 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.xmpp.activity.ActivityEvent;
-import org.limewire.xmpp.activity.ActivityEvent.ActivityState;
+import org.limewire.xmpp.activity.XmppActivityEvent;
+import org.limewire.xmpp.activity.XmppActivityEvent.ActivityState;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -21,12 +21,12 @@ class IdleStatusMonitor {
     private static final int TWENTY_MINUTES_IN_MILLIS = 1200000;
     private final IdleTime idleTime;
     private final ScheduledExecutorService backgroundExecutor;
-    private final EventBroadcaster<ActivityEvent> activityBroadcaster;
+    private final EventBroadcaster<XmppActivityEvent> activityBroadcaster;
     private volatile boolean isXMPPConnected;
 
     @Inject
     public IdleStatusMonitor(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, 
-            IdleTime idleTime, EventBroadcaster<ActivityEvent> activityBroadcaster) {
+            IdleTime idleTime, EventBroadcaster<XmppActivityEvent> activityBroadcaster) {
         this.backgroundExecutor = backgroundExecutor;
         this.idleTime = idleTime;
         this.activityBroadcaster = activityBroadcaster;
@@ -51,10 +51,10 @@ class IdleStatusMonitor {
                     public void run() {
                         if (idleTime.supportsIdleTime() && isXMPPConnected) {
                             if (idleTime.getIdleTime() > TWENTY_MINUTES_IN_MILLIS) {
-                                activityBroadcaster.broadcast(new ActivityEvent(ActivityState.Idle));
+                                activityBroadcaster.broadcast(new XmppActivityEvent(ActivityState.Idle));
                                 hasBecomeInactive = true;
                             } else if (hasBecomeInactive) {
-                                activityBroadcaster.broadcast(new ActivityEvent(ActivityState.Active));
+                                activityBroadcaster.broadcast(new XmppActivityEvent(ActivityState.Active));
                                 hasBecomeInactive = false;
                             }
                         }

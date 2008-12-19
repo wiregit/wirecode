@@ -29,7 +29,7 @@ import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
-import org.limewire.xmpp.activity.ActivityEvent;
+import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
@@ -195,11 +195,11 @@ class LoggedInPanel extends JXPanel {
      * @param listenerSupport
      */
     @Inject
-    void register(ListenerSupport<ActivityEvent> listenerSupport) {
-        listenerSupport.addListener(new EventListener<ActivityEvent>() {
+    void register(ListenerSupport<XmppActivityEvent> listenerSupport) {
+        listenerSupport.addListener(new EventListener<XmppActivityEvent>() {
             @SwingEDTEvent
             @Override
-            public void handleEvent(ActivityEvent event) {
+            public void handleEvent(XmppActivityEvent event) {
                 switch(event.getSource()) {
                 case Idle:
                     currentUser.setIcon(iconLibrary.getAway());
