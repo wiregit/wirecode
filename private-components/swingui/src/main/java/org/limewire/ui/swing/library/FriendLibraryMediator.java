@@ -103,6 +103,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     @Override
     public void dispose() {
         availListeners.removeListener(this);
+        super.dispose();
     }
     
     /**
