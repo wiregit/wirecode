@@ -34,7 +34,7 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     public SharedAudioTableFormat(LocalFileList localFileList) {
         super(ACTION_INDEX, new ColumnStateInfo[] {
                 new ColumnStateInfo(ACTION_INDEX, "SHARE_LIBRARY_AUDIO_ACTION", I18n.tr("Sharing"), 50, true, false),
-                new ColumnStateInfo(PLAY_INDEX, "SHARE_LIBRARY_AUDIO_PLAY", "", 25, true, false), 
+                new ColumnStateInfo(PLAY_INDEX, "SHARE_LIBRARY_AUDIO_PLAY", "", 25, false, false), 
                 new ColumnStateInfo(TITLE_INDEX, "SHARE_LIBRARY_AUDIO_TITLE", I18n.tr("Name"), 260, true, true),     
                 new ColumnStateInfo(ARTIST_INDEX, "SHARE_LIBRARY_AUDIO_ARTIST", I18n.tr("Artist"), 120, true, true), 
                 new ColumnStateInfo(ALBUM_INDEX, "SHARE_LIBRARY_AUDIO_ALBUM", I18n.tr("Album"), 180, true, true), 

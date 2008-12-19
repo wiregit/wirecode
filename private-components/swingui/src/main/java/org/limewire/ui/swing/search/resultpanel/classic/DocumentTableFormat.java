@@ -29,8 +29,8 @@ public class DocumentTableFormat extends ResultsTableFormat<VisualSearchResult> 
                 new ColumnStateInfo(NAME_INDEX, "CLASSIC_SEARCH_DOCUMENT_NAME", I18n.tr("Name"), 360, true, true),     
                 new ColumnStateInfo(TYPE_INDEX, "CLASSIC_SEARCH_DOCUMENT_TYPE", I18n.tr("Type"), 80, true, true), 
                 new ColumnStateInfo(EXTENSION_INDEX, "CLASSIC_SEARCH_DOCUMENT_EXTENSION", I18n.tr("Extension"), 80, true, true), 
-                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_DOCUMENT_SIZE", I18n.tr("Size"), 100, true, true), 
                 new ColumnStateInfo(DATE_INDEX, "CLASSIC_SEARCH_DOCUMENT_DATE", I18n.tr("Date Created"), 60, true, true), 
+                new ColumnStateInfo(SIZE_INDEX, "CLASSIC_SEARCH_DOCUMENT_SIZE", I18n.tr("Size"), 100, true, true), 
                 new ColumnStateInfo(AUTHOR_INDEX, "CLASSIC_SEARCH_DOCUMENT_AUTHOR", I18n.tr("Author"), 80, false, true), 
                 new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_DOCUMENT_DESCRIPTION", I18n.tr("Description"), 80, false, true)
         });
