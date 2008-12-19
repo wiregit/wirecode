@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.image;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -72,14 +73,16 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         String name = parentFolder.getName();
         
         this.currentEventList = eventList;
-        JLabel headerLabel = new JLabel(name, panelIcon, JLabel.CENTER);
+
+        JLabel iconHeaderLabel = new JLabel(panelIcon);
+        iconHeaderLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));        
+        iconHeaderLabel.addMouseListener(new HeaderClickMouseListener(parentFolder));
+        
+        JLabel headerLabel = new JLabel(name);
         headerLabel.setForeground(mainLabelColor);
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
-        
-        
-        headerLabel.addMouseListener(new HeaderDoubleClickMouseListener(parentFolder));
-        
+       
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
@@ -92,6 +95,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow][grow]" ));    // row constraints
         
+        add(iconHeaderLabel, "split 2, gapbottom 4");
         add(headerLabel, "gapbottom 4, push, wrap");       // first row
        // add(unShareButtonLabel, "gapbottom 2, split 2");
         
@@ -142,19 +146,19 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
      * This class listens for double clicks on the header item for each library sub panel.
      * When a double click is detected it will explore the folder represented by this subpanel. 
      */
-    private final class HeaderDoubleClickMouseListener extends MouseAdapter {
+    private final class HeaderClickMouseListener extends MouseAdapter {
         private final File parentFolder;
 
-        private HeaderDoubleClickMouseListener(File parentFolder) {
+        private HeaderClickMouseListener(File parentFolder) {
             this.parentFolder = parentFolder;
         }
 
         @Override
-            public void mouseClicked(MouseEvent e) {
-               if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-                   NativeLaunchUtils.launchExplorer(parentFolder);
-               }
-            }
+        public void mouseClicked(MouseEvent e) {
+           if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 1) {
+               NativeLaunchUtils.launchExplorer(parentFolder);
+           }
+        }
     }
 
 
