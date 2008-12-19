@@ -122,6 +122,7 @@ public class ConversationPane extends JPanel implements Displayable {
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
     @Resource(key="ChatConversation.buttonBarColor") private Color buttonBarColor;
     @Resource(key="ChatConversation.buttonFont") private Font buttonFont;
+    private JButton shareButton;
     
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
@@ -146,7 +147,7 @@ public class ConversationPane extends JPanel implements Displayable {
 
         setLayout(new BorderLayout());
 
-        JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.setOpaque(false);
         scroll.setBorder(BorderFactory.createEmptyBorder());
 
@@ -330,7 +331,7 @@ public class ConversationPane extends JPanel implements Displayable {
         JPanel buttonBar = new JPanel(new BorderLayout());
         buttonBar.setBackground(buttonBarColor);
         buttonBar.add(downloadButton, BorderLayout.WEST);
-        JButton shareButton = new JButton(new ShareAction());
+        shareButton = new JXButton(new ShareAction());
         shareButton.setFont(buttonFont);
         buttonBar.add(shareButton, BorderLayout.EAST);
         inputPanel = new ResizingInputPanel(writer);
@@ -346,9 +347,8 @@ public class ConversationPane extends JPanel implements Displayable {
 
     @Override
     public void handleDisplay() {
-        editor.invalidate();
-        editor.repaint();
-        downloadButton.repaint();
+        invalidate();
+        repaint();
         inputPanel.handleDisplay();
     }
 
