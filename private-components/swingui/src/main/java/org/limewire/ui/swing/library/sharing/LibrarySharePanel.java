@@ -312,7 +312,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                     ShadowPathEffect shadow = new ShadowPathEffect();
                     shadow.setEffectWidth(14);
                     shadow.setOffset(new Point(0, 0));
-                    shadow.setBrushSteps(5);
+//                    shadow.setBrushSteps(7);
                     shadow.apply(g2, panelArea, width, height);
                 }
                 
