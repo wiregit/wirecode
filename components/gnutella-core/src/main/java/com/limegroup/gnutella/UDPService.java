@@ -407,7 +407,7 @@ public class UDPService implements ReadWriteObserver {
         if( !(iox instanceof java.nio.channels.ClosedChannelException ) )
             ErrorService.error(iox, "UDP Error.");
         else
-            LOG.trace("Swallowing a UDPService ClosedChannelException", iox);
+            LOG.debug("Swallowing a UDPService ClosedChannelException", iox);
 	}
 	
 	/**
@@ -451,7 +451,13 @@ public class UDPService implements ReadWriteObserver {
                 if (r.getMyPort() != 0) {
                     synchronized(this){
                         _numReceivedIPPongs++;
-                        
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("Received IP pong from " +
+                                    r.getAddress() + ":" + r.getPort() +
+                                    " reporting " +
+                                    r.getMyInetAddress().getHostAddress() +
+                                    ":" + r.getMyPort());
+                        }
                         if (_numReceivedIPPongs==1) 
                             _lastReportedPort=r.getMyPort();
                         else if (_lastReportedPort!=r.getMyPort()) {
@@ -535,10 +541,6 @@ public class UDPService implements ReadWriteObserver {
             LOG.debug("Socket not ready for writing");
             return;
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Sending message: " + msg + "to " + addr);
-        }
-        
         int length = msg.getTotalLength();
         ByteBuffer buffer = NIODispatcher.instance().getBufferCache().getHeap(length);
         if(buffer.remaining() != length)
