@@ -119,12 +119,12 @@ public abstract class Dialog extends LimeJDialog {
         buttons.add(new JButton(new CancelAction()));
         mainPanel.add(buttons, "alignx right, cell 1 4");
         
-        overview = newPanel(new MigLayout("fillx", "[][]push[]", "[][][]"));
+        overview = newPanel(new MigLayout("fillx", "[][]push[]", "[]0[]"));
 
         overview.add(icon);
         overview.add(heading);
         overview.add(copyToClipboard, "wrap");
-        overview.add(metadata, "cell 1 2");
+        overview.add(metadata, "cell 1 1");
         overview.add(moreFileInfo);
 
         addOverview();
