@@ -170,7 +170,7 @@ public class LocalFileItemPropertiesFactory implements PropertiesFactory<LocalFi
             }
             
             location.setLayout(new MigLayout("", "[]10[]15[]", isShared ? "[top][]" : "[top]"));
-            location.add(fileLocation, "push");
+            location.add(fileLocation, "gapbottom 5,push");
             location.add(locateOnDisk);
             location.add(locateInLibrary, isShared ? "wrap" : "");
 

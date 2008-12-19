@@ -48,7 +48,7 @@ public class RemoteFileItemPropertiesFactory implements PropertiesFactory<Remote
         public void showProperties(RemoteFileItem propertiable) {
             icon.setIcon(categoryIconManager.getIcon(propertiable.getCategory()));
             location.setLayout(new MigLayout("", "[]", "[]"));
-            location.add(fileLocation);
+            location.add(fileLocation, "gapbottom 5");
             populateCommonFields(propertiable);
             populateCopyToClipboard(propertiable);
             fileLocation.setText(propertiable.getSources().get(0).getFriendPresence().getPresenceId());
