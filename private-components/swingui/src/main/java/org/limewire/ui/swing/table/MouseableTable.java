@@ -436,6 +436,13 @@ public class MouseableTable extends StripedJXTable {
             if( !visibleRect.intersects(cellRect) )
                 scrollRectToVisible(cellRect);
         }
+
+    }
+    
+    public boolean isColumnVisible(int column) {
+        Rectangle cellRect = getCellRect(0, column, false);
+        Rectangle visibleRect = getVisibleRect();
+        return visibleRect.intersects(cellRect);
     }
     
     public void setStripesPainted(boolean painted){

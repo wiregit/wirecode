@@ -62,6 +62,8 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
+import org.limewire.ui.swing.tray.TrayNotifier;
+import org.limewire.ui.swing.tray.Notification;
 import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -85,11 +87,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
 	private final LimeProgressBarFactory progressBarFactory;
     private final Navigator navigator;
+    private final TrayNotifier notifier;
 	
 	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private AbstractDownloadTable table;
+    private final HorizontalDownloadTableModel horizontalTableModel;
 
-	private JLabel header;
+    private JLabel header;
 	private JXHyperlink moreButton;
 	private EventList<DownloadItem> allList;
     private RangeList<DownloadItem> chokeList;    
@@ -114,9 +118,10 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Inject
 	public DownloadSummaryPanel(DownloadListManager downloadListManager, DownloadMediator downloadMediator, MainDownloadPanel mainDownloadPanel, 
 	        Navigator navigator, LimeProgressBarFactory progressBarFactory, BarPainterFactory barPainterFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
-	        DownloadActionHandlerFactory downloadActionHandlerFactory) {
+	        DownloadActionHandlerFactory downloadActionHandlerFactory, TrayNotifier notifier) {
 	    this.navigator = navigator;        
         this.progressBarFactory = progressBarFactory;
+        this.notifier = notifier;
         this.allList = downloadMediator.getDownloadList();
         
         GuiUtils.assignResources(this);        
@@ -132,15 +137,15 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		
 		chokeList = GlazedListsFactory.rangeList(allList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
-		final HorizontalDownloadTableModel tableModel = new HorizontalDownloadTableModel(allList);
+		horizontalTableModel = new HorizontalDownloadTableModel(allList);
 		table = new AbstractDownloadTable() {
             @Override
             public DownloadItem getDownloadItem(int row) {
                 // row is actually a column here
-                return tableModel.getDownloadItem(row);
+                return horizontalTableModel.getDownloadItem(row);
             } 
         };
-        table.setModel(tableModel);
+        table.setModel(horizontalTableModel);
 		table.setShowHorizontalLines(false);
 		table.setShowVerticalLines(false);		
 		table.setOpaque(false);
@@ -275,12 +280,34 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                             if (!navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).isSelected()) {
                                 header.setIcon(downloadCompletedIcon);
                             }
-                          }
+                            // loop thru the inserted elements, and add
+                            for (int i=listChanges.getBlockStartIndex(); i<=listChanges.getBlockEndIndex(); i++) {
+                                DownloadItem item = listChanges.getSourceList().get(i);
+                                if (shouldShowNotifier(item)) {
+                                    notifier.showMessage(new Notification("Download complete for "
+                                            + item.getFileName()));
+                                }
+                            }
+                        }
                     }
                 } finally {
                     allList.getReadWriteLock().readLock().unlock();
                 }
-            }});
+            }
+
+            /**
+             * Only show tray notifier if there is no other indication that the user's download has finished.
+             *
+             * 1. Main Limewire application window is minimized, or not in focus
+             * 2. OR User's download is not visible in the download tray
+             * 3. But if the main download panel is showing, do not show tray notification
+             */
+            private boolean shouldShowNotifier(DownloadItem item) {
+                return (!GuiUtils.getMainFrame().isActive() ||
+                        (!table.isColumnVisible(horizontalTableModel.indexOf(item)) &&
+                         !navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).isSelected()));
+            }
+        });
     }
 
     private MouseListener createDownloadNavListener() {
