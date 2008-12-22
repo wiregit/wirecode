@@ -20,6 +20,7 @@ import org.limewire.core.api.Category;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
+import org.limewire.player.api.AudioSource;
 import org.limewire.player.api.PlayerState;
 import org.limewire.ui.swing.components.MarqueeButton;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
@@ -94,7 +95,11 @@ public class MiniPlayerPanel extends JPanel {
     private class ShowPlayerListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            libraryNavigator.selectInLibrary(player.getCurrentSong().getFile(), Category.AUDIO);
+            AudioSource currentSource = player.getCurrentSong();
+            
+            if (currentSource != null) { 
+                libraryNavigator.selectInLibrary(currentSource.getFile(), Category.AUDIO);
+            }
         }
     }
     
