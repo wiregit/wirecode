@@ -44,11 +44,11 @@ public class AutoDirectoryManageConfig {
             String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);
             
             if (homePath != null && !homePath.isEmpty()) {
-                dirs.add(new File(homePath, "/Downloads"));
-                dirs.add(new File(homePath, "/Movies"));
-                dirs.add(new File(homePath, "/Music"));
-                dirs.add(new File(homePath, "/Pictures"));
-                dirs.add(new File(homePath, "/Public"));
+                dirs.add(new File(homePath, "Downloads"));
+                dirs.add(new File(homePath, "Movies"));
+                dirs.add(new File(homePath, "Music"));
+                dirs.add(new File(homePath, "Pictures"));
+                dirs.add(new File(homePath, "Public"));
             }
         }
                 
