@@ -14,6 +14,7 @@ import javax.swing.TransferHandler;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LibraryManager;
@@ -71,6 +72,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
     private PropertiesFactory<RemoteFileItem> remoteItemPropFactory;
     
+    private PropertiesFactory<DownloadItem> downloadItemPropFactory;
+    
     private LibraryImageSubPanelFactory subPanelFactory;
     
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
@@ -95,6 +98,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             MagnetLinkFactory magnetLinkFactory,
             PropertiesFactory<LocalFileItem> localItemPropFactory,
             PropertiesFactory<RemoteFileItem> remoteItemPropFactory,
+            PropertiesFactory<DownloadItem> downloadItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             @Named("known") Collection<Friend> allFriends,
@@ -108,6 +112,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.magnetLinkFactory = magnetLinkFactory;
         this.localItemPropFactory = localItemPropFactory;
         this.remoteItemPropFactory = remoteItemPropFactory;
+        this.downloadItemPropFactory = downloadItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.allFriends = allFriends;
@@ -265,7 +270,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         }
         libTable.setPopupHandler(new FriendLibraryPopupHandler(
                 castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
-                remoteItemPropFactory, saveLocationExceptionHandler));
+                remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory));
 
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);
