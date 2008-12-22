@@ -65,6 +65,10 @@ public interface VisualSearchResult extends NavSelectable, PropertiableFile {
     
     double getRelevance();
     
+    void setShowingContextOptions(boolean showing);
+    
+    boolean isShowingContextOptions();
+    
     boolean isPreExistingDownload();
     void setPreExistingDownload(boolean preExistingDownload);
 

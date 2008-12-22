@@ -58,6 +58,8 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     private String cachedHeading;
     
     private String cachedSubHeading;
+    
+    private boolean showingOptions;
 
     public SearchResultAdapter(List<SearchResult> sourceValue, PropertiableHeadings propertiableHeadings) {
         this.coreResults = sourceValue;
@@ -355,6 +357,18 @@ class SearchResultAdapter extends AbstractBean implements VisualSearchResult, Co
     @Override
     public void setPreExistingDownload(boolean preExistingDownload) {
         this.preExistingDownload = preExistingDownload;
+    }
+
+    @Override
+    public boolean isShowingContextOptions() {
+        return showingOptions;
+    }
+
+    @Override
+    public void setShowingContextOptions(boolean showing) {
+        boolean oldShowing = this.showingOptions;
+        this.showingOptions = showing;
+        firePropertyChange("showingContextOptions", oldShowing, showing);
     }
 
     @Override
