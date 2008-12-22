@@ -24,6 +24,7 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
@@ -465,12 +466,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         @Override
         public Transferable createTransferable(JComponent comp) {
             int indices[] = table.getSelectedRows();
-            List<RemoteFileItem> files = new ArrayList<RemoteFileItem>();
+            List<File> files = new ArrayList<File>();
             for (int i = 0; i < indices.length; i++) {
-                files.add((RemoteFileItem) ((LibraryTableModel) table.getModel())
-                        .getFileItem(indices[i]));
+                LocalFileItem localFileItem = (LocalFileItem) ((LibraryTableModel) table.getModel()).getFileItem(indices[i]); 
+                files.add(localFileItem.getFile());
             }
-            return new RemoteFileTransferable(files);
+            return new LocalFileTransferable(files.toArray(new File[0]));
         }
     }
 }
