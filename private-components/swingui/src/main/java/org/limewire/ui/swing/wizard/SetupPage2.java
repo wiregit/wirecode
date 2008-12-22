@@ -30,19 +30,21 @@ import org.limewire.ui.swing.util.I18n;
 public class SetupPage2 extends WizardPage {
 
     private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
-    private final String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files with the P2P Network and, or your friends.");
-    private final String autoText = I18n.tr("Automatically manage My Library");
-    private final String autoExplanation = I18n.tr("Choose this option to have LimeWire automatically scan files into your Library from My Documents and the Desktop.");
-    private final String manualText = I18n.tr("Manually manage My Library");
-    private final String manualExplanation = I18n.tr("Choose this option if you want to select which folders LimeWire scans into your Library.");
-    private final String bottomText1 = I18n.tr("Scanning these folders into your Library will not automatically share your files.");
-    private final String bottomText2 = I18n.tr("You can change these options later from Tools > Options");
+    private final String line2 = I18n.tr("My Library is where you view, share and unshare your files.");
+    private final String autoText = I18n.tr("Automatically add files to My Library");
+    private final String autoExplanation = I18n.tr("Have LimeWire automatically add files from My Documents and the Desktop to My Library.");
+    private final String manualText = I18n.tr("Manually add files to My Library");
+    private final String manualExplanation = I18n.tr("Select the folders and categories LimeWire automatically adds to My Library.");
+    private final String bottomText1 = I18n.tr("Adding these folders will not automatically share your files.");
+    private final String bottomText2 = I18n.tr("You can change this option later from Tools > Options");
     
     private final LibraryData libraryData;
     
     private final ButtonGroup buttonGroup;
     private final JRadioButton autoButton;
     private final JRadioButton manualButton;
+    
+    private final JLabel manualLabel;
     
     private final LibraryManagerTreeTable treeTable;
     private final JScrollPane treeTableScrollPane;
@@ -60,6 +62,9 @@ public class SetupPage2 extends WizardPage {
         decorator.decorateLargeRadioButton(autoButton);
         autoButton.setSelected(true);
         autoButton.addActionListener(buttonSelectionListener);
+        
+        manualLabel = new MultiLineLabel(manualText);
+        decorator.decorateHeadingText(manualLabel);
         
         manualButton = new JRadioButton();
         decorator.decorateLargeRadioButton(manualButton);
@@ -82,6 +87,7 @@ public class SetupPage2 extends WizardPage {
 
         add(autoButton, "gaptop 10, gapleft 40");
         label = new JLabel(autoText);
+        label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(autoButton));
         decorator.decorateHeadingText(label);
         add(label, "gaptop 10, gapleft 10, wrap");
         
@@ -90,10 +96,9 @@ public class SetupPage2 extends WizardPage {
         add(label, "gapleft 76, wrap");
         
         add(manualButton, "gaptop 10, gapleft 40");
-        label = new JLabel(manualText);
-        decorator.decorateHeadingText(label);
-        add(label, "gaptop 10, gapleft 10, wrap");
-        
+        manualLabel.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(manualButton));
+        add(manualLabel, "gaptop 10, gapleft 10, wrap");
+
         label = new MultiLineLabel(manualExplanation, 500);
         decorator.decorateNormalText(label);
         add(label, "gapleft 76, wrap");

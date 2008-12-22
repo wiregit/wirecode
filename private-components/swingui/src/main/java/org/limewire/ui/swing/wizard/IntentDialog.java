@@ -32,9 +32,8 @@ public class IntentDialog extends LimeJDialog {
     private final String title = I18n.tr("LimeWire 5 Alpha");
     private final String heading  = " ";
     
-    private final String bodyText1 = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  " +
-    		"Installing and using either program does not constitute a license for obtaining or distributing " +
-    		"unauthorized content.");
+    private final String bodyText1 
+    = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
     
     private final String linkText = I18n.tr("Learn more");
     

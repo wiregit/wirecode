@@ -17,15 +17,11 @@ import org.limewire.ui.swing.util.I18n;
 public class UpgradePage1 extends WizardPage {
 
     private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
-    private final String line2 = I18n.tr("Your Library is a central location to view, share and unshare your files " +
-    		"with the P2P Network and, or your friends.");
-    private final String footer = I18n.tr("You can change this option later from Tools > Options");
-    
-    private final String noteText = I18n.tr("LimeWire will import old shared files into your Library " +
-    		"and continue sharing them");
+    private final String line2 = I18n.tr("My Library is where you view, share and unshare your files.");
+    private final String footer = I18n.tr("You can change this option later from Tools > Options");    
+    private final String noteText = I18n.tr("LimeWire will import old shared files into your Library and continue sharing them");
     private final String autoTitle = I18n.tr("Automatically manage my Library");
-    private final String autoCheckText = I18n.tr("Allow LimeWire to automatically scan new files into your" +
-    		" Library from My Documents and the Desktop.  This will not automatically share your files.");
+    private final String autoCheckText = I18n.tr("Allow LimeWire to automatically scan new files into your Library from My Documents and the Desktop.  This will not automatically share your files.");
     
     private final LibraryData libraryData;
     
@@ -52,6 +48,7 @@ public class UpgradePage1 extends WizardPage {
         
         add(autoCheck, "gaptop 10, gapleft 40");
         label = new MultiLineLabel(autoCheckText, 500);
+        label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(autoCheck));
         decorator.decorateNormalText(label);       
         add(label, "gaptop 10, gapleft 10, wrap");
         
