@@ -569,10 +569,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     
 
     private void adjustFriendLabel() {
-        System.out.println(shareFriendList.size() == 0 ? startTypingText : addFriendText);
         friendLabel.setText(shareFriendList.size() == 0 ? startTypingText : addFriendText);
-        System.out.println(friendLabel.getText());
-        //friendLabel.setVisible(friendCombo.isVisible());
         friendLabel.paintImmediately(friendLabel.getVisibleRect());
     }
     
