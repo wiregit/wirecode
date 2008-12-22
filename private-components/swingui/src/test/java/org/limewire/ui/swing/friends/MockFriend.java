@@ -73,4 +73,9 @@ public class MockFriend implements Friend {
     public String getFirstName() {
         return null;
     }
+
+    @Override
+    public boolean isOnline() {
+        return false;
+    }
 }

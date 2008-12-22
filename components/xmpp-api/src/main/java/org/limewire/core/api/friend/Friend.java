@@ -53,4 +53,9 @@ public interface Friend {
      * {@link FriendPresence#getPresenceId()}.
      */
     Map<String, FriendPresence> getFriendPresences();
+    
+    /**
+     * Returns true if this friend has a FriendPresence, false otherwise.
+     */
+    boolean isOnline();
 }

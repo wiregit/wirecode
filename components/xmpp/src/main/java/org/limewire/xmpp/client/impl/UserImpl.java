@@ -156,6 +156,14 @@ public class UserImpl implements User {
             return Collections.unmodifiableMap(new HashMap<String, Presence>(presences));
         }
     }
+    
+
+    @Override
+    public boolean isOnline() {
+        synchronized (presenceLock) {
+            return !presences.isEmpty();
+        }
+    }
 
     void addPresense(Presence presence) {
         if(LOG.isDebugEnabled()) {

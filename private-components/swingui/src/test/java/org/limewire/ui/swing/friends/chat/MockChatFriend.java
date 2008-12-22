@@ -63,6 +63,10 @@ class MockChatFriend implements ChatFriend {
             public Map<String, FriendPresence> getFriendPresences() {
                 return Collections.emptyMap();
             }
+            @Override
+            public boolean isOnline() {
+                return false;
+            }
         };
     }
 
