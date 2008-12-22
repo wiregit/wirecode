@@ -87,9 +87,6 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         if (getSession().getIOSession() != null) {
             getSession().getIOSession().shutdown();
         }
-        if(getState() != UploadStatus.COMPLETE) {
-            setState(UploadStatus.CANCELLED);
-        }
 	}
 	
 	/**
