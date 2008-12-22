@@ -64,6 +64,9 @@ import com.google.inject.Inject;
 
 public class MyLibraryPanel extends LibraryPanel {
     
+    @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
+    private Color selectionPanelBackgroundOverride = null;
+    
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
@@ -81,7 +84,10 @@ public class MyLibraryPanel extends LibraryPanel {
                           ShareWidgetFactory shareFactory,
                           LimeHeaderBarFactory headerBarFactory,
                           PlayerPanel player) {
+        
         super(headerBarFactory);
+        
+        GuiUtils.assignResources(this);
         
         this.libraryManager = libraryManager;
         this.tableFactory = tableFactory;
@@ -89,6 +95,10 @@ public class MyLibraryPanel extends LibraryPanel {
         this.shareFactory = shareFactory;
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
+        
+        if (selectionPanelBackgroundOverride != null) { 
+            selectionPanel.setBackground(selectionPanelBackgroundOverride);
+        }
         
         getHeaderPanel().setText(I18n.tr("My Library"));
         categoryShareWidget = shareFactory.createCategoryShareWidget();

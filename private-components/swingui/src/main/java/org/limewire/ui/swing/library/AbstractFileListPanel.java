@@ -62,7 +62,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     private ButtonItem currentItem = null;
 
-    private final JPanel selectionPanel = new LibrarySelectionPanel();
+    protected final JPanel selectionPanel = new LibrarySelectionPanel();
     private final LimeHeaderBar headerPanel;    
     
     private final Next next = new Next();

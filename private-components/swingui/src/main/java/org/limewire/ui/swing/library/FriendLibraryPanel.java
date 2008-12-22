@@ -1,9 +1,11 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 
+import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
@@ -14,6 +16,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -23,6 +26,9 @@ import com.google.inject.assistedinject.AssistedInject;
 
 public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
 
+    @Resource(key="LibraryPanel.selectionPanelBackgroundOverride") 
+    private Color selectionPanelBackgroundOverride = null;    
+    
     private final Friend friend;
     
     @AssistedInject
@@ -37,9 +43,15 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
                     LimeHeaderBarFactory headerBarFactory,
                     ButtonDecorator buttonDecorator) {
         super(friend, friendFileList, eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory);
+
+        GuiUtils.assignResources(this);
         
         this.friend = friend;
 
+        if (selectionPanelBackgroundOverride != null) { 
+            selectionPanel.setBackground(selectionPanelBackgroundOverride);
+        }
+        
         //don't show share button for browse hosts
         if(!friend.isAnonymous()) {
             addButtonToHeader(new ViewSharedLibraryAction(mediator), buttonDecorator);
