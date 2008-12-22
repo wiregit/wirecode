@@ -218,8 +218,8 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         cancelButton.addActionListener(new CancelOptionAction(this));
         
         footerPanel.add(helpButton, "push");
-        footerPanel.add(okButton);
-        footerPanel.add(cancelButton);
+        footerPanel.add(okButton, "split, tag ok");
+        footerPanel.add(cancelButton, "tag cancel");
     }
 
     @Override
