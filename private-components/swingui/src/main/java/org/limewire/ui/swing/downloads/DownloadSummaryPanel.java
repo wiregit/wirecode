@@ -14,6 +14,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
@@ -98,7 +99,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	private EventList<DownloadItem> allList;
     private RangeList<DownloadItem> chokeList;    
 
-    private JButton minimizeButton;
+    private JXHyperlink minimizeButton;
+    private JXHyperlink clearButton;
+    private JLabel clearDivider;
 
     @Resource private Font seeAllFont; 
     @Resource private Color blueForeground; 
@@ -108,11 +111,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Resource private Color fontColor; 
     @Resource private Icon downloadIcon;
     @Resource private Icon downloadCompletedIcon;
-    @Resource private Icon minimizeIcon;
-    @Resource private Icon minimizeIconHover;
-    @Resource private Icon minimizeIconDown;
     @Resource private int panelHeight;
     @Resource private int nameLabelWidth;
+    @Resource private Font minimizeFont;
+    @Resource private Color minimizeColor;
+
+    private DownloadMediator downloadMediator;
 
 
     
@@ -124,6 +128,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         this.progressBarFactory = progressBarFactory;
         this.notifier = notifier;
         this.allList = downloadMediator.getDownloadList();
+        this.downloadMediator = downloadMediator;
         
         GuiUtils.assignResources(this);        
         
@@ -228,7 +233,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         moreButton.addMouseListener(navMouseListener);
         header.addMouseListener(navMouseListener);
         
-        minimizeButton = new IconButton(minimizeIcon, minimizeIconHover, minimizeIconDown);
+        minimizeButton = new JXHyperlink();
+        minimizeButton.setText("<HTML><U>" +I18n.tr("Hide Tray") + "</U></HTML>");
+        minimizeButton.setFont(minimizeFont);
+        minimizeButton.setMinimumSize(minimizeButton.getPreferredSize());
+        minimizeButton.setForeground(minimizeColor);
+        minimizeButton.setClickedColor(minimizeColor);
         minimizeButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -236,16 +246,39 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             }
         });
         
+        clearButton = new JXHyperlink();
+        clearButton.setText("<HTML><U>" + I18n.tr("Clear finished") + "</U></HTML>");
+        clearButton.setFont(minimizeFont);
+        clearButton.setMinimumSize(clearButton.getPreferredSize());
+        clearButton.setForeground(minimizeColor);
+        clearButton.setClickedColor(minimizeColor);
+        clearButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DownloadSummaryPanel.this.downloadMediator.clearFinished();
+            }
+        });
+        clearButton.setVisible(false);
+        
+        clearDivider = new JLabel("|");
+        clearDivider.setVisible(false);
+        
         initializeDownloadCompleteListener();
         initializeDownloadAddedListener();
 
         setLayout(new MigLayout("nocache, ins 0, gap 0! 0!, novisualpadding"));
         
+        JPanel rightPanel = new JPanel(new MigLayout("nogrid, ins 0, gap 0! 0!, novisualpadding"));
+        rightPanel.setOpaque(false);
+        rightPanel.add(clearButton, "gaptop 2, aligny 0%, alignx 100%");
+        rightPanel.add(clearDivider, "gaptop 2, aligny 0%, alignx 50%");
+        rightPanel.add(minimizeButton, "gaptop 2, gapright 2, aligny 0%, alignx 100%, wrap");
+        rightPanel.add(moreButton, "push, pad " + (-clearButton.getPreferredSize().height) + " 0 0 0, aligny 50%, alignx 50%");
         
         add(header, "gapleft 8, aligny 50%");
         add(tableScroll, "gapleft 12, aligny 50%, growx, growy, push");
-        add(moreButton, "aligny 50%");
-        add(minimizeButton, "aligny 0%, alignx 100%");
+        add(rightPanel, "growy, shrinkprio 0");
+       
 		
 		updateTitle();
 		addListeners();
@@ -269,10 +302,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     }
 
     private void initializeDownloadCompleteListener(){
-        EventList<DownloadItem> completeDownloads = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.DONE));
+        final EventList<DownloadItem> completeDownloads = GlazedListsFactory.filterList(allList, new DownloadStateMatcher(DownloadState.DONE));
         completeDownloads.addListEventListener(new ListEventListener<DownloadItem>(){
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
+                clearButton.setVisible(completeDownloads.size() > 0);
+                clearDivider.setVisible(completeDownloads.size() > 0);
+                
                 allList.getReadWriteLock().readLock().lock();
                 try {
                     while(listChanges.nextBlock()) {
