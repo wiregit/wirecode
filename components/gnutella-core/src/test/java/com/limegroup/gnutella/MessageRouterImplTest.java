@@ -106,8 +106,6 @@ import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.version.UpdateHandler;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 // TODO write test for storing bypassed results
 public final class MessageRouterImplTest extends LimeTestCase {
@@ -1136,10 +1134,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         @Inject
         public TestQRPUpdater(FileManager fileManager, 
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
-                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository,
                 ListenerSupport<FileDescChangeEvent> fileDescListenerSupport) {
-            super(fileManager, backgroundExecutor, schemaReplyCollectionMapper, limeXMLSchemaRepository, fileDescListenerSupport);
+            super(fileManager, backgroundExecutor, fileDescListenerSupport);
         }
         
         @Override
