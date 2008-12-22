@@ -15,7 +15,15 @@ import org.limewire.util.SystemUtils.SpecialLocations;
  */
 public class AutoDirectoryManageConfig {
     
-   
+   /**
+    * Helper method to add a file to a set from a file string if it is not null or empty
+    */
+    private static void addIfSupported(String path, Set<File> directories) {
+        if (path != null && !path.isEmpty()) {
+            directories.add(new File(path));
+        }
+    }
+    
     /**
      * Determines the OS specific list of directories to manage by default.
      *  Note, this list is not for certain as no checks are performed so  any results
@@ -26,19 +34,22 @@ public class AutoDirectoryManageConfig {
         Set<File> dirs = new HashSet<File>();
 
         if (OSUtils.isWindows() && !OSUtils.isWindowsVista()) {
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
+            addIfSupported(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), dirs);
+            addIfSupported(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), dirs);
         } else {
         
+            addIfSupported(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), dirs);
+            addIfSupported(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), dirs);
+            
             String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);
             
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS)));
-            dirs.add(new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP)));
-            dirs.add(new File(homePath + "/Downloads"));
-            dirs.add(new File(homePath + "/Movies"));
-            dirs.add(new File(homePath + "/Music"));
-            dirs.add(new File(homePath + "/Pictures"));
-            dirs.add(new File(homePath + "/Public"));
+            if (homePath != null && !homePath.isEmpty()) {
+                dirs.add(new File(homePath, "/Downloads"));
+                dirs.add(new File(homePath, "/Movies"));
+                dirs.add(new File(homePath, "/Music"));
+                dirs.add(new File(homePath, "/Pictures"));
+                dirs.add(new File(homePath, "/Public"));
+            }
         }
                 
         return dirs;
