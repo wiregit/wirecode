@@ -115,7 +115,7 @@ final class BasicNotifier implements TrayNotifier {
             final int screenHeight = screenBounds.height
                     - Math.abs(screenInsets.top + screenInsets.bottom);
 
-            int totalWindowHeight = 28;// TODO calculate starting position
+            int totalWindowHeight = 0;//will be relative to the system tray on windows.
             for (int i = 0; i < notificationWindows.size(); i++) {
                 NotificationWindow notificationWindow = notificationWindows.get(notificationWindows
                         .size()
