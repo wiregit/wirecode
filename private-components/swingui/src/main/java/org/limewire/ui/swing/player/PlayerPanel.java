@@ -285,8 +285,14 @@ public class PlayerPanel extends JXPanel {
                 }
                 else {
                     player.stop();
-                    player.loadSong(file);
-                    player.playSong();
+                    
+                    // If somehow the user is able to press the back button
+                    //  when no song is loaded do not attempt to load an empty
+                    //  deck
+                    if (file != null) {
+                        player.loadSong(file);
+                        player.playSong();
+                    }
                 }
             } else if (e.getActionCommand() == VOLUME) {
                 if (System.currentTimeMillis() - menuInvizTime > 250f) {
