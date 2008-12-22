@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
@@ -22,6 +23,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -145,11 +148,37 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		horizontalTableModel = new HorizontalDownloadTableModel(allList);
 		table = new AbstractDownloadTable() {
+		    private JLabel blankRenderer = new JLabel();
+		    
             @Override
             public DownloadItem getDownloadItem(int row) {
                 // row is actually a column here
                 return horizontalTableModel.getDownloadItem(row);
             } 
+            
+            @Override
+            public Component prepareEditor(TableCellEditor editor, int row, int column) {
+                if (!isColumnFullyVisible(column)){
+                    return blankRenderer;
+                }
+                return super.prepareEditor(editor, row, column);
+            }           
+            
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row,
+                    int column) {
+                if (!isColumnFullyVisible(column)){
+                    return blankRenderer;
+                }
+                return super.prepareRenderer(renderer, row, column);
+            }
+            
+            private boolean isColumnFullyVisible(int column) {
+                Rectangle cellRect = getCellRect(0, column, false);
+                Rectangle visibleRect = getVisibleRect();
+                return visibleRect.contains(cellRect);
+            }
+            
         };
         table.setModel(horizontalTableModel);
 		table.setShowHorizontalLines(false);
@@ -287,6 +316,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		
 		setVisibility(false);
 	}
+    
 
     private void initializeDownloadAddedListener() {
         final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
