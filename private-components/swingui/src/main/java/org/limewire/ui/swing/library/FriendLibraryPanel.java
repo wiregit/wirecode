@@ -76,7 +76,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         public ViewSharedLibraryAction(FriendLibraryMediator friendLibraryMediator) {
             this.friendLibraryMediator = friendLibraryMediator;
             putValue(Action.NAME, I18n.tr("Share with {0}", getShortPanelName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getShortPanelName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", getShortPanelName()));
         }
         
         @Override
