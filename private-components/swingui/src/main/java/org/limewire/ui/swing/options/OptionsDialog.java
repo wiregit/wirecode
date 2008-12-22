@@ -2,7 +2,6 @@ package org.limewire.ui.swing.options;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import org.limewire.ui.swing.options.actions.TabAction;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -103,8 +103,13 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
         this.miscOptionPanel = miscOptionPanel;
         this.advancedOptionPanel = advancedOptionPanel;
 
-        setSize(700,620);
-        setPreferredSize(new Dimension(700,620));
+        if(!OSUtils.isAnyMac()) {
+            setSize(700,620);
+            setPreferredSize(getSize());
+        } else {
+            setSize(743, 671);
+            setPreferredSize(getSize());
+        }
         setResizable(false);
         
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
