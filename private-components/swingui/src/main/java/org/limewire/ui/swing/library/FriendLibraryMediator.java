@@ -56,7 +56,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         this.availListeners = availListeners;
         this.availListeners.addListener(this);
         
-        if(friend.isOnline())
+        if(!friend.getFriendPresences().isEmpty())
             setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, new OnLineMessageComponent(friendFileList.getSwingModel())));
         else
             setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new OffLineMessageComponent(friendFileList.getSwingModel())));

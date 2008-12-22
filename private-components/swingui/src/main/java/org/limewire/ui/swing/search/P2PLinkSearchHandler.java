@@ -164,11 +164,6 @@ class P2PLinkSearchHandler implements SearchHandler {
         @Override
         public void setName(String name) {
         }
-
-        @Override
-        public boolean isOnline() {
-            return presence != null;
-        }
     }
 
 }

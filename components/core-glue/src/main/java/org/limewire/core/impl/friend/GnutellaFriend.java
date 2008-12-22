@@ -59,9 +59,4 @@ public class GnutellaFriend implements Friend {
     public String getFirstName() {
         return getName();
     }
-
-    @Override
-    public boolean isOnline() {
-        return !map.isEmpty();
-    }
 }

@@ -92,12 +92,6 @@ public class MockUser implements User {
     public boolean isSignedIn() {
         return true;
     }
-    
-
-    @Override
-    public boolean isOnline() {
-        return true;
-    }
 
     @Override
     public void setName(String name) {

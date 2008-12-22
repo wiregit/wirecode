@@ -90,11 +90,6 @@ public class SharingTarget {
         public String getFirstName() {
             return getName();
         }
-
-        @Override
-        public boolean isOnline() {
-            return true;
-        }
     }
 
 }
