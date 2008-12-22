@@ -49,6 +49,7 @@ import com.google.inject.Singleton;
 public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequestSender {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
+    private static final int MAX_RECONNECTION_ATTEMPTS = 10;
 
     private final Provider<EventBroadcaster<RosterEvent>> rosterBroadcaster;
     private final Provider<EventBroadcaster<FileOfferEvent>> fileOfferBroadcaster;
@@ -290,7 +291,8 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                         public void run() {
                             long sleepTime = 10000;
                             XMPPConnection newConnection = null;
-                            while(newConnection == null) {
+                            for(int i = 0; i < MAX_RECONNECTION_ATTEMPTS &&
+                                    newConnection == null; i++) {
                                 try {
                                     LOG.debugf("attempting to reconnect to {0} ..." + configuration.getServiceName());
                                     newConnection = login(configuration, true);
@@ -303,6 +305,7 @@ public class XMPPServiceImpl implements Service, XMPPService, ConnectBackRequest
                                     // Ignored
                                 }
                             }
+                            LOG.debugf("giving up trying to connect to {0}" + configuration.getServiceName());
                         }
                     }), "xmpp-reconnection-manager");
                     t.start();
