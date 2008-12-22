@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-16 16:23-0500\n"
+"POT-Creation-Date: 2008-12-22 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -239,14 +239,14 @@ msgstr ""
 msgid "DHT Peer Publisher"
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:297
+#: core/com/limegroup/gnutella/AcceptorImpl.java:298
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:395
+#: core/com/limegroup/gnutella/AcceptorImpl.java:396
 msgid "Connection Listener"
 msgstr ""
 
@@ -274,22 +274,22 @@ msgstr ""
 msgid "Gnutella Connections"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:203
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:202
 msgid "Old Downloads"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:226
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:225
 msgid "Download Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:275
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:274
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:277
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:276
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -304,7 +304,7 @@ msgstr ""
 msgid "Upload Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/HostCatcher.java:381
+#: core/com/limegroup/gnutella/HostCatcher.java:379
 msgid "Peer Locator"
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:157
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:160
 msgid "Network Management"
 msgstr ""
 
