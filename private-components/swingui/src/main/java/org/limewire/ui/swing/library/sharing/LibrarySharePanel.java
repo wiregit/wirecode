@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -38,7 +40,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.plaf.basic.ComboPopup;
+import javax.swing.plaf.basic.BasicComboPopup;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -47,7 +49,6 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.Painter;
-import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.LimeEditableComboBox;
@@ -55,7 +56,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.ShapeDialog;
-import org.limewire.ui.swing.components.ShapeDialogComponent;
+import org.limewire.ui.swing.components.ShapeComponent;
 import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
 import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.table.MouseableTable;
@@ -81,14 +82,13 @@ import ca.odell.glazedlists.swing.EventTableModel;
 /**
  * This is used internally by ShareWidget.  Needs refactoring.
  */
-class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable, ShapeDialogComponent {
+class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Disposable, ShapeComponent {
 
     private static final int SHARED_ROW_COUNT = 10;
-    private static final int SHADOW_INSETS = 5;
     
     public static enum ShadowMode {SHADOW, NO_SHADOW};
     
-    private ShadowMode shadowMode = ShadowMode.SHADOW;
+ //   private ShadowMode shadowMode = ShadowMode.SHADOW;
   //  private static final int HGAP = 5;
     
     @Resource
@@ -143,6 +143,13 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private JLabel titleLabel;
     
     private JXPanel mainPanel;
+    
+    /**
+     * arc for RoundedRect
+     */
+    @Resource
+    private int arc = 10;
+
     private JButton closeButton;
     @Resource
     private Icon closeIcon;
@@ -154,7 +161,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     
     private ShapeDialog dialog;
     
-    private ComboPopup comboPopup;
+    private BasicComboPopup comboPopup;
     
     private TextMatcherEditor<SharingTarget> textMatcher;
     
@@ -209,7 +216,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     public LibrarySharePanel(Collection<Friend> allFriends, ShapeDialog dialog, ShadowMode shadowMode) {
         this.allFriends = allFriends;
         this.dialog = dialog;
-        this.shadowMode = shadowMode;
+        //this.shadowMode = shadowMode;
         initialize();
     }
   
@@ -233,9 +240,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         
         addComponents();
         
-        setKeyStrokes(this);
-        setKeyStrokes(mainPanel);
-        setKeyStrokes(inputField); 
+        setChildComponentKeyStrokes(this);
         
         addComponentListener(new ComponentAdapter(){
 
@@ -243,7 +248,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             public void componentResized(ComponentEvent e) {
                 if (friendCombo.isPopupVisible()) {
                     friendCombo.showPopup();
-                }                
+                }      
             }
        });
     }
@@ -283,14 +288,13 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         //TODO: sizes and shapes
         
         setBackgroundPainter(new Painter() {
+           
 
             @Override
             public void paint(Graphics2D g, Object object, int width, int height) {
-                int arc = 10;
-               
-                RoundRectangle2D.Float panelShape = new RoundRectangle2D.Float(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth()-2,
-                        mainPanel.getHeight()-2, arc, arc);
-                Area panelArea = new Area(panelShape);
+                               
+                Shape mainPanelShape = getShape();
+                Area panelArea = new Area(mainPanelShape);
                 Point bottomLocation = SwingUtilities.convertPoint(mainPanel, bottomPanel.getLocation(), LibrarySharePanel.this);
                 Area bottomArea = new Area(new Rectangle2D.Float(0, bottomLocation.y, getWidth(), 1000));
                
@@ -302,19 +306,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 g2.setRenderingHint(RenderingHints.KEY_RENDERING,
                         RenderingHints.VALUE_RENDER_SPEED);
                 
-                if (shadowMode == ShadowMode.SHADOW) {
-                    // TODO it's a pretty crappy shadow but good enough for now
-//                    Area shadowArea = new Area(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, arc, arc));
-//                    shadowArea.subtract(panelArea);
-                    
-                 //   g2.setColor(shadowColor);
-                  //  g2.fill(shadowArea);
-                    ShadowPathEffect shadow = new ShadowPathEffect();
-                    shadow.setEffectWidth(14);
-                    shadow.setOffset(new Point(0, 0));
-//                    shadow.setBrushSteps(7);
-                    shadow.apply(g2, panelArea, width, height);
-                }
+               
                 
                 g2.setColor(Color.WHITE);
                 g2.fill(panelArea);        
@@ -325,19 +317,25 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                     g2.setPaint(bottomGradient);
                     g2.fill(bottomArea);
                     g2.setColor(dividerColor);
-                    g2.drawLine((int)panelShape.x, bottomLocation.y, (int)(panelShape.x + panelShape.getWidth()), bottomLocation.y);
+                    Rectangle panelBounds = mainPanelShape.getBounds();
+                    g2.drawLine(panelBounds.x, bottomLocation.y, panelBounds.x + panelBounds.width, bottomLocation.y);
                 }
                 g2.setColor(borderColor);
-                g2.draw(panelShape);
-                panelShape.x++;
-                panelShape.y++;
-                g2.draw(panelShape);
+                g2.draw(mainPanelShape);
+                g2.translate(1, 1);
+                g2.draw(mainPanelShape);
                 g2.dispose();
             }
         });        
         
     }
 
+    @Override
+    public Shape getShape() {
+        return new RoundRectangle2D.Float(mainPanel.getLocation().x, mainPanel.getLocation().y, mainPanel.getWidth()-2,
+                mainPanel.getHeight()-2, arc, arc);
+    }
+    
     private void initializeLabels() {
         titleLabel = new JLabel();
         FontUtils.bold(titleLabel);
@@ -428,7 +426,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         mainPanel.add(bottomPanel, "growx, hidemode 3");
         
      //   add(mainPanel, "growx, gapleft " + BORDER_BUFFER + ", gapright " + BORDER_BUFFER + ", gaptop " + BORDER_BUFFER + ", gapbottom " + BORDER_BUFFER); 
-        int inset = shadowMode == ShadowMode.SHADOW ? SHADOW_INSETS : 0;
+        int inset = 0;//shadowMode == ShadowMode.SHADOW ? SHADOW_INSETS : 0;
         add(mainPanel, "alignx 50%, aligny 50%, gapleft " + inset + ", gapright " + inset + ", gaptop " + inset + ", gapbottom " + inset); 
     }
 
@@ -607,6 +605,14 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         return shareModel;
     }
 
+    private void setChildComponentKeyStrokes(JComponent component){
+        setKeyStrokes(component);
+        for(Component child : component.getComponents()){
+            if (child instanceof JComponent) {
+                setChildComponentKeyStrokes((JComponent) child);                
+            }
+        }
+    }
     
     private void setKeyStrokes(JComponent component) {
         component.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "up");
@@ -623,19 +629,15 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         }
         reloadSharedBuddies();
         adjustSize();
-        dialog.show(this, owner);
+        dialog.show(this, owner, true);
         inputField.requestFocusInWindow();
     }
     
-    public boolean contains(Component c) {
-        for (; c != null; c = c.getParent()) {
-            if (c == this || c == comboPopup) {
-                return true;
-            }
-        }
-        return false;
-    }
 
+    @Override
+    public boolean contains(Point p) {
+        return super.contains(p) || comboPopup.contains(SwingUtilities.convertPoint(this, p, comboPopup));
+    }
 
 
     private void resetRowSelection(int oldSelRow) {
@@ -693,7 +695,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             shareScroll.setVerticalScrollBarPolicy(scrollPolicy);
         }
         
-        setSize(getPreferredSize());        
+        setSize(getPreferredSize());  
     }
     
     
@@ -817,5 +819,5 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         // the share model file or category has changed - reload friends.
         reloadSharedBuddies();
     }
-    
+     
 }
