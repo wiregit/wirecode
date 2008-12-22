@@ -87,13 +87,31 @@ final class BasicNotifier implements TrayNotifier {
         }
 
         public synchronized void createWindow(Notification notification) {
-            NotificationWindow notWindow = new NotificationWindow(limeIcon, notification);
-            notWindow.addListener(this);
-            notificationWindows.add(notWindow);
+            NotificationWindow notificationWindow = new NotificationWindow(limeIcon, notification);
+            notificationWindow.addListener(this);
+            notificationWindow.setLocation(getNewWindowLocation(notificationWindow, -1
+                    * notificationWindow.getPreferredSize().height));
+            notificationWindows.add(notificationWindow);
             bumpWindows();
         }
 
-        private void bumpWindows() {
+        private synchronized void bumpWindows() {
+            int totalWindowHeight = 0;// will be relative to the system tray on
+            // windows.
+            for (int i = 0; i < notificationWindows.size(); i++) {
+                NotificationWindow notificationWindow = notificationWindows.get(notificationWindows
+                        .size()
+                        - (i + 1));
+
+                Point newLocation = getNewWindowLocation(notificationWindow, totalWindowHeight);
+                notificationWindow.moveTo(newLocation);
+
+                Dimension preferredSize = notificationWindow.getPreferredSize();
+                totalWindowHeight += preferredSize.height + 10;//keep a space between windows
+            }
+        }
+
+        public Point getNewWindowLocation(NotificationWindow notificationWindow, int startHeight) {
             final Rectangle screenBounds;
             final Insets screenInsets;
 
@@ -111,21 +129,16 @@ final class BasicNotifier implements TrayNotifier {
             }
 
             final int screenWidth = screenBounds.width
-                    - Math.abs(screenInsets.left + screenInsets.right);
+                    - Math.abs(screenInsets.right);
             final int screenHeight = screenBounds.height
-                    - Math.abs(screenInsets.top + screenInsets.bottom);
+                    - Math.abs(screenInsets.bottom);
 
-            int totalWindowHeight = 0;//will be relative to the system tray on windows.
-            for (int i = 0; i < notificationWindows.size(); i++) {
-                NotificationWindow notificationWindow = notificationWindows.get(notificationWindows
-                        .size()
-                        - (i + 1));
-                final Dimension preferredSize = notificationWindow.getPreferredSize();
-                Point location = new Point(screenWidth - preferredSize.width, screenHeight
-                        - preferredSize.height - totalWindowHeight);
-                notificationWindow.setLocation(location);
-                totalWindowHeight += preferredSize.height + 10;
-            }
+            Dimension preferredSize = notificationWindow.getPreferredSize();
+            Point newLocation = new Point(screenWidth - preferredSize.width, screenHeight
+                    - preferredSize.height - startHeight);
+
+            return newLocation;
+
         }
 
         @Override

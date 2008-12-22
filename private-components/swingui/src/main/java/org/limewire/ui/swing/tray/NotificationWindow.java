@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -33,6 +34,7 @@ import org.limewire.listener.EventListenerList;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.animate.AnimatorEvent;
 import org.limewire.ui.swing.animate.FadeInOutAnimator;
+import org.limewire.ui.swing.animate.MoveAnimator;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -60,11 +62,13 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
     @Resource
     private Font messageFont;
 
+    private MoveAnimator currentMoveAnimator;
+
     public NotificationWindow(Icon icon, final Notification notification) {
         GuiUtils.assignResources(this);
         this.notification = notification;
 
-        FadeInOutAnimator fadeInOutAnimator = new FadeInOutAnimator(this, 500, 3000, 500);
+        FadeInOutAnimator fadeInOutAnimator = new FadeInOutAnimator(this, 500, 2500, 500);
         fadeInOutAnimator.addListener(new EventListener<AnimatorEvent<JWindow>>() {
             @Override
             public void handleEvent(AnimatorEvent event) {
@@ -309,6 +313,18 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         public void mouseExited(MouseEvent e) {
             closeButton.setIcon(trayNotifyClose);
         }
+    }
+
+    /**
+     * Moves the window from its current location to the new one. 
+     */
+    public synchronized void moveTo(Point newLocation) {
+        if(this.currentMoveAnimator != null) {
+            currentMoveAnimator.stop();
+        }
+        MoveAnimator moveAnimator = new MoveAnimator(this, 250, newLocation);
+        moveAnimator.start();
+        currentMoveAnimator = moveAnimator;
     }
 
 }
