@@ -7,7 +7,7 @@ import org.limewire.collection.IntSet;
 import org.limewire.collection.IntSet.IntSetIterator;
 
 /**
- * This class assumes that a lock is held on the FileList being iterated
+ * This class assumes that a lock is held on the FileList being iterated.
  */
 class FileListIterator implements Iterator<FileDesc> {
     

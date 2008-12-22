@@ -43,7 +43,7 @@ public class CoreSearch implements Search {
     private final FriendSearcher friendSearcher;
     private final CachedGeoLocation geoLocation;
 
-    /**
+    /*
      * A search is considered processed when it is acted upon (started or stopped)
      * -cannot repeat a search that has not yet been processed
      * -cannot start a search that has already been processed
