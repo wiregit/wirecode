@@ -112,6 +112,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Resource private Icon minimizeIconHover;
     @Resource private Icon minimizeIconDown;
     @Resource private int panelHeight;
+    @Resource private int nameLabelWidth;
 
 
     
@@ -406,6 +407,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 			nameLabel = new JLabel();
             nameLabel.setFont(itemFont);
             nameLabel.setForeground(fontColor);
+            nameLabel.setMaximumSize(new Dimension(nameLabelWidth, Integer.MAX_VALUE));
             
 			progressBar = progressBarFactory.create(0, 100);
 			Dimension size = new Dimension(173, 8);
@@ -468,7 +470,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
         @Override
         public void update(DownloadItem item){
-            nameLabel.setText(item.getTitle());
+            nameLabel.setText("here is a really long title " + item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
             if (progressBar.isVisible()) { 
                 if (item.getTotalSize() != 0) {
