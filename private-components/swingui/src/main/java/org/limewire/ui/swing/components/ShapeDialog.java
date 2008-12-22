@@ -93,7 +93,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
      */
     public void show(Component c, Component owner, boolean autoClose) {
         removeAll();
-        int inset = SHADOW_INSETS;
+        int inset = (owner != null && isPositionedRelativeToOwner) ? 0 : SHADOW_INSETS;
         add(c, "alignx 50%, aligny 50%, gapleft " + inset + ", gapright " + inset + ", gaptop " + inset + ", gapbottom " + inset);
         this.component = c;
         this.owner = owner;
@@ -104,8 +104,10 @@ public class ShapeDialog extends JXPanel implements Resizable {
     
     private void positionRelativeToOwner(){
         Point ownerLocation = SwingUtilities.convertPoint(owner.getParent(), owner.getLocation(), getParent());            
-        setBounds(ownerLocation.x + owner.getWidth() - getWidth(), ownerLocation.y + getHeight(), getPreferredSize().width, getPreferredSize().height);
+        setBounds(ownerLocation.x + owner.getWidth() - getWidth(), ownerLocation.y + owner.getHeight(), getPreferredSize().width, getPreferredSize().height);
     }
+    
+    
 
 
     private void addListeners() {
