@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
@@ -44,7 +46,6 @@ import org.limewire.ui.swing.util.SwingUtils;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import net.miginfocom.swing.MigLayout;
 
 public class LibraryImageSubPanel extends JPanel implements ListEventListener<LocalFileItem>, Disposable {
     
@@ -93,7 +94,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         Line line = Line.createHorizontalLine(lineColor, lineSize);
         
         imageList = new ImageList(currentEventList, fileList);        
-        //imageList.setTransferHandler(transferHandler);
         imageList.setPopupHandler(new MyImageLibraryPopupHandler(this, params));
         
         // top row should never be tall than 30pixels, the bottom row(table, should fill any remaining space
@@ -102,7 +102,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
                 "[::30] [] [grow][grow]" ));    // row constraints
         
         add(iconHeaderLabel, "split 2, gapbottom 4");
-        add(headerLabel, "gapbottom 4, push");       // first row
+        add(headerLabel, "growy, push");       // first row
         add(shareFolderButton, "gapbottom 4, wrap");
        // add(unShareButtonLabel, "gapbottom 2, split 2");
         
