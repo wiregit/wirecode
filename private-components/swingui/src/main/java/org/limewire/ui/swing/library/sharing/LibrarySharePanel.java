@@ -107,6 +107,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private LibraryShareModel shareModel;
     
     private JTextField inputField;
+
+    private String startTypingText = I18n.tr("Start typing a friend's name");
+    private String addFriendText = I18n.tr("Add another friend");
     
 
 
@@ -340,9 +343,11 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         titleLabel = new JLabel();
         FontUtils.bold(titleLabel);
         topLabel = new JLabel(I18n.tr("Currently sharing with"));
-        friendLabel = new JXLabel(I18n.tr("Start typing a friend's name"));
+        friendLabel = new JXLabel(startTypingText);
         friendLabel.setForeground(Color.WHITE);
-        friendLabel.setForegroundPainter(new TextShadowPainter());
+        TextShadowPainter textPainter = new TextShadowPainter();
+        textPainter.setCacheable(false);
+        friendLabel.setForegroundPainter(textPainter);
         
         Dimension labelSize = friendLabel.getPreferredSize().width > topLabel.getPreferredSize().width ? 
                 friendLabel.getPreferredSize() : topLabel.getPreferredSize();
@@ -362,7 +367,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         shareFriendList.addListEventListener(new ListEventListener<SharingTarget>() {
             @Override
             public void listChanged(ListEvent<SharingTarget> listChanges) {
-                adjustFriendLabelVisibility();
+                adjustFriendLabel();
             }
         });
         
@@ -557,17 +562,18 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         topLabel.setText(text);
     }
     
-    public void setComboLabelText(String text){
-        friendLabel.setText(text);
-    }
 
     public void setBottomLabel(String text){
         bottomLabel.setText(text);
     }
     
 
-    private void adjustFriendLabelVisibility() {
-        friendLabel.setVisible(friendCombo.isVisible());
+    private void adjustFriendLabel() {
+        System.out.println(shareFriendList.size() == 0 ? startTypingText : addFriendText);
+        friendLabel.setText(shareFriendList.size() == 0 ? startTypingText : addFriendText);
+        System.out.println(friendLabel.getText());
+        //friendLabel.setVisible(friendCombo.isVisible());
+        friendLabel.paintImmediately(friendLabel.getVisibleRect());
     }
     
     private void shareSelectedFriend() {
@@ -682,7 +688,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     }
     
     private void adjustSize(){
-        adjustFriendLabelVisibility();
+        adjustFriendLabel();
         bottomPanel.setVisible(!bottomPanelHidden && noShareFriendList.size() > 0);
         
         if (!tableHidden ) {

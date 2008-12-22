@@ -19,7 +19,6 @@ public class FileShareWidget implements ShareWidget<File> {
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog, ShadowMode.SHADOW);
         sharePanel.setShareModel(new FileShareModel(shareListManager));
         sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
-        sharePanel.setComboLabelText(I18n.tr("Start typing a friend's name"));
         sharePanel.setTitleLabel(I18n.tr("Share one file"));
     }
     

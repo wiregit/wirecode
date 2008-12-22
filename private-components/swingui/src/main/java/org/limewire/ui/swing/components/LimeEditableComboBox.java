@@ -12,6 +12,7 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.ComboPopup;
 
 import net.miginfocom.swing.MigLayout;
@@ -56,7 +57,7 @@ public class LimeEditableComboBox extends JXPanel{
     }
     
     
-    public ComboPopup getPopup(){
+    public BasicComboPopup getPopup(){
         return comboUI.getPopup();
     }
     
@@ -157,8 +158,13 @@ public class LimeEditableComboBox extends JXPanel{
             GuiUtils.assignResources(this);
         }
         
-        public ComboPopup getPopup(){
-            return popup;
+        public BasicComboPopup getPopup(){
+            return (BasicComboPopup)popup;
+        }
+        
+        @Override 
+        protected ComboPopup createPopup() {
+            return new BasicComboPopup(comboBox);
         }
         
         @Override
