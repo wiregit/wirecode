@@ -150,7 +150,7 @@ public class QRPUpdater implements SettingListener, Service, Inspectable {
         gnutella.getReadLock().lock();
         try {
             for (FileDesc fd : gnutella) {
-                queryRouteTable.add(fd.getPath());
+                queryRouteTable.add(fd.getFileName());
             }
         } finally {
             gnutella.getReadLock().unlock();
