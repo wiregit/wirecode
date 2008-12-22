@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -34,7 +36,9 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.JTextComponent;
@@ -79,7 +83,6 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
-import static org.limewire.ui.swing.util.I18n.tr;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -123,6 +126,7 @@ public class ConversationPane extends JPanel implements Displayable {
     @Resource(key="ChatConversation.buttonBarColor") private Color buttonBarColor;
     @Resource(key="ChatConversation.buttonFont") private Font buttonFont;
     private JButton shareButton;
+    private JScrollPane conversationScroll;
     
     @AssistedInject
     public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
@@ -146,11 +150,18 @@ public class ConversationPane extends JPanel implements Displayable {
         GuiUtils.assignResources(this);
 
         setLayout(new BorderLayout());
+        
+        editor = new JEditorPane();
+        editor.setEditable(false);
+        editor.setContentType("text/html");
+        editor.addHyperlinkListener(new HyperlinkListener());
+        HTMLEditorKit editorKit = (HTMLEditorKit) editor.getEditorKit();
+        editorKit.setAutoFormSubmission(false);
 
-        JScrollPane scroll = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setOpaque(false);
-        scroll.setBorder(BorderFactory.createEmptyBorder());
-
+        conversationScroll = new JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        conversationScroll.setOpaque(false);
+        conversationScroll.setBorder(BorderFactory.createEmptyBorder());
+        
         //Needed to add margin to the left side of the scrolling chat pane
         JPanel chatWrapper = new JPanel(new GridBagLayout());
         chatWrapper.setBackground(BACKGROUND_COLOR);
@@ -159,22 +170,14 @@ public class ConversationPane extends JPanel implements Displayable {
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         constraints.fill = GridBagConstraints.BOTH;
-        chatWrapper.add(scroll,constraints);
+        chatWrapper.add(conversationScroll,constraints);
 
         add(chatWrapper, BorderLayout.CENTER);
-
-        editor = new JEditorPane();
-        editor.setEditable(false);
-        editor.setContentType("text/html");
-        editor.addHyperlinkListener(new HyperlinkListener());
-        HTMLEditorKit editorKit = (HTMLEditorKit) editor.getEditorKit();
-        editorKit.setAutoFormSubmission(false);
 
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
 
         FriendShareDropTarget friendShare = new FriendShareDropTarget(editor, libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()));
         editor.setDropTarget(friendShare.getDropTarget());
-        scroll.getViewport().add(editor);
 
         add(footerPanel(writer, chatFriend), BorderLayout.SOUTH);
 
@@ -286,7 +289,23 @@ public class ConversationPane extends JPanel implements Displayable {
     private void displayMessages(boolean friendSignedOff) {
         String chatDoc = ChatDocumentBuilder.buildChatText(messages, currentChatState, conversationName, friendSignedOff);
         LOG.debugf("Chat doc: {0}", chatDoc);
+        final JScrollBar verticalScrollBar = conversationScroll.getVerticalScrollBar();
+        final int scrollValue = verticalScrollBar.getValue();
         editor.setText(chatDoc);
+        
+        //LWC-2262: If the scroll bar was moved above the bottom of the scrollpane, reset the value of
+        //the bar to where it was before the text was updated.  This needs to be issued to the end of the
+        //queue because the actual repainting/resizing of the scrollbar happens later in a 
+        //task added to the EDT by the plaf listener of the editor's document.
+        //A better fix for this behavior may be possible
+        if (verticalScrollBar.getMaximum() > (verticalScrollBar.getValue() + verticalScrollBar.getVisibleAmount())) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    verticalScrollBar.setValue(scrollValue);
+                }
+            });
+        }
         decorateFileOfferButtons();
     }
 
