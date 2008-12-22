@@ -24,7 +24,8 @@ class LibraryMediator extends JPanel implements Disposable {
 
     private JComponent libraryComponent = null;
     private JComponent sharingComponent = null;
-    
+    protected boolean disposed;
+
     public LibraryMediator() {
         cardLayout = new CardLayout();
         
@@ -69,6 +70,13 @@ class LibraryMediator extends JPanel implements Disposable {
         cardLayout.show(this, SHARING_CARD);
     }
 
+
+    @Override
+    protected void addImpl(Component comp, Object constraints, int index) {
+        assert !disposed;
+        super.addImpl(comp, constraints, index);
+    }
+
     @Override
     public void dispose() {        
         // Important: rm before dispose -- see note at top of class
@@ -77,5 +85,7 @@ class LibraryMediator extends JPanel implements Disposable {
         for(Component component : components) {
             ((Disposable)component).dispose();
         }
+        libraryComponent = null;
+        disposed = true;
     }
 }

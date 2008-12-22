@@ -2,8 +2,6 @@ package org.limewire.ui.swing.library;
 
 import javax.swing.JLabel;
 
-import net.miginfocom.swing.MigLayout;
-
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
@@ -20,13 +18,14 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.inject.name.Named;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import net.miginfocom.swing.MigLayout;
 
 public class FriendLibraryMediator extends LibraryMediator implements EventListener<FriendEvent> {
 
@@ -41,7 +40,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     private EventList<RemoteFileItem> eventList;
     
     private ListenerSupport<FriendEvent> availListeners;
-    
+
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
             FriendSharingPanelFactory sharingFactory, LibraryManager libraryManager, ShareListManager shareListManager,
@@ -63,40 +62,44 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     }
     
     public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
-        switch(libraryState) { 
-        case FAILED_TO_LOAD:
-            this.eventList = null;
-            setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent(friendFileList.getSwingModel())));
-            showLibraryCard();
-            break;
-        case LOADED:
-        case LOADING:
-            if(this.eventList != eventList) {
-                this.eventList = eventList;
-                setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
+        if(!disposed) {
+            switch(libraryState) { 
+            case FAILED_TO_LOAD:
+                this.eventList = null;
+                setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent(friendFileList.getSwingModel())));
                 showLibraryCard();
+                break;
+            case LOADED:
+            case LOADING:
+                if(this.eventList != eventList) {
+                    this.eventList = eventList;
+                    setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
+                    showLibraryCard();
+                }
+                break;
             }
-            break;
         }
     }
     
     @Override
     @SwingEDTEvent
     public void handleEvent(FriendEvent event) {
-        switch(event.getType()) {
-        case ADDED: 
-            //if friend signed on, show online view
-            if(event.getSource().getId().equals(friend.getId())) {
-                setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, new OnLineMessageComponent(friendFileList.getSwingModel())));
+        if(!disposed) {
+            switch(event.getType()) {
+            case ADDED: 
+                //if friend signed on, show online view
+                if(event.getSource().getId().equals(friend.getId())) {
+                    setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, new OnLineMessageComponent(friendFileList.getSwingModel())));
+                }
+                break;
+            case REMOVED: 
+                //if this friend signed off, show offline view
+                if(event.getSource().getId().equals(friend.getId())) {
+                    setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, new OffLineMessageComponent(friendFileList.getSwingModel())));
+                }
+                break;
             }
-            break;
-        case REMOVED: 
-            //if this friend signed off, show offline view
-            if(event.getSource().getId().equals(friend.getId())) {
-                setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, FriendLibraryMediator.this, new OffLineMessageComponent(friendFileList.getSwingModel())));
-            }
-            break;
-      }
+        }
     }
     
     @Override
@@ -190,12 +193,14 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 
     @Override
     public void showSharingCard() {
-        if(!isSharingCardSet()) {
-            setSharingCard(sharingFactory.createPanel(this, friend, 
-                    libraryManager.getLibraryManagedList().getSwingModel(),
-                    shareListManager.getOrCreateFriendShareList(friend)));
+        if(!disposed) {
+            if(!isSharingCardSet()) {
+                setSharingCard(sharingFactory.createPanel(this, friend, 
+                        libraryManager.getLibraryManagedList().getSwingModel(),
+                        shareListManager.getOrCreateFriendShareList(friend)));
+            }
+            super.showSharingCard();            
         }
-        super.showSharingCard();
     }
 
 }
