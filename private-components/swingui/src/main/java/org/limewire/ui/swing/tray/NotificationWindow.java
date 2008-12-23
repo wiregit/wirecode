@@ -78,7 +78,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
             }
         });
 
-        JXPanel panel = new JXPanel(new MigLayout());
+        JXPanel panel = new JXPanel(new MigLayout("fillx"));
         add(panel);
 
         panel.setBackgroundPainter(createPainter(panel));
@@ -102,9 +102,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         closeButton.addMouseListener(new HoverPanelMouseListener(closeButton));
         iconCheckBox.addMouseListener(new HoverPanelMouseListener(closeButton));
 
-        panel.add(closeButton, "spanx 2, alignx right, wrap");// TODO right
-        // align the
-        // button
+        panel.add(closeButton, "alignx right, wrap");
 
         String title = notification.getTitle();
         String message = notification.getMessage();
@@ -112,7 +110,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         if (!StringUtils.isEmpty(title)) {
             JLabel titleLabel = new JLabel(title);
             titleLabel.setFont(titleFont);
-            panel.add(titleLabel, "spanx 3, wrap");
+            panel.add(titleLabel, "spanx 2, wrap");
         }
 
         JEditorPane editor = new JEditorPane();
@@ -144,7 +142,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
             }
         });
 
-        panel.add(editor, "spanx 3");
+        panel.add(editor, "spanx 2");
         setPreferredSize(new Dimension(200, 110));
         pack();
 
