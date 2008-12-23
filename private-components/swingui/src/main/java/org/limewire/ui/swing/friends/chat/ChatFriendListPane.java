@@ -8,7 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GradientPaint;
+import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,6 +44,7 @@ import javax.swing.table.TableModel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
@@ -51,7 +52,6 @@ import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.decorator.BorderHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
-import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
@@ -70,7 +70,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.table.AbstractTableFormat;
-import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.MessageWriter;
 import org.limewire.xmpp.api.client.Presence;
@@ -98,13 +98,12 @@ public class ChatFriendListPane extends JPanel {
     
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
-    private static final int PREFERRED_WIDTH = 120;
+    private static final int PREFERRED_WIDTH = 122;
     private static final int RIGHT_EDGE_PADDING_PIXELS = 2;
     private static final int RIGHT_ADJUSTED_WIDTH = PREFERRED_WIDTH - RIGHT_EDGE_PADDING_PIXELS;
     private static final int ICON_WIDTH_FUDGE_FACTOR = 4;
     private static final Log LOG = LogFactory.getLog(ChatFriendListPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
-    private static final Color LIGHT_GREY = new Color(218, 218, 218);
     
     private final EventList<ChatFriend> chatFriends;
     private final JTable friendsTable;
@@ -119,6 +118,12 @@ public class ChatFriendListPane extends JPanel {
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
     private Action minimizeAction;
+    @Resource(key="ChatFriendList.rightEdgeBorderColor") private Color rightBorderColor;
+    @Resource(key="ChatFriendList.conversationsSeparatorColor") private Color conversationsSeparatorColor;
+    @Resource(key="ChatFriendList.friendColor") private Color friendColor;
+    @Resource(key="ChatFriendList.friendFont") private Font friendFont;
+    @Resource(key="ChatFriendList.friendSelectionOrHoverColor") private Color friendSelectionOrHoverColor;
+    @Resource(key="ChatFriendList.activeConversationBackgroundColor") private Color activeConversationBackgroundColor;
 
     @Inject
     public ChatFriendListPane(IconLibrary icons, 
@@ -131,11 +136,16 @@ public class ChatFriendListPane extends JPanel {
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
         this.libraryManager = libraryManager;
         this.libraryNavigator = libraryNavigator;
+        
+        GuiUtils.assignResources(this);
+        
         ObservableElementList<ChatFriend> observableList = GlazedListsFactory.observableElementList(chatFriends, GlazedLists.beanConnector(ChatFriend.class));
         SortedList<ChatFriend> sortedFriends = GlazedListsFactory.sortedList(observableList,  new FriendAvailabilityComparator());
         friendsTable = createFriendsTable(sortedFriends);
-        
+
         addPopupMenus(friendsTable);
+        
+        setBorder(new DropShadowBorder(rightBorderColor, 1, 0f, 0, false, false, false, true));
         
         scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane);
@@ -292,7 +302,7 @@ public class ChatFriendListPane extends JPanel {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         table.addHighlighter(new BorderHighlighter(new ChattingUnderlineHighlightPredicate(), 
-                new DropShadowBorder(new Color(194, 194, 194), 1, 1.0f, 1, false, false, true, false)));
+                new DropShadowBorder(conversationsSeparatorColor, 1, 1.0f, 1, false, false, true, false)));
         
         return table;
     }
@@ -475,21 +485,17 @@ public class ChatFriendListPane extends JPanel {
         private final JXLabel friendName;
         private final JXLabel chatStatus;
         private final JXLabel endChat;
-        private final RectanglePainter activeConversationPainter;
         
         public FriendCellRenderer() {
-            cell = new JXPanel(new MigLayout("insets 0 0 0 0", "3[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "1[]0"));
-            activeConversationPainter = new RectanglePainter();
-            //light-blue gradient
-            activeConversationPainter.setFillPaint(new GradientPaint(50.0f, 0.0f, Color.WHITE, 50.0f, 20.0f, new Color(176, 205, 247)));
-            activeConversationPainter.setBorderPaint(Color.WHITE);
-            activeConversationPainter.setBorderWidth(0f);
+            cell = new JXPanel(new MigLayout("insets 3 3 0 0", "[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "[]0"));
             
             this.friendName = new JXLabel();
             this.chatStatus = new JXLabel();
             this.endChat = new JXLabel();
-
-            FontUtils.changeSize(friendName, -2.0f);
+            this.endChat.setToolTipText(tr("Close conversation"));
+            
+            friendName.setFont(friendFont);
+            friendName.setForeground(friendColor);
             friendName.setMaximumSize(new Dimension(85, 12));
         }
 
@@ -507,9 +513,9 @@ public class ChatFriendListPane extends JPanel {
             renderComponent(cell, value, chatFriend, isChatHoveredOver);
             
             if (isSelected || isChatHoveredOver) {
-                cell.setBackground(LIGHT_GREY);
+                cell.setBackground(friendSelectionOrHoverColor);
             } else if (chatFriend.isActiveConversation()) {
-                cell.setBackgroundPainter(activeConversationPainter);
+                cell.setBackground(activeConversationBackgroundColor);
             } else  {
                 cell.setBackground(table.getBackground());
                 cell.setForeground(table.getForeground());
