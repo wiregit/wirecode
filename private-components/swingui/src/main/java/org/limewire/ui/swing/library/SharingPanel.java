@@ -241,17 +241,24 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             if(category == Category.PROGRAM) {
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
             }
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+                LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
+            }
         }
 
         private void setText() {
-            if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
-                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-            } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
-                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-            } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
-                action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-            } else {
+            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
                 action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
+            } else {
+                if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
+                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+                } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
+                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+                } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
+                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+                } else {
+                    action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
+                }
             }
             if(category == Category.OTHER) {
                 action.setEnabled(allFileList.size() > 0);
@@ -266,6 +273,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             allFileList.removeListEventListener(this);
             if(category == Category.PROGRAM) {
                 LibrarySettings.ALLOW_PROGRAMS.removeSettingListener(this);
+            }
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+                LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
             }
         }
 
@@ -322,7 +332,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         }       
     }
     
-    private class SharingSelectionPanel extends JPanel {
+    private class SharingSelectionPanel extends JPanel implements Disposable, SettingListener {
         @Resource Color selectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
@@ -414,6 +424,18 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
         public JButton getButton() {
             return button;
+        }
+
+        @Override
+        public void dispose() {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            // TODO Auto-generated method stub
+            
         }
     }    
     

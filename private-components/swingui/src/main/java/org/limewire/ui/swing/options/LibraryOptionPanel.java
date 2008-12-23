@@ -20,8 +20,13 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FriendFileList;
+import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -35,7 +40,10 @@ import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * Library Option View
@@ -47,10 +55,15 @@ public class LibraryOptionPanel extends OptionPanel {
     private ShareCategoryPanel shareCategoryPanel;
     
     private LibraryManager libraryManager;
+    private Provider<RemoteLibraryManager> remoteLibraries;
+    private Provider<ShareListManager> shareListManager;
     
     @Inject
-    public LibraryOptionPanel(LibraryManager libraryManager) {
+    public LibraryOptionPanel(LibraryManager libraryManager, Provider<RemoteLibraryManager> remoteLibraries, 
+            Provider<ShareListManager> shareListManager) {
         this.libraryManager = libraryManager;
+        this.remoteLibraries = remoteLibraries;
+        this.shareListManager = shareListManager;
         
         setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
         
@@ -93,7 +106,6 @@ public class LibraryOptionPanel extends OptionPanel {
     
     /**
      * Share Category Panel
-     * 
      */
     private class ShareCategoryPanel extends OptionPanel {
 
@@ -124,6 +136,27 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         boolean applyOptions() {
             LibrarySettings.SNAPSHOT_SHARING_ENABLED.setValue(shareSnapshot.isSelected());
+            // revert to defaults for collection sharing if true
+            if(shareSnapshot.isSelected()) {
+                //TODO: put this on a background thread??
+                RemoteLibraryManager manager = remoteLibraries.get();
+                ShareListManager shareManager = shareListManager.get();
+                EventList<FriendLibrary> eventList = manager.getSwingFriendLibraryList();
+                
+                //clear the list of any friends that are currently signed on
+                for(FriendLibrary friendLibrary : eventList) {
+                    Friend friend = friendLibrary.getFriend();
+                    FriendFileList fileList = shareManager.getFriendShareList(friend);
+                    
+                    fileList.setAddNewAudioAlways(false);
+                    fileList.setAddNewImageAlways(false);
+                    fileList.setAddNewVideoAlways(false);
+                }
+                // clear anyone that may be in an offline list 
+                LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.revertToDefault();
+                LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.revertToDefault();
+                LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.revertToDefault();
+            }
             return false;
         }
 

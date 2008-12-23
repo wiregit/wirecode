@@ -77,7 +77,7 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
      * Creates a subPanel in the inner nav. This panel displays file information 
      * about the particular category that is currently selected.
      */
-    private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T> {
+    private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T>, SettingListener {
         private JLabel categoryLabel;
         private JLabel totalLabel;
         private JLabel sharingLabel;
@@ -164,26 +164,32 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                  });
             }
         }
+        
         private void createCollectionLabel() {
             collectionLabel = new JLabel();
             setCollectionLabel(0);
             add(collectionLabel, "wrap, gapleft 10");
+            collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
+            LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
         }
-        
         
         private void setTotalLabel(int total) {
             totalLabel.setText(I18n.tr("Total: {0}", total));
         }
         
         private void setSharingLabel(int count) {
-            if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
-                sharingLabel.setText(I18n.tr("Sharing: all"));
-            } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
-                sharingLabel.setText(I18n.tr("Sharing: all"));
-            } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
-                sharingLabel.setText(I18n.tr("Sharing: all"));
-            } else {
+            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
                 sharingLabel.setText(I18n.tr("Sharing: {0}", count));
+            } else {
+                if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
+                    sharingLabel.setText(I18n.tr("Sharing: all"));
+                } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
+                    sharingLabel.setText(I18n.tr("Sharing: all"));
+                } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
+                    sharingLabel.setText(I18n.tr("Sharing: all"));
+                } else {
+                    sharingLabel.setText(I18n.tr("Sharing: {0}", count));
+                }
             }
         }
         
@@ -198,6 +204,8 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 fileList.removeListEventListener(this);
             if(sharedList != null)
                 sharedList.removeListEventListener(this);
+            if(sharedList == null)
+                LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
         }
 
         @Override
@@ -206,6 +214,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 setTotalLabel(fileList.size());
             if(sharedList != null)
                 setSharingLabel(sharedList.size());
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
         }
     }
 
