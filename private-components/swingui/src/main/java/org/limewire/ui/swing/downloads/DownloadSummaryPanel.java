@@ -172,13 +172,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 }
                 return super.prepareRenderer(renderer, row, column);
             }
-            
-            private boolean isColumnFullyVisible(int column) {
-                Rectangle cellRect = getCellRect(0, column, false);
-                Rectangle visibleRect = getVisibleRect();
-                return visibleRect.contains(cellRect);
-            }
-            
         };
         table.setModel(horizontalTableModel);
 		table.setShowHorizontalLines(false);
@@ -212,6 +205,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 //columns and rows are reversed in this table
                 return table.columnAtPoint(new Point(x, y));
             }
+            @Override
+            public void maybeShowPopup(Component component, int x, int y) {
+                if(isColumnFullyVisible(getPopupRow(x, y))){
+                    super.maybeShowPopup(component, x, y);
+                }
+            }
+                
         };
 
         table.setPopupHandler(popupHandler);
@@ -317,6 +317,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		setVisibility(false);
 	}
     
+    private boolean isColumnFullyVisible(int column) {
+        Rectangle cellRect = table.getCellRect(0, column, false);
+        Rectangle visibleRect = table.getVisibleRect();
+        return visibleRect.contains(cellRect);
+    }
 
     private void initializeDownloadAddedListener() {
         final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
