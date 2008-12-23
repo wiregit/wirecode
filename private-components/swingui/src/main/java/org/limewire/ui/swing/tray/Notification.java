@@ -10,29 +10,26 @@ import javax.swing.Icon;
 public class Notification {
 
     private String title;
+
     private String message;
 
     private Action[] actions;
 
     private Icon icon;
 
-    public Notification(String title, String message) {
+    public Notification(String title, String message, Icon icon, Action... actions) {
         this.title = title;
-        this.message = message;
-    }
-    
-    public Notification(String message, Icon icon, Action... actions) {
         this.message = message;
         this.icon = icon;
         this.actions = actions;
     }
 
-    public Notification(String message, Icon icon) {
-        this(message, icon, (Action[]) null);
+    public Notification(String message, Icon icon, Action... actions) {
+        this(null, message, icon, actions);
     }
 
-    public Notification(String message) {
-        this(message, null, (Action[]) null);
+    public Notification(String title, String message) {
+        this(title, message, null, new Action[0]);
     }
 
     public String getMessage() {
@@ -46,7 +43,7 @@ public class Notification {
     public Icon getIcon() {
         return icon;
     }
-    
+
     public String getTitle() {
         return title;
     }

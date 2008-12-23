@@ -87,7 +87,8 @@ final class BasicNotifier implements TrayNotifier {
         }
 
         public synchronized void createWindow(Notification notification) {
-            NotificationWindow notificationWindow = new NotificationWindow(limeIcon, notification);
+            Icon icon = notification.getIcon() != null ? notification.getIcon() : limeIcon;
+            NotificationWindow notificationWindow = new NotificationWindow(icon, notification);
             notificationWindow.addListener(this);
             notificationWindow.setLocation(getNewWindowLocation(notificationWindow, -1
                     * notificationWindow.getPreferredSize().height));

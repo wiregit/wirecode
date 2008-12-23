@@ -356,8 +356,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                             for (int i=listChanges.getBlockStartIndex(); i<=listChanges.getBlockEndIndex(); i++) {
                                 DownloadItem item = listChanges.getSourceList().get(i);
                                 if (shouldShowNotifier(item)) {
-                                    notifier.showMessage(new Notification("Download complete for "
-                                            + item.getFileName()));
+                                    notifier.showMessage(new Notification(I18n.tr("Download Complete"), item.getFileName()));
                                 }
                             }
                         }
