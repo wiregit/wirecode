@@ -49,7 +49,10 @@ public class AdvancedToolsPanel extends JPanel {
     public enum TabId {
         CONNECTIONS(I18n.tr("Connections")), 
         //LOGGING(I18n.tr("Logging")), // removed obsolete feature
-        CONSOLE(I18n.tr("Console"));
+        CONSOLE(I18n.tr("Console")),
+        MOJITO(I18n.tr("Mojito")),
+        
+        ;
         
         private final String name;
         
@@ -104,8 +107,10 @@ public class AdvancedToolsPanel extends JPanel {
      * injected Provider instances to create the tab content panels.
      */
     @Inject
-    public AdvancedToolsPanel(Provider<ConnectionsPanel> connectionsPanel, 
-        Provider<ConsolePanel> consolePanel, BarPainterFactory barPainterFactory) {
+    public AdvancedToolsPanel(BarPainterFactory barPainterFactory, 
+        Provider<ConnectionsPanel> connectionsPanel, 
+        Provider<ConsolePanel> consolePanel,
+        Provider<MojitoPanel> mojitoPanel) {
 
         // Inject annotated resource values.
         GuiUtils.assignResources(this);
@@ -117,6 +122,7 @@ public class AdvancedToolsPanel extends JPanel {
         addTab(TabId.CONNECTIONS, connectionsIcon, connectionsPanel);
         //addTab(TabId.LOGGING, null, loggingPanel);
         addTab(TabId.CONSOLE, consoleIcon, consolePanel);
+        addTab(TabId.MOJITO, consoleIcon, mojitoPanel);
     }
     
     /**
