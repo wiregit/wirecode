@@ -263,7 +263,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         header.addMouseListener(navMouseListener);
         
         minimizeButton = new JXHyperlink();
-        minimizeButton.setText("<HTML><U>" +I18n.tr("Hide Tray") + "</U></HTML>");
+        minimizeButton.setText("<HTML><U>" +I18n.tr("Hide") + "</U></HTML>");
         minimizeButton.setFont(minimizeFont);
         minimizeButton.setMinimumSize(minimizeButton.getPreferredSize());
         minimizeButton.setForeground(minimizeColor);
