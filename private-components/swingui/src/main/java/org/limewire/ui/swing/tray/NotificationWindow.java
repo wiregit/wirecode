@@ -97,7 +97,6 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         String message = notification.getMessage();
 
         JEditorPane editor = new JEditorPane();
-        editor.addMouseListener(new HoverPanelMouseListener(closeButton));
         HTMLEditorKit htmlEditorKit = new HTMLEditorKit();
         StyleSheet styleSheet = new StyleSheet();
         styleSheet.setBaseFontSize(messageFont.getSize());
@@ -115,13 +114,16 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         closeButton.addMouseListener(new HoverButtonMouseListener(closeButton, trayNotifyClose,
                 trayNotifyCloseRollover));
         
-        panel.addMouseListener(new HoverPanelMouseListener(closeButton));
-        closeButton.addMouseListener(new HoverPanelMouseListener(closeButton));
-        iconCheckBox.addMouseListener(new HoverPanelMouseListener(closeButton));
+        HoverPanelMouseListener hoverPanelMouseListener = new HoverPanelMouseListener(closeButton);
+        panel.addMouseListener(hoverPanelMouseListener);
+        closeButton.addMouseListener(hoverPanelMouseListener);
+        iconCheckBox.addMouseListener(hoverPanelMouseListener);
+        editor.addMouseListener(new HoverPanelMouseListener(closeButton));
         
-        iconCheckBox.addMouseListener(new PerformNotificationActions());
-        panel.addMouseListener(new PerformNotificationActions());
-        editor.addMouseListener(new PerformNotificationActions());
+        PerformNotificationActionsMouseListener performNotificationActionsMouseListener = new PerformNotificationActionsMouseListener();
+        panel.addMouseListener(performNotificationActionsMouseListener);
+        iconCheckBox.addMouseListener(performNotificationActionsMouseListener);
+        editor.addMouseListener(performNotificationActionsMouseListener);
         
         
         panel.add(iconCheckBox, "");
@@ -130,6 +132,8 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
             JLabel titleLabel = new JLabel(
                     getTruncatedMessage(title, htmlEditorKit, titleFont, 180));
             titleLabel.setFont(titleFont);
+            titleLabel.addMouseListener(performNotificationActionsMouseListener);
+            titleLabel.addMouseListener(hoverPanelMouseListener);
             panel.add(titleLabel, "spanx 2, wrap");
         }
         panel.add(editor, "spanx 2");
@@ -139,7 +143,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         fadeInOutAnimator.start();
     }
 
-    private class PerformNotificationActions extends MouseAdapter {
+    private class PerformNotificationActionsMouseListener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
             performActions();
