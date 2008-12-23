@@ -72,7 +72,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         
         removeButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
 
-        Action removeAction = new AbstractAction(I18n.tr("Remove")) {
+        Action removeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                actionHandler.performAction(removeButton.getActionCommand(), editItem);
@@ -103,7 +103,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         statusLabel = new JLabel(I18n.tr("Status"));
         cancelButton = new JXButton(I18n.tr("X")); 
         removeButton = new JXHyperlink();
-        removeButton.setText(I18n.tr("Remove"));
+        removeButton.setText("<HTML><U>" + I18n.tr("Remove") + "</U></HTML>");
         removeButton.setForeground(linkColor);        
         removeButton.setClickedColor(linkColor);
 
