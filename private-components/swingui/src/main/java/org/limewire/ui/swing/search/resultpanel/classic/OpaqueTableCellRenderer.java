@@ -19,22 +19,22 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * Any new TableCellRenderer added to the classic search view should 
  * subclass this renderer.
  */
-public class OpaqueTableCellRenderer implements TableCellRenderer {
+public class OpaqueTableCellRenderer extends JXPanel implements TableCellRenderer {
 
     private static final int HGAP = 4;
     private static final int VGAP = 5;
     
-    private final JXPanel panel;
+   // private final JXPanel panel;
     private final FlowLayout flowLayout;
     
     public OpaqueTableCellRenderer(int alignment) {
-        panel = new JXPanel();
+      //  panel = new JXPanel();
         flowLayout = new FlowLayout(alignment, HGAP, VGAP);
-        panel.setLayout(flowLayout);
+        setLayout(flowLayout);
     }
     
     public void addComponent(JComponent component) {
-        panel.add(component);
+        add(component);
     }
     
     public void setLayoutAlignment(int alignment) {
@@ -50,8 +50,8 @@ public class OpaqueTableCellRenderer implements TableCellRenderer {
         } else {
             EventTableModel tableModel = (EventTableModel) table.getModel();
             VisualSearchResult vsr = (VisualSearchResult) tableModel.getElementAt(row);
-            panel.setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
+            setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
         }
-        return panel;
+        return this;
     }
 }

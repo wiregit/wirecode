@@ -256,4 +256,9 @@ public class SearchResultFromWidget extends JPanel {
             }
         }
     }
+    
+    @Override
+    public String getToolTipText(){
+        return comboBox.getText();
+    }
 }

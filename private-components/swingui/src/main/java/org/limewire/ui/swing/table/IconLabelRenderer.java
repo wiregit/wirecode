@@ -74,4 +74,9 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
         
         return this;
     }
+    
+    @Override
+    public String getToolTipText(){
+        return label.getText();
+    }
 }

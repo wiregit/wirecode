@@ -36,4 +36,9 @@ public class OpaqueStringRenderer extends OpaqueTableCellRenderer {
         }
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
+    
+    @Override
+    public String getToolTipText(){
+        return label.getText();
+    }
 }

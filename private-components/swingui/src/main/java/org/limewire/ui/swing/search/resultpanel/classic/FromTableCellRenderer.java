@@ -97,4 +97,10 @@ public class FromTableCellRenderer extends OpaqueTableCellRenderer implements Ta
         }
         return true;
     }
+    
+    
+    @Override
+    public String getToolTipText(){
+        return fromWidget.getToolTipText();
+    }
 }
