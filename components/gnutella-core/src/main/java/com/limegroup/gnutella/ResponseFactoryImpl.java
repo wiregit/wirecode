@@ -496,9 +496,9 @@ public class ResponseFactoryImpl implements ResponseFactory {
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
-        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS)) {
+        if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_ALTS)) {
             byte[] tlsData = null;
-            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS_TLS)) {
+            if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_ALTS_TLS)) {
                 try {
                     tlsData = ggep.getBytes(GGEPKeys.GGEP_HEADER_ALTS_TLS);
                 } catch (BadGGEPPropertyException ignored) {
@@ -512,25 +512,24 @@ public class ResponseFactoryImpl implements ResponseFactory {
             }
         }
 
-        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_CREATE_TIME)) {
+        if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_CREATE_TIME)) {
             try {
                 createTime = ggep.getLong(GGEPKeys.GGEP_HEADER_CREATE_TIME) * 1000;
             } catch (BadGGEPPropertyException bad) {
             }
         }
 
-        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_LARGE_FILE)) {
+        if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_LARGE_FILE)) {
             try {
                 size64 = ggep.getLong(GGEPKeys.GGEP_HEADER_LARGE_FILE);
             } catch (BadGGEPPropertyException bad) {
             }
         }
         
-        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_TTROOT)) {
+        if (ggep.hasValueFor(GGEPKeys.GGEP_HEADER_TTROOT)) {
             try {
                 byte []tt = ggep.get(GGEPKeys.GGEP_HEADER_TTROOT);
-                if (tt != null)
-                    ttroot = URN.createTTRootFromBytes(tt);
+                ttroot = URN.createTTRootFromBytes(tt);
             } catch (IOException bad){}
         }
         

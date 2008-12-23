@@ -63,15 +63,15 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     /* Throws a RTE if we're missing any required fields. */
     public byte[] encode() {
         payload.put(TYPE_KEY, getType());
-        if (!payload.hasKey(KEY_HEADER))
+        if (!payload.hasValueFor(KEY_HEADER))
             throw new RuntimeException("Missing header");
-        if (!payload.hasKey(KEY_TERRITORIES))
+        if (!payload.hasValueFor(KEY_TERRITORIES))
             throw new RuntimeException("Missing territories");
-        if (!payload.hasKey(KEY_DESCRIPTION))
+        if (!payload.hasValueFor(KEY_DESCRIPTION))
             throw new RuntimeException("Missing description");
-        if (!payload.hasKey(KEY_URL))
+        if (!payload.hasValueFor(KEY_URL))
             throw new RuntimeException("Missing URL");
-        if (!payload.hasKey(KEY_KEYWORDS))
+        if (!payload.hasValueFor(KEY_KEYWORDS))
             throw new RuntimeException("Missing keywords");
 
         return payload.toByteArray();
@@ -411,7 +411,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      */
     public List<GeoRestriction> getGeoRestrictions() {
         List<GeoRestriction> list = new ArrayList<GeoRestriction>();
-        if (payload.hasKey(KEY_GEO_RESTRICT)) {
+        if (payload.hasValueFor(KEY_GEO_RESTRICT)) {
             byte[] encoded = payload.get(KEY_GEO_RESTRICT);
             for (int i = 0; i < encoded.length - 6; i += 7) {
                 byte[] geoBytes = new byte[7];
@@ -509,13 +509,13 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     /** Parses out the given key, or returns "" if the key is not present. */
     private String get(String key) {
         try {
-            if (!payload.hasKey(key)) {
+            if (!payload.hasValueFor(key)) {
                 return "";
             } else {
                 return StringUtils.toUTF8String(payload.getBytes(key));
             }
         } catch (BadGGEPPropertyException ex) {
-            throw new RuntimeException("GGEP exception parsing value." + ex.getMessage());
+            throw new RuntimeException("GGEP exception parsing value.", ex);
         }
     }
 
@@ -530,15 +530,15 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
-        if (!rawGGEP.hasKey(KEY_HEADER))
+        if (!rawGGEP.hasValueFor(KEY_HEADER))
             throw new BadGGEPBlockException("Missing header");
-        if (!rawGGEP.hasKey(KEY_TERRITORIES))
+        if (!rawGGEP.hasValueFor(KEY_TERRITORIES))
             throw new BadGGEPBlockException("Missing territories");
-        if (!rawGGEP.hasKey(KEY_DESCRIPTION))
+        if (!rawGGEP.hasValueFor(KEY_DESCRIPTION))
             throw new BadGGEPBlockException("Missing description");
-        if (!rawGGEP.hasKey(KEY_URL))
+        if (!rawGGEP.hasValueFor(KEY_URL))
             throw new BadGGEPBlockException("Missing URL");
-        if (!rawGGEP.hasKey(KEY_KEYWORDS))
+        if (!rawGGEP.hasValueFor(KEY_KEYWORDS))
             throw new BadGGEPBlockException("Missing keywords");
 
         this.payload = rawGGEP;
