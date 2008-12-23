@@ -12,6 +12,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadListManager;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -117,8 +118,10 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
 
     @Override
     public void uploadRemoved(Uploader uploader) {
-        // ignore this. it is called when uploads complete.
-        // uploadItems.remove(new CoreUploadItem(uploader));
+        // This is called when uploads complete.  Remove if auto-clear is enabled.
+        if (new CoreUploadItem(uploader).getState() == UploadState.DONE && SharingSettings.CLEAR_UPLOAD.getValue()) {
+            uploadItems.remove(new CoreUploadItem(uploader));
+        }
     }
     
     @Override
