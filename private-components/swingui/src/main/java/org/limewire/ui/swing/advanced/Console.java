@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -147,6 +148,7 @@ public class Console extends JPanel {
         output.setEditable(false);
 
         scrollPane = new JScrollPane(output);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(0,0,1,0, Color.black));
         scrollPane.getVerticalScrollBar().addAdjustmentListener(
                 new AdjustmentListener() {
                     public void adjustmentValueChanged(AdjustmentEvent e) {

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -16,7 +17,6 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -28,8 +28,10 @@ import javax.swing.KeyStroke;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
+import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -64,10 +66,6 @@ public class AdvancedToolsPanel extends JPanel {
     private static final String WINDOW_TITLE = I18n.tr("Advanced Tools");
 
     @Resource
-    private Color headerColor;
-    @Resource
-    private Color dividerColor;
-    @Resource
     private Color backgroundColor;
     @Resource
     private Icon connectionsIcon;
@@ -77,6 +75,10 @@ public class AdvancedToolsPanel extends JPanel {
     private Color tabTopColor;
     @Resource
     private Color tabBottomColor;
+    @Resource
+    private Color tabFontColor;
+    @Resource
+    private Font tabFont;
 
     /** Action to select next tab. */
     private Action nextTabAction = new NextTabAction();
@@ -93,7 +95,7 @@ public class AdvancedToolsPanel extends JPanel {
     /** Window used to display the panel. */
     private Window window;
     
-    private JPanel headerPanel;
+    private JXPanel headerPanel;
     private JPanel cardPanel;
     private CardLayout cardLayout;
     
@@ -103,13 +105,13 @@ public class AdvancedToolsPanel extends JPanel {
      */
     @Inject
     public AdvancedToolsPanel(Provider<ConnectionsPanel> connectionsPanel, 
-        Provider<ConsolePanel> consolePanel) {
+        Provider<ConsolePanel> consolePanel, BarPainterFactory barPainterFactory) {
 
         // Inject annotated resource values.
         GuiUtils.assignResources(this);
 
         // Initialize components.
-        initComponents();
+        initComponents(barPainterFactory);
         
         // Add tabs to dialog.
         addTab(TabId.CONNECTIONS, connectionsIcon, connectionsPanel);
@@ -120,13 +122,12 @@ public class AdvancedToolsPanel extends JPanel {
     /**
      * Initializes the components in the container.
      */
-    private void initComponents() {
+    private void initComponents(BarPainterFactory barPainterFactory) {
         setLayout(new BorderLayout());
 
         // Create header panel to hold tab buttons.
-        headerPanel = new JPanel();
-        headerPanel.setBackground(headerColor);
-        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, dividerColor));
+        headerPanel = new JXPanel();
+        headerPanel.setBackgroundPainter(barPainterFactory.createTopBarPainter());
         headerPanel.setLayout(new MigLayout("insets 0 0 0 0, gap 0 0",
                 "",                  // col constraints
                 "align top,fill"));  // row constraints
@@ -162,6 +163,8 @@ public class AdvancedToolsPanel extends JPanel {
         
         // Set gradient colors.
         button.setGradients(tabTopColor, tabBottomColor);
+        button.setForeground(tabFontColor);
+        button.setFont(tabFont);
         
         // Add inputs and action to select previous tab.
         button.getActionMap().put(PrevTabAction.KEY, this.prevTabAction);

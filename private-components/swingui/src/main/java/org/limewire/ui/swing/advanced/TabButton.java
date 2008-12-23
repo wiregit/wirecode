@@ -10,6 +10,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.JXButton;
@@ -40,7 +41,8 @@ public class TabButton extends JXButton {
         setOpaque(false);
         setHorizontalTextPosition(SwingConstants.CENTER);
         setVerticalTextPosition(SwingConstants.BOTTOM);
-        setPreferredSize(new Dimension(Math.max(getPreferredSize().width, 70), 50));
+        setPreferredSize(new Dimension(Math.max(getPreferredSize().width, 70), 60));
+        setBorder(BorderFactory.createEmptyBorder(4,12,4,12));
         
         // Add listener to repaint button when selected state changes.
         getAction().addPropertyChangeListener(new PropertyChangeListener() {
@@ -70,7 +72,7 @@ public class TabButton extends JXButton {
             public void doPaint(Graphics2D g, JXButton component, int width,
                 int height) {
                 if (Boolean.TRUE.equals(getAction().getValue(Action.SELECTED_KEY))) {
-                    super.doPaint(g, component, width, height);
+                    super.doPaint(g, component, width, height-1);
                 } else {
                     oldPainter.paint(g, component, width, height);
                 }
