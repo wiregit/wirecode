@@ -199,23 +199,24 @@ class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 desc = fileManager.getIncompleteFileList().getFileDescForIndex(i);
             }
 
-            assert desc != null : "unexpected null in FileManager for query:\n" + request;
-
-            if ((filter != null) && !filter.allow(desc.getFileName()))
-                continue;
-
-            desc.incrementHitCount();
-            activityCallback.handleSharedFileUpdate(desc.getFile());
-
-            Response resp = responseFactory.get().createResponse(desc);
-            if (includeXML) {
-                if (doc != null && resp.getDocument() != null && !isValidXMLMatch(resp, doc))
+            if(desc != null) {
+                //desc can bet null if items were removed after the IntSet matches were built
+                if ((filter != null) && !filter.allow(desc.getFileName()))
                     continue;
-            } else {
-            	//remove xml doc to save bandwidth
-                resp.setDocument(null);
+    
+                desc.incrementHitCount();
+                activityCallback.handleSharedFileUpdate(desc.getFile());
+    
+                Response resp = responseFactory.get().createResponse(desc);
+                if (includeXML) {
+                    if (doc != null && resp.getDocument() != null && !isValidXMLMatch(resp, doc))
+                        continue;
+                } else {
+                	//remove xml doc to save bandwidth
+                    resp.setDocument(null);
+                }
+                responses.add(resp);
             }
-            responses.add(resp);
         }
         if (responses.size() == 0)
             return Collections.emptySet();
