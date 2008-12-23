@@ -66,8 +66,13 @@ public class LimeComboBox extends JXButton {
     /** True if clicking will always force visibility. */
     private boolean clickForcesVisible = false;
     
-    /** Constructs a new combobox with the given actions. */
-    LimeComboBox(List<Action> newActions) {        
+    /** Constructs an empty unskinned combo box. */
+    public LimeComboBox() {
+        this(null);
+    }
+    
+    /** Constructs an empty unskinned combo box. */
+    public LimeComboBox(List<Action> newActions) {        
         setText(null);
         actions = new ArrayList<Action>();
         addActions(newActions);

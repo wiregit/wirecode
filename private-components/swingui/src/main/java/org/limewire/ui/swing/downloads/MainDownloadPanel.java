@@ -2,15 +2,10 @@ package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -20,14 +15,14 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.LimeCheckBox;
+import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dock.DockIcon;
 import org.limewire.ui.swing.dock.DockIconFactory;
 import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.util.ButtonDecorator;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -42,6 +37,7 @@ import com.google.inject.Singleton;
 public class MainDownloadPanel extends JPanel {
 	
     private final ButtonDecorator buttonDecorator;
+    private final LimeComboBoxFactory comboBoxFactory;
     
     public static final String NAME = "MainDownloadPanel";
 	private final CardLayout cardLayout;
@@ -52,10 +48,9 @@ public class MainDownloadPanel extends JPanel {
 	private final DownloadMediator downloadMediator;
 	
 	private final LimeHeaderBar settingsPanel;
-    private JButton pauseAllButton;
-    private JButton resumeAllButton;
+    
+	private LimeComboBox moreButton;
     private JXButton clearFinishedButton;
-    private JCheckBox categoriseCheckBox;
     private final DockIcon dock;
 	
     private final AbstractDownloadsAction pauseAction = new AbstractDownloadsAction(I18n.tr("Pause All")) {
@@ -83,7 +78,7 @@ public class MainDownloadPanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            setCategorized(categoriseCheckBox.isSelected());
+            // setCategorized(categoriseCheckBox.isSelected());
         }
 
     };
@@ -112,12 +107,14 @@ public class MainDownloadPanel extends JPanel {
 	public MainDownloadPanel(AllDownloadPanelFactory allDownloadPanelFactory, 
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator, AudioPlayer player,
-	        LimeHeaderBarFactory headerBarFactory,
+	        LimeHeaderBarFactory headerBarFactory, LimeComboBoxFactory comboBoxFactory,
 	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory) {
 	    
 	    
 		this.downloadMediator = downloadMediator;
 		this.buttonDecorator = buttonDecorator;
+		this.comboBoxFactory = comboBoxFactory;
+		
 		dock = dockIconFactory.createDockIcon();
 		
 		setLayout(new BorderLayout());
@@ -180,27 +177,19 @@ public class MainDownloadPanel extends JPanel {
 	}
 	
 	private void initHeader() {
-	    pauseAllButton = new JButton(pauseAction);	
-	    resumeAllButton = new JButton(resumeAction);
+	    moreButton = new LimeComboBox();
 	    clearFinishedButton = new JXButton(clearAction);
-	    categoriseCheckBox = new LimeCheckBox(categorizeAction);
-
-	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
 	    
-	    categoriseCheckBox.setOpaque(false);
-	    categoriseCheckBox.setForeground(Color.WHITE);
-	    FontUtils.changeStyle(categoriseCheckBox, Font.PLAIN);
+	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
+	    comboBoxFactory.decorateDarkMiniComboBox(moreButton, I18n.tr("more"));
 
-	    categorizeAction.setEnabled(true);
-
-	    JPanel buttonPanel = new JPanel(new FlowLayout());
-	    buttonPanel.setOpaque(false);
-	    buttonPanel.add(pauseAllButton);
-	    buttonPanel.add(resumeAllButton);
-
+	    moreButton.addAction(pauseAction);
+	    moreButton.addAction(resumeAction);
+	    moreButton.addAction(categorizeAction);
+	    
 	    this.settingsPanel.setLayout(new MigLayout("insets 0, fillx, filly","push[][]"));
-	    this.settingsPanel.add(categoriseCheckBox);
-	    this.settingsPanel.add(clearFinishedButton, "gapafter 10");
+	    this.settingsPanel.add(clearFinishedButton, "gapafter 5");
+	    this.settingsPanel.add(moreButton, "gapafter 5");
 	}
 	
 	

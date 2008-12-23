@@ -99,6 +99,13 @@ public class LimeComboBoxFactory {
         return box;
     }
     
+    public void decorateDarkMiniComboBox(LimeComboBox box, String promptText) {
+        buttonDecorator.decorateDarkFullButton(box);
+        box.setIcon(this.darkFullIcon);
+        box.setBorder(BorderFactory.createEmptyBorder(2,10,2,20));
+        box.setText(promptText);
+    }
+    
     public void decorateMiniComboBox(LimeComboBox box, String promptText) {
         buttonDecorator.decorateMiniButton(box);
         box.setIcons(this.miniRegIcon, this.miniHoverIcon, this.miniDownIcon);
