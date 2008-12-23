@@ -46,7 +46,7 @@ public class ChatPanel extends JPanel implements Displayable {
         this.chats = new HashMap<String, ConversationPane>();
 
         //Dimensions according to the spec
-        setPreferredSize(new Dimension(400, 235));
+        setPreferredSize(new Dimension(400, 240));
         add(friendsPanel, BorderLayout.WEST);
         add(chatTopPanel, BorderLayout.NORTH);
         conversationPanel = new JPanel(new BorderLayout());
