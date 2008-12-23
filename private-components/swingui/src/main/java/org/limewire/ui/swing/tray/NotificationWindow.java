@@ -84,7 +84,7 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         panel.setBackgroundPainter(createPainter(panel));
 
         JCheckBox iconCheckBox = new JCheckBox(icon);
-        panel.add(iconCheckBox, "");
+       
 
         final JCheckBox closeButton = new JCheckBox(trayNotifyClose);
         closeButton.setVisible(false);
@@ -102,16 +102,12 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         closeButton.addMouseListener(new HoverPanelMouseListener(closeButton));
         iconCheckBox.addMouseListener(new HoverPanelMouseListener(closeButton));
 
-        panel.add(closeButton, "alignx right, wrap");
+        
 
         String title = notification.getTitle();
         String message = notification.getMessage();
 
-        if (!StringUtils.isEmpty(title)) {
-            JLabel titleLabel = new JLabel(title);
-            titleLabel.setFont(titleFont);
-            panel.add(titleLabel, "spanx 2, wrap");
-        }
+        
 
         JEditorPane editor = new JEditorPane();
         editor.addMouseListener(new HoverPanelMouseListener(closeButton));
@@ -141,7 +137,14 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
                 }
             }
         });
-
+        
+        panel.add(iconCheckBox, "");
+        panel.add(closeButton, "alignx right, wrap");
+        if (!StringUtils.isEmpty(title)) {
+            JLabel titleLabel = new JLabel(getTruncatedMessage(title, htmlEditorKit, titleFont, 180));
+            titleLabel.setFont(titleFont);
+            panel.add(titleLabel, "spanx 2, wrap");
+        }
         panel.add(editor, "spanx 2");
         setPreferredSize(new Dimension(200, 110));
         pack();
