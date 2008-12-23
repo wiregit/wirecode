@@ -23,7 +23,6 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
@@ -32,12 +31,12 @@ import javax.swing.JToggleButton.ToggleButtonModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.ResizeUtils;
 
 /**
  * A fancy 'tab' for use in a {@link FancyTabList}.
@@ -47,7 +46,7 @@ public class FancyTab extends JXPanel {
     private final TabActionMap tabActions;
     private final AbstractButton mainButton;
     private final AbstractButton removeButton;
-    private final JXBusyLabel busyLabel;
+    private final JLabel busyLabel;
     private final JLabel additionalText;
     private final Line underline;
     private final FancyTabProperties props;
@@ -65,7 +64,8 @@ public class FancyTab extends JXPanel {
     @Resource private Icon removeInactiveIcon;
     @Resource private Icon removeInactiveRolloverIcon;
     @Resource private Icon removeInactivePressedIcon;
-
+    @Resource private Icon spinnerIcon; 
+    
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
             FancyTabProperties fancyTabProperties) {
@@ -133,24 +133,17 @@ public class FancyTab extends JXPanel {
         return props.getInsets();
     }
     
-    // TODO: Remove this hack and make a consistant model mediating 
-    //        control of tab states and state existance 
-    private static void setBuisySize(JComponent c, Dimension d) {
-        c.setMaximumSize(d);
-        c.setMinimumSize(d);
-        c.setPreferredSize(d);
-        c.setSize(d);
-    }
-    
-    JXBusyLabel createBusyLabel() {
-        final JXBusyLabel busy = new JXBusyLabel(new Dimension(16, 16));
-        setBuisySize(busy, new Dimension(0,0));
+    SpinLabel createBusyLabel() {
+        final SpinLabel busy = new SpinLabel();
+        busy.setIcon(spinnerIcon);
+        
+        ResizeUtils.forceSize(busy, new Dimension(0,0));
         busy.setVisible(false);
         
         if (tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
             Boolean.TRUE) {
             busy.setBusy(true);
-            setBuisySize(busy, new Dimension(16,16));    
+            ResizeUtils.forceSize(busy, new Dimension(16,16));    
             busy.setVisible(true);
         } 
         
@@ -160,7 +153,7 @@ public class FancyTab extends JXPanel {
                 if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
                     boolean on = evt.getNewValue() == Boolean.TRUE;
                     busy.setBusy(on);
-                    setBuisySize(busy, new Dimension(16,16));
+                    ResizeUtils.forceSize(busy, new Dimension(16,16));
                     busy.setVisible(on);                    
                 }
             }
