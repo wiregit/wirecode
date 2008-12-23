@@ -577,9 +577,10 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         int index = friendCombo.getSelectedIndex();
         if (index > -1) {
             shareFriend(noShareFilterList.get(index));
-            if (noShareFilterList.size() == 0) {
-                inputField.setText(null);
-            }
+            //clear filter every time friend is added
+           // if (noShareFilterList.size() == 0) {
+            inputField.setText(null);
+            // }
             resetRowSelection(index);
 
             if (noShareFriendList.size() > 0) {
