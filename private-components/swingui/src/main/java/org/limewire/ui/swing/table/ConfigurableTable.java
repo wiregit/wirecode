@@ -1,17 +1,16 @@
 package org.limewire.ui.swing.table;
 
 import java.awt.Point;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.RowPresevationListener;
 
 import ca.odell.glazedlists.EventList;
@@ -36,15 +35,14 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
         setModel(tableModel);
         
         if (showHeaders) {
-            // Set up table headers to have a context menu
-            // that configures which columns are visible.
-            final JTableHeader header = getTableHeader();
-            header.addMouseListener(new MouseAdapter() {
+            // Set up table headers to have a context menu that configures 
+            // which columns are visible.  We use MousePopupListener to detect
+            // the popup trigger, which differs on Windows, Mac, and Linux.
+            JTableHeader header = getTableHeader();
+            header.addMouseListener(new MousePopupListener() {
                 @Override
-                public void mouseClicked(MouseEvent e) {
-                    if(SwingUtilities.isRightMouseButton(e)){
-                        showHeaderPopupMenu(e.getPoint());
-                    }
+                public void handlePopupMouseEvent(MouseEvent e) {
+                    showHeaderPopupMenu(e.getPoint());
                 }
             });
             

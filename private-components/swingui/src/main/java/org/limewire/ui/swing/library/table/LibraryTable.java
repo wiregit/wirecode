@@ -3,7 +3,6 @@ package org.limewire.ui.swing.library.table;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -33,6 +31,7 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
+import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.table.TableColumnSelector;
@@ -88,13 +87,14 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         setDragEnabled(true);
         setRowHeight(rowHeight);
         
-        final JTableHeader header = getTableHeader();
-        header.addMouseListener(new MouseAdapter() {
+        // Add mouse listener to display popup menu on column header.  We use 
+        // MousePopupListener to detect the popup trigger, which differs on 
+        // Windows, Mac, and Linux.
+        JTableHeader header = getTableHeader();
+        header.addMouseListener(new MousePopupListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if(SwingUtilities.isRightMouseButton(e)){
-                    showHeaderPopupMenu(e.getPoint());
-                }
+            public void handlePopupMouseEvent(MouseEvent e) {
+                showHeaderPopupMenu(e.getPoint());
             }
         });       
         
