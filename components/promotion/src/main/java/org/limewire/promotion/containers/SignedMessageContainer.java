@@ -50,11 +50,11 @@ public class SignedMessageContainer implements MessageContainer {
     public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
-        if (!rawGGEP.hasValueFor(KEY_ALIAS))
+        if (!rawGGEP.hasKey(KEY_ALIAS))
             throw new BadGGEPBlockException("Missing alias");
-        if (!rawGGEP.hasValueFor(KEY_SIGNATURE))
+        if (!rawGGEP.hasKey(KEY_SIGNATURE))
             throw new BadGGEPBlockException("Missing signature");
-        if (!rawGGEP.hasValueFor(KEY_WRAPPED_BYTES))
+        if (!rawGGEP.hasKey(KEY_WRAPPED_BYTES))
             throw new BadGGEPBlockException("Missing wrapped message");
 
         this.payload = rawGGEP;

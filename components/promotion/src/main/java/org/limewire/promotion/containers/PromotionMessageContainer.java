@@ -63,15 +63,15 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     /* Throws a RTE if we're missing any required fields. */
     public byte[] encode() {
         payload.put(TYPE_KEY, getType());
-        if (!payload.hasValueFor(KEY_HEADER))
+        if (!payload.hasKey(KEY_HEADER))
             throw new RuntimeException("Missing header");
-        if (!payload.hasValueFor(KEY_TERRITORIES))
+        if (!payload.hasKey(KEY_TERRITORIES))
             throw new RuntimeException("Missing territories");
-        if (!payload.hasValueFor(KEY_DESCRIPTION))
+        if (!payload.hasKey(KEY_DESCRIPTION))
             throw new RuntimeException("Missing description");
-        if (!payload.hasValueFor(KEY_URL))
+        if (!payload.hasKey(KEY_URL))
             throw new RuntimeException("Missing URL");
-        if (!payload.hasValueFor(KEY_KEYWORDS))
+        if (!payload.hasKey(KEY_KEYWORDS))
             throw new RuntimeException("Missing keywords");
 
         return payload.toByteArray();
@@ -530,15 +530,15 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
-        if (!rawGGEP.hasValueFor(KEY_HEADER))
+        if (!rawGGEP.hasKey(KEY_HEADER))
             throw new BadGGEPBlockException("Missing header");
-        if (!rawGGEP.hasValueFor(KEY_TERRITORIES))
+        if (!rawGGEP.hasKey(KEY_TERRITORIES))
             throw new BadGGEPBlockException("Missing territories");
-        if (!rawGGEP.hasValueFor(KEY_DESCRIPTION))
+        if (!rawGGEP.hasKey(KEY_DESCRIPTION))
             throw new BadGGEPBlockException("Missing description");
-        if (!rawGGEP.hasValueFor(KEY_URL))
+        if (!rawGGEP.hasKey(KEY_URL))
             throw new BadGGEPBlockException("Missing URL");
-        if (!rawGGEP.hasValueFor(KEY_KEYWORDS))
+        if (!rawGGEP.hasKey(KEY_KEYWORDS))
             throw new BadGGEPBlockException("Missing keywords");
 
         this.payload = rawGGEP;
