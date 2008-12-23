@@ -74,12 +74,14 @@ public class LibraryOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        return getLibraryManagerPanel().applyOptions();
+        return getLibraryManagerPanel().applyOptions() ||
+               getShareCategoryPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
-        return getLibraryManagerPanel().hasChanged();
+        return getLibraryManagerPanel().hasChanged() ||
+               getShareCategoryPanel().hasChanged();
     }
 
     @Override
@@ -121,17 +123,21 @@ public class LibraryOptionPanel extends OptionPanel {
         
         @Override
         boolean applyOptions() {
+            LibrarySettings.SNAPSHOT_SHARING_ENABLED.setValue(shareSnapshot.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return false;
+            return shareSnapshot.isSelected() != LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue();
         }
 
         @Override
         public void initOptions() {
-            shareSnapshot.setSelected(true);    //need to hit props file I'm guessing?
+            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue())
+                shareSnapshot.setSelected(true);
+            else
+                shareCollection.setSelected(true);
         }
     }
     

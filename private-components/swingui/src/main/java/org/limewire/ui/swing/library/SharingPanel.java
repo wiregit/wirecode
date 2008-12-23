@@ -251,7 +251,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
                 action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
             } else {
-                action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");//+ "/" + allFileList.size() + ")");
+                action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
             }
             if(category == Category.OTHER) {
                 action.setEnabled(allFileList.size() > 0);
