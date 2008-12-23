@@ -147,8 +147,7 @@ final class BasicNotifier implements TrayNotifier {
             notificationWindows.remove(notificationWindow);
             notifications.remove(notificationWindow.getNotification());
             notificationWindow.dispose();
-            // bumpWindows();//TODO do we want to redraw when they close a
-            // window?
+            bumpWindows();
         }
     }
 
