@@ -11,6 +11,7 @@ import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.mainframe.LeftPanel;
+import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.ForceInvisibleComponent;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityListener;
@@ -45,6 +46,7 @@ public class ViewMenu extends JMenu {
 
         addVisibilityListener(component, action, visibleName, notVisibleName);
         setInitialText(component, action, visibleName, notVisibleName);
+        addEnabledListener(component, action);
 
         return action;
     }
@@ -78,6 +80,20 @@ public class ViewMenu extends JMenu {
         
 
         return action;
+    }
+
+    /**
+     * Adds a listener to the specified component to update the enabled state
+     * of the specified action, and initializes its enabled state. 
+     */
+    private void addEnabledListener(VisibleComponent component, final Action action) {
+        component.addEnabledListener(new EnabledListener() {
+            @Override
+            public void enabledChanged(boolean enabled) {
+                action.setEnabled(enabled);
+            }
+        });
+        action.setEnabled(component.isActionEnabled());
     }
 
     private void addVisibilityListener(VisibleComponent component, final Action action,
