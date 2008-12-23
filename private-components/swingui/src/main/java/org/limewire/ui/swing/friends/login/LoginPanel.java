@@ -54,7 +54,7 @@ class LoginPanel extends JXPanel implements SettingListener {
     private static final String SIGNIN_ENABLED_TEXT = tr("Sign in");
     private static final String SIGNIN_DISABLED_TEXT = tr("Signing in ...");
 
-    private static final String AUTHENTICATION_ERROR = tr("Incorrect username\nor password.");
+    private static final String AUTHENTICATION_ERROR = tr("Incorrect username or password.");
     private static final String NETWORK_ERROR = tr("Network error.");
     
     private static final String CONFIG = "limewire.configProperty";
