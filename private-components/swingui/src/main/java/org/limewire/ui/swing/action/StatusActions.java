@@ -3,7 +3,6 @@ package org.limewire.ui.swing.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 
@@ -32,9 +31,13 @@ public class StatusActions {
     private final JCheckBoxMenuItem available;
 
     private final JCheckBoxMenuItem dnd;
+    
+    private final XMPPService xmppService;
 
     @Inject
     public StatusActions(final XMPPService xmppService, final IconLibrary iconLibrary) {
+        this.xmppService = xmppService;
+        
         available = new JCheckBoxMenuItem(I18n.tr("Available"), iconLibrary.getAvailable());
 
         available.addActionListener(new ActionListener() {
@@ -55,12 +58,8 @@ public class StatusActions {
         });
         dnd.setEnabled(false);
         
-        ButtonGroup group = new ButtonGroup();
-        group.add(available);
-        group.add(dnd);
-
         updateSelection();
-
+        
         XMPPSettings.XMPP_DO_NOT_DISTURB.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
@@ -75,8 +74,14 @@ public class StatusActions {
     }
 
     private void updateSelection() {
-        available.setSelected(!XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
-        dnd.setSelected(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
+        if(xmppService.isLoggedIn()) {
+            available.setSelected(!XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
+            dnd.setSelected(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
+        } else {
+            //do not show selections when logged out
+            available.setSelected(false);
+            dnd.setSelected(false);
+        }
     }
 
     @Inject
@@ -90,11 +95,13 @@ public class StatusActions {
                 case CONNECTING:
                     available.setEnabled(true);
                     dnd.setEnabled(true);
+                    updateSelection();
                     break;
                 case CONNECT_FAILED:
                 case DISCONNECTED:
                     available.setEnabled(false);
                     dnd.setEnabled(false);
+                    updateSelection();
                     break;
                 }
             }
