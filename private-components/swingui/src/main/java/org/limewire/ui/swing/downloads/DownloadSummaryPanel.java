@@ -556,7 +556,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             pauseButton.setVisible(item.getState() == DownloadState.DOWNLOADING);
             resumeButton.setVisible(item.getState() == DownloadState.PAUSED);
             tryAgainButton.setVisible(item.getState() == DownloadState.STALLED);
-            launchButton.setVisible(item.getState() == DownloadState.DONE);
+            launchButton.setVisible(item.isLaunchable() && item.getState() == DownloadState.DONE);
             removeButton.setVisible(item.getState() == DownloadState.ERROR);
             
             statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);
