@@ -71,7 +71,7 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
         }
     }
     
-    private JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered) {
+    protected JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered) {
         FilterList<RemoteFileItem> filterList = GlazedListsFactory.filterList(filtered, 
                 new TextComponentMatcherEditor<RemoteFileItem>(getFilterTextField(), new LibraryTextFilterator<RemoteFileItem>()));
         addDisposable(filterList);

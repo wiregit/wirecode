@@ -51,6 +51,7 @@ class LibraryPanel extends AbstractFileListPanel {
             this.category = category;
             this.action = action;
             this.list = list;
+            action.putValue(Action.NAME, I18n.tr(category.toString()));
             setText();
             if(category == Category.PROGRAM) {
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
@@ -58,7 +59,6 @@ class LibraryPanel extends AbstractFileListPanel {
         }
 
         private void setText() {
-            action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
             //disable other category if size is 0
             if(category == Category.OTHER) {
                 action.setEnabled(list.size() > 0);

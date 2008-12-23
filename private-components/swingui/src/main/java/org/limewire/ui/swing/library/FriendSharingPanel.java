@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.Icon;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
@@ -44,6 +46,8 @@ public class FriendSharingPanel extends SharingPanel {
             LimeHeaderBarFactory headerBarFactory) {
 
         super(wholeLibraryList, friendFileList, categoryIconManager, tableFactory, headerBarFactory);
+        
+        setInnerNavLayout(new MigLayout("insets 0, gap 0, fill, wrap, hidemode 3", "[138!]", ""));
         
         GuiUtils.assignResources(this);
         

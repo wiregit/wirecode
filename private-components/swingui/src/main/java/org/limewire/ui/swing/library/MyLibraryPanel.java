@@ -17,7 +17,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -32,9 +31,6 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.core.settings.LibrarySettings;
-import org.limewire.setting.evt.SettingEvent;
-import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperLinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -95,15 +91,15 @@ public class MyLibraryPanel extends LibraryPanel {
         this.shareFactory = shareFactory;
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
-        
+
         if (selectionPanelBackgroundOverride != null) { 
             selectionPanel.setBackground(selectionPanelBackgroundOverride);
         }
-        
+
         getHeaderPanel().setText(I18n.tr("My Library"));
+        
         categoryShareWidget = shareFactory.createCategoryShareWidget();
         createMyCategories(libraryManager.getLibraryManagedList());
-        
         selectFirst();
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
@@ -129,6 +125,7 @@ public class MyLibraryPanel extends LibraryPanel {
             addCategory(categoryIconManager.getIcon(category), category, 
                     createMyCategoryAction(category, filtered), filtered, callback);
             addDisposable(filtered);
+            addLibraryInfoBar(category, filtered);
         }
     }
 
@@ -237,7 +234,6 @@ public class MyLibraryPanel extends LibraryPanel {
         
         private JButton button;
         private HyperLinkButton shareButton;
-        private JLabel collectionLabel;
         private LibraryPanel libraryPanel;
         
         public MySelectionPanel(Action action, Action shareAction, Category category, LibraryPanel panel) {
@@ -265,14 +261,12 @@ public class MyLibraryPanel extends LibraryPanel {
                             button.setForeground(selectedTextColor);
                             if(shareButton != null) {
                                 shareButton.setVisible(true);
-                                collectionLabel.setVisible(collectionLabel.isEnabled());
                             }
                         } else {
                             setOpaque(false);
                             button.setForeground(textColor);
                             if(shareButton != null) {
                                 shareButton.setVisible(false);
-                                collectionLabel.setVisible(false);
                             }
                         }
                         repaint();
@@ -305,44 +299,7 @@ public class MyLibraryPanel extends LibraryPanel {
                 shareButton.setForeground(shareForegroundColor);
                 shareButton.setMouseOverColor(shareMouseOverColor);
                 add(shareButton, "wrap");
-                
-                collectionLabel = new JLabel();
-                collectionLabel.setVisible(false);
-                setLabelText(0);
-                add(collectionLabel, "span 2, gapleft 10");
-                
-                //TODO: there should be a better way of adding listeners here
-                if(category == Category.AUDIO) {
-                    setLabelText(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);
-                    LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.addSettingListener(new SettingListener(){
-                        @Override
-                        public void settingChanged(SettingEvent evt) {
-                            setLabelText(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);
-                        }
-                     });
-                } else if(category == Category.VIDEO) {
-                    setLabelText(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);
-                    LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.addSettingListener(new SettingListener(){
-                        @Override
-                        public void settingChanged(SettingEvent evt) {
-                            setLabelText(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);
-                        }
-                     });
-                } else if(category == Category.IMAGE) { 
-                    setLabelText(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);
-                    LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.addSettingListener(new SettingListener(){
-                        @Override
-                        public void settingChanged(SettingEvent evt) {
-                            setLabelText(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);
-                        }
-                     });
-                }
             }
-        }
-        
-        private void setLabelText(int numSharedCollections) {
-            collectionLabel.setText(I18n.tr("Sharing collection: {0}", numSharedCollections));
-            collectionLabel.setEnabled(numSharedCollections > 0);
         }
         
         public JButton getButton() {

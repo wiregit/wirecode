@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 
+import org.limewire.core.api.Category;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
@@ -60,6 +62,11 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         createMyCategories(eventList);
         selectFirst();
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
+    }
+    
+    protected JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered) {
+        addFriendInfoBar(category, filtered);
+        return super.createMyCategoryAction(category, filtered);
     }
     
     protected String getFullPanelName() {

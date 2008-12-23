@@ -86,7 +86,6 @@ public class EmptyLibraryPanel extends LibraryPanel {
     }
     
     private void createEmptyPanel(JXPanel component) {
-        createSelectionPanel();
         JPanel p = new JPanel(new MigLayout("nocache, insets 0, gap 0, fill", "[125!][][fill]", "[fill]"));
         JXPanel leftPanel = new JXPanel();
         leftPanel.setBackgroundPainter(new GenericBarPainter<JXPanel>(
