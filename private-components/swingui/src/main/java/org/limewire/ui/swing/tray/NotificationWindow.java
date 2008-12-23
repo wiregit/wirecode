@@ -277,13 +277,11 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         @Override
         public void mouseEntered(MouseEvent e) {
             closeButton.setVisible(true);
-            // timer.stop();
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
             closeButton.setVisible(false);
-            // timer.start();
         }
     }
 
