@@ -30,6 +30,9 @@ import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.GuiUtils;
 import static org.limewire.ui.swing.util.I18n.tr;
+
+import org.limewire.ui.swing.util.EnabledListener;
+import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
@@ -54,6 +57,8 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private final java.awt.Panel mainPanel;
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
+    private final EnabledListenerList enabledListenerList = new EnabledListenerList();
+    private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
     
@@ -168,12 +173,14 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         mainPanel.add(chatPanel);
         chatPanel.setLoggedInID(event.getSource().getConfiguration().getCanonicalizedLocalID());
         resetBounds();
+        setActionEnabled(true);
     }
     
     private void handleLogoffEvent() {
         mainPanel.remove(chatPanel);
         resetBounds();
         setChatPanelVisible(false);
+        setActionEnabled(false);
     }
     
     public String getMessagingTopicPatternName() {
@@ -210,4 +217,38 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         setChatPanelVisible(visible);
         visibilityListenerList.visibilityChanged(visible);
     }
+
+    @Override
+    public void addEnabledListener(EnabledListener listener) {
+        enabledListenerList.addEnabledListener(listener);
+    }
+
+    @Override
+    public void removeEnabledListener(EnabledListener listener) {
+        enabledListenerList.removeEnabledListener(listener);
+    }
+
+    /**
+     * Returns true if the component is enabled for use. 
+     */
+    @Override
+    public boolean isActionEnabled() {
+        return actionEnabled;
+    }
+
+    /**
+     * Sets an indicator to determine whether the component is enabled for use,
+     * and notifies all registered EnabledListener instances. 
+     */
+    private void setActionEnabled(boolean enabled) {
+        // Get old value, and save new value.
+        boolean oldValue = actionEnabled;
+        actionEnabled = enabled;
+        
+        // Notify listeners if value changed.
+        if (enabled != oldValue) {
+            enabledListenerList.fireEnabledChanged(enabled);
+        }
+    }
+    
 }

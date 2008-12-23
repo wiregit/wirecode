@@ -58,6 +58,8 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.EnabledListener;
+import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.ForceInvisibleComponent;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -94,6 +96,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     private final TrayNotifier notifier;
 	
 	private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
+    private final EnabledListenerList enabledListenerList = new EnabledListenerList();
     private AbstractDownloadTable table;
     private final HorizontalDownloadTableModel horizontalTableModel;
 
@@ -672,4 +675,23 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     public void removeVisibilityListener(VisibilityListener listener) {
         visibilityListenerList.removeVisibilityListener(listener);
     }
+
+    @Override
+    public void addEnabledListener(EnabledListener listener) {
+        enabledListenerList.addEnabledListener(listener);
+    }
+
+    @Override
+    public void removeEnabledListener(EnabledListener listener) {
+        enabledListenerList.removeEnabledListener(listener);
+    }
+
+    /**
+     * Returns true if the component is enabled for use.  Always true. 
+     */
+    @Override
+    public boolean isActionEnabled() {
+        return true;
+    }
+    
 }

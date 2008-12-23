@@ -8,6 +8,8 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.util.EnabledListener;
+import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
@@ -21,6 +23,7 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
     public static final String NAME = "Library Panel";
 
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
+    private final EnabledListenerList enabledListenerList = new EnabledListenerList();
     
     @Inject
     public LeftPanel(Navigator navigator, LibraryNavigator libraryNavigator) {
@@ -61,4 +64,23 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
         setVisible(visible);
         visibilityListenerList.visibilityChanged(visible);
     }
+
+    @Override
+    public void addEnabledListener(EnabledListener listener) {
+        enabledListenerList.addEnabledListener(listener);
+    }
+
+    @Override
+    public void removeEnabledListener(EnabledListener listener) {
+        enabledListenerList.removeEnabledListener(listener);
+    }
+
+    /**
+     * Returns true if the component is enabled for use.  Always true. 
+     */
+    @Override
+    public boolean isActionEnabled() {
+        return true;
+    }
+
 }
