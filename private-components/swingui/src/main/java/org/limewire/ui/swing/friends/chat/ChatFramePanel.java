@@ -8,10 +8,12 @@ import java.awt.event.ActionEvent;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
+import org.jdesktop.application.Application;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.UISettings;
@@ -52,6 +54,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private static final Log LOG = LogFactory.getLog(ChatFramePanel.class);
     private static final String MESSAGE_SOUND_PATH = "/org/limewire/ui/swing/mainframe/resources/sounds/friends/message.wav";
     private final ChatPanel chatPanel;
+    private final ChatFriendListPane chatFriendListPane;
     private final TrayNotifier notifier;
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
@@ -63,9 +66,10 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private UnseenMessageListener unseenMessageListener;
     
     @Inject
-    public ChatFramePanel(ChatPanel chatPanel, TrayNotifier notifier) {
+    public ChatFramePanel(ChatPanel chatPanel, ChatFriendListPane chatFriendListPane, TrayNotifier notifier) {
         super(new BorderLayout());
         this.chatPanel = chatPanel;
+        this.chatFriendListPane = chatFriendListPane;
         this.notifier = notifier;
         this.mainPanel = new java.awt.Panel();
         
@@ -163,10 +167,20 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     }
 
     private Notification getNoticeForMessage(MessageReceivedEvent event) {
-        Message message = event.getMessage();
+        final Message message = event.getMessage();
         String title = tr("Chat from {0}", message.getSenderName());
         String messageString = message.toString();
-        return new Notification(title, messageString);
+        Notification notification = new Notification(title, messageString, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ActionMap map = Application.getInstance().getContext().getActionManager()
+                .getActionMap();
+                map.get("restoreView").actionPerformed(e);
+                setChatPanelVisible(true);
+                chatFriendListPane.fireConversationStarted(message.getFriendID());
+            }
+        });
+        return notification;
     }
     
     private void handleConnectionEstablished(XMPPConnectionEvent event) {

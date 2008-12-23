@@ -18,8 +18,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -84,7 +82,6 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         panel.setBackgroundPainter(createPainter(panel));
 
         JCheckBox iconCheckBox = new JCheckBox(icon);
-       
 
         final JCheckBox closeButton = new JCheckBox(trayNotifyClose);
         closeButton.setVisible(false);
@@ -95,19 +92,9 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
             }
         });
 
-        closeButton.addMouseListener(new HoverButtonMouseListener(closeButton, trayNotifyClose,
-                trayNotifyCloseRollover));
-
-        panel.addMouseListener(new HoverPanelMouseListener(closeButton));
-        closeButton.addMouseListener(new HoverPanelMouseListener(closeButton));
-        iconCheckBox.addMouseListener(new HoverPanelMouseListener(closeButton));
-
         
-
         String title = notification.getTitle();
         String message = notification.getMessage();
-
-        
 
         JEditorPane editor = new JEditorPane();
         editor.addMouseListener(new HoverPanelMouseListener(closeButton));
@@ -124,24 +111,24 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         editor.setContentType("text/html");
         editor.setText(html);
         editor.setEditable(false);
-        editor.addHyperlinkListener(new HyperlinkListener() {
-            @Override
-            public void hyperlinkUpdate(HyperlinkEvent e) {
-                if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                    if (notification.getActions() != null) {
-                        for (Action action : notification.getActions()) {
-                            action.actionPerformed(new ActionEvent(NotificationWindow.this,
-                                    ActionEvent.ACTION_PERFORMED, "Message Clicked"));
-                        }
-                    }
-                }
-            }
-        });
+        
+        closeButton.addMouseListener(new HoverButtonMouseListener(closeButton, trayNotifyClose,
+                trayNotifyCloseRollover));
+        
+        panel.addMouseListener(new HoverPanelMouseListener(closeButton));
+        closeButton.addMouseListener(new HoverPanelMouseListener(closeButton));
+        iconCheckBox.addMouseListener(new HoverPanelMouseListener(closeButton));
+        
+        iconCheckBox.addMouseListener(new PerformNotificationActions());
+        panel.addMouseListener(new PerformNotificationActions());
+        editor.addMouseListener(new PerformNotificationActions());
+        
         
         panel.add(iconCheckBox, "");
         panel.add(closeButton, "alignx right, wrap");
         if (!StringUtils.isEmpty(title)) {
-            JLabel titleLabel = new JLabel(getTruncatedMessage(title, htmlEditorKit, titleFont, 180));
+            JLabel titleLabel = new JLabel(
+                    getTruncatedMessage(title, htmlEditorKit, titleFont, 180));
             titleLabel.setFont(titleFont);
             panel.add(titleLabel, "spanx 2, wrap");
         }
@@ -150,6 +137,22 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
         pack();
 
         fadeInOutAnimator.start();
+    }
+
+    private class PerformNotificationActions extends MouseAdapter {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            performActions();
+        }
+    }
+
+    private void performActions() {
+        if (notification.getActions() != null) {
+            for (Action action : notification.getActions()) {
+                action.actionPerformed(new ActionEvent(NotificationWindow.this,
+                        ActionEvent.ACTION_PERFORMED, "Message Clicked"));
+            }
+        }
     }
 
     /**
@@ -315,10 +318,10 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
     }
 
     /**
-     * Moves the window from its current location to the new one. 
+     * Moves the window from its current location to the new one.
      */
     public synchronized void moveTo(Point newLocation) {
-        if(this.currentMoveAnimator != null) {
+        if (this.currentMoveAnimator != null) {
             currentMoveAnimator.stop();
         }
         MoveAnimator moveAnimator = new MoveAnimator(this, 250, newLocation);

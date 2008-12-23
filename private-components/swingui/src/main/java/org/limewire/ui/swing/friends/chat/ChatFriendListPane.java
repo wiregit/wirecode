@@ -400,8 +400,8 @@ public class ChatFriendListPane extends JPanel {
         return myID;
     }
     
-    public void fireConversationStarted(Friend friend) {
-        ChatFriend chatFriend = idToFriendMap.get(friend.getId());
+    public void fireConversationStarted(String friendId) {
+        ChatFriend chatFriend = idToFriendMap.get(friendId);
         if(chatFriend != null) {
             startOrSelectConversation(chatFriend);
         } else {

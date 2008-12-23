@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 
+import javax.swing.ActionMap;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -28,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
@@ -37,6 +39,7 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
@@ -55,9 +58,12 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.tray.Notification;
+import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.FontUtils;
@@ -68,8 +74,6 @@ import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
-import org.limewire.ui.swing.tray.TrayNotifier;
-import org.limewire.ui.swing.tray.Notification;
 import org.limewire.util.CommonUtils;
 
 import ca.odell.glazedlists.EventList;
@@ -357,9 +361,18 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                             }
                             // loop thru the inserted elements, and add
                             for (int i=listChanges.getBlockStartIndex(); i<=listChanges.getBlockEndIndex(); i++) {
-                                DownloadItem item = listChanges.getSourceList().get(i);
-                                if (shouldShowNotifier(item)) {
-                                    notifier.showMessage(new Notification(I18n.tr("Download Complete"), item.getFileName()));
+                                final DownloadItem downloadItem = listChanges.getSourceList().get(i);
+                                if (shouldShowNotifier(downloadItem)) {
+                                    notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), new AbstractAction() {
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            ActionMap map = Application.getInstance().getContext().getActionManager()
+                                            .getActionMap();
+                                            map.get("restoreView").actionPerformed(e);
+                                            NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
+                                            item.select(SimpleNavSelectable.create(downloadItem));
+                                        }
+                                    }));
                                 }
                             }
                         }

@@ -43,7 +43,7 @@ public class ChatAction extends AbstractAction {
         Friend friend = getFriend();
         if (friend != null) {
             friendsPanel.setChatPanelVisible(true);
-            friendsPane.fireConversationStarted(friend);
+            friendsPane.fireConversationStarted(friend.getId());
         }
     }
 

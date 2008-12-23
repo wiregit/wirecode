@@ -28,8 +28,8 @@ public class Notification {
         this(null, message, icon, actions);
     }
 
-    public Notification(String title, String message) {
-        this(title, message, null, new Action[0]);
+    public Notification(String title, String message, Action... actions) {
+        this(title, message, null, actions);
     }
 
     public String getMessage() {
