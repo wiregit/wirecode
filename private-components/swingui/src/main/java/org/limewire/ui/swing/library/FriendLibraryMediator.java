@@ -61,20 +61,18 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new OffLineMessageComponent(friendFileList.getSwingModel())));
     }
     
-    public void showLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
+    public void updateLibraryPanel(EventList<RemoteFileItem> eventList, LibraryState libraryState) {
         if(!disposed) {
             switch(libraryState) { 
             case FAILED_TO_LOAD:
                 this.eventList = null;
                 setLibraryCard(emptyFactory.createEmptyLibrary(friend, friendFileList, this, new ConnectionErrorComponent(friendFileList.getSwingModel())));
-                showLibraryCard();
                 break;
             case LOADED:
             case LOADING:
                 if(this.eventList != eventList) {
                     this.eventList = eventList;
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
-                    showLibraryCard();
                 }
                 break;
             }

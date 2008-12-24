@@ -253,7 +253,7 @@ public class NavPanel extends JXPanel {
     public void updateLibrary(FriendLibrary friendLibrary) {
         this.friendLibrary = friendLibrary;
         updateLibraryState(friendLibrary.getState());
-        libraryPanel.showLibraryPanel(friendLibrary.getSwingModel(), friendLibrary.getState());
+        libraryPanel.updateLibraryPanel(friendLibrary.getSwingModel(), friendLibrary.getState());
     }
     
     public boolean hasSelection() {
@@ -275,7 +275,6 @@ public class NavPanel extends JXPanel {
     public void removeBrowse() {
         if(libraryPanel != null) {
             unbusy(false);
-            libraryPanel.showLibraryCard();
         }
     }
     

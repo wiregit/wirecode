@@ -17,19 +17,24 @@ class LibraryMediator extends JPanel implements Disposable {
     // Otherwise, the act of removing them may require bits of the
     // disposed code, and cause exceptions.
 
-    private static final String LIBRRY_CARD = "LIBRARY_CARD";
+    private static final String LIBRARY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
     
     private CardLayout cardLayout;
 
     private JComponent libraryComponent = null;
     private JComponent sharingComponent = null;
+    
+    
+    private String currentlyShownCard = LIBRARY_CARD;
+    
     protected boolean disposed;
 
     public LibraryMediator() {
         cardLayout = new CardLayout();
         
         setLayout(cardLayout);
+        
     }
     
     protected void setLibraryCard(JComponent panel) {
@@ -40,8 +45,12 @@ class LibraryMediator extends JPanel implements Disposable {
             libraryComponent = null;
         }
         libraryComponent = panel;
-        add(panel, LIBRRY_CARD);
-        revalidate();
+        add(panel, LIBRARY_CARD);
+        if(LIBRARY_CARD.equals(currentlyShownCard)) {
+            //removing libraryComponent might have changed the currently displayed card
+            //if it should be displayed force it here.
+            showLibraryCard();
+        }
     }
     
     protected boolean isSharingCardSet() {
@@ -61,13 +70,15 @@ class LibraryMediator extends JPanel implements Disposable {
     }
     
     public void showLibraryCard() {
-        cardLayout.show(this, LIBRRY_CARD);
+        cardLayout.show(this, LIBRARY_CARD);
+        this.currentlyShownCard = LIBRARY_CARD;
         validate();
         repaint();
     }
     
     protected void showSharingCard() {
         cardLayout.show(this, SHARING_CARD);
+        this.currentlyShownCard = SHARING_CARD;
     }
 
 
