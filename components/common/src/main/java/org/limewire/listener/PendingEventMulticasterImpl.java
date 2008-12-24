@@ -3,7 +3,7 @@ package org.limewire.listener;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class PendingEventBroadcasterImpl<E> implements EventMulticaster<E>, PendingEventBroadcaster<E> {
+public class PendingEventMulticasterImpl<E> implements EventMulticaster<E>, PendingEventBroadcaster<E> {
 
     private final EventListenerList<E> listeners = new EventListenerList<E>();
     private final ConcurrentLinkedQueue<E> queuedEvents = new ConcurrentLinkedQueue<E>();

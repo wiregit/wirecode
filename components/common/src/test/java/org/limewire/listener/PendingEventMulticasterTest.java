@@ -14,7 +14,7 @@ import org.limewire.util.AssertComparisons;
 public class PendingEventMulticasterTest extends TestCase {
     
     public void testOrder() throws Exception {
-        final PendingEventBroadcasterImpl<Object> multicaster = new PendingEventBroadcasterImpl<Object>();
+        final PendingEventMulticasterImpl<Object> multicaster = new PendingEventMulticasterImpl<Object>();
         Listener listener = new Listener();
         multicaster.addListener(listener);
         
