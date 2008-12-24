@@ -337,7 +337,8 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
     
     @Override
     public boolean isCellEditable(EventObject e) {
-        if (e instanceof MouseEvent) {
+        //TODO this is probably unnecessary since MouseableTable handles background color
+        if (table != null && e instanceof MouseEvent) {
             MouseEvent event = (MouseEvent) e;
             if (event.getID() == MouseEvent.MOUSE_PRESSED) {
                 //Cache the cell that's just been clicked on so that the editor component
@@ -349,9 +350,9 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         return super.isCellEditable(e);
     }
 
+    @Override
     public Component getTableCellEditorComponent(
         final JTable table, Object value, boolean isSelected, int row, final int col) {
-        
         vsr = (VisualSearchResult) value;
         this.table = table;
         LOG.debugf("getTableCellEditorComponent: row = {0} column = {1}", row, col);
