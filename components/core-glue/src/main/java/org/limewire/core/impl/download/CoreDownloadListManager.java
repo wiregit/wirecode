@@ -265,7 +265,7 @@ public class CoreDownloadListManager implements DownloadListManager {
     @Override
     public void updateDownloadsCompleted() {
         if (downloadManager.downloadsInProgress() == 0) {
-            changeSupport.firePropertyChange("downloadsCompleted", false, true);
+            changeSupport.firePropertyChange(DOWNLOADS_COMPLETED, false, true);
         }
     }
 
