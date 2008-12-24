@@ -12,6 +12,7 @@
     <import file="../common/build-macros.xml"/>
     <import file="../common/build.xml" />
 	<import file="../io/build.xml" />
+	<import file="../http/build.xml" />
     
     <target name="initialize" depends="lw-common.initialize, lw-http.initialize, lw-io.initialize" unless="initialized.security">
         <do.setup-properties component="security">
