@@ -156,15 +156,13 @@ class LoginPanel extends JXPanel implements SettingListener {
         ResizeUtils.forceWidth(passwordField, 139);
 
         autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
+        autoLoginCheckBox.setSelected(true);
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 // When the user clears the auto-login checkbox,
                 // forget the auto-login config
                 if(!autoLoginCheckBox.isSelected()) {
-                    serviceField.setText("");
-                    usernameField.setText("");
-                    passwordField.setText("");
                     accountManager.setAutoLoginConfig(null);
                 }
             }
@@ -224,7 +222,8 @@ class LoginPanel extends JXPanel implements SettingListener {
             serviceField.setText("");
             usernameField.setText("");
             passwordField.setText("");
-            autoLoginCheckBox.setSelected(false);
+            // Preserve prior state.
+//            autoLoginCheckBox.setSelected(false);
         }
         validate();
         repaint();
