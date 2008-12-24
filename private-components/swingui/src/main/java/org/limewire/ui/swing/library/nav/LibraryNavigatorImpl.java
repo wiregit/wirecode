@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.library.nav;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -13,6 +12,8 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
@@ -48,12 +49,11 @@ import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
+import ca.odell.glazedlists.EventList;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-
-import ca.odell.glazedlists.EventList;
-import net.miginfocom.swing.MigLayout;
 
 @Singleton
 class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
@@ -87,16 +87,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
             FriendsSignInPanel friendsPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler) {
-        
-        setMinimumSize(new Dimension(150, 0));
-        setMaximumSize(new Dimension(150, 999));
-        setPreferredSize(new Dimension(150, 999));
-        
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
-        this.limewireList = new NavList();
-        this.onlineList = new NavList();
-        this.offlineList = new OfflineNavList();
+        this.limewireList = new NavList("LibraryNavigator.limewireList");
+        this.onlineList = new NavList("LibraryNavigator.onlineList");
+        this.offlineList = new OfflineNavList("LibraryNavigator.offlineList");
         this.allLists = new NavList[] { limewireList, onlineList, offlineList };
         this.navPanelFactory = navPanelFactory;
         this.friendLibraryMediatorFactory = friendLibraryMediatorFactory;

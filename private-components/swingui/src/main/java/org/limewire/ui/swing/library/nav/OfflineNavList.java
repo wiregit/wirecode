@@ -10,7 +10,8 @@ import org.limewire.setting.evt.SettingListener;
  */
 class OfflineNavList extends NavList {
 
-    public OfflineNavList() {
+    public OfflineNavList(String name) {
+        super(name);
         XMPPSettings.XMPP_SHOW_OFFLINE.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {

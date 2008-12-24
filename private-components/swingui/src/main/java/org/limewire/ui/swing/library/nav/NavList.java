@@ -11,7 +11,9 @@ import java.util.ListIterator;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -28,24 +30,29 @@ class NavList extends JXPanel {
     private final NavPanelMoveAction panelMoveUpAction;
     private final NavPanelMoveAction panelMoveDownAction;
     
+    private final Action labelAction;
     private final JXLabel titleLabel;
     private final JXCollapsiblePane collapsablePanels;
     private final JXPanel panelContainer;
     
-    NavList() {
-        GuiUtils.assignResources(this);
-        
+    private final NavListResources resources = new NavListResources();
+    
+    NavList(String name) {
+        setName(name);
         setLayout(new VerticalLayout(0));
         
         this.panelMoveUpAction = new NavPanelMoveAction(false);
         this.panelMoveDownAction = new NavPanelMoveAction(true);
         
-        this.titleLabel = new ActionLabel(new AbstractAction("Nav List Title") {
+        this.labelAction = new AbstractAction("Nav List Title") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 collapsablePanels.setCollapsed(!collapsablePanels.isCollapsed());
+                putValue(Action.SMALL_ICON, collapsablePanels.isCollapsed() ? resources.collapsedIcon : resources.expandedIcon);
             }
-        }, false, true);
+        };
+        labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
+        this.titleLabel = new ActionLabel(labelAction, false, true);
         FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
@@ -109,6 +116,7 @@ class NavList extends JXPanel {
         NavPanel panel = getPanelForFriend(friend);
         if(panel != null) {
             collapsablePanels.setCollapsed(false);
+            labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
             collapsablePanels.scrollRectToVisible(panel.getBounds());
             if(panel == navPanels.get(0)) {
                 scrollRectToVisible(titleLabel.getBounds());
@@ -278,6 +286,14 @@ class NavList extends JXPanel {
                     moveUpFromThis();
                 }
             }
+        }
+    }
+    
+    private static class NavListResources {        
+        @Resource private Icon collapsedIcon;
+        @Resource private Icon expandedIcon;
+        NavListResources() {
+            GuiUtils.assignResources(this);
         }
     }
 

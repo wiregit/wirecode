@@ -1,7 +1,5 @@
 package org.limewire.ui.swing.mainframe;
 
-import java.awt.Dimension;
-
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXPanel;
@@ -32,11 +30,8 @@ public class LeftPanel extends JXPanel implements VisibleComponent {
         setName("LeftPanel");
 
         setLayout(new MigLayout("insets 0, fill, gap 0"));
-        setMinimumSize(new Dimension(150, 0));
-        setMaximumSize(new Dimension(150, 999));
-        setPreferredSize(new Dimension(150, 999));
-        
         JXPanel libraryNav = libraryNavigator.getComponent();
+        libraryNav.setName("LeftPanel.contents");
         add(libraryNav, "grow");
 
         Line line = Line.createVerticalLine();
