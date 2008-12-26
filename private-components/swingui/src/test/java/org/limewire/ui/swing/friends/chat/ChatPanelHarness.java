@@ -42,7 +42,7 @@ public class ChatPanelHarness {
                 EventListenerList<FriendPresenceEvent> presenceSupport = new EventListenerList<FriendPresenceEvent>();
                 final EventListenerList<FriendEvent> friendSupport = new EventListenerList<FriendEvent>();
                 final EventListenerList<FeatureEvent> featureSupport = new EventListenerList<FeatureEvent>();
-                ChatFriendListPane friendsPane = new ChatFriendListPane(icons, libraryManager, null, presenceSupport);
+                ChatFriendListPane friendsPane = new ChatFriendListPane(icons, null, presenceSupport);
                 frame.add(new ChatPanel(new ConversationPaneFactory() {
                     @Override
                     public ConversationPane create(MessageWriter writer, ChatFriend chatFriend, String loggedInID) {

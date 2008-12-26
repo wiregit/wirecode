@@ -31,7 +31,6 @@ import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolTip;
@@ -56,7 +55,6 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendPresence;
 import org.limewire.core.api.friend.FriendPresenceEvent;
-import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -99,9 +97,7 @@ public class ChatFriendListPane extends JPanel {
     private static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
     private static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     private static final int PREFERRED_WIDTH = 122;
-    private static final int RIGHT_EDGE_PADDING_PIXELS = 2;
-    private static final int RIGHT_ADJUSTED_WIDTH = PREFERRED_WIDTH - RIGHT_EDGE_PADDING_PIXELS;
-    private static final int ICON_WIDTH_FUDGE_FACTOR = 4;
+    private static final int LEFT_EDGE_PADDING_PIXELS = 5;
     private static final Log LOG = LogFactory.getLog(ChatFriendListPane.class);
     private static final String ALL_CHAT_MESSAGES_TOPIC_PATTERN = MessageReceivedEvent.buildTopic(".*");
     
@@ -110,7 +106,6 @@ public class ChatFriendListPane extends JPanel {
     private final IconLibrary icons;
     private final Map<String, ChatFriend> idToFriendMap;
     private final WeakHashMap<ChatFriend, AlternatingIconTimer> friendTimerMap;
-    private final ShareListManager libraryManager;
     private final LibraryNavigator libraryNavigator;
     private final JScrollPane scrollPane;
 
@@ -127,14 +122,13 @@ public class ChatFriendListPane extends JPanel {
 
     @Inject
     public ChatFriendListPane(IconLibrary icons, 
-            ShareListManager libraryManager, LibraryNavigator libraryNavigator,
+            LibraryNavigator libraryNavigator,
             ListenerSupport<FriendPresenceEvent> presenceSupport) {
         super(new BorderLayout());
         this.icons = icons;
         this.chatFriends = new BasicEventList<ChatFriend>();
         this.idToFriendMap = new HashMap<String, ChatFriend>();
         this.friendTimerMap = new WeakHashMap<ChatFriend, AlternatingIconTimer>();
-        this.libraryManager = libraryManager;
         this.libraryNavigator = libraryNavigator;
         
         GuiUtils.assignResources(this);
@@ -484,21 +478,18 @@ public class ChatFriendListPane extends JPanel {
         private final JXPanel cell; 
         private final JXLabel friendName;
         private final JXLabel chatStatus;
-        private final JXLabel endChat;
         
         public FriendCellRenderer() {
-            cell = new JXPanel(new MigLayout("insets 3 3 0 0", "[]4[]0:push[]" + Integer.toString(RIGHT_EDGE_PADDING_PIXELS), "[]0"));
+            cell = new JXPanel(new MigLayout("insets 2 2 0 0", "[]4[]"));
             
             this.friendName = new JXLabel();
             this.chatStatus = new JXLabel();
-            this.endChat = new JXLabel();
-            this.endChat.setToolTipText(tr("Close conversation"));
-            
+
             friendName.setFont(friendFont);
             friendName.setForeground(friendColor);
             friendName.setMaximumSize(new Dimension(85, 12));
         }
-
+        
         @Override
         public final Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
@@ -525,21 +516,19 @@ public class ChatFriendListPane extends JPanel {
         }
 
         protected void renderComponent(JPanel panel, Object value, ChatFriend chatFriend, boolean isChatHoveredOver) {
-            chatStatus.setIcon(getChatIcon(chatFriend));
-            panel.add(chatStatus);
-
-            friendName.setText(value.toString());
-            panel.add(friendName);
-            
             if (isChatHoveredOver) {
                 Point hoverPoint = mouseHoverFriend.getHoverPoint();
-                Icon closeChatIcon = icons.getEndChat();
                 boolean overCloseIcon = isOverCloseIcon(hoverPoint);
-                endChat.setIcon(overCloseIcon ? icons.getEndChatOverIcon() : closeChatIcon);
-                panel.add(endChat);
+                chatStatus.setIcon(overCloseIcon ? icons.getEndChatOverIcon() : icons.getEndChat());
+                chatStatus.setToolTipText(tr("Close conversation"));
+                panel.add(chatStatus, "gapleft 4, gapright 2");
             } else {
-                endChat.setIcon(null);
+                chatStatus.setIcon(getChatIcon(chatFriend));
+                chatStatus.setToolTipText(null);
+                panel.add(chatStatus);
             }
+            friendName.setText(value.toString());
+            panel.add(friendName);
         }
     }
     
@@ -563,6 +552,7 @@ public class ChatFriendListPane extends JPanel {
             if (row == -1) {
                 return null;
             }
+            
             EventTableModel model = (EventTableModel) friendsTable.getModel();
             ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
             StringBuilder tooltip = new StringBuilder();
@@ -576,7 +566,7 @@ public class ChatFriendListPane extends JPanel {
                 .append("<b>").append(chatFriend.getName()).append("</b><br/>");
             String status = chatFriend.getStatus();
             if (status != null && status.length() > 0) {
-                //using width to limit the size of the tooltip, unfortunatley looks like max-width does not work 
+                //using width to limit the size of the tooltip, unfortunately looks like max-width does not work 
                 tooltip.append("<div color=\"rgb(255,255,255)\" style=\"width: 300px;\">").append(status).append("</div>");
             }
             tooltip.append("</body>")
@@ -586,12 +576,9 @@ public class ChatFriendListPane extends JPanel {
     }
     
     private boolean isOverCloseIcon(Point point) {
-        JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
-        int scrollBarWidthAdjustment = verticalScrollBar.isVisible() ? verticalScrollBar.getWidth() : 0;
-        return point.x > RIGHT_ADJUSTED_WIDTH - icons.getEndChat().getIconWidth() - ICON_WIDTH_FUDGE_FACTOR - scrollBarWidthAdjustment && 
-                                    point.x < RIGHT_ADJUSTED_WIDTH;
+        return point.x > LEFT_EDGE_PADDING_PIXELS && point.x < icons.getEndChat().getIconWidth() + LEFT_EDGE_PADDING_PIXELS;
     }
-
+    
     private class AlternatingIconTimer {
         private WeakReference<ChatFriend> friendRef;
         private int flashCount;
@@ -646,7 +633,8 @@ public class ChatFriendListPane extends JPanel {
             
             if (e.getClickCount() == 2 || chatFriend.isChatting()) {
                 startOrSelectConversation(chatFriend);
-             }
+                mouseHoverFriend.clearHoverDetails();
+            }
         }
     }
     
@@ -684,7 +672,7 @@ public class ChatFriendListPane extends JPanel {
                 setTableCursor(isOverCloseIcon(e.getPoint()) && friend.isChatting());
             }
         }
-
+        
         private void repaintTableCell(int friendIndex) {
             AbstractTableModel model = (AbstractTableModel) friendsTable.getModel();
             model.fireTableCellUpdated(friendIndex, 0);
@@ -840,24 +828,6 @@ public class ChatFriendListPane extends JPanel {
             ChatFriend chatFriend = context.getFriend();
             closeChat(chatFriend);
         }
-    }
-
-    public boolean isSharingFilesWithFriends() {
-        for(ChatFriend chatFriend : chatFriends) {
-            if (libraryManager.getOrCreateFriendShareList(chatFriend.getFriend()).size() > 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean hasFriendsOnLimeWire() {
-        for(ChatFriend chatFriend : chatFriends) {
-            if (chatFriend.isSignedInToLimewire()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void setTableCursor(boolean useHandCursor) {
