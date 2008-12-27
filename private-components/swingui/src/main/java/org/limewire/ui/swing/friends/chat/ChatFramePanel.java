@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.friends.chat;
 
+import static org.limewire.ui.swing.util.I18n.tr;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,11 +32,9 @@ import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.sound.WavSoundPlayer;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
-import org.limewire.ui.swing.util.GuiUtils;
-import static org.limewire.ui.swing.util.I18n.tr;
-
 import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.EnabledListenerList;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
@@ -64,6 +64,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
+    private String lastSelectedConversationFriendId;
     
     @Inject
     public ChatFramePanel(ChatPanel chatPanel, ChatFriendListPane chatFriendListPane, TrayNotifier notifier) {
@@ -146,9 +147,8 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     @RuntimeTopicPatternEventSubscriber(methodName="getMessagingTopicPatternName")
     public void handleMessageReceived(String topic, MessageReceivedEvent event) {
-        unseenMessageListener.messageReceivedFrom(event.getMessage().getFriendID(), isVisible());
-        
         if (event.getMessage().getType() != Message.Type.Sent && !GuiUtils.getMainFrame().isActive()) {
+            notifyUnseenMessageListener(event);
             LOG.debug("Sending a message to the tray notifier");
             notifier.showMessage(getNoticeForMessage(event));
             
@@ -158,11 +158,26 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
             }
         } 
     }
+
+    private void notifyUnseenMessageListener(MessageReceivedEvent event) {
+        String messageFriendID = event.getMessage().getFriendID();
+        if (!messageFriendID.equals(lastSelectedConversationFriendId)) {
+            unseenMessageListener.messageReceivedFrom(messageFriendID, isVisible());
+        }
+    }
     
     @EventSubscriber
     public void handleConversationSelected(ConversationSelectedEvent event) {
         if (event.isLocallyInitiated()) {
-            unseenMessageListener.conversationSelected(event.getFriend().getID());
+            lastSelectedConversationFriendId = event.getFriend().getID();
+            unseenMessageListener.conversationSelected(lastSelectedConversationFriendId);
+        }
+    }
+    
+    @EventSubscriber
+    public void handleChatClosed(CloseChatEvent event) {
+        if (event.getFriend().getID().equals(lastSelectedConversationFriendId)) {
+            lastSelectedConversationFriendId = null;
         }
     }
 
