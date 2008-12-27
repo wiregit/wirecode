@@ -43,6 +43,7 @@ import javax.swing.table.TableModel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -436,6 +437,15 @@ public class ChatFriendListPane extends JPanel {
         }
         return getIcon(chatFriend, icons);
     }
+    
+    private void fireCloseChat(ChatFriend chatFriend) {
+        new CloseChatEvent(chatFriend).publish();
+    }
+    
+    @EventSubscriber
+    public void handleCloseChatEvent(CloseChatEvent event) {
+        closeChat(event.getFriend());
+    }
 
     private void closeChat(ChatFriend chatFriend) {
         if (chatFriend != null) {
@@ -444,7 +454,6 @@ public class ChatFriendListPane extends JPanel {
             if (!chatFriend.isSignedIn()) {
                 chatFriends.remove(idToFriendMap.remove(chatFriend.getID()));
             }
-            new CloseChatEvent(chatFriend).publish();
             
             ChatFriend nextFriend = null;
             for(ChatFriend tmpFriend : chatFriends) {
@@ -702,7 +711,7 @@ public class ChatFriendListPane extends JPanel {
             if (isOverCloseIcon(e.getPoint())) {
                 ChatFriend chatFriend = getFriendFromPoint(e);
                 if (e.getClickCount() == 1 && chatFriend != null && chatFriend.isChatting()) {
-                    closeChat(chatFriend);
+                    fireCloseChat(chatFriend);
                     setTableCursor(false);
                 }
             } 
@@ -826,7 +835,7 @@ public class ChatFriendListPane extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
-            closeChat(chatFriend);
+            fireCloseChat(chatFriend);
         }
     }
 

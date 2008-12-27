@@ -137,12 +137,12 @@ public class ConversationPane extends JPanel implements Displayable {
     private JScrollPane conversationScroll;
     
     @AssistedInject
-    public ConversationPane(@Assisted MessageWriter writer, @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
+    public ConversationPane(@Assisted MessageWriter writer, final @Assisted ChatFriend chatFriend, @Assisted String loggedInID,
                             ShareListManager libraryManager, IconManager iconManager, LibraryNavigator libraryNavigator,
                             ResultDownloader downloader, RemoteFileItemFactory remoteFileItemFactory,
                             @Named("available") ListenerSupport<FriendEvent> friendSupport,
                             SaveLocationExceptionHandler saveLocationExceptionHandler,
-                            ListenerSupport<FeatureEvent> featureSupport) {
+                            ListenerSupport<FeatureEvent> featureSupport, IconLibrary iconLibrary) {
         this.writer = writer;
         this.chatFriend = chatFriend;
         this.remoteFileItemFactory = remoteFileItemFactory;
@@ -169,6 +169,20 @@ public class ConversationPane extends JPanel implements Displayable {
         conversationScroll = new JScrollPane(editor, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         conversationScroll.setOpaque(false);
         conversationScroll.setBorder(BorderFactory.createEmptyBorder());
+        JButton closeConversation = new JButton(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CloseChatEvent(chatFriend).publish();
+            }
+        });
+        closeConversation.setIcon(iconLibrary.getEndChat());
+        closeConversation.setBorderPainted(false);
+        closeConversation.setContentAreaFilled(false);
+        closeConversation.setFocusPainted(false);
+        JPanel closeConversationButtonPanel = new JPanel(new BorderLayout());
+        closeConversationButtonPanel.setOpaque(false);
+        closeConversationButtonPanel.add(closeConversation, BorderLayout.EAST);
+        conversationScroll.setColumnHeaderView(closeConversationButtonPanel);
         editor.setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
         
         JPanel chatWrapper = new JPanel(new GridBagLayout());
