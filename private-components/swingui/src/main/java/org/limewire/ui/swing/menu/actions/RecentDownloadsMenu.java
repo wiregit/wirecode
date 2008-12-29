@@ -28,13 +28,16 @@ import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 
+import com.google.inject.Inject;
+
 public class RecentDownloadsMenu extends JMenu {
     private final JMenuItem emptyItem;
 
     private final Action clearMenu;
 
-    public RecentDownloadsMenu(String name, final LibraryManager libraryManager) {
-        super(name);
+    @Inject
+    public RecentDownloadsMenu(final LibraryManager libraryManager) {
+        super(I18n.tr("Recent Downloads"));
         emptyItem = new JMenuItem(I18n.tr("(empty)"));
         emptyItem.setEnabled(false);
 

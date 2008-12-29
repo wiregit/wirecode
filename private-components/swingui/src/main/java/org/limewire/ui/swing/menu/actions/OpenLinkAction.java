@@ -24,6 +24,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MagnetHandler;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
+import com.google.inject.Inject;
+
 /**
  * An action to prompt the user to open and download a link. Two link types are
  * supported: magnet links and torrent links.
@@ -41,11 +43,12 @@ public class OpenLinkAction extends AbstractAction {
 
     private final MagnetHandler magnetHandler;
 
-    public OpenLinkAction(Navigator navigator, String name,
+    @Inject
+    public OpenLinkAction(Navigator navigator,
             DownloadListManager downloadListManager,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
             MagnetHandler magnetHandler) {
-        super(name);
+        super(I18n.tr("Open &Link..."));
         this.navigator = navigator;
         this.downloadListManager = downloadListManager;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
