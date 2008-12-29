@@ -3,6 +3,8 @@ package org.limewire.listener;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.util.ExceptionUtils;
+
 public class PendingEventMulticasterImpl<E> implements EventMulticaster<E>, PendingEventBroadcaster<E> {
 
     private final EventListenerList<E> listeners = new EventListenerList<E>();
@@ -47,11 +49,25 @@ public class PendingEventMulticasterImpl<E> implements EventMulticaster<E>, Pend
         // no queued events remain.
         while (!queuedEvents.isEmpty()) {
             if (firing.compareAndSet(false, true)) {
-                E e;
-                while ((e = queuedEvents.poll()) != null) {
-                    listeners.broadcast(e);
+                try {
+                    Throwable t = null;
+                    E e;
+                    while ((e = queuedEvents.poll()) != null) {
+                        try {
+                            listeners.broadcast(e);
+                        } catch(Throwable thrown) {
+                            thrown = ExceptionUtils.reportOrReturn(thrown);
+                            if(thrown != null && t == null) {
+                                t = thrown;
+                            }
+                        }
+                    }
+                    if(t != null) {
+                        ExceptionUtils.reportOrRethrow(t);
+                    }
+                } finally {
+                    firing.set(false);
                 }
-                firing.set(false);
             } else {
                 // Exit while loop, allow firing thread
                 // to take control of broadcasting the pending events.
