@@ -14,11 +14,11 @@ import org.limewire.xmpp.api.client.LibraryChangedEvent;
 import org.limewire.xmpp.api.client.RosterEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 import org.limewire.xmpp.api.client.XMPPService;
+import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 import org.limewire.xmpp.client.impl.XMPPAddressResolver;
 import org.limewire.xmpp.client.impl.XMPPAddressSerializer;
 import org.limewire.xmpp.client.impl.XMPPAuthenticator;
 import org.limewire.xmpp.client.impl.XMPPServiceImpl;
-import org.limewire.xmpp.client.impl.XMPPAddressRegistry;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -52,7 +52,8 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
         bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
 
-        EventMulticaster<XMPPConnectionEvent> connectionMulticaster = new EventMulticasterImpl<XMPPConnectionEvent>();
+        EventMulticaster<XMPPConnectionEvent> connectionMulticaster =
+            new EventMulticasterImpl<XMPPConnectionEvent>(org.limewire.logging.LogFactory.getLog(XMPPConnectionEvent.class));
         bind(new TypeLiteral<EventMulticaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventBroadcaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);

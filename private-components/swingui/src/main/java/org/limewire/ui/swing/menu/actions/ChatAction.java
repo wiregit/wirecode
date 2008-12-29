@@ -34,7 +34,7 @@ public class ChatAction extends AbstractAction {
         super(I18n.tr("Chat"));
         this.friendsPane = friendsPane;
         this.friendsPanel = friendsPanel;
-        updateDisability();
+        setEnabled(false);
 
     }
 
@@ -52,48 +52,22 @@ public class ChatAction extends AbstractAction {
         // listen for changes in the selected friend
         navigator.addNavigationListener(new NavigationListener() {
             @Override
-            public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {
-                handleFriendNav(libraryNavigator, category);
-            }
-
-            @Override
-            public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {
-                handleFriendNav(libraryNavigator, category);
-            }
-
-            @Override
             public void itemSelected(NavCategory category, NavItem navItem,
                     NavSelectable selectable, JComponent panel) {
-                handleFriendNav(libraryNavigator, category);
+                setFriend(libraryNavigator.getSelectedFriend());
             }
-
-            private void handleFriendNav(final LibraryNavigator libraryNavigator,
-                    NavCategory category) {
-                if (category == NavCategory.LIBRARY) {
-                    setFriend(libraryNavigator.getSelectedFriend());
-                }
-            }
+            
+            @Override public void itemAdded(NavCategory category, NavItem navItem, JComponent panel) {}
+            @Override public void itemRemoved(NavCategory category, NavItem navItem, JComponent panel) {}
+            @Override public void categoryAdded(NavCategory category) {}
+            @Override public void categoryRemoved(NavCategory category) {}
         });
     }
 
-    /**
-     * Sets a new friend for this action and calls updateDisability().
-     */
+    /** Sets a new friend for this action and calls updates the enabledness. */
     protected void setFriend(Friend friend) {
         this.friend = friend;
-        updateDisability();
-    }
-
-    /**
-     * Enables or disables the action based on whether the new friend is a
-     * jabber user.
-     */
-    protected void updateDisability() {
-        if (friend == null || friend.isAnonymous()) {
-            setEnabled(false);
-        } else {
-            setEnabled(true);
-        }
+        setEnabled(friend != null && !friend.isAnonymous());
     }
 
     protected Friend getFriend() {

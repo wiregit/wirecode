@@ -111,6 +111,11 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         
         smackConnectionListener = new SmackConnectionListener();
     }
+    
+    @Override
+    public String toString() {
+        return org.limewire.util.StringUtils.toString(this, configuration, connection);
+    }
 
     public void setMode(Presence.Mode mode) {
         connection.sendPacket(getPresenceForMode(mode));

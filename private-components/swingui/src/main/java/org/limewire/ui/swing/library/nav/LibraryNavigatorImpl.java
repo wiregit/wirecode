@@ -314,6 +314,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             }
         }
     }
+    
+    @Override
+    public void selectLibrary() {
+        myLibrary.select();
+    }
 
     @Override
     public void selectInLibrary(URN urn, Category category) {

@@ -1,7 +1,9 @@
 package org.limewire.ui.swing.nav;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JComponent;
@@ -20,8 +22,15 @@ class NavigatorImpl implements Navigator {
     // CoW to allow listeners to remove themselves during iteration
     private final List<NavigationListener> listeners = new CopyOnWriteArrayList<NavigationListener>();
     private final List<NavItemImpl> navItems = new ArrayList<NavItemImpl>();
+    private final Map<NavCategory, Integer> categoryCount = new EnumMap<NavCategory, Integer>(NavCategory.class);
     
     private NavItemImpl selectedItem;
+    
+    public NavigatorImpl() {
+        for(NavCategory category : NavCategory.values()) {
+            categoryCount.put(category, 0);
+        }
+    }
  
     @Override
     public NavItem createNavItem(NavCategory category, String id, JComponent panel) {
@@ -62,9 +71,16 @@ class NavigatorImpl implements Navigator {
         
     private void addNavItem(NavItemImpl item, JComponent panel) {
         LOG.debugf("Adding item {0}", item);
-        navItems.add(item);
+        navItems.add(item);        
         for(NavigationListener listener : listeners) {
             listener.itemAdded(item.category, item, panel);
+        }
+        
+        categoryCount.put(item.category, categoryCount.get(item.category)+1);        
+        if(categoryCount.get(item.category) == 1) {
+            for(NavigationListener listener : listeners) {
+                listener.categoryAdded(item.category);
+            }    
         }
     }
     
@@ -80,6 +96,13 @@ class NavigatorImpl implements Navigator {
                 }
             }
             item.fireRemoved();
+            
+            categoryCount.put(item.category, categoryCount.get(item.category)-1);
+            if(categoryCount.get(item.category) == 0) {
+                for(NavigationListener listener : listeners) {
+                    listener.categoryRemoved(item.category);
+                }
+            }
         } else {
             LOG.debugf("Item {0} not contained in list.", item);
         }
