@@ -32,6 +32,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.components.LimeJFrame;
 import org.limewire.ui.swing.options.TabItemListener;
 import org.limewire.ui.swing.painter.BarPainterFactory;
+import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -47,17 +48,20 @@ import com.google.inject.Singleton;
 public class AdvancedToolsPanel extends JPanel {
     /** Defines the tab identifiers for the window. */
     public enum TabId {
-        CONNECTIONS(I18n.tr("Connections")), 
-        //LOGGING(I18n.tr("Logging")), // removed obsolete feature
-        CONSOLE(I18n.tr("Console")),
-        MOJITO(I18n.tr("Mojito")),
-        
-        ;
+        CONNECTIONS(I18n.tr("Connections"), I18n.tr("View connections to other P2P clients")), 
+        CONSOLE(I18n.tr("Console"), I18n.tr("View console messages")),
+        MOJITO(I18n.tr("Mojito"), I18n.tr("View incoming and outgoing DHT messages"));
         
         private final String name;
+        private final String tooltip;
         
-        TabId(String name) {
+        TabId(String name, String tooltip) {
             this.name = name;
+            this.tooltip = tooltip;
+        }
+        
+        public String tooltip() {
+            return tooltip;
         }
         
         public String toString() {
@@ -74,6 +78,8 @@ public class AdvancedToolsPanel extends JPanel {
     private Icon connectionsIcon;
     @Resource
     private Icon consoleIcon;
+    @Resource
+    private Icon mojitoIcon;
     @Resource
     private Color tabTopColor;
     @Resource
@@ -120,9 +126,8 @@ public class AdvancedToolsPanel extends JPanel {
         
         // Add tabs to dialog.
         addTab(TabId.CONNECTIONS, connectionsIcon, connectionsPanel);
-        //addTab(TabId.LOGGING, null, loggingPanel);
         addTab(TabId.CONSOLE, consoleIcon, consolePanel);
-        addTab(TabId.MOJITO, consoleIcon, mojitoPanel);
+        addTab(TabId.MOJITO, mojitoIcon, mojitoPanel);
     }
     
     /**
@@ -141,6 +146,7 @@ public class AdvancedToolsPanel extends JPanel {
         // Create panel to hold tab content panels.
         cardLayout = new CardLayout();
         cardPanel = new JPanel();
+        cardPanel.setBackground(backgroundColor);
         cardPanel.setLayout(cardLayout);
         
         add(headerPanel, BorderLayout.NORTH);
@@ -191,10 +197,8 @@ public class AdvancedToolsPanel extends JPanel {
     
     /**
      * Displays this panel in a modeless window.
-     * @param tabId identifier for initial tab, one of TabId.CONNECTIONS, 
-     *  LOGGING, or CONSOLE
      */
-    public void display(TabId tabId) {
+    public void display() {
         if (this.window == null) {
             // Create modeless window.
             JFrame frame = new LimeJFrame(WINDOW_TITLE);
@@ -230,8 +234,16 @@ public class AdvancedToolsPanel extends JPanel {
             // Save window reference.
             this.window = frame;
 
-            // Select initial tab.
-            select(tabId);
+            // Select first enabled tab.
+            select(findNextEnabledTab(-1, true));
+            
+            // Start tab panels.
+            for (TabId tabId : TabId.values()) {
+                TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
+                if (tabPanel != null) {
+                    tabPanel.start();
+                }
+            }
         }
 
         // Display window.
@@ -246,7 +258,7 @@ public class AdvancedToolsPanel extends JPanel {
         if (this.window != null) {
             // Stop tab panels.
             for (TabId tabId : TabId.values()) {
-                TabPanel tabPanel = tabPanelMap.get(tabId);
+                TabPanel tabPanel = tabItemMap.get(tabId).getTabPanel();
                 if (tabPanel != null) {
                     tabPanel.stop();
                 }
@@ -283,10 +295,43 @@ public class AdvancedToolsPanel extends JPanel {
     }
     
     /**
+     * Returns the TabId of the next enabled tab after the specified tab index.
+     * The <code>forward</code> argument specifies direction: true for next
+     * tab, false for previous tab.  If no other enabled tabs are found, then
+     * null is returned.
+     */
+    private TabId findNextEnabledTab(int startIndex, boolean forward) {
+        // Get array of TabId values.
+        TabId[] tabIds = TabId.values();
+
+        // Normalize start index.
+        startIndex = (startIndex + tabIds.length) % tabIds.length;
+        
+        // Get index of next/previous tab.
+        int nextTab = (startIndex + (forward ? 1 : -1) + tabIds.length) % tabIds.length;
+        boolean enabled = tabItemMap.get(tabIds[nextTab]).isEnabled();
+        
+        // Find next/previous enabled tab.  If no enabled tabs are found, 
+        // then return the start index.
+        while (!enabled && (nextTab != startIndex)) {
+            nextTab = (nextTab + (forward ? 1 : -1) + tabIds.length) % tabIds.length;
+            enabled = tabItemMap.get(tabIds[nextTab]).isEnabled();
+        }
+        
+        // Return enabled tab, or null if none found.
+        return (nextTab != startIndex) ? tabIds[nextTab] : null;
+    }
+    
+    /**
      * Selects the tab item with the specified identifier.
      * @param tabId the identifier of the tab
      */
     private void select(TabId tabId) {
+        // Skip if identifier is null.
+        if (tabId == null) {
+            return;
+        }
+        
         // De-select current item.
         if (selectedItem != null) {
             selectedItem.fireSelected(false);
@@ -304,9 +349,6 @@ public class AdvancedToolsPanel extends JPanel {
             cardPanel.add(tabPanel, tabId.toString());
         }
         
-        // Start refresh updates in tab.
-        tabPanel.start();
-        
         // Fire event to select tab.
         selectedItem.fireSelected(true);
 
@@ -315,33 +357,25 @@ public class AdvancedToolsPanel extends JPanel {
     }
 
     /**
-     * Selects the next tab item.
+     * Selects the next enabled tab item.
      */
     private void selectNext() {
-        // Find the selected tab, and select the next one.
-        TabId[] tabIds = TabId.values();
-        for (int i = 0; i < tabIds.length; i++) {
-            if (tabIds[i].equals(selectedItem.getTabId())) {
-                int nextTab = (i + 1) % tabIds.length;
-                select(tabIds[nextTab]);
-                break;
-            }
-        }
+        // Get index for selected tab item.
+        int index = selectedItem.getTabId().ordinal();
+
+        // Select next enabled tab.
+        select(findNextEnabledTab(index, true));
     }
     
     /**
-     * Selects the previous tab item.
+     * Selects the previous enabled tab item.
      */
     private void selectPrev() {
-        // Find the selected tab, and select the previous one.
-        TabId[] tabIds = TabId.values();
-        for (int i = 0; i < tabIds.length; i++) {
-            if (tabIds[i].equals(selectedItem.getTabId())) {
-                int prevTab = ((i == 0) ?  tabIds.length : i) - 1;
-                select(tabIds[prevTab]);
-                break;
-            }
-        }
+        // Get index for selected tab item.
+        int index = selectedItem.getTabId().ordinal();
+
+        // Select previous enabled tab.
+        select(findNextEnabledTab(index, false));
     }
     
     /**
@@ -352,6 +386,7 @@ public class AdvancedToolsPanel extends JPanel {
         private final TabId tabId;
         private final Icon icon;
         private final Provider<? extends TabPanel> provider;
+        private TabPanel tabPanel;
 
         /**
          * Constructs a tab item using the specified tab identifier, icon, and
@@ -373,6 +408,10 @@ public class AdvancedToolsPanel extends JPanel {
         public void select() {
             AdvancedToolsPanel.this.select(tabId);
         }
+
+        public boolean isEnabled() {
+            return getTabPanel().isTabEnabled();
+        }
         
         public Icon getIcon() {
             return icon;
@@ -383,7 +422,10 @@ public class AdvancedToolsPanel extends JPanel {
         }
 
         public TabPanel getTabPanel() {
-            return this.provider.get();
+            if (tabPanel == null) {
+                tabPanel = this.provider.get();
+            }
+            return tabPanel;
         }
     }
 
@@ -405,15 +447,28 @@ public class AdvancedToolsPanel extends JPanel {
             
             // Store tab identifier and action command.
             tabId = tabItem.getTabId();
-            putValue(Action.ACTION_COMMAND_KEY, tabId.toString());
+            putValue(ACTION_COMMAND_KEY, tabId.toString());
+            putValue(SHORT_DESCRIPTION, tabId.tooltip());
 
-            // Install listener to change state when tab item is selected. 
+            // Install listener to handle tab item selection. 
             tabItem.addTabItemListener(new TabItemListener() {
                 @Override
                 public void itemSelected(boolean selected) {
                     putValue(SELECTED_KEY, selected);
                 }
             });
+            
+            // Install listener to handle tab panel enabled.
+            TabPanel tabPanel = tabItem.getTabPanel();
+            tabPanel.addEnabledListener(new EnabledListener() {
+                @Override
+                public void enabledChanged(boolean enabled) {
+                    setEnabled(enabled);
+                }
+            });
+            
+            // Initialize enabled state.
+            setEnabled(tabPanel.isTabEnabled());
         }
 
         @Override
