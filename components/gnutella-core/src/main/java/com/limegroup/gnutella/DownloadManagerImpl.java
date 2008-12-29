@@ -21,6 +21,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.core.settings.DownloadSettings;
+import org.limewire.core.settings.SharingSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.Address;
@@ -268,12 +269,30 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
             }
         }
         
+        loadResumeDownloaders();
+        
         downloadsReadFromDisk = true;
         
-        if(failedAll)
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by going to your Library, viewing your 'Incomplete Files', and clicking to 'Resume' your downloads."));
-        else if(failedSome)
-            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by going to your Library, viewing your 'Incomplete Files', and clicking to 'Resume' your downloads."));
+        if(failedAll) {
+            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+        } else if(failedSome) {
+            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by clicking 'Try Again' on the downloads.  When LimeWire finds a source for the file, the download will pick up where it left off."));
+        }
+    }
+    
+    private void loadResumeDownloaders() {
+        Collection<File> incompleteFiles = 
+            incompleteFileManager.getUnregisteredIncompleteFilesInDirectory(
+                    SharingSettings.INCOMPLETE_DIRECTORY.getValue());
+        for(File file : incompleteFiles) {
+            try {
+                download(file);
+            } catch (SaveLocationException e) {
+                LOG.error("SLE loading incomplete file", e);
+            } catch (CantResumeException e) {
+                LOG.error("CRE loading incomplete file", e);
+            }
+        }
     }
     
     public CoreDownloader prepareMemento(DownloadMemento memento) {

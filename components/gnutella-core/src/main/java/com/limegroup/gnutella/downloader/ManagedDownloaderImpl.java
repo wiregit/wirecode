@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -48,7 +50,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.BandwidthTracker;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Endpoint;
@@ -61,7 +62,6 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocListener;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.DirectDHTAltLoc;
@@ -79,7 +79,6 @@ import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.FileDesc;
 import com.limegroup.gnutella.library.FileManager;
-import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.UrnCache;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -606,11 +605,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             // stores up to 10 locations for up to 10 minutes
             recentInvalidAlts = new FixedSizeExpiringSet<AlternateLocation>(10, 10*60*1000L);
         }
-        synchronized (this) {
-            if(shouldInitAltLocs()) {
-                initializeAlternateLocations();
-            }
-        }
         
         try {
             //initializeFilesAndFolders();
@@ -1030,73 +1024,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                                      long length) throws IOException {
         return incompleteFileManager.getFile(name, urn, length);
     }
-    
-    /**
-     * Adds alternate locations that may have been stored in the
-     * IncompleteFileDesc for this download.
-     */
-    private synchronized void initializeAlternateLocations() {
-        if( incompleteFile == null ) // no incomplete, no big deal.
-            return;
-        
-        FileDesc fd = fileManager.getIncompleteFileList().getFileDesc(incompleteFile);
-        if( fd != null && fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-            // Assert that the SHA1 of the IFD and our sha1 match.
-            if(getSha1Urn() != null && !getSha1Urn().equals(ifd.getSHA1Urn())) {
-                ErrorService.error(new IllegalStateException(
-                           "wrong IFD." +
-                           "\nclass: " + getClass().getName() +
-                           "\nours  :   " + incompleteFile +
-                           "\ntheirs: " + ifd.getFile() +
-                           "\nour hash    : " + getSha1Urn() +
-                           "\ntheir hashes: " + ifd.getUrns()+
-                           "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
-                fileManager.getManagedFileList().remove(incompleteFile);
-            }
-        }
-        
-        // Locate the hash for this incomplete file, to retrieve the 
-        // IncompleteFileDesc.
-        URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
-        if( hash != null ) {
-            long size = IncompleteFileManager.getCompletedSize(incompleteFile);
-            //create validAlts
-            addLocationsToDownload(altLocManager.getDirect(hash),
-                    altLocManager.getPushNoFWT(hash),
-                    altLocManager.getPushFWT(hash),
-                    size);
-        }
-    }
-    
-    /**
-     * Adds the alternate locations from the collections as possible
-     * download sources.
-     */
-    private void addLocationsToDownload(AlternateLocationCollection<? extends AlternateLocation> direct,
-                                        AlternateLocationCollection<? extends AlternateLocation>  push,
-                                        AlternateLocationCollection<? extends AlternateLocation>  fwt,
-                                        long size) {
-        List<RemoteFileDesc> locs =
-            new ArrayList<RemoteFileDesc>(direct.getAltLocsSize()+push.getAltLocsSize()+fwt.getAltLocsSize());
-
-        synchronized(direct) {
-            for(AlternateLocation loc : direct)
-                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
-        }
-        
-        synchronized(push) {
-            for(AlternateLocation loc : push)
-                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
-        }
-        
-        synchronized(fwt) {
-            for(AlternateLocation loc : fwt)
-                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
-        }
-                
-        addPossibleSources(locs);
-    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#conflictsWithIncompleteFile(java.io.File)
@@ -1168,16 +1095,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         else
             return queryRequestFactory.createQuery(queryString);
             
-    }
-    
-    /** Subclasses should override this method when necessary.
-     *  If you return false, then AltLocs are not initialized from the
-     *  incomplete file upon invocation of tryAllDownloads.
-     *  The true case can be used when the partial file is being shared
-     *  through PFS and we've learned about AltLocs we want to use.
-     */
-    protected boolean shouldInitAltLocs() {
-        return false;
     }
     
     /**
