@@ -1,20 +1,42 @@
 package org.limewire.ui.swing.advanced;
 
 import java.awt.BorderLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
+import org.limewire.core.api.mojito.MojitoManager;
 import org.limewire.ui.swing.plugin.SwingUiPlugin;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+/**
+ * The Mojito tab panel for the Advanced Tools window.  This displays the
+ * Arcs view for the Mojito DHT.
+ */
 class MojitoPanel extends TabPanel {
     
+    private final MojitoManager mojitoManager;
+    
     private SwingUiPlugin plugin;
+    
+    private PropertyChangeListener dhtListener;
+    
+    private boolean dhtStarted;
 
-    public MojitoPanel() {
+    /**
+     * Constructs a MojitoPanel using the specified MojitoManager.
+     */
+    @Inject
+    public MojitoPanel(MojitoManager mojitoManager) {
+        
+        this.mojitoManager = mojitoManager;
+        
+        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         setLayout(new BorderLayout());
     }
     
@@ -22,35 +44,93 @@ class MojitoPanel extends TabPanel {
         this.plugin = mojitoPlugin;
     }
 
+    /**
+     * Returns true if the tab content is enabled.
+     */
+    @Override
+    public boolean isTabEnabled() {
+        // Tab enabled if plugin is installed and DHT has started.
+        return ((plugin != null) && dhtStarted);
+    }
+
+    /**
+     * Performs startup tasks for the tab.  This method is called when the 
+     * parent window is opened. 
+     */
     @Override
     public void start() {
-        if(plugin != null) {
-            JComponent render = plugin.getPluginComponent();
-            if(render != null) {
-                removeAll();
-                add(render, BorderLayout.CENTER);
-            } else {
-                fail();
-            }
-            plugin.startPlugin();
+        // Render tab content.
+        if (plugin != null) {
+            renderPlugin();
         } else {
-            fail();
-        }        
+            renderNotAvailable();
+        }
+        
+        // Initialize DHT state.
+        dhtStarted = mojitoManager.isRunning();
+        
+        // Add property change listener to update DHT state.
+        if (dhtListener == null) {
+            dhtListener = new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent e) {
+                    if (MojitoManager.DHT_STARTED.equals(e.getPropertyName())) {
+                        boolean wasStarted = dhtStarted;
+                        dhtStarted = ((Boolean) e.getNewValue()).booleanValue();
+                        // Render plugin if available and DHT just started. 
+                        if (dhtStarted && !wasStarted && (plugin != null)) {
+                            renderPlugin();
+                        }
+                        // Notify listeners about enabled state.
+                        fireEnabledChanged(isTabEnabled());
+                    }
+                }
+            };
+            mojitoManager.addPropertyChangeListener(dhtListener);
+        }
+    }
+
+    /**
+     * Displays the Mojito plugin component in the tab.  
+     */
+    private void renderPlugin() {
+        JComponent render = plugin.getPluginComponent();
+        if (render != null) {
+            removeAll();
+            add(render, BorderLayout.CENTER);
+        } else {
+            renderNotAvailable();
+        }
+        plugin.startPlugin();
     }
     
-    private void fail() {
+    /**
+     * Displays a "not available" message in the tab.
+     */
+    private void renderNotAvailable() {
         removeAll();
         JLabel naLabel = new JLabel();
-        naLabel.setText("Mojito Plugin not available");
+        naLabel.setText("Mojito Arcs View not available");
         naLabel.setHorizontalAlignment(JLabel.CENTER);
         naLabel.setVerticalAlignment(JLabel.CENTER);
         add(naLabel, BorderLayout.CENTER);
     }
 
+    /**
+     * Performs clean up tasks for the tab.  This method is called when the
+     * parent window is closed.
+     */
     @Override
     public void stop() {
-        if(plugin != null) {
+        // Stop Mojito plugin.
+        if (plugin != null) {
             plugin.stopPlugin();
+        }
+        
+        // Remove property change listener.
+        if (dhtListener != null) {
+            mojitoManager.removePropertyChangeListener(dhtListener);
+            dhtListener = null;
         }
     }
 }
