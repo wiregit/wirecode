@@ -61,7 +61,7 @@ public class StatusPanel extends JXPanel {
         add(sharedFileCountPanel, "growy, gaptop 2");
         add(minDownloadPanel, "growy, gapafter 4, hidemode 2, push");
         add(miniPlayerPanel, "gapafter 4");
-        add(friendPanel, "gapbefore push, hidemode 2, dock east");
+        add(friendPanel, "hidemode 2, wmin pref+20, dock east");
         
         connectionManager.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
