@@ -16,7 +16,6 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
-import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
@@ -28,7 +27,6 @@ import org.limewire.logging.LogFactory;
 import org.limewire.net.ConnectBackRequestedEvent;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.util.DebugRunnable;
 import org.limewire.xmpp.api.client.FileOfferEvent;
 import org.limewire.xmpp.api.client.FriendRequestEvent;
 import org.limewire.xmpp.api.client.LibraryChangedEvent;
@@ -261,30 +259,25 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
         public void presenceChanged(final org.jivesoftware.smack.packet.Presence presence) {
             if(!presence.getFrom().equals(connection.getUser())) {
-                Thread t = ThreadExecutor.newManagedThread(new DebugRunnable(new Runnable() {
-                    public void run() {
-                        UserImpl user = getUser(presence);
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("presence.from " + presence.getFrom() + " changed to " + presence.getType());
+                UserImpl user = getUser(presence);
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("presence.from " + presence.getFrom() + " changed to " + presence.getType());
+                }
+                synchronized (user) {
+                    if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
+                        if(!user.getFriendPresences().containsKey(presence.getFrom())) {
+                            addNewPresence(user, presence);
+                        } else {
+                            updatePresence(user, presence);
                         }
-                        synchronized (user) {
-                            if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                                if(!user.getFriendPresences().containsKey(presence.getFrom())) {
-                                    addNewPresence(user, presence);
-                                } else {
-                                    updatePresence(user, presence);
-                                }
-                            } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                                PresenceImpl p = (PresenceImpl)user.getPresence(presence.getFrom());
-                                if(p != null) {
-                                    p.update(presence);
-                                    user.removePresense(p);
-                                }
-                            }
+                    } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
+                        PresenceImpl p = (PresenceImpl)user.getPresence(presence.getFrom());
+                        if(p != null) {
+                            p.update(presence);
+                            user.removePresense(p);
                         }
                     }
-                }), "presence-thread-" + presence.getFrom());
-                t.start();
+                }
             }
         }
 
