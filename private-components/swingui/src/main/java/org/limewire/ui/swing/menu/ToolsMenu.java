@@ -69,7 +69,7 @@ public class ToolsMenu extends JMenu {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AdvancedToolsPanel advancedTools = advancedProvider.get();
-                advancedTools.display(AdvancedToolsPanel.TabId.CONNECTIONS);
+                advancedTools.display();
             }
         });
         if (!OSUtils.isMacOSX()) {
