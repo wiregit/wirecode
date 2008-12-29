@@ -557,13 +557,19 @@ public class ChatFriendListPane extends JPanel {
 
         @Override
         public String getToolTipText(MouseEvent event) {
-            int row = friendsTable.rowAtPoint(event.getPoint());
+            Point mousePoint = event.getPoint();
+            int row = friendsTable.rowAtPoint(mousePoint);
             if (row == -1) {
                 return null;
             }
             
             EventTableModel model = (EventTableModel) friendsTable.getModel();
             ChatFriend chatFriend = (ChatFriend) model.getElementAt(row);
+            
+            if (chatFriend.isChatting() && isOverCloseIcon(mousePoint)) {
+                return tr("Close conversation");
+            }
+            
             StringBuilder tooltip = new StringBuilder();
             tooltip.append("<html>")
                 .append("<head>")
