@@ -767,7 +767,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             if(o2.isGnutellaNetwork()){
                 return 1;
             }
-            return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
+            return o1.getFriend().getRenderName().compareToIgnoreCase(o2.getFriend().getRenderName());
         }
         
     }
@@ -785,7 +785,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
             if (o2.isGnutellaNetwork()) {
                     return -1;
             }
-            return o1.getFriend().getRenderName().compareTo(o2.getFriend().getRenderName());
+            return o1.getFriend().getRenderName().compareToIgnoreCase(o2.getFriend().getRenderName());
         }
         
     }
