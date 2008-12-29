@@ -19,6 +19,7 @@ import org.limewire.ui.swing.menu.actions.RecentDownloadsMenu;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.MagnetHandler;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 import org.limewire.util.OSUtils;
 
@@ -33,13 +34,13 @@ public class FileMenu extends JMenu {
     public FileMenu(DownloadListManager downloadListManager, Navigator navigator,
             LibraryManager libraryManager,
             SaveLocationExceptionHandler saveLocationExceptionHandler, MagnetFactory magnetFactory,
-            SearchHandler searchHandler) {
+            SearchHandler searchHandler, MagnetHandler magnetHandler) {
         super(I18n.tr("File"));
         this.navigator = navigator;
         add(new OpenFileAction(navigator, I18n.tr("&Open Torrent..."), downloadListManager,
                 saveLocationExceptionHandler));
         add(new OpenLinkAction(navigator, I18n.tr("Open &Link..."), downloadListManager,
-                saveLocationExceptionHandler, magnetFactory, searchHandler));
+                saveLocationExceptionHandler, magnetFactory, magnetHandler));
         add(new RecentDownloadsMenu(I18n.tr("Recent Downloads"), libraryManager));
         addSeparator();
         add(new AddFileAction(I18n.tr("Add File to Library..."), libraryManager));

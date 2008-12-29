@@ -26,6 +26,7 @@ import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.StartupSettings;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
+import org.limewire.service.MessageService;
 import org.limewire.ui.support.BugManager;
 import org.limewire.ui.support.DeadlockSupport;
 import org.limewire.ui.support.ErrorHandler;
@@ -153,9 +154,8 @@ public final class Initializer {
         // Initialize late tasks, like Icon initialization & install listeners.
         loadLateTasksForUI();
 
-        //TODO: What should we do about these warnings?
-//      SettingsWarningManager.checkTemporaryDirectoryUsage();
-//      SettingsWarningManager.checkSettingsLoadSaveFailure();        
+      SettingsWarningManager.checkTemporaryDirectoryUsage();
+      SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
         // Start the core & run any queued control requests, and load DAAP.
         startCore(limeWireCore);
@@ -292,9 +292,8 @@ public final class Initializer {
         stopwatch.resetAndLog("ErrorHandler install");
         
         // Set the messaging handler so we can receive core messages
-// TODO: We really need to update this.
-//        org.limewire.service.MessageService.setCallback(new MessageHandler());
-//        stopwatch.resetAndLog("MessageHandler install");
+        MessageService.setCallback(new MessageHandler());
+        stopwatch.resetAndLog("MessageHandler install");
         
         // Set the default event error handler so we can receive uncaught
         // AWT errors.
