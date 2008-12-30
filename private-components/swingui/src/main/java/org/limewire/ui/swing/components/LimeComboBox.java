@@ -28,7 +28,6 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.util.Objects;
 
@@ -394,22 +393,30 @@ public class LimeComboBox extends JXButton {
     
     private void updateMenu() {
         if (!customMenu && menuDirty) {
-            menuDirty = false;        
-            menu.removeAll();        
-            for ( Action action : actions ) {        
-                Action compoundAction = action;            
-                // Wrap the action if this combo box has room for selection
+            menuDirty = false;
+            menu.removeAll();
+            for (final Action action : actions) {
+                JMenuItem menuItem = createMenuItem(action);
+                // Add a selection listener, if selection can be performed.
                 if (getText() == null) {
-                    compoundAction = new SelectionActionWrapper(compoundAction);
-                }                
-                JMenuItem menuItem = createMenuItem(compoundAction);
+                    menuItem.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            selectedAction = action;
+                            // Fire the parent listeners
+                            for (SelectionListener listener : selectionListeners) {
+                                listener.selectionChanged(action);
+                            }
+                            repaint();
+                        }
+                    });
+                }
                 menu.add(menuItem);
             }
         }
     }
     
-    private void initMenu() {
-        
+    private void initMenu() {        
         decorateMenuComponent(menu);
         menu.setBorder(BorderFactory.createLineBorder(Color.BLACK,1));
         
@@ -443,43 +450,5 @@ public class LimeComboBox extends JXButton {
     public interface SelectionListener {
         /** Notification that the given action is now selected. */
         public void selectionChanged(Action item);
-    }
-    
-    // Wraps an action to provide selection listening for the combo box    
-    private class SelectionActionWrapper extends AbstractAction {
-        private final Action delegate;
-        
-        public SelectionActionWrapper(Action delegate) {
-            this.delegate = delegate;
-        }
-        
-        @Override
-        public boolean isEnabled() {
-            return delegate.isEnabled();
-        }
-        
-        @Override
-        public void setEnabled(boolean newValue) {
-            delegate.setEnabled(newValue);
-        }
-        
-        @Override 
-        public Object getValue(String s) {
-            return delegate.getValue(s);
-        }
-        
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            // Change selection in parent combo box
-            selectedAction = delegate;
-            // Fire the parent listeners
-            for ( SelectionListener listener : selectionListeners ) {
-                listener.selectionChanged(delegate);
-            }            
-            // Call original action
-            delegate.actionPerformed(e);
-            repaint();
-        }
-        
     }
 }

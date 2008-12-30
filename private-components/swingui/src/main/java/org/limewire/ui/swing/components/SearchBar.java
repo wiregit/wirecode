@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JButton;
 
 import net.miginfocom.swing.MigLayout;
@@ -30,6 +31,7 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.HistoryAndFriendAutoCompleter;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
 import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -59,7 +61,8 @@ public class SearchBar extends JXPanel {
     
     @Inject
     public SearchBar(LimeComboBoxFactory comboBoxFactory, 
-            final FriendAutoCompleters friendLibraries) {
+            final FriendAutoCompleters friendLibraries,
+            CategoryIconManager categoryIconManager) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
@@ -78,7 +81,11 @@ public class SearchBar extends JXPanel {
                 continue;
             }
 
-            Action action = new CatagoryAction(cat);
+            Icon icon = null;
+            if(cat != SearchCategory.ALL) {
+                icon = categoryIconManager.getIcon(cat.getCategory());                
+            }
+            Action action = new CatagoryAction(cat, icon);
             if (cat == SearchCategory.PROGRAM) {
                 progAction = action;
                 continue;
@@ -220,9 +227,10 @@ public class SearchBar extends JXPanel {
 
         private final SearchCategory category;
         
-        CatagoryAction(SearchCategory category) {
+        CatagoryAction(SearchCategory category, Icon icon) {
             super(SearchCategoryUtils.getName(category));
             
+            putValue(SMALL_ICON, icon);
             this.category = category;
         }
         

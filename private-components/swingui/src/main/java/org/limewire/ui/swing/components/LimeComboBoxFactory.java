@@ -47,11 +47,11 @@ public class LimeComboBoxFactory {
     
     private final ButtonDecorator buttonDecorator;
     
-    @Resource private Icon  miniRegIcon;
-    @Resource private Icon  miniHoverIcon;
-    @Resource private Icon  miniDownIcon;
-    @Resource private Icon  lightFullIcon;
-    @Resource private Icon  darkFullIcon;
+    @Resource private Icon miniRegIcon;
+    @Resource private Icon miniHoverIcon;
+    @Resource private Icon miniDownIcon;
+    @Resource private Icon lightFullIcon;
+    @Resource private Icon darkFullIcon;
     
     @Inject
     LimeComboBoxFactory(ButtonDecorator buttonDecorator) {
