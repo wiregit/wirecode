@@ -29,13 +29,13 @@ public class ViewMenu extends JMenu {
     public ViewMenu(final LeftPanel leftPanel, final DownloadSummaryPanel downloadSummaryPanel,
             final ChatFramePanel friendsPanel, final DownloadMediator downloadMediator) {
         super(I18n.tr("View"));
-        add(buildAction(leftPanel, I18n.tr("Hide Sidebar"), I18n.tr("Show Sidebar")));
+        add(buildShowHideAction(leftPanel, I18n.tr("Hide Sidebar"), I18n.tr("Show Sidebar")));
         add(buildShowHideDownloadTrayAction(downloadSummaryPanel, downloadMediator, I18n
                 .tr("Hide Download Tray"), I18n.tr("Show Download Tray")));
-        add(buildAction(friendsPanel, I18n.tr("Hide Chat Window"), I18n.tr("Show Chat Window")));
+        add(buildShowHideAction(friendsPanel, I18n.tr("Hide Chat Window"), I18n.tr("Show Chat Window")));
     }
 
-    private Action buildAction(final VisibleComponent component, final String visibleName,
+    private Action buildShowHideAction(final VisibleComponent component, final String visibleName,
             final String notVisibleName) {
         final Action action = new AbstractAction() {
             @Override

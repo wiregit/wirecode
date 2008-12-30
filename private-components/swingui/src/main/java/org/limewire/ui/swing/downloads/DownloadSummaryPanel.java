@@ -432,8 +432,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                     @Override
                     public void run() {
                         updateTitle();
-                        //TODO put adjsut view back in? What is going to be the logic for showing the download list? since it is user driven as well as automatic.
-                        //waiting to hear back from mike s
                     }
                 });
             }
