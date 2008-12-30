@@ -1159,8 +1159,33 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                     if (namesClose(otherName, thisName)) 
                         return true;                
             }
+            
+            
+            String resumeFileName = getResumeFileName();
+            if(resumeFileName != null) {
+                return namesClose(otherName, resumeFileName);
+            }
         }
         return false;
+    }
+
+    /**
+     * Returns a filename that the downloader can try to resume its downlkoad with.
+     * This name is parsed from the incomplete file name. which is of the form
+     * t-fileSize-fileName. The fileName portion of the string is parsed out.
+     * Null is returned if getIncompleteFile returns null. If there are no hypens in the
+     * IncompleteFileName the whole name is returned instead of just parsing out the fileName.
+     */
+    private String getResumeFileName() {
+        String resumeFileName = null;
+        if(getIncompleteFile() != null) {
+            File incompleteFile = getIncompleteFile();
+            resumeFileName = incompleteFile.getName();
+            if(resumeFileName.contains("-")) {
+                resumeFileName = resumeFileName.substring(resumeFileName.lastIndexOf("-", resumeFileName.length()));
+            }
+        }
+        return resumeFileName;
     }
 
     private final boolean namesClose(final String one, 
