@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.components;
+package org.limewire.ui.swing.search;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -8,14 +8,12 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.JButton;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.collection.AutoCompleteDictionary;
-import org.limewire.collection.StringTrieSet;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.friend.FriendAutoCompleters;
 import org.limewire.core.settings.LibrarySettings;
@@ -26,18 +24,21 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.DropDownListAutoCompleteControl;
+import org.limewire.ui.swing.components.IconButton;
+import org.limewire.ui.swing.components.LimeComboBox;
+import org.limewire.ui.swing.components.LimeComboBoxFactory;
+import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
-import org.limewire.ui.swing.search.DefaultSearchInfo;
-import org.limewire.ui.swing.search.HistoryAndFriendAutoCompleter;
-import org.limewire.ui.swing.search.SearchCategoryUtils;
-import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * The search bar component at the top of the UI main window.  This includes
@@ -50,26 +51,29 @@ public class SearchBar extends JXPanel {
     
     private final LimeComboBox comboBox;
     private final LimePromptTextField searchField;
-    private final JButton searchButton;
+    private final IconButton searchButton;
     
     private final HistoryAndFriendAutoCompleter autoCompleter;
     private final FriendAutoCompleters friendLibraries;
+    private final AutoCompleteDictionary searchHistory;
+    
+    private final Action programAction;
     
     private SearchCategory categoryToSearch; 
     
-    private final Action programAction;
     
     @Inject
     public SearchBar(LimeComboBoxFactory comboBoxFactory, 
             final FriendAutoCompleters friendLibraries,
+            @Named("searchHistory") AutoCompleteDictionary searchHistory,
             CategoryIconManager categoryIconManager) {
         super(new MigLayout("ins 0, gapx 0, gapy 0"));
     
         GuiUtils.assignResources(this);
 
+        this.searchHistory = searchHistory;
         this.friendLibraries = friendLibraries;
         this.autoCompleter = new HistoryAndFriendAutoCompleter();
-        
         this.categoryToSearch = SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         
         Action actionToSelect = null;
@@ -98,59 +102,59 @@ public class SearchBar extends JXPanel {
             typeActions.add(action);
         }
         
-        this.programAction = progAction;
+        programAction = progAction;
         
-        this.comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
-        this.comboBox.setName("SearchBar.comboBox");
+        comboBox = comboBoxFactory.createLightFullComboBox(typeActions);
+        comboBox.setName("SearchBar.comboBox");
                 
-        this.searchField = new LimePromptTextField(I18n.tr("Search"), AccentType.BUBBLE, searchBorder);
-        this.searchField.setName("SearchBar.searchField");
+        searchField = new LimePromptTextField(I18n.tr("Search"), AccentType.BUBBLE, searchBorder);
+        searchField.setName("SearchBar.searchField");
         
-        this.searchButton = new IconButton();
-        this.searchButton.setName("SearchBar.searchButton");
-        this.searchButton.setFocusPainted(false);
-        this.searchButton.setToolTipText(I18n.tr("Search P2P Network"));
+        searchButton = new IconButton();
+        searchButton.removeActionHandListener();
+        searchButton.setName("SearchBar.searchButton");
+        searchButton.setFocusPainted(false);
+        searchButton.setToolTipText(I18n.tr("Search P2P Network"));
         
-        this.configureProgramCategory();
+        configureProgramCategory();
         
         final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, autoCompleter);
         autoCompleteControl.setAutoComplete(true);
-        final AutoCompleteDictionary historyDictionary = new StringTrieSet(true);
-        autoCompleter.setHistoryDictionary(historyDictionary);
+        autoCompleter.setHistoryDictionary(searchHistory);
         searchField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Get search text, and add to history if non-empty.
                 String searchText = getSearchText();
-                if (!searchText.isEmpty()) {
-                    historyDictionary.addEntry(searchText);
+                if (!searchText.isEmpty() && SearchSettings.KEEP_SEARCH_HISTORY.getValue()) {
+                    SearchBar.this.searchHistory.addEntry(searchText);
                 }
             }
         });
-        // TODO: this setting doesn't exist in options right now
-//        SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.addSettingListener(new SettingListener() {
-//            @Override
-//            public void settingChanged(SettingEvent evt) {
-//                SwingUtils.invokeLater(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        autoCompleteControl.setAutoComplete(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
-//                    }
-//                });
-//            }
-//        });
+        SearchSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener() {
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtils.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        autoCompleter.setSuggestionsShown(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+                    }
+                });
+            }
+        });
         
+        autoCompleter.setSuggestionsShown(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
         if (actionToSelect != null) {
             autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(categoryToSearch));
-            this.comboBox.setSelectedAction(actionToSelect);
+            comboBox.setSelectedAction(actionToSelect);
         } else {
             autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(SearchCategory.ALL));
         }
         
-        this.setOpaque(false);
-        this.add(this.comboBox);
-        this.add(this.searchField, "gap 5");
-        this.add(this.searchButton, "gap 5");
+        setOpaque(false);
+        add(comboBox);
+        add(searchField, "gap 5");
+        add(searchButton, "gap 5");
 
         LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {            
             @Override
@@ -184,18 +188,17 @@ public class SearchBar extends JXPanel {
     
     private void configureProgramCategory() {
         if (!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
-            this.comboBox.removeAction(this.programAction);
+            comboBox.removeAction(this.programAction);
         } else {
-            this.comboBox.addAction(this.programAction);
+            comboBox.addAction(this.programAction);
         }
     }
     
     public void setText(String text) {
-        this.searchField.setText(text);
+        searchField.setText(text);
     }
     
-    public void setSearchHandler(final SearchHandler searchHandler) {
-        
+    public void setSearchHandler(final SearchHandler searchHandler) {        
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -206,10 +209,9 @@ public class SearchBar extends JXPanel {
                             searchText, categoryToSearch));
                 }
             }
-        };
-        
-        this.searchField.addActionListener(listener);
-        this.searchButton.addActionListener(listener);
+        };        
+        searchField.addActionListener(listener);
+        searchButton.addActionListener(listener);
     }
     
     /**
@@ -220,11 +222,10 @@ public class SearchBar extends JXPanel {
     private String getSearchText() {
         // Get search text and trim whitespace.
         String searchText = searchField.getText();
-        return ((searchText != null) ? searchText.trim() : "");
+        return searchText != null ? searchText.trim() : "";
     }
     
     private class CatagoryAction extends AbstractAction {
-
         private final SearchCategory category;
         
         CatagoryAction(SearchCategory category, Icon icon) {

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.components;
 
 import java.awt.Insets;
+import java.awt.event.MouseListener;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -11,6 +12,8 @@ import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.listener.ActionHandListener;
 
 public class IconButton extends JXButton {
+    
+    private MouseListener actionHandListener;
 
     public IconButton() {
         init();
@@ -76,7 +79,12 @@ public class IconButton extends JXButton {
         setHorizontalTextPosition(SwingConstants.CENTER);
         setVerticalTextPosition(SwingConstants.BOTTOM);
         setIconTextGap(2);
-        addMouseListener(new ActionHandListener());
+        actionHandListener = new ActionHandListener();
+        addMouseListener(actionHandListener);
+    }
+    
+    public void removeActionHandListener() {
+        removeMouseListener(actionHandListener);
     }
     
     @Override

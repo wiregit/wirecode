@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -11,6 +13,7 @@ import javax.swing.JList;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.SearchSettings;
@@ -20,6 +23,7 @@ import org.limewire.ui.swing.util.SearchSettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 /**
  * Search Option View
@@ -27,12 +31,14 @@ import com.google.inject.Singleton;
 @Singleton
 public class SearchOptionPanel extends OptionPanel {
 
+    private final AutoCompleteDictionary searchHistory;
     private SearchBarPanel searchBarPanel;
-
     private JCheckBox groupSimilarResults;
 
     @Inject
-    public SearchOptionPanel() {
+    public SearchOptionPanel(@Named("searchHistory") AutoCompleteDictionary searchHistory) {
+        this.searchHistory = searchHistory;
+        
         groupSimilarResults = new JCheckBox(I18n.tr("Group similar search results together"));
         groupSimilarResults.setContentAreaFilled(false);
         
@@ -102,14 +108,19 @@ public class SearchOptionPanel extends OptionPanel {
                     LibrarySettings.ALLOW_PROGRAMS, SearchCategory.PROGRAM,
                     defaultSearchSpinner));
 
-            //TODO: suggest files, search tab number, clear now not tied functionaly to the UI anywhere
-            suggestFriendFiles = new JCheckBox(I18n.tr("Suggestions files from friends when signed on"));
+            suggestFriendFiles = new JCheckBox(I18n.tr("Suggest files from friends"));
             suggestFriendFiles.setContentAreaFilled(false);
 
             searchTabNumberCheckBox = new JCheckBox(I18n.tr("Remember my recent searches"));
             searchTabNumberCheckBox.setContentAreaFilled(false);
             
             clearNowButton = new JButton(I18n.tr("Clear Now"));
+            clearNowButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    searchHistory.clear();
+                }
+            });
             clearNowButton.setBorderPainted(false);
         }
 
@@ -118,24 +129,23 @@ public class SearchOptionPanel extends OptionPanel {
             SearchSettings.DEFAULT_SEARCH_CATEGORY_ID
                     .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
             
-            SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.setValue(suggestFriendFiles.isSelected());
-
-            SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.setValue(searchTabNumberCheckBox.isSelected());
+            SearchSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
+            SearchSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
             return SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId()
-                    || SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue() != suggestFriendFiles.isSelected()
-                    || SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue() != searchTabNumberCheckBox.isSelected();
+                    || SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue() != suggestFriendFiles.isSelected()
+                    || SearchSettings.KEEP_SEARCH_HISTORY.getValue() != searchTabNumberCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() {
             defaultSearchSpinner.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
-            suggestFriendFiles.setSelected(SearchSettings.POPULATE_SEARCH_BAR_FRIEND_FILES.getValue());
-            searchTabNumberCheckBox.setSelected(SearchSettings.REMEMBER_OLD_SEARCHES_SEARCH_BAR.getValue());
+            suggestFriendFiles.setSelected(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+            searchTabNumberCheckBox.setSelected(SearchSettings.KEEP_SEARCH_HISTORY.getValue());
         }
     }
     

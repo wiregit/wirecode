@@ -1,6 +1,5 @@
 package org.limewire.core.settings;
 
-import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
 import org.limewire.setting.CharArraySetting;
@@ -393,13 +392,6 @@ public final class SearchSettings extends LimeProps {
     public static boolean desiresPartialResults() {
         return DESIRES_PARTIAL_RESULTS.getValue() && DESIRES_PARTIAL_RESULTS_REMOTE.getValue();
     }
-    
-    /**
-     * Whether or not the user wants to see promotional results.
-     */
-    @InspectablePrimitive("disable promotional results")
-    public static final BooleanSetting DISABLE_PROMOTIONAL_RESULTS = 
-        FACTORY.createBooleanSetting("DISABLE_PROMOTIONAL_RESULTS_2", false);
 
     /**
      * Whether or not to include metadata in plaintext searches
@@ -419,28 +411,15 @@ public final class SearchSettings extends LimeProps {
      * friends libraries. If true, tips should be displayed, if false
      * they should not. 
      */
-    public static final BooleanSetting POPULATE_SEARCH_BAR_FRIEND_FILES =
-        FACTORY.createBooleanSetting("POPULATE_SEARCH_BAR_FRIEND_FILES", true);
+    public static final BooleanSetting SHOW_FRIEND_SUGGESTIONS =
+        FACTORY.createBooleanSetting("SHOW_FRIEND_SUGGESTIONS", true);
     
     /**
      * Setting for whether to display old searches as search tips. If true,
      * old search will be displayed as tips, if false they won't be displayed
      */
-    public static final BooleanSetting REMEMBER_OLD_SEARCHES_SEARCH_BAR =
-        FACTORY.createBooleanSetting("REMEMBER_OLD_SEARCHES_SEARCH_BAR", true);
-    
-    /**
-     * Setting for how many old search tips to display.
-     */
-    public static final IntSetting POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH =
-        FACTORY.createIntSetting("POPULATE_SEARCH_BAR_NUMBER_OLD_SEARCH", 3);
-    
-    /**
-     * Setting for whether to automatically search your friends libraries
-     * when you spawn a gnutella search.
-     */
-    public static final BooleanSetting SEARCH_FRIENDS_LIBRARIES =
-        FACTORY.createBooleanSetting("SEARCH_FRIENDS_LIBRARIES", true);
+    public static final BooleanSetting KEEP_SEARCH_HISTORY =
+        FACTORY.createBooleanSetting("KEEP_SEARCH_HISTORY", true);
     
     /**
      * The default search category for the search bar.
