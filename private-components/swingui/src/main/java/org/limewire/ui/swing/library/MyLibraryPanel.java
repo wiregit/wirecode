@@ -68,7 +68,7 @@ public class MyLibraryPanel extends LibraryPanel {
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
     private final Map<Category, LibraryOperable> selectableMap;
-    private ShareWidgetFactory shareFactory;
+    private final ShareWidgetFactory shareFactory;
     
     private ShareWidget<Category> categoryShareWidget = null;
     
@@ -93,7 +93,7 @@ public class MyLibraryPanel extends LibraryPanel {
         this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
 
         if (selectionPanelBackgroundOverride != null) { 
-            selectionPanel.setBackground(selectionPanelBackgroundOverride);
+            getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
 
         getHeaderPanel().setText(I18n.tr("My Library"));

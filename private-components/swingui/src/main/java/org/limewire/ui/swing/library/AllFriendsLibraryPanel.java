@@ -46,7 +46,7 @@ public class AllFriendsLibraryPanel extends AbstractFriendLibraryPanel {
         GuiUtils.assignResources(this);
         
         if (selectionPanelBackgroundOverride != null) { 
-            selectionPanel.setBackground(selectionPanelBackgroundOverride);
+            getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
         
         createMyCategories(remoteLibraryManager.getAllFriendsFileList().getSwingModel());

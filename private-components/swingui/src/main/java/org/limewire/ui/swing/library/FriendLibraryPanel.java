@@ -51,7 +51,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         this.friend = friend;
 
         if (selectionPanelBackgroundOverride != null) { 
-            selectionPanel.setBackground(selectionPanelBackgroundOverride);
+            getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
         
         //don't show share button for browse hosts

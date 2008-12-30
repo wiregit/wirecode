@@ -7,6 +7,7 @@ import javax.swing.Icon;
 import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.JXButton;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.listener.ActionHandListener;
 
 public class IconButton extends JXButton {
@@ -84,6 +85,16 @@ public class IconButton extends JXButton {
         if (hasSelectedKey(a)) {
             setSelectedFromAction(a);
         }
+        
+        Icon icon = (Icon)a.getValue(AbstractAction.PRESSED_ICON);
+        if(icon != null) {
+            setPressedIcon(icon);
+        }
+        
+        icon = (Icon)a.getValue(AbstractAction.ROLLOVER_ICON);
+        if(icon != null) {
+            setRolloverIcon(icon);
+        }
     }
     
     @Override
@@ -91,6 +102,10 @@ public class IconButton extends JXButton {
         super.actionPropertyChanged(action, propertyName);
         if (propertyName == Action.SELECTED_KEY && hasSelectedKey(action)) {
             setSelectedFromAction(action);
+        } else if (propertyName == AbstractAction.PRESSED_ICON) {
+            setPressedIcon((Icon)action.getValue(AbstractAction.PRESSED_ICON));
+        } else if (propertyName == AbstractAction.ROLLOVER_ICON) {
+            setRolloverIcon((Icon)action.getValue(AbstractAction.ROLLOVER_ICON));
         }
     }
     

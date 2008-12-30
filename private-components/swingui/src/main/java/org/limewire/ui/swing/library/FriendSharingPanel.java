@@ -57,7 +57,9 @@ public class FriendSharingPanel extends SharingPanel {
         
         IconButton backButton = new IconButton(new BackToLibraryAction(returnToLibraryPanel));
         
-        // TODO: See above todo
+        // TODO: See above todo -- This isn't working because name assignement only works
+        //                         if the component exists on app startup.  Since these
+        //                         components are created on the fly, only @Resource works.
         //backButton.setName("FriendSharingPanel.backButton");
         backButton.setIcon(icon);
         backButton.setPressedIcon(pressedIcon);

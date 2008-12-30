@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -15,6 +16,8 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.action.BackAction;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimeHeaderBar;
@@ -108,7 +111,8 @@ public class MainDownloadPanel extends JPanel {
 	        CategoryDownloadPanelFactory categoryDownloadPanelFactory,
 	        DownloadMediator downloadMediator, AudioPlayer player,
 	        LimeHeaderBarFactory headerBarFactory, LimeComboBoxFactory comboBoxFactory,
-	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory) {
+	        ButtonDecorator buttonDecorator, DockIconFactory dockIconFactory,
+	        BackAction backAction) {
 	    
 	    
 		this.downloadMediator = downloadMediator;
@@ -137,7 +141,12 @@ public class MainDownloadPanel extends JPanel {
 		categoryPanel.setName(CATEGORY);
 		cardPanel.add(categoryPanel, categoryPanel.getName());
 		
-		settingsPanel = headerBarFactory.createBasic(I18n.tr("Downloads"));
+		JPanel headerTitlePanel = new JPanel(new MigLayout("insets 0, gap 0, fill, aligny center"));
+        headerTitlePanel.setOpaque(false);        
+        JLabel titleTextLabel = new JLabel(I18n.tr("Downloads"));        
+        headerTitlePanel.add(new IconButton(backAction), "gapafter 6");
+        headerTitlePanel.add(titleTextLabel, "gapbottom 2");        
+        settingsPanel = headerBarFactory.createBasic(headerTitlePanel, titleTextLabel);
         this.initHeader();
 		add(settingsPanel, BorderLayout.NORTH);
 		

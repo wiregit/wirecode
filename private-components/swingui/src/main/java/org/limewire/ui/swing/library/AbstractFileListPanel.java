@@ -65,7 +65,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     private ButtonItem currentItem = null;
 
-    protected final LibrarySelectionPanel selectionPanel = new LibrarySelectionPanel();
+    private final LibrarySelectionPanel selectionPanel = new LibrarySelectionPanel();
 
     private final LimeHeaderBar headerPanel;    
     
@@ -96,6 +96,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         return headerPanel;
     }
     
+    protected LibrarySelectionPanel getSelectionPanel() {
+        return selectionPanel;
+    }
+    
     protected void addMainPanels() {
         add(selectionPanel, "growy");
         // TODO: move to properties -- funky because this class gets subclassed.
@@ -103,16 +107,14 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         add(cardPanel, "grow");
     }
     
-    protected void addButtonToHeader(Action action, ButtonDecorator buttonDecorator) {
-        
+    protected void addButtonToHeader(Action action, ButtonDecorator buttonDecorator) {        
         JXButton shareButton = new JXButton(action);
         buttonDecorator.decorateDarkFullButton(shareButton);
         headerPanel.add(shareButton, "cell 0 0, push");
     }
     
     protected void addButtonToHeader(Action action, ButtonDecorator buttonDecorator, 
-            AccentType accentType) {
-        
+            AccentType accentType) {        
         JXButton shareButton = new JXButton(action);
         buttonDecorator.decorateDarkFullButton(shareButton, accentType);
         headerPanel.add(shareButton, "cell 0 0, push");

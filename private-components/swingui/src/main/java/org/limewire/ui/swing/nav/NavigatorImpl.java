@@ -2,6 +2,7 @@ package org.limewire.ui.swing.nav;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,8 +24,9 @@ class NavigatorImpl implements Navigator {
     private final List<NavigationListener> listeners = new CopyOnWriteArrayList<NavigationListener>();
     private final List<NavItemImpl> navItems = new ArrayList<NavItemImpl>();
     private final Map<NavCategory, Integer> categoryCount = new EnumMap<NavCategory, Integer>(NavCategory.class);
+    private final List<NavItemImpl> selectionHistory = new ArrayList<NavItemImpl>();
     
-    private NavItemImpl selectedItem;
+    private NavItemImpl selectedItem;    
     
     public NavigatorImpl() {
         for(NavCategory category : NavCategory.values()) {
@@ -68,6 +70,21 @@ class NavigatorImpl implements Navigator {
     public void removeNavigationListener(NavigationListener itemListener) {
         listeners.remove(itemListener);
     }
+    
+    @Override
+    public boolean goBack() {
+        if(selectionHistory.size() < 2) {
+            return false;
+        } else {
+            // Remove the current.
+            selectionHistory.remove(selectionHistory.size() - 1);
+            // Remove & get the prior.
+            NavItem item = selectionHistory.remove(selectionHistory.size() - 1);
+            // And select it.
+            item.select();
+            return true;
+        }
+    }
         
     private void addNavItem(NavItemImpl item, JComponent panel) {
         LOG.debugf("Adding item {0}", item);
@@ -84,9 +101,27 @@ class NavigatorImpl implements Navigator {
         }
     }
     
+    /** Removes all instances of item from the history. */
+    private void removeFromHistory(NavItemImpl item) {
+        for(Iterator<NavItemImpl> iter = selectionHistory.iterator(); iter.hasNext(); ) {
+            if(iter.next() == item) {
+                iter.remove();
+            }
+        }
+    }
+    
+    private void addToHistory(NavItemImpl item) {
+        selectionHistory.add(item);
+        if(selectionHistory.size() > 10) {
+            selectionHistory.remove(0);
+        }
+    }
+    
     private void removeNavItem(NavItemImpl item) {
         if(navItems.remove(item)) {
             LOG.debugf("Removed item {0}", item);
+            removeFromHistory(item);
+            
             for(NavigationListener listener : listeners) {
                 listener.itemRemoved(item.category, item, item.panel);
                 if(selectedItem == item) {
@@ -110,6 +145,7 @@ class NavigatorImpl implements Navigator {
     
     private void selectNavItem(NavItemImpl item, NavSelectable selectable) {
         if(item != selectedItem) {
+            addToHistory(item);            
             if(selectedItem != null) {
                 selectedItem.fireSelected(false);
             }
