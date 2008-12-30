@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
@@ -74,6 +75,12 @@ public class AppFrame extends SingleFrameApplication {
     /** Default background color for panels */
     @Resource private Color bgColor;
     @Resource private Color glassPaneColor;
+    
+    // Icons for JFileChooser bug workaround on Vista. 
+    @Resource private Icon upFolderVistaFixIcon;
+    @Resource private Icon detailsViewVistaFixIcon;
+    @Resource private Icon listViewVistaFixIcon;
+    @Resource private Icon newFolderVistaFixIcon;
     
     @Inject private Application application;
     @Inject private LimeWireSwingUI ui;
@@ -307,6 +314,16 @@ public class AppFrame extends SingleFrameApplication {
         
         // Necessary to allow popups to behave normally.
         UIManager.put("PopupMenu.consumeEventOnClose", false);
+        
+        // FIX FOR SUN BUG 6449933: On Windows sometimes, JFileChooser cannot 
+        // display because some icons throw an AIOOBE when they are retrieved.
+        // To workaround this, we install our own version of those icons.
+        if (OSUtils.isWindows()) {
+            replaceIconIfFailing("FileChooser.upFolderIcon", upFolderVistaFixIcon);
+            replaceIconIfFailing("FileChooser.detailsViewIcon", detailsViewVistaFixIcon);
+            replaceIconIfFailing("FileChooser.listViewIcon", listViewVistaFixIcon);
+            replaceIconIfFailing("FileChooser.newFolderIcon", newFolderVistaFixIcon);
+        }
     }
     
     /**
@@ -337,6 +354,18 @@ public class AppFrame extends SingleFrameApplication {
         }
 
         uiDefaults.put("Table.background", bgColorResource);
+    }
+    
+    /**
+     * Replaces an icon resource in UIManager with the specified replacement
+     * icon if the original resource cannot be retrieved correctly.
+     */
+    private void replaceIconIfFailing(String resource, Icon replacementIcon) {
+        try {
+            UIManager.getIcon(resource);
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+            UIManager.put(resource, replacementIcon);
+        }
     }
         
     /** Ensures the save directory is valid. */
