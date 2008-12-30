@@ -50,6 +50,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         this.xmppService = xmppService;
         this.accountManager = accountManager;
         setLayout(new VerticalLayout());
+        setOpaque(false);
         
         shareLabel = new HyperLinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
             @Override
@@ -58,6 +59,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                 FriendsSignInPanel.this.loginPanel.setVisible(true);
             }
         });
+        shareLabel.setOpaque(false);
         shareLabel.setName("FriendsSignIn.ShareLabel");
         add(shareLabel);
         add(loginPanel);

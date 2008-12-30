@@ -48,6 +48,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.EventList;
 
@@ -71,6 +72,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     private final ShareListManager shareListManager;
     private final FriendLibraryMediatorFactory friendLibraryMediatorFactory;
     private final NavPanelFactory navPanelFactory;
+    private final JScrollPane friendsScrollArea;
     
     private Friend selectedFriend = null;
     private static final Log LOG = LogFactory.getLog(LibraryNavigatorImpl.class);
@@ -127,12 +129,13 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         JXPanel friendsListPanel = new JXPanel(new VerticalLayout(2));
         friendsListPanel.setOpaque(false);
         friendsListPanel.setScrollableTracksViewportHeight(false);
-        JScrollPane scrollableNav = new JScrollPane(friendsListPanel);
-        scrollableNav.setOpaque(false);
-        scrollableNav.getViewport().setOpaque(false);
-        scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollableNav.setBorder(null);
+        friendsScrollArea = new JScrollPane(friendsListPanel);
+        friendsScrollArea.setName("LibraryNavigator.friendsScrollArea");
+        friendsScrollArea.setOpaque(false);
+        friendsScrollArea.getViewport().setOpaque(false);
+        friendsScrollArea.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        friendsScrollArea.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        friendsScrollArea.setBorder(null);
         
         // Increase the painted gaps a bit to make sure it's not smushed.
         myLibrary.setTopGap(2);
@@ -142,7 +145,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
         addItem(allFriends, this, "growx, wmin 0, wrap", p2pNetwork.getAction(), new MoveAction(limewireList, true));
         addItem(friendsPanel, this, "growx, wmin 0, wrap", null, null);
-        addItem(scrollableNav,this, "grow, wmin 0, wrap",  null, null);
+        addItem(friendsScrollArea,this, "grow, wmin 0, wrap",  null, null);
         addItem(limewireList, friendsListPanel, "", allFriends.getAction(), new MoveAction(onlineList, true));
         addItem(onlineList,  friendsListPanel, "", new MoveAction(limewireList, false), new MoveAction(offlineList, true));
         addItem(offlineList, friendsListPanel, "", new MoveAction(onlineList, false), null);
@@ -227,7 +230,27 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
     }    
     
     @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownListeners,
-                          @Named("available") ListenerSupport<FriendEvent> availListeners) {
+                          @Named("available") ListenerSupport<FriendEvent> availListeners,
+                          ListenerSupport<XMPPConnectionEvent> connectionListeners) {
+        
+        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECT_FAILED:
+                case DISCONNECTED:
+                case CONNECTING:
+                    friendsScrollArea.setOpaque(false);
+                    repaint();
+                    break;
+                case CONNECTED:
+                    friendsScrollArea.setOpaque(true);
+                    repaint();
+                    break;
+                }
+            }
+        });
         
         knownListeners.addListener(new EventListener<FriendEvent>() {
             @Override

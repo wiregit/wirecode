@@ -12,6 +12,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXCollapsiblePane;
@@ -40,6 +41,7 @@ class NavList extends JXPanel {
     NavList(String name) {
         setName(name);
         setLayout(new VerticalLayout(0));
+        setOpaque(false);
         
         this.panelMoveUpAction = new NavPanelMoveAction(false);
         this.panelMoveDownAction = new NavPanelMoveAction(true);
@@ -57,6 +59,7 @@ class NavList extends JXPanel {
         titleLabel.setName("LibraryNavigator.NavListTitle");
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         add(titleLabel);
+        titleLabel.setOpaque(false);
         
         panelContainer = new JXPanel(new VerticalLayout(0)) {
             @Override
@@ -65,9 +68,25 @@ class NavList extends JXPanel {
                 d.width = NavList.this.getWidth();
                 return d;
             }
+            
+            // Must explicitly set content pane to something that ignores
+            // opaque changing due to the way JXCollapsiblePanel forces
+            // opaqueness.
+            
+            @Override
+            public void setOpaque(boolean isOpaque) {
+            }
+            
+            @Override
+            public boolean isOpaque() {
+                return false;
+            }
         };
         collapsablePanels = new JXCollapsiblePane();
+        collapsablePanels.setOpaque(false);
         collapsablePanels.setContentPane(panelContainer);
+        // Extended hack to make the panel non-opaque.
+        ((JComponent)collapsablePanels.getComponent(0)).setOpaque(false);
         add(collapsablePanels);
         
         checkVisibility(true);
