@@ -1302,7 +1302,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
         
-        return addDownloadForced(l,cache);
+        if(l.size() > 0) {
+            return addDownloadForced(l,cache);
+        } else {
+            return false;
+        }
     }
 
     /**

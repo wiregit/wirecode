@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -603,6 +604,8 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
 
         String fName = getFileName(files, fileName);
         if (conflicts(files, new File(saveDir,fName))) {
+            addRemoteFileDescsToDownloader(files);
+            
             throw new SaveLocationException
             (LocationCode.FILE_ALREADY_DOWNLOADING,
                     new File(fName != null ? fName : ""));
@@ -628,6 +631,29 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
         downloader.addDownload(alts,false);
         
         return downloader;
+    }
+
+    /**
+     * Adds the provided file descs to the first downloader in the list that
+     * matches up with it.
+     */
+    private void addRemoteFileDescsToDownloader(RemoteFileDesc[] files) {
+        List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size() + waiting.size());
+        synchronized (this) { 
+            // add to all downloaders, even if they are waiting....
+            downloaders.addAll(active);
+            downloaders.addAll(waiting);
+        }
+        
+        for(CoreDownloader downloader : downloaders) {
+            if(downloader instanceof ManagedDownloader) {
+                ManagedDownloader managedDownloader = (ManagedDownloader) downloader;
+                if(managedDownloader.addDownload(Arrays.asList(files), true)) {
+                    //only add fileDescs to 1 downloader
+                    break;
+                }
+            }
+        }
     }
     
     /* (non-Javadoc)
