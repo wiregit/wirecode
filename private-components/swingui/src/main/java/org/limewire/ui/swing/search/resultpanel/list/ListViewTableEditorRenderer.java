@@ -272,7 +272,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         itemIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if(SwingUtilities.isLeftMouseButton(e) && !vsr.isSpam()) {
+                if(SwingUtilities.isLeftMouseButton(e) && isDownloadEligible(vsr)) {
                     actionButtonPanel.startDownload();
                     table.editingStopped(new ChangeEvent(table));
                 } else {
@@ -437,7 +437,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
     private Component makeLeftPanel(final Navigator navigator, final LibraryNavigator libraryNavigator) {
         itemIconLabel = new JLabel();
-        itemIconLabel.setCursor(getIconCursor(false));
         itemIconLabel.setOpaque(false);
         
         heading.setContentType("text/html");
@@ -506,8 +505,13 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         return panel;
     }
 
-    private Cursor getIconCursor(boolean isSpam) {
-        return Cursor.getPredefinedCursor(isSpam ? Cursor.DEFAULT_CURSOR : Cursor.HAND_CURSOR);
+    private Cursor getIconCursor(VisualSearchResult vsr) {
+        boolean useDefaultCursor = !isDownloadEligible(vsr);
+        return Cursor.getPredefinedCursor(useDefaultCursor ? Cursor.DEFAULT_CURSOR : Cursor.HAND_CURSOR);
+    }
+
+    private boolean isDownloadEligible(VisualSearchResult vsr) {
+        return !vsr.isSpam() && vsr.getDownloadState() == BasicDownloadState.NOT_STARTED;
     }
 
     private void makePanel(Navigator navigator, LibraryNavigator libraryNavigator, PropertiesFactory<VisualSearchResult> properties) {
@@ -624,7 +628,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             }
             
             itemIconLabel.setIcon(getIcon(vsr));
-            itemIconLabel.setCursor(getIconCursor(vsr.isSpam()));
+            itemIconLabel.setCursor(getIconCursor(vsr));
 
             RowDisplayResult result = rowHeightRule.getDisplayResult(vsr, searchText);
             
