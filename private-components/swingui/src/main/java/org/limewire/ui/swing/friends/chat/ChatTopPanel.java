@@ -53,7 +53,7 @@ public class ChatTopPanel extends JXPanel {
         GuiUtils.assignResources(this);
         
         RectanglePainter painter = new RectanglePainter();
-        painter.setFillPaint(new GradientPaint(50.0f, -1.0f, gradientTop, 50.0f, 20.0f, gradientBottom));
+        painter.setFillPaint(new GradientPaint(50.0f, 0.0f, gradientTop, 50.0f, 9.5f, gradientBottom));
         painter.setBorderPaint(borderBottom);
         painter.setBorderWidth(1f);
         

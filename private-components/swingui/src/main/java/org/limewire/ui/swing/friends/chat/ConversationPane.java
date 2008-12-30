@@ -373,7 +373,7 @@ public class ConversationPane extends JPanel implements Displayable {
         RectanglePainter painter = new RectanglePainter();
         painter.setBorderPaint(toolbarBorderColor);
         painter.setBorderWidth(1.0f);
-        painter.setFillPaint(new GradientPaint(50.0f, -1.0f, toolbarTopColor, 50.0f, 20.0f, toolbarBottomColor));
+        painter.setFillPaint(new GradientPaint(50.0f, 0.0f, toolbarTopColor, 50.0f, 11.0f, toolbarBottomColor));
         toolbar.setBackgroundPainter(painter);
         toolbar.add(downloadlink);
         sharelink = new JXHyperlink(new ShareAction());
