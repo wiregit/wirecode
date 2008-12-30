@@ -9,6 +9,7 @@ import java.text.NumberFormat;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -23,6 +24,7 @@ import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
+import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.table.TableRendererEditor;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -44,6 +46,10 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JLabel timeLabel;
     @Resource
     private Color linkColor;
+    
+    @Resource private Icon cancelIcon;
+    @Resource private Icon cancelIconRollover;
+    @Resource private Icon cancelIconPressed;
     
 
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
@@ -101,7 +107,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private void initializeComponents(LimeProgressBarFactory progressBarFactory){
         nameLabel = new JLabel(I18n.tr("Name"));
         statusLabel = new JLabel(I18n.tr("Status"));
-        cancelButton = new JXButton(I18n.tr("X")); 
+        cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         removeButton = new JXHyperlink();
         removeButton.setText("<HTML><U>" + I18n.tr("Remove") + "</U></HTML>");
         removeButton.setForeground(linkColor);        
@@ -118,10 +124,10 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     }
     
     private void addComponents() {
-        add(nameLabel, "aligny bottom");
-        add(cancelButton, "alignx right, aligny 50%, spany 3, push, wrap");
-        add(progressBar, "hidemode 3, wrap");
-        add(statusLabel, "aligny top, split 3");
+        add(nameLabel, "gapleft 5, aligny bottom");
+        add(cancelButton, "gapright 5, alignx right, aligny 50%, spany 3, push, wrap");
+        add(progressBar, "gapleft 5, hidemode 3, wrap");
+        add(statusLabel, "gapleft 5, aligny top, split 3");
         add(timeLabel, "push, aligny top, alignx right, hidemode 3");
         add(removeButton, "push, aligny top, alignx right, hidemode 3");
     }
