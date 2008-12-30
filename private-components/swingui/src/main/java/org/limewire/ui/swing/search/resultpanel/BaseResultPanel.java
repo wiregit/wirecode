@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.JComponent;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
@@ -20,12 +21,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.RangeList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.EventTableModel;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
@@ -50,16 +45,23 @@ import org.limewire.ui.swing.search.resultpanel.classic.OpaqueCalendarRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.OpaqueStringRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewDisplayedRowsLimit;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
-import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRenderer;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableFormat;
+import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule.RowDisplayResult;
 import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.VisibleTableFormat;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.RangeList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.EventTableModel;
 
 public abstract class BaseResultPanel extends JXPanel implements DownloadHandler {
     
@@ -320,15 +322,10 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
         } catch (final SaveLocationException sle) {
             if(sle.getErrorCode()  == SaveLocationException.LocationCode.FILE_ALREADY_DOWNLOADING) {
-                List<DownloadItem> downloads = downloadListManager.getSwingThreadSafeDownloads();
-                // TODO instead of iterating through loop, it would be
-                // nice to lookup download by urn potentially.
-                for (DownloadItem downloadItem : downloads) {
-                    if (vsr.getUrn().equals(downloadItem.getUrn())) {
-                        downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
-                        vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
-                        break;
-                    }
+                DownloadItem downloadItem = downloadListManager.getDownloadItem(vsr.getUrn());
+                if(downloadItem != null) {
+                    downloadItem.addPropertyChangeListener(new DownloadItemPropertyListener(vsr));
+                    vsr.setDownloadState(BasicDownloadState.DOWNLOADING);
                 }
             } else {
                 saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
