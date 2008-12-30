@@ -749,9 +749,9 @@ public class DownloadManagerImpl implements DownloadManager, Service, EventListe
                                               name,
                                               size);
         } catch (IllegalArgumentException e) {
-            throw new CantResumeException(incompleteFile.getName());
+            throw new CantResumeException(e, incompleteFile.getName());
         } catch (IOException ioe) {
-            throw new CantResumeException(incompleteFile.getName());
+            throw new CantResumeException(ioe, incompleteFile.getName());
         }
         
         initializeDownload(downloader, true);
