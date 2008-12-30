@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library.nav;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -13,6 +14,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.border.Border;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXBusyLabel;
@@ -112,6 +114,18 @@ public class NavPanel extends JXPanel {
                 }
             }
         });
+    }
+    
+    void setTopGap(int topgap) {
+        Border border = categoryLabel.getBorder();
+        Insets insets = border.getBorderInsets(categoryLabel);
+        categoryLabel.setBorder(BorderFactory.createEmptyBorder(topgap, insets.left, insets.bottom, insets.right));
+    }
+    
+    void setBottomGap(int bottomgap) {
+        Border border = categoryLabel.getBorder();
+        Insets insets = border.getBorderInsets(categoryLabel);
+        categoryLabel.setBorder(BorderFactory.createEmptyBorder(insets.top, insets.left, bottomgap, insets.right));
     }
     
     void setTitle(String text) {

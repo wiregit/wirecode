@@ -121,7 +121,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         
         allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
 
-        setLayout(new MigLayout("insets 0, fill, gap 2"));
+        setLayout(new MigLayout("insets 0, fill, gap 0"));
 
         
         JXPanel friendsListPanel = new JXPanel(new VerticalLayout(2));
@@ -133,6 +133,10 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollableNav.setBorder(null);
+        
+        // Increase the painted gaps a bit to make sure it's not smushed.
+        myLibrary.setTopGap(2);
+        allFriends.setBottomGap(2);
         
         addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
         addItem(p2pNetwork, this, "growx, wmin 0, wrap", myLibrary.getAction(), allFriends.getAction());
