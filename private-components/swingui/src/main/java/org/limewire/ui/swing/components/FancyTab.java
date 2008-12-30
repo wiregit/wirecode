@@ -113,7 +113,7 @@ public class FancyTab extends JXPanel {
         //problem only visible on OSX. The problem is that the additionalText
         //label displays far to the right and well below the mainButton.
         mainButton.setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new MigLayout("insets 0 0 4 0, fill, gap 0, hidemode 2"));        
+        setLayout(new MigLayout("insets 0 0 7 0, fill, gap 0, hidemode 2"));        
         add(mainButton,     "gapbefore 4, aligny bottom, width min(pref,50):pref:max, cell 1 1");
         add(additionalText, "gapbefore 2, aligny bottom, cell 2 1");
         add(busyLabel,      "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 2");
