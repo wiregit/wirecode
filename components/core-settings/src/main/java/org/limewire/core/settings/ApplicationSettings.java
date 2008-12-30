@@ -154,22 +154,7 @@ public class ApplicationSettings extends LimeProps {
 	 */
     public static final BooleanSetting MINIMIZE_TO_TRAY =
         FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
-            OSUtils.supportsTray());   
-    
-    /**
-     * A flag for whether or not to display the system
-     * tray icon while the application is visible. 
-     */
-    public static final BooleanSetting DISPLAY_TRAY_ICON =
-        FACTORY.createBooleanSetting("DISPLAY_TRAY_ICON_2", true);
-    
-    /**
-	 * A flag for whether or not the application should shutdown
-	 * immediately, or when file transfers are complete
-	 */
-    public static final BooleanSetting SHUTDOWN_AFTER_TRANSFERS =
-        FACTORY.createBooleanSetting("SHUTDOWN_AFTER_TRANSFERS", 
-            OSUtils.isMacOSX() ? false : !OSUtils.supportsTray());
+            OSUtils.supportsTray());
     
     /**
 	 * The language to use for the application.

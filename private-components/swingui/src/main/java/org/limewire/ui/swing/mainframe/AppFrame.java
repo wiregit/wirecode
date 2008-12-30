@@ -28,6 +28,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
+import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inject.Modules;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
@@ -82,6 +83,11 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
     @Inject private DelayedShutdownHandler delayedShutdownHandler;
+    
+    /** Starts with the mock core. */
+    public static void main(String[] args) {
+        launch(AppFrame.class, args);
+    }
 
     /** Returns true if the UI has initialized & successfully been shown. */
     public static boolean isStarted() {
@@ -132,7 +138,11 @@ public class AppFrame extends SingleFrameApplication {
         createUiInjector();
         assert ui != null;
 
-        trayNotifier.showTrayIcon();
+        if(isStartup || ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+            trayNotifier.showTrayIcon();            
+        } else {
+            trayNotifier.hideTrayIcon();
+        }
         getMainFrame().setJMenuBar(limeMenuBar);
 
         // Install handler for shutdown after transfers.
@@ -218,6 +228,9 @@ public class AppFrame extends SingleFrameApplication {
     
     @EventSubscriber
     public void handleRestoreView(RestoreViewEvent event) {
+        if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+            trayNotifier.hideTrayIcon();
+        }
         getMainFrame().setVisible(true);
         getMainFrame().setState(Frame.NORMAL);
         getMainFrame().toFront();
@@ -266,30 +279,25 @@ public class AppFrame extends SingleFrameApplication {
             return Guice.createInjector(Stage.PRODUCTION, modules);
         }
     }
-
-    public static void main(String[] args) {
-        launch(AppFrame.class, args);
-    }
     
     /**
-     * Sets the custom default UI colour and behaviour properties
+     * Sets the custom default UI color and behavior properties
      */
-    private void initUIDefaults() {
-       
+    private void initUIDefaults() {       
         if (OSUtils.isAnyMac()) {
             initMacUIDefaults();
         }
         
         initBackgrounds();
         
-        // Set the menu item highlight colours
+        // Set the menu item highlight colors
         Paint highlightBackground = new Color(0xdaf2b5);
         UIManager.put("Menu.selectionBackground", highlightBackground);
         UIManager.put("MenuItem.selectionBackground", highlightBackground);
         UIManager.put("CheckBoxMenuItem.selectionBackground", highlightBackground);
         UIManager.put("RadioButtonMenuItem.selectionBackground", highlightBackground);
         
-        // Set the menu item highlight colours to avoid contrast issues with
+        // Set the menu item highlight colors to avoid contrast issues with
         //  new highlight background in default XP theme
         Color highlightForeground = Color.BLACK;
         UIManager.put("Menu.selectionForeground", highlightForeground);

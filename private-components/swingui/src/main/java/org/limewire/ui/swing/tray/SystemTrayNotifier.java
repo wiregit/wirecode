@@ -127,7 +127,6 @@ class SystemTrayNotifier implements TrayNotifier {
     }
 
     public boolean showTrayIcon() {
-
         if (tray == null || trayIconResource == null) {
             return false;
         }

@@ -18,6 +18,7 @@ import org.limewire.core.settings.UpdateSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
+import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.OSUtils;
 
@@ -28,14 +29,14 @@ import com.google.inject.Inject;
  */
 public class SystemOptionPanel extends OptionPanel {
 
+    private final TrayNotifier trayNotifier;
     private FileAssociationPanel fileAssociationPanel;
-
     private StartupShutdownPanel startupShutdownPanel;
-
     private UpdatesBugsPanel updatesBugsPanel;
 
     @Inject
-    public SystemOptionPanel() {
+    public SystemOptionPanel(TrayNotifier trayNotifier) {
+        this.trayNotifier = trayNotifier;
         setLayout(new MigLayout("hidemode 2, insets 15 15 15 15, fillx, wrap", "", ""));
 
         setOpaque(false);
@@ -233,8 +234,6 @@ public class SystemOptionPanel extends OptionPanel {
 
         private boolean displaySystemTrayIcon = false;
 
-        private boolean shutdownAfterTransfer = false;
-
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
 
@@ -251,9 +250,8 @@ public class SystemOptionPanel extends OptionPanel {
 
             add(runAtStartupCheckBox, "split, wrap");
 
-            if (!OSUtils.isAnyMac()) {
+            if (trayNotifier.supportsSystemTray()) {
                 add(new JLabel(I18n.tr("When I press X:")), "wrap");
-
                 add(minimizeButton, "gapleft 25, split, gapafter 20");
                 add(exitButton);
             }
@@ -263,16 +261,11 @@ public class SystemOptionPanel extends OptionPanel {
         boolean applyOptions() {
             StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
             ApplicationSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
-
-            // if minimize or run at startup is selected, system tray icon must
-            // be shown
-            if ((minimizeButton.isSelected() || runAtStartupCheckBox.isSelected())
-                    && OSUtils.supportsTray()) {
-                ApplicationSettings.DISPLAY_TRAY_ICON.setValue(true);
+            if(ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+                trayNotifier.showTrayIcon();
             } else {
-                ApplicationSettings.DISPLAY_TRAY_ICON.setValue(false);
+                trayNotifier.hideTrayIcon();
             }
-            ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.setValue(false);
             return false;
         }
 
@@ -280,7 +273,7 @@ public class SystemOptionPanel extends OptionPanel {
         boolean hasChanged() {
             return StartupSettings.RUN_ON_STARTUP.getValue() != runAtStartupCheckBox.isSelected()
                     || ApplicationSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton
-                            .isSelected() || isIconDisplayed() || shutdownAfterTransfer != false;
+                            .isSelected() || isIconDisplayed();
         }
 
         private boolean isIconDisplayed() {
@@ -293,22 +286,9 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            // TODO: should shutdown after transfer be set to false here??
-            shutdownAfterTransfer = ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.getValue();
-            if (shutdownAfterTransfer) {
-                ApplicationSettings.SHUTDOWN_AFTER_TRANSFERS.setValue(false);
-                ApplicationSettings.MINIMIZE_TO_TRAY.setValue(true);
-                shutdownAfterTransfer = false;
-            }
-
             runAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
             minimizeButton.setSelected(ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
             exitButton.setSelected(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
-
-            // load these to ensure that we override them correctly since they
-            // aren't
-            // directly accessable in 5.0
-            displaySystemTrayIcon = ApplicationSettings.DISPLAY_TRAY_ICON.getValue();
         }
     }
 
