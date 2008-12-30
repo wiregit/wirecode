@@ -75,8 +75,9 @@ public class StatusActions {
 
     private void updateSelection() {
         if(xmppService.isLoggedIn()) {
-            available.setSelected(!XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
-            dnd.setSelected(XMPPSettings.XMPP_DO_NOT_DISTURB.getValue());
+            boolean dndBool = XMPPSettings.XMPP_DO_NOT_DISTURB.getValue();
+            available.setSelected(!dndBool);
+            dnd.setSelected(dndBool);
         } else {
             //do not show selections when logged out
             available.setSelected(false);
