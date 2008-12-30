@@ -150,8 +150,10 @@ public abstract class Dialog extends LimeJDialog {
     }
     
     protected void setFont(Font font, JComponent... components) {
-        for(JComponent comp : components) {
-            comp.setFont(font);
+        if (font != null) {
+            for (JComponent comp : components) {
+                comp.setFont(font);
+            }
         }
     }
 
