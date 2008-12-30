@@ -506,7 +506,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         removeEditor.setOpaque(false);
         //do nothing ColorHighlighter eliminates default striping
         shareTable.setHighlighters(new ColorHighlighter());
-        shareTable.setRowHeight(removeEditor.getPreferredSize().height + 4);
+        shareTable.setRowHeight(removeEditor.getPreferredSize().height + 3);
         shareTable.getColumnModel().getColumn(actionCol).setCellEditor(removeEditor);
         shareTable.getColumnModel().getColumn(actionCol).setPreferredWidth(removeEditor.getPreferredSize().width + 4);    
         shareTable.getColumnModel().getColumn(actionCol).setMaxWidth(removeEditor.getPreferredSize().width + 4);    
