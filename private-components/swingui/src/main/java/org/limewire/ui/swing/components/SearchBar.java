@@ -113,7 +113,11 @@ public class SearchBar extends JXPanel {
         searchField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                historyDictionary.addEntry(searchField.getText());
+                // Get search text, and add to history if non-empty.
+                String searchText = getSearchText();
+                if (!searchText.isEmpty()) {
+                    historyDictionary.addEntry(searchText);
+                }
             }
         });
         // TODO: this setting doesn't exist in options right now
@@ -188,18 +192,28 @@ public class SearchBar extends JXPanel {
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (searchField.getText().isEmpty()) {
-                    return;
+                // Get search text, and do search if non-empty.
+                String searchText = getSearchText();
+                if (!searchText.isEmpty()) {
+                    searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(
+                            searchText, categoryToSearch));
                 }
-
-                String searchText = searchField.getText();
-                searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(searchText,
-                        categoryToSearch));
             }
         };
         
         this.searchField.addActionListener(listener);
         this.searchButton.addActionListener(listener);
+    }
+    
+    /**
+     * Returns the search text with leading and trailing whitespace removed.
+     * The method returns an empty string if there are no non-whitespace
+     * characters.
+     */
+    private String getSearchText() {
+        // Get search text and trim whitespace.
+        String searchText = searchField.getText();
+        return ((searchText != null) ? searchText.trim() : "");
     }
     
     private class CatagoryAction extends AbstractAction {
