@@ -57,6 +57,7 @@ public class FancyTab extends JXPanel {
     
     private TabState currentState;
     
+    private boolean mouseInside;
     private Icon removeEmptyIcon;
     @Resource private Icon removeActiveIcon;
     @Resource private Icon removeActiveRolloverIcon;
@@ -100,24 +101,24 @@ public class FancyTab extends JXPanel {
         HighlightListener highlightListener = new HighlightListener();
         if (props.isRemovable()) {
             removeButton.addMouseListener(highlightListener);
-            removeButton.setVisible(true);
         }
         
         addMouseListener(highlightListener);
         mainButton.addMouseListener(highlightListener);
 
+        updateButtons(false);
         changeState(isSelected() ? TabState.SELECTED : TabState.BACKGROUND);
+        
         //For some reason, setting the border on the main button resolves a layout
         //problem only visible on OSX. The problem is that the additionalText
         //label displays far to the right and well below the mainButton.
         mainButton.setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new MigLayout("insets 0 0 2 0, filly, gapy 0, hidemode 1"));        
-        add(busyLabel, "gapbefore 4, alignx left, aligny bottom, hidemode 0");
-        add(mainButton, "aligny bottom, width min(pref,50):pref:max, split 1");
-        add(additionalText, "aligny bottom, gapbottom 0");
-        add(removeButton, "gapafter 4, aligny bottom, alignx right, wrap");
-        // TODO: not worrying about underlining extras for now
-        add(underline, "skip 1, span 1, growx, aligny top");
+        setLayout(new MigLayout("insets 0 0 4 0, fill, gap 0, hidemode 2"));        
+        add(mainButton,     "gapbefore 4, aligny bottom, width min(pref,50):pref:max, cell 1 1");
+        add(additionalText, "gapbefore 2, aligny bottom, cell 2 1");
+        add(busyLabel,      "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 2");
+        add(removeButton,   "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 2");
+        add(underline,      "gapbefore 4, aligny top, growx, cell 1 2");
     }
     
     @Override
@@ -133,6 +134,10 @@ public class FancyTab extends JXPanel {
         return props.getInsets();
     }
     
+    private boolean isBusy() {
+        return Boolean.TRUE.equals(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY));
+    }
+    
     SpinLabel createBusyLabel() {
         final SpinLabel busy = new SpinLabel();
         busy.setIcon(spinnerIcon);
@@ -140,8 +145,7 @@ public class FancyTab extends JXPanel {
         ResizeUtils.forceSize(busy, new Dimension(0,0));
         busy.setVisible(false);
         
-        if (tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY) ==
-            Boolean.TRUE) {
+        if (isBusy()) {
             busy.setBusy(true);
             ResizeUtils.forceSize(busy, new Dimension(16,16));    
             busy.setVisible(true);
@@ -151,10 +155,11 @@ public class FancyTab extends JXPanel {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
-                    boolean on = evt.getNewValue() == Boolean.TRUE;
+                    boolean on = Boolean.TRUE.equals(evt.getNewValue());
                     busy.setBusy(on);
                     ResizeUtils.forceSize(busy, new Dimension(16,16));
-                    busy.setVisible(on);                    
+                    busy.setVisible(on);  
+                    updateButtons(mouseInside);
                 }
             }
         });
@@ -333,6 +338,22 @@ public class FancyTab extends JXPanel {
 //      FontUtils.underline(additionalText);
 //  }
     
+    private void updateButtons(boolean mouseInside) {
+        this.mouseInside = mouseInside;
+        
+        if(mouseInside || !isBusy()) {
+            if(props.isRemovable()) {
+                removeButton.setVisible(true);
+            } else {
+                removeButton.setVisible(false);
+            }
+            busyLabel.setVisible(false);
+        } else { // isBusy == true
+            busyLabel.setVisible(true);
+            removeButton.setVisible(false);
+        }
+    }
+    
     private void changeState(TabState tabState) {
         if (currentState != tabState) {
             this.currentState = tabState;
@@ -380,6 +401,7 @@ public class FancyTab extends JXPanel {
     private class HighlightListener extends MouseAdapter {
         @Override
         public void mouseEntered(MouseEvent e) {
+            updateButtons(true);
             if (!isSelected() && mainButton.isEnabled()) {
                 getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 changeState(TabState.ROLLOVER);
@@ -388,6 +410,7 @@ public class FancyTab extends JXPanel {
 
         @Override
         public void mouseExited(MouseEvent e) {
+            updateButtons(false);
             getTopLevelAncestor().setCursor(Cursor.getDefaultCursor());            
             if (!isSelected()) {
                 changeState(TabState.BACKGROUND);
