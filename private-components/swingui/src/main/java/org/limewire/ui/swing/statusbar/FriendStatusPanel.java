@@ -4,12 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -64,8 +66,13 @@ class FriendStatusPanel {
         chatButton.setIcon(iconLibrary.getChatting());
         chatButton.setFont(chatButtonFont);
         chatButton.setForeground(chatButtonForeground);
+        chatButton.setFocusPainted(false);
+        chatButton.setHorizontalAlignment(AbstractButton.LEFT);
+        chatButton.setHorizontalTextPosition(AbstractButton.RIGHT);
+        Insets insets = new Insets(1, 2, 0, 25);
+        chatButton.setMargin(insets);
         
-        chatPanel.add(chatButton, BorderLayout.WEST);
+        chatPanel.add(chatButton);
         
         friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
         
