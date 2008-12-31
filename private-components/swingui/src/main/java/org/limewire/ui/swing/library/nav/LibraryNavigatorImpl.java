@@ -87,7 +87,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
             AllFriendsLibraryPanel allFriendsLibraryPanel,
             NavPanelFactory navPanelFactory,
             FriendLibraryMediatorFactory friendLibraryMediatorFactory,
-            FriendsSignInPanel friendsPanel,
+            final FriendsSignInPanel friendsPanel,
             SaveLocationExceptionHandler saveLocationExceptionHandler) {
         this.myLibraryPanel = myLibraryPanel;
         this.shareListManager = shareListManager;
@@ -122,6 +122,12 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         p2pNetwork.setTransferHandler(new LocalFileListTransferHandler(shareListManager.getGnutellaShareList()));
         
         allFriends = initializePanel(I18n.tr("All Friends"), allFriendsLibraryPanel, "LibraryNavigator.allFriends");
+        allFriends.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                friendsPanel.signIn();
+            }
+        });
 
         setLayout(new MigLayout("insets 0, fill, gap 0"));
 
