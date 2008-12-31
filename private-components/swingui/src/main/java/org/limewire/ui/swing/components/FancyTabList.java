@@ -272,7 +272,7 @@ public class FancyTabList extends JXPanel {
         }        
         if (tabs.size() > maxVisibleTabs) {
             
-            FancyTabMoreButton more = new FancyTabMoreButton(tabs, props);
+            FancyTabMoreButton more = new FancyTabMoreButton(tabs);
             comboBoxFactory.decorateMiniComboBox(more, I18n.tr("more"));
             more.setFont(props.getTextFont());
             
