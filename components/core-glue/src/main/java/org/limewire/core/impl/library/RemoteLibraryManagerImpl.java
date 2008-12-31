@@ -16,14 +16,17 @@ import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.util.StringUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.UniqueList;
-import ca.odell.glazedlists.ObservableElementList.Connector;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -31,9 +34,6 @@ import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 @Singleton
 public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
@@ -43,6 +43,8 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     private final EventList<FriendLibrary> readOnlyFriendLibraries;
     private volatile EventList<FriendLibrary> swingFriendLibraries;
     private final ReadWriteLock lock;
+    
+    private static final RemoteFileComparator COMPARATOR = new RemoteFileComparator();
 
     @Inject
     public RemoteLibraryManagerImpl() {
@@ -51,6 +53,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(lock)), connector);
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
         allFriendsList = new AllFriendsLibraryImpl(lock);
+        swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries, "readOnlyFriendLibraries");  
     }
     
     @Override
@@ -67,7 +70,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     public EventList<FriendLibrary> getSwingFriendLibraryList() {
         assert EventQueue.isDispatchThread();
         if(swingFriendLibraries == null) {
-            swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries);            
+            swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries, "readOnlyFriendLibraries");            
         }
         return swingFriendLibraries;
     }
@@ -104,7 +107,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             FriendLibraryImpl friendLibrary = getFriendLibrary(presence.getFriend());
             if (friendLibrary != null) {
                 friendLibrary.removePresenceLibrary(presence); 
-                if (friendLibrary.size() == 0) {
+                if (friendLibrary.getPresenceLibraryList().size() == 0) {
                     removeFriendLibrary(friendLibrary);
                 }
             }
@@ -169,6 +172,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     return o1.getUrn().compareTo(o2.getUrn());
                 }
             });
+            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:AllFriendsLibraryImpl");
         }
         
         @Override
@@ -180,7 +184,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:AllFriendsLibraryImpl");
             }
             return swingList;
         }
@@ -225,19 +229,14 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             compositeList = new CompositeList<RemoteFileItem>(allFriendsList.getPublisher(), lock);
             readOnlyList = GlazedListsFactory.readOnlyList(compositeList);
             threadSafeUniqueList = GlazedListsFactory.uniqueList(GlazedListsFactory.threadSafeList(readOnlyList),
-                    new Comparator<RemoteFileItem>() {
-                @Override
-                public int compare(RemoteFileItem o1, RemoteFileItem o2) {
-                    return o1.getUrn().compareTo(o2.getUrn());
-                }
-            });
+                    COMPARATOR);
             
             changeSupport = new PropertyChangeSupport(this);
             
             Connector<PresenceLibrary> connector = GlazedLists.beanConnector(PresenceLibrary.class);            
             allPresenceLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>(lock)), connector);
             readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
-            
+            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:FriendLibraryImpl");
             allPresenceLibraries.addListEventListener(new ListEventListener<PresenceLibrary>() {
                 @Override
                 public void listChanged(ListEvent<PresenceLibrary> listChanges) {
@@ -336,7 +335,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:FriendLibraryImpl");
             }
             return swingList;
         }
@@ -398,6 +397,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         PresenceLibraryImpl(FriendPresence presence, EventList<RemoteFileItem> list) {
             this.presence = presence;
             eventList = GlazedListsFactory.threadSafeList(list);
+            swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList, "eventList:PresenceLibraryImpl");
             changeSupport = new PropertyChangeSupport(this);
         }
 
@@ -419,12 +419,13 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
-                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
+                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList, "eventList:PresenceLibraryImpl");
             }
             return swingEventList;
         }
 
         void dispose() {
+            //eventList.clear();
             if(swingEventList != null) {
                 swingEventList.dispose();
             }
@@ -469,6 +470,13 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         
         public void removePropertyChangeListener(PropertyChangeListener listener) {
             changeSupport.removePropertyChangeListener(listener);
+        }
+    }
+    
+    private static class RemoteFileComparator implements Comparator<RemoteFileItem> {
+        @Override
+            public int compare(RemoteFileItem o1, RemoteFileItem o2) {
+            return o1.getUrn().compareTo(o2.getUrn());
         }
     }
 }
