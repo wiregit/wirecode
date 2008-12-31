@@ -53,7 +53,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         allFriendLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<FriendLibrary>(lock)), connector);
         readOnlyFriendLibraries = GlazedListsFactory.readOnlyList(allFriendLibraries);
         allFriendsList = new AllFriendsLibraryImpl(lock);
-        swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries, "readOnlyFriendLibraries");  
+        swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries);  
     }
     
     @Override
@@ -70,7 +70,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
     public EventList<FriendLibrary> getSwingFriendLibraryList() {
         assert EventQueue.isDispatchThread();
         if(swingFriendLibraries == null) {
-            swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries, "readOnlyFriendLibraries");            
+            swingFriendLibraries = GlazedListsFactory.swingThreadProxyEventList(readOnlyFriendLibraries);            
         }
         return swingFriendLibraries;
     }
@@ -172,7 +172,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
                     return o1.getUrn().compareTo(o2.getUrn());
                 }
             });
-            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:AllFriendsLibraryImpl");
+            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
         }
         
         @Override
@@ -184,7 +184,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:AllFriendsLibraryImpl");
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
             }
             return swingList;
         }
@@ -236,7 +236,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
             Connector<PresenceLibrary> connector = GlazedLists.beanConnector(PresenceLibrary.class);            
             allPresenceLibraries = GlazedListsFactory.observableElementList(GlazedListsFactory.threadSafeList(new BasicEventList<PresenceLibrary>(lock)), connector);
             readOnlyPresenceLibraries = GlazedListsFactory.readOnlyList(allPresenceLibraries);
-            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:FriendLibraryImpl");
+            swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
             allPresenceLibraries.addListEventListener(new ListEventListener<PresenceLibrary>() {
                 @Override
                 public void listChanged(ListEvent<PresenceLibrary> listChanges) {
@@ -335,7 +335,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingList == null) {
-                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList, "threadSafeUniqueList:FriendLibraryImpl");
+                swingList =  GlazedListsFactory.swingThreadProxyEventList(threadSafeUniqueList);
             }
             return swingList;
         }
@@ -397,7 +397,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         PresenceLibraryImpl(FriendPresence presence, EventList<RemoteFileItem> list) {
             this.presence = presence;
             eventList = GlazedListsFactory.threadSafeList(list);
-            swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList, "eventList:PresenceLibraryImpl");
+            swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
             changeSupport = new PropertyChangeSupport(this);
         }
 
@@ -419,7 +419,7 @@ public class RemoteLibraryManagerImpl implements RemoteLibraryManager {
         public EventList<RemoteFileItem> getSwingModel() {
             assert EventQueue.isDispatchThread();
             if(swingEventList == null) {
-                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList, "eventList:PresenceLibraryImpl");
+                swingEventList =  GlazedListsFactory.swingThreadProxyEventList(eventList);
             }
             return swingEventList;
         }
