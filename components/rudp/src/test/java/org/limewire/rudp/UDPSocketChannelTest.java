@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import org.limewire.rudp.messages.SynMessage.Role;
 import org.limewire.util.BaseTestCase;
+import org.limewire.listener.EventListenerList;
 
 
 public class UDPSocketChannelTest extends BaseTestCase {
@@ -462,7 +463,7 @@ public class UDPSocketChannelTest extends BaseTestCase {
         }
         
         StubProcessor() {
-            super(null, new DefaultRUDPContext(), Role.UNDEFINED);
+            super(null, new DefaultRUDPContext(), Role.UNDEFINED, new EventListenerList<UDPSocketChannelConnectionEvent>());
         }
 
         @Override
