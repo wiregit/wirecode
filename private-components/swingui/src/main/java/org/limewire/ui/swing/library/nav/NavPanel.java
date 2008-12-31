@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.nav;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
@@ -14,6 +15,8 @@ import java.beans.PropertyChangeListener;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.border.Border;
 
 import org.jdesktop.application.Resource;
@@ -25,11 +28,16 @@ import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.RemoteLibraryManager;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.library.FriendLibraryMediator;
 import org.limewire.ui.swing.listener.ActionHandListener;
+import org.limewire.ui.swing.listener.MousePopupListener;
+import org.limewire.ui.swing.menu.actions.ChatAction;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
@@ -63,18 +71,22 @@ public class NavPanel extends JXPanel {
     private MouseListener removeListener;     
     
     private boolean failed;
+    
+    private final Provider<ChatAction> chatActionProvider;
 
     @AssistedInject
     NavPanel(@Assisted Action action,
              @Assisted Friend friend,
              @Assisted FriendLibraryMediator libraryPanel,
-            RemoteLibraryManager remoteLibraryManager) {
+            RemoteLibraryManager remoteLibraryManager,
+            Provider<ChatAction> chatActionProvider) {
         super(new MigLayout("insets 0, gap 0, fill"));
         
         GuiUtils.assignResources(this);
         
         setOpaque(false);
         
+        this.chatActionProvider = chatActionProvider;
         this.action = action;
         this.friend = friend;           
         this.libraryPanel = libraryPanel;
@@ -87,6 +99,9 @@ public class NavPanel extends JXPanel {
         categoryLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, 20));
         if(friend != null) {
             categoryLabel.setText(friend.getRenderName());
+            if(!friend.isAnonymous()) {
+                categoryLabel.addMouseListener(new ContextMenuListener());
+            }
         }
         statusIcon = new JXBusyLabel(new Dimension(12, 12));
         statusIcon.setOpaque(false);
@@ -298,5 +313,25 @@ public class NavPanel extends JXPanel {
 
     public FriendLibrary getFriendLibrary() {
         return friendLibrary;
+    }
+    
+    private class ContextMenuListener extends MousePopupListener {
+        @Override
+        public void handlePopupMouseEvent(MouseEvent e) {
+            JPopupMenu menu = new JPopupMenu();
+            menu.add(new JMenuItem(new AbstractAction(I18n.tr("Share")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    select();
+                    showSharingCard();
+                }                
+            }));
+            
+            
+            ChatAction chatAction = chatActionProvider.get();
+            chatAction.setFriend(friend);
+            menu.add(new JMenuItem(chatAction));
+            menu.show((Component) e.getSource(), e.getX() + 3, e.getY() + 3);
+        }
     }
 }
