@@ -9,7 +9,7 @@ import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.core.settings.StartupSettings;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
@@ -44,7 +44,7 @@ public class SetupPage1 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
-        HyperLinkButton learnMoreButton = new HyperLinkButton(learnMore);
+        HyperlinkButton learnMoreButton = new HyperlinkButton(learnMore);
         decorator.decorateNormalText(learnMoreButton);
         decorator.decorateLink(learnMoreButton);
         

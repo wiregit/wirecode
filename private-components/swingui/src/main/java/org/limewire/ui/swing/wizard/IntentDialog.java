@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
@@ -87,7 +87,7 @@ public class IntentDialog extends LimeJDialog {
         headingLabel.setFont(headingFont);
         JLabel agreeLabel = new MultiLineLabel(agreementText, 500);
         agreeLabel.setFont(normalFont);
-        HyperLinkButton linkButton = new HyperLinkButton(linkText, urlAction);
+        HyperlinkButton linkButton = new HyperlinkButton(linkText, urlAction);
         linkButton.setFont(normalFont);
         linkButton.setForeground(new Color(0x2152a6));
         MultiLineLabel bodyLabel = new MultiLineLabel(bodyText1, 500);        

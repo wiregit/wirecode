@@ -18,7 +18,7 @@ import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
@@ -34,7 +34,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class FriendsSignInPanel extends JXPanel implements FriendActions {
     
-    private final HyperLinkButton shareLabel;
+    private final HyperlinkButton shareLabel;
     private final LoginPanel loginPanel;
     private final LoggedInPanel loggedInPanel;
     private final XMPPService xmppService;
@@ -52,7 +52,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
         setLayout(new VerticalLayout());
         setOpaque(false);
         
-        shareLabel = new HyperLinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
+        shareLabel = new HyperlinkButton(I18n.tr("Share with friends!"), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 shareLabel.setVisible(false);

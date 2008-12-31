@@ -18,7 +18,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -69,7 +69,7 @@ class ConnectionStatusPanel extends JXPanel {
         connectionStatusLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,4));
         connectionStatusLabel.setFont(font);
         connectionStatusLabel.setForeground(this.getForeground());
-        tryAgainButton = new HyperLinkButton("Try Again");
+        tryAgainButton = new HyperlinkButton("Try Again");
         tryAgainButton.setFont(font);
         tryAgainButton.setVisible(false);
         tryAgainButton.setForeground(linkForeground);

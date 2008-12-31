@@ -25,7 +25,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -93,7 +93,7 @@ public class Wizard extends JPanel {
         continueButton = new JXButton(continueAction);
         decorator.decorateGreenButton(continueButton);
         
-        backButton = new HyperLinkButton((String)backAction.getValue(Action.NAME), backAction);
+        backButton = new HyperlinkButton((String)backAction.getValue(Action.NAME), backAction);
         decorator.decorateBackButton(backButton);
         
         finishButton = new JXButton(finishAction);

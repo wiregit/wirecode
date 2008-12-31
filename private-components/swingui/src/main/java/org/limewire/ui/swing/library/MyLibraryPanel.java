@@ -32,7 +32,7 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperLinkButton;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
@@ -233,7 +233,7 @@ public class MyLibraryPanel extends LibraryPanel {
         @Resource Color shareMouseOverColor;
         
         private JButton button;
-        private HyperLinkButton shareButton;
+        private HyperlinkButton shareButton;
         private LibraryPanel libraryPanel;
         
         public MySelectionPanel(Action action, Action shareAction, Category category, LibraryPanel panel) {
@@ -287,7 +287,7 @@ public class MyLibraryPanel extends LibraryPanel {
             
             // only add a share category button if its an audio/video/image category
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-                shareButton = new HyperLinkButton(null, shareAction);
+                shareButton = new HyperlinkButton(null, shareAction);
                 shareButton.setContentAreaFilled(false);
                 shareButton.setBorderPainted(false);
                 shareButton.setFocusPainted(false);
@@ -297,7 +297,7 @@ public class MyLibraryPanel extends LibraryPanel {
                 FontUtils.underline(shareButton);
                 shareButton.setFont(shareButtonFont);
                 shareButton.setForeground(shareForegroundColor);
-                shareButton.setMouseOverColor(shareMouseOverColor);
+                shareButton.setRolloverForeground(shareMouseOverColor);
                 add(shareButton, "wrap");
             }
         }
