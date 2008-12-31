@@ -149,9 +149,9 @@ class TopPanel extends JXPanel implements SearchNavigator {
         searchList.setName("WireframeTop.SearchList");
         searchList.setMaxVisibleTabs(3);
         searchList.setMaxTotalTabs(10);
-        searchList.setCloseAllText(I18n.tr("Close all searches"));
-        searchList.setCloseOneText(I18n.tr("Close search"));
-        searchList.setCloseOtherText(I18n.tr("Close other searches"));
+        searchList.setCloseAllText(I18n.tr("Close All Searches"));
+        searchList.setCloseOneText(I18n.tr("Close Search"));
+        searchList.setCloseOtherText(I18n.tr("Close Other searches"));
         searchList.setRemovable(true);
         searchList.setSelectionPainter(tabPainterFactory.createSelectionPainter());
         searchList.setHighlightPainter(tabPainterFactory.createHighlightPainter());
@@ -359,7 +359,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         private final Search search;
 
         RepeatSearchAction(Search search) {
-            super(I18n.tr("Repeat search"));
+            super(I18n.tr("Find More Results"));
             this.search = search;
             setEnabled(false);
         }

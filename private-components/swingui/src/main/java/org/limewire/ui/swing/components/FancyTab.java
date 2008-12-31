@@ -2,6 +2,7 @@ package org.limewire.ui.swing.components;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -17,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -24,6 +26,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.JToggleButton.ToggleButtonModel;
@@ -33,7 +36,6 @@ import net.miginfocom.swing.MigLayout;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
-import org.limewire.ui.swing.search.resultpanel.SearchTabPopup;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -392,10 +394,27 @@ public class FancyTab extends JXPanel {
     }
     
     private void showPopup(MouseEvent e) {
-        // A new popup menu needs to be created each time
-        // because its contents can change.
-        SearchTabPopup menu = new SearchTabPopup(this);
-        menu.show(e);
+        JPopupMenu menu = new JPopupMenu();
+        for (Action action : getTabActionMap().getRightClickActions()) {
+            menu.add(action);
+        }
+        
+        if (getComponentCount() != 0 && props.isRemovable()) {
+            menu.addSeparator();
+        }
+        
+        if (props.isRemovable()) {
+            menu.add(getTabActionMap().getRemoveOthers());
+            menu.add(getTabActionMap().getRemoveAll());
+            menu.addSeparator();
+            menu.add(new AbstractAction(props.getCloseOneText()) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    remove();
+                }
+            });
+        }
+        menu.show((Component)e.getSource(), e.getX() + 3, e.getY() + 3);
     }
     
     private class HighlightListener extends MouseAdapter {
