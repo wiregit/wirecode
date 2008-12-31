@@ -327,8 +327,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             LocalFileItem fileItem = libraryTableModel.getFileItem(adapter.row);
-            //TODO cache values?
-            return !(friendFileList.contains(fileItem.getUrn()));
+            return !friendFileList.contains(fileItem.getFile());
         }       
     }
     

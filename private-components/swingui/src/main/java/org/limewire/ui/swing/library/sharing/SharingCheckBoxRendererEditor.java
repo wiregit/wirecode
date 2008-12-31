@@ -72,7 +72,7 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
             setEnabled(false);
             setSelected(false);
         } else {
-            setSelected(localFileList.contains(fileItem.getUrn()));
+            setSelected(localFileList.contains(fileItem.getFile()));
             setEnabled(true);    
         }
     }

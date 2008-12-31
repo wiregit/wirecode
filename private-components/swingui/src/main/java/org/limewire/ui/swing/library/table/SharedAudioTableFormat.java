@@ -98,11 +98,11 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     /**
      * Creates a Comparator for sorting checkboxs.
      */
-    private class CheckBoxComparator implements Comparator<FileItem> {
+    private class CheckBoxComparator implements Comparator<LocalFileItem> {
         @Override
-        public int compare(FileItem o1, FileItem o2) {
-            boolean isShared1 = localFileList.contains(o1.getUrn());
-            boolean isShared2 = localFileList.contains(o2.getUrn());
+        public int compare(LocalFileItem o1, LocalFileItem o2) {
+            boolean isShared1 = localFileList.contains(o1.getFile());
+            boolean isShared2 = localFileList.contains(o2.getFile());
 
             if(isShared1 && isShared2) {
                 return 0;
@@ -117,9 +117,9 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     /**
      * Compares the title field in the NAME_COLUMN
      */
-    private class NameComparator implements Comparator<FileItem> {
+    private class NameComparator implements Comparator<LocalFileItem> {
         @Override
-        public int compare(FileItem o1, FileItem o2) {
+        public int compare(LocalFileItem o1, LocalFileItem o2) {
             String title1 = PropertyUtils.getTitle(o1);
             String title2 = PropertyUtils.getTitle(o2);
             
