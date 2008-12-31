@@ -120,11 +120,13 @@ public class NavPanel extends JXPanel {
                         categoryLabel.setForeground(selectedTextColor);
                         categoryLabel.setFont(selectedTextFont);
                         setOpaque(true);
+                        repaint();
                     } else {
                         setBackground(null);
                         categoryLabel.setForeground(textColor);
                         categoryLabel.setFont(textFont);
                         setOpaque(false);
+                        repaint();
                     }
                 }
             }
@@ -285,7 +287,7 @@ public class NavPanel extends JXPanel {
         libraryPanel.updateLibraryPanel(friendLibrary.getSwingModel(), friendLibrary.getState());
     }
     
-    public boolean hasSelection() {
+    public boolean isSelected() {
         return Boolean.TRUE.equals(action.getValue(Action.SELECTED_KEY));
     }
     

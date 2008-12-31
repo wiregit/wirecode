@@ -164,64 +164,7 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         addItem(onlineList,  friendsListPanel, "", new MoveAction(limewireList, false), new MoveAction(offlineList, true));
         addItem(offlineList, friendsListPanel, "", new MoveAction(onlineList, false), null);
 
-        new AbstractListEventListener<FriendLibrary>() {
-            @Override
-            protected void itemAdded(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
-                LOG.debugf("friend library {0} added ...", item.getFriend().getId());  
-                NavPanel panel = getPanelForFriend(item.getFriend());
-                if(panel != null) {
-                    LOG.debugf("... removing existing friend library {0}", item.getFriend().getId());  
-                    panel.getParentList().removePanel(panel);
-                } else {
-                    LOG.debugf("... creating new friend nav panel {0}", item.getFriend().getId()); 
-                    panel = createFriendNavPanel(item.getFriend());
-                }
-                
-                limewireList.addNavPanel(panel);
-                updatePanel(item, panel);
-            }
-            
-            @Override
-            protected void itemRemoved(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
-                LOG.debugf("friend library {0} removed ...", item.getFriend().getId()); 
-                Friend friend = item.getFriend();
-                if(friend.isAnonymous()) {
-                    NavPanel panel = limewireList.removePanelForFriend(item.getFriend());
-                    if(panel != null) {
-                        disposeNavPanel(panel);
-                    }
-                } else {
-                    NavPanel panel = limewireList.getPanelForFriend(item.getFriend());
-                    if(panel != null && panel.getFriendLibrary() == item) {
-                        LOG.debugf("... removing matching friend library {0}", item.getFriend().getId()); 
-                        // extra check is needed b/c when
-                        // glazedlist batches up updates, add/remove events
-                        // can get dispatched out of order
-                        limewireList.removePanel(panel);
-                        panel.removeBrowse();
-                        onlineList.addNavPanel(panel); // Assume still online.
-                    } else {
-                        // else probably signed off & cleared the lists.
-                        LOG.debugf("... friend library {0} was already removed", item.getFriend().getId()); 
-                    }
-                }
-            }
-            
-            @Override
-            protected void itemUpdated(FriendLibrary item, FriendLibrary prior, int idx, EventList<FriendLibrary> source) {
-                NavPanel panel = limewireList.getPanelForFriend(item.getFriend());                
-                if(panel != null) {
-                    LOG.debugf("updating navpanel for {0} to state {1}", item.getFriend().getId(), item.getState());  
-                    updatePanel(item, panel);
-                } else {
-                    LOG.debugf("null navpanel for {0}", item.getFriend().getId());    
-                }
-            }
-            
-            void updatePanel(FriendLibrary item, NavPanel panel) {
-                panel.updateLibrary(item);
-            }
-        }.install(remoteLibraryManager.getSwingFriendLibraryList());
+        new FriendLibraryUpdater().install(remoteLibraryManager.getSwingFriendLibraryList());
     }
     
     private void addItem(JComponent item, JComponent parent, String constraints, Action upAction, Action downAction) {
@@ -290,7 +233,11 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                     break;
                 case REMOVED:
                     if(panel != null) {
-                        LOG.debugf("removing matching friend library {0}", event.getSource().getId()); 
+                        LOG.debugf("removing matching friend library {0}", event.getSource().getId());
+                        // Shift selection to library if this was selected before.
+                        if(panel.isSelected()) {
+                            selectLibrary();
+                        }
                         panel.getParentList().removePanel(panel);
                         disposeNavPanel(panel);
                     }
@@ -448,6 +395,75 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         return action;
     }
     
+    @Override
+    public Friend getSelectedFriend() {
+        return selectedFriend;
+    }
+    
+    private class FriendLibraryUpdater extends AbstractListEventListener<FriendLibrary> {
+        @Override
+        protected void itemAdded(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
+            LOG.debugf("friend library {0} added ...", item.getFriend().getId());  
+            NavPanel panel = getPanelForFriend(item.getFriend());
+            if(panel != null) {
+                LOG.debugf("... removing existing friend library {0}", item.getFriend().getId());  
+                panel.getParentList().removePanel(panel);
+            } else {
+                LOG.debugf("... creating new friend nav panel {0}", item.getFriend().getId()); 
+                panel = createFriendNavPanel(item.getFriend());
+            }
+            
+            limewireList.addNavPanel(panel);
+            updatePanel(item, panel);
+        }
+        
+        @Override
+        protected void itemRemoved(FriendLibrary item, int idx, EventList<FriendLibrary> source) {
+            LOG.debugf("friend library {0} removed ...", item.getFriend().getId()); 
+            Friend friend = item.getFriend();
+            if(friend.isAnonymous()) {
+                NavPanel panel = limewireList.removePanelForFriend(item.getFriend());
+                if(panel != null) {
+                    // If this was selected, tell the navigator
+                    // to go to the prior view.
+                    if(panel.isSelected()) {
+                        navigator.goBack();
+                    }
+                    disposeNavPanel(panel);
+                }
+            } else {
+                NavPanel panel = limewireList.getPanelForFriend(item.getFriend());
+                if(panel != null && panel.getFriendLibrary() == item) {
+                    LOG.debugf("... removing matching friend library {0}", item.getFriend().getId()); 
+                    // extra check is needed b/c when
+                    // glazedlist batches up updates, add/remove events
+                    // can get dispatched out of order
+                    limewireList.removePanel(panel);
+                    panel.removeBrowse();
+                    onlineList.addNavPanel(panel); // Assume still online.
+                } else {
+                    // else probably signed off & cleared the lists.
+                    LOG.debugf("... friend library {0} was already removed", item.getFriend().getId()); 
+                }
+            }
+        }
+        
+        @Override
+        protected void itemUpdated(FriendLibrary item, FriendLibrary prior, int idx, EventList<FriendLibrary> source) {
+            NavPanel panel = limewireList.getPanelForFriend(item.getFriend());                
+            if(panel != null) {
+                LOG.debugf("updating navpanel for {0} to state {1}", item.getFriend().getId(), item.getState());  
+                updatePanel(item, panel);
+            } else {
+                LOG.debugf("null navpanel for {0}", item.getFriend().getId());    
+            }
+        }
+        
+        private void updatePanel(FriendLibrary item, NavPanel panel) {
+            panel.updateLibrary(item);
+        }
+    }
+    
     private class MoveAction extends AbstractAction {
         private final NavList navList;
         private final boolean selectFirst;
@@ -465,10 +481,5 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
                 navList.selectLast();
             }
         }
-    }
-    
-    @Override
-    public Friend getSelectedFriend() {
-        return selectedFriend;
     }
 }

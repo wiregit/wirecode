@@ -11,8 +11,6 @@ import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
-
-import org.limewire.core.api.friend.Friend;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.EventListener;
@@ -21,7 +19,6 @@ import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
-import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.XMPPConnectionConfiguration;
@@ -205,7 +202,7 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
     }
     
     @Inject
-    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport, final LibraryNavigator libraryNavigator) {
+    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
         connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
             @Override
             @SwingEDTEvent
@@ -226,12 +223,6 @@ public class FriendsSignInPanel extends JXPanel implements FriendActions {
                     if(reason != null) {
                         disconnected(reason);
                     }
-                    
-                    Friend selectedFriend = libraryNavigator.getSelectedFriend();
-                    if(selectedFriend != null && !selectedFriend.isAnonymous()) {
-                        libraryNavigator.selectLibrary();
-                    }
-                    break;
                 }
             }
         });

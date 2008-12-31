@@ -187,7 +187,7 @@ class NavList extends JXPanel {
         ListIterator<NavPanel> iter = navPanels.listIterator();
         while(iter.hasNext()) {
             NavPanel panel = iter.next();
-            if(panel.hasSelection()) {
+            if(panel.isSelected()) {
                 if(iter.hasNext()) {
                     panel = iter.next();
                     panel.select();
@@ -219,7 +219,7 @@ class NavList extends JXPanel {
         ListIterator<NavPanel> iter = navPanels.listIterator();
         while(iter.hasNext()) {
             NavPanel panel = iter.next();
-            if(panel.hasSelection()) {
+            if(panel.isSelected()) {
                 iter.previous();
                 if(iter.hasPrevious()) {
                     panel = iter.previous();
