@@ -42,6 +42,7 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorUtils;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.SearchTabPainterFactory;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchBar;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchNavItem;
@@ -82,9 +83,8 @@ class TopPanel extends JXPanel implements SearchNavigator {
         GuiUtils.assignResources(this);
         
         this.searchBar = searchBar;        
-        this.searchBar.setSearchHandler(searchHandler);
-        
         this.navigator = navigator;
+        this.searchBar.addSearchActionListener(new Searcher(searchHandler));        
         
         setName("WireframeTop");
         
@@ -275,6 +275,26 @@ class TopPanel extends JXPanel implements SearchNavigator {
         homeNav.select();
     }
     
+    private class Searcher implements ActionListener {
+        private final SearchHandler searchHandler;
+        
+        Searcher(SearchHandler searchHandler) {
+            this.searchHandler = searchHandler;
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // Get search text, and do search if non-empty.
+            String searchText = searchBar.getSearchText();
+            if (!searchText.isEmpty()) {
+                searchHandler.doSearch(
+                        DefaultSearchInfo.createKeywordSearch(searchText,  
+                                searchBar.getCategory()));
+                searchBar.selectAllSearchText();
+            }
+        }
+    }
+    
     private class SearchAction extends AbstractAction implements SearchListener {
         private final NavItem item;
         private Timer busyTimer;
@@ -301,6 +321,7 @@ class TopPanel extends JXPanel implements SearchNavigator {
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals(TabActionMap.SELECT_COMMAND)) {
                 item.select();
+                searchBar.requestSearchFocus();
             } else if (e.getActionCommand().equals(TabActionMap.REMOVE_COMMAND)) {
                 item.remove();
             }

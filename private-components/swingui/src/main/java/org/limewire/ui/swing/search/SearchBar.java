@@ -121,7 +121,7 @@ public class SearchBar extends JXPanel {
         final DropDownListAutoCompleteControl autoCompleteControl = DropDownListAutoCompleteControl.install(this.searchField, autoCompleter);
         autoCompleteControl.setAutoComplete(true);
         autoCompleter.setHistoryDictionary(searchHistory);
-        searchField.addActionListener(new ActionListener() {
+        addSearchActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Get search text, and add to history if non-empty.
@@ -194,24 +194,24 @@ public class SearchBar extends JXPanel {
         }
     }
     
+    public boolean requestSearchFocus() {
+        // Request w/ temporary==true to indicate we don't
+        // want to select everything.
+        return searchField.requestFocus(true);
+    }
+    
+    public void selectAllSearchText() {
+        searchField.setCaretPosition(searchField.getDocument().getLength());
+        searchField.selectAll();
+    }
+    
     public void setText(String text) {
         searchField.setText(text);
     }
     
-    public void setSearchHandler(final SearchHandler searchHandler) {        
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Get search text, and do search if non-empty.
-                String searchText = getSearchText();
-                if (!searchText.isEmpty()) {
-                    searchHandler.doSearch(DefaultSearchInfo.createKeywordSearch(
-                            searchText, categoryToSearch));
-                }
-            }
-        };        
-        searchField.addActionListener(listener);
-        searchButton.addActionListener(listener);
+    public void addSearchActionListener(ActionListener actionListener) {
+        searchField.addActionListener(actionListener);
+        searchButton.addActionListener(actionListener);
     }
     
     /**
@@ -219,10 +219,14 @@ public class SearchBar extends JXPanel {
      * The method returns an empty string if there are no non-whitespace
      * characters.
      */
-    private String getSearchText() {
+    public String getSearchText() {
         // Get search text and trim whitespace.
         String searchText = searchField.getText();
         return searchText != null ? searchText.trim() : "";
+    }
+    
+    public SearchCategory getCategory() {
+        return categoryToSearch;
     }
     
     private class CatagoryAction extends AbstractAction {
