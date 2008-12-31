@@ -30,16 +30,12 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         this.passwordManager = passwordManager;
         configs = new HashMap<String,XMPPAccountConfiguration>();
         resource = xmppResourceFactory.getResource();
-        for(String server : XMPPSettings.XMPP_SERVERS.getValue()) {
-            try {
-                XMPPAccountConfiguration config =
-                    new XMPPAccountConfigurationImpl(server, resource);
-                configs.put(config.getLabel(), config);
-            } catch(IllegalArgumentException ignored) {
-                // Malformed string - no soup for you!
-            }
-        }
-        String custom = XMPPSettings.XMPP_SERVER.getValue();
+        loadWellKnownServers();
+        loadCustomServer();
+    }
+
+    private void loadCustomServer() {
+        String custom = XMPPSettings.USER_DEFINED_XMPP_SERVER.getValue();
         XMPPAccountConfiguration customConfig;
         try {
             customConfig = new XMPPAccountConfigurationImpl(custom, resource);
@@ -71,7 +67,19 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
             }
         }
     }
-    
+
+    private void loadWellKnownServers() {
+        for(String server : XMPPSettings.XMPP_SERVERS.getValue()) {
+            try {
+                XMPPAccountConfiguration config =
+                    new XMPPAccountConfigurationImpl(server, resource);
+                configs.put(config.getLabel(), config);
+            } catch(IllegalArgumentException ignored) {
+                // Malformed string - no soup for you!
+            }
+        }
+    }
+
     @Override
     public XMPPAccountConfiguration getConfig(String label) {
         return configs.get(label);
@@ -85,7 +93,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
             public int compare(XMPPAccountConfiguration o1, XMPPAccountConfiguration o2) {
                 return o1.getLabel().compareToIgnoreCase(o2.getLabel());
             }
-        });;
+        });
         return configurations;
     }    
     
@@ -109,7 +117,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
         if(autoLoginConfig != null) {
             passwordManager.removePassword(autoLoginConfig.getUserInputLocalID());
             XMPPSettings.XMPP_AUTO_LOGIN.setValue("");
-            XMPPSettings.XMPP_SERVER.setValue("");
+            XMPPSettings.USER_DEFINED_XMPP_SERVER.setValue("");
             autoLoginConfig = null;
         }
         // Store the new configuration, if there is one
@@ -120,7 +128,7 @@ public class XMPPAccountConfigurationManagerImpl implements XMPPAccountConfigura
                 XMPPSettings.XMPP_AUTO_LOGIN.setValue(config.getLabel() + "," +
                         config.getUserInputLocalID());
                 if(config.getLabel().equals("Jabber"))
-                    XMPPSettings.XMPP_SERVER.setValue(config.toString());
+                    XMPPSettings.USER_DEFINED_XMPP_SERVER.setValue(config.toString());
                 autoLoginConfig = config;
             } catch (IllegalArgumentException ignored) {
                 // Empty username or password - no soup for you!

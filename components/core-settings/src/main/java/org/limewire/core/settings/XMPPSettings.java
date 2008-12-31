@@ -12,14 +12,20 @@ import org.limewire.setting.StringSetting;
 public class XMPPSettings extends LimeProps {
 
     private XMPPSettings() {}
-    
+
+    /**
+     * Out-of-the-box list of well known jabber servers
+     */
     public static final StringSetSetting XMPP_SERVERS =
         FACTORY.createStringSetSetting("XMPP_SERVERS",
                 "false,true,gmail.com,Gmail;" +
                 "false,false,livejournal.com,LiveJournal;" +
         "");
-    
-    public static final StringSetting XMPP_SERVER =
+
+    /**
+     * User-defined custom jabber server
+     */
+    public static final StringSetting USER_DEFINED_XMPP_SERVER =
         (StringSetting)FACTORY.createStringSetting("XMPP_SERVER", "").setPrivate(true);
 
     public static final StringSetting XMPP_AUTO_LOGIN =

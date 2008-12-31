@@ -137,10 +137,11 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             try {
                 org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
-                connection = new org.jivesoftware.smack.XMPPConnection(getConnectionConfig(configuration));
+                ConnectionConfiguration connectionConfig = new ConnectionConfiguration(configuration.getServiceName());
+                connection = new org.jivesoftware.smack.XMPPConnection(connectionConfig);
                 connection.addRosterListener(new RosterListenerImpl(connection));
                 if (LOG.isInfoEnabled())
-                    LOG.info("connecting to " + connection.getServiceName() + " at " + connection.getHost() + ":" + connection.getPort() + "...");
+                    LOG.info("connecting to " + connectionConfig.getServiceName() + " at " + connectionConfig.getHost() + ":" + connectionConfig.getPort() + "...");
                 connection.connect();
                 SubscriptionListener sub = new SubscriptionListener(connection,
                                                     friendRequestBroadcaster);
@@ -186,16 +187,6 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     public boolean isLoggedIn() {
         return connection != null && connection.isAuthenticated();
-    }
-
-    /**
-     * Converts a LimeWire XMPPConnectionConfiguration into a Smack
-     * ConnectionConfiguration, trying to obtain the hostname and port from
-     * DNS SRV as per RFC 3920 and falling back to the service name and default
-     * port if the SRV lookup fails. This method blocks during the DNS lookup.
-     */
-    private ConnectionConfiguration getConnectionConfig(XMPPConnectionConfiguration config) {
-        return new ConnectionConfiguration(config.getServiceName());
     }
 
     private class RosterListenerImpl implements org.jivesoftware.smack.RosterListener {
