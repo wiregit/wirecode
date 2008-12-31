@@ -72,7 +72,7 @@ public class IconButton extends JXButton {
         setBorderPainted(false);
         setContentAreaFilled(false);
         setFocusPainted(false);
-        setRolloverEnabled(true);
+        setRolloverEnabled(false);
         setHideActionText(true);
         setBorder(null);
         setOpaque(false);
