@@ -21,8 +21,11 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -34,23 +37,22 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.FancyTab;
 import org.limewire.ui.swing.components.FancyTabList;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
-import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
-import net.miginfocom.swing.MigLayout;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 /**
  * This class displays search results in a panel.
@@ -240,9 +242,11 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
             TableColumn column = new TableColumn();
             model.addColumn(column);
             JTableHeader header = new JTableHeader(model);
+            header.setDefaultRenderer(new TableCellHeaderRenderer());
             header.setReorderingAllowed(false);
             header.setResizingAllowed(false);
-            header.setTable(new JTable());
+            header.setTable(new JXTable(0, 1));
+            
             int width = sponsoredResultsPanel.getPreferredSize().width;
             int height = resultHeader.getPreferredSize().height;
             column.setWidth(width);
