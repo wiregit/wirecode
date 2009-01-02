@@ -59,6 +59,51 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     private static final Log LOG = LogFactory.getLog(ManagedFileListImpl.class);
     
+    private static enum DirectoryLoadStyle { 
+        /**
+         * Used for the initial loading of all previously managed directories.
+         * This preserves excluded files and recurses through subdirectories.
+         */
+        INITIAL_PASS(true, true, false),
+        
+        /**
+         * Used for adding a brand new folder for managing.
+         * This re-adds previously excluded files and recurses through subdirectories. 
+         */
+        ADD_FOLDER(true, false, true),
+        
+        /**
+         * Used for explicitly setting a single folder to be managed.
+         * This re-adds previously excluded files but does not recurse through subdirectories.
+         * 
+         */
+        SET_FOLDER(false, false, true)
+        
+        ;
+        
+        private final boolean recurse;
+        private final boolean validateDir;
+        private final boolean allowExcludedFiles;
+        
+        DirectoryLoadStyle(boolean recurse, boolean validateDir, boolean allowExcludedFiles) {
+            this.recurse = recurse;
+            this.validateDir = validateDir;
+            this.allowExcludedFiles = allowExcludedFiles;
+        }
+        
+        boolean shouldRecurse() {
+            return recurse;
+        }
+        
+        boolean shouldValidateDirectory() {
+            return validateDir;
+        }
+        
+        boolean shouldAddExcludedFiles() {
+            return allowExcludedFiles;
+        }
+    }
+    
     private final SourcedEventMulticaster<FileDescChangeEvent, FileDesc> fileDescMulticaster;
     private final EventMulticaster<ManagedListStatusEvent> managedListListenerSupport;
     private final EventMulticaster<FileListChangedEvent> fileListListenerSupport;
@@ -369,13 +414,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         // Step 3: Go through all newly managed dirs & manage them.
         List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
         for(File dir : addedDirs) {
-            addManagedDirectory(extensions, dir, startRevision, false, false, true, futures);
+            addManagedDirectory(extensions, dir, startRevision, DirectoryLoadStyle.SET_FOLDER, futures);
         }
         
         // Step 4: Go through all unchanged dirs & manage new extensions.
         if(!addedExtensions.isEmpty() && !preservedDirs.isEmpty()) {            
             for(File directory : preservedDirs) {
-                addManagedDirectory(addedExtensions, directory, startRevision, false, false, false, futures);
+                addManagedDirectory(addedExtensions, directory, startRevision, DirectoryLoadStyle.SET_FOLDER, futures);
             }
         }
         
@@ -435,19 +480,6 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File f) {
         final File folder = canonicalize(f);   
         
-        // This is not actually needed for correctness,
-        // but is a nice quick way to avoid going to another
-        // thread.
-        rwLock.readLock().lock();
-        try {
-            if(managedDirectories.contains(folder)) {
-                List<ListeningFuture<FileDesc>> list = Collections.emptyList();
-                return new SimpleFuture<List<ListeningFuture<FileDesc>>>(list);
-            }
-        } finally {
-            rwLock.readLock().unlock();
-        }
-        
         getLibraryData().addDirectoryToManageRecursively(folder);
         fireLoading();
         return submit(new Callable<List<ListeningFuture<FileDesc>>>() {
@@ -455,7 +487,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             public List<ListeningFuture<FileDesc>> call() {
                 int rev = revision.get();
                 List<ListeningFuture<FileDesc>> futures = new ArrayList<ListeningFuture<FileDesc>>();
-                addManagedDirectory(extensions, folder, rev, true, true, true, futures);
+                addManagedDirectory(extensions, folder, rev, DirectoryLoadStyle.ADD_FOLDER, futures);
                 addLoadingListener(futures, rev);
                 return futures;
             }
@@ -1014,7 +1046,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             if(rev != revision.get()) {
                 break;
             }
-            addManagedDirectory(extensions, directory, rev, true, true, false, futures);        
+            addManagedDirectory(extensions, directory, rev, DirectoryLoadStyle.INITIAL_PASS, futures);        
         }
         
         Set<File> managedDirs = new HashSet<File>();
@@ -1047,14 +1079,32 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * expected revision, this returns immediately.
      */
     private void addManagedDirectory(Collection<String> managedExts, File directory, int rev,
-            boolean recurse, boolean validateDir, boolean allowExcludedFiles,
+            DirectoryLoadStyle loadStyle,
             List<ListeningFuture<FileDesc>> futures) {
+        Set<File> addedFolders = new HashSet<File>();
+        addManagedDirectoryImpl(managedExts, directory, rev, loadStyle, futures, addedFolders);
+    }
+    
+    /**
+     * The implementation of {@link #addManagedDirectory(Collection, File, int, boolean, boolean, boolean, List)}.
+     */
+    private void addManagedDirectoryImpl(Collection<String> managedExts, File directory, int rev,
+            DirectoryLoadStyle loadStyle,
+            List<ListeningFuture<FileDesc>> futures, Set<File> addedFolders) {    
         LOG.debugf("Adding [{0}] to managed directories", directory);
          
          directory = canonicalize(directory);
          if(!isFolderManageable(directory, true)) {
              LOG.debugf("Exiting because dir isn't manageable {0}", directory);
              return;
+         }
+         
+         // Immediately exit if we already added this directory in this pass.
+         if(addedFolders.contains(directory)) {
+             LOG.debugf("Exiting because already added {0} in this pass", directory);
+             return;
+         } else {
+             addedFolders.add(directory);
          }
      
          // Exit quickly (without doing the dir lookup) if revisions changed.
@@ -1065,26 +1115,24 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
          // STEP 1:
          // Add directory
-         if(validateDir) {
-             rwLock.readLock().lock();
-             try {
-                 // if it was already added, ignore.
-                 if (managedDirectories.contains(directory)) {
-                     LOG.debugf("Exiting because dir already managed {0}", directory);
-                     return;
-                 } else {
-                     managedDirectories.add(directory);
-                 }
-             } finally {
-                 rwLock.readLock().unlock();
+         rwLock.readLock().lock();
+         try {
+             // if it was already added, ignore.
+             if (loadStyle.shouldValidateDirectory() && managedDirectories.contains(directory)) {
+                 LOG.debugf("Exiting because dir already managed {0}", directory);
+                 return;
+             } else {
+                 managedDirectories.add(directory);
              }
+         } finally {
+             rwLock.readLock().unlock();
          }
      
          // STEP 2:
-         // Scan subdirectory for the amount of shared files.
-         File[] fileList = directory.listFiles(new ManageableFileFilter(managedExts, allowExcludedFiles));
+         // Scan subdirectory for the amount of manageable files.
+         File[] fileList = directory.listFiles(new ManageableFileFilter(managedExts, loadStyle.shouldAddExcludedFiles(), false));
          if (fileList == null) {
-             LOG.debugf("Exiting because no files in directory {0}", directory);
+             LOG.debugf("Exiting because of strange return value finding files in {0}", directory);
              return;
          }
          
@@ -1097,20 +1145,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
              LOG.debugf("Exiting because revisions changed.  Expected {0}, was {1}", rev, revision.get());
              return;
          }
-
-         // Explicitly unset recurse for forced share dirs.
-         if(LibraryUtils.isForcedShareDirectory(directory)) {
-             recurse = false;
-         }
     
          // STEP 3:
          // Recursively add subdirectories.
-         if(recurse) {
+         if(loadStyle.shouldRecurse() && !LibraryUtils.isForcedShareDirectory(directory)) {
              File[] dirList = directory.listFiles(new ManagedDirectoryFilter());
              if(dirList != null) {
                  for(int i = 0; i < dirList.length && rev == revision.get(); i++) {
-                     addManagedDirectory(managedExts, dirList[i], rev, recurse,
-                                              validateDir, allowExcludedFiles, futures);
+                     addManagedDirectoryImpl(managedExts, dirList[i], rev, loadStyle, futures, addedFolders);
                  }
             }
          } else {
@@ -1224,7 +1266,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** Returns a filter used to get manageable files. */
     FileFilter newManageableFilter() {
-        return new ManageableFileFilter(extensions, true);
+        return new ManageableFileFilter(extensions, true, true);
     }
     
     @Override
@@ -1246,16 +1288,19 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private class ManageableFileFilter implements FileFilter {
         private final Set<String> extensions;
         private final boolean allowExcludedFiles;
+        private final boolean includeContainedFiles;
         
         /** Constructs the filter with the given set of allowed extensions. */
-        public ManageableFileFilter(Collection<String> extensions, boolean allowExcludedFiles) {
+        public ManageableFileFilter(Collection<String> extensions, boolean allowExcludedFiles, boolean includeContainedFiles) {
             this.extensions = new HashSet<String>(extensions);
             this.allowExcludedFiles = allowExcludedFiles;
+            this.includeContainedFiles = includeContainedFiles;
         }
         
         @Override
         public boolean accept(File file) {
             return file.isFile()
+                && (includeContainedFiles || !contains(file))
                 && LibraryUtils.isFileManagable(file)
                 && extensions.contains(FileUtils.getFileExtension(file).toLowerCase(Locale.US))
                 && (allowExcludedFiles || !getLibraryData().isFileExcluded(file));

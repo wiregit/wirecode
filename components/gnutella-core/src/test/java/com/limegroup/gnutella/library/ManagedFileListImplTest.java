@@ -521,8 +521,32 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertContainsFiles(fileList);     
     }
     
+    public void testAddFolderAddsExcludedFiles() throws Exception {
+        List<File> emptyList = Collections.emptyList();
+        List<FileDesc> fdList;
+        
+        f1 = createNewTestFile(1, _scratchDir);
+        f2 = createNewTestFile(3, _scratchDir);
+        f3 = createNewTestFile(5, _scratchDir);
+        
+        
+        assertChangeExtensions(fileList, "tmp");
+        assertEquals(0, fileList.size());
+        
+        fdList = assertSetManagedDirectories(fileList, Collections.singleton(_scratchDir), emptyList);
+        assertContainsFiles(fdList, f1, f2, f3);
+        assertContainsFiles(fileList, f1, f2, f3);
+        
+        assertTrue(fileList.remove(f2));
+        
+        assertContainsFiles(fileList, f1, f3);
+        
+        fdList = assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(fdList, f2);
+        assertContainsFiles(fileList, f1, f2, f3);
+    }
+    
     // TODO: Test that adding folders / setting manageable folders / changing extensions
-    //       does not forcibly exclude the file from adding again, nor does adding folders
-    //       listen to previously excluded files.
+    //       does not forcibly exclude the file from adding again.
 
 }
