@@ -593,7 +593,8 @@ public abstract class AbstractConnection implements Connection {
      * Determines if the address should be changed and changes it if necessary.
      */
     // TODO: this really shouldn't be here -- use a listener pattern instead
-    private void updateAddress(HandshakeResponse readHeaders) {
+    // package private for testing
+    void updateAddress(HandshakeResponse readHeaders) {
         String ipStringFromHeader = readHeaders.getProperty(HeaderNames.REMOTE_IP);
         if (ipStringFromHeader == null) {
             return;
@@ -623,7 +624,9 @@ public abstract class AbstractConnection implements Connection {
             }
         }
         // Otherwise, if our current address is invalid, change.
-        else if (!NetworkUtils.isValidAddress(networkManager.getAddress())) {
+        // also update address if we accepted incoming to make sure the external one is advertised to peers
+        // this can happen if port forwarding is enabled in the firewall but not enabled explicitly in the client
+        else if (!NetworkUtils.isValidAddress(networkManager.getAddress()) || acceptor.acceptedIncoming()) {
             // will auto-call addressChanged.
             // TODO store address in one place     
             acceptor.setAddress(ipAddressFromHeader);
