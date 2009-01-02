@@ -653,7 +653,12 @@ public class IncompleteFileManager  {
                 }
             }
         });
-        return Arrays.asList(files);
+        
+        if(files == null) {
+            return Collections.emptyList(); 
+        } else {
+            return Arrays.asList(files);
+        }
     }
     
 }
