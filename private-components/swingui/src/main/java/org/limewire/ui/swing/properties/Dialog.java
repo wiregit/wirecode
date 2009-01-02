@@ -2,6 +2,7 @@ package org.limewire.ui.swing.properties;
 
 import static org.limewire.ui.swing.util.I18n.tr;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -26,7 +27,6 @@ import javax.swing.text.JTextComponent;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXHyperlink;
-import org.jdesktop.swingx.JXLabel;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.URN;
@@ -121,11 +121,14 @@ public abstract class Dialog extends LimeJDialog {
         
         overview = newPanel(new MigLayout("fillx", "[][]push[]", "[top]3[top]"));
 
+        JPanel linksPanel = new JPanel(new BorderLayout());
+        linksPanel.add(copyToClipboard, BorderLayout.NORTH);
+        linksPanel.add(moreFileInfo, BorderLayout.SOUTH);
+        
         overview.add(icon, "spany");
-        overview.add(heading);
-        overview.add(copyToClipboard, "wrap");
+        overview.add(heading, "grow");
+        overview.add(linksPanel, "spany, wrap");
         overview.add(metadata, "cell 1 1");
-        overview.add(moreFileInfo);
 
         addOverview();
     }
@@ -158,9 +161,22 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private JLabel newLabel() {
-        JXLabel label = new JXLabel();
-        label.setLineWrap(true);
-        return label;
+        //Creating a JLabel that wraps all text in HTML so that multiline word
+        //wrapping will behave correctly.  The JXLabel.setMultiline() causes the
+        //labels to wrap correctly, however, they don't seem to report their preferred
+        //sizes correctly, so if those labels appear in a composite panel, their
+        //enclosing panel won't ask for as much space as the label is trying to 
+        //take up, so other components in the same panel (vertically), get truncated
+        //This change is for LWC-2147
+        return new JLabel() {
+            @Override
+            public void setText(String text) {
+                if (!text.toLowerCase().startsWith("<html>")) {
+                    text = "<html>" + text + "</html>";
+                }
+                super.setText(text);
+            }
+        };
     }
 
     private JTextArea newTextArea() {
