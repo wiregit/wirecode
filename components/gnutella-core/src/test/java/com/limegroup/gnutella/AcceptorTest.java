@@ -415,6 +415,11 @@ public class AcceptorTest extends LimeTestCase {
          
          acceptor.checkFirewall(InetAddress.getByName("129.0.0.1"));
          assertEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(false));
+         
+         acceptor.setAddress(InetAddress.getByName("192.168.0.1"));
+         acceptor.checkFirewall(InetAddress.getByName("129.0.0.1"));
+         // doesn't update address second time, since incoming status doesn't change
+         assertNotEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(false));
      }
      
      private int bindAcceptor() throws Exception {
