@@ -1190,17 +1190,10 @@ public class HTTPDownloader implements BandwidthTracker {
         } catch (NumberFormatException e) {
             throw new ProblemReadingHeaderException(str);
         }
-        // In order to be backwards compatible with
-        // LimeWire 0.5, which sent broken headers like:
-        // Content-range: bytes=1-67818707/67818707
-        //
-        // If the number preceding the '/' is equal 
-        // to the number after the '/', then we want
-        // to decrement the first number and the number
-        // before the '/'.
-        if (numBeforeSlash == numAfterSlash) {
-            numBeforeDash--;
-            numBeforeSlash--;
+
+        // ignore invalid ranges
+        if (numBeforeSlash >= numAfterSlash) {
+            throw new ProblemReadingHeaderException(str);
         }
         
         if(LOG.isDebugEnabled())
