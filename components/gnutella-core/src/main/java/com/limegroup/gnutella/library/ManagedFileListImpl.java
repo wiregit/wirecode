@@ -293,7 +293,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     @Override
     public FileDesc getFileDesc(File file) {
-        file = canonicalize(file);        
+        file = FileUtils.canonicalize(file);        
         rwLock.readLock().lock();
         try {
             return fileToFileDescMap.get(file);
@@ -315,20 +315,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         }
     }
     
-    /** Attempts to canonicalize the file, returning the file if canonicalization fails. */
-    private File canonicalize(File file) {
-        try {
-            return FileUtils.getCanonicalFile(file);
-        } catch(IOException iox) {
-            return file;
-        }
-    }
-    
     @Override
     public boolean contains(File file) {
         rwLock.readLock().lock();
         try {
-            return fileToFileDescMap.containsKey(canonicalize(file));
+            return fileToFileDescMap.containsKey(FileUtils.canonicalize(file));
         } finally {
             rwLock.readLock().unlock();
         }
@@ -462,7 +453,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     
     /** Recursively calculates all dirs (including subdirs) that should be managed. */
     private void calculateManagedDirsImpl(File dir, Set<File> files) {
-        dir = canonicalize(dir);
+        dir = FileUtils.canonicalize(dir);
         
         if(files.contains(dir)) {
             return;
@@ -478,7 +469,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
 
     @Override
     public ListeningFuture<List<ListeningFuture<FileDesc>>> addFolder(File f) {
-        final File folder = canonicalize(f);   
+        final File folder = FileUtils.canonicalize(f);   
         
         getLibraryData().addDirectoryToManageRecursively(folder);
         fireLoading();
@@ -824,7 +815,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public boolean remove(File file) {
         LOG.debugf("Removing file: {0}", file);                
 
-        file = canonicalize(file);
+        file = FileUtils.canonicalize(file);
         FileDesc fd = removeInternal(file, true);        
         if(fd != null) {
             dispatch(new FileListChangedEvent(this, FileListChangedEvent.Type.REMOVED, fd));
@@ -902,7 +893,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public ListeningFuture<FileDesc> fileRenamed(File oldName, final File newName) {
         LOG.debugf("Attempting to rename: {0} to: {1}", oldName, newName);      
         
-        oldName = canonicalize(oldName);
+        oldName = FileUtils.canonicalize(oldName);
         FileDesc fd = removeInternal(oldName, false);        
         if (fd != null) {
             // TODO: It's dangerous to prepopulate, because we might actually
@@ -920,7 +911,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     public ListeningFuture<FileDesc> fileChanged(File file, List<? extends LimeXMLDocument> xmlDocs) {
         LOG.debugf("File Changed: {0}", file);
 
-        file = canonicalize(file);
+        file = FileUtils.canonicalize(file);
         FileDesc fd = removeInternal(file, false);
         if (fd != null) {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
@@ -1093,7 +1084,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             List<ListeningFuture<FileDesc>> futures, Set<File> addedFolders) {    
         LOG.debugf("Adding [{0}] to managed directories", directory);
          
-         directory = canonicalize(directory);
+         directory = FileUtils.canonicalize(directory);
          if(!isFolderManageable(directory, true)) {
              LOG.debugf("Exiting because dir isn't manageable {0}", directory);
              return;
@@ -1176,7 +1167,9 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
      * this will *NOT* check against the list of excluded subdirectories.
      */
     private boolean isFolderManageable(File folder, boolean excludeExcludedDirectories) {
-        if (!folder.isDirectory() || !folder.canRead() || !folder.exists()) {
+        folder = FileUtils.canonicalize(folder);
+        
+        if (!folder.isDirectory() || !folder.canRead() || !folder.exists() && folder.getParent() != null) {
             return false;
         }
 

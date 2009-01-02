@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.manager;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -8,12 +9,6 @@ import java.util.List;
  * directory should be scanned.
  */
 public interface LibraryManagerItem {
-
-	/** Marks this item as wanting to be scanned. */
-    public void setScanned(boolean value);
-    
-    /** Returns true if this item is scanned. */
-    public boolean isScanned();
     
     /** Returns the File this is an item for. */
     public File getFile();
@@ -26,4 +21,16 @@ public interface LibraryManagerItem {
     
     /** Returns the item that is this' parent. */
     public LibraryManagerItem getParent();
+
+    /** Returns all Files that are subfolders but not listed as children. */
+    public Collection<? extends File> getExcludedChildren();
+
+    /** Adds the given child to the list of items to manage. */
+    public int addChild(LibraryManagerItem child);
+
+    /** Removes the given child from the list of items to manage. */
+    public int removeChild(LibraryManagerItem item);
+
+    /** Returns the LibraryManagerItem for a particular child directory. */
+    public LibraryManagerItem getChildFor(File directory);
 }

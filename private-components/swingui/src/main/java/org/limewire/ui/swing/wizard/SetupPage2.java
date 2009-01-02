@@ -118,7 +118,7 @@ public class SetupPage2 extends WizardPage {
     private void initManualPanel() {
         RootLibraryManagerItem root = new RootLibraryManagerItem();
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, true));
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, false));
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(root));

@@ -54,7 +54,7 @@ class NavList extends JXPanel {
             }
         };
         labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
-        this.titleLabel = new ActionLabel(labelAction, false, true);
+        this.titleLabel = new ActionLabel(labelAction, true);
         FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));

@@ -472,7 +472,7 @@ public class LimeComboBox extends JXButton {
                 JXPanel panel = new JXPanel(new VerticalLayout());
                 panel.setOpaque(false);
                 panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
-                ActionLabel menuItem = new ActionLabel(action, false, false);
+                ActionLabel menuItem = new ActionLabel(action, false);
                 if(menuItem.getIcon() == null) {
                     menuItem.setIcon(emptyIcon);
                 }

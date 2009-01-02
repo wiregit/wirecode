@@ -318,7 +318,7 @@ public class LibraryOptionPanel extends OptionPanel {
         public void initOptions() {
             RootLibraryManagerItem root = new RootLibraryManagerItem();
             for(File file : libraryData.getDirectoriesToManageRecursively()) {
-                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, true));
+                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, false));
             }
 
             treeTable.setTreeTableModel(new LibraryManagerModel(root));
@@ -354,10 +354,10 @@ public class LibraryOptionPanel extends OptionPanel {
                         treeTable.addDirectory(folder);
                     } else {
                     FocusJOptionPane.showMessageDialog(LibraryManagerOptionPanel.this,
-                            I18n.tr("You selected: {0}\n\nLimeWire cannot share " +
+                            I18n.tr("You selected: {0}\n\nLimeWire cannot manage " +
                                     "this folder because it is either not a folder " +
                                     "or cannot be read.\n\nPlease select another " +
-                                    "folder to share.", folder),
+                                    "folder to manage.", folder),
                             I18n.tr("Library Manager Error"),
                             JOptionPane.ERROR_MESSAGE);
                     }

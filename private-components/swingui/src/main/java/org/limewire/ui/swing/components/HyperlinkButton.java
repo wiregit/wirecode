@@ -112,7 +112,7 @@ public class HyperlinkButton extends JXButton implements MouseListener {
         if(isEnabled()) {
             super.setForeground(r.rolloverForeground);
             oldCursor = getCursor();
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            getTopLevelAncestor().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
     }
 
@@ -120,7 +120,7 @@ public class HyperlinkButton extends JXButton implements MouseListener {
     public void mouseExited(MouseEvent e) {
         if(isEnabled()) {
             super.setForeground(r.foreground);
-            setCursor(oldCursor);
+            getTopLevelAncestor().setCursor(oldCursor);
         }
     }
 

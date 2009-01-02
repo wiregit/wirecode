@@ -24,7 +24,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
-import org.limewire.ui.swing.table.MouseableTable.TableColors;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.CategoryIconManager;
 
 import ca.odell.glazedlists.EventList;

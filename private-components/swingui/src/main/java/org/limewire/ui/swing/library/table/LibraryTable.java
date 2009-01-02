@@ -34,6 +34,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.table.ColumnStateHandler;
 import org.limewire.ui.swing.table.MouseableTable;
+import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;

@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library.manager;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class RootLibraryManagerItem implements LibraryManagerItem {
@@ -44,14 +46,20 @@ public class RootLibraryManagerItem implements LibraryManagerItem {
         children.remove(idx);
         return idx;
     }
-
+    
     @Override
-    public boolean isScanned() {
-        return false;
+    public Collection<? extends File> getExcludedChildren() {
+        return Collections.emptyList();
     }
-
+    
     @Override
-    public void setScanned(boolean value) {       
+    public LibraryManagerItem getChildFor(File directory) {
+        for(LibraryManagerItem child : children) {
+            if(child.getFile().equals(directory)) {
+                return child;
+            }
+        }
+        return null;
     }
 
 }
