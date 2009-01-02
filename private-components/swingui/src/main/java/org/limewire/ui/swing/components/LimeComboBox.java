@@ -5,13 +5,15 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +25,17 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
 import org.jdesktop.swingx.JXButton;
-import org.limewire.ui.swing.util.FontUtils;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.VerticalLayout;
+import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.util.Objects;
 
 /** A combobox rendered in the LimeWire 5.0 style. */
@@ -350,43 +357,65 @@ public class LimeComboBox extends JXButton {
         initMenu();
     }
     
+    /**
+     * Updates the size of the button to match either the explicit text of the
+     * button, or the largest item in the menu.
+     */
     private void updateSize() {        
         if (getText() == null && (actions == null || actions.isEmpty())) {
             return;
         }
         
-        Rectangle2D labelRect = null;                
-        if (getText() != null && !getText().isEmpty()) {
-            labelRect = FontUtils.getLongestTextArea(getFont(), getText());
+        Font font = getFont();
+        FontMetrics fm = getFontMetrics(font);
+        Rectangle largest = new Rectangle();
+        Rectangle iconR = new Rectangle();
+        Rectangle textR = new Rectangle();
+        Rectangle viewR = new Rectangle(Short.MAX_VALUE, Short.MAX_VALUE);
+        
+        // If text is explicitly set, layout that text.
+        if(getText() != null && !getText().isEmpty()) {
+            SwingUtilities.layoutCompoundLabel(
+                    this, fm, getText(), null,
+                    SwingConstants.CENTER, SwingConstants.CENTER,
+                    SwingConstants.CENTER, SwingConstants.TRAILING,
+                    viewR, iconR, textR, (getText() == null ? 0 : 4)
+            );
+            Rectangle r = iconR.union(textR);
+            largest = r;
         } else {
-            labelRect = FontUtils.getLongestTextArea(getFont(), actions.toArray());
-        }
-
-        int ix1 = 0;
-        int ix2 = 0;
-        int iy1 = 0;
-        int iy2 = 0;
-
-        if (getBorder() != null) {
-            Insets insets = getBorder().getBorderInsets(this);
-            ix1 = insets.left;
-            ix2 = insets.right;
-            iy1 = insets.top;
-            iy2 = insets.bottom;
-        }
-
-        int height = (int) labelRect.getHeight() + iy1 + iy2;
-        int width = (int) labelRect.getWidth() + ix1 + ix2;
-        
-        if (height < getMinimumSize().getHeight()) { 
-            height = (int)getMinimumSize().getHeight();
-        }
-        
-        setMinimumSize(new Dimension(width, height));
-        setMaximumSize(new Dimension(200, 100));
-        setPreferredSize(new Dimension(width, height));
-        setSize(new Dimension(width, height));
+            // Otherwise, find the largest layout area of all the menu items.
+            for(Action action : actions) {
+                Icon icon = (Icon)action.getValue(Action.SMALL_ICON);
+                String text = (String)action.getValue(Action.NAME);            
                 
+                iconR.height = iconR.width = iconR.x = iconR.y = 0;
+                textR.height = textR.width = textR.x = textR.y = 0;
+                viewR.x = viewR.y = 0;
+                viewR.height = viewR.width = Short.MAX_VALUE;
+                
+                SwingUtilities.layoutCompoundLabel(
+                        this, fm, text, icon,
+                        SwingConstants.CENTER, SwingConstants.CENTER,
+                        SwingConstants.CENTER, SwingConstants.TRAILING,
+                        viewR, iconR, textR, (text == null ? 0 : 4)
+                );
+                Rectangle r = iconR.union(textR);                
+                largest.height = Math.max(r.height, largest.height);
+                largest.width = Math.max(r.width, largest.width);
+            }
+        }
+        
+        Insets insets = getInsets();
+        largest.width += insets.left + insets.right;
+        largest.height += insets.top + insets.bottom;
+        largest.height = Math.max(getMinimumSize().height, largest.height);
+        
+        setMaximumSize(new Dimension(200, 100));
+        setMinimumSize(largest.getSize());
+        setPreferredSize(largest.getSize());
+        setSize(largest.getSize());
+        
         revalidate();
         repaint();
     }
@@ -395,23 +424,67 @@ public class LimeComboBox extends JXButton {
         if (!customMenu && menuDirty) {
             menuDirty = false;
             menu.removeAll();
-            for (final Action action : actions) {
-                JMenuItem menuItem = createMenuItem(action);
-                // Add a selection listener, if selection can be performed.
-                if (getText() == null) {
-                    menuItem.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            selectedAction = action;
-                            // Fire the parent listeners
-                            for (SelectionListener listener : selectionListeners) {
-                                listener.selectionChanged(action);
-                            }
-                            repaint();
-                        }
-                    });
+            ActionListener actionListener = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ActionLabel label = (ActionLabel)e.getSource();
+                    Action action = label.getAction();
+                    selectedAction = action;
+                    // Fire the parent listeners
+                    for (SelectionListener listener : selectionListeners) {
+                        listener.selectionChanged(action);
+                    }
+                    repaint();
                 }
-                menu.add(menuItem);
+            };
+            
+            // This is a workaround for not using JMenuItem -- it mimicks the feel
+            // without requiring odd spacing.
+            MouseListener mouseListener = new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    ActionLabel label = (ActionLabel)e.getSource();
+                    ((JComponent)label.getParent()).setOpaque(true);
+                    label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
+                    label.getParent().repaint();
+                }
+                
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    ActionLabel label = (ActionLabel)e.getSource();
+                    ((JComponent)label.getParent()).setOpaque(false);
+                    label.setForeground(UIManager.getColor("MenuItem.foreground"));
+                    label.getParent().repaint();
+                }
+            };
+            
+            Icon emptyIcon = null; 
+            for(Action action : actions) {
+                if(action.getValue(Action.SMALL_ICON) != null) {
+                    emptyIcon = new EmptyIcon(16, 16);
+                    break;
+                }
+            }
+            
+            for (Action action : actions) {
+                // We create the label ourselves (instead of using JMenuItem),
+                // because JMenuItem adds lots of bulky insets.
+                JXPanel panel = new JXPanel(new VerticalLayout());
+                panel.setOpaque(false);
+                panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
+                ActionLabel menuItem = new ActionLabel(action, false, false);
+                if(menuItem.getIcon() == null) {
+                    menuItem.setIcon(emptyIcon);
+                }
+                menuItem.addMouseListener(mouseListener);
+                decorateMenuComponent(menuItem);
+                menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
+                // Add a selection listener, if selection can be performed. 
+                if (getText() == null) {
+                    menuItem.addActionListener(actionListener);
+                }
+                panel.add(menuItem);
+                menu.add(panel);
             }
         }
     }
