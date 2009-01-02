@@ -237,12 +237,13 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
         public void entriesDeleted(Collection<String> removedIds) {
             synchronized (users) {
                 for(String id : removedIds) {
-                    User user;
-                    user = users.remove(id);
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("user " + user + " removed");
+                    User user = users.remove(id);
+                    if(user != null) {
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("user " + user + " removed");
+                        }
+                        rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
                     }
-                    rosterListeners.broadcast(new RosterEvent(user, User.EventType.USER_DELETED));
                 }
                 users.notifyAll();
             }
