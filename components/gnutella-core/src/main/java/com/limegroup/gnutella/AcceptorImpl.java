@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import net.jcip.annotations.GuardedBy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
@@ -589,7 +591,10 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	/**
 	 * Sets the new incoming status.
 	 * Returns whether or not the status changed.
+	 * 
+	 * Called within {@link #ADDRESS_LOCK}.
 	 */
+	@GuardedBy("ADDRESS_LOCK")
 	boolean setIncoming(boolean canReceiveIncoming) {
         if (canReceiveIncoming) 
             incomingValidator.cancelReset();
@@ -617,16 +622,31 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.Acceptor#checkFirewall(java.net.InetAddress)
      */
-	private void checkFirewall(InetAddress address) {
+	// package private for testing
+	void checkFirewall(InetAddress address) {
 		// we have accepted an incoming socket -- only record
         // that we've accepted incoming if it's definitely
         // not from our local subnet and we aren't connected to
         // the host already.
         boolean changed = false;
+        byte[] newAddress = null;
         if(isOutsideConnection(address)) {
             synchronized (ADDRESS_LOCK) {
                 changed = setIncoming(true);
                 ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+                // if the incoming status changed and we have an external address
+                // and port forwarding is not enabled in the client, update the address
+                if (changed && NetworkUtils.isValidAddress(_externalAddress) && !ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+                    LOG.debug("updating address to external address");
+                    newAddress = _externalAddress;
+                }
+            }
+        }
+        if (newAddress != null) {
+            try {
+                setAddress(InetAddress.getByAddress(newAddress));
+            } catch (UnknownHostException e) {
+                LOG.debug("unknown host", e);
             }
         }
         if(changed)
