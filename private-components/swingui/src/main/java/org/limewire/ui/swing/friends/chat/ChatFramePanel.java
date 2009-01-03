@@ -11,11 +11,10 @@ import java.net.URL;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.UISettings;
@@ -57,10 +56,11 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private final ChatFriendListPane chatFriendListPane;
     private final TrayNotifier notifier;
     //Heavy-weight component so that it can appear above other heavy-weight components
-    private final java.awt.Panel mainPanel;
+    private final Border mainPanel;
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private final EnabledListenerList enabledListenerList = new EnabledListenerList();
+    @Resource(key="ChatFramePanel.frameBorderColor") private Color frameBorderColor;
     private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
@@ -72,13 +72,13 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         this.chatPanel = chatPanel;
         this.chatFriendListPane = chatFriendListPane;
         this.notifier = notifier;
-        this.mainPanel = new java.awt.Panel();
+        this.mainPanel = new Border(1, 0);
         
-        mainPanel.setVisible(false);
-        mainPanel.setBackground(getBackground());
-
-        Border lineBorder = BorderFactory.createLineBorder(Color.BLACK);
-        chatPanel.setBorder(lineBorder);
+        GuiUtils.assignResources(this);
+        
+        mainPanel.setLineColor(frameBorderColor);
+        
+        mainPanel.setVisible(false);        
         add(mainPanel);
         setVisible(false);
         
