@@ -3,7 +3,9 @@ package org.limewire.ui.swing.friends.chat;
 import static org.limewire.ui.swing.util.I18n.tr;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.net.URL;
@@ -13,6 +15,7 @@ import javax.swing.ActionMap;
 
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.settings.UISettings;
@@ -58,7 +61,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private final EnabledListenerList enabledListenerList = new EnabledListenerList();
-//    @Resource(key="ChatFramePanel.frameBorderColor") private Color frameBorderColor;
+    @Resource(key="ChatFramePanel.frameBorderColor") private Color frameBorderColor;
     private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
@@ -70,10 +73,11 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         this.chatPanel = chatPanel;
         this.chatFriendListPane = chatFriendListPane;
         this.notifier = notifier;
-        this.mainPanel = new java.awt.Panel();
+        this.mainPanel = new java.awt.Panel(new FlowLayout(FlowLayout.CENTER, 1, 1));
         
-//        GuiUtils.assignResources(this);
+        GuiUtils.assignResources(this);
         
+        mainPanel.setBackground(frameBorderColor);
         mainPanel.setVisible(false);        
         add(mainPanel);
         setVisible(false);
