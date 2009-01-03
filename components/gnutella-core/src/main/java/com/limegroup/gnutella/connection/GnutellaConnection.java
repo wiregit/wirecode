@@ -1061,6 +1061,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     }
 
     public void countDroppedMessage() {
+        LOG.debug("dropped", new Exception());
         _connectionStats.addReceivedDropped();
     }
 

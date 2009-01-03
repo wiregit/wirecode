@@ -398,28 +398,22 @@ public class AcceptorTest extends LimeTestCase {
      }
      
      /**
-      * Ensures that {@link AcceptorImpl#checkFirewall(InetAddress)} sets
-      * the address to the external address if the incoming status
-      * changes to true and port forwarding is not enabled in the client.
+      * Ensures the external address is returned as forced address if the client
+      * accepts incoming connections. This can happen if port forwarding is configured
+      * in the firewall but not in the client.
       * 
-      * This ensures that the client is in a consistent state and advertises
-      * itself with its public ip address since it can receive incoming
-      * connections.
+      * This is necessary to ensure that the client advertises its external address
+      * correctly to peers. 
       */
-     public void testCheckFireWallSetsAddressIfIncomingChanged() throws Exception {
-         assertFalse(acceptor.acceptedIncoming());
+     public void testGetAddressReturnsForcedExternalAddressIfAcceptedIncoming() throws Exception {
+         acceptor.setAcceptedIncoming(true);
+         assertTrue(acceptor.acceptedIncoming());
          acceptor.setExternalAddress(InetAddress.getByName("129.0.0.2"));
          assertTrue(NetworkUtils.isValidAddress(acceptor.getExternalAddress()));
          assertFalse(ConnectionSettings.FORCE_IP_ADDRESS.getValue());
          assertNotEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(false));
          
-         acceptor.checkFirewall(InetAddress.getByName("129.0.0.1"));
-         assertEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(false));
-         
-         acceptor.setAddress(InetAddress.getByName("192.168.0.1"));
-         acceptor.checkFirewall(InetAddress.getByName("129.0.0.1"));
-         // doesn't update address second time, since incoming status doesn't change
-         assertNotEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(false));
+         assertEquals(new byte[] { (byte)129, 0, 0, 2}, acceptor.getAddress(true));
      }
      
      private int bindAcceptor() throws Exception {

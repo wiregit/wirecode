@@ -624,11 +624,9 @@ public abstract class AbstractConnection implements Connection {
             }
         }
         // Otherwise, if our current address is invalid, change.
-        // also update address if we accepted incoming to make sure the external one is advertised to peers
-        // this can happen if port forwarding is enabled in the firewall but not enabled explicitly in the client
-        else if (!NetworkUtils.isValidAddress(networkManager.getAddress()) || acceptor.acceptedIncoming()) {
+        else if (!NetworkUtils.isValidAddress(networkManager.getAddress())) {
             if (LOG.isDebugEnabled())
-                LOG.debugf("updating address {0}, accepted incoming {1}", ipAddressFromHeader, acceptor.acceptedIncoming());
+                LOG.debugf("updating address {0}", ipAddressFromHeader);
             // will auto-call addressChanged.
             // TODO store address in one place     
             acceptor.setAddress(ipAddressFromHeader);

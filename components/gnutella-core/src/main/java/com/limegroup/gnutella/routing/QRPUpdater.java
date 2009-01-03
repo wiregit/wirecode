@@ -14,8 +14,6 @@ import org.limewire.inspection.Inspectable;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
@@ -38,7 +36,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 @Singleton
 public class QRPUpdater implements SettingListener, Service, Inspectable {
 
-    private static Log LOG = LogFactory.getLog(QRPUpdater.class);
+    // private static Log LOG = LogFactory.getLog(QRPUpdater.class);
     
     /**
      * delay between qrp updates should the simpp words change.
