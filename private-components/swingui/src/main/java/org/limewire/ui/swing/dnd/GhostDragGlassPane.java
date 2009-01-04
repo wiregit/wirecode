@@ -120,6 +120,7 @@ public class GhostDragGlassPane extends JPanel {
         int x = (int) (location.getX());
         int y = (int) (location.getY() - (height/ 2));
         
+        // TODO: Are both the clip sets necessary?
         if (visibleRect != null) {
             g2.setClip(visibleRect);
         }
@@ -130,6 +131,7 @@ public class GhostDragGlassPane extends JPanel {
         }
         
         g2.drawImage(dragged, x, y, width, height, null);
+        g2.dispose();
     }
     
     /**
