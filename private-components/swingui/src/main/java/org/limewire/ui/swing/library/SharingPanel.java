@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.TooManyListenersException;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -35,6 +36,7 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LocalFileItem;
@@ -46,6 +48,8 @@ import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
+import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
@@ -74,6 +78,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     private final LibraryTableFactory tableFactory;
     private final CategoryIconManager categoryIconManager;
     private final FriendFileList friendFileList;
+    private final Friend friend;
     
     private final Map<Category, LockableUI> locked = new EnumMap<Category, LockableUI>(Category.class);
     private final Map<Category, SharingSelectionPanel> listeners = new EnumMap<Category, SharingSelectionPanel>(Category.class);
@@ -84,16 +89,23 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                  FriendFileList friendFileList,
                  CategoryIconManager categoryIconManager,
                  LibraryTableFactory tableFactory,
-                 LimeHeaderBarFactory headerBarFactory) {
+                 LimeHeaderBarFactory headerBarFactory,
+                 GhostDragGlassPane ghostPane, Friend friend) {
         super(headerBarFactory);
         
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.friendFileList = friendFileList;        
+        this.friend = friend;
         this.friendFileList.addPropertyChangeListener(this);
         setTransferHandler(new LocalFileListTransferHandler(friendFileList));
+        
+        try {
+            getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane, friend));
+        } catch (TooManyListenersException ignoreException) {            
+        } 
     }
-    
+
     /** Returns the full name of the panel, which may be very long. */
     abstract String getFullPanelName();
     /** Returns a shorter more concise version of the panel name. */
@@ -154,7 +166,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         JScrollPane scrollPane;
         
         if (category != Category.IMAGE) {
-            LibraryTable table = tableFactory.createSharingTable(category, sortedList, friendFileList);
+            LibraryTable table = tableFactory.createSharingTable(category, sortedList, friendFileList, friend);
             table.setDoubleClickHandler(new MyLibraryDoubleClickHandler(getTableModel(table)));
             table.enableSharing();
             addDisposable(table);

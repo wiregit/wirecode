@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library;
 
 import java.awt.Component;
+import java.util.TooManyListenersException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -19,6 +20,8 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
+import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
@@ -46,7 +49,8 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
                     LibraryTableFactory tableFactory,
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
-                    LimeHeaderBarFactory headerBarFactory) {        
+                    LimeHeaderBarFactory headerBarFactory,
+                    GhostDragGlassPane ghostPane) {        
         super(headerBarFactory);
         this.friend = friend;
         this.categoryIconManager = categoryIconManager;
@@ -57,6 +61,11 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
        //All friends panel gives a null friend
         if(friend != null) {
             setTransferHandler(new LocalFileListTransferHandler(friendFileList));
+            
+            try {
+                getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane));
+            } catch (TooManyListenersException ignoreException) {            
+            }  
         }
     }    
     

@@ -12,6 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.TooManyListenersException;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -34,6 +35,8 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
+import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -79,7 +82,8 @@ public class MyLibraryPanel extends LibraryPanel {
                           CategoryIconManager categoryIconManager,
                           ShareWidgetFactory shareFactory,
                           LimeHeaderBarFactory headerBarFactory,
-                          PlayerPanel player) {
+                          PlayerPanel player, 
+                          GhostDragGlassPane ghostPane) {
         
         super(headerBarFactory);
         
@@ -105,8 +109,12 @@ public class MyLibraryPanel extends LibraryPanel {
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
         playerPanel.setPreferredSize(new Dimension(999,999));
+
         setTransferHandler(new LocalFileListTransferHandler(libraryManager.getLibraryManagedList()));
-        
+        try {
+            getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane));
+        } catch (TooManyListenersException ignoreException) {            
+        }      
     }
     
     private void createMyCategories(LibraryFileList libraryFileList) {

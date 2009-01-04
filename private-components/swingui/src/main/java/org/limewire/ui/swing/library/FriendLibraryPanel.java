@@ -15,6 +15,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.CategoryIconManager;
@@ -43,8 +44,9 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
                     LimeHeaderBarFactory headerBarFactory,
-                    ButtonDecorator buttonDecorator) {
-        super(friend, friendFileList, eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory);
+                    ButtonDecorator buttonDecorator,
+                    GhostDragGlassPane ghostPane) {
+        super(friend, friendFileList, eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory, ghostPane);
 
         GuiUtils.assignResources(this);
         

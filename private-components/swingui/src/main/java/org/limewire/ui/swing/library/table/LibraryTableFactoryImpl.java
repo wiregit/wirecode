@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.TooManyListenersException;
 
 import javax.swing.DropMode;
 import javax.swing.JComponent;
@@ -24,6 +25,8 @@ import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.player.api.AudioPlayer;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
+import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
@@ -85,6 +88,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final IconLabelRenderer iconLabelRenderer;
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
+    private final GhostDragGlassPane ghostPane;
 
     private Collection<Friend> allFriends;
 
@@ -104,7 +108,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             @Named("known") Collection<Friend> allFriends,
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
-            ShareWidgetFactory shareFactory) {
+            ShareWidgetFactory shareFactory,
+            GhostDragGlassPane ghostPane) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -118,6 +123,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
         this.allFriends = allFriends;
         this.shareFactory = shareFactory;
+        this.ghostPane = ghostPane;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
         iconLabelRenderer = new IconLabelRenderer(iconManager);
@@ -161,6 +167,10 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         };
         
         imagePanel.setTransferHandler(noDragTransferHandler);
+        try {
+            imagePanel.getDropTarget().addDropTargetListener(new GhostDropTargetListener(imagePanel, ghostPane));
+        } catch (TooManyListenersException ingoreException) {
+        }
         return imagePanel;
     }
     
@@ -214,6 +224,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
                 category, libraryManager, shareListManager, magnetLinkFactory, allFriends,
                 localItemPropFactory, shareFactory));
+        
+        try {
+            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable, ghostPane));
+        } catch (TooManyListenersException ingoreException) {
+        }
 
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);
@@ -266,8 +281,12 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             throw new IllegalArgumentException("Unknown category: " + category);
         }
 
-        if(friend != null) {
+        if(friend != null && !friend.isAnonymous()) {
             libTable.setTransferHandler(new FriendLibraryTransferHandler(libTable, friend));
+            try {
+                libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable,ghostPane, friend));
+            } catch (TooManyListenersException ignoreException) {            
+            }     
         }
         libTable.setPopupHandler(new FriendLibraryPopupHandler(
                 castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
@@ -284,7 +303,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
      * Creates a table for sharing files from your library with a friend.
      */
     @Override
-    public <T extends LocalFileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList) {
+    public <T extends LocalFileItem> LibraryTable<T> createSharingTable(Category category, EventList<T> eventList, LocalFileList friendFileList, Friend friend) {
         final LibraryTable<T> libTable;
         SortedList<T> sortedList = new SortedList<T>(eventList);
         
@@ -331,7 +350,11 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         
 
         libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));
-
+        try {
+            libTable.getDropTarget().addDropTargetListener(new GhostDropTargetListener(libTable,ghostPane, friend));
+        } catch (TooManyListenersException ignoreException) {            
+        } 
+        
         EventListJXTableSorting.install(libTable, sortedList);
         libTable.setDropMode(DropMode.ON);
         

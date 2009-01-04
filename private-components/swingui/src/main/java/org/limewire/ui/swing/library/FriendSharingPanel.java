@@ -14,6 +14,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
+import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -43,9 +44,10 @@ public class FriendSharingPanel extends SharingPanel {
             IconManager iconManager,
             CategoryIconManager categoryIconManager,
             LibraryTableFactory tableFactory,
-            LimeHeaderBarFactory headerBarFactory) {
+            LimeHeaderBarFactory headerBarFactory,
+            GhostDragGlassPane ghostPane) {
 
-        super(wholeLibraryList, friendFileList, categoryIconManager, tableFactory, headerBarFactory);
+        super(wholeLibraryList, friendFileList, categoryIconManager, tableFactory, headerBarFactory, ghostPane, friend);
         
         setInnerNavLayout(new MigLayout("insets 0, gap 0, fill, wrap, hidemode 3", "[138!]", ""));
         
