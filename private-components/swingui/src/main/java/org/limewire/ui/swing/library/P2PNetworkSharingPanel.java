@@ -58,13 +58,15 @@ public class P2PNetworkSharingPanel extends SharingPanel {
         public String getName() {
             return I18n.tr("the P2P Network");
         }
-
+        @Override
+        public String getId() {
+            return "_@_GNUTELLA_@_";
+        }
+        
         @Override
         public String getFirstName() {return null;}
         @Override
         public Map<String, FriendPresence> getFriendPresences() {return null;}
-        @Override
-        public String getId() {return null;}
         @Override
         public Network getNetwork() {return null;}
         @Override

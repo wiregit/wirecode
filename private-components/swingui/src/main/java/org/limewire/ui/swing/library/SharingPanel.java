@@ -230,7 +230,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     @Override
     protected <T extends FileItem> void addCategorySizeListener(Category category,
             Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
-        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredAllFileList, filteredList, friendFileList);
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredAllFileList, filteredList, friendFileList, friend);
         filteredAllFileList.addListEventListener(listener);
         filteredList.addListEventListener(listener);
         addDisposable(listener);
@@ -242,19 +242,25 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         private final FilterList<T> allFileList;
         private final FilterList<T> list;
         private final FriendFileList friendList;
+        private final Friend friend;
         
-        private ButtonSizeListener(Category category, Action action, FilterList<T> allFileList, FilterList<T> list, FriendFileList friendList) {
+        private ButtonSizeListener(Category category, Action action, FilterList<T> allFileList, FilterList<T> list, FriendFileList friendList, Friend friend) {
             this.category = category;
             this.action = action;
             this.allFileList = allFileList;
             this.list = list;
             this.friendList = friendList;
+            this.friend = friend;
+            
             setText();
             if(category == Category.PROGRAM) {
                 LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
             }
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
+            }
+            if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+                LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.addSettingListener(this);
             }
         }
 
@@ -276,6 +282,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 action.setEnabled(allFileList.size() > 0);
             } else if(category == Category.PROGRAM) {// hide program category is not enabled
                 action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
+            } else if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+                action.setEnabled(LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue());
             }
         }
         
@@ -288,6 +296,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             }
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
+            }
+            if(category == Category.DOCUMENT && friend.getId().equals("_@_GNUTELLA_@_")) {
+                LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.removeSettingListener(this);
             }
         }
 
