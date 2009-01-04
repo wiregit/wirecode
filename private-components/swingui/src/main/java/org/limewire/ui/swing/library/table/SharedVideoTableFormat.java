@@ -21,6 +21,7 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
     static final int RATING_INDEX = 6;
     static final int DIMENSION_INDEX = 7;
     static final int DESCRIPTION_INDEX = 8;
+    static final int GENRE_INDEX = 9;
     
     private final LocalFileList localFileList;
     
@@ -34,7 +35,8 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
                 new ColumnStateInfo(SIZE_INDEX, "SHARED_LIBRARY_VIDEO_SIZE", I18n.tr("Size"), 60, false, true),
                 new ColumnStateInfo(RATING_INDEX, "SHARED_LIBRARY_VIDEO_RATING", I18n.tr("Rating"), 60, false, true), 
                 new ColumnStateInfo(DIMENSION_INDEX, "SHARED_LIBRARY_VIDEO_RESOLUTION", I18n.tr("Resolution"), 80, false, true), 
-                new ColumnStateInfo(DESCRIPTION_INDEX, "SHARED_LIBRARY_VIDEO_DESCRIPTION", I18n.tr("Description"), 100, false, true) 
+                new ColumnStateInfo(DESCRIPTION_INDEX, "SHARED_LIBRARY_VIDEO_DESCRIPTION", I18n.tr("Description"), 100, false, true),
+                new ColumnStateInfo(GENRE_INDEX, "SHARED_LIBRARY_VIDEO_GENRE", I18n.tr("Genre"), 80, false, true) 
         });
         this.localFileList = localFileList;
     }
@@ -55,6 +57,7 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
                 return baseObject.getProperty(FilePropertyKey.WIDTH) + " X " + baseObject.getProperty(FilePropertyKey.HEIGHT); 
         case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
         case ACTION_INDEX: return baseObject;
+        case GENRE_INDEX: return baseObject.getProperty(FilePropertyKey.GENRE);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

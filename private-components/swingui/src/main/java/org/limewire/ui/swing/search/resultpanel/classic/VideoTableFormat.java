@@ -22,6 +22,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     static final int DIMENSION_INDEX = 8;
     static final int YEAR_INDEX = 9;
     static final int DESCRIPTION_INDEX = 10;
+    static final int GENRE_INDEX = 11;
     
     public VideoTableFormat() {
         super(NAME_INDEX, FROM_INDEX, new ColumnStateInfo[] {
@@ -35,7 +36,8 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 new ColumnStateInfo(RATING_INDEX, "CLASSIC_SEARCH_VIDEO_RATING", I18n.tr("Rating"), 60, false, true), 
                 new ColumnStateInfo(DIMENSION_INDEX, "CLASSIC_SEARCH_VIDEO_RESOLUTION", I18n.tr("Resolution"), 60, false, true),
                 new ColumnStateInfo(YEAR_INDEX, "CLASSIC_SEARCH_VIDEO_YEAR", I18n.tr("Year"), 60, false, true), 
-                new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_VIDEO_DESCRIPTION", I18n.tr("Description"), 60, false, true)
+                new ColumnStateInfo(DESCRIPTION_INDEX, "CLASSIC_SEARCH_VIDEO_DESCRIPTION", I18n.tr("Description"), 60, false, true),
+                new ColumnStateInfo(GENRE_INDEX, "CLASSIC_SEARCH_VIDEO_GENRE", I18n.tr("Genre"), 80, false, true)
         });
     }
 
@@ -67,6 +69,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
                 else
                     return (vsr.getProperty(FilePropertyKey.WIDTH) + " X " + vsr.getProperty(FilePropertyKey.HEIGHT));
             case SIZE_INDEX: return vsr.getSize();
+            case GENRE_INDEX: return vsr.getProperty(FilePropertyKey.GENRE);
         }
         throw new IllegalArgumentException("Unknown column:" + index);
     }
