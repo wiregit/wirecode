@@ -100,7 +100,10 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         }
         
         if(friendCount > 0) {   
-            shareButton.setText(I18n.tr("{0} friends",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
+            if(friendCount == 1)
+                shareButton.setText(I18n.tr("{0} friend",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
+            else
+                shareButton.setText(I18n.tr("{0} friends",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
             shareButton.setIcon(downIcon);
             shareButton.removeUnderline();
         } else {
