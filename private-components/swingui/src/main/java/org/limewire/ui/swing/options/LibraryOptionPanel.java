@@ -318,9 +318,9 @@ public class LibraryOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            RootLibraryManagerItem root = new RootLibraryManagerItem();
+            RootLibraryManagerItem root = new RootLibraryManagerItem(libraryData);
             for(File file : libraryData.getDirectoriesToManageRecursively()) {
-                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, false));
+                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
             }
 
             treeTable.setTreeTableModel(new LibraryManagerModel(root));

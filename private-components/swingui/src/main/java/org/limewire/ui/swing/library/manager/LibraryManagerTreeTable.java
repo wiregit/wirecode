@@ -75,13 +75,12 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
         // If no parent, it's going to be added to root.
         if(parent == null) {
             parent = root;
-        } else {
-            // If a parent, find the particular child.
-            item = parent.getChildFor(directory);
         }
         
+        item = parent.getChildFor(directory);
+        
         if(item == null) {
-            item = new LibraryManagerItemImpl(parent, libraryData, directory, parent == root, true);
+            item = new LibraryManagerItemImpl(parent, libraryData, directory, true);
             getLibraryModel().addChild(item, parent);
             
             // Make sure that we're not the ancestor of any existing item in the list
@@ -101,7 +100,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
             // work off a copy because we'll be modifying the list as we iterate through it.
             for(File excludedChild : new ArrayList<File>(item.getExcludedChildren())) {
                 expand = true;
-                getLibraryModel().addChild(new LibraryManagerItemImpl(item, libraryData, excludedChild, false, true), item);
+                getLibraryModel().addChild(new LibraryManagerItemImpl(item, libraryData, excludedChild, true), item);
             }
         }
         

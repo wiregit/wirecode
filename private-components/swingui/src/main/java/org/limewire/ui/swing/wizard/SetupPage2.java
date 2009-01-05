@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -117,9 +117,9 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void initManualPanel() {
-        RootLibraryManagerItem root = new RootLibraryManagerItem();
+        RootLibraryManagerItem root = new RootLibraryManagerItem(libraryData);
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, true, false));
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
@@ -151,26 +151,9 @@ public class SetupPage2 extends WizardPage {
             LibraryManagerModel model = treeTable.getLibraryModel();
             manage = model.getManagedDirectories();
             exclude = model.getExcludedDirectories();
-        } 
-        else {
-            manage = AutoDirectoryManageConfig.getManagedDirectories();
-            exclude = AutoDirectoryManageConfig.getExcludedDirectories();
-
-            // Remove any bad directories to be safe
-            
-            for( Iterator<File> iter = manage.iterator() ; iter.hasNext() ; ) {
-                File i = iter.next();
-                if(!libraryData.isDirectoryAllowed(i)) {
-                    iter.remove();
-                }
-            }
-            
-            for( Iterator<File> iter = exclude.iterator() ; iter.hasNext() ; ) {
-                File i = iter.next();
-                if(!libraryData.isDirectoryAllowed(i)) {
-                    iter.remove();
-                }
-            }
+        } else {
+            manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
+            exclude = Collections.emptySet();
         }
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());

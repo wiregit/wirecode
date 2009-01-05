@@ -4,14 +4,20 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
+import org.limewire.core.api.library.LibraryData;
+import org.limewire.ui.swing.wizard.AutoDirectoryManageConfig;
 
 public class RootLibraryManagerItem implements LibraryManagerItem {
 
     private final List<LibraryManagerItem> children;
+    private final Collection<File> defaultFiles;
     
-    public RootLibraryManagerItem() {
+    public RootLibraryManagerItem(LibraryData libraryData) {
         this.children = new ArrayList<LibraryManagerItem>();
+        this.defaultFiles = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
     }
     
     @Override
@@ -28,6 +34,10 @@ public class RootLibraryManagerItem implements LibraryManagerItem {
     public String displayName() {
         return "root";
     }
+    
+    @Override
+    public void setShowFullName(boolean show) {
+    }
 
     @Override
     public List<LibraryManagerItem> getChildren() {
@@ -35,9 +45,19 @@ public class RootLibraryManagerItem implements LibraryManagerItem {
     }
     
     public int addChild(LibraryManagerItem item) {
-        children.add(item);
+        int idx = Collections.binarySearch(children, item, new Orderer());
+        if(idx >= 0) {
+            throw new IllegalStateException("already contains: " + item + ", in: " + children);
+        }
+        idx = -(idx + 1);
+        children.add(idx, item);
         assert item.getParent() == this;
-        return children.size() - 1;
+        if(defaultFiles.contains(item.getFile())) {
+            item.setShowFullName(false);
+        } else {
+            item.setShowFullName(true);
+        }
+        return idx;
     }
 
     public int removeChild(LibraryManagerItem item) {
@@ -60,6 +80,21 @@ public class RootLibraryManagerItem implements LibraryManagerItem {
             }
         }
         return null;
+    }
+    
+    private class Orderer implements Comparator<LibraryManagerItem> {
+        @Override
+        public int compare(LibraryManagerItem o1, LibraryManagerItem o2) {
+            boolean oneDefault = defaultFiles.contains(o1.getFile());
+            boolean twoDefault = defaultFiles.contains(o2.getFile());
+            if(oneDefault == twoDefault) {
+                return o1.getFile().compareTo(o2.getFile());
+            } else if(oneDefault) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
     }
 
 }

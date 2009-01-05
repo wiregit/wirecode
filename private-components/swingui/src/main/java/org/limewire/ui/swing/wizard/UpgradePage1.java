@@ -2,7 +2,6 @@ package org.limewire.ui.swing.wizard;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -64,29 +63,12 @@ public class UpgradePage1 extends WizardPage {
         
         InstallSettings.SCAN_FILES.setValue(true);
         
-        Collection<File> manage = AutoDirectoryManageConfig.getManagedDirectories();
-        Collection<File> exclude = AutoDirectoryManageConfig.getExcludedDirectories();
-        
-        // Remove any bad directories to be safe
-        
-        for( Iterator<File> iter = manage.iterator() ; iter.hasNext() ; ) {
-            File i = iter.next();
-            if(!libraryData.isDirectoryAllowed(i)) {
-                iter.remove();
-            }
-        }
-        
-        for( Iterator<File> iter = exclude.iterator() ; iter.hasNext() ; ) {
-            File i = iter.next();
-            if(!libraryData.isDirectoryAllowed(i)) {
-                iter.remove();
-            }
-        }
+        Collection<File> manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
         
         // Add old directories to the list because this is an upgrade and we
-        //  want to preserve old settings as much as possible
+        // want to preserve old settings as much as possible
         manage.addAll(libraryData.getDirectoriesToManageRecursively());
-        exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
+        Collection<File> exclude = libraryData.getDirectoriesToExcludeFromManaging();
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());        
     }

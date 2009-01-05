@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.limewire.core.api.library.LibraryData;
@@ -13,7 +14,7 @@ import org.limewire.util.FileUtils;
 
 public class LibraryManagerItemImpl implements LibraryManagerItem {
 
-    private final boolean fullName;
+    private boolean fullName;
     private final File file;
     private final LibraryData libraryData;
     private final LibraryManagerItem parent;
@@ -25,14 +26,17 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
     public LibraryManagerItemImpl(LibraryManagerItem parent, 
             LibraryData libraryData,
             File file,
-            boolean fullName,
             boolean showExcludedChildren) {
         this.showExcludedChildren = showExcludedChildren;
         this.parent = parent;
         this.libraryData = libraryData;
         this.file = canonicalize(file);
-        this.fullName = fullName;
         this.excludedChildren = new ArrayList<File>();
+    }
+    
+    @Override
+    public void setShowFullName(boolean show) {
+        this.fullName = show;
     }
     
     @Override
@@ -97,20 +101,26 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
                     if(!showExcludedChildren && libraryData.isDirectoryExcluded(folder)) {
                         excludedChildren.add(folder);
                     } else {
-                        children.add(new LibraryManagerItemImpl(this, libraryData, folder, false, showExcludedChildren));
+                        children.add(new LibraryManagerItemImpl(this, libraryData, folder, showExcludedChildren));
                     }
                 }
             }
         }
         
+        Collections.sort(children, new Orderer());
         return children;
     }
     
     public int addChild(LibraryManagerItem item) {
         excludedChildren.remove(item.getFile());
-        children.add(item);
+        int idx = Collections.binarySearch(children, item, new Orderer());
+        if(idx >= 0) {
+            throw new IllegalStateException("already contains: " + item + ", in: " + children);
+        }
+        idx = -(idx + 1);
+        children.add(idx, item);
         assert item.getParent() == this;
-        return children.size() - 1;
+        return idx;
     }
 
     public int removeChild(LibraryManagerItem item) {
@@ -135,4 +145,11 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
         }
         return null;
     }    
+    
+    private static class Orderer implements Comparator<LibraryManagerItem> {
+        @Override
+        public int compare(LibraryManagerItem o1, LibraryManagerItem o2) {
+            return o1.getFile().compareTo(o2.getFile());
+        }
+    }
 }
