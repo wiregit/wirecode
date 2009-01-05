@@ -152,11 +152,8 @@ public final class Initializer {
         
         enablePreferences();
         
-        // Initialize late tasks, like Icon initialization & install listeners.
-        loadLateTasksForUI();
-
-      SettingsWarningManager.checkTemporaryDirectoryUsage();
-      SettingsWarningManager.checkSettingsLoadSaveFailure();        
+        SettingsWarningManager.checkTemporaryDirectoryUsage();
+        SettingsWarningManager.checkSettingsLoadSaveFailure();        
         
         // Start the core & run any queued control requests, and load DAAP.
         startCore(limeWireCore);
@@ -511,10 +508,13 @@ public final class Initializer {
         DefaultErrorCatcher.storeCaughtBugs();
         String[] launchParams = isStartup ? new String[] { AppFrame.STARTUP } : new String[0];
         Application.launch(AppFrame.class, launchParams);
+        // Initialize late tasks, like Icon initialization & install listeners.
+        loadLateTasksForUI();
         
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
                 splashRef.get().dispose();
+                splashRef.set(null);
                 List<Throwable> caughtBugs = DefaultErrorCatcher.getAndResetStoredBugs();
                 if(!AppFrame.isStarted()) {
                     // Report the last bug that caused us to fail.
