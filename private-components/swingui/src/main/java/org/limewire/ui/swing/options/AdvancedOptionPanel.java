@@ -41,7 +41,7 @@ public class AdvancedOptionPanel extends OptionPanel {
         final JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Color.WHITE);
         tabbedPane.addTab(I18n.tr("Files"), list[0]);
-        tabbedPane.addTab(I18n.tr("Connections"), new JPanel());
+        tabbedPane.addTab(I18n.tr("Transfers"), new JPanel());
         tabbedPane.addTab(I18n.tr("System"), new JPanel());
         tabbedPane.addTab(I18n.tr("Super Really Advanced"), new JPanel());
         
