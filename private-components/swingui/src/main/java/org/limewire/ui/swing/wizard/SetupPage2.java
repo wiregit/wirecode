@@ -12,6 +12,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -30,12 +32,21 @@ import org.limewire.ui.swing.util.IconManager;
 
 public class SetupPage2 extends WizardPage {
 
+    /**
+     * A switch to control whether this page overrides or updates any existing lw settings.
+     * 
+     * (When doing an update this will be true and the new directories will be appended to the list.)
+     */
+    private boolean shouldKeepExistingDirectorySettings = false;
+    
     private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
     private final String line2 = I18n.tr("My Library is where you view, share and unshare your files.");
+    private final String line2KeepExisting = I18n.tr("My Library is where you view, share and unshare your files.  Don't worry, we will still share files from the older version.");
     private final String autoText = I18n.tr("Automatically add files to My Library");
     private final String autoExplanation = I18n.tr("Have LimeWire automatically add files from My Documents and the Desktop to My Library.");
     private final String manualText = I18n.tr("Manually add files to My Library");
     private final String manualExplanation = I18n.tr("Select the folders and categories LimeWire automatically adds to My Library.");
+    private final String manualExplanationOpen = I18n.tr("LimeWire will look in the following folders...");
     private final String bottomText1 = I18n.tr("Adding these folders will not automatically share your files.");
     private final String bottomText2 = I18n.tr("You can change this option later from Tools > Options");
     
@@ -51,6 +62,14 @@ public class SetupPage2 extends WizardPage {
     private final JScrollPane treeTableScrollPane;
     private final JXButton addFolderButton;
         
+    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData,
+            boolean shouldKeepExistingDirectorySettings) {
+        
+        this(decorator, iconManager, libraryData);
+        this.shouldKeepExistingDirectorySettings = shouldKeepExistingDirectorySettings;
+    }
+    
+    
     public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData) {
         this.libraryData = libraryData;
         
@@ -64,8 +83,8 @@ public class SetupPage2 extends WizardPage {
         autoButton.setSelected(true);
         autoButton.addActionListener(buttonSelectionListener);
         
-        manualLabel = new MultiLineLabel(manualText);
-        decorator.decorateHeadingText(manualLabel);
+        manualLabel = new MultiLineLabel(manualExplanation);
+        decorator.decorateNormalText(manualLabel);
         
         manualButton = new JRadioButton();
         decorator.decorateLargeRadioButton(manualButton);
@@ -96,13 +115,26 @@ public class SetupPage2 extends WizardPage {
         decorator.decorateNormalText(label);
         add(label, "gapleft 76, wrap");
         
+        manualButton.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (manualButton.isSelected()) {
+                    manualLabel.setText(manualExplanationOpen);
+                }
+                else {
+                    manualLabel.setText(manualExplanation);
+                }
+            }
+        });
         add(manualButton, "gaptop 10, gapleft 40");
-        manualLabel.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(manualButton));
-        add(manualLabel, "gaptop 10, gapleft 10, wrap");
+        
+        label = new JLabel(manualText);
+        decorator.decorateHeadingText(label);
+        label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(manualButton));
+        
+        add(label, "gaptop 10, gapleft 10, wrap");
 
-        label = new MultiLineLabel(manualExplanation, 500);
-        decorator.decorateNormalText(label);
-        add(label, "gapleft 76, wrap");
+        add(manualLabel, "gapleft 76, wrap");
         
         add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
         add(addFolderButton, "gaptop 10, gapright 30, wrap");
@@ -132,7 +164,12 @@ public class SetupPage2 extends WizardPage {
     
     @Override
     public String getLine2() {
-        return line2;
+        if (shouldKeepExistingDirectorySettings) {
+            return line2KeepExisting;
+        }
+        else {
+            return line2;
+        }
     }
 
     @Override
@@ -154,6 +191,13 @@ public class SetupPage2 extends WizardPage {
         } else {
             manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
             exclude = Collections.emptySet();
+        }
+        
+        if (shouldKeepExistingDirectorySettings) {
+            // Add old directories to the list because this is an upgrade and we
+            //  want to preserve old settings as much as possible
+            manage.addAll(libraryData.getDirectoriesToManageRecursively());
+            exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         }
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());

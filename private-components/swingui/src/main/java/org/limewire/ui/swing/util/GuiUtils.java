@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -483,5 +484,18 @@ public class GuiUtils {
         // as the screen size includes the taskbar
         int appHeight = Math.min(screenSize.height - 40, dimension.height);
         return new Point((screenSize.width - appWidth) / 2, (screenSize.height - appHeight) / 2);
+    }
+
+    /**
+     * Determines if a font can display up to a point in the string.
+     *
+     * Returns -1 if it can display the whole string.
+     */
+    public static boolean canDisplay(Font f, String s) {
+        int upTo = f.canDisplayUpTo(s);
+        if(upTo >= s.length() || upTo == -1)
+            return true;
+        else
+            return false;
     }
 }

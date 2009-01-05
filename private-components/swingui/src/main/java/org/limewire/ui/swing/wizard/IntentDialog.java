@@ -2,14 +2,22 @@ package org.limewire.ui.swing.wizard;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Locale;
 
 import javax.swing.Action;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -19,6 +27,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.util.SystemUtils;
 
@@ -108,7 +117,10 @@ public class IntentDialog extends LimeJDialog {
         panel.add(bodyLabel, "gapleft " + indent + ", gaptop 20, wrap");
         panel.add(linkButton, "gapleft " + indent +  ", gaptop 20, wrap");
         panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 70, wrap");
-                
+        
+        JComboBox languageDropDown = createLanguageDropDown(normalFont);        
+        panel.add(languageDropDown, "gapleft " + indent +  ", gaptop 70, wrap");
+        
         contentPane.add(panel, BorderLayout.NORTH);
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
         
@@ -132,6 +144,46 @@ public class IntentDialog extends LimeJDialog {
         setLocationRelativeTo(null);
         setVisible(true);
         return agreed;
+    }
+    
+    
+    private static JComboBox createLanguageDropDown(Font normalFont) {
+        final JComboBox languageDropDown = new JComboBox();
+        Locale[] locales = LanguageUtils.getLocales(normalFont);
+        languageDropDown.setRenderer(new LocaleRenderer());
+        languageDropDown.setFont(normalFont);
+        languageDropDown.setModel(new DefaultComboBoxModel(locales));
+        Locale locale = LanguageUtils.guessLocale();
+        languageDropDown.setSelectedItem(locale);
+        languageDropDown.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    Locale locale = (Locale) languageDropDown.getSelectedItem();
+                    LanguageUtils.setLocale(locale);
+                }
+            }
+            
+        });
+        
+        return languageDropDown;
+    }
+    
+    
+    private static class LocaleRenderer extends DefaultListCellRenderer {
+        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
+            
+            if (value instanceof Locale) {
+                Locale locale = (Locale) value;
+                setText(locale.getDisplayName(locale));
+            } else {
+                setIcon(null);
+            }
+            
+            return this;
+        }
     }
 
 }
