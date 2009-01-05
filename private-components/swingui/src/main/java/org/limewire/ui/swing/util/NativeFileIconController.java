@@ -145,7 +145,12 @@ public class NativeFileIconController implements FileIconController {
         final AtomicReference<SmartFileView> ref = new AtomicReference<SmartFileView>();
         SwingUtils.invokeAndWait(new Runnable() {
             public void run() {
-                ref.set(new FSVFileView());
+                try {
+                    ref.set(new FSVFileView());
+                } catch(Throwable err) {
+                    // If an error constructing FSF view, ignore.
+                    ref.set(null);
+                }
             }
         });
         return ref.get();
@@ -376,10 +381,13 @@ public class NativeFileIconController implements FileIconController {
             // Similarly, with the My Documents folder, the icon is only valid if it's
             // retrieved as the child from the root.
             if(OSUtils.isWindows() && roots.length == 1) {
-                File documents = new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS));
-                File child = VIEW.getChild(roots[0], documents.getName());
-                if(child != null) {
-                    CACHE.put(documents, VIEW.getSystemIcon(child));
+                String path = SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS);
+                if(path != null) {
+                    File documents = new File(path);
+                    File child = VIEW.getChild(roots[0], documents.getName());
+                    if(child != null) {
+                        CACHE.put(documents, VIEW.getSystemIcon(child));
+                    }
                 }
             }
         }
