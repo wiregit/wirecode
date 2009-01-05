@@ -28,8 +28,6 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 
 /**
  * This class provides utility methods retrieving supported languages and
@@ -75,9 +73,10 @@ public class LanguageUtils {
             LOG.warn("Could not find bundle jar to determine locales");
         }
 
-        if (LimeWireUtils.isTestingVersion()) { 
+        // TODO: fix for build
+      /*  if (LimeWireUtils.isTestingVersion()) { 
             addLocalesFromJar(locales, new File(CVS_BUNDLE_FILE));
-        }
+        } */
         
         Collections.sort(locales, new Comparator<Locale>() {
             public int compare(Locale o1, Locale o2) {
