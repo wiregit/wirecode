@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.search;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -8,6 +9,9 @@ import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -35,6 +39,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.util.I18NConvert;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -109,6 +114,7 @@ public class SearchBar extends JXPanel {
                 
         searchField = new LimePromptTextField(I18n.tr("Search"), AccentType.BUBBLE, searchBorder);
         searchField.setName("SearchBar.searchField");
+        searchField.setDocument(new SearchFieldDocument());
         
         searchButton = new IconButton();
         searchButton.removeActionHandListener();
@@ -243,6 +249,54 @@ public class SearchBar extends JXPanel {
         public void actionPerformed(ActionEvent arg0) {
             categoryToSearch = category;            
             autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(category));
+        }
+    }
+
+    /**
+     * Helper class that filters out all characters that make the search longer
+     * than the maximum allowed length.  If characters entered make the search
+     * field too long (normalized or not normalized), the system should beep.
+     */
+    private static class SearchFieldDocument extends PlainDocument {
+
+        private static final int MAX_QUERY_LENGTH =
+                SearchSettings.MAX_QUERY_LENGTH.getValue();
+
+
+        @Override
+        public void insertString(int offs,
+                                 String str,
+                                 AttributeSet a) throws BadLocationException {
+
+            if(str == null) {
+                return;
+            }
+
+            if(offs >= MAX_QUERY_LENGTH) {
+                Toolkit.getDefaultToolkit().beep();
+                return;
+            }
+
+            // Normalized String are maybe longer or shorter than MAX_QUERY_LENGTH
+            String norm = I18NConvert.instance().getNorm(str);
+            if (getMaxLength() + Math.max(str.length(), norm.length()) > MAX_QUERY_LENGTH) {
+                Toolkit.getDefaultToolkit().beep();
+                return;
+            }
+            super.insertString(offs, str, a);
+        }
+
+        /**
+         * Returns the maximum length of the existing text normalized or not
+         * normalized.
+         */
+        private int getMaxLength() {
+            try {
+                String text = getText(0, getLength());
+                return Math.max(text.length(), I18NConvert.instance().getNorm(text).length());
+            } catch (BadLocationException e) {
+                return 0;
+            }
         }
     }
 }
