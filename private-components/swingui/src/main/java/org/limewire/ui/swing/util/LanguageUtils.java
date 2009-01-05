@@ -58,11 +58,7 @@ public class LanguageUtils {
      * Returns a Locale of the current language that is being used.
      */
     public static Locale getCurrentLocale() {
-        if (ApplicationSettings.LANGUAGE.getValue().equals(""))
-            ApplicationSettings.LANGUAGE.setValue("en");
-        return new Locale(ApplicationSettings.LANGUAGE.getValue(),
-                ApplicationSettings.COUNTRY.getValue(),
-                ApplicationSettings.LOCALE_VARIANT.getValue());
+        return Locale.getDefault();
     }
 
     /**
