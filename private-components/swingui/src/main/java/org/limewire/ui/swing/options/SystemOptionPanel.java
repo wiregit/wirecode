@@ -335,10 +335,6 @@ public class SystemOptionPanel extends OptionPanel {
             return UpdateSettings.UPDATE_STYLE.getValue() == expectedUpdateStyle;
         }
 
-        private boolean hasChanged(JCheckBox checkbox, BooleanSetting setting) {
-            return setting.getValue() != checkbox.isSelected();
-        }
-
         @Override
         public void initOptions() {
             initOption(betaCheckBox, UpdateSettings.UPDATE_STYLE.getValue() == 0);

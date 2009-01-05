@@ -43,8 +43,6 @@ public class LanguageUtils {
 
     private static final String BUNDLE_MARKER = "org/limewire/i18n/Messages.class";
 
-    private static final String CVS_BUNDLE_FILE = "../lib/jars/compile/messages.jar";
-
     /**
      * Applies this language code to be the new language of the program.
      */
@@ -54,6 +52,17 @@ public class LanguageUtils {
         ApplicationSettings.LOCALE_VARIANT.setValue(locale.getVariant());
         
         LocaleUtils.setLocaleFromPreferences();
+    }
+    
+    /**
+     * Returns a Locale of the current language that is being used.
+     */
+    public static Locale getCurrentLocale() {
+        if (ApplicationSettings.LANGUAGE.getValue().equals(""))
+            ApplicationSettings.LANGUAGE.setValue("en");
+        return new Locale(ApplicationSettings.LANGUAGE.getValue(),
+                ApplicationSettings.COUNTRY.getValue(),
+                ApplicationSettings.LOCALE_VARIANT.getValue());
     }
 
     /**
