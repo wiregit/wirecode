@@ -122,6 +122,7 @@ public abstract class Dialog extends LimeJDialog {
         overview = newPanel(new MigLayout("fillx", "[][]push[]", "[top]3[top]"));
 
         JPanel linksPanel = new JPanel(new BorderLayout());
+        linksPanel.setOpaque(false);
         linksPanel.add(copyToClipboard, BorderLayout.NORTH);
         linksPanel.add(moreFileInfo, BorderLayout.SOUTH);
         
