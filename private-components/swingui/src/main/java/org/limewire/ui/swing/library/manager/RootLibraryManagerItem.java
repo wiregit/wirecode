@@ -7,17 +7,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.limewire.core.api.library.LibraryData;
-import org.limewire.ui.swing.wizard.AutoDirectoryManageConfig;
-
 public class RootLibraryManagerItem implements LibraryManagerItem {
 
     private final List<LibraryManagerItem> children;
     private final Collection<File> defaultFiles;
     
-    public RootLibraryManagerItem(LibraryData libraryData) {
+    public RootLibraryManagerItem(Collection<File> defaultFiles) {
         this.children = new ArrayList<LibraryManagerItem>();
-        this.defaultFiles = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
+        this.defaultFiles = defaultFiles;
     }
     
     @Override

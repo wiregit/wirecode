@@ -40,6 +40,7 @@ import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
+import org.limewire.ui.swing.wizard.AutoDirectoryManageConfig;
 
 import ca.odell.glazedlists.EventList;
 
@@ -318,7 +319,7 @@ public class LibraryOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            RootLibraryManagerItem root = new RootLibraryManagerItem(libraryData);
+            RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
             for(File file : libraryData.getDirectoriesToManageRecursively()) {
                 root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
             }

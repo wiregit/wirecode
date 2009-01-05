@@ -149,7 +149,7 @@ public class SetupPage2 extends WizardPage {
     }
 
     private void initManualPanel() {
-        RootLibraryManagerItem root = new RootLibraryManagerItem(libraryData);
+        RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
         for(File file : libraryData.getDirectoriesToManageRecursively()) {
             root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
         }
