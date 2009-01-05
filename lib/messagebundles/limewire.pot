@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-12-29 11:30-0500\n"
+"POT-Creation-Date: 2009-01-05 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,7 +39,7 @@ msgstr ""
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:44
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:12
-#: core/com/limegroup/gnutella/daap/DaapManager.java:185
+#: core/com/limegroup/gnutella/daap/DaapManager.java:176
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 msgid "Video"
 msgstr ""
@@ -90,6 +90,25 @@ msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
 msgid "Trouble connecting to people"
+msgstr ""
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:159
+msgid ""
+"<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
+"b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
+"limewire.com</a> and download the newest official version of LimeWire.</html>"
+msgstr ""
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:282
+msgid ""
+"If you stop this upload, the torrent download will stop. Are you sure you "
+"want to do this?"
+msgstr ""
+
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
+msgid ""
+"This upload is a torrent and it hasn't seeded enough. You should let it "
+"upload some more. Are you sure you want to stop it?"
 msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
@@ -239,14 +258,14 @@ msgstr ""
 msgid "DHT Peer Publisher"
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:298
+#: core/com/limegroup/gnutella/AcceptorImpl.java:306
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:396
+#: core/com/limegroup/gnutella/AcceptorImpl.java:404
 msgid "Connection Listener"
 msgstr ""
 
@@ -266,34 +285,34 @@ msgstr ""
 msgid "Stale Connection Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:104
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:101
 msgid "Various Core Services"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:109
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:106
 msgid "Gnutella Connections"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:202
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:204
 msgid "Old Downloads"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:225
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
 msgid "Download Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:274
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:278
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
-"going to your Library, viewing your 'Incomplete Files', and clicking to "
-"'Resume' your downloads."
+"clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
+"file, the download will pick up where it left off."
 msgstr ""
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:276
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:280
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
-"them by going to your Library, viewing your 'Incomplete Files', and clicking "
-"to 'Resume' your downloads."
+"them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
+"for the file, the download will pick up where it left off."
 msgstr ""
 
 #: core/com/limegroup/gnutella/HTTPAcceptor.java:87
@@ -316,7 +335,7 @@ msgstr ""
 msgid "Message Routing"
 msgstr ""
 
-#: core/com/limegroup/gnutella/NetworkManagerImpl.java:160
+#: core/com/limegroup/gnutella/NetworkManagerImpl.java:157
 msgid "Network Management"
 msgstr ""
 
@@ -344,17 +363,6 @@ msgstr ""
 msgid "Content Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:151
-#, java-format
-msgid "Could not process bad MAGNET link {0}"
-msgstr ""
-
-#: core/com/limegroup/gnutella/browser/ExternalControl.java:157
-msgid ""
-"One or more URLs in the MAGNET link were invalid. Your file may not download "
-"correctly."
-msgstr ""
-
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 msgid "Local Socket Listener"
 msgstr ""
@@ -363,25 +371,18 @@ msgstr ""
 msgid "Magnet Processor"
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:73
+#: core/com/limegroup/gnutella/daap/DaapManager.java:120
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:74
-msgid ""
-"LimeWire encountered an error in the Digital Audio Access Protocol (for "
-"sharing files in iTunes). This feature will be turned off. You can turn it "
-"back on in options, under iTunes -> Sharing."
-msgstr ""
-
-#: core/com/limegroup/gnutella/daap/DaapManager.java:183
+#: core/com/limegroup/gnutella/daap/DaapManager.java:174
 msgid "What's New"
 msgstr ""
 
-#: core/com/limegroup/gnutella/daap/DaapManager.java:184
+#: core/com/limegroup/gnutella/daap/DaapManager.java:175
 msgid "Creative Commons"
 msgstr ""
 
@@ -409,7 +410,7 @@ msgstr ""
 msgid "Static Messages"
 msgstr ""
 
-#: core/com/limegroup/gnutella/routing/QRPUpdater.java:182
+#: core/com/limegroup/gnutella/routing/QRPUpdater.java:184
 msgid "QRP Updater"
 msgstr ""
 
