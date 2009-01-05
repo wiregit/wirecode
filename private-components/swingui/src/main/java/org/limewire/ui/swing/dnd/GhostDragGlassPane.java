@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -120,14 +119,8 @@ public class GhostDragGlassPane extends JPanel {
         int x = (int) (location.getX());
         int y = (int) (location.getY() - (height/ 2));
         
-        // TODO: Are both the clip sets necessary?
         if (visibleRect != null) {
             g2.setClip(visibleRect);
-        }
-        
-        if (visibleRect != null) {
-            Area clip = new Area(visibleRect);
-            g2.setClip(clip);
         }
         
         g2.drawImage(dragged, x, y, width, height, null);
