@@ -82,10 +82,6 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
         fileItem = item;
 
         int friendCount = item.getFriendShareCount();
-        if(item.isSharedWithGnutella()){
-            friendCount++;
-        }
-
 
         shareButton.setEnabled(item.isShareable() && !item.isIncomplete());
         
