@@ -2,7 +2,7 @@ package org.limewire.ui.swing.event;
 
 import org.bushe.swing.event.EventServiceLocator;
 import org.bushe.swing.event.SwingEventService;
-import org.limewire.util.ExceptionUtils;
+import org.limewire.service.ErrorService;
 
 /**
  * Event service (utilized by the EventBus library) that simply passes
@@ -19,6 +19,6 @@ public class ExceptionPublishingSwingEventService extends SwingEventService {
     protected void handleException(String action, Object event, String topic, Object eventObj,
             Throwable e, StackTraceElement[] callingStack, String sourceString) {
         super.handleException(action, event, topic, eventObj, e, callingStack, sourceString);
-        ExceptionUtils.reportOrRethrow(e);
+        ErrorService.error(e, "Uncaught EventBus Subscriber Error");
     }
 }
