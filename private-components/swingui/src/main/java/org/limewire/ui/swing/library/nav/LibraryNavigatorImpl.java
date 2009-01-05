@@ -168,6 +168,8 @@ class LibraryNavigatorImpl extends JXPanel implements LibraryNavigator {
         
         // Increase the painted gaps a bit to make sure it's not smushed.
         myLibrary.setTopGap(2);
+        myLibrary.setBottomGap(2);
+        allFriends.setTopGap(2);
         allFriends.setBottomGap(2);
         
         addItem(myLibrary, this, "growx, wmin 0, wrap", null, p2pNetwork.getAction());
