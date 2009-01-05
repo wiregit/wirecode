@@ -41,7 +41,8 @@ public class TabButton extends JXButton {
         setOpaque(false);
         setHorizontalTextPosition(SwingConstants.CENTER);
         setVerticalTextPosition(SwingConstants.BOTTOM);
-        setPreferredSize(new Dimension(Math.max(getPreferredSize().width, 70), 60));
+        setIconTextGap(0);
+        setPreferredSize(new Dimension(Math.max(getPreferredSize().width, 70), 62));
         setBorder(BorderFactory.createEmptyBorder(4,12,4,12));
         
         // Add listener to repaint button when selected state changes.
