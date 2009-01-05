@@ -155,11 +155,7 @@ public class ApplicationSettings extends LimeProps {
     public static final BooleanSetting MINIMIZE_TO_TRAY =
         FACTORY.createBooleanSetting("MINIMIZE_TO_TRAY", 
             OSUtils.supportsTray());
-    
-    
-    public static final StringSetting te =
-        FACTORY.createStringSetting("TEST", "hello");
-    
+   
     /**
 	 * The language to use for the application.
 	 */
