@@ -32,6 +32,7 @@ import org.limewire.core.api.URN;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.settings.LibrarySettings;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -49,7 +50,6 @@ import org.limewire.ui.swing.player.PlayerPanel;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -166,7 +166,7 @@ public class MyLibraryPanel extends LibraryPanel {
     
     @Override
     protected JComponent createCategoryButton(Action action, Category category) {
-        MySelectionPanel component = new MySelectionPanel(action, new ShareAllAction(category), category, this);
+        MySelectionPanel component = new MySelectionPanel(action, new ShareCategoryAction(category), category, this);
         addNavigation(component.getButton());
         return component;
     }
@@ -213,11 +213,11 @@ public class MyLibraryPanel extends LibraryPanel {
     /**
      * Display the Share Collection widget when pressed
      */
-    private class ShareAllAction extends AbstractAction {
+    private class ShareCategoryAction extends AbstractAction {
 
         private Category category;
         
-        public ShareAllAction(Category category) {
+        public ShareCategoryAction(Category category) {
             this.category = category;
             
             putValue(Action.NAME, I18n.tr("share"));
@@ -226,8 +226,14 @@ public class MyLibraryPanel extends LibraryPanel {
         
         @Override
         public void actionPerformed(ActionEvent e) {
-          categoryShareWidget.setShareable(category);
-          categoryShareWidget.show((JComponent)e.getSource());
+            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
+                //TODO: when snapshot sharing is enabled, this action should bring
+                //     up the share widget to share all of the files in this category.
+                //     New files added after this action will not be automatically added
+            } else {
+                categoryShareWidget.setShareable(category);
+                categoryShareWidget.show((JComponent)e.getSource());
+            }
         }
     }
     
@@ -295,14 +301,9 @@ public class MyLibraryPanel extends LibraryPanel {
             
             // only add a share category button if its an audio/video/image category
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
-                shareButton = new HyperlinkButton(null, shareAction);
-                shareButton.setContentAreaFilled(false);
-                shareButton.setBorderPainted(false);
-                shareButton.setFocusPainted(false);
+                shareButton = new HyperlinkButton(shareAction);
                 shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
-                shareButton.setOpaque(false);
                 shareButton.setVisible(false);
-                FontUtils.underline(shareButton);
                 shareButton.setFont(shareButtonFont);
                 shareButton.setForeground(shareForegroundColor);
                 shareButton.setRolloverForeground(shareMouseOverColor);
