@@ -26,6 +26,7 @@ import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 
 public class SetupPage2 extends WizardPage {
 
@@ -50,7 +51,7 @@ public class SetupPage2 extends WizardPage {
     private final JScrollPane treeTableScrollPane;
     private final JXButton addFolderButton;
         
-    public SetupPage2(SetupComponentDecorator decorator, LibraryData libraryData) {
+    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData) {
         this.libraryData = libraryData;
         
         setOpaque(false);
@@ -73,7 +74,7 @@ public class SetupPage2 extends WizardPage {
         addFolderButton = new JXButton(new AddDirectoryAction(SetupPage2.this));
         decorator.decoratePlainButton(addFolderButton);
         
-        treeTable = new LibraryManagerTreeTable(libraryData);
+        treeTable = new LibraryManagerTreeTable(iconManager, libraryData);
         initManualPanel();
         treeTableScrollPane = new JScrollPane(treeTable);
         

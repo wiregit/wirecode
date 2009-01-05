@@ -56,6 +56,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Stage;
 
 /**
@@ -85,11 +86,13 @@ public class AppFrame extends SingleFrameApplication {
     @Inject private Application application;
     @Inject private LimeWireSwingUI ui;
     @Inject private SetupWizard setupWizard;
-    @Inject private OptionsDialog options;
+    @Inject private Provider<OptionsDialog> options;
     @Inject private FramePositioner framePositioner;
     @Inject private TrayNotifier trayNotifier;
     @Inject private LimeMenuBar limeMenuBar;
     @Inject private DelayedShutdownHandler delayedShutdownHandler;
+    
+    private OptionsDialog lastOptionsDialog;
     
     /** Starts with the mock core. */
     public static void main(String[] args) {
@@ -221,10 +224,14 @@ public class AppFrame extends SingleFrameApplication {
     
     @EventSubscriber
     public void handleShowOptionsDialog(OptionsDisplayEvent event) {
-        if (!options.isVisible()) {
-            options.initOptions();
-            options.setLocationRelativeTo(GuiUtils.getMainFrame());
-            options.setVisible(true);
+        if(lastOptionsDialog == null) {
+            lastOptionsDialog = options.get();
+        }
+        
+        if (!lastOptionsDialog.isVisible()) {
+            lastOptionsDialog.initOptions();
+            lastOptionsDialog.setLocationRelativeTo(GuiUtils.getMainFrame());
+            lastOptionsDialog.setVisible(true);
         }
     }
     

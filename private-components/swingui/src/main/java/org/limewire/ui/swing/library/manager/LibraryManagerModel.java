@@ -9,7 +9,6 @@ import java.util.List;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
-import org.limewire.ui.swing.util.I18n;
 
 public class LibraryManagerModel extends AbstractTreeTableModel {
 
@@ -83,7 +82,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
             LibraryManagerItem item = (LibraryManagerItem) node;
             switch (column) {
                 case REMOVE_INDEX: return item;
-                case FOLDER_INDEX: return item.displayName();
+                case FOLDER_INDEX: return item;
             }
         }
         return null;
@@ -91,8 +90,8 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
     
     public String getColumnName(int column) {
         switch(column) {
-            case REMOVE_INDEX: return "";
-            case FOLDER_INDEX: return I18n.tr("Folder");
+            case REMOVE_INDEX: return null;
+            case FOLDER_INDEX: return null;
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

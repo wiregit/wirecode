@@ -39,6 +39,7 @@ import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.IconManager;
 
 import ca.odell.glazedlists.EventList;
 
@@ -50,17 +51,18 @@ import com.google.inject.Provider;
  */
 public class LibraryOptionPanel extends OptionPanel {
 
-    private LibraryManagerOptionPanel libraryManagerPanel;
-    
+    private final IconManager iconManager;    
+    private final LibraryManager libraryManager;
+    private final Provider<RemoteLibraryManager> remoteLibraries;
+    private final Provider<ShareListManager> shareListManager;
+
+    private LibraryManagerOptionPanel libraryManagerPanel;    
     private ShareCategoryPanel shareCategoryPanel;
-    
-    private LibraryManager libraryManager;
-    private Provider<RemoteLibraryManager> remoteLibraries;
-    private Provider<ShareListManager> shareListManager;
     
     @Inject
     public LibraryOptionPanel(LibraryManager libraryManager, Provider<RemoteLibraryManager> remoteLibraries, 
-            Provider<ShareListManager> shareListManager) {
+            Provider<ShareListManager> shareListManager, IconManager iconManager) {
+        this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.remoteLibraries = remoteLibraries;
         this.shareListManager = shareListManager;
@@ -212,7 +214,7 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         
         private void createComponents() {
-            treeTable = new LibraryManagerTreeTable(libraryData);
+            treeTable = new LibraryManagerTreeTable(iconManager, libraryData);
             addFolderButton = new JButton(new AddDirectoryAction(this));
             
             audioCheckBox = new JCheckBox(I18n.tr(Category.AUDIO.toString()));

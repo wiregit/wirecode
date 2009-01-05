@@ -6,16 +6,20 @@ import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.IconManager;
 
 import com.google.inject.Inject;
 
 public class SetupWizard {
     
+    private final IconManager iconManager;
     private Wizard wizard;
     
     @Inject
     public SetupWizard(SetupComponentDecoratorFactory decoratorFactory, 
+            IconManager iconManager,
             LibraryManager libraryManager){
+        this.iconManager = iconManager;
         
         if (shouldShowWizard()) {
             createWizard(decoratorFactory, libraryManager.getLibraryData());
@@ -51,7 +55,7 @@ public class SetupWizard {
             wizard.addPage(new UpgradePage1(decorator, libraryData));
         } 
         else if(needsPage2()){
-            wizard.addPage(new SetupPage2(decorator, libraryData));
+            wizard.addPage(new SetupPage2(decorator, iconManager, libraryData));
         }
     }
     

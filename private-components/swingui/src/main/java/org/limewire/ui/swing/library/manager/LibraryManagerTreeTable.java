@@ -6,19 +6,20 @@ import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
+import javax.swing.table.TableColumn;
 import javax.swing.tree.TreePath;
 
 import org.jdesktop.swingx.treetable.TreeTableModel;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.ui.swing.table.MouseableTreeTable;
+import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.FileUtils;
 
 public class LibraryManagerTreeTable extends MouseableTreeTable {
     
     private final LibraryData libraryData;
 
-    public LibraryManagerTreeTable(LibraryData libraryData) {
+    public LibraryManagerTreeTable(IconManager iconManager, LibraryData libraryData) {
         setTableHeader(null); // No table header for this table.
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setSelectionBackground(getBackground());
@@ -27,6 +28,10 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
         setCellSelectionEnabled(false);
         setRowSelectionAllowed(false);
         setColumnSelectionAllowed(false);
+        setTreeCellRenderer(new FolderRenderer(iconManager));
+        setLeafIcon(null);
+        setClosedIcon(null);
+        setOpenIcon(null);
         
         this.libraryData = libraryData;
     }
@@ -38,15 +43,14 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
     @Override
     public void setTreeTableModel(TreeTableModel model) {
         super.setTreeTableModel(model);
-
-        // all the nodes are always folders, set the leaf node to the folder icon
-        setLeafIcon(UIManager.getIcon("Tree.closedIcon"));
         
-        getColumn(LibraryManagerModel.REMOVE_INDEX).setCellEditor(new RemoveButtonEditor(this));
         RemoveButtonRenderer renderer = new RemoveButtonRenderer();
-        getColumn(LibraryManagerModel.REMOVE_INDEX).setCellRenderer(renderer);
-        getColumn(LibraryManagerModel.REMOVE_INDEX).setMaxWidth(renderer.getPreferredSize().width);
-        getColumn(LibraryManagerModel.REMOVE_INDEX).setMinWidth(renderer.getPreferredSize().width);
+        RemoveButtonEditor editor = new RemoveButtonEditor(this);
+        TableColumn removeColumn = getColumn(LibraryManagerModel.REMOVE_INDEX);        
+        removeColumn.setCellEditor(editor);
+        removeColumn.setCellRenderer(renderer);
+        removeColumn.setMaxWidth(renderer.getPreferredSize().width);
+        removeColumn.setMinWidth(renderer.getPreferredSize().width);
     }
 
     
