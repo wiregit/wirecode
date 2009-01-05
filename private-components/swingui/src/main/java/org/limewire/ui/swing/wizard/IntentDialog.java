@@ -87,8 +87,6 @@ public class IntentDialog extends LimeJDialog {
         agreeButton = new JButton();
         exitButton = new JButton();
         
-        setTextContents();
-        
         int indent = 50;
         panel.add(headingLabel, "gapleft 10, gaptop 15, wrap");
         panel.add(bodyLabel, "gapleft " + indent + ", gaptop 20, wrap");
@@ -109,6 +107,8 @@ public class IntentDialog extends LimeJDialog {
         JComboBox languageDropDown = createLanguageDropDown(normalFont);        
         langInnerPanel.add(languageDropDown);
         bottomPanel.add(langInnerPanel, BorderLayout.WEST);
+
+        setTextContents();
         
         contentPane.add(panel, BorderLayout.NORTH);
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
@@ -135,15 +135,22 @@ public class IntentDialog extends LimeJDialog {
         return agreed;
     }
     
-    
     private JComboBox createLanguageDropDown(Font normalFont) {
         final JComboBox languageDropDown = new JComboBox();
         Locale[] locales = LanguageUtils.getLocales(normalFont);
         languageDropDown.setRenderer(new LocaleRenderer());
         languageDropDown.setFont(normalFont);
         languageDropDown.setModel(new DefaultComboBoxModel(locales));
-        Locale locale = LanguageUtils.guessLocale();
-        languageDropDown.setSelectedItem(locale);
+        
+        // Attempt to guess the default locale and set accordingly
+        languageDropDown.setSelectedItem(LanguageUtils.guessBestAvailableLocale(locales));
+        
+        // Make sure the drop down and the set locale match.  This may cause the default OS
+        //  language to be overridden to English in the case of a bad guess.  This has always been
+        //  a problem but in this case at least it will be obvious that the users language is being
+        //  overridden.
+        LanguageUtils.setLocale((Locale)languageDropDown.getSelectedItem());
+                
         languageDropDown.addItemListener(new ItemListener() {
 
             @Override
@@ -156,7 +163,7 @@ public class IntentDialog extends LimeJDialog {
             }
             
         });
-        
+
         return languageDropDown;
     }
     

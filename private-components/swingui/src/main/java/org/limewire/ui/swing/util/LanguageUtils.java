@@ -204,6 +204,27 @@ public class LanguageUtils {
         return generic.length() == 0 || detailed.equals(generic);
     }
     
+    /**
+     * Uses the guess mechanism to attempt to guess the current locale.  The guess
+     *  is then compared to the given list of available languages and the closest
+     *  match is returned.  If no match is found english is defaulted since
+     *  english will always be available.
+     */
+    public static Locale guessBestAvailableLocale(Locale... locales) {
+        Locale guessLocale = guessLocale();
+        Locale bestLocale = Locale.ENGLISH;
+        int bestScore = Integer.MIN_VALUE;
+        
+        for ( Locale item : locales ) {
+            int checkScore = getMatchScore(guessLocale, item); 
+            if (checkScore >= 0 && checkScore > bestScore) {
+                bestLocale = item;
+                bestScore = checkScore; 
+            }
+        }
+        
+        return bestLocale;
+    }
     
     public static Locale guessLocale() {
         String[] language = guessLanguage();
