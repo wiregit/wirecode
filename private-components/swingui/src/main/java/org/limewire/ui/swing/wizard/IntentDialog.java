@@ -38,15 +38,14 @@ public class IntentDialog extends LimeJDialog {
     private final Font normalFont = new Font("Arial", Font.PLAIN, 14);
     
     
-    private final String title = I18n.tr("LimeWire 5 Alpha");
-    private final String heading  = " ";
+    private final String title = "LimeWire 5 Alpha";
     
-    private final String bodyText1 
-    = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
-    
-    private final String linkText = I18n.tr("Learn more");
-    
-    private final String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright infringement.");
+    private final JLabel headingLabel;
+    private final MultiLineLabel bodyLabel;
+    private final JLabel agreeLabel;
+    private final HyperlinkButton linkButton;
+    private final JButton agreeButton;
+    private final JButton exitButton;
     
     private final String learnMoreURL = "http://www.limewire.com/learnMore/intent";
     
@@ -58,20 +57,6 @@ public class IntentDialog extends LimeJDialog {
     };
     
     private boolean agreed = false;
-    
-    private final Action exitAction = new AbstractAction(I18n.tr("Exit")){
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            finish(false);
-        }
-    };
-    
-    private final Action agreeAction = new AbstractAction(I18n.tr("I Agree")){
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            finish(true);
-        }
-    };    
     
     public IntentDialog(){
         super();
@@ -92,17 +77,19 @@ public class IntentDialog extends LimeJDialog {
         JPanel panel = new JPanel(new MigLayout("nogrid, insets 0, gap 0"));
         panel.setOpaque(false);
         
-        JLabel headingLabel = new JLabel(heading);
+        headingLabel = new JLabel();
         headingLabel.setFont(headingFont);
-        JLabel agreeLabel = new MultiLineLabel(agreementText, 500);
+        agreeLabel = new MultiLineLabel("", 500);
         agreeLabel.setFont(normalFont);
-        HyperlinkButton linkButton = new HyperlinkButton(linkText, urlAction);
+        linkButton = new HyperlinkButton("", urlAction);
         linkButton.setFont(normalFont);
         linkButton.setForeground(new Color(0x2152a6));
-        MultiLineLabel bodyLabel = new MultiLineLabel(bodyText1, 500);        
+        bodyLabel = new MultiLineLabel("", 500);        
         bodyLabel.setFont(normalFont);
-        JButton agreeButton = new JButton(agreeAction);
-        JButton exitButton = new JButton(exitAction);
+        agreeButton = new JButton();
+        exitButton = new JButton();
+        
+        setTextContents();
         
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
@@ -147,7 +134,7 @@ public class IntentDialog extends LimeJDialog {
     }
     
     
-    private static JComboBox createLanguageDropDown(Font normalFont) {
+    private JComboBox createLanguageDropDown(Font normalFont) {
         final JComboBox languageDropDown = new JComboBox();
         Locale[] locales = LanguageUtils.getLocales(normalFont);
         languageDropDown.setRenderer(new LocaleRenderer());
@@ -162,6 +149,7 @@ public class IntentDialog extends LimeJDialog {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     Locale locale = (Locale) languageDropDown.getSelectedItem();
                     LanguageUtils.setLocale(locale);
+                    setTextContents();
                 }
             }
             
@@ -186,4 +174,35 @@ public class IntentDialog extends LimeJDialog {
         }
     }
 
+    
+    private void setTextContents() {
+
+        String heading  = " ";
+        String bodyText1
+        = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
+        String linkText = I18n.tr("Learn more");
+        String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright infringement.");
+        
+        
+        Action exitAction = new AbstractAction(I18n.tr("Exit")){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                finish(false);
+            }
+        };
+        
+        Action agreeAction = new AbstractAction(I18n.tr("I Agree")){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                finish(true);
+            }
+        };    
+        
+        headingLabel.setText(heading);
+        bodyLabel.setText(bodyText1);
+        linkButton.setText(linkText);
+        agreeLabel.setText(agreementText);
+        exitButton.setAction(exitAction);
+        agreeButton.setAction(agreeAction);
+    }
 }
