@@ -32,7 +32,8 @@ public class SystemOptionPanel extends OptionPanel {
     private final TrayNotifier trayNotifier;
     private FileAssociationPanel fileAssociationPanel;
     private StartupShutdownPanel startupShutdownPanel;
-    private UpdatesBugsPanel updatesBugsPanel;
+    private UpdatesPanel updatesPanel;
+    private BugsPanel bugsPanel;
 
     @Inject
     public SystemOptionPanel(TrayNotifier trayNotifier) {
@@ -43,7 +44,9 @@ public class SystemOptionPanel extends OptionPanel {
 
         add(getFileAssociationPanel(), "pushx, growx");
         add(getStartupShutdownPanel(), "pushx, growx");
-        add(getUpdatesBugsPanel(), "pushx, growx");
+        add(getUpdatesPanel(), "pushx, growx");
+        add(getBugsPanel(), "pushx, growx");
+
     }
 
     private OptionPanel getFileAssociationPanel() {
@@ -60,18 +63,27 @@ public class SystemOptionPanel extends OptionPanel {
         return startupShutdownPanel;
     }
 
-    private OptionPanel getUpdatesBugsPanel() {
-        if (updatesBugsPanel == null) {
-            updatesBugsPanel = new UpdatesBugsPanel();
+    private OptionPanel getUpdatesPanel() {
+        if (updatesPanel == null) {
+            updatesPanel = new UpdatesPanel();
         }
-        return updatesBugsPanel;
+        return updatesPanel;
     }
+
+    private OptionPanel getBugsPanel() {
+        if (bugsPanel == null) {
+            bugsPanel = new BugsPanel();
+        }
+        return bugsPanel;
+    }
+
 
     @Override
     boolean applyOptions() {
         boolean restart = getFileAssociationPanel().applyOptions();
         restart |= getStartupShutdownPanel().applyOptions();
-        restart |= getUpdatesBugsPanel().applyOptions();
+        restart |= getUpdatesPanel().applyOptions();
+        restart |= getBugsPanel().applyOptions();
 
         return restart;
     }
@@ -79,14 +91,16 @@ public class SystemOptionPanel extends OptionPanel {
     @Override
     boolean hasChanged() {
         return getFileAssociationPanel().hasChanged() || getStartupShutdownPanel().hasChanged()
-                || getUpdatesBugsPanel().hasChanged();
+                || getUpdatesPanel().hasChanged() || getBugsPanel().hasChanged();                
     }
 
     @Override
     public void initOptions() {
         getFileAssociationPanel().initOptions();
         getStartupShutdownPanel().initOptions();
-        getUpdatesBugsPanel().initOptions();
+        getUpdatesPanel().initOptions();
+        getBugsPanel().initOptions();
+
     }
 
     private class FileAssociationPanel extends OptionPanel {
@@ -292,35 +306,21 @@ public class SystemOptionPanel extends OptionPanel {
         }
     }
 
-    private class UpdatesBugsPanel extends OptionPanel {
+    private class UpdatesPanel extends OptionPanel {
 
         private JCheckBox betaCheckBox;
 
-        private JCheckBox bugCheckBox;
-
-        private JCheckBox bugMessageCheckBox;
-
-        public UpdatesBugsPanel() {
-            super(I18n.tr("Updates and Bugs"));
+        public UpdatesPanel() {
+            super(I18n.tr("Updates"));
 
             betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
             betaCheckBox.setContentAreaFilled(false);
-            bugCheckBox = new JCheckBox(I18n.tr("Report bugs to LimeWire"));
-            bugCheckBox.setContentAreaFilled(false);
-
-            bugMessageCheckBox = new JCheckBox(I18n.tr("Show me the bug report before sending it"));
-            bugMessageCheckBox.setContentAreaFilled(false);
 
             add(betaCheckBox, "split, wrap");
-            add(bugCheckBox, "split, wrap");
-            add(bugMessageCheckBox, "split, wrap");
         }
 
         @Override
         boolean applyOptions() {
-            applyOption(bugCheckBox, BugSettings.REPORT_BUGS);
-            applyOption(bugMessageCheckBox, BugSettings.SHOW_BUGS);
-            
             if(betaCheckBox.isSelected()) {
                 UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
             } else {
@@ -329,14 +329,10 @@ public class SystemOptionPanel extends OptionPanel {
             return false;
         }
 
-        private void applyOption(JCheckBox checkbox, BooleanSetting setting) {
-            setting.setValue(checkbox.isSelected());
-        }
-
         @Override
         boolean hasChanged() {
-            return hasChanged(bugCheckBox, BugSettings.REPORT_BUGS)
-                    || hasChanged(bugMessageCheckBox, BugSettings.SHOW_BUGS);
+            int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA : UpdateStyle.STYLE_MINOR;
+            return UpdateSettings.UPDATE_STYLE.getValue() == expectedUpdateStyle;
         }
 
         private boolean hasChanged(JCheckBox checkbox, BooleanSetting setting) {
@@ -346,12 +342,72 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             initOption(betaCheckBox, UpdateSettings.UPDATE_STYLE.getValue() == 0);
-            initOption(bugCheckBox, BugSettings.REPORT_BUGS.getValue());
-            initOption(bugMessageCheckBox, BugSettings.SHOW_BUGS.getValue());
         }
 
         private void initOption(JCheckBox checkBox, boolean value) {
             checkBox.setSelected(value);
+        }
+    }
+
+    private class BugsPanel extends OptionPanel {
+
+        private JRadioButton showBugsBeforeSending;
+        private JRadioButton alwaysSendBugs;
+        private JRadioButton neverSendBugs;
+
+
+        public BugsPanel() {
+            super(I18n.tr("Bugs"));
+            showBugsBeforeSending = new JRadioButton(I18n.tr("Let me know about bugs before sending them"));
+            showBugsBeforeSending.setContentAreaFilled(false);
+            alwaysSendBugs = new JRadioButton(I18n.tr("Always send bugs to Lime Wire"));
+            alwaysSendBugs.setContentAreaFilled(false);
+            neverSendBugs = new JRadioButton(I18n.tr("Never send bugs to Lime Wire"));
+            neverSendBugs.setContentAreaFilled(false);
+
+            ButtonGroup bugsButtonGroup = new ButtonGroup();
+            bugsButtonGroup.add(showBugsBeforeSending);
+            bugsButtonGroup.add(alwaysSendBugs);
+            bugsButtonGroup.add(neverSendBugs);
+            add(showBugsBeforeSending, "split, wrap");
+            add(alwaysSendBugs, "split, wrap");
+            add(neverSendBugs, "split, wrap");
+        }
+
+        @Override
+        boolean applyOptions() {
+            if (showBugsBeforeSending.isSelected()) {
+                BugSettings.SHOW_BUGS.setValue(true);
+                BugSettings.REPORT_BUGS.setValue(true);
+            } else if (alwaysSendBugs.isSelected()) {
+                BugSettings.SHOW_BUGS.setValue(false);
+                BugSettings.REPORT_BUGS.setValue(true);
+            } else {
+                BugSettings.SHOW_BUGS.setValue(false);
+                BugSettings.REPORT_BUGS.setValue(false);
+            }
+            return false;
+        }
+
+        @Override
+        boolean hasChanged() {
+            return hasChanged(alwaysSendBugs, BugSettings.REPORT_BUGS)
+                    || hasChanged(showBugsBeforeSending, BugSettings.SHOW_BUGS);
+        }
+
+        private boolean hasChanged(JRadioButton radioButton, BooleanSetting setting) {
+            return setting.getValue() != radioButton.isSelected();
+        }
+
+        @Override
+        public void initOptions() {
+            if (BugSettings.SHOW_BUGS.getValue()) {
+                showBugsBeforeSending.setSelected(true);
+            } else if (BugSettings.REPORT_BUGS.getValue()) {
+                alwaysSendBugs.setSelected(true);
+            } else {
+                neverSendBugs.setSelected(true);
+            }
         }
     }
 }
