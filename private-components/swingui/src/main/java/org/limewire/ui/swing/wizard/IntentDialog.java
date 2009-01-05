@@ -12,6 +12,7 @@ import java.awt.event.ItemListener;
 import java.util.Locale;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -37,7 +38,6 @@ public class IntentDialog extends LimeJDialog {
     private final Color backgroundColor = Color.WHITE;
     private final Font headingFont = new Font("Arial", Font.BOLD, 16);
     private final Font normalFont = new Font("Arial", Font.PLAIN, 14);
-    
     
     private final String title = "LimeWire 5 Alpha";
     
@@ -89,6 +89,12 @@ public class IntentDialog extends LimeJDialog {
         
         setTextContents();
         
+        int indent = 50;
+        panel.add(headingLabel, "gapleft 10, gaptop 15, wrap");
+        panel.add(bodyLabel, "gapleft " + indent + ", gaptop 20, wrap");
+        panel.add(linkButton, "gapleft " + indent +  ", gaptop 20, wrap");
+        panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 70, wrap");
+
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
         JPanel innerPanel = new JPanel(new FlowLayout());
@@ -97,14 +103,12 @@ public class IntentDialog extends LimeJDialog {
         innerPanel.add(exitButton);
         bottomPanel.add(innerPanel, BorderLayout.EAST);
         
-        int indent = 50;
-        panel.add(headingLabel, "gapleft 10, gaptop 15, wrap");
-        panel.add(bodyLabel, "gapleft " + indent + ", gaptop 20, wrap");
-        panel.add(linkButton, "gapleft " + indent +  ", gaptop 20, wrap");
-        panel.add(agreeLabel, "gapleft " + indent +  ", gaptop 70, wrap");
-        
+        JPanel langInnerPanel = new JPanel(new FlowLayout());
+        langInnerPanel.setOpaque(false);
+        langInnerPanel.setBorder(BorderFactory.createEmptyBorder(0,44,0,0));
         JComboBox languageDropDown = createLanguageDropDown(normalFont);        
-        panel.add(languageDropDown, "gapleft " + indent +  ", gaptop 70, wrap");
+        langInnerPanel.add(languageDropDown);
+        bottomPanel.add(langInnerPanel, BorderLayout.WEST);
         
         contentPane.add(panel, BorderLayout.NORTH);
         contentPane.add(bottomPanel, BorderLayout.SOUTH);
