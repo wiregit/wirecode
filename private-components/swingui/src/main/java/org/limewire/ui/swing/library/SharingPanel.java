@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
@@ -12,6 +14,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TooManyListenersException;
 
@@ -25,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.jxlayer.JXLayer;
@@ -44,7 +49,9 @@ import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
@@ -72,7 +79,6 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
-import net.miginfocom.swing.MigLayout;
 
 abstract class SharingPanel extends AbstractFileListPanel implements PropertyChangeListener {
     private final LibraryTableFactory tableFactory;
@@ -214,8 +220,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }   
     
     @Override
-    protected JComponent createCategoryButton(Action action, Category category) {
-        SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this);
+    @SuppressWarnings("unchecked")
+    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
+        SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this, new ShareAction(filteredAllFileList), new UnshareAction(filteredAllFileList));
         listeners.put(category, panel);
         addNavigation(panel.getButton());
         return panel;
@@ -358,55 +365,52 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Resource Color selectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
+        @Resource Color shareMouseOverColor;
+        @Resource Color shareForegroundColor;
+        @Resource Font  shareButtonFont;
         
         private JCheckBox checkBox;
         private JButton button;
-        private AbstractFileListPanel libraryPanel;
         
-        public SharingSelectionPanel(Action action, final Category category, AbstractFileListPanel library) {
-            super(new MigLayout("insets 0, fill"));
+        private JLabel shareLabel;
+        private HyperlinkButton shareButton;
+        private HyperlinkButton unshareButton;
+        
+        private AbstractFileListPanel libraryPanel;
+        private Category category;
+        
+        public SharingSelectionPanel(Action action, Category category, AbstractFileListPanel library, 
+                ShareAction shareAction, UnshareAction unshareAction) {
+            super(new MigLayout("insets 0, fill, hidemode 3"));
             
             this.libraryPanel = library;
+            this.category = category;
             
             GuiUtils.assignResources(this);     
-
-            checkBox = new JCheckBox();                
-            checkBox.setContentAreaFilled(false);
-            checkBox.setBorderPainted(false);
-            checkBox.setFocusPainted(false);
-            checkBox.setBorder(BorderFactory.createEmptyBorder(2,2,2,0));
-            checkBox.setOpaque(false);
-            
-            add(checkBox);
             
             setOpaque(false);
             
-            if(category != Category.AUDIO && category != Category.VIDEO && category != Category.IMAGE) {
-                checkBox.setVisible(false);
-            } else {
-                if(category == Category.AUDIO) {
-                    checkBox.setSelected(friendFileList.isAddNewAudioAlways());
-                } else if(category == Category.VIDEO) {
-                    checkBox.setSelected(friendFileList.isAddNewVideoAlways());
-                } else if(category == Category.IMAGE) {
-                    checkBox.setSelected(friendFileList.isAddNewImageAlways());
-                }
-                
-                checkBox.addItemListener(new ItemListener(){
-                    @Override
-                    public void itemStateChanged(ItemEvent e) {
-                        select(category);
-                        if(category == Category.AUDIO) {
-                            friendFileList.setAddNewAudioAlways(checkBox.isSelected());
-                        } else if(category == Category.VIDEO) {
-                            friendFileList.setAddNewVideoAlways(checkBox.isSelected());
-                        } else if(category == Category.IMAGE) {
-                            friendFileList.setAddNewImageAlways(checkBox.isSelected());
-                        }
-                    }
-                });
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+                createCheckBox(); 
+                add(checkBox);
+                LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
             }
 
+            createSelectionButton(action);
+            add(button, "gapleft 2, growx, span, wrap");
+            
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
+                createShareButtons(shareAction, unshareAction);
+                add(shareLabel, "gapleft 15, span 2, split");
+                add(shareButton, "split");
+                add(unshareButton);
+            }
+            
+
+          libraryPanel.selectFirst();
+        }
+        
+        private void createSelectionButton(Action action) {
             button = new JButton(action);           
             button.setContentAreaFilled(false);
             button.setBorderPainted(false);
@@ -421,9 +425,13 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                             setOpaque(true);
                             setBackground(selectedBackground);
                             button.setForeground(selectedTextColor);
+                            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue())
+                                setShareButtonVisible(true);
                         } else {
                             setOpaque(false);
                             button.setForeground(textColor);
+                            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue())
+                                setShareButtonVisible(false);
                         }
                         repaint();
                     } else if(evt.getPropertyName().equals("enabled")) {
@@ -437,7 +445,66 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                     }
                 }
             });
-            add(button, "growx");
+        }
+        
+        private void setShareButtonVisible(boolean value) {
+            if(shareLabel != null) {
+                shareLabel.setVisible(value);
+                shareButton.setVisible(value);
+                unshareButton.setVisible(value);
+            }
+        }
+        
+        private void createShareButtons(Action shareAction, Action unshareAction) {
+            shareLabel = new JLabel(I18n.tr("Share:"));
+            shareButton = new HyperlinkButton(shareAction);
+            unshareButton = new HyperlinkButton(unshareAction);
+
+            shareButton.setFont(shareButtonFont);
+            shareButton.setForeground(shareForegroundColor);
+            shareButton.setRolloverForeground(shareMouseOverColor);
+            
+            unshareButton.setFont(shareButtonFont);
+            unshareButton.setForeground(shareForegroundColor);
+            unshareButton.setRolloverForeground(shareMouseOverColor);
+            
+            boolean visible = LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() && category == Category.AUDIO;
+            shareLabel.setVisible(visible);
+            shareButton.setVisible(visible);
+            unshareButton.setVisible(visible);
+        }
+        
+        private void createCheckBox() {
+            checkBox = new JCheckBox();                
+            checkBox.setContentAreaFilled(false);
+            checkBox.setBorderPainted(false);
+            checkBox.setFocusPainted(false);
+            checkBox.setBorder(BorderFactory.createEmptyBorder(2,2,2,0));
+            checkBox.setOpaque(false);
+            checkBox.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
+
+
+            if(category == Category.AUDIO) {
+                checkBox.setSelected(friendFileList.isAddNewAudioAlways());
+            } else if(category == Category.VIDEO) {
+                checkBox.setSelected(friendFileList.isAddNewVideoAlways());
+            } else if(category == Category.IMAGE) {
+                checkBox.setSelected(friendFileList.isAddNewImageAlways());
+            }
+            
+            checkBox.addItemListener(new ItemListener(){
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    select(category);
+                    if(category == Category.AUDIO) {
+                        friendFileList.setAddNewAudioAlways(checkBox.isSelected());
+                    } else if(category == Category.VIDEO) {
+                        friendFileList.setAddNewVideoAlways(checkBox.isSelected());
+                    } else if(category == Category.IMAGE) {
+                        friendFileList.setAddNewImageAlways(checkBox.isSelected());
+                    }
+                }
+            });
         }
         
         public void setSelect(boolean value) {
@@ -450,14 +517,31 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
 
         @Override
         public void dispose() {
-            // TODO Auto-generated method stub
-            
+            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE)
+                LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
         }
 
         @Override
         public void settingChanged(SettingEvent evt) {
-            // TODO Auto-generated method stub
-            
+            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
+                if(checkBox != null) {
+                    checkBox.setVisible(false);
+                    checkBox.setSelected(false);
+                }
+
+                if(button != null && 
+                   button.getAction() != null && 
+                   button.getAction().getValue(Action.SELECTED_KEY) != null && 
+                   button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                    setShareButtonVisible(true);
+                }
+            } else {
+                if(checkBox != null) {
+                    checkBox.setVisible(true);
+                }
+                setShareButtonVisible(false);
+            }
+            revalidate();
         }
     }    
     
@@ -552,6 +636,60 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 return -1;
             else
                 return 1;
+        }
+    }
+    
+    /**
+     * Shares all the files currently in a category, with a friend
+     */
+    private class ShareAction<T extends FileItem> extends AbstractAction {
+        FilterList<T> filteredAllFileList;
+        
+        public ShareAction(FilterList<T> filteredAllFileList) {
+            this.filteredAllFileList = filteredAllFileList;
+            
+            putValue(Action.NAME, I18n.tr("all"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            //TODO: move to background executor
+            filteredAllFileList.getReadWriteLock().readLock().lock();
+            ListIterator<T> iter = filteredAllFileList.listIterator();
+            while(iter.hasNext()) {
+                friendFileList.addFile(((LocalFileItem)iter.next()).getFile());
+            }
+            filteredAllFileList.getReadWriteLock().readLock().unlock();
+            
+            SharingPanel.this.repaint();
+        }
+    }
+    
+    /**
+     * Unshares all the files currently in a category, with a friend
+     */
+    private class UnshareAction<T extends FileItem> extends AbstractAction {
+        FilterList<T> filteredAllFileList;
+        
+        public UnshareAction(FilterList<T> filteredAllFileList) {
+            this.filteredAllFileList = filteredAllFileList;
+            
+            putValue(Action.NAME, I18n.tr("none"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
+        }
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {            
+            //TODO: move to background executor
+            filteredAllFileList.getReadWriteLock().readLock().lock();
+            ListIterator<T> iter = filteredAllFileList.listIterator();
+            while(iter.hasNext()) {
+                friendFileList.removeFile(((LocalFileItem)iter.next()).getFile());
+            }
+            filteredAllFileList.getReadWriteLock().readLock().unlock();
+            
+            SharingPanel.this.repaint();
         }
     }
 }

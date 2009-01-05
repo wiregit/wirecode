@@ -29,6 +29,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
@@ -165,7 +166,7 @@ public class MyLibraryPanel extends LibraryPanel {
     }
     
     @Override
-    protected JComponent createCategoryButton(Action action, Category category) {
+    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
         MySelectionPanel component = new MySelectionPanel(action, new ShareCategoryAction(category), category, this);
         addNavigation(component.getButton());
         return component;

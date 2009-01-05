@@ -177,7 +177,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         categoryOrder.add(category);
         
         Action action = new SelectionAction(icon, category, item, callback);
-        JComponent button = createCategoryButton(action, category);
+        JComponent button = createCategoryButton(action, category, filteredAllFileList);
         
         ((ButtonItemImpl) item).setAction(action);
         
@@ -206,7 +206,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
     
     
     /** Creates the category button & adds navigation listeners to it. */
-    protected JComponent createCategoryButton(Action action, Category category) {
+    protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
         SelectionPanel component = new SelectionPanel(action, this);
         addNavigation(component.getButton());
         return component;
