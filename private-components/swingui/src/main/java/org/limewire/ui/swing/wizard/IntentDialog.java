@@ -29,6 +29,7 @@ import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.SystemUtils;
 
 public class IntentDialog extends LimeJDialog {
@@ -61,11 +62,8 @@ public class IntentDialog extends LimeJDialog {
     public IntentDialog(){
         super();
         
-        setMinimumSize(new Dimension(590,400));
-        setMaximumSize(new Dimension(590,400));
-        setPreferredSize(new Dimension(590,400));
-        setSize(new Dimension(590,400));
-        
+        ResizeUtils.forceSize(this, new Dimension(590,400));
+                
         setTitle(title);
         setModal(true);
         setResizable(false);
@@ -166,8 +164,6 @@ public class IntentDialog extends LimeJDialog {
             if (value instanceof Locale) {
                 Locale locale = (Locale) value;
                 setText(locale.getDisplayName(locale));
-            } else {
-                setIcon(null);
             }
             
             return this;
