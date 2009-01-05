@@ -51,7 +51,7 @@ import ca.odell.glazedlists.swing.EventTableModel;
  * be files in your own library or remote files in someone else's library. 
  */
 public class LibraryTable<T extends FileItem> extends MouseableTable
-    implements Sharable<File>, Disposable, LibraryOperable {
+    implements Sharable<File>, Disposable, LibraryOperable<T> {
     
     private final LibraryTableFormat<T> format;
     private final TableColors tableColors;
@@ -372,4 +372,12 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         }
         return null;
     }
+    
+    public void selectAll() {
+        if (getRowCount() > 0) {
+            getSelectionModel().setSelectionInterval(0, getRowCount() - 1);
+            System.out.println("getSelectionModel().setSelectionInterval(" + 0+ "," + (getRowCount() - 1));
+        }
+    }
+
 }

@@ -122,7 +122,7 @@ public class MouseableTable extends StripedJXTable {
 
 	
 	protected void initialize() {	
-		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);        
+		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);        
 		setCellSelectionEnabled(false);
 		setRowSelectionAllowed(true);
 	    setTableHeaderRenderer();
@@ -235,6 +235,29 @@ public class MouseableTable extends StripedJXTable {
             removeEditor();
         }
     }
+	
+	public void setStripeHighlighterEnabled(boolean striped){
+	    if (striped) {
+            // HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
+            setHighlighters(
+                    colors.getEvenHighLighter(),
+                    colors.getOddHighLighter(),
+                    new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,
+                            colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+
+        } else {
+            setHighlighters(
+                    new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
+                            colors.evenForeground, colors.selectionColor,
+                            colors.selectionForeground),
+                    new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
+                            colors.evenForeground, colors.selectionColor,
+                            colors.selectionForeground),
+                    new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,
+                            colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+
+        }
+	}
 
     // gets rid of default editor color so that editors are colored by highlighters and selection color is shown
     @Override

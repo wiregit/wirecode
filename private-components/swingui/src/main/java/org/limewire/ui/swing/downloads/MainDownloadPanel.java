@@ -150,7 +150,7 @@ public class MainDownloadPanel extends JPanel {
         this.initHeader();
 		add(settingsPanel, BorderLayout.NORTH);
 		
-		cardLayout.show(cardPanel, NO_CATEGORY);
+		cardLayout.show(cardPanel, CATEGORY);
 		
 		EventList<DownloadItem> pausableList = GlazedListsFactory.filterList(downloadMediator.getDownloadList(), 
 		        new PausableMatcher());

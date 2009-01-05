@@ -11,6 +11,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TooManyListenersException;
 
@@ -71,10 +72,11 @@ public class MyLibraryPanel extends LibraryPanel {
     private final CategoryIconManager categoryIconManager;
     private final PlayerPanel playerPanel;
     private final LibraryManager libraryManager;
-    private final Map<Category, LibraryOperable> selectableMap;
-    private final ShareWidgetFactory shareFactory;
-    
+    private final Map<Category, LibraryOperable<LocalFileItem>> selectableMap;
+    private final ShareWidgetFactory shareFactory;    
+   
     private ShareWidget<Category> categoryShareWidget = null;
+    private ShareWidget<LocalFileItem[]> multiShareWidget = null;
     
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -95,7 +97,7 @@ public class MyLibraryPanel extends LibraryPanel {
         this.categoryIconManager = categoryIconManager;    
         this.shareFactory = shareFactory;
         this.playerPanel = player;
-        this.selectableMap = new EnumMap<Category, LibraryOperable>(Category.class);
+        this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
 
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
@@ -104,6 +106,7 @@ public class MyLibraryPanel extends LibraryPanel {
         getHeaderPanel().setText(I18n.tr("My Library"));
         
         categoryShareWidget = shareFactory.createCategoryShareWidget();
+        multiShareWidget = shareFactory.createMultiFileShareWidget();
         createMyCategories(libraryManager.getLibraryManagedList());
         selectFirst();
         
@@ -182,6 +185,7 @@ public class MyLibraryPanel extends LibraryPanel {
         super.dispose();
         
         categoryShareWidget.dispose();
+        multiShareWidget.dispose();
     }
     
     private static class MyLibraryDoubleClickHandler implements TableDoubleClickHandler{
@@ -228,9 +232,11 @@ public class MyLibraryPanel extends LibraryPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
-                //TODO: when snapshot sharing is enabled, this action should bring
-                //     up the share widget to share all of the files in this category.
-                //     New files added after this action will not be automatically added
+                SelectAllable<LocalFileItem> selectAllable = selectableMap.get(category);
+                selectAllable.selectAll();
+                List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
+                multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                multiShareWidget.show(null);
             } else {
                 categoryShareWidget.setShareable(category);
                 categoryShareWidget.show((JComponent)e.getSource());
