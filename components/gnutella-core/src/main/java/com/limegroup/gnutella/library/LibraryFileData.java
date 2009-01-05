@@ -339,6 +339,19 @@ class LibraryFileData extends AbstractSettingsGroup {
             lock.readLock().unlock();
         }
     }
+
+    public Collection<File> getDirectoriesWithImportedFiles() {
+        Set<File> directories = new HashSet<File>();
+        lock.readLock().lock();
+        try {
+            for(File file : libraryShareData.keySet()) {
+                directories.add(file.getParentFile());
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+        return directories;
+    }    
     
     /** Returns all categories that should be managed. */
     public Collection<Category> getManagedCategories() {

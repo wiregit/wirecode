@@ -136,7 +136,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         
         assertLoads(fileList);
         assertEquals(1, fileList.size());
-        assertEquals(f1, fileList.getFileDescForIndex(0).getFile());       
+        assertEquals(f1, fileList.getFileDescForIndex(0).getFile());
     }
 
     public void testRemovingOneFile() throws Exception {
@@ -322,6 +322,49 @@ public class ManagedFileListImplTest extends LimeTestCase {
         
         assertLoads(fileList);
         assertContainsFiles(fileList, f1, f2, f4, f6, f7);
+    }
+    
+    public void testRemoveFolder() throws Exception {
+        f1 = createNewNamedTestFile(1,  "f1", "tmp", _scratchDir);
+        f2 = createNewNamedTestFile(3,  "f2", "tmp", _scratchDir);
+        f3 = createNewNamedTestFile(11, "f3", "tmp2", _scratchDir);
+        
+        File dir1 = new File(_scratchDir, "sub1");        
+        File dir2 = new File(_scratchDir, "sub2");
+        dir1.mkdirs();
+        dir2.mkdirs();
+        
+        f4 = createNewNamedTestFile(15, "f4", "tmp", dir1);
+        f5 = createNewNamedTestFile(15, "f5", "tmp2", dir2);
+        f8 = createNewNamedTestFile(15, "f8", "tmp2", dir1);
+
+        fileList.setManagedExtensions(Collections.singletonList("tmp"));
+        
+        f6 = createNewNamedTestFile(15, "f6", "tmp", _scratchDir);
+        f7 = createNewNamedTestFile(15, "f7", "tmp2", _scratchDir);
+        assertAdds(fileList, f6, f7);
+        fileList.removeFolder(_scratchDir);
+        assertContainsFiles(fileList);
+        assertAdds(fileList, f6, f7);
+        
+        assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(fileList, f1, f2, f4, f6, f7);
+        assertFalse(fileList.contains(f3));
+        fileList.removeFolder(_scratchDir);
+        assertContainsFiles(fileList);
+        
+        assertLoads(fileList);
+        assertContainsFiles(fileList);
+        
+        // Test subdirs too
+        assertAddsFolder(fileList, _scratchDir);
+        assertContainsFiles(fileList, f1, f2, f4, f6);
+        assertAdds(fileList, f8);
+        fileList.removeFolder(dir1);
+        assertContainsFiles(fileList, f1, f2, f6);
+        
+        assertLoads(fileList);
+        assertContainsFiles(fileList, f1, f2, f6);        
     }
     
     public void testChangeExtensions() throws Exception {
@@ -544,6 +587,65 @@ public class ManagedFileListImplTest extends LimeTestCase {
         fdList = assertAddsFolder(fileList, _scratchDir);
         assertContainsFiles(fdList, f2);
         assertContainsFiles(fileList, f1, f2, f3);
+    }
+    
+    public void testGetDirectoriesWithImportedFiles() throws Exception {
+        f1 = createNewNamedTestFile(1,  "f1", "tmp", _scratchDir);
+        f2 = createNewNamedTestFile(3,  "f2", "tmp", _scratchDir);
+        f3 = createNewNamedTestFile(11, "f3", "tmp2", _scratchDir);
+        
+        File dir1 = new File(_scratchDir, "sub1");        
+        File dir2 = new File(_scratchDir, "sub2");
+        dir1.mkdirs();
+        dir2.mkdirs();
+        
+        f4 = createNewNamedTestFile(15, "f4", "tmp", dir1);
+        f5 = createNewNamedTestFile(15, "f5", "tmp2", dir2);
+        f8 = createNewNamedTestFile(15, "f8", "tmp2", dir1);
+
+        fileList.setManagedExtensions(Collections.singletonList("tmp"));
+        
+        f6 = createNewNamedTestFile(15, "f6", "tmp", _scratchDir);
+        f7 = createNewNamedTestFile(15, "f7", "tmp2", _scratchDir);
+        
+        // assert specific added files show as import
+        assertAdds(fileList, f6, f7);
+        assertEquals(fileList.getDirectoriesWithImportedFiles(), Collections.singleton(_scratchDir));
+        
+        // after folder is removed, no imports.
+        fileList.removeFolder(_scratchDir);
+        assertContainsFiles(fileList);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());
+        
+        // add specific files, then add containing dir.  shouldn't be imported anymore.
+        assertAdds(fileList, f6, f7);
+        assertEquals(fileList.getDirectoriesWithImportedFiles(), Collections.singleton(_scratchDir));
+        assertAddsFolder(fileList, _scratchDir);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());
+        
+        // rm containing dir, no imported files.
+        fileList.removeFolder(_scratchDir);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());
+        
+        // same after reload.
+        assertLoads(fileList);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());        
+        
+        // assert specific file in managed dir doesn't make it imported. 
+        assertAddsFolder(fileList, _scratchDir);
+        assertNull(fileList.getFileDesc(f8));
+        assertAdds(fileList, f8);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());
+        
+        // assert if subfolder is excluded but has imported file, it's listed.
+        fileList.removeFolder(dir1);
+        assertEmpty(fileList.getDirectoriesWithImportedFiles());
+        assertAdds(fileList, f4);
+        assertEquals(fileList.getDirectoriesWithImportedFiles(), Collections.singleton(dir1));
+        
+        // assert after reload it still works
+        assertLoads(fileList);
+        assertEquals(fileList.getDirectoriesWithImportedFiles(), Collections.singleton(dir1));        
     }
     
     // TODO: Test that adding folders / setting manageable folders / changing extensions

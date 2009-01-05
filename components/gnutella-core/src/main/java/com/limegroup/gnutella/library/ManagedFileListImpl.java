@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -155,7 +156,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     private final Set<String> extensions;
     
     /**
-     * A Set of managed directories that are completely shared.  Files in these
+     * A Set of directories that are completely managed.  Files in these
      * directories are managed by default and will be managed unless the File is
      * listed in the set of files not to share.
      */
@@ -354,6 +355,49 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 return setManagedOptionsImpl(startRevision);                
             }
         });
+    }
+    
+    @Override
+    public void removeFolder(File folder) {
+        folder = FileUtils.canonicalize(folder);
+        
+        boolean managed;
+        List<FileDesc> removedFds = Collections.emptyList();
+        rwLock.writeLock().lock();
+        try {
+            managed = managedDirectories.contains(folder);
+            if(!managed) {
+                List<String> emptyExtensionList = Collections.emptyList();
+                removedFds = removeFilesInDirectoriesOrWithExtensions(Collections.singletonList(folder), emptyExtensionList);
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+        
+        // If we were able to remove above, fire the events.
+        for(FileDesc fd : removedFds) {
+            dispatch(new FileListChangedEvent(ManagedFileListImpl.this, FileListChangedEvent.Type.REMOVED, fd));
+        }
+        
+        if(managed) {
+            // If it was managed, we shouldn't have tried to remove.
+            assert removedFds.size() == 0;
+            LibraryFileData libraryData = getLibraryData();
+            Collection<File> manage = libraryData.getDirectoriesToManageRecursively();
+            Collection<File> exclude = libraryData.getDirectoriesToExcludeFromManaging();
+            Collection<Category> categories = libraryData.getManagedCategories();
+            if(manage.contains(folder)) {
+                manage.remove(folder);
+            } else {
+                exclude.add(folder);
+            }
+            try {
+                setManagedOptions(manage, exclude, categories).get();
+            } catch (InterruptedException e) {
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
     
     private List<ListeningFuture<FileDesc>> setManagedOptionsImpl(int startRevision) {
@@ -628,6 +672,18 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     @Override
     public List<File> getDirectoriesToManageRecursively() {
         return getLibraryData().getDirectoriesToManageRecursively();
+    }
+    
+    @Override
+    public Collection<File> getDirectoriesWithImportedFiles() {
+        Collection<File> directories = getLibraryData().getDirectoriesWithImportedFiles();
+        rwLock.readLock().lock();
+        try {
+            directories.removeAll(managedDirectories);
+        } finally {
+            rwLock.readLock().unlock();
+        }
+        return directories;
     }
     
     @Override

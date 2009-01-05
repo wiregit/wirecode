@@ -90,6 +90,11 @@ class LibraryManagerImpl implements LibraryManager {
         public boolean isDirectoryExcluded(File folder) {
             return fileList.isDirectoryExcluded(folder);
         }
+        
+        @Override
+        public Collection<File> getDirectoriesWithImportedFiles() {
+            return fileList.getDirectoriesWithImportedFiles();
+        }
 
         @Override
         public List<File> getDirectoriesToManageRecursively() {

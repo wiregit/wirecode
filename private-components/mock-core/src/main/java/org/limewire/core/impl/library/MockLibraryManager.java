@@ -3,6 +3,7 @@ package org.limewire.core.impl.library;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -154,6 +155,11 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
     }
     
     private class LibraryDataAdapter implements LibraryData {
+        
+        @Override
+        public List<File> getDirectoriesWithImportedFiles() {
+            return Collections.emptyList();
+        }
         
         @Override
         public boolean isFileManageable(File f) {
