@@ -8,8 +8,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.GradientPaint;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -39,6 +37,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.JTextComponent;
@@ -185,13 +185,9 @@ public class ConversationPane extends JPanel implements Displayable {
         conversationScroll.setColumnHeaderView(closeConversationButtonPanel);
         editor.setBorder(BorderFactory.createEmptyBorder(PADDING, PADDING, PADDING, PADDING));
         
-        JPanel chatWrapper = new JPanel(new GridBagLayout());
+        JPanel chatWrapper = new JPanel(new BorderLayout());
         chatWrapper.setBackground(BACKGROUND_COLOR);
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.fill = GridBagConstraints.BOTH;
-        chatWrapper.add(conversationScroll,constraints);
+        chatWrapper.add(conversationScroll);
 
         add(chatWrapper, BorderLayout.CENTER);
 
@@ -370,11 +366,15 @@ public class ConversationPane extends JPanel implements Displayable {
         downloadlink.setFont(linkFont);
         downloadlink.setForeground(linkColor);
         JXPanel toolbar = new JXPanel(new MigLayout("insets 0", "push[]10[]5", "0[22px]0"));
+        Border insideBorder = BorderFactory.createEmptyBorder(0, -1, 0, -1);
+        Border outsideBorder = BorderFactory.createLineBorder(toolbarBorderColor, 1);
+        toolbar.setBorder(new CompoundBorder(insideBorder, outsideBorder));
         RectanglePainter painter = new RectanglePainter();
         painter.setBorderPaint(toolbarBorderColor);
-        painter.setBorderWidth(1.0f);
+        painter.setBorderWidth(0.0f);
         painter.setFillPaint(new GradientPaint(50.0f, 0.0f, toolbarTopColor, 50.0f, 11.0f, toolbarBottomColor));
         toolbar.setBackgroundPainter(painter);
+        toolbar.setPaintBorderInsets(false);
         toolbar.add(downloadlink);
         sharelink = new JXHyperlink(new ShareAction());
         sharelink.setFont(linkFont);

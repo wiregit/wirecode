@@ -114,7 +114,6 @@ public class ChatFriendListPane extends JPanel {
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
     private Action minimizeAction;
-    @Resource(key="ChatFriendList.rightEdgeBorderColor") private Color rightBorderColor;
     @Resource(key="ChatFriendList.conversationsSeparatorColor") private Color conversationsSeparatorColor;
     @Resource(key="ChatFriendList.friendColor") private Color friendColor;
     @Resource(key="ChatFriendList.friendFont") private Font friendFont;
@@ -139,8 +138,6 @@ public class ChatFriendListPane extends JPanel {
         friendsTable = createFriendsTable(sortedFriends);
 
         addPopupMenus(friendsTable);
-        
-        setBorder(new DropShadowBorder(rightBorderColor, 1, 0f, 0, false, false, false, true));
         
         scrollPane = new JScrollPane(friendsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane);
