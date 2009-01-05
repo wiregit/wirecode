@@ -353,7 +353,7 @@ public class LimeComboBox extends JXButton {
     }
 
     private void createPopupMenu() {
-        menu = new JPopupMenu();
+        menu = new JPopupMenu();        
         initMenu();
     }
     
@@ -421,71 +421,85 @@ public class LimeComboBox extends JXButton {
     }
     
     private void updateMenu() {
-        if (!customMenu && menuDirty) {
-            menuDirty = false;
-            menu.removeAll();
-            ActionListener actionListener = new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    ActionLabel label = (ActionLabel)e.getSource();
-                    Action action = label.getAction();
-                    selectedAction = action;
-                    // Fire the parent listeners
-                    for (SelectionListener listener : selectionListeners) {
-                        listener.selectionChanged(action);
-                    }
-                    repaint();
+        // If custom or not dirty, do nothing.
+        if(customMenu || !menuDirty) {
+            return;
+        }
+        
+        // otherwise, reset up the menu.
+        menuDirty = false;
+        menu.removeAll();
+        ActionListener actionListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ActionLabel label = (ActionLabel)e.getSource();
+                Action action = label.getAction();
+                selectedAction = action;
+                // Fire the parent listeners
+                for (SelectionListener listener : selectionListeners) {
+                    listener.selectionChanged(action);
                 }
-            };
-            
-            // This is a workaround for not using JMenuItem -- it mimicks the feel
-            // without requiring odd spacing.
-            MouseListener mouseListener = new MouseAdapter() {
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    ActionLabel label = (ActionLabel)e.getSource();
-                    ((JComponent)label.getParent()).setOpaque(true);
-                    label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
-                    label.getParent().repaint();
-                }
-                
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    ActionLabel label = (ActionLabel)e.getSource();
-                    ((JComponent)label.getParent()).setOpaque(false);
-                    label.setForeground(UIManager.getColor("MenuItem.foreground"));
-                    label.getParent().repaint();
-                }
-            };
-            
-            Icon emptyIcon = null; 
-            for(Action action : actions) {
-                if(action.getValue(Action.SMALL_ICON) != null) {
-                    emptyIcon = new EmptyIcon(16, 16);
-                    break;
-                }
+                repaint();
+                menu.setVisible(false);
+            }
+        };
+        
+        // This is a workaround for not using JMenuItem -- it mimicks the feel
+        // without requiring odd spacing.
+        MouseListener mouseListener = new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                ActionLabel label = (ActionLabel)e.getSource();
+                ((JComponent)label.getParent()).setOpaque(true);
+                label.setForeground(UIManager.getColor("MenuItem.selectionForeground"));
+                label.getParent().repaint();
             }
             
-            for (Action action : actions) {
-                // We create the label ourselves (instead of using JMenuItem),
-                // because JMenuItem adds lots of bulky insets.
-                JXPanel panel = new JXPanel(new VerticalLayout());
-                panel.setOpaque(false);
-                panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
-                ActionLabel menuItem = new ActionLabel(action, false);
-                if(menuItem.getIcon() == null) {
-                    menuItem.setIcon(emptyIcon);
-                }
-                menuItem.addMouseListener(mouseListener);
-                decorateMenuComponent(menuItem);
-                menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
-                // Add a selection listener, if selection can be performed. 
-                if (getText() == null) {
-                    menuItem.addActionListener(actionListener);
-                }
-                panel.add(menuItem);
-                menu.add(panel);
+            @Override
+            public void mouseExited(MouseEvent e) {
+                paintNormal(e.getSource());
             }
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                paintNormal(e.getSource());
+            }
+            
+            private void paintNormal(Object source) {
+                ActionLabel label = (ActionLabel)source;
+                ((JComponent)label.getParent()).setOpaque(false);
+                label.setForeground(UIManager.getColor("MenuItem.foreground"));
+                label.getParent().repaint();
+            }
+        };
+        
+        Icon emptyIcon = null; 
+        for(Action action : actions) {
+            if(action.getValue(Action.SMALL_ICON) != null) {
+                emptyIcon = new EmptyIcon(16, 16);
+                break;
+            }
+        }
+        
+        for (Action action : actions) {
+            // We create the label ourselves (instead of using JMenuItem),
+            // because JMenuItem adds lots of bulky insets.
+            JXPanel panel = new JXPanel(new VerticalLayout());
+            panel.setOpaque(false);
+            panel.setBackground(UIManager.getColor("MenuItem.selectionBackground"));                
+            ActionLabel menuItem = new ActionLabel(action, false);
+            if(menuItem.getIcon() == null) {
+                menuItem.setIcon(emptyIcon);
+            }
+            menuItem.addMouseListener(mouseListener);
+            decorateMenuComponent(menuItem);
+            menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
+            // Add a selection listener, if selection can be performed. 
+            if (getText() == null) {
+                menuItem.addActionListener(actionListener);
+            }
+            panel.add(menuItem);
+            menu.add(panel);
         }
     }
     
