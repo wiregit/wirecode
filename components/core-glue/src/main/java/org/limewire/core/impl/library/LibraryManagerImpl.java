@@ -72,6 +72,13 @@ class LibraryManagerImpl implements LibraryManager {
         }
         
         @Override
+        public void removeFolders(Collection<File> folders) {
+            for(File folder : folders) {
+                fileList.removeFolder(folder);
+            }
+        }
+        
+        @Override
         public Collection<Category> getManagedCategories() {
             return fileList.getManagedCategories();
         }

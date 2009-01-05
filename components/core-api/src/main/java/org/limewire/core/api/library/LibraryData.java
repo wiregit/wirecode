@@ -65,6 +65,12 @@ public interface LibraryData {
     void setManagedOptions(Collection<File> recursiveFoldersToManage, 
             Collection<File> foldersToExclude,
             Collection<Category> managedCategories);
+    
+    /**
+     * Removes a bunch of folders from being managed, as well as removing any
+     * files within them from being managed.
+     */
+    void removeFolders(Collection<File> folders);
 
     /** Returns true if this file is potentially manageable. */
     boolean isFileManageable(File f);

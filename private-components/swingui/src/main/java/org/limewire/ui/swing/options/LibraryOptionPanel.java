@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -32,10 +33,12 @@ import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.FocusJOptionPane;
+import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.library.manager.LibraryManagerItemImpl;
 import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
+import org.limewire.ui.swing.library.manager.NoChildrenLibraryManagerItem;
 import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
@@ -47,9 +50,7 @@ import ca.odell.glazedlists.EventList;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-/**
- * Library Option View
- */
+/** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
 
     private final IconManager iconManager;    
@@ -57,6 +58,7 @@ public class LibraryOptionPanel extends OptionPanel {
     private final Provider<RemoteLibraryManager> remoteLibraries;
     private final Provider<ShareListManager> shareListManager;
 
+    private ManualImportPanel manualImportPanel;
     private LibraryManagerOptionPanel libraryManagerPanel;    
     private ShareCategoryPanel shareCategoryPanel;
     
@@ -68,9 +70,10 @@ public class LibraryOptionPanel extends OptionPanel {
         this.remoteLibraries = remoteLibraries;
         this.shareListManager = shareListManager;
         
-        setLayout(new MigLayout("insets 15 15 15 15, fillx, wrap", "", ""));
+        setLayout(new MigLayout("insets 15, fillx, wrap", "", ""));
         
         add(getLibraryManagerPanel(), "pushx, growx");
+        add(getManualImportPanel(), "pushx, growx, hidemode 2");
         add(getShareCategoryPanel(), "pushx, growx");
     }
     
@@ -87,23 +90,33 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         return shareCategoryPanel;
     }
+    
+    private ManualImportPanel getManualImportPanel() {
+        if(manualImportPanel == null) {
+            manualImportPanel = new ManualImportPanel(libraryManager.getLibraryData());
+        }
+        return manualImportPanel;
+    }
 
     @Override
     boolean applyOptions() {
         return getLibraryManagerPanel().applyOptions() ||
-               getShareCategoryPanel().applyOptions();
+               getShareCategoryPanel().applyOptions() ||
+               getManualImportPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
         return getLibraryManagerPanel().hasChanged() ||
-               getShareCategoryPanel().hasChanged();
+               getShareCategoryPanel().hasChanged() ||
+               getManualImportPanel().hasChanged();
     }
 
     @Override
     public void initOptions() {
         getLibraryManagerPanel().initOptions();
         getShareCategoryPanel().initOptions();
+        getManualImportPanel().initOptions();
     }
     
     
@@ -197,21 +210,19 @@ public class LibraryOptionPanel extends OptionPanel {
         public LibraryManagerOptionPanel(LibraryData libraryData) {
             this.libraryData = libraryData;
             
-            setLayout(new MigLayout("", "[300!][grow]", ""));
+            setLayout(new MigLayout("insets 0, gap 0, fill"));
             
             setOpaque(false);
             
             createComponents();
             
-            add(new JLabel(I18n.tr("LimeWire will automatically scan the folders below")), "span 2, gapbottom 10, wrap");
+            add(new JLabel(I18n.tr("LimeWire will watch the following folders...")), "gapbottom 5, wrap");
         
-            add(new JScrollPane(treeTable), "span 2, growx, wrap");
-            add(addFolderButton, "skip 1, alignx right, wrap");
-            
-            add(new JLabel(I18n.tr("and add the following types of files to My Library:")), "span 2, wrap");
-            add(getCheckBoxPanel(), "gapbottom 20, span 2, wrap");
-            
-            add(new MultiLineLabel(I18n.tr("Scanning these folders into your Library will not automatically share your files unless you explicitly choose to share a collection.")), "span 2, growx");
+            add(new JScrollPane(treeTable), "growy, growx, gapbottom 5, wrap");            
+            add(new JLabel(I18n.tr("and add the following categories to My Library:")), "split, alignx left");
+            add(addFolderButton, "gapbefore push, alignx right, wrap");
+            add(getCheckBoxPanel(), "gapbefore 10, wrap");            
+            add(new MultiLineLabel(I18n.tr("Scanning these folders into your Library will not automatically share your files unless you explicitly choose to share a collection.")), "growx");
         }
         
         private void createComponents() {
@@ -264,7 +275,7 @@ public class LibraryOptionPanel extends OptionPanel {
             p.setOpaque(false);
             p.setLayout(new MigLayout("gapx 18"));
             
-            p.add(audioCheckBox, "gapleft 25");        
+            p.add(audioCheckBox);        
             p.add(videoCheckBox);        
             p.add(imageCheckBox);        
             p.add(docCheckBox);
@@ -277,8 +288,8 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         public boolean applyOptions() {
             LibraryManagerModel model = treeTable.getLibraryModel();
-            Collection<File> manage = model.getManagedDirectories();
-            Collection<File> exclude = model.getExcludedDirectories();
+            Collection<File> manage = model.getRootChildrenAsFiles();
+            Collection<File> exclude = model.getAllExcludedSubfolders();
             libraryData.setManagedOptions(manage, exclude, getManagedCategories());
             return false;
         }
@@ -309,8 +320,8 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() {
             LibraryManagerModel model = treeTable.getLibraryModel();
-            Collection<File> manage = model.getManagedDirectories();
-            Collection<File> exclude = model.getExcludedDirectories();
+            Collection<File> manage = model.getRootChildrenAsFiles();
+            Collection<File> exclude = model.getAllExcludedSubfolders();
             Collection<Category> categories = getManagedCategories();
             return !manage.equals(libraryData.getDirectoriesToManageRecursively())
                 || !exclude.equals(libraryData.getDirectoriesToExcludeFromManaging())
@@ -367,6 +378,67 @@ public class LibraryOptionPanel extends OptionPanel {
                 }
             }
         }    
+    }
+    
+    /**
+     * The manual import panel
+     */
+    public class ManualImportPanel extends OptionPanel {
+
+        private final Collection<File> initialList;
+        private final LibraryData libraryData;       
+        private LibraryManagerTreeTable treeTable;
+        
+        public ManualImportPanel(LibraryData libraryData) {
+            this.libraryData = libraryData;
+            this.initialList = new HashSet<File>();
+            
+            treeTable = new LibraryManagerTreeTable(iconManager, libraryData);
+            treeTable.setShowsRootHandles(false);
+            treeTable.putClientProperty("JTree.lineStyle", "None");
+            
+            setLayout(new MigLayout("insets 0, gap 0, fill"));
+            
+            setOpaque(false);
+            
+            add(Line.createHorizontalLine(), "growx, gapbottom 4, wrap");
+            add(new JLabel(I18n.tr("At some point, you manually imported files from some folders into My Library.")), "gapbottom 5, split");
+            add(new JButton(new AbstractAction(I18n.tr("View Folders...")) {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    FocusJOptionPane.showMessageDialog(ManualImportPanel.this,
+                            new JScrollPane(treeTable), I18n.tr("Manage Folders"), JOptionPane.PLAIN_MESSAGE);
+                }
+            }), "alignx left, gapafter push");
+            
+            
+        }
+
+        @Override
+        public boolean applyOptions() {
+            Collection<File> current = new HashSet<File>(initialList);
+            current.removeAll(treeTable.getLibraryModel().getRootChildrenAsFiles());
+            libraryData.removeFolders(current);
+            return false;
+        }
+
+        @Override
+        boolean hasChanged() {
+            return !initialList.equals(treeTable.getLibraryModel().getRootChildrenAsFiles());
+        }
+
+        @Override
+        public void initOptions() {
+            initialList.clear();
+            RootLibraryManagerItem root = new RootLibraryManagerItem(new HashSet<File>());
+            for(File file : libraryData.getDirectoriesWithImportedFiles()) {
+                initialList.add(file);
+                root.addChild(new NoChildrenLibraryManagerItem(root, file));
+            }
+
+            treeTable.setTreeTableModel(new LibraryManagerModel(root));
+            setVisible(!initialList.isEmpty());
+        }
     }
 
 }

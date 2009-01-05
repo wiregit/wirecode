@@ -132,7 +132,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         return -1;
     }
     
-    public Collection<File> getManagedDirectories() {
+    public Collection<File> getRootChildrenAsFiles() {
         Collection<File> manageRecursively = new HashSet<File>();
         List<LibraryManagerItem> children = getRoot().getChildren();
         for(LibraryManagerItem child : children) {
@@ -141,7 +141,7 @@ public class LibraryManagerModel extends AbstractTreeTableModel {
         return manageRecursively;
     }
     
-    public Collection<File> getExcludedDirectories() {
+    public Collection<File> getAllExcludedSubfolders() {
         Collection<File> excludes = new HashSet<File>();
         List<LibraryManagerItem> children = getRoot().getChildren();
         for(LibraryManagerItem child : children) {

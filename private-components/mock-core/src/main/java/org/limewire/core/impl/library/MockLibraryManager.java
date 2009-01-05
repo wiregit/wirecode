@@ -177,6 +177,10 @@ public class MockLibraryManager implements ShareListManager, LibraryManager {
         }
         
         @Override
+        public void removeFolders(Collection<File> folders) {
+        }
+        
+        @Override
         public Collection<Category> getManagedCategories() {
             return EnumSet.allOf(Category.class);
         }

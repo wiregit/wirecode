@@ -2,7 +2,6 @@ package org.limewire.ui.swing.library.manager;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,7 +29,7 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
         this.showExcludedChildren = showExcludedChildren;
         this.parent = parent;
         this.libraryData = libraryData;
-        this.file = canonicalize(file);
+        this.file = FileUtils.canonicalize(file);
         this.excludedChildren = new ArrayList<File>();
     }
     
@@ -41,20 +40,12 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
     
     @Override
     public String toString() {
-        return file.toString() + " [excluded: " + excludedChildren + "]";
+        return displayName();
     }
     
     @Override
     public LibraryManagerItem getParent() {
         return parent;
-    }
-    
-    private File canonicalize(File file) {
-        try {
-            return FileUtils.getCanonicalFile(file);
-        } catch(IOException iox) {
-            return file;
-        }
     }
     
     @Override

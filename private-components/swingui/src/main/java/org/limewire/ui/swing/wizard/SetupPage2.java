@@ -186,8 +186,8 @@ public class SetupPage2 extends WizardPage {
         
         if (manualButton.isSelected()) {
             LibraryManagerModel model = treeTable.getLibraryModel();
-            manage = model.getManagedDirectories();
-            exclude = model.getExcludedDirectories();
+            manage = model.getRootChildrenAsFiles();
+            exclude = model.getAllExcludedSubfolders();
         } else {
             manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
             exclude = Collections.emptySet();
