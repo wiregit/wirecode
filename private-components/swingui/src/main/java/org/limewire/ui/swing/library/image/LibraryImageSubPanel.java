@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -29,13 +29,11 @@ import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
-import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
 import org.limewire.ui.swing.images.ImageListModel;
-import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.table.Configurable;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
@@ -71,10 +69,10 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
 
     private EventList<LocalFileItem> currentEventList;
     
-    private ShareWidget<LocalFileItem[]> shareWidget;
+    private JButton shareFolderButton;
     
     public LibraryImageSubPanel(final File parentFolder, EventList<LocalFileItem> eventList, LocalFileList fileList, 
-            ImageLibraryPopupParams params, final ShareWidget<LocalFileItem[]> shareWidget) {       
+            ImageLibraryPopupParams params) {       
         GuiUtils.assignResources(this); 
         
         setBackground(backgroundColor);
@@ -82,7 +80,6 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         String name = parentFolder.getName();
         
         this.currentEventList = eventList;
-        this.shareWidget = shareWidget;
 
         //icon
         JLabel iconHeaderLabel = new JLabel(panelIcon);
@@ -95,8 +92,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
        
-        JButton shareFolderButton = new JButton(I18n.tr("Share"));
-        shareFolderButton.addActionListener(new ShareFolderAction());
+        shareFolderButton = new JButton(I18n.tr("Share"));
         
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
@@ -127,6 +123,10 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         add(layer, "span 2, grow");
 
         eventList.addListEventListener(this);
+    }
+    
+    public void addShareFolderButtonAction(ActionListener listener){
+        shareFolderButton.addActionListener(listener);
     }
     
     public void setImageEditor(TableRendererEditor editor) {
@@ -176,17 +176,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         }
     }
     
-    private final class ShareFolderAction extends AbstractAction{
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            imageList.setSelectionInterval(0, currentEventList.size() - 1);
-            List<LocalFileItem> items = getSelectedItems();
-            shareWidget.setShareable(items.toArray(new LocalFileItem[items.size()]));
-            shareWidget.show(null);
-        }
-        
-    }
 
 
     public class MouseReaction implements MouseListener, MouseMotionListener {

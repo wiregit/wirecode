@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JList;
@@ -46,6 +48,7 @@ public class ImageList extends JXList implements Disposable{
     private int insetRight;
     
     private ImageCellRenderer renderer;
+    private EventList<LocalFileItem> listSelection;
     
     public ImageList(EventList<LocalFileItem> eventList, LocalFileList fileList) {
         super(new ImageListModel(eventList, fileList));
@@ -66,8 +69,14 @@ public class ImageList extends JXList implements Disposable{
         //enable double click launching of image files.
         addMouseListener(new ImageDoubleClickMouseListener());
         EventSelectionModel<LocalFileItem> selectionModel = new EventSelectionModel<LocalFileItem>(eventList);
+        this.listSelection = selectionModel.getSelected();
         setSelectionModel(selectionModel);
         selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+    }
+    
+    /** Returns a copy of all selected items. */
+    public List<LocalFileItem> getSelectedItems() {
+        return new ArrayList<LocalFileItem>(listSelection);
     }
 
     @Override
