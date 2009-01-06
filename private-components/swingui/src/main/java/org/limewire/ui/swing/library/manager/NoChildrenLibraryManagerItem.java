@@ -11,6 +11,7 @@ public class NoChildrenLibraryManagerItem implements LibraryManagerItem {
 
     private final File file;
     private final LibraryManagerItem parent;
+    private boolean showFullName;
     
     public NoChildrenLibraryManagerItem(LibraryManagerItem parent, File file) {
         this.parent = parent;
@@ -29,7 +30,11 @@ public class NoChildrenLibraryManagerItem implements LibraryManagerItem {
 
     @Override
     public String displayName() {
-        return file.getPath();
+        if(showFullName) {
+            return file.getPath();
+        } else {
+            return file.getName();
+        }
     }
 
     @Override
@@ -64,6 +69,7 @@ public class NoChildrenLibraryManagerItem implements LibraryManagerItem {
 
     @Override
     public void setShowFullName(boolean show) {
+        this.showFullName = show;
     }
 
 }

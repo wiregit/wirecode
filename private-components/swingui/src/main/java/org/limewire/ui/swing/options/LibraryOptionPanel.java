@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.options;
 
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Collection;
@@ -406,8 +407,10 @@ public class LibraryOptionPanel extends OptionPanel {
             add(new JButton(new AbstractAction(I18n.tr("View Folders...")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    JScrollPane scroller = new JScrollPane(treeTable);
+                    scroller.setPreferredSize(new Dimension(500, 300));
                     FocusJOptionPane.showMessageDialog(ManualImportPanel.this,
-                            new JScrollPane(treeTable), I18n.tr("Manage Folders"), JOptionPane.PLAIN_MESSAGE);
+                            scroller, I18n.tr("Manage Folders"), JOptionPane.PLAIN_MESSAGE);
                 }
             }), "alignx left, gapafter push");
             
@@ -430,7 +433,7 @@ public class LibraryOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             initialList.clear();
-            RootLibraryManagerItem root = new RootLibraryManagerItem(new HashSet<File>());
+            RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
             for(File file : libraryData.getDirectoriesWithImportedFiles()) {
                 initialList.add(file);
                 root.addChild(new NoChildrenLibraryManagerItem(root, file));

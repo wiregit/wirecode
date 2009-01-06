@@ -24,6 +24,7 @@ public class LibraryManagerTreeTable extends MouseableTreeTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setSelectionBackground(getBackground());
         setEditable(true);
+        setHorizontalScrollEnabled(true);
         setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         setCellSelectionEnabled(false);
         setRowSelectionAllowed(false);

@@ -24,7 +24,7 @@ class FolderRenderer extends DefaultTreeCellRenderer {
             boolean expanded, boolean leaf, int row, boolean hasFocus) {
         if(value instanceof LibraryManagerItem) {
             LibraryManagerItem item = (LibraryManagerItem)value;
-            getTreeCellRendererComponent(tree, item.displayName(), false, expanded, leaf, row, false);
+            super.getTreeCellRendererComponent(tree, item.displayName(), false, expanded, leaf, row, false);
             Icon icon = iconManager.getIconForFile(item.getFile());
             if(icon == null) {
                 icon = emptyIcon;
