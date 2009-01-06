@@ -475,7 +475,6 @@ public class ChatFriendListPane extends JPanel {
                 idToFriendMap.remove(userId);
             }
             chatFriend.stopChat();
-            new CloseChatEvent(chatFriend).publish();
         }
         chatFriends.clear();
     }

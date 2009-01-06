@@ -26,6 +26,10 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.xmpp.api.client.Presence.Mode;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.SwingEDTEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -101,6 +105,20 @@ public class ChatTopPanel extends JXPanel {
         ToolTipManager.sharedInstance().registerComponent(this);
         
         EventAnnotationProcessor.subscribe(this);
+    }
+
+    @Inject
+    void register(ListenerSupport<XMPPConnectionEvent> connectionSupport) {
+        connectionSupport.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                if (event.getType() == XMPPConnectionEvent.Type.DISCONNECTED) {
+                    // when signed off, erase info about who LW was chatting with
+                    clearFriendInfo();
+                }
+            }
+        });
     }
     
     void setMinimizeAction(Action minimizeAction) {

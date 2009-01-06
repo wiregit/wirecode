@@ -210,6 +210,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         resetBounds();
         setChatPanelVisible(false);
         setActionEnabled(false);
+        lastSelectedConversationFriendId = null;
     }
     
     public String getMessagingTopicPatternName() {
