@@ -65,7 +65,10 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     }
     
     private void updateCheckbox(LocalFileItem fileItem) {
-        if(fileItem.getCategory() == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+        if(!fileItem.isShareable()) {
+            setEnabled(false);
+        }
+        else if(fileItem.getCategory() == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             setEnabled(false);
             setSelected(false);
         } else if(fileItem.getCategory() == Category.DOCUMENT && !LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() && GnutellaFileList.class.isInstance(localFileList)) {

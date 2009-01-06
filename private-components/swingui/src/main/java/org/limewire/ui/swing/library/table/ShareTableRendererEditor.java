@@ -83,15 +83,17 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
 
         int friendCount = item.getFriendShareCount();
 
-        shareButton.setEnabled(!item.isIncomplete());
-        
-        if(item.getCategory() == Category.DOCUMENT && (!LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() && !xmppService.isLoggedIn())) {
+        if(!item.isShareable() || item.isIncomplete()) {
+            shareButton.setEnabled(item.isShareable() && !item.isIncomplete());
+            shareButton.setToolTipText(I18n.tr("This file cannot be shared."));
+        } else if(item.getCategory() == Category.DOCUMENT && (!LibrarySettings.ALLOW_DOCUMENT_GNUTELLA_SHARING.getValue() && !xmppService.isLoggedIn())) {
             //if the share documents with gnutella option is unchecked, the user must be logged in for the share button to be enabled.
             shareButton.setEnabled(false);
             shareButton.setToolTipText(I18n.tr("Sign in to share Documents with your friends"));
         } else if(item.getCategory() == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             shareButton.setEnabled(false);
         } else {
+            shareButton.setEnabled(true);
             shareButton.setToolTipText(I18n.tr("Share this file with a friend"));
         }
         
