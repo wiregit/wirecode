@@ -20,6 +20,9 @@ public class UploadTable extends MouseableTable {
         model = new EventTableModel<UploadItem>(swingThreadSafeUploads, new LimeSingleColumnTableFormat<UploadItem>());
         setModel(model);
         
+        setStripeHighlighterEnabled(false);
+        setStripesPainted(false);
+        
         UploadActionHandler actionHandler = new UploadActionHandler(swingThreadSafeUploads, propertiesFactory, libraryNavigator);
         
         UploadTableRendererEditor editor = new UploadTableRendererEditor(categoryIconManager, progressBarFactory);

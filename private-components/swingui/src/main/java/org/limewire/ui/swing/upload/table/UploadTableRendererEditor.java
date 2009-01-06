@@ -3,6 +3,7 @@ package org.limewire.ui.swing.upload.table;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -45,8 +46,11 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private UploadItem editItem;
     private JProgressBar progressBar;
     private JLabel timeLabel;
+    
     @Resource
     private Color linkColor;
+    @Resource private Font statusFont;
+    @Resource private Font titleFont;
     
     @Resource private Icon cancelIcon;
     @Resource private Icon cancelIconRollover;
@@ -107,13 +111,20 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     
     private void initializeComponents(LimeProgressBarFactory progressBarFactory){
         nameLabel = new JLabel(I18n.tr("Name"));
+        nameLabel.setFont(titleFont);
+        
         iconLabel = new JLabel();
+        
         statusLabel = new JLabel(I18n.tr("Status"));
+        statusLabel.setFont(statusFont);
+        
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
+        
         removeButton = new JXHyperlink();
         removeButton.setText("<HTML><U>" + I18n.tr("Remove") + "</U></HTML>");
         removeButton.setForeground(linkColor);        
         removeButton.setClickedColor(linkColor);
+        removeButton.setFont(statusFont);
 
         timeLabel = new JLabel(I18n.tr("Time"));
         timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
