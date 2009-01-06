@@ -41,17 +41,23 @@ public class AutoDirectoryManageConfig {
         if (OSUtils.isWindows() && !OSUtils.isWindowsVista()) {
             addIfSupported(data, SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), dirs);
             addIfSupported(data, SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), dirs);
-        } else {        
+        } else {
             addIfSupported(data, SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), dirs);
             addIfSupported(data, SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), dirs);
             
             String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);            
             if (homePath != null && !homePath.isEmpty()) {
                 addIfAllowed(data, new File(homePath, "Downloads"), dirs);
-                addIfAllowed(data, new File(homePath, "Videos"), dirs);
                 addIfAllowed(data, new File(homePath, "Music"), dirs);
                 addIfAllowed(data, new File(homePath, "Pictures"), dirs);
-                addIfAllowed(data, new File(homePath, "Public"), dirs);
+                
+                if (OSUtils.isWindowsVista()) { 
+                    addIfAllowed(data, new File(homePath, "Videos"), dirs);
+                } 
+                else {
+                    addIfAllowed(data, new File(homePath, "Public"), dirs);
+                    addIfAllowed(data, new File(homePath, "Movies"), dirs);
+                }
             }
         }
                 
