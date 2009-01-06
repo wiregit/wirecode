@@ -19,14 +19,13 @@ class LibraryMediator extends JPanel implements Disposable {
 
     private static final String LIBRARY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
+    private static final String EMPTY_CARD = "EMPTY_CARD";
     
     private CardLayout cardLayout;
 
     private JComponent libraryComponent = null;
     private JComponent sharingComponent = null;
-    
-    
-    private String currentlyShownCard = LIBRARY_CARD;
+    private JComponent emptyComponent = null;
     
     protected boolean disposed;
 
@@ -46,11 +45,6 @@ class LibraryMediator extends JPanel implements Disposable {
         }
         libraryComponent = panel;
         add(panel, LIBRARY_CARD);
-        if(LIBRARY_CARD.equals(currentlyShownCard)) {
-            //removing libraryComponent might have changed the currently displayed card
-            //if it should be displayed force it here.
-            showLibraryCard();
-        }
     }
     
     protected boolean isSharingCardSet() {
@@ -69,18 +63,35 @@ class LibraryMediator extends JPanel implements Disposable {
         add(panel, SHARING_CARD);
     }
     
+    protected void setEmptyCard(JComponent panel) {
+        if(emptyComponent != null) {
+            // Important: rm before dispose -- see note at top of class
+            remove(emptyComponent);
+            ((Disposable)emptyComponent).dispose();
+            emptyComponent = null;
+        }
+        emptyComponent = panel;
+        panel.validate();
+        add(panel, EMPTY_CARD);
+    }
+    
     public void showLibraryCard() {
         cardLayout.show(this, LIBRARY_CARD);
-        this.currentlyShownCard = LIBRARY_CARD;
         validate();
         repaint();
     }
     
     protected void showSharingCard() {
         cardLayout.show(this, SHARING_CARD);
-        this.currentlyShownCard = SHARING_CARD;
+        validate();
+        repaint();
     }
 
+    protected void showEmptyCard() {
+        cardLayout.show(this, EMPTY_CARD);
+        validate();
+        repaint();
+    }
 
     @Override
     protected void addImpl(Component comp, Object constraints, int index) {
