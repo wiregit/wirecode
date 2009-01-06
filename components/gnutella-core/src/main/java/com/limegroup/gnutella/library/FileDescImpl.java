@@ -20,6 +20,7 @@ import org.limewire.util.Objects;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseType;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -270,6 +271,9 @@ public class FileDescImpl implements FileDesc {
 	    doc.initIdentifier(FILE);
 	    if(doc.isLicenseAvailable())
 	        _license = doc.getLicense();
+	    
+	    if(doc.getLicenseString() != null && doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name()))
+	            setStoreFile(true);
     }
     
     /* (non-Javadoc)
