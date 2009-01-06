@@ -1033,7 +1033,6 @@ public class FileUtils {
             if(cached != null) {
                 return cached;
             } else {
-                System.out.println("Inserting: " + file + ", into cache");
                 try {
                     File f = createTempFile("lw-", "can-write-test", file);
                     f.delete();
