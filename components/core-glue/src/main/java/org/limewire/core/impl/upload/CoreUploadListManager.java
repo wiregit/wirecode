@@ -109,7 +109,7 @@ public class CoreUploadListManager implements UploadListener, UploadListManager{
 
     @Override
     public void uploadAdded(Uploader uploader) {
-        if (!uploader.getUploadType().isInternal()) {
+        if (!uploader.getUploadType().isInternal() && uploader.getFile() != null) {
             UploadItem item = new CoreUploadItem(uploader);
             uploadItems.add(item);
             item.addPropertyChangeListener(new UploadPropertyListener(item));
