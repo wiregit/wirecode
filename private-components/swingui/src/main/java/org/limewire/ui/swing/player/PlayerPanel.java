@@ -42,13 +42,16 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.painter.BorderPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 
 public class PlayerPanel extends JXPanel {
 
+    // TODO: Move somewhere better
+    public static final String AUDIO_LENGTH_BYTES = "audio.length.bytes";
+    public static final String AUDIO_TYPE = "audio.type";
+    
     @Resource private int arcWidth;
     @Resource private int arcHeight;
     @Resource private Color innerBorder;
@@ -173,7 +176,7 @@ public class PlayerPanel extends JXPanel {
         
         progressSlider = sliderBarFactory.create();
         progressSlider.addChangeListener(new AudioProgressListener());
-        progressSlider.setMaximum(0);
+        progressSlider.setMaximum(Integer.MAX_VALUE);
         progressSlider.setMaximumSize(new Dimension(206, 6));
         progressSlider.setMinimumSize(new Dimension(206, 6));
         progressSlider.setPreferredSize(new Dimension(206, 6));
@@ -338,14 +341,14 @@ public class PlayerPanel extends JXPanel {
         public void skip(double percent) {
             
             // need to know something about the audio type to be able to skip
-            if (audioProperties != null && audioProperties.containsKey(LimeAudioFormat.AUDIO_TYPE)) {
-                String songType = (String) audioProperties.get(LimeAudioFormat.AUDIO_TYPE);
+            if (audioProperties != null && audioProperties.containsKey(AUDIO_TYPE)) {
+                String songType = (String) audioProperties.get(AUDIO_TYPE);
                 
                 // currently, only mp3 and wav files can be seeked upon
                 if ( isSeekable(songType)
-                        && audioProperties.containsKey(LimeAudioFormat.AUDIO_LENGTH_BYTES)) {
+                        && audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
                     final long skipBytes = Math.round((Integer) audioProperties
-                            .get(LimeAudioFormat.AUDIO_LENGTH_BYTES)
+                            .get(AUDIO_LENGTH_BYTES)
                             * percent);
 
                     player.seekLocation(skipBytes);
@@ -417,7 +420,7 @@ public class PlayerPanel extends JXPanel {
            String songText = null;
            
            if (properties.get("author") == null || properties.get("title") == null) {
-               songText = I18n.tr("Unknown");
+               songText = file.getName();
            } 
            else {
                songText = properties.get("author") + " - " + properties.get("title");
@@ -427,23 +430,6 @@ public class PlayerPanel extends JXPanel {
            titleLabel.setToolTipText(songText);
            titleLabel.start();
         
-           Object duration = properties.get("duration");
-           if (duration != null) {
-               durationSecs = (int)(((Long)duration).longValue()/1000/1000);
-           } 
-           else {
-               durationSecs = 0;
-           }
-               
-           progressSlider.setMaximum(durationSecs);
-           
-           if (properties.get("audio.length.bytes") != null) {
-               byteLength = (Integer)properties.get("audio.length.bytes");
-           } 
-           else {
-               byteLength = 0;
-           }
-                      
            innerPanel.setVisible(true);
         }
 
