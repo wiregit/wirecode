@@ -48,7 +48,7 @@ public class AutoDirectoryManageConfig {
             String homePath = SystemUtils.getSpecialPath(SpecialLocations.HOME);            
             if (homePath != null && !homePath.isEmpty()) {
                 addIfAllowed(data, new File(homePath, "Downloads"), dirs);
-                addIfAllowed(data, new File(homePath, "Movies"), dirs);
+                addIfAllowed(data, new File(homePath, "Videos"), dirs);
                 addIfAllowed(data, new File(homePath, "Music"), dirs);
                 addIfAllowed(data, new File(homePath, "Pictures"), dirs);
                 addIfAllowed(data, new File(homePath, "Public"), dirs);
