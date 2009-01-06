@@ -27,6 +27,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
+import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
@@ -113,7 +114,7 @@ public class Wizard extends JPanel {
         headerLine1 = new JLabel();
         decorator.decorateHeadingText(headerLine1);
         
-        headerLine2 = new JLabel();
+        headerLine2 = new MultiLineLabel();
         decorator.decorateNormalText(headerLine2);
         
         footer = new JLabel();

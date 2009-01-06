@@ -37,7 +37,7 @@ public class SetupPage2 extends WizardPage {
      * 
      * (When doing an update this will be true and the new directories will be appended to the list.)
      */
-    private boolean shouldKeepExistingDirectorySettings = false;
+    private final boolean shouldKeepExistingDirectorySettings;
     
     private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
     private final String line2 = I18n.tr("My Library is where you view, share and unshare your files.");
@@ -47,8 +47,7 @@ public class SetupPage2 extends WizardPage {
     private final String manualText = I18n.tr("Manually add files to My Library");
     private final String manualExplanation = I18n.tr("Select the folders and categories LimeWire automatically adds to My Library.");
     private final String manualExplanationOpen = I18n.tr("LimeWire will look in the following folders...");
-    private final String bottomText1 = I18n.tr("Adding these folders will not automatically share your files.");
-    private final String bottomText2 = I18n.tr("You can change this option later from Tools > Options");
+    private final String bottomText = I18n.tr("You can change this option later from Tools > Options");
     
     private final LibraryData libraryData;
     
@@ -62,16 +61,15 @@ public class SetupPage2 extends WizardPage {
     private final JScrollPane treeTableScrollPane;
     private final JXButton addFolderButton;
         
+    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData) {
+        this(decorator, iconManager, libraryData, false);
+    }
+    
     public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData,
             boolean shouldKeepExistingDirectorySettings) {
         
-        this(decorator, iconManager, libraryData);
-        this.shouldKeepExistingDirectorySettings = shouldKeepExistingDirectorySettings;
-    }
-    
-    
-    public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData) {
         this.libraryData = libraryData;
+        this.shouldKeepExistingDirectorySettings = shouldKeepExistingDirectorySettings;
         
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
@@ -138,20 +136,18 @@ public class SetupPage2 extends WizardPage {
         
         add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
         add(addFolderButton, "gaptop 10, gapright 30, wrap");
-
-        label = new MultiLineLabel(bottomText1,630);
-        decorator.decorateHeadingText(label);
-        add(label, "gaptop 10, gapleft 14, pushy, aligny bottom, wrap");
-        
-        label = new JLabel(bottomText2);
-        decorator.decorateNormalText(label);
-        add(label, "gapleft 14, aligny bottom");        
     }
 
     private void initManualPanel() {
         RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
-        for(File file : libraryData.getDirectoriesToManageRecursively()) {
-            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
+        
+        if (shouldKeepExistingDirectorySettings) {
+            
+            // Add old directories to the list because this is an upgrade and we
+            //  want to preserve old settings as much as possible
+            for(File file : libraryData.getDirectoriesToManageRecursively()) {
+                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
+            }
         }
 
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
@@ -174,7 +170,7 @@ public class SetupPage2 extends WizardPage {
 
     @Override
     public String getFooter() {
-        return "";
+        return bottomText;
     }
     
     @Override
@@ -191,13 +187,6 @@ public class SetupPage2 extends WizardPage {
         } else {
             manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
             exclude = Collections.emptySet();
-        }
-        
-        if (shouldKeepExistingDirectorySettings) {
-            // Add old directories to the list because this is an upgrade and we
-            //  want to preserve old settings as much as possible
-            manage.addAll(libraryData.getDirectoriesToManageRecursively());
-            exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         }
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());
