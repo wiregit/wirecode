@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -32,6 +33,7 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
+import org.limewire.player.impl.LimeAudioFormat;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBarFactory;
 import org.limewire.ui.swing.components.MarqueeButton;
@@ -44,8 +46,6 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.gui.GUIMediator;
-import com.limegroup.gnutella.gui.mp3.LimeAudioFormat;
 
 public class PlayerPanel extends JXPanel {
 
@@ -396,7 +396,7 @@ public class PlayerPanel extends JXPanel {
          * Updates the current progress of the progress bar, on the Swing thread.
          */
         private void setProgressValue(final int update) {
-            GUIMediator.safeInvokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     progressSlider.setValue(update);
                 }
