@@ -141,6 +141,12 @@ public class SetupPage2 extends WizardPage {
     private void initManualPanel() {
         RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
         
+        Collection<File> autoManage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
+        
+        for(File file : autoManage) {
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
+        }
+        
         if (shouldKeepExistingDirectorySettings) {
             
             // Add old directories to the list because this is an upgrade and we
