@@ -100,16 +100,6 @@ public class PlayerPanel extends JXPanel {
     
     private final AudioPlayer player;
     private final LibraryNavigator libraryNavigator;
-    
-    /**
-     * length of the current audio in seconds
-     */
-    private int durationSecs;
-
-    /**
-     * length of the current audio in bytes
-     */
-    private int byteLength;
 
     /**
      * Pointer to the last opened song's file
@@ -233,7 +223,6 @@ public class PlayerPanel extends JXPanel {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             }
         });
-    
     }
     
     private void initVolumeControl() {
@@ -379,10 +368,6 @@ public class PlayerPanel extends JXPanel {
        
         @Override
         public void progressChange(int bytesread) {
-            if (byteLength != 0 && !progressSlider.getValueIsAdjusting()) {
-                progressSlider.setValue(durationSecs * bytesread / byteLength);
-            }
-            
             // if we know the length of the song, update the progress bar
             if (audioProperties.containsKey(LimeAudioFormat.AUDIO_LENGTH_BYTES)) {
                 int byteslength = ((Integer) audioProperties.get(LimeAudioFormat.AUDIO_LENGTH_BYTES))
