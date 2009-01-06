@@ -343,12 +343,6 @@ public class PlayerPanel extends JXPanel {
                 }
             }
         }
-        
-        private boolean isSeekable(String songType) {
-            if( songType == null )
-                return false;
-            return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
-        }
     }
 
     private class VolumeController implements ChangeListener {
@@ -403,6 +397,13 @@ public class PlayerPanel extends JXPanel {
             
            String songText = null;
            
+           if (isSeekable((String) properties.get(AUDIO_TYPE))) {
+               progressSlider.setEnabled(true);
+           } 
+           else {
+               progressSlider.setEnabled(false);
+           }
+           
            if (properties.get("author") == null || properties.get("title") == null) {
                songText = file.getName();
            } 
@@ -436,7 +437,13 @@ public class PlayerPanel extends JXPanel {
         }
         
     }
-     
+    
+    private boolean isSeekable(String songType) {
+        if( songType == null )
+            return false;
+        return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
+    }
+    
     private Painter<JXPanel> createStatusBackgroundPainter() {
         
         CompoundPainter<JXPanel> compoundPainter = new CompoundPainter<JXPanel>();
