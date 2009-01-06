@@ -17,6 +17,11 @@ public class MockMojitoManager implements MojitoManager {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
+    
+    @Override
+    public String getName() {
+        return null;
+    }
 
     @Override
     public boolean isRunning() {

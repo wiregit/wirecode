@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 
 import org.limewire.core.api.mojito.MojitoManager;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
+import org.limewire.mojito.Context;
 import org.limewire.mojito.MojitoDHT;
 
 import com.google.inject.Inject;
@@ -61,6 +62,15 @@ public class MojitoManagerImpl implements MojitoManager {
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.removePropertyChangeListener(listener);
+    }
+    
+    /**
+     * Returns the name of the DHT.
+     */
+    @Override
+    public String getName() {
+        MojitoDHT dht = manager.getMojitoDHT();
+        return (dht != null) ? ((Context) dht).getName() : null;
     }
     
     /**

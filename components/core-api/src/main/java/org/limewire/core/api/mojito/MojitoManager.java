@@ -23,6 +23,11 @@ public interface MojitoManager {
     public void removePropertyChangeListener(PropertyChangeListener listener);
 
     /**
+     * Returns the name of the DHT.
+     */
+    public String getName();
+    
+    /**
      * Returns true if the Mojito DHT is running.
      */
     public boolean isRunning();
