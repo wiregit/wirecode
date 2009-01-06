@@ -45,6 +45,8 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
+import com.limegroup.gnutella.gui.GUIMediator;
+import com.limegroup.gnutella.gui.mp3.LimeAudioFormat;
 
 public class PlayerPanel extends JXPanel {
 
@@ -108,9 +110,17 @@ public class PlayerPanel extends JXPanel {
     private int byteLength;
 
     /**
-     * Pointer to the current songs file
+     * Pointer to the last opened songs file
      */
     private File file = null;
+    
+    /**
+     * Map of properties of the last opened song
+     */
+    private Map audioProperties = null;
+    
+    private static final String MP3 = "mp3";
+    private static final String WAVE = "wave";
     
     private static final String BACK = "BACK";
     private static final String PLAY = "PLAY";
@@ -206,7 +216,7 @@ public class PlayerPanel extends JXPanel {
 
         VolumeController volumeController = new VolumeController();
         volumeSlider.addChangeListener(volumeController);
-        player.addAudioPlayerListener(new PlayerListener(volumeController));      
+        player.addAudioPlayerListener(new PlayerListener());      
         
         volumeControlPopup.addPopupMenuListener(new PopupMenuListener() {
             @Override
@@ -237,8 +247,6 @@ public class PlayerPanel extends JXPanel {
         volumeControlPopup.setSize(new Dimension(20, 80));
         
         volumeControlPopup.add(volumeSlider);
-        
-
     }
 
     private void previousSong() {
@@ -305,72 +313,107 @@ public class PlayerPanel extends JXPanel {
     private class AudioProgressListener implements ChangeListener {
         
         private boolean waiting = false; 
-        private boolean wasPlaying = false; 
-        
+       
         @Override
         public void stateChanged(ChangeEvent e) {
             
             if (progressSlider.getMaximum() != 0 && progressSlider.getValueIsAdjusting()) {
                 if (!waiting) {
                     waiting = true;
-//                    System.out.println("waiting to seek");
-                    wasPlaying = player.getStatus() == PlayerState.PLAYING;
-                    if (wasPlaying) {
-//                        System.out.println("pausing");
-                        player.pause();
-                    }
                 }
             } 
             else if (waiting) {
-//                System.out.println("seeking");                
-                int position = byteLength * progressSlider.getValue() / progressSlider.getMaximum();
-//                System.out.println("seeking to " + position);
-                player.seekLocation(position);                
-                if (wasPlaying) {                
-//                    System.out.println("unpausing");
-                    player.unpause();
-                }                
                 waiting = false;
+                double percent = (double)progressSlider.getValue() / (double)progressSlider.getMaximum();
+                skip(percent);
+                progressSlider.setValue((int)(percent * progressSlider.getMaximum()));
             }
+        }
+        
+        
+        /**
+         * Skips the current song to a new position in the song. If the song's
+         * length is unknown (streaming audio), then ignore the skip
+         * 
+         * @param percent of the song frames to skip from begining of file
+         */
+        public void skip(double percent) {
+            
+            // need to know something about the audio type to be able to skip
+            if (audioProperties != null && audioProperties.containsKey(LimeAudioFormat.AUDIO_TYPE)) {
+                String songType = (String) audioProperties.get(LimeAudioFormat.AUDIO_TYPE);
+                
+                // currently, only mp3 and wav files can be seeked upon
+                if ( isSeekable(songType)
+                        && audioProperties.containsKey(LimeAudioFormat.AUDIO_LENGTH_BYTES)) {
+                    final long skipBytes = Math.round((Integer) audioProperties
+                            .get(LimeAudioFormat.AUDIO_LENGTH_BYTES)
+                            * percent);
+
+                    player.seekLocation(skipBytes);
+                }
+            }
+        }
+        
+        private boolean isSeekable(String songType) {
+            if( songType == null )
+                return false;
+            return songType.equalsIgnoreCase(MP3) || songType.equalsIgnoreCase(WAVE);
         }
     }
 
-    
     private class VolumeController implements ChangeListener {
-        
-        private int lastVolume = -1;  
         
         @Override
         public void stateChanged(ChangeEvent e) {
-            lastVolume = volumeSlider.getValue();
-            player.setVolume((double)lastVolume / 100);
-        }
-        
-        public void resetVolume() {
-            if (lastVolume != -1) {
-                player.setVolume((double)lastVolume / 100);
-            }
+            setVolumeValue();
         }
     }
+    
+    private void setVolumeValue() {
+        player.setVolume(((float) volumeSlider.getValue()) / volumeSlider.getMaximum());
+    }
+    
+    
     
     
     private class PlayerListener implements AudioPlayerListener {
        
-        private final VolumeController volumeController;
-        
-        public PlayerListener(VolumeController volumeController) {
-            this.volumeController = volumeController;
-        }
-        
         @Override
         public void progressChange(int bytesread) {
             if (byteLength != 0 && !progressSlider.getValueIsAdjusting()) {
                 progressSlider.setValue(durationSecs * bytesread / byteLength);
             }
+            
+            // if we know the length of the song, update the progress bar
+            if (audioProperties.containsKey(LimeAudioFormat.AUDIO_LENGTH_BYTES)) {
+                int byteslength = ((Integer) audioProperties.get(LimeAudioFormat.AUDIO_LENGTH_BYTES))
+                        .intValue();
+
+                float progressUpdate = bytesread * 1.0f / byteslength * 1.0f;
+
+                if (!(progressSlider.getValueIsAdjusting() || player.getStatus() == PlayerState.SEEKING))
+                    setProgressValue((int) (progressSlider.getMaximum() * progressUpdate));
+            }
         }
 
+        /**
+         * Updates the current progress of the progress bar, on the Swing thread.
+         */
+        private void setProgressValue(final int update) {
+            GUIMediator.safeInvokeLater(new Runnable() {
+                public void run() {
+                    progressSlider.setValue(update);
+                }
+            });
+        }
+        
         @Override
         public void songOpened(Map<String, Object> properties) {
+           
+           audioProperties = properties; 
+           
+           setVolumeValue();
            
            if (player.getCurrentSong() != null) {
                file = player.getCurrentSong().getFile();
@@ -384,8 +427,7 @@ public class PlayerPanel extends JXPanel {
            else {
                songText = properties.get("author") + " - " + properties.get("title");
            }
-            
-           volumeController.resetVolume();
+
            titleLabel.setText(songText);
            titleLabel.setToolTipText(songText);
            titleLabel.start();
@@ -415,6 +457,9 @@ public class PlayerPanel extends JXPanel {
             if (event.getState() == PlayerState.EOM) {
                 nextSong();
             } 
+            else if (event.getState() == PlayerState.OPENED || event.getState() == PlayerState.SEEKED) {
+                setVolumeValue();
+            }
             
             if (player.getStatus() == PlayerState.PLAYING || player.getStatus() == PlayerState.SEEKING_PLAY){
                 playButton.setVisible(false);
