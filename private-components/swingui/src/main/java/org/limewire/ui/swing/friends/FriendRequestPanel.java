@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.friends;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class FriendRequestPanel extends JXPanel {
     
     @Inject 
     public FriendRequestPanel(BarPainterFactory barPainterFactory) {
-        setLayout(new MigLayout("gap 0, insets 0, fill", "10[]2", "2[]2[]2[]2"));
+        setLayout(new MigLayout("nocache, gap 0, insets 0, fill", "10[]2", "2[]2[]2[]2"));
         setBackgroundPainter(barPainterFactory.createFriendsBarPainter());
         setOpaque(false);
 
@@ -38,6 +40,16 @@ public class FriendRequestPanel extends JXPanel {
         nameLabel = new JXLabel();
         FontUtils.bold(nameLabel);
         requestLabel = new MultiLineLabel(I18n.tr("wants to be your friend.  Do you accept?"));
+        
+        // workaround for LWC-2465 -- MultiLineLabel seems to require it.
+        addComponentListener(new ComponentAdapter() {
+           @Override
+            public void componentShown(ComponentEvent e) {
+               invalidate();
+               validate();
+            } 
+        });
+        
         JComponent yes = new HyperlinkButton(new AbstractAction(I18n.tr("Yes")) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -51,7 +63,7 @@ public class FriendRequestPanel extends JXPanel {
             }
         });
         add(nameLabel, "wmin 0, wrap");
-        add(requestLabel, "wmin 0, wrap");
+        add(requestLabel, "growx, wrap");
         add(yes, "gapbefore push, split, alignx right");
         add(no, "alignx right");
         
@@ -68,6 +80,7 @@ public class FriendRequestPanel extends JXPanel {
             nameLabel.setText(pendingRequests.get(0).getFriendUsername());
             nameLabel.setToolTipText(pendingRequests.get(0).getFriendUsername());
             setVisible(true);
+            
         } else {
             setVisible(false);
         }
