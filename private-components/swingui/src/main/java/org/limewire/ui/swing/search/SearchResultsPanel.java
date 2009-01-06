@@ -385,10 +385,10 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     
     private void updateMessages() {
         if(!lifeCycleComplete) {
-            messageLabel.setText(I18n.tr("LimeWire is currently starting. Your search will start when it completes."));
+            messageLabel.setText(I18n.tr("LimeWire will start your search right after it finishes loading."));
             messagePanel.setVisible(true);
         } else if(!fullyConnected) {
-            messageLabel.setText(I18n.tr("LimeWire is not fully connected. You may not receive many search results until it finishes connecting."));
+            messageLabel.setText(I18n.tr("You might not receive many results until LimeWire finishes loading..."));
             messagePanel.setVisible(true);
         } else {
             messagePanel.setVisible(false);
