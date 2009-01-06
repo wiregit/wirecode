@@ -27,9 +27,9 @@ import org.limewire.core.api.library.ShareListManager;
 import org.limewire.player.api.AudioPlayer;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
-import org.limewire.ui.swing.dnd.LocalFileTransferable;
 import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.dnd.RemoteFileTransferable;
+import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanelFactory;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
@@ -434,67 +434,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
                         .getFileItem(indices[i]));
             }
             return new RemoteFileTransferable(files);
-        }
-    }
-    
-    /**
-     * Drops with this handler will add the file to the ManagedLibrary and share
-     * with the owner of this LocalFileList
-     */
-    private class SharingLibraryTransferHandler extends TransferHandler {
-
-        private LibraryTable table;
-
-        private LocalFileList friendFileList;
-
-        public SharingLibraryTransferHandler(LibraryTable table, LocalFileList friendFileList) {
-            this.table = table;
-            this.friendFileList = friendFileList;
-        }
-
-        @Override
-        public int getSourceActions(JComponent comp) {
-            return COPY;
-        }
-
-        @Override
-        public boolean canImport(TransferHandler.TransferSupport info) {
-            return DNDUtils.containsFileFlavors(info);
-        }
-
-        @Override
-        public boolean importData(TransferHandler.TransferSupport info) {
-            if (!info.isDrop()) {
-                return false;
-            }
-
-            Transferable t = info.getTransferable();
-
-            final List<File> fileList;
-            try {
-                fileList = Arrays.asList(DNDUtils.getFiles(t));
-            } catch (Exception e) {
-                return false;
-            }
-            for (File file : fileList) {
-                if (file.isDirectory()) {
-                    friendFileList.addFolder(file);
-                } else {
-                    friendFileList.addFile(file);
-                }
-            }
-            return true;
-        }
-
-        @Override
-        public Transferable createTransferable(JComponent comp) {
-            int indices[] = table.getSelectedRows();
-            List<File> files = new ArrayList<File>();
-            for (int i = 0; i < indices.length; i++) {
-                LocalFileItem localFileItem = (LocalFileItem) ((LibraryTableModel) table.getModel()).getFileItem(indices[i]); 
-                files.add(localFileItem.getFile());
-            }
-            return new LocalFileTransferable(files.toArray(new File[0]));
         }
     }
 }

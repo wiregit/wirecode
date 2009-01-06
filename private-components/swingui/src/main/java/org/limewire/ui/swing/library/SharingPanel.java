@@ -57,7 +57,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
-import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
@@ -104,7 +104,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         this.friendFileList = friendFileList;        
         this.friend = friend;
         this.friendFileList.addPropertyChangeListener(this);
-        setTransferHandler(new LocalFileListTransferHandler(friendFileList));
+        setTransferHandler(new SharingLibraryTransferHandler(null, friendFileList));
         
         try {
             getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane, friend));
