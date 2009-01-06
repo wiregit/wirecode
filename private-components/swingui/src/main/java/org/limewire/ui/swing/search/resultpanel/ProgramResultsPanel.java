@@ -12,6 +12,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.OpaqueFileSizeRenderer;
 import org.limewire.ui.swing.search.resultpanel.classic.ProgramTableFormat;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewRowHeightRule;
 import org.limewire.ui.swing.search.resultpanel.list.ListViewTableEditorRendererFactory;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -35,11 +36,11 @@ public class ProgramResultsPanel extends BaseResultPanel {
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
         PropertiesFactory<VisualSearchResult> properties,
         ListViewRowHeightRule rowHeightRule, SaveLocationExceptionHandler saveLocationExceptionHandler,
-        SearchResultFromWidgetFactory searchResultFromWidget, IconManager iconManager) {
+        SearchResultFromWidgetFactory searchResultFromWidget, IconManager iconManager, CategoryIconManager categoryIconManager) {
             
         super(listViewEditorRendererFactory, eventList, tableFormat, downloadListManager,
             search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, 
-            saveLocationExceptionHandler, searchResultFromWidget, iconManager);
+            saveLocationExceptionHandler, searchResultFromWidget, iconManager, categoryIconManager);
     }
     
     @Override

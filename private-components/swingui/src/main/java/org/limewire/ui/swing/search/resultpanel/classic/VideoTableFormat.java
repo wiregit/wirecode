@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
+import java.awt.Component;
+
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
@@ -44,6 +46,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Class getColumnClass(int index) {
         switch(index) {
+        case NAME_INDEX: return Component.class;
         case RATING_INDEX: return Integer.class;
         case YEAR_INDEX: return Integer.class;
         case FROM_INDEX: return VisualSearchResult.class;
@@ -54,7 +57,7 @@ public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
     @Override
     public Object getColumnValue(VisualSearchResult vsr, int index) {
         switch(index) {
-            case NAME_INDEX: return vsr.getProperty(FilePropertyKey.NAME);
+            case NAME_INDEX: return vsr;
             case EXTENSION_INDEX: return  vsr.getFileExtension();
             case LENGTH_INDEX: return vsr.getProperty(FilePropertyKey.LENGTH);
             case YEAR_INDEX: return vsr.getProperty(FilePropertyKey.YEAR);

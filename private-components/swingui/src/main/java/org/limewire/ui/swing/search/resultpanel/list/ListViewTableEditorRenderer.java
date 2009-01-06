@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.regex.Pattern;
 
@@ -292,7 +293,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
 
             private void handlePopupMouseEvent(MouseEvent e) {
                 if(e.isPopupTrigger()) {
-                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);
+                    SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), properties);
                     searchResultMenu.show(itemIconLabel, e.getX(), e.getY());
                 }
             }
@@ -303,7 +304,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             @Override
             public void mousePressed(MouseEvent e) {
                 final VisualSearchResult result = vsr; 
-                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, vsr, properties);
+                SearchResultMenu searchResultMenu = new SearchResultMenu(downloadHandler, Collections.singletonList(vsr), properties);
                 searchResultMenu.addPopupMenuListener(new PopupMenuListener() {
                     @Override
                     public void popupMenuCanceled(PopupMenuEvent e) {

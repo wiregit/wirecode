@@ -42,6 +42,7 @@ import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.DNDUtils;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.I18n;
@@ -109,7 +110,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             @Named("known") Collection<Friend> allFriends,
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
             ShareWidgetFactory shareFactory,
-            GhostDragGlassPane ghostPane) {
+            GhostDragGlassPane ghostPane, 
+            CategoryIconManager categoryIconManager) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
         this.shareListManager = shareListManager;
@@ -126,7 +128,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.ghostPane = ghostPane;
         
         this.shareTableRendererEditorFactory = shareTableRendererEditorFactory;
-        iconLabelRenderer = new IconLabelRenderer(iconManager);
+        iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager);
     }
 
 //    @Inject void register(@Named("known") ListenerSupport<FriendEvent> knownFriends) {

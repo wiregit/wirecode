@@ -8,6 +8,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.limewire.ui.swing.table.ConfigurableTable;
 import org.limewire.ui.swing.table.IconLabelRenderer;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.VisibleTableFormat;
+import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
@@ -89,6 +91,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private final SearchResultFromWidgetFactory factory;
     private final RemoteHostActions remoteHostActions;
     private IconManager iconManager;
+    private CategoryIconManager categoryIconManager;
     private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
 
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
@@ -101,7 +104,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
             SaveLocationExceptionHandler saveLocationExceptionHandler,
-            SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager) {
+            SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager, CategoryIconManager categoryIconManager) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
@@ -111,6 +114,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.remoteHostActions = remoteHostActions;
         this.factory = fromWidgetFactory;
         this.iconManager = iconManager;
+        this.categoryIconManager = categoryIconManager;
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         
         setLayout(layout);
@@ -245,7 +249,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
                 // Display a SearchResultMenu for the VisualSearchResult.
                 JComponent component = (JComponent) e.getSource();
-                SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, vsr, properties);
+                SearchResultMenu searchResultMenu = new SearchResultMenu(BaseResultPanel.this, Collections.singletonList(vsr), properties);
                 searchResultMenu.show(component, e.getX(), e.getY());
             }
         });
@@ -277,7 +281,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         OpaqueCalendarRenderer calendarRenderer =
             new OpaqueCalendarRenderer();
         IconLabelRenderer iconLabelRenderer =
-            new IconLabelRenderer(iconManager);
+            new IconLabelRenderer(iconManager, categoryIconManager);
         OpaqueStringRenderer stringRenderer =
             new OpaqueStringRenderer();
 
