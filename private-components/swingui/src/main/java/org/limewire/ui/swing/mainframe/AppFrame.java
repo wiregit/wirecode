@@ -11,6 +11,7 @@ import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
@@ -31,6 +32,8 @@ import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inject.Modules;
+import org.limewire.logging.Log;
+import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.browser.LimeMozillaInitializer;
 import org.limewire.ui.swing.components.LimeJFrame;
@@ -65,7 +68,7 @@ import com.google.inject.Stage;
  * uses the mock-core.
  */
 public class AppFrame extends SingleFrameApplication {
-    
+    private static final Log LOG = LogFactory.getLog(AppFrame.class);    
     public static final String STARTUP = "startup";
     private boolean isStartup = false;
 
@@ -122,7 +125,7 @@ public class AppFrame extends SingleFrameApplication {
     protected void initialize(String[] args) {
         changeSessionStorage(getContext(), new NullSessionStorage(getContext()));
         
-        GuiUtils.assignResources(this);        
+        GuiUtils.assignResources(this);
 
         initUIDefaults();
         
@@ -302,6 +305,10 @@ public class AppFrame extends SingleFrameApplication {
             initMacUIDefaults();
         }
         
+        if (OSUtils.isWindows()) {
+            verifyWindowsLAF();
+        }
+        
         initBackgrounds();
         
         // Set the menu item highlight colors
@@ -379,6 +386,45 @@ public class AppFrame extends SingleFrameApplication {
     private void validateSaveDirectory() {        
         // Make sure the save directory is valid.
         SaveDirectoryHandler.validateSaveDirectoryAndPromptForNewOne();
+    }
+    
+    /**
+     * Verify that the Windows LAF will load properly.  If not, then this 
+     * method installs the cross-platform LAF.  This is a workaround for Sun
+     * Bug IDs 6629522, 6588271, 6622760, 6637885, which can cause an NPE when 
+     * retrieving the checkbox icon width. 
+     */
+    private void verifyWindowsLAF() {
+        // Skip if installed LAF is not Windows LAF.
+        String lafName = UIManager.getLookAndFeel().getClass().getName();
+        if (!UIManager.getSystemLookAndFeelClassName().equals(lafName)) {
+            return;
+        }
+        
+        boolean lafValid = true;
+
+        try {
+            // Create checkbox with sample text, and get its preferred size.  
+            // This should force a call to get the width of the checkbox icon 
+            // in the Windows LAF.  The icon class is 
+            // WindowsIconFactory$CheckBoxIcon.  The icon can also be retrieved
+            // by a call to WindowsCheckBoxUI.getDefaultIcon(). (JIRA LWC-2302)
+            JCheckBox checkBox = new JCheckBox("Verify");
+            checkBox.getPreferredSize();
+            
+        } catch (NullPointerException npe) {
+            LOG.error("Windows XP LAF error", npe);
+            lafValid = false;
+        }
+        
+        // Install cross-platform LAF if Windows LAF is not valid.
+        if (!lafValid) {
+            try {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            } catch (Exception ex) {
+                LOG.error("Unable to install LAF", ex);
+            }
+        }
     }
     
     private static class ShutdownListener implements ExitListener {
