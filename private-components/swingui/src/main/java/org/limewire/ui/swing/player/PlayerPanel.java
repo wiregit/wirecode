@@ -15,7 +15,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -473,11 +472,11 @@ public class PlayerPanel extends JXPanel {
     }
     
     
-    private Painter<JTextField> createStatusBackgroundPainter() {
+    private Painter<JXPanel> createStatusBackgroundPainter() {
         
-        CompoundPainter<JTextField> compoundPainter = new CompoundPainter<JTextField>();
+        CompoundPainter<JXPanel> compoundPainter = new CompoundPainter<JXPanel>();
         
-        RectanglePainter<JTextField> painter = new RectanglePainter<JTextField>();
+        RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>();
         
         painter.setRounded(true);
         painter.setFillPaint(innerBackground);
@@ -490,7 +489,7 @@ public class PlayerPanel extends JXPanel {
         painter.setAntialiasing(true);
         painter.setCacheable(true);
         
-        compoundPainter.setPainters(painter, new BorderPainter<JTextField>(this.arcWidth, this.arcHeight,
+        compoundPainter.setPainters(painter, new BorderPainter<JXPanel>(this.arcWidth, this.arcHeight,
                 this.innerBorder, this.bevelLeft, this.bevelTop1, this.bevelTop2, 
                 this.bevelRight,  this.bevelBottom, AccentType.SHADOW));
         compoundPainter.setCacheable(true);
