@@ -109,7 +109,7 @@ public class PlayerPanel extends JXPanel {
     private int byteLength;
 
     /**
-     * Pointer to the last opened songs file
+     * Pointer to the last opened song's file
      */
     private File file = null;
     
@@ -329,7 +329,6 @@ public class PlayerPanel extends JXPanel {
             }
         }
         
-        
         /**
          * Skips the current song to a new position in the song. If the song's
          * length is unknown (streaming audio), then ignore the skip
@@ -372,9 +371,6 @@ public class PlayerPanel extends JXPanel {
     private void setVolumeValue() {
         player.setVolume(((float) volumeSlider.getValue()) / volumeSlider.getMaximum());
     }
-    
-    
-    
     
     private class PlayerListener implements AudioPlayerListener {
        
@@ -470,8 +466,7 @@ public class PlayerPanel extends JXPanel {
         }
         
     }
-    
-    
+     
     private Painter<JXPanel> createStatusBackgroundPainter() {
         
         CompoundPainter<JXPanel> compoundPainter = new CompoundPainter<JXPanel>();
