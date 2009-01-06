@@ -437,7 +437,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             @Override
             protected void doPaint(Graphics2D g, JXPanel object, int width, int height) {
                 g.setPaint(borderPaint);
-                g.drawLine(0, height-3, width-0, height-3);
+                g.drawLine(0, height-1, width-0, height-1);
             }
         } ;
         
