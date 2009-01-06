@@ -15,6 +15,8 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
@@ -39,16 +41,20 @@ class FriendStatusPanel {
     @Resource(key="FriendStatus.font") private Font chatButtonFont;
     @Resource(key="FriendStatus.foreground") private Color chatButtonForeground;
     @Resource(key="FriendStatus.background") private Color chatBackground;
+    @Resource(key="FriendStatus.buttonBorderColor") private Color buttonBorderColor;
 
     private final JXButton chatButton;
     
-    private Component mainComponent;
+    private JPanel mainComponent;
+    private CompoundBorder chatPanelVisibleBorder;
 
     @Inject FriendStatusPanel(final FriendActions friendActions, final ChatFramePanel friendsPanel, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         
         JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setBorder(BorderFactory.createLineBorder(new Color(159, 159, 159)));
+        Border insideBorder = BorderFactory.createEmptyBorder(-1, 0, 0, 0);
+        Border outsideBorder = BorderFactory.createLineBorder(buttonBorderColor);
+        chatPanelVisibleBorder = new CompoundBorder(insideBorder, outsideBorder);
         chatPanel.setOpaque(true);
         chatPanel.setBackground(chatBackground);
         
@@ -58,11 +64,16 @@ class FriendStatusPanel {
                 if(!friendActions.isSignedIn()) {
                     friendActions.signIn();
                 } else {
+                    friendsPanel.setAdjacentEdgeWidth(mainComponent.getWidth());
                     friendsPanel.toggleVisibility();
+                    mainComponent.setBorder(friendsPanel.isVisible() ? chatPanelVisibleBorder : null);
+                    chatButton.setSize(chatButton.getWidth(), chatButton.getHeight() + 1);
                 }
             }
         });
-        chatButton.setBackgroundPainter(new RectanglePainter<JXButton>(chatBackground, chatBackground));
+        RectanglePainter<JXButton> backgroundPainter = new RectanglePainter<JXButton>(chatBackground, chatBackground);
+        backgroundPainter.setBorderWidth(0.0f);
+        chatButton.setBackgroundPainter(backgroundPainter);
         chatButton.setIcon(iconLibrary.getChatting());
         chatButton.setFont(chatButtonFont);
         chatButton.setForeground(chatButtonForeground);
@@ -71,6 +82,7 @@ class FriendStatusPanel {
         chatButton.setHorizontalTextPosition(AbstractButton.RIGHT);
         Insets insets = new Insets(1, 2, 0, 25);
         chatButton.setMargin(insets);
+        chatButton.setPaintBorderInsets(true);
         
         chatPanel.add(chatButton);
         

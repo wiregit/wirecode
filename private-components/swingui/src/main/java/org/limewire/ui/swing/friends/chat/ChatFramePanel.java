@@ -13,6 +13,8 @@ import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
@@ -61,11 +63,14 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private final EnabledListenerList enabledListenerList = new EnabledListenerList();
-    @Resource(key="ChatFramePanel.frameBorderColor") private Color frameBorderColor;
+    @Resource(key="ChatFramePanel.primaryframeBorderColor") private Color primaryFrameBorderColor;
+    @Resource(key="ChatFramePanel.secondaryframeBorderColor") private Color secondaryFrameBorderColor;
     private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
     private String lastSelectedConversationFriendId;
+    private JXPanel borderPanel;
+    private ChatFramePainter chatFramePainter;
     
     @Inject
     public ChatFramePanel(ChatPanel chatPanel, ChatFriendListPane chatFriendListPane, TrayNotifier notifier) {
@@ -73,11 +78,14 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         this.chatPanel = chatPanel;
         this.chatFriendListPane = chatFriendListPane;
         this.notifier = notifier;
-        this.mainPanel = new java.awt.Panel(new FlowLayout(FlowLayout.CENTER, 1, 1));
+        this.mainPanel = new java.awt.Panel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         
         GuiUtils.assignResources(this);
+        borderPanel = new JXPanel(new MigLayout("insets 1 1 1 1"));
+        chatFramePainter = new ChatFramePainter(primaryFrameBorderColor, secondaryFrameBorderColor);
+        borderPanel.setBackgroundPainter(chatFramePainter);
+        borderPanel.add(chatPanel);
         
-        mainPanel.setBackground(frameBorderColor);
         mainPanel.setVisible(false);        
         add(mainPanel);
         setVisible(false);
@@ -109,6 +117,15 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         });
     }
     
+    /**
+     * The width of the portion of the bottom right frame border that 
+     * intersects with the 'chat' button.
+     * @param width
+     */
+    public void setAdjacentEdgeWidth(int width) {
+        this.chatFramePainter.setSecondaryColorWidth(width);
+    }
+    
     public void setUnseenMessageListener(UnseenMessageListener unseenMessageListener) {
         this.unseenMessageListener = unseenMessageListener;
     }
@@ -128,10 +145,14 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         setVisible(shouldDisplay);
         if (shouldDisplay) {
             unseenMessageListener.clearUnseenMessages();
-            ((Displayable)mainPanel.getComponent(0)).handleDisplay();
+            getDisplayable().handleDisplay();
             new PanelDisplayedEvent(this).publish();
         }
         visibilityListenerList.visibilityChanged(shouldDisplay);
+    }
+    
+    private Displayable getDisplayable() {
+        return chatPanel;
     }
     
     /**
@@ -199,18 +220,26 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     }
     
     private void handleConnectionEstablished(XMPPConnectionEvent event) {
-        mainPanel.add(chatPanel);
+        addChatPanel();
         chatPanel.setLoggedInID(event.getSource().getConfiguration().getCanonicalizedLocalID());
         resetBounds();
         setActionEnabled(true);
     }
+
+    private void addChatPanel() {
+        mainPanel.add(borderPanel);
+    }
     
     private void handleLogoffEvent() {
-        mainPanel.remove(chatPanel);
+        removeChatPanel();
         resetBounds();
         setChatPanelVisible(false);
         setActionEnabled(false);
         lastSelectedConversationFriendId = null;
+    }
+
+    private void removeChatPanel() {
+        mainPanel.remove(borderPanel);
     }
     
     public String getMessagingTopicPatternName() {
