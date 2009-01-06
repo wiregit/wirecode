@@ -39,6 +39,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     
     private JLabel statusLabel;
     private JLabel nameLabel;
+    private JLabel iconLabel;
     private JXButton cancelButton;
     private JXHyperlink removeButton;
     private UploadItem editItem;
@@ -106,6 +107,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     
     private void initializeComponents(LimeProgressBarFactory progressBarFactory){
         nameLabel = new JLabel(I18n.tr("Name"));
+        iconLabel = new JLabel();
         statusLabel = new JLabel(I18n.tr("Status"));
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         removeButton = new JXHyperlink();
@@ -124,17 +126,18 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     }
     
     private void addComponents() {
-        add(nameLabel, "gapleft 5, aligny bottom");
-        add(cancelButton, "gapright 5, alignx right, aligny 50%, spany 3, push, wrap");
-        add(progressBar, "gapleft 5, hidemode 3, wrap");
-        add(statusLabel, "gapleft 5, aligny top, split 3");
-        add(timeLabel, "push, aligny top, alignx right, hidemode 3");
-        add(removeButton, "push, aligny top, alignx right, hidemode 3");
+        add(iconLabel, "gapleft 10, alignx left, aligny 50%, spany 3, hidemode 3");
+        add(nameLabel, "gapleft 10, gaptop 5, aligny bottom");
+        add(cancelButton, "gapright 10, alignx right, aligny 50%, spany 3, push, wrap");
+        add(progressBar, "gapleft 10, , gaptop 2, hidemode 3, wrap");
+        add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top, split 3");
+        add(timeLabel, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
+        add(removeButton, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
     }
     
     private void update(UploadItem item){
         nameLabel.setText(item.getFileName());
-        nameLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+        
         statusLabel.setText(getMessage(item));
         
         if(UploadItemType.GNUTELLA == item.getUploadItemType()) {
@@ -151,6 +154,15 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         } else {
             progressBar.setVisible(false);
             timeLabel.setVisible(false);
+        }
+
+        if (item.getState() == UploadState.UPLOADING) {
+            nameLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            iconLabel.setVisible(false);
+        } else {
+            nameLabel.setIcon(null);
+            iconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            iconLabel.setVisible(true);
         }
         
         removeButton.setVisible(item.getState() == UploadState.UNABLE_TO_UPLOAD);
