@@ -33,7 +33,6 @@ import org.limewire.player.api.AudioPlayer;
 import org.limewire.player.api.AudioPlayerEvent;
 import org.limewire.player.api.AudioPlayerListener;
 import org.limewire.player.api.PlayerState;
-import org.limewire.player.impl.LimeAudioFormat;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeSliderBarFactory;
 import org.limewire.ui.swing.components.MarqueeButton;
@@ -369,8 +368,8 @@ public class PlayerPanel extends JXPanel {
         @Override
         public void progressChange(int bytesread) {
             // if we know the length of the song, update the progress bar
-            if (audioProperties.containsKey(LimeAudioFormat.AUDIO_LENGTH_BYTES)) {
-                int byteslength = ((Integer) audioProperties.get(LimeAudioFormat.AUDIO_LENGTH_BYTES))
+            if (audioProperties.containsKey(AUDIO_LENGTH_BYTES)) {
+                int byteslength = ((Integer) audioProperties.get(AUDIO_LENGTH_BYTES))
                         .intValue();
 
                 float progressUpdate = bytesread * 1.0f / byteslength * 1.0f;
