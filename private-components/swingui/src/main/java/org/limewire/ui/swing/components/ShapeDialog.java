@@ -60,6 +60,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
             @Override
             public void componentShown(ComponentEvent e) {
                 addListeners();
+                resize();
             }
 
             @Override
@@ -99,7 +100,6 @@ public class ShapeDialog extends JXPanel implements Resizable {
         this.owner = owner;
         this.isAutoClose = autoClose;
         setVisible(true);
-        resize();
     }
     
     private void positionRelativeToOwner(){
