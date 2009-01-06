@@ -279,7 +279,7 @@ public class PlayerPanel extends JXPanel {
             } else if (e.getActionCommand() == FORWARD) {
                 nextSong();
             } else if (e.getActionCommand() == BACK) {
-                if (progressSlider.getValue() < 3) {
+                if ((double)progressSlider.getValue() / (double)progressSlider.getMaximum() < .1) {
                     previousSong();
                 }
                 else {
