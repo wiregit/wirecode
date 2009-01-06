@@ -115,7 +115,12 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
                     
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        hadFocus = e.getComponent().hasFocus();
+                        hadFocus = e.getComponent().isFocusOwner();
+                        // Request focus if not focused.  This can occur if the 
+                        // window is newly activated.
+                        if (!hadFocus) {
+                            ArcsVisualizer.this.requestFocusInWindow();
+                        }
                     }
 
                     @Override
