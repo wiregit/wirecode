@@ -137,9 +137,9 @@ public final class FileUtilsTest extends BaseTestCase {
         testFile.setReadOnly();
 		assertTrue(testFile.exists());
 		assertTrue(testFile.isFile());
-        assertTrue(!testFile.canWrite());
+        assertTrue(!FileUtils.canWrite(testFile));
         assertTrue("Cannot set file writable: "+testFile, FileUtils.setWriteable(testFile));
-        assertTrue(testFile.canWrite());
+        assertTrue(FileUtils.canWrite(testFile));
 		SystemUtils.setWriteable(testFile.getPath());
 		assertTrue(FileUtils.setWriteable(testFile));
         File testDir = new File("directory");
@@ -148,7 +148,7 @@ public final class FileUtilsTest extends BaseTestCase {
 		assertTrue(testDir.exists());
 		assertTrue(testDir.isDirectory());
         testDir.setReadOnly();
-        assertTrue(!testDir.canWrite());
+        assertTrue(!FileUtils.canWrite(testDir));
 		File testInTestDir = new File(testDir, "testDirTest");
 		testInTestDir.deleteOnExit();
 		try {
@@ -159,12 +159,12 @@ public final class FileUtilsTest extends BaseTestCase {
         assertTrue(FileUtils.setWriteable(testDir));
         testInTestDir.delete();
 		assertTrue(testInTestDir.createNewFile());
-        assertTrue(testDir.canWrite());
+        assertTrue(FileUtils.canWrite(testDir));
         // Make sure it doesn't die if called on a file that doesn't exist
         File nowhere = new File("m'kay");
 		assertTrue(!nowhere.exists());
         assertTrue(FileUtils.setWriteable(nowhere));
-        assertTrue(!nowhere.canWrite()); // doesn't exist, can't write.
+        assertTrue(!FileUtils.canWrite(nowhere)); // doesn't exist, can't write.
     }
     
     public void testIsReallyParent() throws Exception {
