@@ -723,7 +723,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         } catch (IOException e) {
             LOG.debugf("Not adding {0} because canonicalize failed", f);
             FileListChangedEvent event = dispatchFailure(f, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Can't canonicalize file"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CANONICALIZE));
         }
         
         boolean explicitAdd = false;
@@ -736,7 +736,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             if(fileToFileDescMap.containsKey(file)) {
                 LOG.debugf("Not loading because file already loaded {0}", file);
                 FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-                return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "File already managed"));
+                return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ALREADY_MANAGED));
             }
         } finally {
             rwLock.readLock().unlock();
@@ -746,13 +746,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         if (!LibraryUtils.isFilePhysicallyManagable(file)) {
             LOG.debugf("Not adding {0} because file isn't physically manageable", file);
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "File isn't physically manageable"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.NOT_MANAGEABLE));
         }
         
         if (!LibraryUtils.isFileAllowedToBeManaged(file)) {
             LOG.debugf("Not adding {0} because programs are not allowed to be manageable", file);
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Programs not manageable"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.PROGRAMS_NOT_MANAGEABLE));
         }
 
         getLibraryData().addManagedFile(file, explicitAdd);
@@ -770,7 +770,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         if(failed) {
             LOG.debugf("Not adding {0} because revisions changed while loading", file);
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, "Revisions changed while loading"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));
         } else {
             final PendingFuture task = new PendingFuture();
             ListeningFuture<Set<URN>> urnFuture = urnCache.calculateAndCacheUrns(file);
@@ -827,14 +827,14 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         if(revchange) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, "Revisions changed while loading FD."));          
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));          
         } else if(fd == null) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, "Couldn't create FD"));
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CREATE_FD));
         } else if(failed) {
             LOG.debugf("Couldn't load FD because FD with file {0} exists already.  FD: {1}", file, fd);
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, "File already managed"));
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ALREADY_MANAGED));
         } else { // SUCCESS!
             // try loading the XML for this fileDesc
             fileDescMulticaster.broadcast(new FileDescChangeEvent(fd, FileDescChangeEvent.Type.LOAD, metadata));
@@ -959,7 +959,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             List<LimeXMLDocument> xmlDocs = new ArrayList<LimeXMLDocument>(fd.getLimeXMLDocuments());
             return add(newName, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldName, null, newName), "Old file wasn't managed"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, oldName, null, newName), FileListChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -973,7 +973,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             urnCache.removeUrns(file); // Explicitly remove URNs to force recalculating.
             return add(file, xmlDocs, revision.get(), fd);
         } else {
-            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, file, null, file), "Old file wasn't managed"));
+            return new SimpleFuture<FileDesc>(new FileListChangeFailedException(new FileListChangedEvent(this, FileListChangedEvent.Type.CHANGE_FAILED, file, null, file), FileListChangeFailedException.Reason.OLD_WASNT_MANAGED));
         }
     }
     
@@ -1104,13 +1104,37 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             rwLock.readLock().unlock();
         }
         
+        // A listener that will remove individually managed files if they can't load.
+        EventListener<FutureEvent<FileDesc>> indivListeners = new EventListener<FutureEvent<FileDesc>>() {
+            @Override
+            public void handleEvent(FutureEvent<FileDesc> event) {
+                switch(event.getType()) {
+                case EXCEPTION:
+                    if(event.getException().getCause() instanceof FileListChangeFailedException) {
+                        FileListChangeFailedException ex = (FileListChangeFailedException)event.getException().getCause();
+                        switch(ex.getReason()) {
+                        case CANT_CANONICALIZE:
+                        case CANT_CREATE_FD:
+                        case NOT_MANAGEABLE:
+                        case PROGRAMS_NOT_MANAGEABLE:
+                            getLibraryData().removeManagedFile(ex.getEvent().getFile(), true);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        };
+        
         for(File file : getLibraryData().getManagedFiles()) {
             if(rev != revision.get()) {
                 break;
             }
             // Load files that aren't in managed dirs & aren't manageable files.
             if(!managedDirs.contains(file.getParentFile()) || !hasManageableExtension(file)) {
-                futures.add(add(file, LimeXMLDocument.EMPTY_LIST, rev, null));
+                ListeningFuture<FileDesc> future = add(file, LimeXMLDocument.EMPTY_LIST, rev, null);
+                future.addFutureListener(indivListeners);
+                futures.add(future);
             }
         }
         
