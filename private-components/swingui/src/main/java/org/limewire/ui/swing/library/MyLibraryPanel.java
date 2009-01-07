@@ -235,8 +235,11 @@ public class MyLibraryPanel extends LibraryPanel {
                 SelectAllable<LocalFileItem> selectAllable = selectableMap.get(category);
                 selectAllable.selectAll();
                 List<LocalFileItem> selectedItems = selectAllable.getSelectedItems();
-                multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
-                multiShareWidget.show(null);
+                //TODO this is a temporary fix for LWC-2490.  A real fix depends on LWC-2494.
+                if (selectedItems.size() > 0) {
+                    multiShareWidget.setShareable(selectedItems.toArray(new LocalFileItem[selectedItems.size()]));
+                    multiShareWidget.show(null);
+                }
             } else {
                 categoryShareWidget.setShareable(category);
                 categoryShareWidget.show((JComponent)e.getSource());
