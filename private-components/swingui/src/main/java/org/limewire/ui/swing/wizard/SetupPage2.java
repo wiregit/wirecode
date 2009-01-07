@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -141,16 +140,8 @@ public class SetupPage2 extends WizardPage {
 
     private void initManualPanel() {
         RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
-        
-        Set<File> totalList = new HashSet<File>();
-        
-        totalList.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
-        
-        // Always add existing manage settings, even if this is not technically an upgrade
-        //  (aka there has been a settings problem)
-        totalList.addAll(libraryData.getDirectoriesToManageRecursively());
-
-        for ( File file : totalList ) {
+       
+        for ( File file : AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData) ) {
             root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
         }
         
@@ -181,21 +172,19 @@ public class SetupPage2 extends WizardPage {
     public void applySettings() {
         InstallSettings.SCAN_FILES.setValue(true);
         
-        Collection<File> manage;
+        Collection<File> manage = new HashSet<File>();
         Collection<File> exclude = new HashSet<File>();
         
         if (manualButton.isSelected()) {
             LibraryManagerModel model = treeTable.getLibraryModel();
-            manage = model.getRootChildrenAsFiles();
+            manage.addAll(model.getRootChildrenAsFiles());
             exclude.addAll(model.getAllExcludedSubfolders());
         } else {
-            manage = new HashSet<File>();
-
             manage.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
-            manage.addAll(libraryData.getDirectoriesToManageRecursively());
         }
-        
-        // We should always add existing exclusions back to be safe
+
+        // Always add existing settings
+        manage.addAll(libraryData.getDirectoriesToManageRecursively());
         exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());
