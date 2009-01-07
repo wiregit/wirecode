@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.library.nav;
 
 import org.limewire.core.settings.XMPPSettings;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 
@@ -10,8 +11,8 @@ import org.limewire.setting.evt.SettingListener;
  */
 class OfflineNavList extends NavList {
 
-    public OfflineNavList(String name) {
-        super(name);
+    public OfflineNavList(String name, BooleanSetting collapsedSetting) {
+        super(name, collapsedSetting);
         XMPPSettings.XMPP_SHOW_OFFLINE.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {

@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library.nav;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +22,7 @@ import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.ui.swing.components.ActionLabel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -38,7 +41,7 @@ class NavList extends JXPanel {
     
     private final NavListResources resources = new NavListResources();
     
-    NavList(String name) {
+    NavList(String name, final BooleanSetting collapsedSetting) {
         setName(name);
         setLayout(new VerticalLayout(0));
         setOpaque(false);
@@ -50,10 +53,8 @@ class NavList extends JXPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 collapsablePanels.setCollapsed(!collapsablePanels.isCollapsed());
-                putValue(Action.SMALL_ICON, collapsablePanels.isCollapsed() ? resources.collapsedIcon : resources.expandedIcon);
             }
         };
-        labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
         this.titleLabel = new ActionLabel(labelAction, true);
         FontUtils.bold(titleLabel);
         titleLabel.setName("LibraryNavigator.NavListTitle");
@@ -88,6 +89,26 @@ class NavList extends JXPanel {
         // Extended hack to make the panel non-opaque.
         ((JComponent)collapsablePanels.getComponent(0)).setOpaque(false);
         add(collapsablePanels);
+        
+
+        labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
+        collapsablePanels.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals("collapsed")) {
+                    Boolean collapsed = (Boolean)evt.getNewValue();
+                    if(collapsed != null) {
+                        labelAction.putValue(Action.SMALL_ICON, collapsed ? resources.collapsedIcon : resources.expandedIcon);
+                        if(collapsedSetting != null) {
+                            collapsedSetting.setValue(collapsed);
+                        }
+                    }
+                }
+            }
+        });
+        if(collapsedSetting != null) {
+            collapsablePanels.setCollapsed(collapsedSetting.getValue());
+        }
         
         checkVisibility(true);
     }
@@ -135,7 +156,6 @@ class NavList extends JXPanel {
         NavPanel panel = getPanelForFriend(friend);
         if(panel != null) {
             collapsablePanels.setCollapsed(false);
-            labelAction.putValue(Action.SMALL_ICON, resources.expandedIcon);
             collapsablePanels.scrollRectToVisible(panel.getBounds());
             if(panel == navPanels.get(0)) {
                 scrollRectToVisible(titleLabel.getBounds());
