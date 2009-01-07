@@ -217,7 +217,7 @@ public final class Initializer {
                         awtSplash.setVisible(false);
                     }
                     
-                    boolean confirmed = new IntentDialog().confirmLegal();
+                    boolean confirmed = new IntentDialog(LimeWireUtils.getLimeWireVersion()).confirmLegal();
                     if (!confirmed) {
                         System.exit(0);
                     }

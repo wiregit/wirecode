@@ -39,8 +39,6 @@ public class IntentDialog extends LimeJDialog {
     private final Font headingFont = new Font("Arial", Font.BOLD, 16);
     private final Font normalFont = new Font("Arial", Font.PLAIN, 14);
     
-    private final String title = "LimeWire 5 Alpha";
-    
     private final JLabel headingLabel;
     private final MultiLineLabel bodyLabel;
     private final JLabel agreeLabel;
@@ -59,12 +57,12 @@ public class IntentDialog extends LimeJDialog {
     
     private boolean agreed = false;
     
-    public IntentDialog(){
+    public IntentDialog(String version){
         super();
         
         ResizeUtils.forceSize(this, new Dimension(590,400));
                 
-        setTitle(title);
+        setTitle("LimeWire " + version);
         setModal(true);
         setResizable(false);
         setAlwaysOnTop(true);
@@ -188,7 +186,7 @@ public class IntentDialog extends LimeJDialog {
         String bodyText1
         = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
         String linkText = I18n.tr("Learn more");
-        String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright infringement.");
+        String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire for copyright infringement.");
         
         
         Action exitAction = new AbstractAction(I18n.tr("Exit")){
