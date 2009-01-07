@@ -554,6 +554,10 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
         @Override
         public void update(DownloadItem item){
+            if(item == null) { // Ignore null calls, used for accessibility.
+                return;
+            }
+            
             nameLabel.setText(item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
             if (progressBar.isVisible()) { 
