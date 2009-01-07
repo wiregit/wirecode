@@ -32,29 +32,23 @@ public class FilePropertyKeyPopulator {
                 set(properties, doc, category, filePropertyKey);
             }
 
-            if (category == Category.AUDIO) {
-                Long bitrate = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.AUDIO_BITRATE));
-
-                Long length = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.AUDIO_SECONDS));
-
-                Integer quality = toAudioQualityScore(extension, fileSize, bitrate, length);
+            Long bitrate, length;
+            Integer quality;
+            switch(category) {
+            case AUDIO:
+                bitrate = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.AUDIO_BITRATE));
+                length = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.AUDIO_SECONDS));
+                quality = toAudioQualityScore(extension, fileSize, bitrate, length);
                 set(properties, FilePropertyKey.QUALITY, quality);
-
-            } else if (category == Category.VIDEO) {
-                Long bitrate = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.VIDEO_BITRATE));
-                Long length = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.VIDEO_LENGTH));
-                Long height = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.VIDEO_HEIGHT));
-                Long width = CommonUtils.parseLongNoException(doc
-                        .getValue(LimeXMLNames.VIDEO_WIDTH));
-
-                Integer quality = toVideoQualityScore(extension, fileSize, bitrate, length, height,
-                        width);
+                break;
+            case VIDEO:
+                bitrate = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.VIDEO_BITRATE));
+                length = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.VIDEO_LENGTH));
+                Long height = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.VIDEO_HEIGHT));
+                Long width = CommonUtils.parseLongNoException(doc.getValue(LimeXMLNames.VIDEO_WIDTH));
+                quality = toVideoQualityScore(extension, fileSize, bitrate, length, height, width);
                 set(properties, FilePropertyKey.QUALITY, quality);
+                break;
             }
         }
     }
@@ -78,8 +72,12 @@ public class FilePropertyKeyPopulator {
         }
     }
 
-    public static void set(Map<FilePropertyKey, Object> map, LimeXMLDocument doc,
-            Category category, FilePropertyKey property) {
+    /**
+     * Sets the correct value in the map, retrieving the value from the
+     * {@link LimeXMLDocument}. The value retrieved from the document is based
+     * on the {@link Category} and {@link FilePropertyKey}.
+     */
+    public static void set(Map<FilePropertyKey, Object> map, LimeXMLDocument doc, Category category, FilePropertyKey property) {
         String limeXmlName = getLimeXmlName(category, property);
         if (limeXmlName != null) {
             Object value = doc.getValue(limeXmlName);
@@ -204,7 +202,8 @@ public class FilePropertyKeyPopulator {
      * FilePropertyKey. If not mapping exists null is returned.
      */
     public static String getLimeXmlName(Category category, FilePropertyKey filePropertyKey) {
-        if (category == Category.AUDIO) {
+        switch(category) {
+        case AUDIO:
             switch (filePropertyKey) {
             case ALBUM:
                 return LimeXMLNames.AUDIO_ALBUM;
@@ -225,7 +224,8 @@ public class FilePropertyKeyPopulator {
             case TITLE:
                 return LimeXMLNames.AUDIO_TITLE;
             }
-        } else if (category == Category.DOCUMENT) {
+            break;
+        case DOCUMENT:
             switch (filePropertyKey) {
             case AUTHOR:
                 return LimeXMLNames.DOCUMENT_AUTHOR;
@@ -234,14 +234,18 @@ public class FilePropertyKeyPopulator {
             case TOPIC:
                 return LimeXMLNames.DOCUMENT_TOPIC;
             }
-        } else if (category == Category.IMAGE) {
+            break;
+        case IMAGE:
             switch (filePropertyKey) {
             case AUTHOR:
                 return LimeXMLNames.IMAGE_ARTIST;
             case TITLE:
                 return LimeXMLNames.IMAGE_TITLE;
+            case COMMENTS:
+                return LimeXMLNames.IMAGE_DESCRIPTION;
             }
-        } else if (category == Category.PROGRAM) {
+            break;
+        case PROGRAM:
             switch (filePropertyKey) {
             case AUTHOR:
                 return LimeXMLNames.APPLICATION_PUBLISHER;
@@ -252,7 +256,8 @@ public class FilePropertyKeyPopulator {
             case TITLE:
                 return LimeXMLNames.APPLICATION_NAME;
             }
-        } else if (category == Category.VIDEO) {
+            break;
+        case VIDEO:
             switch (filePropertyKey) {
             case AUTHOR:
                 return LimeXMLNames.VIDEO_PRODUCER;
@@ -275,6 +280,7 @@ public class FilePropertyKeyPopulator {
             case RATING:
                 return LimeXMLNames.VIDEO_RATING;
             }
+            break;
         }
         return null;
     }
