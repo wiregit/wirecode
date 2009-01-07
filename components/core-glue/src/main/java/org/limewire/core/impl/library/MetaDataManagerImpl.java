@@ -123,7 +123,7 @@ public class MetaDataManagerImpl implements MetaDataManager {
         case IMAGE:
             return LimeXMLNames.IMAGE_SCHEMA;
         case PROGRAM:
-            return LimeXMLNames.AUDIO_SCHEMA;
+            return LimeXMLNames.APPLICATION_SCHEMA;
         case VIDEO:
             return LimeXMLNames.VIDEO_SCHEMA;
         }
