@@ -40,7 +40,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
-import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.dnd.MyLibraryTransferHandler;
 import org.limewire.ui.swing.library.image.LibraryImagePanel;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
@@ -114,7 +114,8 @@ public class MyLibraryPanel extends LibraryPanel {
         playerPanel.setMaximumSize(new Dimension(999,999));
         playerPanel.setPreferredSize(new Dimension(999,999));
 
-        setTransferHandler(new LocalFileListTransferHandler(libraryManager.getLibraryManagedList()));
+        
+        setTransferHandler(new MyLibraryTransferHandler(null, libraryManager.getLibraryManagedList()));
         try {
             getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane));
         } catch (TooManyListenersException ignoreException) {            

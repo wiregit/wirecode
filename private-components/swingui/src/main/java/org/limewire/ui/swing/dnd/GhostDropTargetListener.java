@@ -36,10 +36,10 @@ public class GhostDropTargetListener implements DropTargetListener {
         this.friend = null;
     }
     
-    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, String name) {
+    public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, String renderName) {
         this.parent = parent;
         this.ghostDragGlassPane = ghostDragGlassPane;
-        this.friend = new FriendAdapter(name);
+        this.friend = new FriendAdapter(renderName);
     }
     
     public GhostDropTargetListener(Component parent, GhostDragGlassPane ghostDragGlassPane, Friend friend) {
@@ -129,17 +129,19 @@ public class GhostDropTargetListener implements DropTargetListener {
      * Takes a String and creates a Friend which returns that name.
      */
     private class FriendAdapter implements Friend {
-        private String name;
+        private String renderName;
         
         public FriendAdapter(String name) {
-            this.name = name;
+            this.renderName = name;
+        }
+
+        @Override
+        public String getRenderName() {
+            return renderName;
         }
         
         @Override
-        public String getName() {
-            return name;
-        }
-
+        public String getName() {return null;}
         @Override
         public String getFirstName() {return null;}
         @Override
@@ -148,8 +150,6 @@ public class GhostDropTargetListener implements DropTargetListener {
         public String getId() {return null;}
         @Override
         public Network getNetwork() {return null;}
-        @Override
-        public String getRenderName() {return null;}
         @Override
         public boolean isAnonymous() {return false;}
         @Override

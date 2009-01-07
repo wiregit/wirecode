@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 
 import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -156,7 +157,12 @@ public class GhostDragGlassPane extends JPanel {
             if(friend == null) {
             	label.setText(I18n.tr("Add to My Library"));
             } else {
-	            label.setText(I18n.tr("Share files with {0}", friend.getName()));
+                String renderName = friend.getRenderName();
+                if(!StringUtils.isEmpty(renderName)) {
+                    label.setText(I18n.tr("Share files with {0}", renderName));
+                } else {
+                    label.setText(I18n.tr("Share files"));
+                }
             }
         }
     }
