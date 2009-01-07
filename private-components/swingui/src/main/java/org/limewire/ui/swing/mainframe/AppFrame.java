@@ -212,18 +212,18 @@ public class AppFrame extends SingleFrameApplication {
         }
         
         validateSaveDirectory();
-        
+
         EventAnnotationProcessor.subscribe(this);
-        
+
         // Now that the UI is ready to use, update it's priority a bit.
         Thread eventThread = Thread.currentThread();
         eventThread.setPriority(eventThread.getPriority() + 1);
-        
-       new ShellAssociationManager().validateFileAssociations(getMainFrame());
-       
-       ui.loadProNag();
+
+        new ShellAssociationManager().validateFileAssociations(getMainFrame());
+
+        ui.loadProNag();
     }
-    
+
     @EventSubscriber
     public void handleShowAboutWindow(AboutDisplayEvent event) {
         new AboutWindow(getMainFrame(), application).showDialog();
