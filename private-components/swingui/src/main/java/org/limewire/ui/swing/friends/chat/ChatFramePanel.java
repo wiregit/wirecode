@@ -262,9 +262,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
 
     @Override
     public void resize() {
-        if (isVisible()) {
-            resetBounds();
-        }
+        resetBounds();
     }
 
     @Override

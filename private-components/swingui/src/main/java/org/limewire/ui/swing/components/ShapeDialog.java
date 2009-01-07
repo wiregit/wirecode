@@ -159,7 +159,7 @@ public class ShapeDialog extends JXPanel implements Resizable {
 
     @Override
     public void resize() {
-        if (isVisible() && component != null) {
+        if (component != null) {
             if (!isPositionedRelativeToOwner || owner == null) {
                 Rectangle parentBounds = getParent().getBounds();
                 Dimension preferredSize = getPreferredSize();

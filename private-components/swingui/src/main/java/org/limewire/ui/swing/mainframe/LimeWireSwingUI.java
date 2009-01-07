@@ -39,6 +39,8 @@ public class LimeWireSwingUI extends JPanel {
     private final MainPanel mainPanel;
     private final TopPanel topPanel;
     private final ProNag proNag;
+    private final Application application;
+    private final JLayeredPane layeredPane;
     
 	@Inject
     public LimeWireSwingUI(
@@ -51,6 +53,9 @@ public class LimeWireSwingUI extends JPanel {
     	        
     	this.topPanel = topPanel;
     	this.mainPanel = mainPanel;
+    	this.proNag = proNag;
+    	this.application = application;
+    	this.layeredPane = new JLayeredPane();
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -78,21 +83,12 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.addComponentListener(new MainPanelResizer(mainPanel));
-        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
+        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
-        if(!application.isProVersion()) {
-            this.proNag = proNag;
-            layeredPane.addComponentListener(new PanelResizer(proNag));
-            layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
-            proNag.setVisible(false);
-        } else {
-            this.proNag = null;
-        }
-        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         layeredPane.addComponentListener(new PanelResizer(shapeDialog));
+        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         add(layeredPane, gbc);
                 
         JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);
@@ -117,20 +113,21 @@ public class LimeWireSwingUI extends JPanel {
 	}
 	
 	void loadProNag() {
-	    if(proNag != null) {
+        if(!application.isProVersion()) {
 	        proNag.loadContents().addFutureListener(new EventListener<FutureEvent<Void>>() {
 	            @Override
 	            @SwingEDTEvent
 	            public void handleEvent(FutureEvent<Void> event) {
 	                switch(event.getType()) {
 	                case SUCCESS:
-	                    proNag.setVisible(true);
+	                    layeredPane.addComponentListener(new PanelResizer(proNag));
+	                    layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
+	                    proNag.resize();
 	                }
 	            }
 	        });
 	    }
 	}
-
     
     public void goHome() {
         topPanel.goHome();
@@ -163,7 +160,9 @@ public class LimeWireSwingUI extends JPanel {
         
         @Override
         public void componentResized(ComponentEvent e) {
-            target.resize();
+            if(target.isVisible()) {
+                target.resize();
+            }
         }
     }
     
