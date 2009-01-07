@@ -82,7 +82,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         
         GuiUtils.assignResources(this);
         borderPanel = new JXPanel(new MigLayout("insets 1 1 1 1"));
-        chatFramePainter = new ChatFramePainter(primaryFrameBorderColor, secondaryFrameBorderColor);
+        chatFramePainter = new ChatFramePainter(primaryFrameBorderColor, Color.white);
         borderPanel.setBackgroundPainter(chatFramePainter);
         borderPanel.add(chatPanel);
         
@@ -179,7 +179,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
             }
         } 
     }
-
+    
     private void notifyUnseenMessageListener(MessageReceivedEvent event) {
         String messageFriendID = event.getMessage().getFriendID();
         if (!messageFriendID.equals(lastSelectedConversationFriendId)) {
@@ -192,6 +192,9 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         if (event.isLocallyInitiated()) {
             lastSelectedConversationFriendId = event.getFriend().getID();
             unseenMessageListener.conversationSelected(lastSelectedConversationFriendId);
+            chatFramePainter.setSecondaryBorderPaint(secondaryFrameBorderColor);
+            borderPanel.invalidate();
+            borderPanel.repaint();
         }
     }
     
@@ -200,6 +203,9 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         if (event.getFriend().getID().equals(lastSelectedConversationFriendId)) {
             lastSelectedConversationFriendId = null;
         }
+        chatFramePainter.setSecondaryBorderPaint(Color.white);
+        borderPanel.invalidate();
+        borderPanel.repaint();
     }
 
     private Notification getNoticeForMessage(MessageReceivedEvent event) {
