@@ -472,7 +472,7 @@ public class ConversationPane extends JPanel implements Displayable {
             } else if (EventType.ACTIVATED == e.getEventType()) {
                 if (ChatDocumentBuilder.LIBRARY_LINK.equals(e.getDescription())) {
                     LOG.debugf("Opening a view to {0}'s library", chatFriend.getName());
-                    //TODO: Open the view for this friends' library
+                    libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
 
                 } else {
                     String linkDescription = e.getDescription();
