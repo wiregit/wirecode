@@ -53,7 +53,7 @@ public class SetupWizard {
 
         if (needsUpgrade()) {
             wizard.addPage(new SetupPage2(decorator, iconManager, libraryData, true));
-        } 
+        }
         else if(needsPage2()){
             wizard.addPage(new SetupPage2(decorator, iconManager, libraryData));
         }
