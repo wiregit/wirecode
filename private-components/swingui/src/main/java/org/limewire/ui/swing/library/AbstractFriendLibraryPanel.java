@@ -3,6 +3,7 @@ package org.limewire.ui.swing.library;
 import java.awt.Component;
 import java.util.TooManyListenersException;
 
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -15,10 +16,15 @@ import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
+import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.FriendFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
@@ -29,9 +35,12 @@ import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 abstract class AbstractFriendLibraryPanel extends LibraryPanel {
@@ -108,6 +117,61 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
     private LibraryTableModel<RemoteFileItem> getTableModel(LibraryTable table){
         return (LibraryTableModel<RemoteFileItem>)table.getModel();
     }   
+    
+    @Override
+    protected <T extends FileItem> void addCategorySizeListener(Category category,
+            Action action, FilterList<T> filteredAllFileList, FilterList<T> filteredList) {
+        // Comment this out & return null if you don't want sizes added to library panels.
+        ButtonSizeListener<T> listener = new ButtonSizeListener<T>(category, action, filteredList);
+        filteredList.addListEventListener(listener);
+        addDisposable(listener);
+    }
+    
+    /**
+     * Hide any category that has no files in it.
+     */
+    private class ButtonSizeListener<T> implements Disposable, ListEventListener<T>, SettingListener {
+        private final Category category;
+        private final Action action;
+        private final FilterList<T> list;
+        
+        private ButtonSizeListener(Category category, Action action, FilterList<T> list) {
+            this.category = category;
+            this.action = action;
+            this.list = list;
+            action.putValue(Action.NAME, I18n.tr(category.toString()));
+            setText();
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.addSettingListener(this);
+            }
+        }
+
+        private void setText() {
+            if(category == Category.PROGRAM) { // hide program category is not enabled
+                action.setEnabled(LibrarySettings.ALLOW_PROGRAMS.getValue());
+            }
+            //disable any category if size is 0
+            action.setEnabled(list.size() > 0);
+        }
+        
+        @Override
+        public void dispose() {
+            list.removeListEventListener(this);
+            if(category == Category.PROGRAM) {
+                LibrarySettings.ALLOW_PROGRAMS.removeSettingListener(this);
+            }
+        }
+
+        @Override
+        public void listChanged(ListEvent<T> listChanges) {
+            setText();
+        }
+
+        @Override
+        public void settingChanged(SettingEvent evt) {
+            setText();
+        }
+    }    
     
     /**
      * Grays out a table row if a file is already downloading or
