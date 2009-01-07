@@ -24,7 +24,15 @@ public class SearchResultMenu extends JPopupMenu {
 
         final VisualSearchResult firstItem = selectedItems.get(0);
         
-        boolean downloadEnabled = selectedItems.size() > 1 || firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
+        
+        boolean downloadEnabled = false;
+        for(VisualSearchResult visualSearchResult : selectedItems) {
+            if(visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                downloadEnabled = true;
+                break;
+            }
+        }
+        
         boolean markAsSpamEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
         boolean showHideSimilarFileVisible = selectedItems.size() == 1 && firstItem.getSimilarResults().size() > 0;
         boolean showHideSimilarFileEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
