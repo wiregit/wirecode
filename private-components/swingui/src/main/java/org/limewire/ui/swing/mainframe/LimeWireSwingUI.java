@@ -11,6 +11,7 @@ import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
+import org.limewire.concurrent.FutureEvent;
 import org.limewire.core.api.Application;
 import org.limewire.core.api.updates.UpdateEvent;
 import org.limewire.listener.EventListener;
@@ -35,7 +36,9 @@ import com.google.inject.Inject;
 
 public class LimeWireSwingUI extends JPanel {
     
+    private final MainPanel mainPanel;
     private final TopPanel topPanel;
+    private final ProNag proNag;
     
 	@Inject
     public LimeWireSwingUI(
@@ -47,6 +50,7 @@ public class LimeWireSwingUI extends JPanel {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
+    	this.mainPanel = mainPanel;
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -80,9 +84,12 @@ public class LimeWireSwingUI extends JPanel {
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
         if(!application.isProVersion()) {
+            this.proNag = proNag;
             layeredPane.addComponentListener(new PanelResizer(proNag));
             layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
-            proNag.loadContents();
+            proNag.setVisible(false);
+        } else {
+            this.proNag = null;
         }
         layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
         layeredPane.addComponentListener(new PanelResizer(shapeDialog));
@@ -100,6 +107,28 @@ public class LimeWireSwingUI extends JPanel {
         gbc.gridheight = GridBagConstraints.REMAINDER;
         add(southPanel, gbc);
     }
+	
+	void hideMainPanel() {
+	    mainPanel.setVisible(false);
+	}
+	
+	void showMainPanel() {
+	    mainPanel.setVisible(true);
+	}
+	
+	void loadProNag() {
+	    if(proNag != null) {
+	        proNag.loadContents().addFutureListener(new EventListener<FutureEvent<Void>>() {
+	            @Override
+	            public void handleEvent(FutureEvent<Void> event) {
+	                switch(event.getType()) {
+	                case SUCCESS:
+	                    proNag.setVisible(true);
+	                }
+	            }
+	        });
+	    }
+	}
 
     
     public void goHome() {

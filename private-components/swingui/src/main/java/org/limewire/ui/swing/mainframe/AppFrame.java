@@ -204,9 +204,11 @@ public class AppFrame extends SingleFrameApplication {
             });
             getMainFrame().setGlassPane(glassPane);
 
+            ui.hideMainPanel();
             glassPane.setVisible(true);
             setupWizard.showDialogIfNeeded(getMainFrame());
             glassPane.setVisible(false);
+            ui.showMainPanel();
         }
         
         validateSaveDirectory();
@@ -218,6 +220,8 @@ public class AppFrame extends SingleFrameApplication {
         eventThread.setPriority(eventThread.getPriority() + 1);
         
        new ShellAssociationManager().validateFileAssociations(getMainFrame());
+       
+       ui.loadProNag();
     }
     
     @EventSubscriber
