@@ -237,7 +237,6 @@ public class LibraryOptionPanel extends OptionPanel {
         
         
         public void enablePrograms(boolean enable) {
-            System.out.println(enable);
             if(enable) {
                 programCheckBox.setEnabled(true);
             } else {
