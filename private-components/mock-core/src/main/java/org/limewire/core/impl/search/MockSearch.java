@@ -181,7 +181,7 @@ public class MockSearch implements Search {
         msr.addSource("12.12.1.21");
         msr.setUrn("www.partytime.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Night Life");
-        msr.setProperty(FilePropertyKey.COMMENTS, "Our album is awesome!");
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "Our album is awesome!");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 2.8);
         msr.setProperty(FilePropertyKey.NAME, name);
         msr.setProperty(FilePropertyKey.LENGTH, "4:19");
@@ -199,7 +199,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy km lkn nans jaskj asjkbcjkbs bbja " +
         		"scb bjk asc bjkajbsc kbk asbc b bascbbasc b " +
         		"ascb bascb asb cbascbab cb ascbbas cba scbasc");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
@@ -222,7 +222,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -243,7 +243,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -264,7 +264,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -285,7 +285,7 @@ public class MockSearch implements Search {
         msr.setProperty(FilePropertyKey.ALBUM, "Nightfall");
         msr.setProperty(FilePropertyKey.AUTHOR, "The Buddies");
         msr.setProperty(FilePropertyKey.BITRATE, "192");
-        msr.setProperty(FilePropertyKey.COMMENTS, "very jazzy");
+        msr.setProperty(FilePropertyKey.DESCRIPTION, "very jazzy");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 3.9);
         msr.setProperty(FilePropertyKey.GENRE, "Jazz");
         msr.setProperty(FilePropertyKey.NAME, name);
@@ -329,7 +329,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.mtownzoo.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Morristown Zoo");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Who knew they could do that?");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -351,7 +351,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.sdzoo.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "San Diego Zoo");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Who knew they could do that?");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -372,7 +372,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.stlzoo.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "St. Louis Zoo");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Who knew they could do that?");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -393,7 +393,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.stlzoo2.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "St. Louis Zoo");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Who knew they could do that?");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -414,7 +414,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.bracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Bracket High School");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -435,7 +435,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.Dobracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Monkey Matt");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -456,7 +456,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.dbracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Fleet Corrs");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -479,7 +479,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.FunPazabracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Monkey Fun");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -500,7 +500,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.WrenchFerabracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Ouch");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -521,7 +521,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.OalRangbracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Moneky High School");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -542,7 +542,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.Sepbracket.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Mall Of Canada");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -563,7 +563,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.SurfBlahBl.edu" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "Surfing Monkeys");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Food fight");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -772,7 +772,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.johnswedding.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "John's Wedding");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Someone likes to dance");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -803,7 +803,7 @@ public class MockSearch implements Search {
         msr.addSource("1.1.1.123");
         msr.setUrn("www.joeswedding.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.QUALITY, "excellent");
@@ -819,7 +819,7 @@ public class MockSearch implements Search {
         msr.addSource("1.1.1.123");
         msr.setUrn("www.medicalMe.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "Dr. John");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "don't itch");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.RATING, "8");
@@ -836,7 +836,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.GoodForSole.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "PB&J");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Peanut butter ones are the best");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -1027,7 +1027,7 @@ public class MockSearch implements Search {
         msr.setUrn("www.stlzood.com" + i);
         msr.setProperty(FilePropertyKey.AUTHOR, "I'm engaged");
         msr.setProperty(FilePropertyKey.BITRATE, "5000");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Who knew they could do that?");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.HEIGHT, "480");
@@ -1047,7 +1047,7 @@ public class MockSearch implements Search {
         msr.addSource("1.1.1.123");
         msr.setUrn("www.joeswedding.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.RATING, "8");
@@ -1064,7 +1064,7 @@ public class MockSearch implements Search {
         msr.addSource("1.1.1.123");
         msr.setUrn("www.jsdfoeswedding.com");
         msr.setProperty(FilePropertyKey.AUTHOR, "Joe's Wedding");
-        msr.setProperty(FilePropertyKey.COMMENTS,
+        msr.setProperty(FilePropertyKey.DESCRIPTION,
             "Live life to live");
         msr.setProperty(FilePropertyKey.FILE_SIZE, 5.1);
         msr.setProperty(FilePropertyKey.RATING, "8");

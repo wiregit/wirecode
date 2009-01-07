@@ -211,7 +211,7 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.AUDIO_ARTIST;
             case BITRATE:
                 return LimeXMLNames.AUDIO_BITRATE;
-            case COMMENTS:
+            case DESCRIPTION:
                 return LimeXMLNames.AUDIO_COMMENTS;
             case GENRE:
                 return LimeXMLNames.AUDIO_GENRE;
@@ -241,7 +241,7 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.IMAGE_ARTIST;
             case TITLE:
                 return LimeXMLNames.IMAGE_TITLE;
-            case COMMENTS:
+            case DESCRIPTION:
                 return LimeXMLNames.IMAGE_DESCRIPTION;
             }
             break;
@@ -263,7 +263,7 @@ public class FilePropertyKeyPopulator {
                 return LimeXMLNames.VIDEO_PRODUCER;
             case BITRATE:
                 return LimeXMLNames.VIDEO_BITRATE;
-            case COMMENTS:
+            case DESCRIPTION:
                 return LimeXMLNames.VIDEO_COMMENTS;
             case COMPANY:
                 return LimeXMLNames.VIDEO_STUDIO;

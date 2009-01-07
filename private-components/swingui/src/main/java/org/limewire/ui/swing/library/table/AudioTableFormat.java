@@ -72,7 +72,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
         case TRACK_INDEX: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
         case QUALITY_INDEX: return "";
-        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case ACTION_INDEX: return baseObject;
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();

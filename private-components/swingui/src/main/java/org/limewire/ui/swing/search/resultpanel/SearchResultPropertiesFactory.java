@@ -82,7 +82,7 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             album.setText(vsr.getPropertyString(FilePropertyKey.ALBUM));
             title.setText(vsr.getPropertyString(FilePropertyKey.TITLE));
             year.setText(vsr.getPropertyString(FilePropertyKey.YEAR));
-            description.setText(vsr.getPropertyString(FilePropertyKey.COMMENTS));
+            description.setText(vsr.getPropertyString(FilePropertyKey.DESCRIPTION));
 
             // Clear the table
             readOnlyInfoModel.setRowCount(0);

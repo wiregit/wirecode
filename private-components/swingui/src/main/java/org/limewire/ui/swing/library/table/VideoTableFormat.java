@@ -55,7 +55,7 @@ public class VideoTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
                 return null;
             else
                 return baseObject.getProperty(FilePropertyKey.WIDTH) + " X " + baseObject.getProperty(FilePropertyKey.HEIGHT); 
-        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case GENRE_INDEX: return baseObject.getProperty(FilePropertyKey.GENRE);
         case HIT_INDEX: return baseObject.getNumHits();
         case UPLOAD_ATTEMPTS_INDEX: return baseObject.getNumUploadAttempts();

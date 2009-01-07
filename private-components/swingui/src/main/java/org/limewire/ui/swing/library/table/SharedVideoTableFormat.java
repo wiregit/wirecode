@@ -55,7 +55,7 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
                 return null;
             else
                 return baseObject.getProperty(FilePropertyKey.WIDTH) + " X " + baseObject.getProperty(FilePropertyKey.HEIGHT); 
-        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case ACTION_INDEX: return baseObject;
         case GENRE_INDEX: return baseObject.getProperty(FilePropertyKey.GENRE);
         }

@@ -30,6 +30,6 @@ public abstract class AbstractPropertiableFileDialog extends Dialog {
         album.setText(str(propertiable.getProperty(FilePropertyKey.ALBUM)));
         year.setText(str(propertiable.getProperty(FilePropertyKey.YEAR)));
         track.setText(str(propertiable.getProperty(FilePropertyKey.TRACK_NUMBER)));
-        description.setText(str(propertiable.getProperty(FilePropertyKey.COMMENTS)));
+        description.setText(str(propertiable.getProperty(FilePropertyKey.DESCRIPTION)));
     }
 }

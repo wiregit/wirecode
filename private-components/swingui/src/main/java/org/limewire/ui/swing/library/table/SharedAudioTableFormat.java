@@ -70,7 +70,7 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
         case TRACK_INDEX: return baseObject.getProperty(FilePropertyKey.TRACK_NUMBER);
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
         case QUALITY_INDEX: return "";
-        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+        case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         case ACTION_INDEX: return baseObject;
         }
         throw new IllegalArgumentException("Unknown column:" + column);

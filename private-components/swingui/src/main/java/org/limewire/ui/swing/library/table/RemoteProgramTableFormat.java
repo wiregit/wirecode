@@ -36,7 +36,7 @@ public class RemoteProgramTableFormat<T extends FileItem> extends AbstractRemote
             case COMPANY_INDEX: return baseObject.getProperty(FilePropertyKey.COMPANY);
             case SIZE_INDEX: return baseObject.getSize();
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
-            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

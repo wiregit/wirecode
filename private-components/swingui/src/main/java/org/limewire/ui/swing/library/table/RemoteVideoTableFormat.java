@@ -44,12 +44,12 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
             case NAME_INDEX: return baseObject.getName();
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
             case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
-            case MISC_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case MISC_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
             case QUALITY_INDEX: return "";
             case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
             case RATING_INDEX: return baseObject.getProperty(FilePropertyKey.RATING);
             case SIZE_INDEX: return baseObject.getSize();
-            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
             case DIMENSION_INDEX:
                 if(baseObject.getProperty(FilePropertyKey.WIDTH) == null || baseObject.getProperty(FilePropertyKey.HEIGHT) == null)
                     return null;

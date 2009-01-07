@@ -36,7 +36,7 @@ public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRe
             case CREATED_INDEX: return baseObject.getCreationTime();
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
             case TITLE_INDEX: return baseObject.getProperty(FilePropertyKey.TITLE);
-            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }

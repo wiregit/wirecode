@@ -57,7 +57,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
             case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);
             case FILENAME_INDEX: return baseObject.getProperty(FilePropertyKey.NAME);
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
-            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.COMMENTS);
+            case DESCRIPTION_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
         }
         throw new IllegalArgumentException("Unknown column:" + column);
     }
