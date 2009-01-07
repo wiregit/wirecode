@@ -10,6 +10,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import net.miginfocom.swing.MigLayout;
+
 /**
  * A panel that manages a list of check boxes based on a set of keys
  */
@@ -25,7 +27,9 @@ public class HorizonalCheckBoxListPanel<K> extends JPanel {
      * Creates the panel and selects the set of boxes
      */
     public HorizonalCheckBoxListPanel(Collection<K> options, Collection<K> selected) {
-        this.setOpaque(false);
+        
+        setLayout(new MigLayout("gapx 18"));
+        setOpaque(false);
         
         optionsMap = new HashMap<K,JCheckBox>();
         
