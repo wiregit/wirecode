@@ -91,7 +91,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         cm.request(u1, new StubContentResponseObserver(), 1000);
         cm.handleContentResponse(new ContentResponse(u1, false));
 
-        assertAddFails("Couldn't create FD", fileList, f1);
+        assertAddFails("CANT_CREATE_FD", fileList, f1);
         assertAdds(fileList, f2, f3, f4);
 
         assertEquals("unexpected # of files", 3, fileList.size());
@@ -120,7 +120,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
 
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
-        assertAddFails("Couldn't create FD", fileList, f2);
+        assertAddFails("CANT_CREATE_FD", fileList, f2);
         assertFalse("shouldn't be shared", fileList.contains(f2));
     }
     
@@ -187,7 +187,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertAdds(fileList, f1, f3);
         assertEquals(2, fileList.size());        
         
-        assertFileRenameFails("File isn't physically manageable", fileList, f1, new File(_scratchDir, "!<invalid file>"));
+        assertFileRenameFails("NOT_MANAGEABLE", fileList, f1, new File(_scratchDir, "!<invalid file>"));
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f3);
         
@@ -195,7 +195,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertEquals(1, fileList.size());
         assertContainsFiles(CollectionUtils.listOf(fileList), f2);
 
-        assertFileRenameFails("Old file wasn't managed", fileList, f1, f3);
+        assertFileRenameFails("OLD_WASNT_MANAGED", fileList, f1, f3);
         
         assertLoads(fileList);
         assertEquals(1, fileList.size());
@@ -220,10 +220,10 @@ public class ManagedFileListImplTest extends LimeTestCase {
         assertNotSame(fd, fileList.getFileDescsMatching(fileList.getFileDesc(f1).getSHA1Urn()).get(0));
         
         f1.delete();
-        assertFileChangedFails("File isn't physically manageable", fileList, f1);
+        assertFileChangedFails("NOT_MANAGEABLE", fileList, f1);
         assertEquals(0, fileList.size());
         
-        assertFileChangedFails("Old file wasn't managed", fileList, f2);
+        assertFileChangedFails("OLD_WASNT_MANAGED", fileList, f2);
         assertEquals(0, fileList.size());
         
         assertLoads(fileList);
@@ -239,7 +239,7 @@ public class ManagedFileListImplTest extends LimeTestCase {
 
         // Try to add a huge file. (It will be ignored.)
         f3 = createFakeTestFile(maxSize + 1l, _scratchDir);
-        assertAddFails("File isn't physically manageable", fileList, f3);
+        assertAddFails("NOT_MANAGEABLE", fileList, f3);
         
         // Add really big files.
         f4 = createFakeTestFile(maxSize - 1, _scratchDir);

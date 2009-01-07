@@ -53,7 +53,7 @@ public class FileManagerTestUtils {
                 FileListChangeFailedException cause = (FileListChangeFailedException) expected.getCause();
                 assertEquals(FileListChangedEvent.Type.ADD_FAILED, cause.getEvent().getType());
                 assertEquals(file, cause.getEvent().getFile());
-                assertEquals(reason, cause.getReason());
+                assertEquals(reason, cause.getReason().toString());
             }
         }
     }
@@ -88,7 +88,7 @@ public class FileManagerTestUtils {
             assertEquals(old, cause.getEvent().getOldFile());
             assertEquals(newFile, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());
-            assertEquals(reason, cause.getReason());
+            assertEquals(reason, cause.getReason().toString());
         }
     }
     
@@ -110,7 +110,7 @@ public class FileManagerTestUtils {
             assertEquals(file, cause.getEvent().getOldFile());
             assertEquals(file, cause.getEvent().getFile());
             assertEquals(oldFd, cause.getEvent().getOldValue());
-            assertEquals(reason, cause.getReason());
+            assertEquals(reason, cause.getReason().toString());
         }
     }
     
