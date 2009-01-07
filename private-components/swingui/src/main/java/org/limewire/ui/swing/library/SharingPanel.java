@@ -63,6 +63,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.painter.BackgroundMessagePainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableColors;
@@ -551,15 +552,16 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
      */
     private class LockedUI extends LockableUI {
         private JXPanel panel;
-        private JPanel messagePanel;
+        private JXPanel messagePanel;
         private JLabel label;
         private JLabel minLabel;
         
         public LockedUI(Category category, LayerEffect... lockedEffects) {
             super(lockedEffects);
             
-            messagePanel = new JPanel(new MigLayout("insets 5, gapy 10, wrap, alignx 50%"));
-            messagePanel.setBackground(new Color(209,247,144));
+            messagePanel = new JXPanel(new MigLayout("insets 10, gapy 10, wrap, alignx 50%"));
+            messagePanel.setOpaque(false);
+            messagePanel.setBackgroundPainter(new BackgroundMessagePainter<JXPanel>());
             
             label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category.getSingularName(), getFullPanelName()));
             FontUtils.setSize(label, 12);
