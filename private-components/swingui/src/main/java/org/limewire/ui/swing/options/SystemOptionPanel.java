@@ -20,6 +20,8 @@ import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.MacOSXUtils;
+import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -273,6 +275,11 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
+            if (OSUtils.isMacOSX()) {
+                MacOSXUtils.setLoginStatus(runAtStartupCheckBox.isSelected());
+            } else if (WindowsUtils.isLoginStatusAvailable()) {
+                WindowsUtils.setLoginStatus(runAtStartupCheckBox.isSelected());
+            }
             StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
             ApplicationSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
             if(ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
