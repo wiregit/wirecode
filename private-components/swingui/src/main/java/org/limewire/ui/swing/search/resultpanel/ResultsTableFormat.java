@@ -6,8 +6,6 @@ import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.table.AbstractColumnStateFormat;
 import org.limewire.ui.swing.table.ColumnStateInfo;
 
-import ca.odell.glazedlists.GlazedLists;
-
 
 /**
  * This class is the base class for each of the TableFormat classes
@@ -63,7 +61,7 @@ public abstract class ResultsTableFormat<T> extends AbstractColumnStateFormat<T>
         if(index == fromColumn) 
             return getFromComparator();
         else
-            return GlazedLists.comparableComparator();
+            return getLimeComparator();
     }
     
     public FromComparator getFromComparator() {
