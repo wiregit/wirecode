@@ -471,7 +471,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 	    private final JButton resumeButton; 
         private final JXHyperlink launchButton; 
         private final JXHyperlink tryAgainButton;
-        private final JXHyperlink removeButton;
+        private final JXHyperlink cancelButton;
 
         private final JButton[] linkButtons;
         private final JButton[] buttons;
@@ -523,16 +523,16 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             FontUtils.bold(tryAgainButton);
             FontUtils.underline(tryAgainButton);
 
-            removeButton = new JXHyperlink();
-            removeButton.setText(I18n.tr("Remove"));
-            removeButton.setFont(itemFont);
-            removeButton.setUnclickedColor(blueForeground);
-            removeButton.setClickedColor(blueForeground);
-            removeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
-            FontUtils.bold(removeButton);
-            FontUtils.underline(removeButton);
+            cancelButton = new JXHyperlink();
+            cancelButton.setText(I18n.tr("Remove"));
+            cancelButton.setFont(itemFont);
+            cancelButton.setUnclickedColor(blueForeground);
+            cancelButton.setClickedColor(blueForeground);
+            cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
+            FontUtils.bold(cancelButton);
+            FontUtils.underline(cancelButton);
 
-            linkButtons = new JButton[]{launchButton, tryAgainButton, removeButton};
+            linkButtons = new JButton[]{launchButton, tryAgainButton, cancelButton};
             buttons = new JButton[]{pauseButton, resumeButton};
                         
 			setOpaque(false);
@@ -570,7 +570,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             resumeButton.setVisible(item.getState() == DownloadState.PAUSED);
             tryAgainButton.setVisible(item.getState() == DownloadState.STALLED);
             launchButton.setVisible(item.isLaunchable() && item.getState() == DownloadState.DONE);
-            removeButton.setVisible(item.getState() == DownloadState.ERROR);
+            cancelButton.setVisible(item.getState() == DownloadState.ERROR);
             
             statusLabel.setVisible(item.getState() != DownloadState.DOWNLOADING && item.getState() != DownloadState.PAUSED);
             if (statusLabel.isVisible()){

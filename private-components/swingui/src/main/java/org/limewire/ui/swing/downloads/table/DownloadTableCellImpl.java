@@ -60,7 +60,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     private JLabel fullTimeLabel;
     
     private JLabel removeLinkSpacer;
-    private JXHyperlink removeLink;
+    private JXHyperlink cancelLink;
    
     @Resource private Icon warningIcon;
     @Resource private int progressBarWidth;
@@ -93,7 +93,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         this.minButtonPanel.setActionListener(editorListener);
         this.fullButtonPanel.setActionListener(editorListener);
         this.minLinkButton.addActionListener(editorListener);
-        this.removeLink.addActionListener(editorListener);
+        this.cancelLink.addActionListener(editorListener);
     }
     
     public void update(DownloadItem item) {
@@ -135,9 +135,9 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         minButtonPanel.setOpaque(false);
 
         minLinkButton = new JXHyperlink();
-        minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
         minLinkButton.addActionListener(editorListener);
         minLinkButton.setForeground(linkColour);
+        minLinkButton.setClickedColor(linkColour);
         minLinkButton.setFont(statusFontPlainMin);
                                 
         fullIconLabel = new JLabel();
@@ -161,11 +161,12 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);        
 
-        removeLink = new JXHyperlink();
-        removeLink.setText("<html><u>" + I18n.tr("Remove") + "</u></html>");
-        removeLink.setForeground(linkColour);
-        removeLink.setFont(statusFontPlainMin);
-        removeLink.setActionCommand(DownloadActionHandler.REMOVE_COMMAND);
+        cancelLink = new JXHyperlink();
+        cancelLink.setText("<html><u>" + I18n.tr("Remove") + "</u></html>");
+        cancelLink.setForeground(linkColour);
+        cancelLink.setClickedColor(linkColour);
+        cancelLink.setFont(statusFontPlainMin);
+        cancelLink.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
         
         removeLinkSpacer = new JLabel(I18n.tr(" - "));
         
@@ -178,7 +179,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         JPanel removePanel = new JPanel();
         removePanel.setOpaque(false);
         removePanel.add(removeLinkSpacer);
-        removePanel.add(removeLink);
+        removePanel.add(cancelLink);
         
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -392,14 +393,25 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         
             case ERROR :
                 editor.minLinkButton.setVisible(true);
-                editor.minLinkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
-                
+                editor.minLinkButton.setActionCommand(DownloadActionHandler.LINK_COMMAND);
+                //underline hidden  & color changed till link is active
+                editor.minLinkButton.setText(I18n.tr(item.getErrorState().getMessage()));
+               //  editor.minLinkButton.setText("<html><u>" + I18n.tr(item.getErrorState().getMessage()) + "</u></html>");
+                // TODO remove color and rollover settings once error link is active
+                editor.minLinkButton.setRolloverEnabled(false);
+                editor.minLinkButton.setForeground(Color.decode("#313131"));
+                editor.minLinkButton.setClickedColor(Color.decode("#313131"));
                 break;
                 
             case STALLED :
 
                 editor.minLinkButton.setVisible(true);
+                editor.minLinkButton.setActionCommand(DownloadActionHandler.TRY_AGAIN_COMMAND);
                 editor.minLinkButton.setText("<html><u>Try Again</u></html>");
+                // TODO remove color and rollover settings once error link is active
+                editor.minLinkButton.setForeground(linkColour);
+                editor.minLinkButton.setClickedColor(linkColour);
+                editor.minLinkButton.setRolloverEnabled(true);
 
                 break;
                 
@@ -408,8 +420,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         }
         
 
-        removeLink.setVisible(item.getState() == DownloadState.ERROR);
-        removeLinkSpacer.setVisible(removeLink.isVisible());
+        cancelLink.setVisible(item.getState() == DownloadState.ERROR);
+        removeLinkSpacer.setVisible(cancelLink.isVisible());
     }
     
     private void updateButtonsFull(DownloadTableCellImpl editor, DownloadItem item) {
