@@ -376,7 +376,6 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     public void selectAll() {
         if (getRowCount() > 0) {
             getSelectionModel().setSelectionInterval(0, getRowCount() - 1);
-            System.out.println("getSelectionModel().setSelectionInterval(" + 0+ "," + (getRowCount() - 1));
         }
     }
 
