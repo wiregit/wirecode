@@ -29,6 +29,7 @@ import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.LocalFileListTransferHandler;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
@@ -49,6 +50,7 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
     private final LibraryTableFactory tableFactory;
     private final DownloadListManager downloadListManager;
     private final LibraryManager libraryManager;
+    private final LibraryNavigator libraryNavigator;
     private final Friend friend;
     
     public AbstractFriendLibraryPanel(Friend friend,
@@ -59,13 +61,15 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
                     DownloadListManager downloadListManager,
                     LibraryManager libraryManager,
                     LimeHeaderBarFactory headerBarFactory,
-                    GhostDragGlassPane ghostPane) {        
+                    GhostDragGlassPane ghostPane,
+                    LibraryNavigator libraryNavigator) {        
         super(headerBarFactory);
         this.friend = friend;
         this.categoryIconManager = categoryIconManager;
         this.tableFactory = tableFactory;
         this.downloadListManager = downloadListManager;
         this.libraryManager = libraryManager;
+        this.libraryNavigator = libraryNavigator;
         
        //All friends panel gives a null friend
         if(friend != null) {
@@ -95,7 +99,7 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
         addDisposable(filterList);
         
         LibraryTable table = tableFactory.createFriendTable(category, filterList, friend);
-        table.enableDownloading(downloadListManager);
+        table.enableDownloading(downloadListManager, libraryNavigator, libraryManager.getLibraryManagedList());
         addDisposable(table);
         
         JScrollPane scrollPane = new JScrollPane(table);

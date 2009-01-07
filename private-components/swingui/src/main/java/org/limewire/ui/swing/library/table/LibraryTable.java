@@ -25,11 +25,13 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.library.FileItem;
+import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.library.LibraryOperable;
 import org.limewire.ui.swing.library.Sharable;
+import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.table.ColumnStateHandler;
@@ -150,8 +152,8 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         setSavedColumnSettings();
     }
     
-    public void enableDownloading(DownloadListManager downloadListManager){
-        LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this);
+    public void enableDownloading(DownloadListManager downloadListManager, LibraryNavigator libraryNavigator, LibraryFileList libraryList){
+        LibraryDownloadAction downloadAction = new LibraryDownloadAction(I18n.tr("download"), downloadListManager, this, libraryNavigator, libraryList);
         
         setDoubleClickHandler(new LibraryDownloadDoubleClickHandler(downloadAction));
         
@@ -230,13 +232,17 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
     }
 
     private class LibraryDownloadAction extends AbstractAction {
+        private LibraryFileList libraryFileList;
         private DownloadListManager downloadListManager;
+        private LibraryNavigator libraryNavigator;
         private LibraryTable table;
         
-        public LibraryDownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table){
+        public LibraryDownloadAction(String text, DownloadListManager downloadListManager, LibraryTable table, LibraryNavigator navigator, LibraryFileList libraryList){
             super(text);
             this.downloadListManager = downloadListManager;
             this.table = table;
+            this.libraryFileList = libraryList;
+            this.libraryNavigator = navigator;
         }
 
         @Override
@@ -246,20 +252,24 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         
         public void download(int row) {
             final RemoteFileItem file = (RemoteFileItem) ((LibraryTableModel) table.getModel()).getElementAt(row);
-            try {
-                downloadListManager.addDownload(file);
-                TableCellEditor editor = table.getCellEditor();
-                if (editor != null) {          
-                   editor.cancelCellEditing();
-                }
-            } catch (SaveLocationException e) {
-                saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
-                    @Override
-                    public void download(File saveFile, boolean overwrite)
-                            throws SaveLocationException {
-                        downloadListManager.addDownload(file, saveFile, overwrite);
+            if(libraryFileList.contains(file.getUrn())) {
+                libraryNavigator.selectInLibrary(file.getUrn(), file.getCategory());            
+            } else {
+                try {
+                    downloadListManager.addDownload(file);
+                    TableCellEditor editor = table.getCellEditor();
+                    if (editor != null) {          
+                       editor.cancelCellEditing();
                     }
-                }, e, true);
+                } catch (SaveLocationException e) {
+                    saveLocationExceptionHandler.handleSaveLocationException(new DownloadAction() {
+                        @Override
+                        public void download(File saveFile, boolean overwrite)
+                                throws SaveLocationException {
+                            downloadListManager.addDownload(file, saveFile, overwrite);
+                        }
+                    }, e, true);
+                }
             }
         }
     }
