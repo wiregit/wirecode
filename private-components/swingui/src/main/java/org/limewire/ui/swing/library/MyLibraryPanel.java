@@ -35,6 +35,9 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.settings.LibrarySettings;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -56,6 +59,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
+import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -86,7 +90,8 @@ public class MyLibraryPanel extends LibraryPanel {
                           ShareWidgetFactory shareFactory,
                           LimeHeaderBarFactory headerBarFactory,
                           PlayerPanel player, 
-                          GhostDragGlassPane ghostPane) {
+                          GhostDragGlassPane ghostPane,
+                          ListenerSupport<XMPPConnectionEvent> connectionListeners) {
         
         super(headerBarFactory);
         
@@ -120,6 +125,25 @@ public class MyLibraryPanel extends LibraryPanel {
             getDropTarget().addDropTargetListener(new GhostDropTargetListener(this,ghostPane));
         } catch (TooManyListenersException ignoreException) {            
         }      
+        
+        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+            @Override
+            @SwingEDTEvent
+            public void handleEvent(XMPPConnectionEvent event) {
+                switch(event.getType()) {
+                case CONNECT_FAILED: break;
+                case DISCONNECTED:
+                    if(isVisible())
+                        repaint();
+                    break;
+                case CONNECTING: break;
+                case CONNECTED:
+                    if(isVisible())
+                        repaint();
+                    break;
+                }
+            }
+        });
     }
     
     private void createMyCategories(LibraryFileList libraryFileList) {
