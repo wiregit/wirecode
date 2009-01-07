@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -186,16 +185,21 @@ public class SetupPage2 extends WizardPage {
         InstallSettings.SCAN_FILES.setValue(true);
         
         Collection<File> manage;
-        Collection<File> exclude;
+        Collection<File> exclude = new HashSet<File>();
         
         if (manualButton.isSelected()) {
             LibraryManagerModel model = treeTable.getLibraryModel();
             manage = model.getRootChildrenAsFiles();
-            exclude = model.getAllExcludedSubfolders();
+            exclude.addAll(model.getAllExcludedSubfolders());
         } else {
-            manage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
-            exclude = Collections.emptySet();
+            manage = new HashSet<File>();
+
+            manage.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
+            manage.addAll(libraryData.getDirectoriesToManageRecursively());
         }
+        
+        // We should always add existing exclusions back to be safe
+        exclude.addAll(libraryData.getDirectoriesToExcludeFromManaging());
         
         libraryData.setManagedOptions(manage, exclude, libraryData.getManagedCategories());
     }
