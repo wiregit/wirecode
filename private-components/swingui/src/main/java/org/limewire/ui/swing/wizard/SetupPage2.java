@@ -6,6 +6,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
@@ -141,21 +143,21 @@ public class SetupPage2 extends WizardPage {
     private void initManualPanel() {
         RootLibraryManagerItem root = new RootLibraryManagerItem(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
         
-        Collection<File> autoManage = AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData);
+        Set<File> totalList = new HashSet<File>();
         
-        for(File file : autoManage) {
-            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
-        }
+        totalList.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
         
         if (shouldKeepExistingDirectorySettings) {
             
             // Add old directories to the list because this is an upgrade and we
             //  want to preserve old settings as much as possible
-            for(File file : libraryData.getDirectoriesToManageRecursively()) {
-                root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
-            }
+            totalList.addAll(libraryData.getDirectoriesToManageRecursively());
         }
 
+        for ( File file : totalList ) {
+            root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
+        }
+        
         treeTable.setTreeTableModel(new LibraryManagerModel(root));
     }
 
