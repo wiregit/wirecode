@@ -507,7 +507,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
         this.pushListProvider = pushListProvider;
-        socketsManager.addListener(connectivityChangeEventHandler);
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -593,7 +592,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
 		if (getSha1Urn() != null) 
 		    altLocManager.addListener(getSha1Urn(),this);
-        
+		
+        socketsManager.addListener(connectivityChangeEventHandler);
 		
 		// make sure all rfds have the same sha1
         verifyAllFiles();
