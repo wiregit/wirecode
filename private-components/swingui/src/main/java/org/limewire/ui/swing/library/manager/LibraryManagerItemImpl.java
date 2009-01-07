@@ -104,7 +104,7 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
     
     public int addChild(LibraryManagerItem item) {
         excludedChildren.remove(item.getFile());
-        int idx = Collections.binarySearch(children, item, new Orderer());
+        int idx = Collections.binarySearch(getChildren(), item, new Orderer());
         if(idx >= 0) {
             throw new IllegalStateException("already contains: " + item + ", in: " + children);
         }
@@ -116,7 +116,7 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
 
     public int removeChild(LibraryManagerItem item) {
         excludedChildren.add(item.getFile());
-        int idx = children.indexOf(item);
+        int idx = getChildren().indexOf(item);
         assert idx != -1;
         children.remove(idx);
         return idx;
@@ -124,12 +124,13 @@ public class LibraryManagerItemImpl implements LibraryManagerItem {
     
     @Override
     public Collection<? extends File> getExcludedChildren() {
+        getChildren(); // calculate the exclusions...
         return Collections.unmodifiableList(excludedChildren);
     }
     
     @Override
     public LibraryManagerItem getChildFor(File directory) {
-        for(LibraryManagerItem child : children) {
+        for(LibraryManagerItem child : getChildren()) {
             if(child.getFile().equals(directory)) {
                 return child;
             }
