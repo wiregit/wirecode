@@ -20,7 +20,7 @@ public class DefaultDataEvent<S, E, D> extends DefaultEvent<S, E> {
     @Override
     public int hashCode() {
         int hash = super.hashCode();
-        hash = 31 * hash + data.hashCode();
+        hash = 31 * hash + (data != null ? data.hashCode() : 0);
         return hash;
     }
 

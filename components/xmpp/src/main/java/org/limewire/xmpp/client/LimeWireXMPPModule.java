@@ -1,12 +1,13 @@
 package org.limewire.xmpp.client;
 
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
+import org.limewire.listener.BroadcastPolicy;
 import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.EventMulticasterImpl;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.BroadcastPolicy;
 import org.limewire.logging.LogFactory;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.ConnectBackRequestSender;
@@ -55,8 +56,9 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
         bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
 
-        EventMulticaster<XMPPConnectionEvent> connectionMulticaster =
+        CachingEventMulticaster<XMPPConnectionEvent> connectionMulticaster =
             new CachingEventMulticaster<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, LogFactory.getLog(XMPPConnectionEvent.class));
+        bind(new TypeLiteral<EventBean<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventMulticaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventBroadcaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
