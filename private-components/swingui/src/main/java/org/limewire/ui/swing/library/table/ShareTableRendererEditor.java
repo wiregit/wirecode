@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.Action;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -34,8 +33,6 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
     private Color shareMouseOverColor;
     @Resource
     private Color disabledColor;
-    @Resource
-    private Icon downIcon;
 
     private HyperlinkButton shareButton;
     private LocalFileItem fileItem;
@@ -102,8 +99,6 @@ public class ShareTableRendererEditor extends TableRendererEditor implements Con
                 shareButton.setText(I18n.tr("{0} friend",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
             else
                 shareButton.setText(I18n.tr("{0} friends",GuiUtils.toLocalizedInteger(item.getFriendShareCount())));
-            shareButton.setIcon(downIcon);
-            shareButton.removeUnderline();
         } else {
             shareButton.setText(I18n.tr("share"));
             shareButton.setIcon(null);
