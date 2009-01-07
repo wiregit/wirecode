@@ -58,7 +58,7 @@ public class SplashWindow {
         textLabel.setOpaque(false);
         textLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         textLabel.setForeground(Color.WHITE);
-        
+                
         progressBar = LimeProgressBarFactory.createSplashProgressBar();
         
         int width = progressBar.getPreferredSize().width;
@@ -67,7 +67,7 @@ public class SplashWindow {
         progressBar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
         progressBar.setMaximum(steps+1);
         progressBar.setMinimum(0);
-        progressBar.setValue(0);        
+        progressBar.setValue(0);
         
         textAndProgressPanel.setLayout(new BoxLayout(textAndProgressPanel, BoxLayout.Y_AXIS));
         textAndProgressPanel.setOpaque(false);
@@ -76,6 +76,7 @@ public class SplashWindow {
         panel.add(textLabel, BorderLayout.SOUTH);
         textAndProgressPanel.add(Box.createVerticalGlue());
         textAndProgressPanel.add(panel);
+        textAndProgressPanel.add(Box.createVerticalStrut(2));
         textAndProgressPanel.add(progressBar);
         textAndProgressPanel.setBorder(BorderFactory.createEmptyBorder(0, 8, 8, 8));
 
