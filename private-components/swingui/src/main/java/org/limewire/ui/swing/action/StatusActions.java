@@ -39,7 +39,7 @@ public class StatusActions {
         this.xmppService = xmppService;
         
         available = new JCheckBoxMenuItem(I18n.tr("Available"), iconLibrary.getAvailable());
-
+        available.setMnemonic('a');
         available.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -49,6 +49,7 @@ public class StatusActions {
         });
         available.setEnabled(false);
         dnd = new JCheckBoxMenuItem(I18n.tr("Do Not Disturb"), iconLibrary.getDoNotDisturb());
+        dnd.setMnemonic('d');
         dnd.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -5,10 +5,10 @@ import java.io.File;
 import java.util.Random;
 
 import javax.swing.Icon;
-import javax.swing.JMenu;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.action.AbstractMenu;
 import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.Navigator;
@@ -23,22 +23,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class HelpMenu extends JMenu {
+class HelpMenu extends AbstractMenu {
 
     @Inject
     public HelpMenu(Application application, final IconManager iconManager,
             final TrayNotifier trayNotifier, final Navigator navigator, 
             final StorePanel storePanel) {
-        super(I18n.tr("Help"));
+        super(I18n.tr("&Help"));
 
-        add(new AbstractAction(I18n.tr("Using LimeWire")) {
+        add(new AbstractAction(I18n.tr("&Using LimeWire")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL("http://www.limewire.com/client_redirect/?page=support");
             }
         });
 
-        add(new AbstractAction(I18n.tr("FAQ")) {
+        add(new AbstractAction(I18n.tr("&FAQ")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils
@@ -48,7 +48,7 @@ class HelpMenu extends JMenu {
         
         if(!application.isProVersion()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("Get personalized tech support")) {
+            add(new AbstractAction(I18n.tr("Get personalized &tech support")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     NativeLaunchUtils
@@ -59,7 +59,7 @@ class HelpMenu extends JMenu {
         
         if (!OSUtils.isMacOSX()) {
             addSeparator();
-            add(new AbstractAction(I18n.tr("About LimeWire...")) {
+            add(new AbstractAction(I18n.tr("&About LimeWire...")) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     new AboutDisplayEvent().publish();
