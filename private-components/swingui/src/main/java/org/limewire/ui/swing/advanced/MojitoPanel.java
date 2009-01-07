@@ -22,15 +22,20 @@ import com.google.inject.name.Named;
  */
 class MojitoPanel extends TabPanel {
     
+    /** Manager instance for Mojito DHT. */
     private final MojitoManager mojitoManager;
     
+    /** Plugin for Mojito Arcs view component. */
     private SwingUiPlugin plugin;
     
+    /** Listener to handle start event on Mojito DHT. */
     private PropertyChangeListener dhtListener;
     
-    private JLabel dhtLabel = new JLabel();
-    
+    /** Indicator that determines if DHT has started. */
     private boolean dhtStarted;
+    
+    private JLabel dhtLabel = new JLabel();
+    private JComponent dhtRenderer;
 
     /**
      * Constructs a MojitoPanel using the specified MojitoManager.
@@ -44,11 +49,11 @@ class MojitoPanel extends TabPanel {
         setLayout(new BorderLayout());
 
         // Install listener to request focus when tab panel is shown.  This
-        // allows the Arcs view component to begin handling mouse clicks.
+        // allows the Arcs view to begin handling mouse clicks immediately.
         addComponentListener(new ComponentAdapter() {
             public void componentShown(ComponentEvent e) {
-                if (MojitoPanel.this.getComponentCount() > 1) {
-                    MojitoPanel.this.getComponent(1).requestFocusInWindow();
+                if (dhtRenderer != null) {
+                    dhtRenderer.requestFocusInWindow();
                 }
             }
         });
@@ -117,11 +122,11 @@ class MojitoPanel extends TabPanel {
      * Displays the Mojito plugin component in the tab.  
      */
     private void renderPlugin() {
-        JComponent render = plugin.getPluginComponent();
-        if (render != null) {
+        dhtRenderer = plugin.getPluginComponent();
+        if (dhtRenderer != null) {
             removeAll();
             add(dhtLabel, BorderLayout.NORTH);
-            add(render, BorderLayout.CENTER);
+            add(dhtRenderer, BorderLayout.CENTER);
         } else {
             renderNotAvailable();
         }
@@ -133,6 +138,7 @@ class MojitoPanel extends TabPanel {
      */
     private void renderNotAvailable() {
         removeAll();
+        dhtRenderer = null;
         JLabel naLabel = new JLabel();
         naLabel.setText("Mojito Arcs View not available");
         naLabel.setHorizontalAlignment(JLabel.CENTER);
