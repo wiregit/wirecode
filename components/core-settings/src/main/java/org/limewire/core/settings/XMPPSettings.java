@@ -43,4 +43,12 @@ public class XMPPSettings extends LimeProps {
      */
     public static final BooleanSetting XMPP_SHOW_OFFLINE =
         (BooleanSetting)FACTORY.createBooleanSetting("XMPP_SHOW_OFFLINE", true).setPrivate(true);
+    
+    /**
+     * Whether or not 'REMEMBER_ME' is checked -- this has nothing to do with
+     * auto logging in. It's only the state of the REMEMBER ME checkbox, so if
+     * you uncheck it it doesn't stay checked on the next login.
+     */
+    public static final BooleanSetting REMEMBER_ME_CHECKED =
+        FACTORY.createBooleanSetting("REMEMBER_ME_XMPP", true);
 }
