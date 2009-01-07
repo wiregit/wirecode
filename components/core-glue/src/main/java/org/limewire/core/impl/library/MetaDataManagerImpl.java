@@ -12,6 +12,7 @@ import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.MetaDataManager;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.util.NameValue;
+import org.limewire.util.NotImplementedException;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
@@ -69,18 +70,15 @@ public class MetaDataManagerImpl implements MetaDataManager {
             newDoc = limeXMLDocumentFactory.createLimeXMLDocument(input);
         } catch (SAXException e) {
             coreLocalFileItem.reloadProperties();
-            // TODO show error
-            throw new UnsupportedOperationException(
+            throw new NotImplementedException(
                     "Internal Document Error. Data could not be saved.");
         } catch (SchemaNotFoundException e) {
             coreLocalFileItem.reloadProperties();
-            // TODO show error
-            throw new UnsupportedOperationException(
+            throw new NotImplementedException(
                     "Internal Document Error. Data could not be saved.");
         } catch (IOException e) {
             coreLocalFileItem.reloadProperties();
-            // TODO show error
-            throw new UnsupportedOperationException(
+            throw new NotImplementedException(
                     "Internal Document Error. Data could not be saved.");
         }
 
@@ -102,14 +100,12 @@ public class MetaDataManagerImpl implements MetaDataManager {
             final MetaDataState committed = collection.mediaFileToDisk(fileDesc, result);
             if (committed != MetaDataState.NORMAL && committed != MetaDataState.UNCHANGED) {
                 coreLocalFileItem.reloadProperties();
-                // TODO show errors
-                throw new UnsupportedOperationException(
+                throw new NotImplementedException(
                         "Internal Document Error. Data could not be saved.");
             }
         } else if (!collection.writeMapToDisk()) {
             coreLocalFileItem.reloadProperties();
-            // TODO show error
-            throw new UnsupportedOperationException(
+            throw new NotImplementedException(
                     "Internal Document Error. Data could not be saved.");
         }
     }
