@@ -1,5 +1,7 @@
 package org.limewire.listener;
 
+import org.limewire.logging.Log;
+
 
 /**
  * A Multicaster that caches the last event it handles or broadcasts.
@@ -25,11 +27,19 @@ public class CachingEventMulticaster<E> implements EventMulticaster<E>, EventBea
     private volatile E cachedEvent;
     
     public CachingEventMulticaster() {
-        this(BroadcastPolicy.ALWAYS);    
+        this(BroadcastPolicy.ALWAYS, null);    
+    }
+    
+    public CachingEventMulticaster(Log log) {
+        this(BroadcastPolicy.ALWAYS, log);
     }
     
     public CachingEventMulticaster(BroadcastPolicy broadcastPolicy) {
-        eventListenerList = new EventListenerList<E>();
+        this(broadcastPolicy, null);
+    }
+    
+    public CachingEventMulticaster(BroadcastPolicy broadcastPolicy, Log log) {
+        eventListenerList = new EventListenerList<E>(log);
         this.broadcastPolicy = broadcastPolicy;
     }
 
