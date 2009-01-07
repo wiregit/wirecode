@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.table;
 
 import java.util.Comparator;
-import java.util.Locale;
 
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
@@ -68,7 +67,7 @@ public abstract class AbstractColumnStateFormat<T> implements VisibleTableFormat
                 } else if(alpha instanceof Integer) {
                     return ((Integer)alpha).compareTo((Integer)beta);
                 }
-                return alpha.toString().toLowerCase(Locale.ENGLISH).compareTo(beta.toString().toLowerCase(Locale.ENGLISH));
+                return alpha.toString().compareToIgnoreCase(beta.toString());
             }
         }
     }
