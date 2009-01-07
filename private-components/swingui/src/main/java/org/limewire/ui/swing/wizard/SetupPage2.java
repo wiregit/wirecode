@@ -146,12 +146,9 @@ public class SetupPage2 extends WizardPage {
         
         totalList.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
         
-        if (shouldKeepExistingDirectorySettings) {
-            
-            // Add old directories to the list because this is an upgrade and we
-            //  want to preserve old settings as much as possible
-            totalList.addAll(libraryData.getDirectoriesToManageRecursively());
-        }
+        // Always add existing manage settings, even if this is not technically an upgrade
+        //  (aka there has been a settings problem)
+        totalList.addAll(libraryData.getDirectoriesToManageRecursively());
 
         for ( File file : totalList ) {
             root.addChild(new LibraryManagerItemImpl(root, libraryData, file, false));
