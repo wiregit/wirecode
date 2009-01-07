@@ -1,5 +1,6 @@
 package org.limewire.xmpp.client.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ChatStateManager;
+
 import org.limewire.core.api.friend.feature.FeatureEvent;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListenerList;
@@ -51,6 +53,11 @@ import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryChangedIQListener;
+
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.Type;
 
 public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConnection {
 
@@ -137,7 +144,7 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
             try {
                 org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(smackConnectionListener);
                 org.jivesoftware.smack.XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
-                ConnectionConfiguration connectionConfig = new ConnectionConfiguration(configuration.getServiceName());
+                ConnectionConfiguration connectionConfig = getConnectionConfig();
                 connection = new org.jivesoftware.smack.XMPPConnection(connectionConfig);
                 connection.addRosterListener(new RosterListenerImpl(connection));
                 if (LOG.isInfoEnabled())
@@ -187,6 +194,48 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
 
     public boolean isLoggedIn() {
         return connection != null && connection.isAuthenticated();
+    }
+
+    /**
+     * Converts a LimeWire XMPPConnectionConfiguration into a Smack
+     * ConnectionConfiguration, trying to obtain the hostname from DNS SRV
+     * as per RFC 3920 and falling back to the service name and default port
+     * if the SRV lookup fails. This method blocks during the DNS lookup.
+     */
+    private ConnectionConfiguration getConnectionConfig() {
+        String host = configuration.getServiceName(); // Fallback
+        int port = 5222; // Default XMPP client port
+        String serviceName = configuration.getServiceName();
+        try {
+            String domain = "_xmpp-client._tcp." + serviceName;
+            Lookup lookup = new Lookup(domain, Type.SRV);
+            Record[] answers = lookup.run();
+            int result = lookup.getResult();
+            if(result == Lookup.SUCCESSFUL && answers != null) {
+                // RFC 2782: use the server with the lowest-numbered priority,
+                // break ties by preferring servers with higher weights
+                int lowestPriority = Integer.MAX_VALUE;
+                int highestWeight = Integer.MIN_VALUE;
+                for(Record rec : answers) {
+                    if(rec instanceof SRVRecord) {
+                        SRVRecord srvRec = (SRVRecord)rec;
+                        int priority = srvRec.getPriority();
+                        int weight = srvRec.getWeight();
+                        if(priority < lowestPriority
+                                && weight > highestWeight) {
+                            port = srvRec.getPort();
+                            host = srvRec.getTarget().toString();
+                            lowestPriority = priority;
+                            highestWeight = weight;
+                        }
+                    }
+                }
+            }
+        } catch (IOException iox) {
+            // Failure looking up the SRV record - use the service name
+            LOG.debug("Failed to look up SRV record", iox);
+        }
+        return new ConnectionConfiguration(host, port, serviceName);
     }
 
     private class RosterListenerImpl implements org.jivesoftware.smack.RosterListener {
