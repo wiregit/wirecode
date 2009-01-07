@@ -8,7 +8,7 @@ import javax.swing.Icon;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.event.AboutDisplayEvent;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.nav.Navigator;
@@ -23,7 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-class HelpMenu extends AbstractMenu {
+class HelpMenu extends MnemonicMenu {
 
     @Inject
     public HelpMenu(Application application, final IconManager iconManager,

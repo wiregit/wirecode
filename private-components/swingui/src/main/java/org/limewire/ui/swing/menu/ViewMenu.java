@@ -6,7 +6,7 @@ import javax.swing.Action;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
@@ -23,7 +23,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 
 import com.google.inject.Inject;
 
-public class ViewMenu extends AbstractMenu {
+public class ViewMenu extends MnemonicMenu {
 
     @Inject
     public ViewMenu(final LeftPanel leftPanel, final DownloadSummaryPanel downloadSummaryPanel,

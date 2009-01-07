@@ -12,7 +12,7 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.advanced.AdvancedToolsPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.event.OptionsDisplayEvent;
@@ -31,7 +31,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ToolsMenu extends AbstractMenu {
+public class ToolsMenu extends MnemonicMenu {
 
     @Inject
     public ToolsMenu(final Provider<AdvancedToolsPanel> advancedProvider,
@@ -85,7 +85,7 @@ public class ToolsMenu extends AbstractMenu {
     }
 
     private JMenu createWhatsNewSubmenu(final SearchHandler searchHandler) {
-        JMenu menu = new AbstractMenu(I18n.tr("&What's New Search")){};
+        JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search")){};
         for (final SearchCategory category : SearchCategory.values()) {
             if (category == SearchCategory.OTHER) {
                 continue;

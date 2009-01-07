@@ -2,7 +2,7 @@ package org.limewire.ui.swing.menu;
 
 import javax.swing.JComponent;
 
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.action.StatusActions;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.menu.actions.ChatAction;
@@ -17,7 +17,7 @@ import org.limewire.ui.swing.util.I18n;
 
 import com.google.inject.Inject;
 
-public class FriendMenu extends AbstractMenu {
+public class FriendMenu extends MnemonicMenu {
     
     private final ChatAction chatAction;
     

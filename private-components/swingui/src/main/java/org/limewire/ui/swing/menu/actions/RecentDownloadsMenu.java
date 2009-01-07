@@ -19,7 +19,7 @@ import org.limewire.core.settings.DownloadSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -30,7 +30,7 @@ import org.limewire.util.MediaType;
 
 import com.google.inject.Inject;
 
-public class RecentDownloadsMenu extends AbstractMenu {
+public class RecentDownloadsMenu extends MnemonicMenu {
     private final JMenuItem emptyItem;
 
     private final Action clearMenu;

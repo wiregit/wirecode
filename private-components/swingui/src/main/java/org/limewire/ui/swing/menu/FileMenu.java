@@ -1,6 +1,6 @@
 package org.limewire.ui.swing.menu;
 
-import org.limewire.ui.swing.action.AbstractMenu;
+import org.limewire.ui.swing.action.MnemonicMenu;
 import org.limewire.ui.swing.menu.actions.AddFileAction;
 import org.limewire.ui.swing.menu.actions.AddFolderAction;
 import org.limewire.ui.swing.menu.actions.ExitAction;
@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class FileMenu extends AbstractMenu {
+public class FileMenu extends MnemonicMenu {
     @Inject
     public FileMenu(OpenFileAction openFileAction, OpenLinkAction openLinkAction,
             RecentDownloadsMenu recentDownloadsMenu, AddFileAction addFileAction,
