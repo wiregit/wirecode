@@ -36,6 +36,7 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.menu.actions.ChatAction;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.util.StringUtils;
 
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
@@ -99,6 +100,9 @@ public class NavPanel extends JXPanel {
         categoryLabel.setMaximumSize(new Dimension(Short.MAX_VALUE, 20));
         if(friend != null) {
             categoryLabel.setText(friend.getRenderName());
+            String toolTipText = getToolTipText(friend);
+            categoryLabel.setToolTipText(toolTipText);
+            
             if(!friend.isAnonymous()) {
                 categoryLabel.addMouseListener(new ContextMenuListener());
             }
@@ -131,6 +135,21 @@ public class NavPanel extends JXPanel {
                 }
             }
         });
+    }
+
+    private String getToolTipText(Friend friend) {
+        StringBuffer toolTipText = new StringBuffer();
+        String name = friend.getName();
+        String id = friend.getId();
+        
+        if(!StringUtils.isEmpty(name) && !StringUtils.isEmpty(id) && !name.equals(id)) {
+            toolTipText.append("<html>").append(name).append("<br>").append(id).append("</html>");
+        } else if(!StringUtils.isEmpty(name)) {
+            toolTipText.append(name);
+        } else if(!StringUtils.isEmpty(id)) {
+            toolTipText.append(id);
+        }
+        return toolTipText.toString();
     }
     
     void setTopGap(int topgap) {
