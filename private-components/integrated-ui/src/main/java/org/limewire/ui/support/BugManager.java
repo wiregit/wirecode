@@ -403,7 +403,7 @@ public final class BugManager {
             }
         } else {
             if(sendable) {
-                msg = I18n.tr("Sorry, LimeWire ran into a problem...but you should send us bugs so we can fix them.");
+                msg = I18n.tr("Sorry, LimeWire ran into a problem.  LimeWire's still going to run just fine, but you should send us the bug so we can fix it.");
             } else {
                 msg = I18n.tr("LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To continue using LimeWire, close this window. If desired, you can click \'Show Bug\' to look at the information about the error.");
             }
@@ -489,7 +489,7 @@ public final class BugManager {
 
 
         // the "always use this answer" checkbox
-        final JCheckBox alwaysuseThisAnswer = new JCheckBox(I18n.tr("Always use this answer"));
+        final JCheckBox alwaysuseThisAnswer = new JCheckBox(I18n.tr("Send bugs without asking me in the future"));
         alwaysuseThisAnswer.setSelected(false);
 
         JButton sendButton = new JButton(I18n.tr("Send Bug"));
@@ -543,8 +543,10 @@ public final class BugManager {
             mainPanel.add(sendButton, constraints);
         }
         
+        mainPanel.validate();
         DIALOG.getContentPane().add(mainPanel);
 		DIALOG.pack();
+		sendButton.requestFocusInWindow();
 		DIALOG.setLocationRelativeTo(GuiUtils.getMainFrame());
 
 		try {
