@@ -120,6 +120,7 @@ public class LimeWireSwingUI extends JPanel {
 	    if(proNag != null) {
 	        proNag.loadContents().addFutureListener(new EventListener<FutureEvent<Void>>() {
 	            @Override
+	            @SwingEDTEvent
 	            public void handleEvent(FutureEvent<Void> event) {
 	                switch(event.getType()) {
 	                case SUCCESS:
