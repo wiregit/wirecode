@@ -7,6 +7,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GradientPaint;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,6 +23,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -58,10 +60,13 @@ public class ChatTopPanel extends JXPanel {
         
         RectanglePainter painter = new RectanglePainter();
         painter.setFillPaint(new GradientPaint(50.0f, 0.0f, gradientTop, 50.0f, 9.5f, gradientBottom));
-        painter.setBorderPaint(borderBottom);
-        painter.setBorderWidth(1f);
+        painter.setBorderPaint(null);
+        painter.setInsets(new Insets(0, 0, 0, 0));
+        painter.setBorderWidth(0.0f);
         
         setBackgroundPainter(painter);
+        
+        setBorder(new DropShadowBorder(borderBottom, 1, 1.0f, 0, false, false, true, false));
         
         setLayout(new MigLayout("insets 3 2 0 5, fill", "[]2[][]:push[]5", "[19px, top]"));
         Dimension size = new Dimension(400, 19);
