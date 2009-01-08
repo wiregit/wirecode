@@ -67,6 +67,8 @@ public class EmptyLibraryPanel extends LibraryPanel {
         createEmptyPanel(messageComponent);
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
         setTransferHandler(new LocalFileListTransferHandler(friendFileList));
+        
+        enableFilterBox(false);
     }
     
     protected String getFullPanelName() {

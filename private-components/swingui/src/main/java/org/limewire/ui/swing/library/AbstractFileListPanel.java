@@ -89,6 +89,10 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         addDisposable(selectionPanel);
     }
     
+    protected void enableFilterBox(boolean value) {
+        filterField.setEnabled(value);
+    }
+    
     protected abstract LimeHeaderBar createHeaderBar(LimeHeaderBarFactory headerBarFactory);
     protected abstract LimePromptTextField createFilterField(String prompt);
     
