@@ -175,7 +175,7 @@ public class UDPService implements ReadWriteObserver {
     
     private final NetworkManager networkManager;
     private final Provider<MessageDispatcher> messageDispatcher;
-    private final Provider<IPFilter> hostileFilter;
+    private final Provider<IPFilter> ipFilter;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<Acceptor> acceptor;
@@ -201,7 +201,7 @@ public class UDPService implements ReadWriteObserver {
 	@Inject
     public UDPService(NetworkManager networkManager,
             Provider<MessageDispatcher> messageDispatcher,
-            @Named("hostileFilter") Provider<IPFilter> hostileFilter,
+            Provider<IPFilter> ipFilter,
             Provider<ConnectionManager> connectionManager,
             Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
             Provider<QueryUnicaster> queryUnicaster,
@@ -214,7 +214,7 @@ public class UDPService implements ReadWriteObserver {
             ListenerSupport<UDPSocketChannelConnectionEvent> channelEventListenerSupport) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
-        this.hostileFilter = hostileFilter;
+        this.ipFilter = ipFilter;
         this.connectionManager = connectionManager;
         this.messageRouter = messageRouter;
         this.acceptor = acceptor;
@@ -385,7 +385,7 @@ public class UDPService implements ReadWriteObserver {
                     continue;
 
                 // don't go further if filtered.
-                if(!hostileFilter.get().allow(addr.getAddress().getAddress())) {
+                if(!ipFilter.get().allow(addr.getAddress().getAddress())) {
                     LOG.debug("Received packet from hostile host");
                     return;
                 }
@@ -429,7 +429,7 @@ public class UDPService implements ReadWriteObserver {
 	 */
     protected void processMessage(Message message, InetSocketAddress addr) {
         // FIXME: redundant check?
-        if(!hostileFilter.get().allow(message)) {
+        if(!ipFilter.get().allow(message)) {
             LOG.debug("Received packet from hostile host");
             return;
         }
