@@ -23,7 +23,7 @@ import org.limewire.io.GUID;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventMulticaster;
 import org.limewire.listener.ListenerSupport;
@@ -78,7 +78,7 @@ public class NetworkManagerImpl implements NetworkManager {
     private volatile String tlsDisabledReason;
     
     private final EventMulticaster<AddressEvent> listeners =
-        new CachingEventMulticaster<AddressEvent>(BroadcastPolicy.IF_NOT_EQUALS);
+        new CachingEventMulticasterImpl<AddressEvent>(BroadcastPolicy.IF_NOT_EQUALS);
     private final ApplicationServices applicationServices;
     private volatile boolean started;
 

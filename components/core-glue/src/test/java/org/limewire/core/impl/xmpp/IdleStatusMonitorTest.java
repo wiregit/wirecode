@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventListener;
 import org.limewire.xmpp.activity.XmppActivityEvent;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
@@ -13,7 +13,7 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 public class IdleStatusMonitorTest extends TestCase {
     private MockIdleTime idleTime;
     private Runnable monitorRunnable;
-    private CachingEventMulticaster<XMPPConnectionEvent> connectionSupport;
+    private CachingEventMulticasterImpl<XMPPConnectionEvent> connectionSupport;
     private TestXmppActivityListener listener;
 
     @Override
@@ -22,10 +22,10 @@ public class IdleStatusMonitorTest extends TestCase {
         // TODO broadcasters
         MockScheduledExecutorService backgroundExecutor = new MockScheduledExecutorService();
         idleTime = new MockIdleTime();
-        CachingEventMulticaster<XmppActivityEvent> activityBroadcaster = new CachingEventMulticaster<XmppActivityEvent>(BroadcastPolicy.IF_NOT_EQUALS); 
+        CachingEventMulticasterImpl<XmppActivityEvent> activityBroadcaster = new CachingEventMulticasterImpl<XmppActivityEvent>(BroadcastPolicy.IF_NOT_EQUALS); 
         listener = new TestXmppActivityListener();
         activityBroadcaster.addListener(listener);
-        connectionSupport = new CachingEventMulticaster<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS);
+        connectionSupport = new CachingEventMulticasterImpl<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         IdleStatusMonitor monitor = new IdleStatusMonitor(backgroundExecutor, idleTime, activityBroadcaster);
         MockServiceRegistry registry = new MockServiceRegistry();
         

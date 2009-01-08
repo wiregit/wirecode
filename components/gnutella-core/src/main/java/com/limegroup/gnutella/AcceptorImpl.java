@@ -16,8 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import net.jcip.annotations.GuardedBy;
-
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.connection.FirewallStatus;
 import org.limewire.core.api.connection.FirewallStatusEvent;
@@ -30,7 +28,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.EventBroadcaster;
+import org.limewire.listener.PendingEventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.AsyncConnectionDispatcher;
@@ -142,7 +140,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final Provider<MulticastService> multicastService;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final EventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
+    private final PendingEventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
@@ -157,7 +155,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            EventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
+            PendingEventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,
@@ -405,8 +403,9 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	}
 	
 	public void initialize() {
-        firewallBroadcaster.broadcast(new FirewallStatusEvent(
+        firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(
                 FirewallStatus.FIREWALLED));
+        firewallBroadcaster.firePendingEvents();
 	}
 	
 	public void stop() {
@@ -610,23 +609,28 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	/**
 	 * Sets the new incoming status.
 	 * Returns whether or not the status changed.
-	 * 
-	 * Called within {@link #ADDRESS_LOCK}.
 	 */
-	@GuardedBy("ADDRESS_LOCK")
 	boolean setIncoming(boolean canReceiveIncoming) {
-        if (canReceiveIncoming) 
-            incomingValidator.cancelReset();
+	    synchronized(ADDRESS_LOCK) {
+            if (canReceiveIncoming) 
+                incomingValidator.cancelReset();
+    	    
+    	    if (_acceptedIncoming == canReceiveIncoming)
+                return false;
+            
+    	    _acceptedIncoming = canReceiveIncoming;
+            if(canReceiveIncoming) {
+                firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(FirewallStatus.NOT_FIREWALLED));
+            } else {
+                firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(FirewallStatus.FIREWALLED)); 
+            }
+	    }
+	    firewallBroadcaster.firePendingEvents();
 	    
-	    if (_acceptedIncoming == canReceiveIncoming)
-            return false;
-        
-	    _acceptedIncoming = canReceiveIncoming;
         if(canReceiveIncoming) {
-            firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.NOT_FIREWALLED));
-        } else {
-            firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.FIREWALLED)); 
+            ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         }
+    
         return true;
 	}
 	
@@ -648,10 +652,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         // the host already.
         boolean changed = false;
         if(isOutsideConnection(address)) {
-            synchronized (ADDRESS_LOCK) {
-                changed = setIncoming(true);
-                ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-            }
+            changed = setIncoming(true);
         }
         if(changed)
             networkManager.incomingStatusChanged();
@@ -802,10 +803,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                     _lastConnectBackTime = currTime;
                     Runnable resetter = new Runnable() {
                         public void run() {
-                            boolean changed = false;
-                            synchronized (ADDRESS_LOCK) {
-                                changed = setIncoming(false);
-                            }
+                            boolean changed = setIncoming(false);
                             if(changed)
                                 networkManager.incomingStatusChanged();
                         }

@@ -27,9 +27,9 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.listener.PendingEventBroadcaster;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
 import org.limewire.rudp.AbstractNBSocketChannel;
@@ -48,11 +48,11 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 
 /**
@@ -185,7 +185,7 @@ public class UDPService implements ReadWriteObserver {
     private final MessageFactory messageFactory;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
-    private final EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster;
+    private final PendingEventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster;
 
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
@@ -210,7 +210,7 @@ public class UDPService implements ReadWriteObserver {
             MessageFactory messageFactory,
             PingRequestFactory pingRequestFactory,
             NetworkInstanceUtils networkInstanceUtils,
-            EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster,
+            PendingEventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster,
             ListenerSupport<UDPSocketChannelConnectionEvent> channelEventListenerSupport) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
@@ -231,8 +231,10 @@ public class UDPService implements ReadWriteObserver {
 	    BUFFER = ByteBuffer.wrap(backing);
         // TODO convert this to a Service and move this
         // TODO initialize()
-        fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(
+        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(
                 FirewallTransferStatus.DOES_NOT_SUPPORT_FWT, FWTStatusReason.UNKNOWN));
+        fwtStatusBroadcaster.firePendingEvents();
+        
         channelEventListenerSupport.addListener(new UDPConnectionListener());
     }
     
@@ -701,40 +703,51 @@ public class UDPService implements ReadWriteObserver {
 	 * port.
 	 */
 	public boolean canDoFWT(){
+	    boolean retValue = false;
+	    
 	    // this does not affect EVER_DISABLED_FWT.
 	    if (!canReceiveSolicited()) { 
-            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                     FWTStatusReason.NO_SOLICITED_INCOMING_MESSAGES));
-	        return false;
-        }
-
-	    boolean canDoFWTSetting = !ConnectionSettings.CANNOT_DO_FWT.getValue();
-	    if (!connectionServices.isConnected()) {
-            if(canDoFWTSetting) {
-                fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
-                        FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
-            } else {
-                fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
-                        FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
-            }
-            return canDoFWTSetting;
-        }
-	    
-	    synchronized(this) {
-	        if (_numReceivedIPPongs < 1) {
+            retValue = false;
+        } else {
+    	    boolean canDoFWTSetting = !ConnectionSettings.CANNOT_DO_FWT.getValue();
+    	    if (!connectionServices.isConnected()) {
                 if(canDoFWTSetting) {
-                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                    fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
                             FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                 } else {
-                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                    fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                             FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                 }
-                return canDoFWTSetting;
-            }	            
+                retValue = canDoFWTSetting;
+            }
+
+    	    boolean needToUpdateState;
+    	    synchronized(this) {
+    	        if (_numReceivedIPPongs < 1) {
+                    if(canDoFWTSetting) {
+                        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                                FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+                    } else {
+                        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                                FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
+                    }
+                    needToUpdateState = false;
+                    retValue = canDoFWTSetting;
+                } else {
+                    needToUpdateState = true;
+                }
+    	    }
+    	    
+    	    if(needToUpdateState) {
+    	        updateFWTState();
+    	        retValue = !ConnectionSettings.CANNOT_DO_FWT.getValue();
+    	    }
 	    }
 	    
-	    updateFWTState();
-	    return !ConnectionSettings.CANNOT_DO_FWT.getValue();
+	    fwtStatusBroadcaster.firePendingEvents();
+	    return retValue;
 	}
 	
 	private void updateFWTState() {
@@ -775,12 +788,13 @@ public class UDPService implements ReadWriteObserver {
             }
 	    }
         if(newFWTSetting) {
-            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
                     FWTStatusReason.UNKNOWN));
         } else {
-            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                     reason));
         }
+        fwtStatusBroadcaster.firePendingEvents();
 	    ConnectionSettings.CANNOT_DO_FWT.setValue(!newFWTSetting);
 	}
 	

@@ -7,18 +7,26 @@ import org.limewire.util.ExceptionUtils;
 
 public class PendingEventMulticasterImpl<E> implements EventMulticaster<E>, PendingEventBroadcaster<E> {
 
-    private final EventListenerList<E> listeners = new EventListenerList<E>();
+    private final EventMulticaster<E> multicaster;
     private final ConcurrentLinkedQueue<E> queuedEvents = new ConcurrentLinkedQueue<E>();
     private final AtomicBoolean firing = new AtomicBoolean();
+    
+    public PendingEventMulticasterImpl() {
+        this(new EventMulticasterImpl<E>());
+    }
+    
+    public PendingEventMulticasterImpl(EventMulticaster<E> multicaster) {
+        this.multicaster = multicaster;
+    }
 
     @Override
     public void addListener(EventListener<E> eventListener) {
-        listeners.addListener(eventListener);
+        multicaster.addListener(eventListener);
     }
 
     @Override
     public boolean removeListener(EventListener<E> eventListener) {
-        return listeners.removeListener(eventListener);
+        return multicaster.removeListener(eventListener);
     }
     
     @Override
@@ -54,7 +62,7 @@ public class PendingEventMulticasterImpl<E> implements EventMulticaster<E>, Pend
                     E e;
                     while ((e = queuedEvents.poll()) != null) {
                         try {
-                            listeners.broadcast(e);
+                            multicaster.broadcast(e);
                         } catch(Throwable thrown) {
                             thrown = ExceptionUtils.reportOrReturn(thrown);
                             if(thrown != null && t == null) {

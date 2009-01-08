@@ -2,7 +2,7 @@ package org.limewire.xmpp.client;
 
 import org.limewire.friend.impl.LimeWireFriendXmppModule;
 import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
@@ -56,14 +56,14 @@ public class LimeWireXMPPModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
         bind(new TypeLiteral<ListenerSupport<LibraryChangedEvent>>(){}).toInstance(libraryChangedMulticaster);
 
-        CachingEventMulticaster<XMPPConnectionEvent> connectionMulticaster =
-            new CachingEventMulticaster<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, LogFactory.getLog(XMPPConnectionEvent.class));
+        CachingEventMulticasterImpl<XMPPConnectionEvent> connectionMulticaster =
+            new CachingEventMulticasterImpl<XMPPConnectionEvent>(BroadcastPolicy.IF_NOT_EQUALS, LogFactory.getLog(XMPPConnectionEvent.class));
         bind(new TypeLiteral<EventBean<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventMulticaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<EventBroadcaster<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         bind(new TypeLiteral<ListenerSupport<XMPPConnectionEvent>>(){}).toInstance(connectionMulticaster);
         
-        EventMulticaster<XmppActivityEvent> activityMulticaster = new CachingEventMulticaster<XmppActivityEvent>(BroadcastPolicy.IF_NOT_EQUALS); 
+        EventMulticaster<XmppActivityEvent> activityMulticaster = new CachingEventMulticasterImpl<XmppActivityEvent>(BroadcastPolicy.IF_NOT_EQUALS); 
         bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
         bind(new TypeLiteral<ListenerSupport<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
         

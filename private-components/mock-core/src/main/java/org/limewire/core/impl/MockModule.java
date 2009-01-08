@@ -24,7 +24,7 @@ import org.limewire.core.impl.upload.MockUploadModule;
 import org.limewire.core.impl.xmpp.MockXmppModule;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.listener.BroadcastPolicy;
-import org.limewire.listener.CachingEventMulticaster;
+import org.limewire.listener.CachingEventMulticasterImpl;
 import org.limewire.listener.EventBean;
 import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventMulticaster;
@@ -67,12 +67,12 @@ public class MockModule extends AbstractModule {
         bind(new TypeLiteral<EventBroadcaster<XmppActivityEvent>>(){}).toInstance(activityMulticaster);
         bind(new TypeLiteral<ListenerSupport<XmppActivityEvent>>(){}).toInstance(activityMulticaster);        
         
-        CachingEventMulticaster<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticaster<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
+        CachingEventMulticasterImpl<FirewallTransferStatusEvent> fwtStatusMulticaster = new CachingEventMulticasterImpl<FirewallTransferStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallTransferStatusEvent>>(){}).toInstance(fwtStatusMulticaster);       
         
-        CachingEventMulticaster<FirewallStatusEvent> firewalledStatusMulticaster = new CachingEventMulticaster<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
+        CachingEventMulticasterImpl<FirewallStatusEvent> firewalledStatusMulticaster = new CachingEventMulticasterImpl<FirewallStatusEvent>(BroadcastPolicy.IF_NOT_EQUALS);
         bind(new TypeLiteral<EventBean<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<EventBroadcaster<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
         bind(new TypeLiteral<ListenerSupport<FirewallStatusEvent>>(){}).toInstance(firewalledStatusMulticaster);
