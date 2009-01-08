@@ -65,7 +65,7 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case ARTIST_INDEX: return vsr.getProperty(FilePropertyKey.AUTHOR);
             case ALBUM_INDEX: return vsr.getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return vsr.getProperty(FilePropertyKey.LENGTH);
-            case QUALITY_INDEX: return vsr.getProperty(FilePropertyKey.QUALITY);
+            case QUALITY_INDEX: return vsr;
             case BITRATE_INDEX: return vsr.getProperty(FilePropertyKey.BITRATE);
             case GENRE_INDEX: return vsr.getProperty(FilePropertyKey.GENRE);
             case TRACK_INDEX: return vsr.getProperty(FilePropertyKey.TRACK_NUMBER);

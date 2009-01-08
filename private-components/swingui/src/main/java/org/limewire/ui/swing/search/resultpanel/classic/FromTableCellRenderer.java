@@ -12,20 +12,24 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 
-public class FromTableCellRenderer extends OpaqueTableCellRenderer implements TableCellRenderer, TableCellEditor {
+public class FromTableCellRenderer extends JXPanel implements TableCellRenderer, TableCellEditor {
 
+    private static final int HGAP = 4;
+    private static final int VGAP = 5;
+    
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     private final SearchResultFromWidget fromWidget;
     
     public FromTableCellRenderer(SearchResultFromWidget fromWidget) {
-        super(FlowLayout.LEFT);
+        super(new FlowLayout(FlowLayout.LEFT, HGAP, VGAP));
         
         this.fromWidget = fromWidget;
         
-        addComponent(fromWidget);
+        add(fromWidget);
     }
     
     @Override
@@ -34,18 +38,25 @@ public class FromTableCellRenderer extends OpaqueTableCellRenderer implements Ta
         if (value != null) {
             fromWidget.setPeople(((VisualSearchResult)value).getSources());
         }
+        fromWidget.setForeground(this.getForeground());
         
-        return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        return this;
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
+        if(!isSelected)
+            setBackground(table.getBackground());
+        else
+            setBackground(table.getSelectionBackground());
+        
         if (value != null) {
             fromWidget.setPeople(((VisualSearchResult)value).getSources());
         }
+        fromWidget.setForeground(this.getForeground());
         
-        return super.getTableCellRendererComponent(table, value, isSelected, true, row, column);
+        return this;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.limewire.ui.swing.table;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.BorderFactory;
@@ -16,6 +17,7 @@ import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.RemoteFileItem;
+import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -35,6 +37,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
     @Resource private Icon spamIcon;
     @Resource private Icon downloadingIcon;
     @Resource private Icon libraryIcon;
+    @Resource private Color disabledForegroundColor;
     
     public IconLabelRenderer(IconManager iconManager, CategoryIconManager categoryIconManager) {
         super(new BorderLayout());
@@ -84,7 +87,12 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
             label.setText(name);
             label.setIcon(getIcon(vsr));
 
-            setAlpha(vsr.isSpam() ? 0.2f : 1.0f);
+            if(vsr.isSpam() || vsr.getDownloadState() == BasicDownloadState.LIBRARY
+                    || vsr.getDownloadState() == BasicDownloadState.DOWNLOADED
+                    || vsr.getDownloadState() == BasicDownloadState.DOWNLOADING)
+                label.setForeground(disabledForegroundColor);
+            else
+                label.setForeground(table.getForeground());
         } else if (value != null) {
             throw new IllegalArgumentException(value + " must be a FileItem or VisualSearchResult");
         }
