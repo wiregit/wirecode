@@ -611,8 +611,8 @@ public class HostCatcher implements Service {
     public boolean add(PingReply pr) {
         // Discard UDP pongs with unknown GUIDs, unless they're from local
         // sources, in which case they might be replies to multicast pings 
-        boolean local = networkInstanceUtils.isVeryCloseIP(pr.getInetAddress());
-        if(pr.isUDP() && !local) {
+        boolean isPrivate = networkInstanceUtils.isPrivateAddress(pr.getInetAddress());
+        if(pr.isUDP() && !isPrivate) {
             GUID g = new GUID(pr.getGUID());
             if(!g.equals(PingRequest.UDP_GUID)
                     && !g.equals(udpService.get().getSolicitedGUID())) {
@@ -640,7 +640,7 @@ public class HostCatcher implements Service {
             endpoint.setUDPHostCache(true);
         }
         
-        if(!isValidHost(endpoint) && !local) {
+        if(!isValidHost(endpoint) && !isPrivate) {
             return false;
         }
         
