@@ -241,20 +241,16 @@ public class MouseableTable extends StripedJXTable {
             // HighlightPredicate.EVEN and HighlightPredicate.ODD are zero based
             setHighlighters(
                     colors.getEvenHighLighter(),
-                    colors.getOddHighLighter(),
-                    new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,
-                            colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+                    colors.getOddHighLighter());
 
         } else {
             setHighlighters(
                     new ColorHighlighter(HighlightPredicate.EVEN, colors.evenColor,
-                            colors.evenForeground, colors.selectionColor,
-                            colors.selectionForeground),
+                            colors.evenForeground, colors.evenColor,
+                            colors.evenForeground),
                     new ColorHighlighter(HighlightPredicate.ODD, colors.evenColor,
-                            colors.evenForeground, colors.selectionColor,
-                            colors.selectionForeground),
-                    new ColorHighlighter(new MenuHighlightPredicate(this), colors.menuRowColor,
-                            colors.menuRowForeground, colors.menuRowColor, colors.menuRowForeground));
+                            colors.evenForeground, colors.evenForeground,
+                            colors.evenForeground));
 
         }
 	}
