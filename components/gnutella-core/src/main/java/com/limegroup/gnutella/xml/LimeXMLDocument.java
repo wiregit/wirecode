@@ -68,11 +68,6 @@ public class LimeXMLDocument implements StringLookup {
      */
     private String schemaUri;
     
-    /**
-     * The cached string of attributes.
-     */
-    private String attributeString;
-
     /** 
      * The file this is related to.  Can be null if pure meta-data.
      */
@@ -451,9 +446,7 @@ public class LimeXMLDocument implements StringLookup {
      * It is purposely left unclosed so an index can easily be inserted.
      */
     private String getAttributeString() {
-        if(attributeString == null)
-            attributeString = constructAttributeString();
-        return attributeString;
+        return constructAttributeString();
     }
 
     /**
