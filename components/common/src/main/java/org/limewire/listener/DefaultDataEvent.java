@@ -32,7 +32,7 @@ public class DefaultDataEvent<S, E, D> extends DefaultEvent<S, E> {
         if(!obj.getClass().equals(getClass())) {
             return false;
         }
-        return data.equals(((DefaultDataEvent)obj).getType());
+        return data.equals(((DefaultDataEvent)obj).getData());
     }
     
     @Override
