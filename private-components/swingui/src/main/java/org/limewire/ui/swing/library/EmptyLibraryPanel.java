@@ -60,7 +60,9 @@ public class EmptyLibraryPanel extends LibraryPanel {
         
         this.friend = friend;
         this.mediator = mediator;
-        addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
+        if(!friend.isAnonymous()) {
+            addButtonToHeader(new ViewSharedLibraryAction(), buttonDecorator);
+        }
         addDisposable((Disposable)messageComponent);
         createEmptyPanel(messageComponent);
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
