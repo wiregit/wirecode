@@ -473,6 +473,17 @@ public class AppFrame extends SingleFrameApplication {
                 super.setVisible(visible);
             }
         }
+        
+        @SuppressWarnings("deprecation")
+        @Override
+        public void hide() {
+            try {
+                super.hide();
+            } catch(Throwable t) {
+                // Ignored... Internal JDK bugs causing this to error
+                // out, which ends up stopping us from closing LW.
+            }
+        }
 
     }
 }
