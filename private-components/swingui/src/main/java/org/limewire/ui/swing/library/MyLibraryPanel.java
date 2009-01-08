@@ -113,7 +113,7 @@ public class MyLibraryPanel extends LibraryPanel {
         categoryShareWidget = shareFactory.createCategoryShareWidget();
         multiShareWidget = shareFactory.createMultiFileShareWidget();
         createMyCategories(libraryManager.getLibraryManagedList());
-        selectFirst();
+        selectFirstVisible();
         
         addHeaderComponent(playerPanel, "cell 0 0, grow");
         playerPanel.setMaximumSize(new Dimension(999,999));
@@ -325,7 +325,7 @@ public class MyLibraryPanel extends LibraryPanel {
                         //select first category if this category is hidden
                         if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
                                 button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                            libraryPanel.selectFirst();
+                            libraryPanel.selectFirstVisible();
                         }
                     }
                 }

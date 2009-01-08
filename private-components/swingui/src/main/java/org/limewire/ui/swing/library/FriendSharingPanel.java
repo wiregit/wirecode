@@ -71,7 +71,7 @@ public class FriendSharingPanel extends SharingPanel {
         addBackButton(backButton);
                 
         createMyCategories(wholeLibraryList, friendFileList);
-        selectFirst();
+        selectFirstVisible();
     }
     
     protected String getFullPanelName() {

@@ -408,7 +408,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             }
             
 
-          libraryPanel.selectFirst();
+          libraryPanel.selectFirstVisible();
         }
         
         private void createSelectionButton(Action action) {
@@ -441,7 +441,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                         //select first category if this category is hidden
                         if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
                                 button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                            libraryPanel.selectFirst();
+                            libraryPanel.selectFirstVisible();
                         }
                     }
                 }

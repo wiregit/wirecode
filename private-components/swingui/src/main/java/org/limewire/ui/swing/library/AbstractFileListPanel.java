@@ -139,8 +139,8 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
         selectionPanel.showCard(id);
     }
     
-    protected void selectFirst() {
-        select(categoryOrder.get(0));
+    protected void selectFirstVisible() {
+        select(getNext(0));
     }
     
     protected JTextComponent getFilterTextField() {
@@ -441,7 +441,7 @@ abstract class AbstractFileListPanel extends JPanel implements Disposable {
                         //select first category if this category is hidden
                         if(value == false && button.getAction().getValue(Action.SELECTED_KEY) != null && 
                                 button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                            libraryPanel.selectFirst();
+                            libraryPanel.selectFirstVisible();
                         }
                     }
                 }

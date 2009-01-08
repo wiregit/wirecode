@@ -41,7 +41,7 @@ public class P2PNetworkSharingPanel extends SharingPanel {
 
         createMyCategories(libraryManager.getLibraryManagedList().getSwingModel(),
                            shareListManager.getGnutellaShareList());
-        selectFirst();
+        selectFirstVisible();
     }
     
     protected String getFullPanelName() {

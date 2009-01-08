@@ -54,7 +54,7 @@ public class AllFriendsLibraryPanel extends AbstractFriendLibraryPanel {
         }
         
         createMyCategories(remoteLibraryManager.getAllFriendsFileList().getSwingModel());
-        selectFirst();
+        selectFirstVisible();
         getHeaderPanel().setText(I18n.tr("Download from all friends"));
     }
     

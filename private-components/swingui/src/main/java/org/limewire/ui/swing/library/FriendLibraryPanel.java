@@ -64,7 +64,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         }
         
         createMyCategories(eventList);
-        selectFirst();
+        selectFirstVisible();
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
     }
     
