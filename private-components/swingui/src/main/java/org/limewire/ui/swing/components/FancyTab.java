@@ -149,7 +149,7 @@ public class FancyTab extends JXPanel {
         
         if (isBusy()) {
             busy.setBusy(true);
-            ResizeUtils.forceSize(busy, new Dimension(16,16));    
+            ResizeUtils.forceSize(busy, new Dimension(12,12));    
             busy.setVisible(true);
         } 
         
@@ -159,7 +159,7 @@ public class FancyTab extends JXPanel {
                 if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
                     boolean on = Boolean.TRUE.equals(evt.getNewValue());
                     busy.setBusy(on);
-                    ResizeUtils.forceSize(busy, new Dimension(16,16));
+                    ResizeUtils.forceSize(busy, new Dimension(12,12));
                     busy.setVisible(on);  
                     updateButtons(mouseInside);
                 }
