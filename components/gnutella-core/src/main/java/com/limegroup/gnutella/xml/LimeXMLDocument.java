@@ -194,7 +194,7 @@ public class LimeXMLDocument implements StringLookup {
             return false;
 
         // no valid attributes.
-        if(getAttributeString().length() == 0)
+        if(getOrderedNameValueList().isEmpty())
             return false;
             
         return true;
