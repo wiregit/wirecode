@@ -431,6 +431,10 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     }
 
     private void updateComponent(DownloadTableCellImpl editor, DownloadItem item){
+        if(item == null) { // can be null because of accessibility calls.
+            return;
+        }
+        
         switch(item.getState()) {
             case DOWNLOADING:
             case PAUSED:
