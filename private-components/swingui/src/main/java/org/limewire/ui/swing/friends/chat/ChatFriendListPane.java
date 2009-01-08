@@ -118,7 +118,7 @@ public class ChatFriendListPane extends JPanel {
     @Resource(key="ChatFriendList.conversationsSeparatorColor") private Color conversationsSeparatorColor;
     @Resource(key="ChatFriendList.friendColor") private Color friendColor;
     @Resource(key="ChatFriendList.friendFont") private Font friendFont;
-    @Resource(key="ChatFriendList.friendSelectionOrHoverColor") private Color friendSelectionOrHoverColor;
+    @Resource(key="ChatFriendList.friendSelectionColor") private Color friendSelectionColor;
     @Resource(key="ChatFriendList.activeConversationBackgroundColor") private Color activeConversationBackgroundColor;
 
     @Inject
@@ -512,8 +512,8 @@ public class ChatFriendListPane extends JPanel {
             boolean isChatHoveredOver = (chatFriend == mouseHoverFriend.getFriend() && chatFriend.isChatting());
             renderComponent(cell, value, chatFriend, isChatHoveredOver);
             
-            if (isSelected || isChatHoveredOver) {
-                cell.setBackground(friendSelectionOrHoverColor);
+            if (isSelected) {
+                cell.setBackground(friendSelectionColor);
             } else if (chatFriend.isActiveConversation()) {
                 cell.setBackground(activeConversationBackgroundColor);
             } else  {
