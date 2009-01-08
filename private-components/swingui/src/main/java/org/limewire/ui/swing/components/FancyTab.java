@@ -34,6 +34,7 @@ import javax.swing.JToggleButton.ToggleButtonModel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.util.FontUtils;
@@ -67,7 +68,7 @@ public class FancyTab extends JXPanel {
     @Resource private Icon removeInactiveIcon;
     @Resource private Icon removeInactiveRolloverIcon;
     @Resource private Icon removeInactivePressedIcon;
-    @Resource private Icon spinnerIcon; 
+//    @Resource private Icon spinnerIcon; 
     
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
@@ -140,9 +141,8 @@ public class FancyTab extends JXPanel {
         return Boolean.TRUE.equals(tabActions.getMainAction().getValue(TabActionMap.BUSY_KEY));
     }
     
-    SpinLabel createBusyLabel() {
-        final SpinLabel busy = new SpinLabel();
-        busy.setIcon(spinnerIcon);
+    JLabel createBusyLabel() {
+        final JXBusyLabel busy = new ColoredBusyLabel(new Dimension(12, 12), Color.decode("#acacac"),  Color.decode("#545454"));
         
         ResizeUtils.forceSize(busy, new Dimension(0,0));
         busy.setVisible(false);

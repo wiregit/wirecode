@@ -187,7 +187,6 @@ public class AppFrame extends SingleFrameApplication {
         ui.focusOnSearch();
 
         started = true;
-
     }
     
     @Override
