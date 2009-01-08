@@ -28,11 +28,13 @@ import java.util.Comparator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -440,6 +442,15 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         };
         
         comboPopup.getList().addMouseListener(shareListener);
+        comboPopup.getList().setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                Friend friend = ((SharingTarget)value).getFriend();
+                String text = ((SharingTarget)value).isGnutellaNetwork()? friend.getRenderName() : I18n.tr("<HTML>{0} <font color=#cccccc>({1})</font></HTML>", friend.getRenderName(), friend.getId());
+                return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
+            }
+        });
     }
 
     //must be called after friendCombo is initialized
