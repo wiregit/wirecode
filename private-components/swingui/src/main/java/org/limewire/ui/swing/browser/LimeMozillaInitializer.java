@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Expand;
 import org.limewire.io.IOUtils;
-import org.limewire.service.ErrorService;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -41,7 +40,10 @@ public class LimeMozillaInitializer {
                 Expand.expandFile(in, xulInstallPath, true, null);
                 xulFile.createNewFile();
             } catch (IOException e) {
-                ErrorService.error(e);
+                // This causes errors if the zip file can't be expanded for whatever reason.
+                // It sucks, but no need to report it to us... we fallback to using
+                // JEditorPane where we can.
+//                ErrorService.error(e);
             } finally {
                 IOUtils.close(in);
             }
