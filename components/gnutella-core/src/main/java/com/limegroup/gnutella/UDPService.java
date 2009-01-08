@@ -702,7 +702,6 @@ public class UDPService implements ReadWriteObserver {
 	 * port.
 	 */
 	public boolean canDoFWT(){
-	    System.out.println("entered canDoFWT");
 	    boolean retValue = false;
 	    
 	    // this does not affect EVER_DISABLED_FWT.
@@ -750,7 +749,6 @@ public class UDPService implements ReadWriteObserver {
 	}
 	
 	private void updateFWTState() {
-	    System.out.println("entered update");
 	    boolean newFWTSetting = true;
         FWTStatusReason reason = FWTStatusReason.UNKNOWN;
 	    synchronized(this) {     	
