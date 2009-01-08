@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -182,7 +181,7 @@ public class LimeXMLDocument implements StringLookup {
         scanFields();
         
         if(!isValid()) {
-            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + ((getSchema() != null) ? Arrays.asList(getSchema().getCanonicalizedFieldNames()) : "n/a"));
+            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + ((getSchema() != null) ? getSchema().getCanonicalizedFieldNames() : "n/a"));
         }
     }
     
@@ -409,13 +408,12 @@ public class LimeXMLDocument implements StringLookup {
         if(getSchema() == null)
             return Collections.emptyList();
         
-        String[] fNames = getSchema().getCanonicalizedFieldNames();
-        List<NameValue<String>> retList = new ArrayList<NameValue<String>>(fNames.length);
-        for (int i = 0; i < fNames.length; i++) {
-            String name = fNames[i].trim();
-            String value = fieldToValue.get(name);
+        List<String> fNames = getSchema().getCanonicalizedFieldNames();
+        List<NameValue<String>> retList = new ArrayList<NameValue<String>>(fNames.size());
+        for (String fieldName : fNames) {
+            String value = fieldToValue.get(fieldName);
             if (value != null)
-                retList.add(new NameValue<String>(name, value));
+                retList.add(new NameValue<String>(fieldName, value));
         }
             
         return retList;
