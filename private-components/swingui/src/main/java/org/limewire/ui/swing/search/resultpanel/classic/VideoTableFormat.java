@@ -13,13 +13,14 @@ import org.limewire.ui.swing.util.I18n;
  * video descriptions.
  */
 public class VideoTableFormat extends ResultsTableFormat<VisualSearchResult> {
+    // Indices into ColumnStateInfo array. 
     static final int FROM_INDEX = 0;
     static final int NAME_INDEX = 1;
     static final int EXTENSION_INDEX = 2;
     public static final int LENGTH_INDEX = 3;
-    static final int MISC_INDEX = 4;
-    public static final int QUALITY_INDEX = 5;
-    public static final int SIZE_INDEX = 6;
+    public static final int QUALITY_INDEX = 4;
+    public static final int SIZE_INDEX = 5;
+    static final int MISC_INDEX = 6;
     static final int RATING_INDEX = 7;
     static final int DIMENSION_INDEX = 8;
     static final int YEAR_INDEX = 9;
