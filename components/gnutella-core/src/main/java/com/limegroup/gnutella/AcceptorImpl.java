@@ -28,7 +28,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
-import org.limewire.listener.PendingEventBroadcaster;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.net.AsyncConnectionDispatcher;
@@ -140,7 +140,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final Provider<MulticastService> multicastService;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
     private final ScheduledExecutorService backgroundExecutor;
-    private final PendingEventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
+    private final EventBroadcaster<FirewallStatusEvent> firewallBroadcaster;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionServices connectionServices;
@@ -155,7 +155,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            PendingEventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
+            EventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
             Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,
@@ -403,9 +403,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	}
 	
 	public void initialize() {
-        firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(
-                FirewallStatus.FIREWALLED));
-        firewallBroadcaster.firePendingEvents();
+        firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.FIREWALLED));
 	}
 	
 	public void stop() {
@@ -620,12 +618,11 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             
     	    _acceptedIncoming = canReceiveIncoming;
             if(canReceiveIncoming) {
-                firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(FirewallStatus.NOT_FIREWALLED));
+                firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.NOT_FIREWALLED));
             } else {
-                firewallBroadcaster.addPendingEvent(new FirewallStatusEvent(FirewallStatus.FIREWALLED)); 
+                firewallBroadcaster.broadcast(new FirewallStatusEvent(FirewallStatus.FIREWALLED)); 
             }
 	    }
-	    firewallBroadcaster.firePendingEvents();
 	    
         if(canReceiveIncoming) {
             ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);

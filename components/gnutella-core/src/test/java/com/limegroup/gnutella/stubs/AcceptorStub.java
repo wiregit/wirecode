@@ -3,7 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.core.api.connection.FirewallStatusEvent;
-import org.limewire.listener.PendingEventBroadcaster;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.Inject;
@@ -28,7 +28,7 @@ public class AcceptorStub extends AcceptorImpl {
             Provider<MulticastService> multicastService,
             @Named("global") Provider<ConnectionDispatcher> connectionDispatcher,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            PendingEventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
+            EventBroadcaster<FirewallStatusEvent> firewallBroadcaster,
             Provider<ConnectionManager> connectionManager,
              Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
             Provider<UPnPManager> upnpManager) {

@@ -20,14 +20,14 @@ import org.limewire.logging.Log;
  */
 public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E> {
     
-    private final EventListenerList<E> eventListenerList;
+    private final EventMulticaster<E> multicaster;
     private final BroadcastPolicy broadcastPolicy;
     private final Object LOCK = new Object();
     
     private volatile E cachedEvent;
     
     public CachingEventMulticasterImpl() {
-        this(BroadcastPolicy.ALWAYS, null);    
+        this(BroadcastPolicy.ALWAYS, new EventMulticasterImpl<E>());    
     }
     
     public CachingEventMulticasterImpl(Log log) {
@@ -35,12 +35,16 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
     }
     
     public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy) {
-        this(broadcastPolicy, null);
+        this(broadcastPolicy, new EventMulticasterImpl<E>());
     }
     
     public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, Log log) {
-        eventListenerList = new EventListenerList<E>(log);
+        this(broadcastPolicy, new EventMulticasterImpl<E>(log));
+    }
+    
+    public CachingEventMulticasterImpl(BroadcastPolicy broadcastPolicy, EventMulticaster<E> multicaster) {
         this.broadcastPolicy = broadcastPolicy;
+        this.multicaster = multicaster;
     }
 
     @Override
@@ -52,12 +56,12 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
         if(cachedEvent != null) {
             EventListenerList.dispatch(eEventListener, cachedEvent);
         }
-        eventListenerList.addListener(eEventListener);
+        multicaster.addListener(eEventListener);
     }
 
     @Override
     public boolean removeListener(EventListener<E> eEventListener) {
-        return eventListenerList.removeListener(eEventListener);
+        return multicaster.removeListener(eEventListener);
     }
 
     @Override
@@ -80,7 +84,7 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
         }
         
         if(broadcast) {
-            eventListenerList.broadcast(event);
+            multicaster.broadcast(event);
         }
     }
 

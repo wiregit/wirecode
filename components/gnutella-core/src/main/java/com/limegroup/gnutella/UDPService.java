@@ -27,9 +27,9 @@ import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.EventBroadcaster;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.PendingEventBroadcaster;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
 import org.limewire.rudp.AbstractNBSocketChannel;
@@ -185,7 +185,7 @@ public class UDPService implements ReadWriteObserver {
     private final MessageFactory messageFactory;
     private final PingRequestFactory pingRequestFactory;
     private final NetworkInstanceUtils networkInstanceUtils;
-    private final PendingEventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster;
+    private final EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster;
 
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
@@ -210,7 +210,7 @@ public class UDPService implements ReadWriteObserver {
             MessageFactory messageFactory,
             PingRequestFactory pingRequestFactory,
             NetworkInstanceUtils networkInstanceUtils,
-            PendingEventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster,
+            EventBroadcaster<FirewallTransferStatusEvent> fwtStatusBroadcaster,
             ListenerSupport<UDPSocketChannelConnectionEvent> channelEventListenerSupport) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
@@ -231,9 +231,8 @@ public class UDPService implements ReadWriteObserver {
 	    BUFFER = ByteBuffer.wrap(backing);
         // TODO convert this to a Service and move this
         // TODO initialize()
-        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(
+        fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(
                 FirewallTransferStatus.DOES_NOT_SUPPORT_FWT, FWTStatusReason.UNKNOWN));
-        fwtStatusBroadcaster.firePendingEvents();
         
         channelEventListenerSupport.addListener(new UDPConnectionListener());
     }
@@ -703,21 +702,22 @@ public class UDPService implements ReadWriteObserver {
 	 * port.
 	 */
 	public boolean canDoFWT(){
+	    System.out.println("entered canDoFWT");
 	    boolean retValue = false;
 	    
 	    // this does not affect EVER_DISABLED_FWT.
 	    if (!canReceiveSolicited()) { 
-            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                     FWTStatusReason.NO_SOLICITED_INCOMING_MESSAGES));
             retValue = false;
         } else {
     	    boolean canDoFWTSetting = !ConnectionSettings.CANNOT_DO_FWT.getValue();
     	    if (!connectionServices.isConnected()) {
                 if(canDoFWTSetting) {
-                    fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
                             FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                 } else {
-                    fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                    fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                             FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                 }
                 retValue = canDoFWTSetting;
@@ -727,10 +727,10 @@ public class UDPService implements ReadWriteObserver {
     	    synchronized(this) {
     	        if (_numReceivedIPPongs < 1) {
                     if(canDoFWTSetting) {
-                        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+                        fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
                                 FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                     } else {
-                        fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+                        fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                                 FWTStatusReason.REUSING_STATUS_FROM_PREVIOUS_SESSION));
                     }
                     needToUpdateState = false;
@@ -746,11 +746,11 @@ public class UDPService implements ReadWriteObserver {
     	    }
 	    }
 	    
-	    fwtStatusBroadcaster.firePendingEvents();
 	    return retValue;
 	}
 	
 	private void updateFWTState() {
+	    System.out.println("entered update");
 	    boolean newFWTSetting = true;
         FWTStatusReason reason = FWTStatusReason.UNKNOWN;
 	    synchronized(this) {     	
@@ -788,13 +788,12 @@ public class UDPService implements ReadWriteObserver {
             }
 	    }
         if(newFWTSetting) {
-            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.SUPPORTS_FWT,
                     FWTStatusReason.UNKNOWN));
         } else {
-            fwtStatusBroadcaster.addPendingEvent(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
+            fwtStatusBroadcaster.broadcast(new FirewallTransferStatusEvent(FirewallTransferStatus.DOES_NOT_SUPPORT_FWT,
                     reason));
         }
-        fwtStatusBroadcaster.firePendingEvents();
 	    ConnectionSettings.CANNOT_DO_FWT.setValue(!newFWTSetting);
 	}
 	
