@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
 import java.io.File;
 import java.util.Map;
@@ -20,6 +22,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.basic.BasicSliderUI;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -46,6 +49,11 @@ import org.limewire.ui.swing.util.ResizeUtils;
 
 import com.google.inject.Inject;
 
+/**
+ * NOTE: This class should be treated as a singleton and the only proper media player (except the mini player)
+ *        in the application otherwise there will be contention regarding play control and volume.
+ * 
+ */
 public class PlayerPanel extends JXPanel {
 
     // TODO: Move somewhere better
@@ -165,12 +173,7 @@ public class PlayerPanel extends JXPanel {
         initVolumeControl();
         
         progressSlider = sliderBarFactory.create();
-        progressSlider.addChangeListener(new AudioProgressListener());
-        progressSlider.setMaximum(Integer.MAX_VALUE);
-        progressSlider.setMaximumSize(new Dimension(206, 6));
-        progressSlider.setMinimumSize(new Dimension(206, 6));
-        progressSlider.setPreferredSize(new Dimension(206, 6));
-        progressSlider.setSize(new Dimension(206, 4));
+        initProgressControl();
         
         statusPanel = new JPanel(new MigLayout());
         
@@ -221,6 +224,40 @@ public class PlayerPanel extends JXPanel {
             }
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+            }
+        });
+    }
+    
+    private void initProgressControl() {
+        progressSlider.addChangeListener(new AudioProgressListener());
+        progressSlider.setMaximum(Integer.MAX_VALUE);
+        progressSlider.setMaximumSize(new Dimension(206, 6));
+        progressSlider.setMinimumSize(new Dimension(206, 6));
+        progressSlider.setPreferredSize(new Dimension(206, 6));
+        progressSlider.setSize(new Dimension(206, 4));
+        progressSlider.addMouseListener(new MouseAdapter() {
+            /**
+             * Reposition the thumb on the jslider to the location of the mouse
+             * click
+             */
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (!progressSlider.isEnabled())
+                    return;
+
+                mouseSkip(e.getX());
+            }
+            
+            /**
+             * Overrides the mouse press increment when a mouse click occurs in the 
+             * jslider. Repositions the jslider directly to the location the mouse
+             * click avoiding the standard step increment with each click
+             * @param x - location of mouse click
+             */
+            protected void mouseSkip(int x) {
+                if (progressSlider.getUI() instanceof BasicSliderUI) {
+                    progressSlider.setValue(((BasicSliderUI)progressSlider.getUI()).valueForXPosition(x));
+                }
             }
         });
     }
