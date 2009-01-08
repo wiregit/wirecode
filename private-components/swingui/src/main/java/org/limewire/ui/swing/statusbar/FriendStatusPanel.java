@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.statusbar;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -11,14 +11,14 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.listener.EventListener;
@@ -39,27 +39,23 @@ class FriendStatusPanel {
     @Resource(key="FriendStatus.font") private Font chatButtonFont;
     @Resource(key="FriendStatus.foreground") private Color chatButtonForeground;
     @Resource(key="FriendStatus.background") private Color chatBackground;
-    @Resource(key="FriendStatus.buttonBorderColor") private Color buttonBorderColor;
+    @Resource(key="FriendStatus.primaryTopBorderColor") private Color primaryTopBorderColor;
+    @Resource(key="FriendStatus.primaryButtonBorderColor") private Color primaryButtonBorderColor;
+    @Resource(key="FriendStatus.secondaryButtonBorderColor") private Color secondaryButtonBorderColor;
 
     private final JXButton chatButton;
     
     private JPanel mainComponent;
-    private Border chatPanelVisibleBorder;
+    private ChatButtonBorderPainter borderPainter;
 
     @Inject FriendStatusPanel(final ChatFramePanel friendsPanel, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         
-        JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 25));
+        JXPanel chatPanel = new JXPanel(new MigLayout("insets 1 1 1 1"));
         
-//        Border insideBorder = BorderFactory.createEmptyBorder(0, 2, 0, 20);
-//        Border outsideBorder = BorderFactory.createLineBorder(buttonBorderColor);
-//        chatPanel.setBorder(new CompoundBorder(insideBorder, outsideBorder));
-        
-        Border insideBorder = BorderFactory.createEmptyBorder(-1, 0, 0, 0);
-        Border outsideBorder = BorderFactory.createLineBorder(buttonBorderColor);
-        chatPanelVisibleBorder = new CompoundBorder(insideBorder, outsideBorder);
-//        chatPanelVisibleBorder = insideBorder;
+        borderPainter = new ChatButtonBorderPainter(primaryButtonBorderColor, primaryTopBorderColor);
+        chatPanel.setBackgroundPainter(borderPainter);
+        chatPanel.setPaintBorderInsets(true);
         chatPanel.setOpaque(true);
         chatPanel.setBackground(chatBackground);
         
@@ -72,11 +68,14 @@ class FriendStatusPanel {
                 friendsPanel.toggleVisibility();
                 boolean friendsVisible = friendsPanel.isVisible();
                 backgroundPainter.setBorderPaint(friendsVisible ? chatBackground : null);
-                mainComponent.setBorder(friendsVisible ? chatPanelVisibleBorder : null);
-//                chatButton.setSize(chatButton.getWidth(), chatButton.getHeight() + (friendsVisible ? 1 : 0));
+                borderPainter.setBorderPaint(friendsVisible ? secondaryButtonBorderColor : primaryButtonBorderColor);
+                borderPainter.setSecondaryBorderPaint(friendsVisible ? null : primaryTopBorderColor);
+                mainComponent.invalidate();
+                mainComponent.repaint();
             }
         });
         backgroundPainter.setFillPaint(chatBackground);
+        backgroundPainter.setBorderPaint(null);
         backgroundPainter.setBorderWidth(0.0f);
         chatButton.setBackgroundPainter(backgroundPainter);
         chatButton.setIcon(iconLibrary.getChatting());
@@ -84,12 +83,11 @@ class FriendStatusPanel {
         chatButton.setForeground(chatButtonForeground);
         chatButton.setFocusPainted(false);
         chatButton.setHorizontalAlignment(AbstractButton.LEFT);
-//        chatButton.setHorizontalTextPosition(AbstractButton.RIGHT);
-//        Insets insets = new Insets(0, 2, 0, 25);
-//        chatButton.setMargin(insets);
-//        chatButton.setPaintBorderInsets(true);
+        Insets insets = new Insets(1, 0, 0, 25);
+        chatButton.setMargin(insets);
+        chatButton.setPaintBorderInsets(true);
         
-        chatPanel.add(chatButton);
+        chatPanel.add(chatButton, "hmax 17");
         
         friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
         
