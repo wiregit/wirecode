@@ -36,6 +36,8 @@ public class DownloadTable extends AbstractDownloadTable {
         setStripeHighlighterEnabled(false);
         
         setShowGrid(false, false);
+        
+        setRowSelectionAllowed(false);
       
         DownloadTableCell editorMutator   = tableCellFactory.create();
         DownloadTableCell rendererMutator = tableCellFactory.create();
