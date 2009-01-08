@@ -6,8 +6,10 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -55,6 +57,8 @@ public class MainDownloadPanel extends JPanel {
 	private LimeComboBox moreButton;
     private JXButton clearFinishedButton;
     private final DockIcon dock;
+    
+    private JCheckBoxMenuItem categoriseCheckBox;
 	
     private final AbstractDownloadsAction pauseAction = new AbstractDownloadsAction(I18n.tr("Pause All")) {
         @Override
@@ -81,7 +85,7 @@ public class MainDownloadPanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // setCategorized(categoriseCheckBox.isSelected());
+            setCategorized(categoriseCheckBox.isSelected());
         }
 
     };
@@ -192,9 +196,15 @@ public class MainDownloadPanel extends JPanel {
 	    buttonDecorator.decorateDarkFullButton(clearFinishedButton);
 	    comboBoxFactory.decorateDarkMiniComboBox(moreButton, I18n.tr("more"));
 
-	    moreButton.addAction(pauseAction);
-	    moreButton.addAction(resumeAction);
-	    moreButton.addAction(categorizeAction);
+	    categoriseCheckBox = new JCheckBoxMenuItem(categorizeAction);
+	    
+	    JPopupMenu menu = new JPopupMenu();
+	    menu.add(moreButton.createMenuItem(pauseAction));
+	    menu.add(moreButton.createMenuItem(resumeAction));
+	    menu.addSeparator();
+	    menu.add(moreButton.decorateMenuComponent(categoriseCheckBox));
+	    
+	    moreButton.overrideMenu(menu);
 	    
 	    this.settingsPanel.setLayout(new MigLayout("insets 0, fillx, filly","push[][]"));
 	    this.settingsPanel.add(clearFinishedButton, "gapafter 5");
