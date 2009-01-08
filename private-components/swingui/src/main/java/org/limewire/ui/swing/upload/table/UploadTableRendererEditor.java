@@ -42,7 +42,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     private JLabel nameLabel;
     private JLabel iconLabel;
     private JXButton cancelButton;
-    private JXHyperlink removeButton;
+    private JXHyperlink removeLink;
     private UploadItem editItem;
     private JProgressBar progressBar;
     private JLabel timeLabel;
@@ -55,6 +55,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Resource private Icon cancelIcon;
     @Resource private Icon cancelIconRollover;
     @Resource private Icon cancelIconPressed;
+    @Resource private Icon browseHostIcon;
     
 
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
@@ -81,17 +82,17 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         
         cancelButton.addActionListener(cancelAction);
         
-        removeButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
+        removeLink.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
 
         Action removeAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               actionHandler.performAction(removeButton.getActionCommand(), editItem);
+               actionHandler.performAction(removeLink.getActionCommand(), editItem);
                cancelCellEditing();
             }
         };
         
-        removeButton.addActionListener(removeAction);
+        removeLink.addActionListener(removeAction);
     }
 
     @Override
@@ -110,23 +111,28 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     }
     
     private void initializeComponents(LimeProgressBarFactory progressBarFactory){
-        nameLabel = new JLabel(I18n.tr("Name"));
+        setOpaque(false);
+        
+      //string parameter ensures proper sizing
+        nameLabel = new JLabel("NAME");
         nameLabel.setFont(titleFont);
         
         iconLabel = new JLabel();
         
+      //string parameter ensures proper sizing
         statusLabel = new JLabel(I18n.tr("Status"));
         statusLabel.setFont(statusFont);
         
         cancelButton = new IconButton(cancelIcon, cancelIconRollover, cancelIconPressed);
         
-        removeButton = new JXHyperlink();
-        removeButton.setText("<HTML><U>" + I18n.tr("Remove") + "</U></HTML>");
-        removeButton.setForeground(linkColor);        
-        removeButton.setClickedColor(linkColor);
-        removeButton.setFont(statusFont);
-
-        timeLabel = new JLabel(I18n.tr("Time"));
+        removeLink = new JXHyperlink();
+        removeLink.setText("<HTML><U>" + I18n.tr("Remove") + "</U></HTML>");
+        removeLink.setForeground(linkColor);        
+        removeLink.setClickedColor(linkColor);
+        removeLink.setFont(statusFont);
+        
+        //string parameter ensures proper sizing
+        timeLabel = new JLabel("TIME");
         timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         
         progressBar = progressBarFactory.create();
@@ -138,30 +144,35 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     
     private void addComponents() {
         add(iconLabel, "gapleft 10, alignx left, aligny 50%, spany 3, hidemode 3");
-        add(nameLabel, "gapleft 10, gaptop 5, aligny bottom");
+        add(nameLabel, "gapleft 10, gaptop 5, aligny bottom, hidemode 2");
         add(cancelButton, "gapright 10, alignx right, aligny 50%, spany 3, push, wrap");
         add(progressBar, "gapleft 10, , gaptop 2, hidemode 3, wrap");
         add(statusLabel, "gapleft 10, gapbottom 5, gaptop 2, aligny top, split 3");
         add(timeLabel, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
-        add(removeButton, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
+        add(removeLink, "push, gaptop 2, gapbottom 5, aligny top, alignx right, hidemode 1");
     }
     
     private void update(UploadItem item){
-        nameLabel.setText(item.getFileName());
-        
+        nameLabel.setVisible(!isBrowseHost(item));
+        if (nameLabel.isVisible()) {
+            nameLabel.setText(item.getFileName());
+        }
+
         statusLabel.setText(getMessage(item));
-        
-        if(UploadItemType.GNUTELLA == item.getUploadItemType()) {
-            
+
+        if (UploadItemType.GNUTELLA == item.getUploadItemType()) {
+
             progressBar.setVisible(item.getState() == UploadState.UPLOADING);
-            if (progressBar.isVisible()) { 
-                progressBar.setValue((int)(100 * item.getTotalAmountUploaded()/item.getFileSize()));
+            if (progressBar.isVisible()) {
+                progressBar.setValue((int) (100 * item.getTotalAmountUploaded() / item
+                        .getFileSize()));
             }
-            
+
             timeLabel.setVisible(item.getState() == UploadState.UPLOADING);
             if (timeLabel.isVisible()) {
                 timeLabel.setText(CommonUtils.seconds2time(item.getRemainingUploadTime()));
-            }        
+            }
+
         } else {
             progressBar.setVisible(false);
             timeLabel.setVisible(false);
@@ -172,16 +183,32 @@ public class UploadTableRendererEditor extends TableRendererEditor {
             iconLabel.setVisible(false);
         } else {
             nameLabel.setIcon(null);
-            iconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            if (isBrowseHost(item)) {
+                iconLabel.setIcon(browseHostIcon);
+            } else {
+                iconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
+            }
             iconLabel.setVisible(true);
         }
         
-        removeButton.setVisible(item.getState() == UploadState.UNABLE_TO_UPLOAD);
+        removeLink.setVisible(item.getState() == UploadState.UNABLE_TO_UPLOAD);
+        
+        if(item.getState() == UploadState.DONE || isBrowseHost(item)){
+            cancelButton.setActionCommand(UploadActionHandler.REMOVE_COMMAND);
+        } else {
+            cancelButton.setActionCommand(UploadActionHandler.CANCEL_COMMAND);
+        }
     }
     
+    private boolean isBrowseHost(UploadItem item){
+       return item.getState() == UploadState.BROWSE_HOST || item.getState() == UploadState.BROWSE_HOST_DONE;
+    }
     
     private String getMessage(UploadItem item){
         switch (item.getState()){
+        case BROWSE_HOST:
+        case BROWSE_HOST_DONE:
+            return I18n.tr("{0} browsed your library", item.getHost());
         case DONE:
             return I18n.tr("Done uploading");
         case UPLOADING:

@@ -15,6 +15,7 @@ import org.limewire.core.api.upload.UploadState;
 import org.limewire.ui.swing.table.TablePopupHandler;
 import org.limewire.ui.swing.util.I18n;
 
+
 public class UploadPopupHandler implements TablePopupHandler {
     private int popupRow = -1;
 
@@ -88,25 +89,27 @@ public class UploadPopupHandler implements TablePopupHandler {
         popupMenu.removeAll();
         UploadState state = menuItem.getState();
         
-        if(state == UploadState.DONE || state == UploadState.UNABLE_TO_UPLOAD){
+        if(state == UploadState.BROWSE_HOST || state == UploadState.BROWSE_HOST_DONE || state == UploadState.DONE || state == UploadState.UNABLE_TO_UPLOAD){
             popupMenu.add(removeMenuItem);
         } else {
             popupMenu.add(cancelMenuItem);
         }
         
-        popupMenu.addSeparator();
-        
-        if (menuItem.getCategory() == Category.VIDEO || menuItem.getCategory() == Category.AUDIO) {
-            popupMenu.add(playMenuItem);
-        } else if (menuItem.getCategory() != Category.PROGRAM) {
-            popupMenu.add(launchMenuItem);
-        }
-        popupMenu.add(locateMenuItem);
-        popupMenu.add(showInLibraryMenuItem);
+        if (state != UploadState.BROWSE_HOST && state != UploadState.BROWSE_HOST_DONE) {
+            popupMenu.addSeparator();
 
-        popupMenu.addSeparator();
-        
-        popupMenu.add(propertiesMenuItem);
+            if (menuItem.getCategory() == Category.VIDEO || menuItem.getCategory() == Category.AUDIO) {
+                popupMenu.add(playMenuItem);
+            } else if (menuItem.getCategory() != Category.PROGRAM) {
+                popupMenu.add(launchMenuItem);
+            }
+            popupMenu.add(locateMenuItem);
+            popupMenu.add(showInLibraryMenuItem);
+
+            popupMenu.addSeparator();
+
+            popupMenu.add(propertiesMenuItem);
+        }
         
         popupMenu.show(component, x, y);
     }

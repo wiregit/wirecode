@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.library.sharing;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -302,11 +303,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                 bottomArea.intersect(panelArea);
                 
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setRenderingHint(RenderingHints.KEY_RENDERING,
-                        RenderingHints.VALUE_RENDER_SPEED);
-                
+                        RenderingHints.VALUE_RENDER_SPEED);                
                
                 
                 g2.setColor(Color.WHITE);
@@ -322,9 +320,19 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
                     g2.drawLine(panelBounds.x, bottomLocation.y, panelBounds.x + panelBounds.width, bottomLocation.y);
                 }
                 g2.setColor(borderColor);
+//                g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+//                        RenderingHints.VALUE_STROKE_NORMALIZE);
                 g2.draw(mainPanelShape);
-                g2.translate(1, 1);
+              g2.translate(1, 1);
+              g2.draw(mainPanelShape);
+                g2.setStroke(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+//                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+//                        RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.draw(mainPanelShape);
+//                g2.translate(1, 1);
+//                g2.draw(mainPanelShape);
+//                g2.translate(1, -1);
+//                g2.draw(mainPanelShape);
                 g2.dispose();
             }
         });        

@@ -81,7 +81,7 @@ public class UploadPanel extends JXPanel{
         uploadItems.getReadWriteLock().writeLock().lock();
         try {
             for(UploadItem item : uploadItems){
-                if(item.getState() == UploadState.DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD){
+                if(item.getState() == UploadState.DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD || item.getState() == UploadState.BROWSE_HOST){
                     finishedItems.add(item);
                 }
             }
