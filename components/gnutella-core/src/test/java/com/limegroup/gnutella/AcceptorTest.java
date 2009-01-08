@@ -117,7 +117,9 @@ public class AcceptorTest extends LimeTestCase {
         Thread.sleep(500); // Make sure the resetter gets scheduled.
         
         // Turn incoming on, make sure it triggers a change...
+        activityCallback.resetLatch();
         acceptor.setIncoming(true);
+        activityCallback.waitForSingleChange(true);
         assertEquals(1, activityCallback.getChanges());
         assertTrue(activityCallback.getLastStatus());
         
@@ -129,7 +131,9 @@ public class AcceptorTest extends LimeTestCase {
         assertEquals(2, activityCallback.getChanges());
        
         // Turn incoming on, make sure we get the status...
+        activityCallback.resetLatch();
         acceptor.setIncoming(true);
+        activityCallback.waitForSingleChange(true);
         assertEquals(3, activityCallback.getChanges());
         assertTrue(activityCallback.getLastStatus());
         
@@ -493,6 +497,11 @@ public class AcceptorTest extends LimeTestCase {
         private volatile int changes = 0;
         private volatile boolean lastStatus = false;
         private volatile CountDownLatch latch;
+        private volatile CountDownLatch singleChangeLatch;
+        
+        void resetLatch() {
+            singleChangeLatch = new CountDownLatch(1);
+        }
         
         @Override
         public void handleEvent(FirewallStatusEvent event) {
@@ -500,6 +509,14 @@ public class AcceptorTest extends LimeTestCase {
             lastStatus = event.getSource() == FirewallStatus.NOT_FIREWALLED;
             if(latch != null)
                 latch.countDown();
+            if(singleChangeLatch != null) {
+                singleChangeLatch.countDown();
+            }
+        }
+        
+        int waitForSingleChange(boolean expect) throws Exception {
+            assertEquals(expect, singleChangeLatch.await(500, TimeUnit.MILLISECONDS));
+            return changes;
         }
         
         int getChanges() {
