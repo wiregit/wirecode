@@ -53,7 +53,7 @@ public class MetaDataManagerImpl implements MetaDataManager {
         Category category = coreLocalFileItem.getCategory();
 
         String limeXMLSchemaUri = getLimeXmlSchemaUri(category);
-        LimeXMLDocument oldDocument = fileDesc.getXMLDocument();
+        LimeXMLDocument oldDocument = fileDesc.getXMLDocument(limeXMLSchemaUri);
 
         String input = buildInput(fileDesc, limeXMLSchemaUri, coreLocalFileItem);
 
@@ -173,9 +173,7 @@ public class MetaDataManagerImpl implements MetaDataManager {
                 .getReplyCollection(limeXMLSchemaUri);
 
         if (!collection.removeDoc(fileDesc)) {
-            // unable to remove or write to disk
-            // TODO show error message
-            throw new IllegalArgumentException("Internal Document Error. Data could not be saved.");
+            throw new NotImplementedException("Internal Document Error. Data could not be saved.");
         }
     }
 
