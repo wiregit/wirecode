@@ -59,6 +59,7 @@ public class SetupPage2 extends WizardPage {
     private final JRadioButton manualButton;
     
     private final JLabel manualLabel;
+    private final JLabel manualCategoryLabel;
     
     private final LibraryManagerTreeTable treeTable;
     private final JScrollPane treeTableScrollPane;
@@ -100,6 +101,10 @@ public class SetupPage2 extends WizardPage {
         initManualPanel();
         treeTableScrollPane = new JScrollPane(treeTable);
         setTreeTableVisiable(false);
+        
+        manualCategoryLabel = new MultiLineLabel(categoryText);
+        decorator.decorateNormalText(manualCategoryLabel);
+        manualCategoryLabel.setVisible(false);
         
         Collection<Category> selectedCategories = getDefaultManagedCategories();
         checkBoxes = new HorizonalCheckBoxListPanel<Category>(Category.getCategoriesInOrder(), selectedCategories);
@@ -144,10 +149,8 @@ public class SetupPage2 extends WizardPage {
         
         add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
         add(addFolderButton, "gaptop 10, gapright 30, wrap");
-        
-        label = new JLabel(categoryText);
-        decorator.decorateNormalText(label);
-        add(label, "gaptop 10, gapleft 40, wrap");
+
+        add(manualCategoryLabel, "gaptop 10, gapleft 40, wrap");
         add(checkBoxes, "gaptop 0, gapleft 40, growx");
     }
 
@@ -193,10 +196,10 @@ public class SetupPage2 extends WizardPage {
             LibraryManagerModel model = treeTable.getLibraryModel();
             manage.addAll(model.getRootChildrenAsFiles());
             exclude.addAll(model.getAllExcludedSubfolders());
-            managedCategories.addAll(getDefaultManagedCategories());
+            managedCategories.addAll(checkBoxes.getSelected());
         } else {
             manage.addAll(AutoDirectoryManageConfig.getDefaultManagedDirectories(libraryData));
-            managedCategories.addAll(checkBoxes.getSelected());
+            managedCategories.addAll(getDefaultManagedCategories());            
         }
 
         // Always add existing settings
@@ -214,8 +217,10 @@ public class SetupPage2 extends WizardPage {
     private class ButtonSelectionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            setTreeTableVisiable(buttonGroup.getSelection() == manualButton.getModel());
-            checkBoxes.setVisible(buttonGroup.getSelection() == manualButton.getModel());
+            boolean visible = buttonGroup.getSelection() == manualButton.getModel();
+            setTreeTableVisiable(visible);
+            checkBoxes.setVisible(visible);
+            manualCategoryLabel.setVisible(visible);
         }        
     }
     
