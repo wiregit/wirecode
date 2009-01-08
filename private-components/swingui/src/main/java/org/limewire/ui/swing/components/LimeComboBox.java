@@ -345,7 +345,7 @@ public class LimeComboBox extends JXButton {
                     if(!clickForcesVisible && (menuVisible || System.currentTimeMillis() - menuInvizTime <= 10f)) {
                         menu.setVisible(false);
                     } else {
-                        menu.show((Component) e.getSource(), 0, getHeight()-1);
+                        menu.show((Component) e.getSource(), 1, getHeight()-1);
                     }
                 }
             }
@@ -525,7 +525,7 @@ public class LimeComboBox extends JXButton {
                 menuVisible = true;
                 updateMenu();
                 if (getText() == null) {
-                    menu.setPreferredSize(new Dimension(getWidth(), 
+                    menu.setPreferredSize(new Dimension(getWidth()-2, 
                             (int) menu.getPreferredSize().getHeight()));
                 }                
             }
