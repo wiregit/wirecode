@@ -113,7 +113,6 @@ public class ChatFriendListPane extends JPanel {
     private String myID;
     private WeakReference<ChatFriend> activeConversation = new WeakReference<ChatFriend>(null);
     private FriendHoverBean mouseHoverFriend = new FriendHoverBean();
-    private Action minimizeAction;
     @Resource(key="ChatFriendList.rightEdgeBorderColor") private Color rightBorderColor;
     @Resource(key="ChatFriendList.conversationsSeparatorColor") private Color conversationsSeparatorColor;
     @Resource(key="ChatFriendList.friendColor") private Color friendColor;
@@ -169,10 +168,6 @@ public class ChatFriendListPane extends JPanel {
                 }
             }
         });
-    }
-    
-    void setMinimizeAction(Action minimizeAction) {
-        this.minimizeAction = minimizeAction;
     }
 
     private void handleSignoff() {
@@ -801,7 +796,6 @@ public class ChatFriendListPane extends JPanel {
         public void actionPerformed(ActionEvent e) {
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
-                minimizeAction.actionPerformed(e);
                 libraryNavigator.selectFriendLibrary(chatFriend.getFriend());
             }
         }
@@ -814,7 +808,6 @@ public class ChatFriendListPane extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            minimizeAction.actionPerformed(e);
             ChatFriend chatFriend = context.getFriend();
             if (chatFriend != null) {
                 libraryNavigator.selectFriendShareList(chatFriend.getFriend());

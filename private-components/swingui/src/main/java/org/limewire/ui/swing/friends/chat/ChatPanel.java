@@ -58,7 +58,6 @@ public class ChatPanel extends JPanel implements Displayable {
     }
     
     void setMinimizeAction(Action minimizeAction) {
-        friendsPanel.setMinimizeAction(minimizeAction);
         chatTopPanel.setMinimizeAction(minimizeAction);
     }
     
