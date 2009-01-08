@@ -78,6 +78,7 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     private void updateCheckbox(LocalFileItem fileItem) {
         if(!fileItem.isShareable()) {
             setEnabled(false);
+            setSelected(false);
         }
         else if(fileItem.getCategory() == Category.PROGRAM && !LibrarySettings.ALLOW_PROGRAMS.getValue()) {
             setEnabled(false);
