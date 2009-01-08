@@ -49,7 +49,12 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
             boolean hasFocus, int row, int column) {
-
+		if(value == null || !(value instanceof LocalFileItem)) {
+		    setEnabled(false);
+            setSelected(false);
+            return this;
+		}
+			
         LocalFileItem fileItem = (LocalFileItem) value;
         updateCheckbox(fileItem);
         
@@ -59,6 +64,12 @@ public class SharingCheckBoxRendererEditor extends JCheckBox implements TableCel
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,
             int row, int column) {
+        if(value == null || !(value instanceof LocalFileItem)) {
+            setEnabled(false);
+            setSelected(false);
+            return this;
+        }
+        
         currentItem = (LocalFileItem) value;
         updateCheckbox(currentItem);
         return this;
