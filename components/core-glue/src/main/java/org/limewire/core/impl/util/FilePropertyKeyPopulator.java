@@ -20,6 +20,7 @@ public class FilePropertyKeyPopulator {
     public static void populateProperties(String fileName, long fileSize, long creationTime,
             Map<FilePropertyKey, Object> properties, LimeXMLDocument doc) {
 
+        properties.put(FilePropertyKey.NAME, ""); // Make sure name defaults to empty.
         set(properties, FilePropertyKey.NAME, FileUtils.getFilenameNoExtension(fileName));
         set(properties, FilePropertyKey.DATE_CREATED, creationTime);
         set(properties, FilePropertyKey.FILE_SIZE, fileSize);
