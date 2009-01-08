@@ -90,8 +90,6 @@ public class SortAndFilterPanel implements Disposable {
     @Resource private Icon tableViewIcon;
     
     @Resource private Font sortLabelFont;
-    @Resource private Color sortComboColor;
-    @Resource private Font sortComboFont;
 
     private final LimeComboBox sortCombo;
     
@@ -125,8 +123,6 @@ public class SortAndFilterPanel implements Disposable {
         sortLabel.setFont(sortLabelFont);
         sortLabel.setForeground(Color.WHITE);
         sortCombo = comboBoxFactory.createDarkFullComboBox();
-        sortCombo.setFont(sortComboFont);
-        sortCombo.setForeground(sortComboColor);
         
         sizeSortCombo();
 
