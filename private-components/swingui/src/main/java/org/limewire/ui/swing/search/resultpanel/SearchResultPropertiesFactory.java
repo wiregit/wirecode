@@ -53,19 +53,11 @@ public class SearchResultPropertiesFactory implements PropertiesFactory<VisualSe
             this.categoryIconManager = dialogParam.getCategoryIconManager();
             this.filterList = dialogParam.getFilterList();
             GuiUtils.assignResources(this);
-            
-            disableEdit(album, author, artist, company, year, title, track);
-            disableComponent(description, genre, rating, platform);
-            
+            disableEditForAllCommonFields();
+
             location.setLayout(new MigLayout("nocache", "[50%!]", "[]"));
             readOnlyInfoModel.setColumnIdentifiers(new Object[] { tr("Address"), tr("Filename") });
             location.add(new JScrollPane(readOnlyInfo));
-        }
-        
-        protected void disableComponent(JComponent... comps) {
-            for(JComponent comp : comps) {
-                comp.setEnabled(false);
-            }
         }
 
         @Override

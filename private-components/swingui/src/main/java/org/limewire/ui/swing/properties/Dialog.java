@@ -444,10 +444,21 @@ public abstract class Dialog extends LimeJDialog {
         return property == null ? null : property.toString();
     }
 
-    protected void disableEdit(JTextComponent... comps) {
+    private void disableEdit(JTextComponent... comps) {
         for (JTextComponent comp : comps) {
             comp.setEditable(false);
         }
+    }
+
+    private void disableComponent(JComponent... comps) {
+        for(JComponent comp : comps) {
+            comp.setEnabled(false);
+        }
+    }
+
+    protected void disableEditForAllCommonFields() {
+        disableEdit(album, author, artist, company, year, title, track);
+        disableComponent(description, genre, rating, platform);
     }
 
     private static class ReadOnlyTableModel extends DefaultTableModel {
