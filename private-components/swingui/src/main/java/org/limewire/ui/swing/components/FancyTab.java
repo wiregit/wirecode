@@ -50,7 +50,6 @@ public class FancyTab extends JXPanel {
     private final AbstractButton removeButton;
     private final JLabel busyLabel;
     private final JLabel additionalText;
-    private final Line underline;
     private final FancyTabProperties props;
     
     private static enum TabState {
@@ -82,7 +81,6 @@ public class FancyTab extends JXPanel {
         this.additionalText = createAdditionalText();
         this.removeButton = createRemoveButton();
         this.busyLabel = createBusyLabel();
-        this.underline = Line.createHorizontalLine(props.getUnderlineColor());
 
         if (group != null) {
             group.add(mainButton);
@@ -114,12 +112,11 @@ public class FancyTab extends JXPanel {
         //problem only visible on OSX. The problem is that the additionalText
         //label displays far to the right and well below the mainButton.
         mainButton.setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new MigLayout("debug, insets 0 0 4 0, fill, gap 0"));        
-        add(mainButton,     "gapbefore 6, aligny bottom, width min(pref,50):pref:max, cell 1 1");
-        add(additionalText, "gapbefore 2, gapafter 4, aligny bottom, cell 2 1, hidemode 3");
-        add(busyLabel,      "gapbefore 4, gapafter 6, aligny bottom, alignx right, cell 3 1, hidemode 3");
-        add(removeButton,   "gapbefore 4, gapafter 6, aligny bottom, alignx right, cell 3 1, hidemode 3");
-        add(underline,      "gapbefore 6, aligny top, growx, cell 1 2");
+        setLayout(new MigLayout("insets 0 0 10 0, fill, gap 0"));        
+        add(mainButton,     "gapbefore 6, aligny bottom, width min(pref,50):pref:max, cell 1 0");
+        add(additionalText, "gapbefore 2, gapafter 4, aligny bottom, cell 2 0, hidemode 3");
+        add(busyLabel,      "gapbefore 4, gapafter 6, aligny bottom, alignx right, cell 3 0, hidemode 3");
+        add(removeButton,   "gapbefore 4, gapafter 6, aligny bottom, alignx right, cell 3 0, hidemode 3");
     }
     
     @Override
@@ -308,7 +305,12 @@ public class FancyTab extends JXPanel {
     }
     
     void setUnderlineEnabled(boolean enabled) {
-        underline.setVisible(enabled);
+        if (enabled) {
+            FontUtils.underline(mainButton); 
+        }
+        else {
+            FontUtils.removeUnderline(mainButton);
+        }
     }
 
     /** Returns true if the tab is currently highlighted (in a rollover). */
@@ -330,11 +332,6 @@ public class FancyTab extends JXPanel {
             additionalText.setFont(font);
         }
     }
-
-//  public void underline() {
-//      FontUtils.underline(mainButton);
-//      FontUtils.underline(additionalText);
-//  }
     
     private void updateButtons(boolean mouseInside) {
         this.mouseInside = mouseInside;
@@ -357,7 +354,7 @@ public class FancyTab extends JXPanel {
             this.currentState = tabState;
             switch(tabState) {
             case SELECTED:
-                underline.setVisible(false);
+                setUnderlineEnabled(false);
                 mainButton.setForeground(props.getSelectionColor());
                 additionalText.setForeground(props.getSelectionColor());
                 this.setBackgroundPainter(props.getSelectedPainter());
@@ -366,16 +363,14 @@ public class FancyTab extends JXPanel {
                 removeButton.setPressedIcon(removeActivePressedIcon);
                 break;
             case BACKGROUND:
-                underline.setVisible(props.isUnderlineEnabled());
-                underline.setColor(props.getUnderlineColor());
+                setUnderlineEnabled(props.isUnderlineEnabled());
                 mainButton.setForeground(props.getNormalColor());
                 additionalText.setForeground(props.getNormalColor());
                 this.setBackgroundPainter(props.getNormalPainter());
                 removeButton.setIcon(removeEmptyIcon);
                 break;
             case ROLLOVER:
-                underline.setVisible(props.isUnderlineEnabled());
-                underline.setColor(props.getUnderlineHoverColor());
+                setUnderlineEnabled(props.isUnderlineEnabled());
                 setBackgroundPainter(props.getHighlightPainter());
                 removeButton.setIcon(removeInactiveIcon);
                 removeButton.setRolloverIcon(removeInactiveRolloverIcon);
