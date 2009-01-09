@@ -15,7 +15,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,6 +29,7 @@ import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.images.ImageCellRenderer;
 import org.limewire.ui.swing.images.ImageList;
@@ -69,7 +69,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
 
     private EventList<LocalFileItem> currentEventList;
     
-    private JButton shareFolderButton;
+    private HyperlinkButton shareFolderButton;
     
     public LibraryImageSubPanel(final File parentFolder, EventList<LocalFileItem> eventList, LocalFileList fileList, 
             ImageLibraryPopupParams params) {       
@@ -92,7 +92,7 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
         FontUtils.setSize(headerLabel, mainLabelFontSize);
         FontUtils.bold(headerLabel);
        
-        shareFolderButton = new JButton(I18n.tr("Share"));
+        shareFolderButton = new HyperlinkButton(I18n.tr("share folder"));
         
         // black separator
         Line line = Line.createHorizontalLine(lineColor, lineSize);
