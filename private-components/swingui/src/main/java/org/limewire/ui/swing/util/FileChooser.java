@@ -30,14 +30,32 @@ public final class FileChooser {
     /**
      * Returns the last directory that was used in a FileChooser.
      * 
-     * @return
+     * If no last directory can be found, the users home directory is returned.
+     * If that cannot be found the current directory is returned.
      */
     public static File getLastInputDirectory() {
         File dir = ApplicationSettings.LAST_FILECHOOSER_DIRECTORY.getValue();
-        if(dir == null || dir.getPath().equals("") || !dir.exists() || !dir.isDirectory())
-            return CommonUtils.getCurrentDirectory();
-        else 
+        if(dir == null || dir.getPath().equals("") || !dir.exists() || !dir.isDirectory()) {
+            return getDefaultLastFileChooserDir();
+        }
+        else { 
             return dir;
+        }
+    }
+    
+    /**
+     * Returns the default directory for the file chooser.
+     * Defaults to the users home directory if it exists,
+     * otherwise the current directory is used.
+     * 
+     * Logic is currently duplicated from ApplicationSettings getDefaultLastFileChooserDir.
+     */
+    private static File getDefaultLastFileChooserDir() {
+        File defaultDirectory = CommonUtils.getUserHomeDir();
+        if(defaultDirectory == null || !defaultDirectory.exists()) {
+            defaultDirectory = CommonUtils.getCurrentDirectory();
+        }
+        return defaultDirectory;
     }
    
     public static File getInputDirectory(Component parent) {

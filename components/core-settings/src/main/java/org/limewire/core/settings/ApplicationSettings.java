@@ -9,6 +9,7 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
 
@@ -279,7 +280,7 @@ public class ApplicationSettings extends LimeProps {
     
     /** The last directory used for opening a file chooser. */
     public static final FileSetting LAST_FILECHOOSER_DIRECTORY =
-        FACTORY.createFileSetting("LAST_FILECHOOSER_DIR", new File("")).setAlwaysSave(true);
+        FACTORY.createFileSetting("LAST_FILECHOOSER_DIR", getDefaultLastFileChooserDir()).setAlwaysSave(true);
     
     /** Whether collecting and reporting usage stats is allowed */
     public static final BooleanSetting USAGE_STATS =
@@ -303,4 +304,18 @@ public class ApplicationSettings extends LimeProps {
             lang += "_" + lv;
         return lang;
     }
+    
+    /**
+     * Returns the default directory for the file chooser.
+     * Defaults to the users home directory if it exists,
+     * otherwise the current directory is used. 
+     */
+    private static File getDefaultLastFileChooserDir() {
+        File defaultDirectory = CommonUtils.getUserHomeDir();
+        if(defaultDirectory == null || !defaultDirectory.exists()) {
+            defaultDirectory = CommonUtils.getCurrentDirectory();
+        }
+        return defaultDirectory;
+    }
+
 }
