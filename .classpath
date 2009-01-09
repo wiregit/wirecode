@@ -69,7 +69,7 @@
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jmdns.jar" sourcepath="lib/sources/jmdns-2.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/looks.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
