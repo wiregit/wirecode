@@ -41,7 +41,9 @@ public class SearchResultMenu extends JPopupMenu {
         add(new AbstractAction(tr("Download")) {
             public void actionPerformed(ActionEvent e) {
                 for(VisualSearchResult visualSearchResult : selectedItems) {
-                    downloadHandler.download(visualSearchResult);
+                    if(visualSearchResult.getDownloadState() == BasicDownloadState.NOT_STARTED) {
+                        downloadHandler.download(visualSearchResult);
+                    }
                 }
             }
         }).setEnabled(downloadEnabled);

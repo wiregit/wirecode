@@ -31,17 +31,17 @@ public class SearchPopupHandler implements TablePopupHandler {
     @Override
     public void maybeShowPopup(Component component, int x, int y) {
 
-        int[] selectedRows = configTable.getSelectedRows();
-
-        if (selectedRows.length <= 1) {
-            int popupRow = configTable.rowAtPoint(new Point(x, y));
-            selectedRows = new int[] { popupRow };
+        List<Integer> selectedRows = asList(configTable.getSelectedRows());
+        int popupRow = configTable.rowAtPoint(new Point(x, y));
+        
+        if (selectedRows.size() <= 1 || !selectedRows.contains(popupRow)) {
+            selectedRows.clear();
+            selectedRows.add(popupRow);
             configTable.setRowSelectionInterval(popupRow, popupRow);
         }
 
         List<VisualSearchResult> selectedItems = new ArrayList<VisualSearchResult>();
-        for (int rowIndex = 0; rowIndex < selectedRows.length; rowIndex++) {
-            int row = selectedRows[rowIndex];
+        for (Integer row : selectedRows) {
             if (row != -1) {
                 VisualSearchResult visualSearchResult = configTable.getEventTableModel()
                         .getElementAt(row);
@@ -54,5 +54,13 @@ public class SearchPopupHandler implements TablePopupHandler {
         SearchResultMenu searchResultMenu = new SearchResultMenu(baseResultPanel, selectedItems,
                 properties);
         searchResultMenu.show(component, x, y);
+    }
+
+    private List<Integer> asList(int[] array) {
+        List<Integer> list = new ArrayList<Integer>();
+        for(int i = 0; i < array.length; i++) {
+            list.add(array[i]);
+        }
+        return list;
     }
 }
