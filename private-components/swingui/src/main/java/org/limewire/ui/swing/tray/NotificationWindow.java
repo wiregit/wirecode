@@ -68,6 +68,8 @@ class NotificationWindow extends JWindow implements ListenerSupport<WindowDispos
 
         setAlwaysOnTop(true);
         
+        SystemUtils.setWindowTopMost(this);
+        
         FadeInOutAnimator fadeInOutAnimator = new FadeInOutAnimator(this, 500, 2500, 500);
         fadeInOutAnimator.addListener(new EventListener<AnimatorEvent<JWindow>>() {
             @Override
