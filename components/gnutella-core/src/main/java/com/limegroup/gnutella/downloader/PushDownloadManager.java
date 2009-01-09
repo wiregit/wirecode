@@ -940,7 +940,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 LOG.debug("can connect: local and remote address can do fwt");
                 return true;
             }
-            LOG.debug("can not connect: have not accepted incoming connection and can not do FWT");
+            LOG.debugf("can not connect: have not accepted incoming connection and can not do FWT or invalid address: {0}", address);
         } else {
             LOG.debug(" can not connect: no local valid address");
         }
