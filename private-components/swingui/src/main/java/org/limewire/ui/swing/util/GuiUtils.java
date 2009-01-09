@@ -400,11 +400,11 @@ public class GuiUtils {
      */
     public static String toQualityStringShort(long qualityScore) {
         if (qualityScore <= 1) {
-            return I18n.tr("Poor");
+            return I18n.trc("Poor", "Poor (media quality)");
         } else if (qualityScore == 2) {
-            return I18n.tr("Good");
+            return I18n.trc("Good", "Good (media quality)");
         } else {
-           return I18n.tr("Excellent");
+           return I18n.trc("Excellent", "Excellent (media quality)");
         }
     }
     
