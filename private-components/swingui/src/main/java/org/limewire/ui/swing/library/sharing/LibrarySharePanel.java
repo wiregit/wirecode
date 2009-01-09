@@ -181,6 +181,8 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private Color dividerColor;
     @Resource
     private Color borderColor;
+    @Resource
+    private Color titleFontColor;
     
     private Action up = new AbstractAction() {
         @Override
@@ -347,6 +349,9 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
     private void initializeLabels() {
         titleLabel = new JLabel();
         FontUtils.bold(titleLabel);
+        titleLabel.setForeground(titleFontColor);
+        
+        
         topLabel = new JLabel(I18n.tr("Currently sharing with"));
         friendLabel = new JXLabel(startTypingText);
         friendLabel.setForeground(Color.WHITE);
