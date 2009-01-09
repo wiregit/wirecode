@@ -34,7 +34,7 @@ public class PopupButtonBackgroundPainter extends AbstractPainter<JXButton> {
             g.setColor(this.backgroundPressed);
             g.fillRoundRect(1, 0, width-2, height-1, arcWidth, arcHeight);
         }
-        else if (button.getModel().isRollover()) {
+        else if (button.getModel().isRollover() && button.hasFocus()) {
             g.setColor(this.backgroundRollover);
             g.fillRoundRect(1, 0, width-2, height-1, arcWidth, arcHeight);
         }
