@@ -34,8 +34,9 @@ public class SystemOptionPanel extends OptionPanel {
     private final TrayNotifier trayNotifier;
     private FileAssociationPanel fileAssociationPanel;
     private StartupShutdownPanel startupShutdownPanel;
-    private UpdatesPanel updatesPanel;
     private BugsPanel bugsPanel;
+    
+    private JCheckBox betaCheckBox;
 
     @Inject
     public SystemOptionPanel(TrayNotifier trayNotifier) {
@@ -44,11 +45,13 @@ public class SystemOptionPanel extends OptionPanel {
 
         setOpaque(false);
 
+        betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
+        betaCheckBox.setContentAreaFilled(false);
+        
         add(getFileAssociationPanel(), "pushx, growx");
         add(getStartupShutdownPanel(), "pushx, growx");
-        add(getUpdatesPanel(), "pushx, growx");
         add(getBugsPanel(), "pushx, growx");
-
+        add(betaCheckBox, "gapleft 15");
     }
 
     private OptionPanel getFileAssociationPanel() {
@@ -65,13 +68,6 @@ public class SystemOptionPanel extends OptionPanel {
         return startupShutdownPanel;
     }
 
-    private OptionPanel getUpdatesPanel() {
-        if (updatesPanel == null) {
-            updatesPanel = new UpdatesPanel();
-        }
-        return updatesPanel;
-    }
-
     private OptionPanel getBugsPanel() {
         if (bugsPanel == null) {
             bugsPanel = new BugsPanel();
@@ -84,25 +80,30 @@ public class SystemOptionPanel extends OptionPanel {
     boolean applyOptions() {
         boolean restart = getFileAssociationPanel().applyOptions();
         restart |= getStartupShutdownPanel().applyOptions();
-        restart |= getUpdatesPanel().applyOptions();
         restart |= getBugsPanel().applyOptions();
+        if(betaCheckBox.isSelected()) {
+            UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
+        } else {
+            UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
+        }
 
         return restart;
     }
 
     @Override
     boolean hasChanged() {
+        int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA : UpdateStyle.STYLE_MINOR;
+        
         return getFileAssociationPanel().hasChanged() || getStartupShutdownPanel().hasChanged()
-                || getUpdatesPanel().hasChanged() || getBugsPanel().hasChanged();                
+                || UpdateSettings.UPDATE_STYLE.getValue() == expectedUpdateStyle || getBugsPanel().hasChanged();                
     }
 
     @Override
     public void initOptions() {
         getFileAssociationPanel().initOptions();
         getStartupShutdownPanel().initOptions();
-        getUpdatesPanel().initOptions();
         getBugsPanel().initOptions();
-
+        betaCheckBox.setSelected(UpdateSettings.UPDATE_STYLE.getValue() == 0);
     }
 
     private class FileAssociationPanel extends OptionPanel {
@@ -113,16 +114,11 @@ public class SystemOptionPanel extends OptionPanel {
 
         private JCheckBox warnCheckBox;
 
-        private JLabel magnetLabel;
-
-        private JLabel torrentLabel;
-
-        private JLabel warnLabel;
-
         public FileAssociationPanel() {
             super(I18n.tr("File Associations"));
+            setLayout(new MigLayout("insets 0, gap 0"));
 
-            magnetCheckBox = new JCheckBox();
+            magnetCheckBox = new JCheckBox(I18n.tr(".magnet files"));
             magnetCheckBox.setContentAreaFilled(false);
             magnetCheckBox.addActionListener(new ActionListener() {
                 @Override
@@ -131,7 +127,7 @@ public class SystemOptionPanel extends OptionPanel {
                 }
             });
 
-            torrentCheckBox = new JCheckBox();
+            torrentCheckBox = new JCheckBox(I18n.tr(".torrent files"));
             torrentCheckBox.setContentAreaFilled(false);
             torrentCheckBox.addActionListener(new ActionListener() {
                 @Override
@@ -139,23 +135,12 @@ public class SystemOptionPanel extends OptionPanel {
                     updateView();
                 }
             });
-            warnCheckBox = new JCheckBox();
+            warnCheckBox = new JCheckBox(I18n.tr("Warn me when other programs want to automatically open these types"));
             warnCheckBox.setContentAreaFilled(false);
 
-            add(magnetCheckBox);
-
-            magnetLabel = new JLabel(I18n.tr(".magnet files"));
-            add(magnetLabel, "wrap");
-
-            add(torrentCheckBox);
-
-            torrentLabel = new JLabel(I18n.tr(".torrent files"));
-            add(torrentLabel, "push");
-
+            add(magnetCheckBox, "gapleft 5, gapbottom 5, wrap");
+            add(torrentCheckBox, "gapleft 5, push");
             add(warnCheckBox);
-
-            warnLabel = new JLabel(I18n.tr("Warn me when other programs want to automatically open these types"));
-            add(warnLabel, "wrap");
         }
 
         @Override
@@ -213,15 +198,12 @@ public class SystemOptionPanel extends OptionPanel {
             boolean warnShouldBeVisible = magnetCheckBox.isSelected()
                     || torrentCheckBox.isSelected();
             warnCheckBox.setVisible(warnShouldBeVisible);
-            warnLabel.setVisible(warnShouldBeVisible);
 
             boolean torrentShouldBeVisible = LimeAssociations.isTorrentAssociationSupported();
-            torrentLabel.setVisible(torrentShouldBeVisible);
             torrentCheckBox.setVisible(torrentShouldBeVisible);
 
             boolean magnetShouldBeVisible = LimeAssociations.isMagnetAssociationSupported();
             magnetCheckBox.setVisible(magnetShouldBeVisible);
-            magnetLabel.setVisible(magnetShouldBeVisible);
 
             setVisible(torrentShouldBeVisible || magnetShouldBeVisible);
         }
@@ -252,6 +234,7 @@ public class SystemOptionPanel extends OptionPanel {
 
         public StartupShutdownPanel() {
             super(I18n.tr("Startup and Shutdown"));
+            setLayout(new MigLayout("insets 0, gap 0"));
 
             runAtStartupCheckBox = new JCheckBox(I18n.tr("Run LimeWire on System Startup"));
             runAtStartupCheckBox.setContentAreaFilled(false);
@@ -264,10 +247,10 @@ public class SystemOptionPanel extends OptionPanel {
             buttonGroup.add(minimizeButton);
             buttonGroup.add(exitButton);
 
-            add(runAtStartupCheckBox, "split, wrap");
+            add(runAtStartupCheckBox, "split, gapleft 5, wrap");
 
             if (trayNotifier.supportsSystemTray()) {
-                add(new JLabel(I18n.tr("When I press X:")), "wrap");
+                add(new JLabel(I18n.tr("When I press X:")), "wrap, gapleft 5, gaptop 6");
                 add(minimizeButton, "gapleft 25, split, gapafter 20");
                 add(exitButton);
             }
@@ -313,45 +296,6 @@ public class SystemOptionPanel extends OptionPanel {
         }
     }
 
-    private class UpdatesPanel extends OptionPanel {
-
-        private JCheckBox betaCheckBox;
-
-        public UpdatesPanel() {
-            super(I18n.tr("Updates"));
-
-            betaCheckBox = new JCheckBox(I18n.tr("Tell me about Beta updates"));
-            betaCheckBox.setContentAreaFilled(false);
-
-            add(betaCheckBox, "split, wrap");
-        }
-
-        @Override
-        boolean applyOptions() {
-            if(betaCheckBox.isSelected()) {
-                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_BETA);
-            } else {
-                UpdateSettings.UPDATE_STYLE.setValue(UpdateStyle.STYLE_MINOR);
-            }
-            return false;
-        }
-
-        @Override
-        boolean hasChanged() {
-            int expectedUpdateStyle = betaCheckBox.isSelected() ? UpdateStyle.STYLE_BETA : UpdateStyle.STYLE_MINOR;
-            return UpdateSettings.UPDATE_STYLE.getValue() == expectedUpdateStyle;
-        }
-
-        @Override
-        public void initOptions() {
-            initOption(betaCheckBox, UpdateSettings.UPDATE_STYLE.getValue() == 0);
-        }
-
-        private void initOption(JCheckBox checkBox, boolean value) {
-            checkBox.setSelected(value);
-        }
-    }
-
     private class BugsPanel extends OptionPanel {
 
         private JRadioButton showBugsBeforeSending;
@@ -361,6 +305,8 @@ public class SystemOptionPanel extends OptionPanel {
 
         public BugsPanel() {
             super(I18n.tr("Bugs"));
+            setLayout(new MigLayout("gap 0, insets 0"));
+            
             showBugsBeforeSending = new JRadioButton(I18n.tr("Let me know about bugs before sending them"));
             showBugsBeforeSending.setContentAreaFilled(false);
             alwaysSendBugs = new JRadioButton(I18n.tr("Always send bugs to Lime Wire"));
@@ -372,9 +318,9 @@ public class SystemOptionPanel extends OptionPanel {
             bugsButtonGroup.add(showBugsBeforeSending);
             bugsButtonGroup.add(alwaysSendBugs);
             bugsButtonGroup.add(neverSendBugs);
-            add(showBugsBeforeSending, "split, wrap");
-            add(alwaysSendBugs, "split, wrap");
-            add(neverSendBugs, "split, wrap");
+            add(showBugsBeforeSending, "split, gapleft 5, wrap");
+            add(alwaysSendBugs, "split, gapleft 5, wrap");
+            add(neverSendBugs, "split, gapleft 5, wrap");
         }
 
         @Override

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JComponent;
