@@ -112,7 +112,7 @@ public class UserImpl implements User {
             if(idx == -1) {
                 return name;
             } else {
-                return id.substring(0, idx);
+                return name.substring(0, idx);
             }
         } else {
             return null;
