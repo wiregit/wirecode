@@ -31,7 +31,7 @@ public class QualityRenderer extends DefaultLibraryRenderer {
                     setText("");
                 else {
                     Number num = ((Number)result.getProperty(FilePropertyKey.QUALITY));
-                    setText(GuiUtils.toQualityString(num.longValue())); 
+                    setText(GuiUtils.toQualityStringClassic(num.longValue())); 
                 }
             }
         }

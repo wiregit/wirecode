@@ -395,13 +395,32 @@ public class GuiUtils {
                WindowsUtils.isLoginStatusAvailable();
     }
     
-    public static String toQualityString(long qualityScore) {
+    /**
+     * Returns a string representing the quality score just like toQualityString not including the trailing word 'Quality'
+     */
+    public static String toQualityStringClassic(long qualityScore) {
         if (qualityScore <= 1) {
             return I18n.tr("Poor");
         } else if (qualityScore == 2) {
             return I18n.tr("Good");
         } else {
            return I18n.tr("Excellent");
+        }
+    }
+    
+    /**
+     * Returns a quality string for the given quality score.
+     * <= 1  Poor Quality
+     * == 2  Good Quality
+     * >  2  Excellent Quality
+     */
+    public static String toQualityString(long qualityScore) {
+        if (qualityScore <= 1) {
+            return I18n.tr("Poor Quality");
+        } else if (qualityScore == 2) {
+            return I18n.tr("Good Quality");
+        } else {
+           return I18n.tr("Excellent Quality");
         }
     }
     
