@@ -362,37 +362,22 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                             // loop thru the inserted elements, and add
                             for (int i=listChanges.getBlockStartIndex(); i<=listChanges.getBlockEndIndex(); i++) {
                                 final DownloadItem downloadItem = listChanges.getSourceList().get(i);
-                                if (shouldShowNotifier(downloadItem)) {
-                                    notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), new AbstractAction() {
-                                        @Override
-                                        public void actionPerformed(ActionEvent e) {
-                                            ActionMap map = Application.getInstance().getContext().getActionManager()
-                                            .getActionMap();
-                                            map.get("restoreView").actionPerformed(e);
-                                            NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
-                                            item.select(SimpleNavSelectable.create(downloadItem));
-                                        }
-                                    }));
-                                }
+                                notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), new AbstractAction() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        ActionMap map = Application.getInstance().getContext().getActionManager()
+                                                .getActionMap();
+                                        map.get("restoreView").actionPerformed(e);
+                                        NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
+                                        item.select(SimpleNavSelectable.create(downloadItem));
+                                    }
+                                }));
                             }
                         }
                     }
                 } finally {
                     allList.getReadWriteLock().readLock().unlock();
                 }
-            }
-
-            /**
-             * Only show tray notifier if there is no other indication that the user's download has finished.
-             *
-             * 1. Main Limewire application window is minimized, or not in focus
-             * 2. OR User's download is not visible in the download tray
-             * 3. But if the main download panel is showing, do not show tray notification
-             */
-            private boolean shouldShowNotifier(DownloadItem item) {
-                return (!GuiUtils.getMainFrame().isActive() ||
-                        (!table.isColumnVisible(horizontalTableModel.indexOf(item)) &&
-                         !navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME).isSelected()));
             }
         });
     }
