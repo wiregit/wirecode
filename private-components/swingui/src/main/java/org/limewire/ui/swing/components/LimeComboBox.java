@@ -494,10 +494,7 @@ public class LimeComboBox extends JXButton {
             menuItem.addMouseListener(mouseListener);
             decorateMenuComponent(menuItem);
             menuItem.setBorder(BorderFactory.createEmptyBorder(0, 6, 2, 6));
-            // Add a selection listener, if selection can be performed. 
-            if (getText() == null) {
-                menuItem.addActionListener(actionListener);
-            }
+            menuItem.addActionListener(actionListener);
             panel.add(menuItem);
             menu.add(panel);
         }
