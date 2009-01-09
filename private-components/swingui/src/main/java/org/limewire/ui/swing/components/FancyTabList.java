@@ -295,15 +295,7 @@ public class FancyTabList extends JXPanel {
         props.setCloseOtherText(closeOtherText);
         closeOtherAction.putValue(Action.NAME, closeOtherText);
     }
-    
-    public void setUnderlineColor(Color underlineColor) {
-        props.setUnderlineColor(underlineColor);
-    }
-    
-    public void setUnderlineHoverColor(Color underlineHoverColor) {
-        props.setUnderlineHoverColor(underlineHoverColor);
-    }
-    
+
     public void setUnderlineEnabled(boolean enabled) {
         for (FancyTab tab : tabs) {
             tab.setUnderlineEnabled(enabled);
