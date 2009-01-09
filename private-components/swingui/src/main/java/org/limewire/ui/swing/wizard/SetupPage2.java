@@ -39,16 +39,16 @@ public class SetupPage2 extends WizardPage {
      * 
      * (When doing an update this will be true and the new directories will be appended to the list.)
      */
-    private final boolean shouldKeepExistingDirectorySettings;
+    private final boolean isUpgrade;
     
-    private final String line1 = I18n.tr("LimeWire is ready to fill your Library");
-    private final String line2 = I18n.tr("My Library is where you view, share and unshare your files.");
-    private final String line2KeepExisting = I18n.tr("My Library is where you view, share and unshare your files.  Don't worry, we will still share files from the older version.");
-    private final String autoText = I18n.tr("Automatically add files to My Library");
+    private final String titleLine = I18n.tr("My Library is where you view, share and unshare your files.");
+    private final String titleLineUpgrade = I18n.tr("My Library is where you view, share and unshare your files.  Don't worry, we will still share files from the older version.");
+    private final String autoText = I18n.tr("Automatically add files to My Library, but don't share any files");
+    private final String autoTextUpgrade = I18n.tr("Automatically add files to My Library, but don't share any new files");
     private final String autoExplanation = I18n.tr("Have LimeWire automatically add files from My Documents and the Desktop to My Library.");
     private final String manualText = I18n.tr("Manually add files to My Library");
     private final String manualExplanation = I18n.tr("Select the folders and categories LimeWire automatically adds to My Library.");
-    private final String manualExplanationOpen = I18n.tr("LimeWire will look in the following folders...");
+    private final String manualExplanationOpen = I18n.tr("LimeWire will look in the following folders:");
     private final String bottomText = I18n.tr("You can change this option later from Tools > Options");
     private final String categoryText = I18n.tr("LimeWire will add the following categories of files:");
     
@@ -72,10 +72,10 @@ public class SetupPage2 extends WizardPage {
     }
     
     public SetupPage2(SetupComponentDecorator decorator, IconManager iconManager, LibraryData libraryData,
-            boolean shouldKeepExistingDirectorySettings) {
+            boolean isUpgrade) {
         
         this.libraryData = libraryData;
-        this.shouldKeepExistingDirectorySettings = shouldKeepExistingDirectorySettings;
+        this.isUpgrade = isUpgrade;
         
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
@@ -118,7 +118,12 @@ public class SetupPage2 extends WizardPage {
         JLabel label;
 
         add(autoButton, "gaptop 10, gapleft 40");
-        label = new JLabel(autoText);
+        if (isUpgrade) {
+            label = new JLabel(autoTextUpgrade);
+        } 
+        else { 
+            label = new JLabel(autoText);
+        }
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(autoButton));
         decorator.decorateHeadingText(label);
         add(label, "gaptop 10, gapleft 10, wrap");
@@ -147,11 +152,11 @@ public class SetupPage2 extends WizardPage {
 
         add(manualLabel, "gapleft 76, wrap");
         
-        add(treeTableScrollPane, "gaptop 10, gapleft 40, growx");
+        add(treeTableScrollPane, "gaptop 10, gapleft 76, growx");
         add(addFolderButton, "gaptop 10, gapright 30, wrap");
 
-        add(manualCategoryLabel, "gaptop 10, gapleft 40, wrap");
-        add(checkBoxes, "gaptop 0, gapleft 40, growx");
+        add(manualCategoryLabel, "gaptop 10, gapleft 76, wrap");
+        add(checkBoxes, "gaptop 0, gapleft 76, growx");
     }
 
     private void initManualPanel() {
@@ -166,17 +171,17 @@ public class SetupPage2 extends WizardPage {
 
     @Override
     public String getLine1() {
-        return line1;
+        if (isUpgrade) {
+            return titleLineUpgrade;
+        }
+        else {
+            return titleLine;
+        }
     }
     
     @Override
     public String getLine2() {
-        if (shouldKeepExistingDirectorySettings) {
-            return line2KeepExisting;
-        }
-        else {
-            return line2;
-        }
+        return null;
     }
 
     @Override

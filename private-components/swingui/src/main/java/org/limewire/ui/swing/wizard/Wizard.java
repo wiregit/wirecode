@@ -188,8 +188,17 @@ public class Wizard extends JPanel {
             titleBarLabel.setText(I18n.tr("Setup"));
         }
         
-        headerLine1.setText(page.getLine1());
-        headerLine2.setText(page.getLine2());
+        String line2 = page.getLine2();
+        if (line2 != null) {
+            headerLine1.setText(page.getLine1());
+            headerLine2.setText(line2);
+            headerLine1.setVisible(true);
+        }
+        else {
+            headerLine1.setVisible(false);
+            headerLine2.setText(page.getLine1());
+        }
+        
         footer.setText(page.getFooter());
     }
     

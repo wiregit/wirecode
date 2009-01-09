@@ -22,8 +22,7 @@ import org.limewire.util.OSUtils;
 
 public class SetupPage1 extends WizardPage {
 
-    private String line1 = I18n.tr("A few things before we begin...");
-    private String line2 = I18n.tr("Please take a minute to configure these options before moving on.");
+    private String titleLine = I18n.tr("Please take a minute to configure these options before moving on.");
     
     private String filterTitle = I18n.tr("Content Filters");
     
@@ -104,12 +103,12 @@ public class SetupPage1 extends WizardPage {
 
     @Override
     public String getLine1() {
-        return line1;
+        return titleLine;
     }
     
     @Override
     public String getLine2() {
-        return line2;
+        return null;
     }
     
     @Override
