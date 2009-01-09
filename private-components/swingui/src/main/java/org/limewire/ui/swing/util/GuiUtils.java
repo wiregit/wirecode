@@ -398,7 +398,7 @@ public class GuiUtils {
     /**
      * Returns a string representing the quality score just like toQualityString not including the trailing word 'Quality'
      */
-    public static String toQualityStringClassic(long qualityScore) {
+    public static String toQualityStringShort(long qualityScore) {
         if (qualityScore <= 1) {
             return I18n.tr("Poor");
         } else if (qualityScore == 2) {
