@@ -28,13 +28,10 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.RectanglePainter;
-import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
 import org.limewire.core.settings.SearchSettings;
-import org.limewire.logging.Log;
-import org.limewire.logging.LogFactory;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
@@ -49,7 +46,6 @@ import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -58,8 +54,6 @@ import com.google.inject.assistedinject.AssistedInject;
  * This class displays search results in a panel.
  */
 public class SearchResultsPanel extends JXPanel implements Disposable {
-    private final Log LOG = LogFactory.getLog(getClass());
-       
     private final LimeHeaderBarFactory headerBarFactory;
     
     /**
@@ -132,11 +126,8 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         configureEnclosingScrollPane();
 
         final EventList<VisualSearchResult> filteredList =
-            sortAndFilterPanel.getFilteredAndSortedList(newVisibleFilterList(eventList), preserver);
+            sortAndFilterPanel.getFilteredAndSortedList(eventList, preserver);
         
-        // The ResultsContainerFactory create method takes two parameters
-        // which it passes to the ResultsContainer constructor
-        // for the parameters annotated with @Assisted.
         this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
         
         viewTypeListener = new SettingListener() {
@@ -198,18 +189,6 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         JPanel cornerComponent = new JPanel(new BorderLayout());
         cornerComponent.add(renderer, BorderLayout.CENTER);
         scrollPane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, cornerComponent);
-    }
-    
-    private EventList<VisualSearchResult> newVisibleFilterList(
-            EventList<VisualSearchResult> eventList) {
-        return GlazedListsFactory.filterList(eventList, new Matcher<VisualSearchResult>() {
-            @Override
-            public boolean matches(VisualSearchResult item) {
-                boolean visible = item.isVisible();
-                LOG.debugf("filter... VSR urn {0} visibility {1}", item.getCoreSearchResults().get(0).getUrn(), visible);
-                return visible;
-            }
-        });
     }
     
     public void addSponsoredResults(List<SponsoredResult> sponsoredResults){
