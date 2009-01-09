@@ -94,10 +94,9 @@ public class MiscOptionPanel extends OptionPanel {
         restart |= getFriendChatPanel().applyOptions();
         
         // if the language changed, always notify about a required restart
-        if(selectedLocale != currentLanguage) {
+        if(!selectedLocale.equals(currentLanguage)) {
             currentLanguage = selectedLocale;
             LanguageUtils.setLocale(selectedLocale);
-
             restart = true;
         }
         return restart;
