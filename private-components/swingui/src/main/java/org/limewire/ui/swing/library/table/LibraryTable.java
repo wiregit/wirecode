@@ -40,6 +40,7 @@ import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableColumnSelector;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.table.TableRendererEditor;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
@@ -79,7 +80,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         setShowHorizontalLines(false);
         setShowGrid(false, true);
         
-        EventSelectionModel<T> model = new EventSelectionModel<T>(libraryItems);
+        EventSelectionModel<T> model = GlazedListsSwingFactory.eventSelectionModel(libraryItems);
         setSelectionModel(model);
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.listSelection = model.getSelected();

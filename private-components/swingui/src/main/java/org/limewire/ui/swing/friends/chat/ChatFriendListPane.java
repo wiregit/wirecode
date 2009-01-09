@@ -68,6 +68,7 @@ import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.friends.chat.Message.Type;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.table.AbstractTableFormat;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.xmpp.api.client.MessageWriter;
@@ -239,7 +240,7 @@ public class ChatFriendListPane extends JPanel {
             }
         };
         
-        final JXTable table = new CustomTooltipLocationTable(new EventTableModel<ChatFriend>(friendsList, format)); 
+        final JXTable table = new CustomTooltipLocationTable(GlazedListsSwingFactory.eventTableModel(friendsList, format)); 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.addMouseListener(new LaunchChatListener());
         //Add as mouse listener and motion listener because it cares about MouseExit and MouseMove events

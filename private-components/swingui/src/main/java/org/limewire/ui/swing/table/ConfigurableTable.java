@@ -14,6 +14,7 @@ import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
 import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.search.RowPresevationListener;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.swing.EventTableModel;
@@ -33,7 +34,8 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public ConfigurableTable(EventList<E> eventList, VisibleTableFormat<E> tableFormat, boolean showHeaders) {
         this.eventList = eventList;
         this.tableFormat = tableFormat;
-        tableModel = new EventTableModel<E>(eventList, tableFormat);
+        // TODO: look @ warning
+        tableModel = GlazedListsSwingFactory.eventTableModel(eventList, tableFormat);
         setModel(tableModel);
         
         if (showHeaders) {

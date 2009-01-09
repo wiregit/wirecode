@@ -63,6 +63,7 @@ import org.limewire.ui.swing.library.sharing.model.LibraryShareModel;
 import org.limewire.ui.swing.painter.TextShadowPainter;
 import org.limewire.ui.swing.table.MouseableTable;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -425,7 +426,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
         comboPanel.setMaximumSize(comboPanel.getPreferredSize());   
         comboPanel.setMinimumSize(comboPanel.getPreferredSize());
         friendCombo = comboPanel.getComboBox();
-        friendCombo.setModel(new EventComboBoxModel<SharingTarget>(comboBoxList));
+        friendCombo.setModel(GlazedListsSwingFactory.eventComboBoxModel(comboBoxList));
         initializeInputField();       
         
         comboPopup = comboPanel.getPopup();           
@@ -513,7 +514,7 @@ class LibrarySharePanel extends JXPanel implements PropertyChangeListener, Dispo
 
     private void initializeShareTable() {
         final int actionCol = 0;
-        shareTable = new MouseableTable(new EventTableModel<SharingTarget>(shareFriendList, new LibraryShareTableFormat(actionCol)));
+        shareTable = new MouseableTable(GlazedListsSwingFactory.eventTableModel(shareFriendList, new LibraryShareTableFormat(actionCol)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
         removeEditor.addActionListener(new ActionListener(){

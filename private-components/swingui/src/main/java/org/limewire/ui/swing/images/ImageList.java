@@ -17,6 +17,7 @@ import org.jdesktop.swingx.JXList;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.table.TablePopupHandler;
+import org.limewire.ui.swing.util.GlazedListsSwingFactory;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.components.Disposable;
@@ -68,7 +69,7 @@ public class ImageList extends JXList implements Disposable{
         
         //enable double click launching of image files.
         addMouseListener(new ImageDoubleClickMouseListener());
-        EventSelectionModel<LocalFileItem> selectionModel = new EventSelectionModel<LocalFileItem>(eventList);
+        EventSelectionModel<LocalFileItem> selectionModel = GlazedListsSwingFactory.eventSelectionModel(eventList);
         this.listSelection = selectionModel.getSelected();
         setSelectionModel(selectionModel);
         selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
