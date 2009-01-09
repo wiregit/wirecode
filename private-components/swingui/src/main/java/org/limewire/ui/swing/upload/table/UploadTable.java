@@ -22,6 +22,7 @@ public class UploadTable extends MouseableTable {
         
         setStripeHighlighterEnabled(false);
         setStripesPainted(false);
+        setFillsViewportHeight(false);
         
         UploadActionHandler actionHandler = new UploadActionHandler(swingThreadSafeUploads, propertiesFactory, libraryNavigator);
         

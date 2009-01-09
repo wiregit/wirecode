@@ -111,7 +111,6 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     }
     
     private void initializeComponents(LimeProgressBarFactory progressBarFactory){
-        setOpaque(false);
         
       //string parameter ensures proper sizing
         nameLabel = new JLabel("NAME");
