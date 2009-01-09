@@ -105,10 +105,9 @@ public class LibraryImageSubPanel extends JPanel implements ListEventListener<Lo
                 "[] [] ",                       // column constraints
                 "[::30] [] [grow][grow]" ));    // row constraints
         
-        add(iconHeaderLabel, "split 2, gapbottom 4");
+        add(iconHeaderLabel, "split 2, gapbottom 1");
         add(headerLabel, "growy, push");       // first row
-        add(shareFolderButton, "gapbottom 4, wrap");
-       // add(unShareButtonLabel, "gapbottom 2, split 2");
+        add(shareFolderButton, "gapbottom 1, wrap");
         
         // second row
         add(line, "span 2, growx 100, height :: 3, wrap");

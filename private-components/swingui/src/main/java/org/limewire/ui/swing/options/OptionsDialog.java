@@ -206,7 +206,7 @@ public class OptionsDialog extends LimeJDialog implements OptionsTabNavigator {
     }
     
     private void createFooter() {
-        footerPanel.setLayout(new MigLayout("aligny 50%"));
+        footerPanel.setLayout(new MigLayout("insets 0 15 0 15, aligny 50%"));
         footerPanel.setBackground(backgroundColor);
         
         helpButton = new JButton(new HelpAction());
