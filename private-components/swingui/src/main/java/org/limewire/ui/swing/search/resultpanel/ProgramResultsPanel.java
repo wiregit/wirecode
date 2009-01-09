@@ -5,7 +5,6 @@ import org.limewire.core.api.search.Search;
 import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
@@ -33,7 +32,6 @@ public class ProgramResultsPanel extends BaseResultPanel {
         @Assisted SearchInfo searchInfo,
         @Assisted RowSelectionPreserver preserver,
         Navigator navigator,
-        RemoteHostActions remoteHostActions,
         ListViewTableEditorRendererFactory listViewEditorRendererFactory,
         PropertiesFactory<VisualSearchResult> properties,
         ListViewRowHeightRule rowHeightRule, SaveLocationExceptionHandler saveLocationExceptionHandler,
@@ -41,7 +39,7 @@ public class ProgramResultsPanel extends BaseResultPanel {
         LibraryNavigator libraryNavigator) {
             
         super(listViewEditorRendererFactory, eventList, tableFormat, downloadListManager,
-            search, searchInfo, preserver, navigator, remoteHostActions, properties, rowHeightRule, 
+            search, searchInfo, preserver, navigator, properties, rowHeightRule, 
             saveLocationExceptionHandler, searchResultFromWidget, iconManager, categoryIconManager,
             libraryNavigator);
     }

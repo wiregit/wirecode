@@ -22,6 +22,10 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
     static final int DESCRIPTION_INDEX = 9;
     static final int GENRE_INDEX = 10;
 
+    public RemoteVideoTableFormat(ColumnStateInfo[] columnState) {
+        super(columnState);
+    }
+    
     public RemoteVideoTableFormat() {
         super(new ColumnStateInfo[] {
                 new ColumnStateInfo(NAME_INDEX, "REMOTE_LIBRARY_VIDEO_NAME", I18n.tr("Name"), 260, true, true),     

@@ -41,7 +41,6 @@ import org.limewire.ui.swing.listener.MousePopupListener;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.DownloadItemPropertyListener;
-import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.RowSelectionPreserver;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.search.SearchViewType;
@@ -98,7 +97,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private Scrollable visibileComponent;
     
     private final SearchResultFromWidgetFactory factory;
-    private final RemoteHostActions remoteHostActions;
     private IconManager iconManager;
     private CategoryIconManager categoryIconManager;
     private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
@@ -112,7 +110,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             Search search,
             SearchInfo searchInfo, 
             RowSelectionPreserver preserver,
-            Navigator navigator, RemoteHostActions remoteHostActions, PropertiesFactory<VisualSearchResult> properties, 
+            Navigator navigator, PropertiesFactory<VisualSearchResult> properties, 
             ListViewRowHeightRule rowHeightRule,
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager, CategoryIconManager categoryIconManager,
@@ -123,7 +121,6 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.baseEventList = eventList;
         this.downloadListManager = downloadListManager;
         this.search = search;
-        this.remoteHostActions = remoteHostActions;
         this.factory = fromWidgetFactory;
         this.iconManager = iconManager;
         this.categoryIconManager = categoryIconManager;
@@ -132,8 +129,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         
         setLayout(layout);
                 
-        configureList(eventList, preserver, navigator, searchInfo, remoteHostActions, properties, rowHeightRule);
-        configureTable(eventList, tableFormat, navigator, remoteHostActions, properties);
+        configureList(eventList, preserver, navigator, searchInfo, properties, rowHeightRule);
+        configureTable(eventList, tableFormat, navigator, properties);
  
         add(resultsList, SearchViewType.LIST.name());
         add(resultsTable, SearchViewType.TABLE.name());
@@ -141,7 +138,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
     
     private void configureList(final EventList<VisualSearchResult> eventList, RowSelectionPreserver preserver, final Navigator navigator, 
-            final SearchInfo searchInfo, final RemoteHostActions remoteHostActions, final PropertiesFactory<VisualSearchResult> properties, 
+            final SearchInfo searchInfo, final PropertiesFactory<VisualSearchResult> properties, 
             final ListViewRowHeightRule rowHeightRule) {
         
         ListViewTableFormat tableFormat = new ListViewTableFormat();        
@@ -180,7 +177,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         // can share the same ActionColumnTableCellEditor though.
         ListViewTableEditorRenderer renderer = listViewTableEditorRendererFactory.create(
            new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this, 
+                    navigator, resultsList.getTableColors().selectionColor, this, 
                     displayLimit);
         
         TableColumnModel tcm = resultsList.getColumnModel();
@@ -192,7 +189,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
         ListViewTableEditorRenderer editor = listViewTableEditorRendererFactory.create(
                 new ActionColumnTableCellEditor(this), searchInfo.getQuery(), 
-                    remoteHostActions, navigator, resultsList.getTableColors().selectionColor, this,
+                    navigator, resultsList.getTableColors().selectionColor, this,
                     displayLimit);
         
         resultsList.setDefaultEditor(VisualSearchResult.class, editor);
@@ -281,7 +278,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     }
 
     private void configureTable(EventList<VisualSearchResult> eventList,
-        final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator, RemoteHostActions remoteHostActions,
+        final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator,
         PropertiesFactory<VisualSearchResult> properties) {
         
         CollectionList<VisualSearchResult, VisualSearchResult> explodedParentResults = 
@@ -336,8 +333,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             } else if (i == tableFormat.getNameColumn()) {
                 setCellRenderer(i, iconLabelRenderer);
             } else if (VisualSearchResult.class.isAssignableFrom(clazz)) {
-                setCellRenderer(i, new FromTableCellRenderer(factory.create(remoteHostActions, true)));
-                setCellEditor(i, new FromTableCellRenderer(factory.create(remoteHostActions, true)));
+                setCellRenderer(i, new FromTableCellRenderer(factory.create(true)));
+                setCellEditor(i, new FromTableCellRenderer(factory.create(true)));
             }
         }
     }

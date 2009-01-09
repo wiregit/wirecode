@@ -50,7 +50,6 @@ import org.limewire.ui.swing.library.nav.LibraryNavigator;
 import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.properties.PropertiesFactory;
-import org.limewire.ui.swing.search.RemoteHostActions;
 import org.limewire.ui.swing.search.model.BasicDownloadState;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ActionButtonPanel;
@@ -154,7 +153,6 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             SearchResultFromWidgetFactory fromWidgetFactory,
         @Assisted ActionColumnTableCellEditor actionEditor, 
         @Assisted String searchText, 
-        final @Assisted RemoteHostActions remoteHostActions, 
         @Assisted Navigator navigator, 
         final @Assisted Color rowSelectionColor,
         final @Assisted DownloadHandler downloadHandler,
@@ -246,7 +244,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
             }
         });
         
-        fromWidget = fromWidgetFactory.create(remoteHostActions, false);
+        fromWidget = fromWidgetFactory.create(false);
        
         makePanel(navigator, libraryNavigator, properties);
         

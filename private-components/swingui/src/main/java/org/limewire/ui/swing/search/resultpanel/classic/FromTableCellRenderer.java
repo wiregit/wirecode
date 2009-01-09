@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -12,20 +11,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidget;
 
 public class FromTableCellRenderer extends JXPanel implements TableCellRenderer, TableCellEditor {
-
-    private static final int HGAP = 4;
-    private static final int VGAP = 5;
     
     private final List<CellEditorListener> listeners = new ArrayList<CellEditorListener>();
     private final SearchResultFromWidget fromWidget;
     
     public FromTableCellRenderer(SearchResultFromWidget fromWidget) {
-        super(new FlowLayout(FlowLayout.LEFT, HGAP, VGAP));
+        super(new MigLayout("insets 0 5 0 0, aligny 50%"));
         
         this.fromWidget = fromWidget;
         
@@ -36,7 +35,11 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
     public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {        
         if (value != null) {
-            fromWidget.setPeople(((VisualSearchResult)value).getSources());
+            if(value instanceof VisualSearchResult) {
+                fromWidget.setPeople(((VisualSearchResult)value).getSources());
+            } else if(value instanceof RemoteFileItem) {
+                fromWidget.setPeople(((RemoteFileItem)value).getSources());
+            }
         }
         fromWidget.setForeground(this.getForeground());
         
@@ -52,7 +55,11 @@ public class FromTableCellRenderer extends JXPanel implements TableCellRenderer,
             setBackground(table.getSelectionBackground());
         
         if (value != null) {
-            fromWidget.setPeople(((VisualSearchResult)value).getSources());
+            if(value instanceof VisualSearchResult) {
+                fromWidget.setPeople(((VisualSearchResult)value).getSources());
+            } else if(value instanceof RemoteFileItem) {
+                fromWidget.setPeople(((RemoteFileItem)value).getSources());
+            }
         }
         fromWidget.setForeground(this.getForeground());
         

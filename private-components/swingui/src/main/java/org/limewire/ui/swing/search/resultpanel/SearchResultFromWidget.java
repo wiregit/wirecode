@@ -46,7 +46,7 @@ public class SearchResultFromWidget extends JPanel {
     
     @AssistedInject
     SearchResultFromWidget(LimeComboBoxFactory comboBoxFactory,
-                           @Assisted RemoteHostActions fromActions,
+                           RemoteHostActions fromActions,
                            @Assisted boolean isClassicView) {
         this.fromActions = Objects.nonNull(fromActions, "fromActions");
         this.isClassicView = isClassicView;
