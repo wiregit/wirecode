@@ -84,15 +84,15 @@ public class MainDownloadPanel extends JPanel {
             dock.draw(0);
         }
     };
-    
-    private final AbstractDownloadsAction clearFinishedAction = new AbstractDownloadsAction(I18n.tr("Clear when finished")) {
+   
+    private final AbstractDownloadsAction clearFinishedAction = new AbstractDownloadsAction(I18n.tr("Clear When Finished")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             SharingSettings.CLEAR_DOWNLOAD.setValue(clearFinishedCheckBox.isSelected());
         }
     };
     
-    private final Action categorizeAction = new AbstractAction(I18n.tr("Categorize downloads")) {
+    private final Action categorizeAction = new AbstractAction(I18n.tr("Categorize Downloads")) {
 
         @Override
         public void actionPerformed(ActionEvent e) {
