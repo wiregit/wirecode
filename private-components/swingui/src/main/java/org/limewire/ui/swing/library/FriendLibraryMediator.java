@@ -234,26 +234,29 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
         private void setOfflineMessage() {
             firstLabel.setText(I18n.tr("{0} is offline", friend.getFirstName()));
             if(friendList.size() == 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with {0}", friend.getFirstName()));
+                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with {0}.", friend.getFirstName()));
             else if(friendList.size() > 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with {1}", friendFileList.size(), friend.getFirstName()));
+                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with {1}.", friendFileList.size(), friend.getFirstName()));
             else
-                setShareText(I18n.tr("Share"), I18n.tr("files with {0}", friend.getFirstName()));
-            setChatText(null);
+                setShareText(I18n.tr("Share"), I18n.tr("files with {0}.", friend.getFirstName()));
+            setChatText(null, null);
         }
         
         /**
 		 * Friend is online but not on LimeWire.
 		 */
         private void setOnlineMessage() {
-            firstLabel.setText(I18n.tr("{0} is online", friend.getFirstName()));
-            if(friendList.size() == 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with {0}", friend.getFirstName()));
-            else if(friendList.size() > 1)
-                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with {1}", friendFileList.size(), friend.getFirstName()));
-            else
-                setShareText(I18n.tr("Share"), I18n.tr("files with {0}", friend.getFirstName()));
-            setChatText(I18n.tr("about signing into LimeWire 5"));
+            firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getFirstName()));
+            if(friendList.size() == 1){
+                setShareText(I18n.tr("Sharing"), I18n.tr("1 file with {0}. ", friend.getFirstName()));
+                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
+            } else if(friendList.size() > 1){
+                setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with {1}. ", friendFileList.size(), friend.getFirstName()));
+                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
+            } else{
+                setShareText(I18n.tr("Share"), I18n.tr("files with {0} and", friend.getFirstName()));
+                setChatText(I18n.tr("chat"), I18n.tr("about signing into LimeWire 5."));
+            }
         }
         
         /**
@@ -263,11 +266,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("Loading {0}'s files...", friend.getFirstName()));
                 setShareText(null, null);
-                setChatText(null);
+                setChatText(null, null);
             } else {
                 firstLabel.setText(I18n.tr("Loading files...", friend.getFirstName()));
                 setShareText(null, null);
-                setChatText(null);
+                setChatText(null, null);
             }
         }
         
@@ -278,12 +281,12 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             if(!friend.isAnonymous()) {
                 firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getFirstName()));
                 setShareText(null, null);
-                setChatText(I18n.tr("about sharing with you"));
+                setChatText(I18n.tr("Chat"), I18n.tr("about sharing with you."));
             } else {
                 //this should never happen
                 firstLabel.setText(I18n.tr("This person isn't sharing any files with you."));
                 setShareText(null, null);
-                setChatText(null);
+                setChatText(null, null);
             }
         }
         
@@ -292,13 +295,13 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setLWConnectionError() {
             if(!friend.isAnonymous()) {
-                firstLabel.setText(I18n.tr("There was a problem connecting to {0}", friend.getFirstName()));
+                firstLabel.setText(I18n.tr("There was a problem viewing {0}'s files.", friend.getFirstName()));
                 setShareText(null, null);
-                setChatText(null);
+                setChatText(null, null);
             } else {
-                firstLabel.setText(I18n.tr("There was a problem viewing this person's files"));
+                firstLabel.setText(I18n.tr("There was a problem viewing this person's files."));
                 setShareText(null, null);
-                setChatText(null);
+                setChatText(null, null);
             }
         }
         
@@ -318,9 +321,11 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
          * Sets the text of the chat link and chat label. If the chat text is null,
          * both the link and the label are hidden.
          */
-        private void setChatText(String chat) {
+        private void setChatText(String chatLinkText, String chat) {
             chatLink.setVisible(chat != null);
             chatLabel.setVisible(chat != null);
+            
+            chatLink.setText(chatLinkText);
             chatLabel.setText(chat);
         }
 
