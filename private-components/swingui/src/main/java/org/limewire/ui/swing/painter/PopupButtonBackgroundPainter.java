@@ -32,11 +32,11 @@ public class PopupButtonBackgroundPainter extends AbstractPainter<JXButton> {
     protected void doPaint(Graphics2D g, JXButton button, int width, int height) {
         if (button.getModel().isPressed()) {
             g.setColor(this.backgroundPressed);
-            g.fillRoundRect(0, 0, width-1, height-1, arcWidth, arcHeight);
+            g.fillRoundRect(1, 0, width-2, height-1, arcWidth, arcHeight);
         }
         else if (button.getModel().isRollover()) {
             g.setColor(this.backgroundRollover);
-            g.fillRoundRect(0, 0, width-1, height-1, arcWidth, arcHeight);
+            g.fillRoundRect(1, 0, width-2, height-1, arcWidth, arcHeight);
         }
     }
 }
