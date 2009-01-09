@@ -39,7 +39,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.icon.EmptyIcon;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
-import org.limewire.ui.swing.util.ResizeUtils;
 
 /**
  * A fancy 'tab' for use in a {@link FancyTabList}.
@@ -68,7 +67,6 @@ public class FancyTab extends JXPanel {
     @Resource private Icon removeInactiveIcon;
     @Resource private Icon removeInactiveRolloverIcon;
     @Resource private Icon removeInactivePressedIcon;
-//    @Resource private Icon spinnerIcon; 
     
     public FancyTab(TabActionMap actionMap,
             ButtonGroup group,
@@ -116,11 +114,11 @@ public class FancyTab extends JXPanel {
         //problem only visible on OSX. The problem is that the additionalText
         //label displays far to the right and well below the mainButton.
         mainButton.setBorder(BorderFactory.createEmptyBorder());
-        setLayout(new MigLayout("insets 0 0 7 0, fill, gap 0, hidemode 2"));        
+        setLayout(new MigLayout("insets 0 0 7 0, fill, gap 0"));        
         add(mainButton,     "gapbefore 4, aligny bottom, width min(pref,50):pref:max, cell 1 1");
         add(additionalText, "gapbefore 2, aligny bottom, cell 2 1");
-        add(busyLabel,      "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 2");
-        add(removeButton,   "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 2");
+        add(busyLabel,      "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 3");
+        add(removeButton,   "gapbefore 2, gapafter 2, aligny bottom, alignx right, cell 3 1, hidemode 3");
         add(underline,      "gapbefore 4, aligny top, growx, cell 1 2");
     }
     
@@ -144,12 +142,10 @@ public class FancyTab extends JXPanel {
     JLabel createBusyLabel() {
         final JXBusyLabel busy = new ColoredBusyLabel(new Dimension(12, 12), Color.decode("#acacac"),  Color.decode("#545454"));
         
-        ResizeUtils.forceSize(busy, new Dimension(0,0));
         busy.setVisible(false);
         
         if (isBusy()) {
             busy.setBusy(true);
-            ResizeUtils.forceSize(busy, new Dimension(12,12));    
             busy.setVisible(true);
         } 
         
@@ -159,7 +155,6 @@ public class FancyTab extends JXPanel {
                 if (evt.getPropertyName().equals(TabActionMap.BUSY_KEY)) {
                     boolean on = Boolean.TRUE.equals(evt.getNewValue());
                     busy.setBusy(on);
-                    ResizeUtils.forceSize(busy, new Dimension(12,12));
                     busy.setVisible(on);  
                     updateButtons(mouseInside);
                 }
@@ -213,6 +208,7 @@ public class FancyTab extends JXPanel {
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setRolloverEnabled(true);
+        button.setBorder(BorderFactory.createEmptyBorder());
         button.setMargin(new Insets(0, 0, 0, 0));
         button.setAction(tabActions.getRemoveAction());
         button.setActionCommand(TabActionMap.REMOVE_COMMAND);
