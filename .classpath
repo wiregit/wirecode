@@ -6,7 +6,6 @@
 	<classpathentry kind="src" output="components/player/build/classes" path="components/player/src/main/java"/>
 	<classpathentry kind="src" output="components/player-api/build/classes" path="components/player-api/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
-	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
 	<classpathentry kind="src" output="components/test-util/build/classes" path="components/test-util/src/main/java"/>
