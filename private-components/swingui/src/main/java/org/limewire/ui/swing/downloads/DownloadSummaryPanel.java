@@ -35,7 +35,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
-import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
@@ -44,6 +43,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
@@ -108,13 +108,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     private AbstractDownloadTable table;
     private final HorizontalDownloadTableModel horizontalTableModel;
 
-	private JXHyperlink showAllButton;
+	private HyperlinkButton showAllButton;
 	private EventList<DownloadItem> allList;
     private RangeList<DownloadItem> chokeList;    
 
-    private JXHyperlink clearFinishedButton;
+    private HyperlinkButton clearFinishedButton;
 
-    @Resource private Color blueForeground; 
     @Resource private Color orangeForeground; 
     @Resource private Color grayForeground; 
     @Resource private Font itemFont; 
@@ -122,7 +121,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
     @Resource private int panelHeight;
     @Resource private int nameLabelWidth;
     @Resource private Font showAllFont;
-    @Resource private Color showAllColor;
     @Resource private Color borderTopGradient;
     @Resource private Color borderBottomGradient;
     @Resource private Color secondBorderTopGradient;
@@ -264,21 +262,17 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         tableScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         
 
-        showAllButton = new JXHyperlink();
-        showAllButton.setText(I18n.tr("<HTML><U><B>Show all</B></U></HTML>"));
-        showAllButton.setUnclickedColor(blueForeground);
-        showAllButton.setClickedColor(blueForeground);
+        showAllButton = new HyperlinkButton();
+        showAllButton.setText(I18n.tr("Show all"));
         showAllButton.setFont(showAllFont);
         
         MouseListener navMouseListener = createDownloadNavListener();
         showAllButton.addMouseListener(navMouseListener);
         
-        clearFinishedButton = new JXHyperlink();
-        clearFinishedButton.setText("<HTML><U><B>" + I18n.tr("Clear finished") + "</B></U></HTML>");
+        clearFinishedButton = new HyperlinkButton();
+        clearFinishedButton.setText(I18n.tr("Clear finished"));
         clearFinishedButton.setFont(showAllFont);
         clearFinishedButton.setMinimumSize(clearFinishedButton.getPreferredSize());
-        clearFinishedButton.setForeground(showAllColor);
-        clearFinishedButton.setClickedColor(showAllColor);
         clearFinishedButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -438,9 +432,9 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         private final JLabel timeLabel;
 	    private final JButton pauseButton;
 	    private final JButton resumeButton; 
-        private final JXHyperlink launchButton; 
-        private final JXHyperlink tryAgainButton;
-        private final JXHyperlink cancelButton;
+        private final HyperlinkButton launchButton; 
+        private final HyperlinkButton tryAgainButton;
+        private final HyperlinkButton cancelButton;
 
         private final JButton[] linkButtons;
         private final JButton[] buttons;
@@ -477,29 +471,23 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             resumeButton = new IconButton(resumeIcon, resumeIconHover, resumeIconDown);
             resumeButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
 
-            launchButton = new JXHyperlink();
+            launchButton = new HyperlinkButton();
             launchButton.setText(I18n.tr("Launch"));
             launchButton.setFont(itemFont);
-            launchButton.setUnclickedColor(blueForeground);
-            launchButton.setClickedColor(blueForeground);
             launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
             FontUtils.bold(launchButton);
             FontUtils.underline(launchButton);            
           
-            tryAgainButton = new JXHyperlink();
+            tryAgainButton = new HyperlinkButton();
             tryAgainButton.setText(I18n.tr("Try again"));
             tryAgainButton.setFont(itemFont);
-            tryAgainButton.setUnclickedColor(blueForeground);
-            tryAgainButton.setClickedColor(blueForeground);
             tryAgainButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
             FontUtils.bold(tryAgainButton);
             FontUtils.underline(tryAgainButton);
 
-            cancelButton = new JXHyperlink();
+            cancelButton = new HyperlinkButton();
             cancelButton.setText(I18n.tr("Remove"));
             cancelButton.setFont(itemFont);
-            cancelButton.setUnclickedColor(blueForeground);
-            cancelButton.setClickedColor(blueForeground);
             cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
             FontUtils.bold(cancelButton);
             FontUtils.underline(cancelButton);
