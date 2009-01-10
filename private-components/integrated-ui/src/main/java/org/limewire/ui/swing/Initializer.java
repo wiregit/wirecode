@@ -480,7 +480,7 @@ public final class Initializer {
         splashRef.get().setStatusText(I18n.tr("Loading browser..."));
         // Not pretty but Mozilla initialization errors should not crash the
         // program
-        if (OSUtils.isWindows() || OSUtils.isMacOSX() || OSUtils.isLinux()) {
+        if (LimeMozillaInitializer.shouldInitialize()) {
             try {
                 LimeMozillaInitializer.initialize();
                 mozillaOverrides.overrideMozillaDefaults();

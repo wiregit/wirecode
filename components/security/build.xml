@@ -19,7 +19,7 @@
 			<src-classpath>
 			    <path refid="build.limewire.components.io.buildpath" />
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/dnsjava.jar"/>
+				<pathelement location="${limewire.lib.jars}/dnsjava-2.0.6.jar"/>
                 <pathelement location="${limewire.lib.jars}/httpclient-4.0-beta1.jar"/>
                 <pathelement location="${limewire.lib.jars}/httpcore-4.0-beta2.jar"/>
 		       	<pathelement location="${limewire.lib.jars}/httpcore-nio-4.0-beta2.jar"/>

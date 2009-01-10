@@ -60,25 +60,18 @@
 	<classpathentry kind="src" output="components/xmpp-api/build/classes" path="components/xmpp-api/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/cocoaFoundation.jar"/>
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
-	<classpathentry kind="lib" path="lib/jars/foxtrot.jar"/>
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar" sourcepath="lib/sources/jmdns-2.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/log4j.jar"/>
-	<classpathentry kind="lib" path="lib/jars/looks.jar"/>
 	<classpathentry kind="lib" path="lib/jars/osx/MRJAdapter.jar"/>
-	<classpathentry kind="lib" path="lib/jars/other/themes.jar"/>
-	<classpathentry kind="lib" path="lib/jars/ProgressTabs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/gettext-commons.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
 	<classpathentry kind="lib" path="lib/jars/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/messages.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jflac.jar"/>
@@ -95,6 +88,9 @@
 	<classpathentry kind="lib" path="lib/jars/guice-assistedinject-snapshot.jar" sourcepath="lib/sources/guice-assistedinject-snapshot-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/base64-2.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcip-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jxlayer.jar"/>
+	<classpathentry kind="lib" path="lib/jars/dnsjava-2.0.6.jar"/>
+	<classpathentry kind="lib" path="lib/jars/commons-math-1.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-src.jar"/>
@@ -119,7 +115,6 @@
 	<classpathentry kind="lib" path="lib/jars/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/jars/dnsjava.jar" sourcepath="lib/sources/dnsjava-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jars/mozdom4java.jar" sourcepath="lib/sources/mozdom4java-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/MozillaInterfaces-1.9.jar" sourcepath="lib/sources/MozillaInterfaces-1.9-src.jar"/>
@@ -130,7 +125,6 @@
 	<classpathentry kind="lib" path="lib/jars/smackx-debug.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/smackx.jar" sourcepath="lib/sources/smack-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/EventBus-1.2b.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jxlayer.jar"/>
 	<classpathentry kind="lib" path="lib/jars/miglayout.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-snapshot.jar" sourcepath="lib/sources/guice-snapshot-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/javax.servlet-5.1.12.jar"/>
