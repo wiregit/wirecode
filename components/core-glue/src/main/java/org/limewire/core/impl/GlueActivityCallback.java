@@ -20,7 +20,6 @@ import org.limewire.core.impl.search.QueryReplyListener;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 import org.limewire.core.impl.upload.UploadListener;
 import org.limewire.core.impl.upload.UploadListenerList;
-import org.limewire.core.settings.QuestionsHandler;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.GUID;
 import org.limewire.io.IpPort;
@@ -280,7 +279,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
             
             if(!torrent.isComplete()) {
                 approve = guiCallback.promptUserQuestion(I18nMarker.marktr("If you stop this upload, the torrent download will stop. Are you sure you want to do this?"));
-            } else if (QuestionsHandler.WARN_TORRENT_SEED_MORE.getValue() && torrent.getRatio() < 1.0f) {
+            } else if (torrent.getRatio() < 1.0f) {
                 approve = guiCallback.promptUserQuestion(I18nMarker.marktr("This upload is a torrent and it hasn\'t seeded enough. You should let it upload some more. Are you sure you want to stop it?"));
             }
         } 

@@ -13,10 +13,10 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
-import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.LimeJFrame;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 
@@ -34,7 +34,7 @@ public final class FileChooser {
      * If that cannot be found the current directory is returned.
      */
     public static File getLastInputDirectory() {
-        File dir = ApplicationSettings.LAST_FILECHOOSER_DIRECTORY.getValue();
+        File dir = SwingUiSettings.LAST_FILECHOOSER_DIRECTORY.getValue();
         if(dir == null || dir.getPath().equals("") || !dir.exists() || !dir.isDirectory()) {
             return getDefaultLastFileChooserDir();
         }
@@ -256,7 +256,7 @@ public final class FileChooser {
                 file = file.getParentFile();
             if(file != null) {
                 if(file.exists() && file.isDirectory())
-                    ApplicationSettings.LAST_FILECHOOSER_DIRECTORY.setValue(file);
+                    SwingUiSettings.LAST_FILECHOOSER_DIRECTORY.setValue(file);
             }
         }
     }

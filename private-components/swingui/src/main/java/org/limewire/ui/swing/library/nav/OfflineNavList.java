@@ -1,9 +1,9 @@
 package org.limewire.ui.swing.library.nav;
 
-import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 
 /**
  * Overrides checkVisibility from NavList to setVisibility based on the
@@ -13,10 +13,10 @@ class OfflineNavList extends NavList {
 
     public OfflineNavList(String name, BooleanSetting collapsedSetting) {
         super(name, collapsedSetting);
-        XMPPSettings.XMPP_SHOW_OFFLINE.addSettingListener(new SettingListener() {
+        SwingUiSettings.XMPP_SHOW_OFFLINE.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
-                checkVisibility(XMPPSettings.XMPP_SHOW_OFFLINE.getValue());
+                checkVisibility(SwingUiSettings.XMPP_SHOW_OFFLINE.getValue());
             }
         });
     }
@@ -27,7 +27,7 @@ class OfflineNavList extends NavList {
      */
     @Override
     protected void checkVisibility(boolean canDisplay) {
-        super.checkVisibility(XMPPSettings.XMPP_SHOW_OFFLINE.getValue());
+        super.checkVisibility(SwingUiSettings.XMPP_SHOW_OFFLINE.getValue());
     }
 
 }

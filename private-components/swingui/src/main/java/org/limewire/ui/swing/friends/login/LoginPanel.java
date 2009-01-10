@@ -21,7 +21,6 @@ import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.IconButton;
@@ -35,6 +34,7 @@ import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.ButtonDecorator;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -79,7 +79,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         this.accountManager = accountManager;
         this.xmppService = xmppService;
         GuiUtils.assignResources(this);
-        XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
+        SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
         initComponents(comboFactory, buttonDecorator, barPainterFactory);
     }
     
@@ -156,7 +156,7 @@ class LoginPanel extends JXPanel implements SettingListener {
         ResizeUtils.forceWidth(passwordField, 139);
 
         autoLoginCheckBox = new LimeCheckBox(tr("Remember me")); 
-        autoLoginCheckBox.setSelected(XMPPSettings.REMEMBER_ME_CHECKED.getValue());
+        autoLoginCheckBox.setSelected(SwingUiSettings.REMEMBER_ME_CHECKED.getValue());
         autoLoginCheckBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -165,7 +165,7 @@ class LoginPanel extends JXPanel implements SettingListener {
                 if(!autoLoginCheckBox.isSelected()) {
                     accountManager.setAutoLoginConfig(null);
                 }
-                XMPPSettings.REMEMBER_ME_CHECKED.setValue(autoLoginCheckBox.isSelected());
+                SwingUiSettings.REMEMBER_ME_CHECKED.setValue(autoLoginCheckBox.isSelected());
             }
         });
         autoLoginCheckBox.setName("LoginPanel.autoLoginCheckBox");

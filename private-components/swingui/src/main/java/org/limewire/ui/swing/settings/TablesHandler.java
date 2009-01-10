@@ -1,8 +1,9 @@
-package org.limewire.core.settings;
+package org.limewire.ui.swing.settings;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.core.settings.LimeWireSettings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.Setting;

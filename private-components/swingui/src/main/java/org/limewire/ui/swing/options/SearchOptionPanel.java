@@ -16,8 +16,8 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.collection.AutoCompleteDictionary;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.ui.swing.search.SearchCategoryUtils;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.SearchSettingListener;
 
@@ -57,21 +57,21 @@ public class SearchOptionPanel extends OptionPanel {
 
     @Override
     boolean applyOptions() {
-        SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
+        SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.setValue(groupSimilarResults.isSelected());
         return getSearchBarPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
         return getSearchBarPanel().hasChanged() 
-        || groupSimilarResults.isSelected() != SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue();
+        || groupSimilarResults.isSelected() != SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue();
     }
 
     @Override
     public void initOptions() {
         getSearchBarPanel().initOptions();
         
-        groupSimilarResults.setSelected(SearchSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
+        groupSimilarResults.setSelected(SwingUiSettings.GROUP_SIMILAR_RESULTS_ENABLED.getValue());
     }
 
     private class SearchBarPanel extends OptionPanel {
@@ -126,26 +126,26 @@ public class SearchOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
-            SearchSettings.DEFAULT_SEARCH_CATEGORY_ID
+            SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID
                     .setValue(((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId());
             
-            SearchSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
-            SearchSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
+            SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.setValue(suggestFriendFiles.isSelected());
+            SwingUiSettings.KEEP_SEARCH_HISTORY.setValue(searchTabNumberCheckBox.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId()
-                    || SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue() != suggestFriendFiles.isSelected()
-                    || SearchSettings.KEEP_SEARCH_HISTORY.getValue() != searchTabNumberCheckBox.isSelected();
+            return SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue() != ((SearchCategory) defaultSearchSpinner.getSelectedItem()).getId()
+                    || SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue() != suggestFriendFiles.isSelected()
+                    || SwingUiSettings.KEEP_SEARCH_HISTORY.getValue() != searchTabNumberCheckBox.isSelected();
         }
 
         @Override
         public void initOptions() {
-            defaultSearchSpinner.setSelectedItem(SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
-            suggestFriendFiles.setSelected(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
-            searchTabNumberCheckBox.setSelected(SearchSettings.KEEP_SEARCH_HISTORY.getValue());
+            defaultSearchSpinner.setSelectedItem(SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue()));
+            suggestFriendFiles.setSelected(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+            searchTabNumberCheckBox.setSelected(SwingUiSettings.KEEP_SEARCH_HISTORY.getValue());
         }
     }
     

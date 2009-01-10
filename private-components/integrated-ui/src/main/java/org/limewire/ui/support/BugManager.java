@@ -42,14 +42,14 @@ import javax.swing.JCheckBox;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.api.support.LocalClientInfo;
 import org.limewire.core.api.support.LocalClientInfoFactory;
-import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.core.settings.BugSettings;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.settings.BugSettings;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.FileUtils;
@@ -152,7 +152,7 @@ public final class BugManager {
     private static final Inspectable INSPECTABLE = new Inspectable() {
         public Object inspect() {
             
-            if (!ApplicationSettings.USAGE_STATS.getValue() && !LimeWireUtils.isAlphaRelease())
+            if (!SwingUiSettings.USAGE_STATS.getValue() && !LimeWireUtils.isAlphaRelease())
                 return "Denied";
             
             Exception e = new Exception();

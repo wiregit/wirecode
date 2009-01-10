@@ -34,6 +34,7 @@ import org.limewire.ui.swing.components.LimeComboBox;
 import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -79,7 +80,7 @@ public class SearchBar extends JXPanel {
         this.searchHistory = searchHistory;
         this.friendLibraries = friendLibraries;
         this.autoCompleter = new HistoryAndFriendAutoCompleter();
-        this.categoryToSearch = SearchCategory.forId(SearchSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
+        this.categoryToSearch = SearchCategory.forId(SwingUiSettings.DEFAULT_SEARCH_CATEGORY_ID.getValue());
         
         Action actionToSelect = null;
         Action progAction = null;
@@ -132,24 +133,24 @@ public class SearchBar extends JXPanel {
             public void actionPerformed(ActionEvent e) {
                 // Get search text, and add to history if non-empty.
                 String searchText = getSearchText();
-                if (!searchText.isEmpty() && SearchSettings.KEEP_SEARCH_HISTORY.getValue()) {
+                if (!searchText.isEmpty() && SwingUiSettings.KEEP_SEARCH_HISTORY.getValue()) {
                     SearchBar.this.searchHistory.addEntry(searchText);
                 }
             }
         });
-        SearchSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener() {
+        SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.addSettingListener(new SettingListener() {
             @Override
             public void settingChanged(SettingEvent evt) {
                 SwingUtils.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        autoCompleter.setSuggestionsShown(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+                        autoCompleter.setSuggestionsShown(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
                     }
                 });
             }
         });
         
-        autoCompleter.setSuggestionsShown(SearchSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
+        autoCompleter.setSuggestionsShown(SwingUiSettings.SHOW_FRIEND_SUGGESTIONS.getValue());
         if (actionToSelect != null) {
             autoCompleter.setSuggestionDictionary(friendLibraries.getDictionary(categoryToSearch));
             comboBox.setSelectedAction(actionToSelect);

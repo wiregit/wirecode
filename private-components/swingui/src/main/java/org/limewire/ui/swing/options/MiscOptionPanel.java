@@ -19,12 +19,11 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.core.settings.UISettings;
-import org.limewire.core.settings.XMPPSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfiguration;
 import org.limewire.ui.swing.friends.settings.XMPPAccountConfigurationManager;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
 import org.limewire.ui.swing.util.SwingUtils;
@@ -138,21 +137,21 @@ public class MiscOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
-            UISettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
-            UISettings.PLAY_NOTIFICATION_SOUND.setValue(playNotificationsCheckBox.isSelected());
+            SwingUiSettings.SHOW_NOTIFICATIONS.setValue(showNotificationsCheckBox.isSelected());
+            SwingUiSettings.PLAY_NOTIFICATION_SOUND.setValue(playNotificationsCheckBox.isSelected());
             return false;
         }
 
         @Override
         boolean hasChanged() {
-            return showNotificationsCheckBox.isSelected() != UISettings.SHOW_NOTIFICATIONS.getValue() ||
-            playNotificationsCheckBox.isSelected() != UISettings.PLAY_NOTIFICATION_SOUND.getValue(); 
+            return showNotificationsCheckBox.isSelected() != SwingUiSettings.SHOW_NOTIFICATIONS.getValue() ||
+            playNotificationsCheckBox.isSelected() != SwingUiSettings.PLAY_NOTIFICATION_SOUND.getValue(); 
         }
 
         @Override
         public void initOptions() {
-            playNotificationsCheckBox.setSelected(UISettings.PLAY_NOTIFICATION_SOUND.getValue());
-            showNotificationsCheckBox.setSelected(UISettings.SHOW_NOTIFICATIONS.getValue());
+            playNotificationsCheckBox.setSelected(SwingUiSettings.PLAY_NOTIFICATION_SOUND.getValue());
+            showNotificationsCheckBox.setSelected(SwingUiSettings.SHOW_NOTIFICATIONS.getValue());
         }
     }
 
@@ -168,7 +167,7 @@ public class MiscOptionPanel extends OptionPanel {
         public FriendsChatPanel() {
             super(tr("Friends and Chat"));
             
-            XMPPSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
+            SwingUiSettings.XMPP_AUTO_LOGIN.addSettingListener(this);
 
             autoLoginCheckBox = new JCheckBox(tr("Sign into Friends when LimeWire starts"));            
             autoLoginCheckBox.setContentAreaFilled(false);

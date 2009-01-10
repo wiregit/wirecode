@@ -30,7 +30,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.core.api.Application;
 import org.limewire.core.impl.MockModule;
-import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.inject.Modules;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -44,6 +43,7 @@ import org.limewire.ui.swing.event.OptionsDisplayEvent;
 import org.limewire.ui.swing.event.RestoreViewEvent;
 import org.limewire.ui.swing.menu.LimeMenuBar;
 import org.limewire.ui.swing.options.OptionsDialog;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.ShellAssociationManager;
 import org.limewire.ui.swing.tray.TrayExitListener;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -151,7 +151,7 @@ public class AppFrame extends SingleFrameApplication {
         createUiInjector();
         assert ui != null;
 
-        if(isStartup || ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+        if(isStartup || SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
             trayNotifier.showTrayIcon();            
         } else {
             trayNotifier.hideTrayIcon();
@@ -248,7 +248,7 @@ public class AppFrame extends SingleFrameApplication {
     
     @EventSubscriber
     public void handleRestoreView(RestoreViewEvent event) {
-        if(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+        if(!SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
             trayNotifier.hideTrayIcon();
         }
         getMainFrame().setVisible(true);

@@ -31,7 +31,6 @@ import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.sponsored.SponsoredResult;
-import org.limewire.core.settings.SearchSettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
@@ -41,6 +40,7 @@ import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.BaseResultPanel.ListViewTable;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.table.TableCellHeaderRenderer;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -131,10 +131,10 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         this.resultsContainer = containerFactory.create(filteredList, search, searchInfo, preserver);
         
         viewTypeListener = new SettingListener() {
-           int oldSearchViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+           int oldSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
            @Override
             public void settingChanged(SettingEvent evt) {
-               int newSearchViewTypeId = SearchSettings.SEARCH_VIEW_TYPE_ID.getValue();
+               int newSearchViewTypeId = SwingUiSettings.SEARCH_VIEW_TYPE_ID.getValue();
                if(newSearchViewTypeId != oldSearchViewTypeId) {
                    SearchViewType newSearchViewType = SearchViewType.forId(newSearchViewTypeId);
                    resultsContainer.setViewType(newSearchViewType);
@@ -143,7 +143,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
                }
             } 
         };
-        SearchSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(viewTypeListener);
+        SwingUiSettings.SEARCH_VIEW_TYPE_ID.addSettingListener(viewTypeListener);
 
         SearchTabItems.SearchTabListener listener =
             new SearchTabItems.SearchTabListener() {
@@ -173,7 +173,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
 
     @Override
     public void dispose() {
-        SearchSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
+        SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
         sortAndFilterPanel.dispose();
     }
 

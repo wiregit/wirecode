@@ -1,7 +1,8 @@
-package org.limewire.core.settings;
+package org.limewire.ui.swing.settings;
 
 import java.io.File;
 
+import org.limewire.core.settings.LimeProps;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.IntSetting;

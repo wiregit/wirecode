@@ -4,7 +4,7 @@ import java.awt.Frame;
 
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.settings.InstallSettings;
+import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.IconManager;
 

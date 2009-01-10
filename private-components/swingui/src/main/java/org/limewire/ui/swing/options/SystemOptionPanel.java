@@ -11,11 +11,11 @@ import javax.swing.JRadioButton;
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.api.updates.UpdateStyle;
-import org.limewire.core.settings.ApplicationSettings;
-import org.limewire.core.settings.BugSettings;
-import org.limewire.core.settings.StartupSettings;
 import org.limewire.core.settings.UpdateSettings;
 import org.limewire.setting.BooleanSetting;
+import org.limewire.ui.swing.settings.BugSettings;
+import org.limewire.ui.swing.settings.StartupSettings;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -145,8 +145,8 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         boolean applyOptions() {
-            if (hasChanged(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS)) {
-                applyOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS);
+            if (hasChanged(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS)) {
+                applyOption(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS);
                 LimeAssociationOption magnetAssociationOption = LimeAssociations
                         .getMagnetAssociation();
                 if (magnetAssociationOption != null) {
@@ -154,8 +154,8 @@ public class SystemOptionPanel extends OptionPanel {
                 }
             }
 
-            if (hasChanged(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS)) {
-                applyOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS);
+            if (hasChanged(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS)) {
+                applyOption(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS);
                 LimeAssociationOption torrentAssociationOption = LimeAssociations
                         .getTorrentAssociation();
                 if (torrentAssociationOption != null) {
@@ -163,8 +163,8 @@ public class SystemOptionPanel extends OptionPanel {
                 }
             }
 
-            if (hasChanged(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
-                applyOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
+            if (hasChanged(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES)) {
+                applyOption(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES);
             }
             return false;
         }
@@ -175,9 +175,9 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         boolean hasChanged() {
-            return hasChanged(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS)
-                    || hasChanged(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS)
-                    || hasChanged(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES);
+            return hasChanged(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS)
+                    || hasChanged(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS)
+                    || hasChanged(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES);
         }
 
         private boolean hasChanged(JCheckBox checkBox, BooleanSetting booleanSetting) {
@@ -186,11 +186,11 @@ public class SystemOptionPanel extends OptionPanel {
 
         @Override
         public void initOptions() {
-            initOption(magnetCheckBox, ApplicationSettings.HANDLE_MAGNETS.getValue()
+            initOption(magnetCheckBox, SwingUiSettings.HANDLE_MAGNETS.getValue()
                     && LimeAssociations.isMagnetAssociationSupported() && LimeAssociations.getMagnetAssociation().isEnabled());
-            initOption(torrentCheckBox, ApplicationSettings.HANDLE_TORRENTS.getValue()
+            initOption(torrentCheckBox, SwingUiSettings.HANDLE_TORRENTS.getValue()
                     && LimeAssociations.isTorrentAssociationSupported() && LimeAssociations.getTorrentAssociation().isEnabled());
-            initOption(warnCheckBox, ApplicationSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
+            initOption(warnCheckBox, SwingUiSettings.WARN_FILE_ASSOCIATION_CHANGES.getValue());
             updateView();
         }
 
@@ -264,8 +264,8 @@ public class SystemOptionPanel extends OptionPanel {
                 WindowsUtils.setLoginStatus(runAtStartupCheckBox.isSelected());
             }
             StartupSettings.RUN_ON_STARTUP.setValue(runAtStartupCheckBox.isSelected());
-            ApplicationSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
-            if(ApplicationSettings.MINIMIZE_TO_TRAY.getValue()) {
+            SwingUiSettings.MINIMIZE_TO_TRAY.setValue(minimizeButton.isSelected());
+            if(SwingUiSettings.MINIMIZE_TO_TRAY.getValue()) {
                 trayNotifier.showTrayIcon();
             } else {
                 trayNotifier.hideTrayIcon();
@@ -276,7 +276,7 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         boolean hasChanged() {
             return StartupSettings.RUN_ON_STARTUP.getValue() != runAtStartupCheckBox.isSelected()
-                    || ApplicationSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton
+                    || SwingUiSettings.MINIMIZE_TO_TRAY.getValue() != minimizeButton
                             .isSelected() || isIconDisplayed();
         }
 
@@ -291,8 +291,8 @@ public class SystemOptionPanel extends OptionPanel {
         @Override
         public void initOptions() {
             runAtStartupCheckBox.setSelected(StartupSettings.RUN_ON_STARTUP.getValue());
-            minimizeButton.setSelected(ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
-            exitButton.setSelected(!ApplicationSettings.MINIMIZE_TO_TRAY.getValue());
+            minimizeButton.setSelected(SwingUiSettings.MINIMIZE_TO_TRAY.getValue());
+            exitButton.setSelected(!SwingUiSettings.MINIMIZE_TO_TRAY.getValue());
         }
     }
 

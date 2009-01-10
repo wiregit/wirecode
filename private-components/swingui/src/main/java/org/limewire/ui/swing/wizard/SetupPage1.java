@@ -5,12 +5,12 @@ import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ContentSettings;
-import org.limewire.core.settings.InstallSettings;
-import org.limewire.core.settings.StartupSettings;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
+import org.limewire.ui.swing.settings.InstallSettings;
+import org.limewire.ui.swing.settings.StartupSettings;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.I18n;
@@ -123,13 +123,13 @@ public class SetupPage1 extends WizardPage {
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(filterCheck.isSelected());
         InstallSettings.FILTER_OPTION.setValue(true);
 
-        ApplicationSettings.HANDLE_MAGNETS.setValue(associationCheck.isSelected());
+        SwingUiSettings.HANDLE_MAGNETS.setValue(associationCheck.isSelected());
         LimeAssociationOption magnetAssociationOption = LimeAssociations.getMagnetAssociation();
         if (magnetAssociationOption != null) {
             magnetAssociationOption.setEnabled(associationCheck.isSelected());
         }
 
-        ApplicationSettings.HANDLE_TORRENTS.setValue(associationCheck.isSelected());
+        SwingUiSettings.HANDLE_TORRENTS.setValue(associationCheck.isSelected());
         LimeAssociationOption torrentAssociationOption = LimeAssociations.getTorrentAssociation();
         if (torrentAssociationOption != null) {
             torrentAssociationOption.setEnabled(associationCheck.isSelected());

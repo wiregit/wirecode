@@ -20,7 +20,6 @@ import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.core.settings.UISettings;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
@@ -31,6 +30,7 @@ import org.limewire.ui.swing.event.EventAnnotationProcessor;
 import org.limewire.ui.swing.event.PanelDisplayedEvent;
 import org.limewire.ui.swing.event.RuntimeTopicPatternEventSubscriber;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.sound.WavSoundPlayer;
 import org.limewire.ui.swing.tray.Notification;
 import org.limewire.ui.swing.tray.TrayNotifier;
@@ -174,7 +174,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
             notifier.showMessage(getNoticeForMessage(event));
             
             URL soundURL = ChatFramePanel.class.getResource(MESSAGE_SOUND_PATH);
-            if (soundURL != null && UISettings.PLAY_NOTIFICATION_SOUND.getValue()) {
+            if (soundURL != null && SwingUiSettings.PLAY_NOTIFICATION_SOUND.getValue()) {
                 ThreadExecutor.startThread(new WavSoundPlayer(soundURL.getFile()), "newmessage-sound");
             }
         } 

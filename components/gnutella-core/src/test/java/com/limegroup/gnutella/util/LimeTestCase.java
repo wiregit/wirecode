@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 
@@ -12,7 +11,6 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.LimeProps;
 import org.limewire.core.settings.SearchSettings;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.core.settings.UISettings;
 import org.limewire.core.settings.UltrapeerSettings;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.service.ErrorCallback;
@@ -208,8 +206,6 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SharingSettings.setSaveLWSDirectory(_storeDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
-        if(!GraphicsEnvironment.getLocalGraphicsEnvironment().isHeadlessInstance())
-            UISettings.PRELOAD_NATIVE_ICONS.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
     }
     

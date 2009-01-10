@@ -30,7 +30,6 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.core.settings.ChatSettings;
 import org.limewire.core.settings.DownloadSettings;
 import org.limewire.core.settings.SharingSettings;
 import org.limewire.io.Connectable;
@@ -548,12 +547,12 @@ public class HTTPDownloader implements BandwidthTracker {
             String host = NetworkUtils.ip2string(networkManager.getAddress());
             headers.add(HTTPHeaderName.NODE.create(host + ":" + port));
             features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
-            // Legacy chat header. Replaced by X-Features header / X-Node
-            // header
-            if (ChatSettings.CHAT_ENABLED.getValue()) {
-                headers.add(HTTPHeaderName.CHAT.create(host + ":" + port));
-                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
-            }
+//            // Legacy chat header. Replaced by X-Features header / X-Node
+//            // header
+//            if (ChatSettings.CHAT_ENABLED.getValue()) {
+//                headers.add(HTTPHeaderName.CHAT.create(host + ":" + port));
+//                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
+//            }
         }	
 		
 		// if this node is firewalled, send its push proxy info and guid so

@@ -21,7 +21,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.FixedsizeForgetfulHashSet;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.core.settings.SharingSettings;
-import org.limewire.core.settings.UISettings;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.OSUtils;
@@ -55,7 +55,7 @@ public class NativeFileIconController implements FileIconController {
             VIEW = null;
         } else {
             VIEW = new DelegateFileView(view);
-            if(UISettings.PRELOAD_NATIVE_ICONS.getValue())
+            if(SwingUiSettings.PRELOAD_NATIVE_ICONS.getValue())
                 preload();
         }
     }
