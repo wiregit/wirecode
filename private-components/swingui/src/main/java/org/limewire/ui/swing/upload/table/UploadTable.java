@@ -18,7 +18,7 @@ public class UploadTable extends MouseableTable {
     public UploadTable(EventList<UploadItem> swingThreadSafeUploads, CategoryIconManager categoryIconManager, 
             LimeProgressBarFactory progressBarFactory, PropertiesFactory<UploadItem> propertiesFactory,
             LibraryNavigator libraryNavigator) {
-        model = GlazedListsSwingFactory.eventTableModel(swingThreadSafeUploads, new LimeSingleColumnTableFormat<UploadItem>());
+        model = GlazedListsSwingFactory.eventTableModel(swingThreadSafeUploads, new LimeSingleColumnTableFormat<UploadItem>(UploadItem.class));
         setModel(model);
         
         setStripeHighlighterEnabled(false);
