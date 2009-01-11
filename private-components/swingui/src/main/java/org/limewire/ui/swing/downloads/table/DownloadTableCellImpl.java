@@ -26,9 +26,11 @@ import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeProgressBar;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
 import org.limewire.ui.swing.util.CategoryIconManager;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.util.CommonUtils;
@@ -60,7 +62,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
     private JLabel fullTimeLabel;
     
     private JLabel removeLinkSpacer;
-    private JXHyperlink cancelLink;
+    private HyperlinkButton cancelLink;
+    private HyperlinkButton launchButton;
    
     @Resource private Icon warningIcon;
     @Resource private int progressBarWidth;
@@ -94,6 +97,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         this.fullButtonPanel.setActionListener(editorListener);
         this.minLinkButton.addActionListener(editorListener);
         this.cancelLink.addActionListener(editorListener);
+        this.launchButton.addActionListener(editorListener);
     }
     
     public void update(DownloadItem item) {
@@ -161,12 +165,19 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         fullButtonPanel = new DownloadButtonPanel(editorListener);
         fullButtonPanel.setOpaque(false);        
 
-        cancelLink = new JXHyperlink();
-        cancelLink.setText("<html><u>" + I18n.tr("Remove") + "</u></html>");
-        cancelLink.setForeground(linkColour);
-        cancelLink.setClickedColor(linkColour);
+        cancelLink = new HyperlinkButton();
+        cancelLink.setText(I18n.tr("Remove"));
         cancelLink.setFont(statusFontPlainMin);
         cancelLink.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
+        FontUtils.bold(cancelLink);
+        FontUtils.underline(cancelLink); 
+        
+        launchButton = new HyperlinkButton();
+        launchButton.setText(I18n.tr("Launch"));
+        launchButton.setFont(statusFontPlainMin);
+        launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
+        FontUtils.bold(launchButton);
+        FontUtils.underline(launchButton); 
         
         removeLinkSpacer = new JLabel(I18n.tr(" - "));
         
@@ -180,6 +191,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         removePanel.setOpaque(false);
         removePanel.add(removeLinkSpacer);
         removePanel.add(cancelLink);
+        removePanel.add(launchButton);
         
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -418,7 +430,8 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
             default:
                 editor.minLinkButton.setVisible(false);
         }
-        
+
+        launchButton.setVisible(item.isLaunchable() && item.getState() == DownloadState.DONE);
 
         cancelLink.setVisible(item.getState() == DownloadState.ERROR);
         removeLinkSpacer.setVisible(cancelLink.isVisible());
@@ -471,7 +484,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         case FINISHING:
             return I18n.tr("Finishing download...");
         case DONE:
-            return I18n.tr("Done");
+            return I18n.tr("Done:");
         case CONNECTING:
             return I18n.tr("Connecting...");
         case DOWNLOADING:
