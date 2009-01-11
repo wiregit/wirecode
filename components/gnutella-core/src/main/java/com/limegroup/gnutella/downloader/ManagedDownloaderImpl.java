@@ -341,7 +341,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    private File incompleteFile;
+    private volatile File incompleteFile;
    
     /**
      * The position of the downloader in the uploadQueue */
@@ -1555,7 +1555,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
 
-        if (deleteFile) {
+        if (deleteFile && incompleteFile != null) {
             // Remove file from incomplete file list.
             incompleteFileManager.removeEntry(incompleteFile);
         }
