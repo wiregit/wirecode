@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.library;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +15,7 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.Objects;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.licenses.License;
@@ -117,7 +116,15 @@ public class FileDescImpl implements FileDesc {
     private final RareFileDefinition rareFileDefinition;
     
     private final ConcurrentHashMap<String, Object> clientProperties =
-        new ConcurrentHashMap<String, Object>();
+        new ConcurrentHashMap<String, Object>(4, 0.75f, 4); // non-default initialCapacity,
+                                                            // concurrencyLevel, saves
+                                                            // ~1k memory / file.
+
+                                                            // consider sizing even smaller,
+                                                            // using other Map impls, or
+                                                            // eliminating the use of a
+                                                            // Map altogether
+
 	    
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
