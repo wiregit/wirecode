@@ -12,6 +12,7 @@ public class LimeSingleColumnTableFormat<T> extends AbstractAdvancedTableFormat<
     private Class clazz;
 
     public LimeSingleColumnTableFormat(Class clazz) {
+        super("");
         this.clazz = clazz;
     }
 
