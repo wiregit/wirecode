@@ -6,6 +6,7 @@ public class FileListChangeFailedException extends Exception {
     private final Reason reason;
     
     public static enum Reason {
+        ERROR_LOADING_URNS,
         CANT_CANONICALIZE,
         ALREADY_MANAGED,
         NOT_MANAGEABLE,
@@ -21,6 +22,13 @@ public class FileListChangeFailedException extends Exception {
         this.event = event;
         this.reason = reason;
     }
+    
+    public FileListChangeFailedException(FileListChangedEvent event, Reason reason, Throwable cause) {
+        super("Event: " + event + ", Reason: " + reason, cause);
+        this.event = event;
+        this.reason = reason;
+    }
+    
     
     public FileListChangedEvent getEvent() {
         return event;

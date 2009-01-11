@@ -44,6 +44,7 @@ import org.limewire.listener.SourcedEventMulticaster;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
+import org.limewire.util.ExceptionUtils;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -783,7 +784,11 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
             urnFuture.addFutureListener(new EventListener<FutureEvent<Set<URN>>>() {
                 @Override
                 public void handleEvent(FutureEvent<Set<URN>> event) {
-                    finishLoadingFileDesc(file, event.getResult(), metadata, rev, oldFileDesc, task);
+                    // Report the exception, if one happened, so we know about it.
+                    if(event.getException() != null) {
+                        ExceptionUtils.reportOrReturn(event.getException());
+                    }
+                    finishLoadingFileDesc(file, event, metadata, rev, oldFileDesc, task);
                 }
             });
             return task;
@@ -791,12 +796,13 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
     }
     
     /** Finishes the process of loading the FD, now that URNs are known. */
-    private void finishLoadingFileDesc(File file, Set<? extends URN> urns,
+    private void finishLoadingFileDesc(File file, FutureEvent<Set<URN>> urnEvent,
             List<? extends LimeXMLDocument> metadata, int rev, FileDesc oldFileDesc,
             PendingFuture task) {
         FileDesc fd = null;
         boolean revchange = false;
         boolean failed = false;
+        Set<URN> urns = urnEvent.getResult();
         rwLock.writeLock().lock();
         try {
             if(rev != revision.get()) {
@@ -807,7 +813,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
                 
                 // Only load the file if we were able to calculate URNs 
                 // assume the fd is being shared
-                if(!urns.isEmpty()) {
+                if(urns != null && !urns.isEmpty()) {
                     fd = createFileDesc(file, urns, files.size());
                     if(fd != null) {
                         if(contains(file)) {
@@ -827,7 +833,10 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         
         if(revchange) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
-            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));          
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.REVISIONS_CHANGED));
+        } else if(urnEvent.getType() != FutureEvent.Type.SUCCESS) {
+            FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
+            task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.ERROR_LOADING_URNS, urnEvent.getException()));
         } else if(fd == null) {
             FileListChangedEvent event = dispatchFailure(file, oldFileDesc);
             task.setException(new FileListChangeFailedException(event, FileListChangeFailedException.Reason.CANT_CREATE_FD));
