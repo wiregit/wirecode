@@ -81,6 +81,11 @@ public class NetworkManagerImpl implements NetworkManager {
         new CachingEventMulticasterImpl<AddressEvent>(BroadcastPolicy.IF_NOT_EQUALS);
     private final ApplicationServices applicationServices;
     private volatile boolean started;
+    
+    /**
+     * Set of cached proxies, if proxies are known before the external address is.
+     */
+    private volatile Set<Connectable> cachedProxies;
 
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -302,6 +307,7 @@ public class NetworkManagerImpl implements NetworkManager {
     private void maybeFireNewDirectConnectionAddress() {
         Connectable newDirectAddress = null;
         boolean fireEvent = false;
+        Set<Connectable> proxies = null;
         synchronized (addressLock) {
             if(isDirectConnectionCapable()) {
                 newDirectAddress = getPublicAddress(false);
@@ -312,10 +318,14 @@ public class NetworkManagerImpl implements NetworkManager {
                 }
             } else {
                 directAddress = null;
+                proxies = cachedProxies;
+                cachedProxies = null;
             }
         }
         if (fireEvent) {
             fireAddressChange(newDirectAddress);
+        } else if (proxies != null) {
+            newPushProxies(proxies);
         }
     }
 
@@ -329,7 +339,12 @@ public class NetworkManagerImpl implements NetworkManager {
     }
 
     public void newPushProxies(Set<Connectable> pushProxies) {
-        FirewalledAddress newAddress = new FirewalledAddress(getPublicAddress(canDoFWT()), getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
+        Connectable publicAddress = getPublicAddress(canDoFWT());
+        if (!NetworkUtils.isValidIpPort(publicAddress)) {
+            cachedProxies = pushProxies;
+            return;
+        }
+        FirewalledAddress newAddress = new FirewalledAddress(publicAddress, getPrivateAddress(), new GUID(applicationServices.getMyGUID()), pushProxies, supportsFWTVersion());
         boolean changed = false;
         synchronized (addressLock) {
             if (!newAddress.equals(firewalledAddress) && directAddress == null) {
