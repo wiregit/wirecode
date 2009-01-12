@@ -452,15 +452,24 @@ public abstract class Dialog extends LimeJDialog {
         }
     }
 
-    private void disableComponent(JComponent... comps) {
-        for(JComponent comp : comps) {
-            comp.setEnabled(false);
+    private void disableEdit(JComboBox... comps) {
+        for (JComboBox comp : comps) {
+            comp.setEditable(false);
         }
     }
 
     protected void disableEditForAllCommonFields() {
-        disableEdit(album, author, artist, company, year, title, track);
-        disableComponent(description, genre, rating, platform);
+        disableEdit(album, author, artist, company, year, title, track, description);
+        disableEdit(genre, rating, platform);
+        
+        setColors(album.getForeground(), album.getBackground(), description, genre, rating, platform);
+    }
+
+    protected void setColors(Color foreground, Color background, JComponent... comps) {
+        for(JComponent comp : comps) {
+            comp.setForeground(foreground);
+            comp.setBackground(background);
+        }
     }
 
     private static class ReadOnlyTableModel extends DefaultTableModel {
