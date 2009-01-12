@@ -2,10 +2,12 @@ package org.limewire.ui.swing.library;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.LayoutManager;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -19,7 +21,6 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.components.Line;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
@@ -78,6 +79,19 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
      * about the particular category that is currently selected.
      */
     private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T>, SettingListener {
+        @Resource
+        private Color lineColor;
+        @Resource
+        private Color backgroundColor;
+        @Resource
+        private Color fontColor;
+        @Resource
+        private Font categoryFont;
+        @Resource
+        private Font smallFont;
+        @Resource
+        private Color borderHighlight;
+        
         private JLabel categoryLabel;
         private JLabel totalLabel;
         private JLabel sharingLabel;
@@ -89,14 +103,21 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         private final Category category;
         
         public InfoPanel(Category category, EventList<T> fileList, FriendFileList friendList, FilterList<T> sharedList, boolean isFriendView) {
-            super(new MigLayout("fillx, insets 0 0 5 0, hidemode 3"));
+            super(new MigLayout("fillx, gap 0, insets 5 10 5 0, hidemode 3"));
+            
+            GuiUtils.assignResources(this);
             
             categoryLabel = new JLabel(I18n.tr("{0} Info", category));
+            categoryLabel.setFont(categoryFont);
+            categoryLabel.setForeground(fontColor);
             FontUtils.bold(categoryLabel);
+            
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1, 0, 0, 0, lineColor), 
+                    BorderFactory.createMatteBorder(1, 0, 0, 1, borderHighlight)));
 
-            setBackground(Color.WHITE);
-            add(Line.createHorizontalLine(Color.BLACK, 1), "growx, wrap");
-            add(categoryLabel, "wrap, gapleft 10, gapbottom 5");
+            setBackground(backgroundColor);
+            add(categoryLabel, "wrap, gapbottom 2");
             
             initTotalLabel(fileList);
             initSharedList(sharedList);
@@ -114,8 +135,10 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
          */
         private void initTotalLabel(final EventList<T> fileList) {
             totalLabel = new JLabel();
+            totalLabel.setFont(smallFont);
+            totalLabel.setForeground(fontColor);
             setTotalLabel(fileList.size());
-            add(totalLabel, "wrap, gapleft 10");
+            add(totalLabel, "wrap");
             fileList.addListEventListener(this);
         }
         
@@ -125,8 +148,10 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         private void initSharedList(final FilterList<T> fileList) {
             if(fileList != null) {
                 sharingLabel = new JLabel();
+                sharingLabel.setFont(smallFont);
+                sharingLabel.setForeground(fontColor);
                 setSharingLabel(fileList.size());
-                add(sharingLabel, "wrap, gapleft 10");
+                add(sharingLabel, "wrap");
                 fileList.addListEventListener(this);
             }
         }
@@ -167,8 +192,10 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         
         private void createCollectionLabel() {
             collectionLabel = new JLabel();
+            collectionLabel.setFont(smallFont);
+            collectionLabel.setForeground(fontColor);
             setCollectionLabel(0);
-            add(collectionLabel, "wrap, gapleft 10");
+            add(collectionLabel, "wrap");
             collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
             LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
         }
