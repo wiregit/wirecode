@@ -50,7 +50,6 @@ public class ChatPanelHarness {
                 }, icons, friendsPane, new ChatTopPanel());
                 
                 ChatFramePanel chatFramePanel = new ChatFramePanel(chatPanel, friendsPane, new MockTrayNotifier());
-                chatFramePanel.setAdjacentEdgeWidth(78);
                 XMPPConnectionEvent connectionEvent = new XMPPConnectionEvent(
                         new MockXMPPConnection(
                                 new MockXMPPConnectionConfiguration("foo", "bar", "baz", null)), XMPPConnectionEvent.Type.CONNECTED);

@@ -6,6 +6,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.net.URL;
@@ -19,6 +20,7 @@ import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
@@ -59,19 +61,17 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
     private final ChatPanel chatPanel;
     private final ChatFriendListPane chatFriendListPane;
     private final TrayNotifier notifier;
+    
     //Heavy-weight component so that it can appear above other heavy-weight components
     private final java.awt.Panel mainPanel;
     
     private final VisibilityListenerList visibilityListenerList = new VisibilityListenerList();
     private final EnabledListenerList enabledListenerList = new EnabledListenerList();
-    @Resource(key="ChatFramePanel.primaryframeBorderColor") private Color primaryFrameBorderColor;
-    @Resource(key="ChatFramePanel.secondaryframeBorderColor") private Color secondaryFrameBorderColor;
     private boolean actionEnabled = false;
     
     private UnseenMessageListener unseenMessageListener;
     private String lastSelectedConversationFriendId;
     private JXPanel borderPanel;
-    private ChatFramePainter chatFramePainter;
     
     @Inject
     public ChatFramePanel(ChatPanel chatPanel, ChatFriendListPane chatFriendListPane, TrayNotifier notifier) {
@@ -81,10 +81,9 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         this.notifier = notifier;
         this.mainPanel = new java.awt.Panel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         
-        GuiUtils.assignResources(this);
-        borderPanel = new JXPanel(new MigLayout("insets 1 1 1 1"));
-        chatFramePainter = new ChatFramePainter(primaryFrameBorderColor, Color.white);
-        borderPanel.setBackgroundPainter(chatFramePainter);
+        borderPanel = new JXPanel(new MigLayout("insets 1 1 0 1"));
+        borderPanel.setBackgroundPainter(new ChatPanelPainter());
+        
         borderPanel.add(chatPanel);
         
         mainPanel.setVisible(false);        
@@ -118,14 +117,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         });
     }
     
-    /**
-     * The width of the portion of the bottom right frame border that 
-     * intersects with the 'chat' button.
-     * @param width
-     */
-    public void setAdjacentEdgeWidth(int width) {
-        this.chatFramePainter.setSecondaryColorWidth(width);
-    }
     
     public void setUnseenMessageListener(UnseenMessageListener unseenMessageListener) {
         this.unseenMessageListener = unseenMessageListener;
@@ -193,7 +184,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         if (event.isLocallyInitiated()) {
             lastSelectedConversationFriendId = event.getFriend().getID();
             unseenMessageListener.conversationSelected(lastSelectedConversationFriendId);
-            chatFramePainter.setSecondaryBorderPaint(secondaryFrameBorderColor);
             borderPanel.invalidate();
             borderPanel.repaint();
         }
@@ -204,7 +194,6 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         if (event.getFriend().getID().equals(lastSelectedConversationFriendId)) {
             lastSelectedConversationFriendId = null;
         }
-        chatFramePainter.setSecondaryBorderPaint(Color.white);
         borderPanel.invalidate();
         borderPanel.repaint();
     }
@@ -315,4 +304,24 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         }
     }
     
+    
+    private static class ChatPanelPainter extends AbstractPainter {
+        
+        @Resource private Color border;
+        
+        public ChatPanelPainter() {
+            GuiUtils.assignResources(this);
+            
+            this.setCacheable(true);
+            this.setAntialiasing(true);
+        }
+        
+        @Override
+        protected void doPaint(Graphics2D g, Object object, int width, int height) {
+            g.setPaint(border);
+            g.drawLine(0, 0, 0, height-1);
+            g.drawLine(0, 0, width-1, 0);
+            g.drawLine(width-1, 0, width-1, height-1);
+        }
+    }
 }

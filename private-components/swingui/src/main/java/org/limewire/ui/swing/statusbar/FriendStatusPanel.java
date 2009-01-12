@@ -2,7 +2,7 @@ package org.limewire.ui.swing.statusbar;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -13,21 +13,23 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
 
-import net.miginfocom.swing.MigLayout;
-
+import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.AbstractPainter;
 import org.jdesktop.swingx.painter.Painter;
 import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
+import org.limewire.ui.swing.friends.chat.CloseChatEvent;
+import org.limewire.ui.swing.friends.chat.ConversationSelectedEvent;
 import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.PainterUtils;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -35,55 +37,35 @@ import com.google.inject.Singleton;
 
 @Singleton
 class FriendStatusPanel {
-    @Resource(key="FriendStatus.font") private Font chatButtonFont;
-    @Resource(key="FriendStatus.foreground") private Color chatButtonForeground;
-    @Resource(key="FriendStatus.background") private Color chatBackground;
-    @Resource(key="FriendStatus.primaryTopBorderColor") private Color primaryTopBorderColor;
-    @Resource(key="FriendStatus.primaryButtonBorderColor") private Color primaryButtonBorderColor;
-    @Resource(key="FriendStatus.secondaryButtonBorderColor") private Color secondaryButtonBorderColor;
 
     private final JXButton chatButton;
+    private final ChatFramePanel friendsPanel;
     
     private Component mainComponent;
-    private ChatButtonBorderPainter borderPainter;
 
     @Inject FriendStatusPanel(final ChatFramePanel friendsPanel, IconLibrary iconLibrary) {
         GuiUtils.assignResources(this);
         
-        JXPanel chatPanel = new JXPanel(new MigLayout("insets 1 1 1 1"));
-        
-        borderPainter = new ChatButtonBorderPainter(primaryButtonBorderColor, primaryTopBorderColor);
-        chatPanel.setBackgroundPainter(borderPainter);
-        chatPanel.setPaintBorderInsets(true);
-        chatPanel.setOpaque(true);
-        chatPanel.setBackground(chatBackground);
-        
-        final RectanglePainter<JXButton> backgroundPainter = new RectanglePainter<JXButton>();
+        this.friendsPanel = friendsPanel;
         
         chatButton = new JXButton(new AbstractAction(I18n.tr("Chat")) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                friendsPanel.setAdjacentEdgeWidth(mainComponent.getWidth());
                 friendsPanel.toggleVisibility();
-                boolean friendsVisible = friendsPanel.isVisible();
-                backgroundPainter.setBorderPaint(friendsVisible ? chatBackground : null);
-                borderPainter.setBorderPaint(friendsVisible ? secondaryButtonBorderColor : primaryButtonBorderColor);
-                borderPainter.setSecondaryBorderPaint(friendsVisible ? null : primaryTopBorderColor);
+                
                 mainComponent.invalidate();
                 mainComponent.repaint();
             }
         });
         
-        backgroundPainter.setFillPaint(chatBackground);
-                
-        //chatButton.setBackgroundPainter(backgroundPainter);
+        chatButton.setName("ChatButton");
+        
+        
+        chatButton.setBackgroundPainter(new ChatButtonPainter());
         
         chatButton.setIcon(iconLibrary.getChatting());
-        chatButton.setFont(chatButtonFont);
-        chatButton.setForeground(chatButtonForeground);
         chatButton.setHorizontalAlignment(AbstractButton.LEFT);
         
-        chatButton.setBorderPainted(false);
         chatButton.setFocusPainted(false);
         chatButton.setRolloverEnabled(false);
         chatButton.setOpaque(false);        
@@ -93,11 +75,9 @@ class FriendStatusPanel {
         
         chatButton.setBorder(BorderFactory.createEmptyBorder(2, 10, 0, 10));
         chatButton.setPaintBorderInsets(true);
-        
-        // TODO: ...
-        // friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
-        friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(new JXButton(), iconLibrary));
-        
+                
+        friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
+                
         mainComponent = chatButton;
     }
     
@@ -200,6 +180,38 @@ class FriendStatusPanel {
             flashingButton.setForeground(originalForeground);
             flashingButton.setBackgroundPainter(originalBackgroundPainter);
             hasFlashed = false;
+        }
+    }
+    
+    private class ChatButtonPainter extends AbstractPainter<JXButton> {
+
+        @Resource private Color activeBackground = PainterUtils.TRASPARENT;
+        @Resource private Color activeBorder = PainterUtils.TRASPARENT;
+        @Resource private Color chatWindowBorder = PainterUtils.TRASPARENT;
+        
+        public ChatButtonPainter() {
+            
+            GuiUtils.assignResources(this);
+            
+            setCacheable(false);
+            setAntialiasing(true);
+        }
+        
+        @Override
+        protected void doPaint(Graphics2D g, JXButton object, int width, int height) {
+            
+            if (friendsPanel.isVisible()) {
+                g.setPaint(activeBackground);
+                g.fillRect(0, 0, width, height);
+                g.setPaint(activeBorder);
+                g.drawLine(0, 0, 0, height-1);
+                g.drawLine(0, height-1, width-1, height-1);
+                g.drawLine(width-1, 0, width-1, height-1);
+                
+                // TODO: if (chatting) :
+                g.setPaint(chatWindowBorder);
+                // TODO: paint upper lip
+            }
         }
     }
 }
