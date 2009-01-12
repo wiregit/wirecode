@@ -7,11 +7,12 @@ import java.util.List;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.core.api.Category;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.ui.swing.util.CategoryUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.MediaType;
 import org.limewire.util.Objects;
 import org.limewire.util.StringUtils;
+
+import com.limegroup.gnutella.CategoryConverter;
 
 
 /**
@@ -134,7 +135,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
         getReadLock().lock();
         try {
             for(FileDesc fd : this) {
-                if(CategoryUtils.getCategory(fd.getFile()) == category) {
+                if(CategoryConverter.categoryForFile(fd.getFile()) == category) {
                     fdList.add(fd);
                 }
             }
@@ -176,7 +177,7 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
                     break;
                 }
                 
-                if (CategoryUtils.getCategory(fd.getFile()) == category) {
+                if (CategoryConverter.categoryForFile(fd.getFile()) == category) {
                     add(fd);
                 }
             }
