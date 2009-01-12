@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.mainframe;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -7,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -18,7 +20,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.player.api.AudioPlayer;
-import org.limewire.ui.swing.components.BoxPanel;
 import org.limewire.ui.swing.components.FocusJOptionPane;
 import org.limewire.ui.swing.components.Resizable;
 import org.limewire.ui.swing.components.ShapeDialog;
@@ -56,9 +57,9 @@ public class LimeWireSwingUI extends JPanel {
     	this.proNag = proNag;
     	this.application = application;
     	this.layeredPane = new JLayeredPane();
-        
-        GridBagLayout layout = new GridBagLayout();
-        setLayout(layout);
+    	
+    	JPanel centerPanel = new JPanel(new GridBagLayout());
+        setLayout(new BorderLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
                 
@@ -68,7 +69,7 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = 1;
-        add(topPanel, gbc);
+        centerPanel.add(topPanel, gbc);
                 
         // The left panel
         gbc.fill = GridBagConstraints.VERTICAL;
@@ -76,32 +77,32 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 1;
         gbc.gridwidth = 1;
         gbc.gridheight = 3;
-        add(leftPanel, gbc);
+        centerPanel.add(leftPanel, gbc);
         
         // The main panel
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        layeredPane.addComponentListener(new MainPanelResizer(mainPanel));
-        layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
-        layeredPane.add(friendsPanel, JLayeredPane.PALETTE_LAYER);
-        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
-        layeredPane.add(shapeDialog, JLayeredPane.POPUP_LAYER);
-        add(layeredPane, gbc);
-                
-        JPanel southPanel = new BoxPanel(BoxPanel.Y_AXIS);
-        southPanel.add(downloadSummaryPanel);
-        southPanel.add(statusPanel);
+        centerPanel.add(mainPanel, gbc);
         
-        // The download summary panel and statusbar
+        // The download summary panel
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.gridheight = GridBagConstraints.REMAINDER;
-        add(southPanel, gbc);
+
+        centerPanel.add(downloadSummaryPanel, gbc);
+        
+        layeredPane.addComponentListener(new MainPanelResizer(centerPanel));
+        layeredPane.add(centerPanel, JLayeredPane.DEFAULT_LAYER, 0);
+        layeredPane.addComponentListener(new PanelResizer(friendsPanel));
+        layeredPane.add(friendsPanel, JLayeredPane.DEFAULT_LAYER, 1);
+        layeredPane.addComponentListener(new PanelResizer(shapeDialog));
+        layeredPane.add(shapeDialog, JLayeredPane.DEFAULT_LAYER, 3);
+        add(layeredPane, BorderLayout.CENTER);
+        add(statusPanel, BorderLayout.SOUTH);
     }
 	
 	void hideMainPanel() {
@@ -121,7 +122,7 @@ public class LimeWireSwingUI extends JPanel {
 	                switch(event.getType()) {
 	                case SUCCESS:
 	                    layeredPane.addComponentListener(new PanelResizer(proNag));
-	                    layeredPane.add(proNag, JLayeredPane.MODAL_LAYER);
+	                    layeredPane.add(proNag, JLayeredPane.DEFAULT_LAYER, 2);
 	                    proNag.resize();
 	                }
 	            }
@@ -138,9 +139,9 @@ public class LimeWireSwingUI extends JPanel {
     }
     
     private static class MainPanelResizer extends ComponentAdapter {
-        private final MainPanel target;
+        private final JComponent target;
 
-        public MainPanelResizer(MainPanel target) {
+        public MainPanelResizer(JComponent target) {
             this.target = target;
         }
         
