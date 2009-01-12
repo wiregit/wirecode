@@ -34,7 +34,6 @@ public class ConfigurableTable<E> extends MouseableTable implements RowPresevati
     public ConfigurableTable(EventList<E> eventList, VisibleTableFormat<E> tableFormat, boolean showHeaders) {
         this.eventList = eventList;
         this.tableFormat = tableFormat;
-        // TODO: look @ warning
         tableModel = GlazedListsSwingFactory.eventTableModel(eventList, tableFormat);
         setModel(tableModel);
         
