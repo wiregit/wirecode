@@ -221,7 +221,10 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * @param startRevision the revision under which the address resolution attempt
      * was started
      */
-    private void handleFailedResolution(PresenceLibrary presenceLibrary, int startRevision) {
+    private void handleFailedResolution(PresenceLibrary presenceLibrary, int startRevision) { 
+        LOG.debug("failed resolution " + presenceLibrary.getPresence().getPresenceId() + " "  + startRevision);
+        presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
+        
         boolean retry;
         synchronized (librariesToBrowse) {
             retry = latestConnectivityEventRevision > startRevision;
