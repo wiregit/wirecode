@@ -100,6 +100,8 @@ public class ShapeDialog extends JXPanel implements Resizable {
         this.owner = owner;
         this.isAutoClose = autoClose;
         setVisible(true);
+        //make sure this actually gets shown in a timely manner
+        getParent().repaint();
     }
     
     private void positionRelativeToOwner(){
