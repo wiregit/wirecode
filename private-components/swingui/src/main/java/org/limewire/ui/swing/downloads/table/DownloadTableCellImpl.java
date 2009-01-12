@@ -484,7 +484,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         case FINISHING:
             return I18n.tr("Finishing download...");
         case DONE:
-            return I18n.tr("Done:");
+            return I18n.tr("Done - ");
         case CONNECTING:
             return I18n.tr("Connecting...");
         case DOWNLOADING:
@@ -498,7 +498,7 @@ public class DownloadTableCellImpl extends JXPanel implements DownloadTableCell 
         case STALLED:
             return I18n.tr("Stalled - ");
         case ERROR:         
-            return I18n.tr("Unable to download: ");
+            return I18n.tr("Unable to download - ");
         case PAUSED:
             return I18n.tr("Paused - {0} of {1} ({2}%)", 
                     GuiUtils.toUnitbytes(item.getCurrentSize()), GuiUtils.toUnitbytes(item.getTotalSize()),
