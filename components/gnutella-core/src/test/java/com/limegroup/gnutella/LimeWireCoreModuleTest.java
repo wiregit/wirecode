@@ -13,7 +13,7 @@ import com.google.inject.name.Names;
 public class LimeWireCoreModuleTest extends TestCase {
 
     public void testConnectionDispatcher() {
-        Injector injector = Guice.createInjector(new LimeWireCoreModule());
+        Injector injector = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackAdapter.class));
         ConnectionDispatcher globalInstance = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         ConnectionDispatcher localInstance = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("local")));
         
