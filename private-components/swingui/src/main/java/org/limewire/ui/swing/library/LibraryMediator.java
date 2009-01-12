@@ -20,6 +20,7 @@ class LibraryMediator extends JPanel implements Disposable {
     private static final String LIBRARY_CARD = "LIBRARY_CARD";
     private static final String SHARING_CARD = "SHARING_CARD";
     private static final String EMPTY_CARD = "EMPTY_CARD";
+    private String currentCard = EMPTY_CARD;
     
     private CardLayout cardLayout;
 
@@ -45,6 +46,10 @@ class LibraryMediator extends JPanel implements Disposable {
         }
         libraryComponent = panel;
         add(panel, LIBRARY_CARD);
+        if(isLibraryCardShown()) {
+            //needed because removing the card can change what card is shown
+            showLibraryCard();
+        }
     }
     
     protected boolean isSharingCardSet() {
@@ -76,21 +81,36 @@ class LibraryMediator extends JPanel implements Disposable {
     }
     
     public void showLibraryCard() {
+        currentCard = LIBRARY_CARD;
         cardLayout.show(this, LIBRARY_CARD);
         validate();
         repaint();
     }
     
     protected void showSharingCard() {
+        currentCard = SHARING_CARD;
         cardLayout.show(this, SHARING_CARD);
         validate();
         repaint();
     }
 
     protected void showEmptyCard() {
+        currentCard = EMPTY_CARD;
         cardLayout.show(this, EMPTY_CARD);
         validate();
         repaint();
+    }
+    
+    public boolean isLibraryCardShown() {
+        return LIBRARY_CARD.equals(currentCard);
+    }
+    
+    public boolean isSharingCardShown() {
+        return SHARING_CARD.equals(currentCard);
+    }
+    
+    public boolean isEmptyCardShown() {
+        return EMPTY_CARD.equals(currentCard);
     }
 
     @Override

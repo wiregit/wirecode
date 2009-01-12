@@ -106,15 +106,21 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             case FAILED_TO_LOAD:
                 this.eventList = null;
                 emptyPanelMessage.setMessageType(MessageTypes.LW_CONNECTION_ERROR);
-                showEmptyCard();
+                if(!isSharingCardShown()) {
+                    showEmptyCard();
+                }
                 break;
             case LOADED:
                 if(eventList.size() == 0) {
                     emptyPanelMessage.setMessageType(MessageTypes.LW_NO_FILES);
-                    showEmptyCard();
+                    if(!isSharingCardShown()) {
+                        showEmptyCard();
+                    }
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
-                    super.showLibraryCard();
+                    if(isEmptyCardShown()) {
+                        showLibraryCard();
+                    }
                 }
                 break;
             case LOADING:
@@ -123,10 +129,14 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 } 
                 if(eventList.size() == 0) {
 	                emptyPanelMessage.setMessageType(MessageTypes.LW_LOADING);
-                    showEmptyCard();
+	                if(!isSharingCardShown()) {
+	                    showEmptyCard();
+	                }
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
-                    super.showLibraryCard();
+                    if(isEmptyCardShown()) {
+                        showLibraryCard();
+                    }
                 }
                 break;
             }
@@ -142,14 +152,18 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 //if friend signed on, show online view
                 if(event.getSource().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.ONLINE);
-                    showEmptyCard();
+                    if(!isSharingCardShown()) {
+                        showEmptyCard();
+                    }
                 }
                 break;
             case REMOVED:
                 //if this friend signed off, show offline view
                 if(event.getSource().getId().equals(friend.getId())) {
                     emptyPanelMessage.setMessageType(MessageTypes.OFFLINE);
-                    showEmptyCard();
+                    if(!isSharingCardShown()) {
+                        showEmptyCard();
+                    }
                 }
                 break;
             }
