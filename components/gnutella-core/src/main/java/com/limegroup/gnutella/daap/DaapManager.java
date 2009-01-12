@@ -983,7 +983,7 @@ public final class DaapManager {
         private ServiceInfo serviceInfo;
 
         public BonjourService(InetAddress addr) throws IOException {
-            zeroConf = JmDNS.create(addr);
+            zeroConf = new JmDNS(addr);
         }
 
         public boolean isRegistered() {
@@ -1027,7 +1027,7 @@ public final class DaapManager {
                 qualifiedName = name + "." + type;
             }
 
-            return ServiceInfo.create(type, qualifiedName, port,
+            return new ServiceInfo(type, qualifiedName, port,
                     weight, priority, props);
         }
 
