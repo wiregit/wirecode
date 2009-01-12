@@ -3,7 +3,6 @@ package org.limewire.ui.swing.statusbar;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -11,7 +10,7 @@ import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
-import javax.swing.JPanel;
+import javax.swing.BorderFactory;
 import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
@@ -45,7 +44,7 @@ class FriendStatusPanel {
 
     private final JXButton chatButton;
     
-    private JPanel mainComponent;
+    private Component mainComponent;
     private ChatButtonBorderPainter borderPainter;
 
     @Inject FriendStatusPanel(final ChatFramePanel friendsPanel, IconLibrary iconLibrary) {
@@ -74,24 +73,32 @@ class FriendStatusPanel {
                 mainComponent.repaint();
             }
         });
+        
         backgroundPainter.setFillPaint(chatBackground);
-        backgroundPainter.setBorderPaint(null);
-        backgroundPainter.setBorderWidth(0.0f);
-        chatButton.setBackgroundPainter(backgroundPainter);
+                
+        //chatButton.setBackgroundPainter(backgroundPainter);
+        
         chatButton.setIcon(iconLibrary.getChatting());
         chatButton.setFont(chatButtonFont);
         chatButton.setForeground(chatButtonForeground);
-        chatButton.setFocusPainted(false);
         chatButton.setHorizontalAlignment(AbstractButton.LEFT);
-        Insets insets = new Insets(1, 0, 0, 25);
-        chatButton.setMargin(insets);
+        
+        chatButton.setBorderPainted(false);
+        chatButton.setFocusPainted(false);
+        chatButton.setRolloverEnabled(false);
+        chatButton.setOpaque(false);        
+        chatButton.setBorder(null);
+        chatButton.setContentAreaFilled(false);
+        chatButton.setFocusable(false);
+        
+        chatButton.setBorder(BorderFactory.createEmptyBorder(2, 10, 0, 10));
         chatButton.setPaintBorderInsets(true);
         
-        chatPanel.add(chatButton, "hmax 17");
+        // TODO: ...
+        // friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
+        friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(new JXButton(), iconLibrary));
         
-        friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
-        
-        mainComponent = chatPanel;
+        mainComponent = chatButton;
     }
     
     Component getComponent() {
