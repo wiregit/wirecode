@@ -13,7 +13,6 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Timer;
 
-import org.bushe.swing.event.annotation.EventSubscriber;
 import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.painter.AbstractPainter;
@@ -23,8 +22,6 @@ import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
-import org.limewire.ui.swing.friends.chat.CloseChatEvent;
-import org.limewire.ui.swing.friends.chat.ConversationSelectedEvent;
 import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.GuiUtils;
