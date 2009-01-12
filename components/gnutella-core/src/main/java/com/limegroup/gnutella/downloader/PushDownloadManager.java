@@ -87,7 +87,7 @@ import com.limegroup.gnutella.util.URLDecoder;
 @Singleton
 public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHandlerRegistry, AddressConnector, RegisteringEventListener<AddressEvent> {
 
-    private static final Log LOG = LogFactory.getLog(PushDownloadManager.class);
+    private static final Log LOG = LogFactory.getLog(PushDownloadManager.class, LOGGING_CATEGORY);
     
     private static final int SPECIAL_INDEX = 0;
    
