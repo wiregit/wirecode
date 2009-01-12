@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.limewire.core.settings.ApplicationSettings;
 import org.limewire.core.settings.ConnectionSettings;
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.core.settings.DaapSettings;
 import org.limewire.core.settings.FilterSettings;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.core.settings.LimeProps;
@@ -206,6 +207,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SharingSettings.setSaveLWSDirectory(_storeDir);
         ContentSettings.CONTENT_MANAGEMENT_ACTIVE.setValue(false);
         ContentSettings.USER_WANTS_MANAGEMENTS.setValue(false);
+        DaapSettings.DAAP_ENABLED.setValue(false);
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
     }
     
