@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-05 11:31-0500\n"
+"POT-Creation-Date: 2009-01-12 11:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -92,20 +92,20 @@ msgstr ""
 msgid "Trouble connecting to people"
 msgstr ""
 
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:159
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:158
 msgid ""
 "<html><b>Your LimeWire may have been corrupted by a virus or trojan!</"
 "b><br><br>Please visit <a href=\"http://www.limewire.com/corrupted\">www."
 "limewire.com</a> and download the newest official version of LimeWire.</html>"
 msgstr ""
 
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:282
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:281
 msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
 
-#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:284
+#: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:283
 msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
@@ -113,57 +113,6 @@ msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/xmpp/CoreGlueXMPPService.java:41
 msgid "XMPP Service"
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/StartupAdSettings.java:41
-msgid "Upgrade to PRO"
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/StartupAdSettings.java:42
-msgid ""
-"For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will "
-"love the improved performance of PRO. Thank you for helping keep the "
-"Internet open by running LimeWire."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/StartupAdSettings.java:43
-msgid "Upgrade to LimeWire PRO?"
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:69
-msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:73
-msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:77
-msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:80
-msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:83
-msgid "Support open networks. Get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:87
-msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:90
-msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:93
-msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
-
-#: components/core-settings/src/main/java/org/limewire/core/settings/UpdateSettings.java:96
-msgid "Developing LimeWire costs real money. Get PRO."
 msgstr ""
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:51
@@ -258,14 +207,14 @@ msgstr ""
 msgid "DHT Peer Publisher"
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:306
+#: core/com/limegroup/gnutella/AcceptorImpl.java:304
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:48
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
 
-#: core/com/limegroup/gnutella/AcceptorImpl.java:404
+#: core/com/limegroup/gnutella/AcceptorImpl.java:402
 msgid "Connection Listener"
 msgstr ""
 
@@ -426,7 +375,6 @@ msgstr ""
 msgid "Uptime Statistics"
 msgstr ""
 
-#: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:104
 #: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 msgid "Browse"
 msgstr ""
