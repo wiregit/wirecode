@@ -1,6 +1,7 @@
 package org.limewire.xmpp.client.impl;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -231,7 +232,14 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     }
                 }
             }
-        } catch (IOException iox) {
+        } catch(final UnknownHostException e) {
+            new Thread() {
+                @Override
+                public void run() {
+                    throw new RuntimeException(e);
+                }
+            }.start();
+        } catch(IOException iox) {
             // Failure looking up the SRV record - use the service name
             LOG.debug("Failed to look up SRV record", iox);
         }
