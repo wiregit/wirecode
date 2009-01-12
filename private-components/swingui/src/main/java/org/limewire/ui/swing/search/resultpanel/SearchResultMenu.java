@@ -33,7 +33,7 @@ public class SearchResultMenu extends JPopupMenu {
             }
         }
         
-        boolean markAsSpamEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
+        boolean markAsSpamEnabled = selectedItems.size() == 1;
         boolean showHideSimilarFileVisible = selectedItems.size() == 1 && firstItem.getSimilarResults().size() > 0;
         boolean showHideSimilarFileEnabled = selectedItems.size() == 1 && firstItem.getDownloadState() == BasicDownloadState.NOT_STARTED;
         boolean viewFileInfoEnabled = selectedItems.size() == 1;
