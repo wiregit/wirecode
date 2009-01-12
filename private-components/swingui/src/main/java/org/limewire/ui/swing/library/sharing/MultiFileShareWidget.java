@@ -1,19 +1,19 @@
 package org.limewire.ui.swing.library.sharing;
 
 import java.awt.Component;
-import java.util.Collection;
 
-import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.MultiFileShareModel;
 import org.limewire.ui.swing.util.I18n;
 
+import ca.odell.glazedlists.EventList;
+
 public class MultiFileShareWidget implements ShareWidget<LocalFileItem[]>{
     private LibrarySharePanel sharePanel;
     
-    public MultiFileShareWidget(ShareListManager shareListManager, Collection<Friend> allFriends, ShapeDialog shapeDialog){
+    public MultiFileShareWidget(ShareListManager shareListManager, EventList<SharingTarget> allFriends, ShapeDialog shapeDialog){
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
         sharePanel.setShareModel(new MultiFileShareModel(shareListManager));
     }

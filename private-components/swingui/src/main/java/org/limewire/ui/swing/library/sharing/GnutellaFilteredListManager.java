@@ -3,33 +3,39 @@ package org.limewire.ui.swing.library.sharing;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
+import org.limewire.ui.swing.components.Disposable;
 
 import ca.odell.glazedlists.CompositeList;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.impl.ThreadSafeList;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-class GnutellaFilteredList extends CompositeList<SharingTarget>{
-    private EventList<SharingTarget> noShareFriendList;
-    private EventList<SharingTarget> filteredNoShareFriendList;
-    private EventList<SharingTarget> noShareGnutellaList;
+/**
+ * Thread safe
+ */
+class GnutellaFilteredListManager implements Disposable {
+    private ThreadSafeList<SharingTarget> noShareFriendList;
+    private FilterList<SharingTarget> filteredNoShareFriendList;
+    private ThreadSafeList<SharingTarget> noShareGnutellaList;
     private FilterList<SharingTarget> filteredNoShareGnutellaList;
     private TextMatcherEditor<SharingTarget> textMatcher;
     private Matcher<SharingTarget> gnutellaMatcher;
     
-    private boolean listsInitialized = false;
+    private ThreadSafeList<SharingTarget> compositeListThreadSafe;
     
     
-    public GnutellaFilteredList() {
+    
+    public GnutellaFilteredListManager() {
         setupSubLists();
-        listsInitialized = true;
     }
     
     private void setupSubLists() {
-        noShareFriendList = createMemberList();
+        CompositeList<SharingTarget> compositeList = new CompositeList<SharingTarget>();
+        compositeListThreadSafe = GlazedListsFactory.threadSafeList(compositeList);
+        noShareFriendList = GlazedListsFactory.threadSafeList(compositeList.createMemberList());
 
         //using TextComponentMatcherEditor would cause problems because it also uses DocumentListener so we 
         //have no guarantee about the order of sorting and selecting
@@ -44,7 +50,7 @@ class GnutellaFilteredList extends CompositeList<SharingTarget>{
         filteredNoShareFriendList = GlazedListsFactory.filterList(noShareFriendList, textMatcher);   
         
         
-        noShareGnutellaList = createMemberList();
+        noShareGnutellaList = GlazedListsFactory.threadSafeList(compositeList.createMemberList());
         gnutellaMatcher = new Matcher<SharingTarget>() {
             @Override
             public  boolean matches(SharingTarget item) {
@@ -53,8 +59,8 @@ class GnutellaFilteredList extends CompositeList<SharingTarget>{
         };
         filteredNoShareGnutellaList = GlazedListsFactory.filterList(noShareGnutellaList, gnutellaMatcher);            
         
-        addMemberList(filteredNoShareFriendList);
-        addMemberList(filteredNoShareGnutellaList);
+        compositeList.addMemberList(filteredNoShareFriendList);
+        compositeList.addMemberList(filteredNoShareGnutellaList);
     }
 
     public void addMatcherEditorListener(MatcherEditor.Listener<SharingTarget> listener) {
@@ -72,7 +78,7 @@ class GnutellaFilteredList extends CompositeList<SharingTarget>{
         return noShareFriendList.size() + noShareGnutellaList.size();
     }
     
-    @Override
+    
     public boolean add(SharingTarget friend){
         if(friend.isGnutellaNetwork()){
             return noShareGnutellaList.add(friend);
@@ -80,15 +86,25 @@ class GnutellaFilteredList extends CompositeList<SharingTarget>{
             return noShareFriendList.add(friend);
         }
     }
-
     
-    @Override
-    public void addMemberList(EventList<SharingTarget> list) {
-        //can not add new lists once initialized
-        if(listsInitialized){
-            throw new UnsupportedOperationException("Can not add Lists to GnutellaFilteredList");
-        }
-        super.addMemberList(list);
+    public boolean remove(SharingTarget friend){
+        return compositeListThreadSafe.remove(friend);
+    }
+    
+    public void clear(){
+        compositeListThreadSafe.clear();
+    }
+    
+    public void dispose(){
+         compositeListThreadSafe .dispose();
+         filteredNoShareFriendList.dispose();
+         noShareFriendList.dispose();
+         filteredNoShareGnutellaList.dispose();
+         noShareGnutellaList.dispose();
+    }
+    
+    public ThreadSafeList<SharingTarget> getThreadSafeList(){
+        return compositeListThreadSafe;
     }
     
 }
