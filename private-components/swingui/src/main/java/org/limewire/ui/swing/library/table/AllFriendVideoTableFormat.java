@@ -8,7 +8,7 @@ import org.limewire.ui.swing.util.I18n;
  * Table format for the All Table for All Friends table
  */
 public class AllFriendVideoTableFormat <T extends RemoteFileItem> extends RemoteVideoTableFormat<T> {
-    static final int FROM_INDEX = 6;
+    static final int FROM_INDEX = 11;
     
     public AllFriendVideoTableFormat() {
         super(new ColumnStateInfo[] {
