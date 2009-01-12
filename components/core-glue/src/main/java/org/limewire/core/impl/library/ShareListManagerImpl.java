@@ -110,6 +110,12 @@ class ShareListManagerImpl implements ShareListManager {
     @Override
     public FriendFileList getOrCreateFriendShareList(Friend friend) {
         LOG.debugf("get|Create library for friend {0}", friend.getId());
+        
+        if(friendLocalFileLists.containsKey(friend.getId())){
+            LOG.debugf("Returning existing library for friend {0}", friend.getId());
+            return friendLocalFileLists.get(friend.getId());
+        }
+        
         FriendFileListImpl newList = new FriendFileListImpl(fileManager, friend.getId());        
         FriendFileList existing = friendLocalFileLists.putIfAbsent(friend.getId(), newList);        
         
