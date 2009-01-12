@@ -222,7 +222,7 @@ class PresenceLibraryBrowser implements EventListener<LibraryChangedEvent> {
      * was started
      */
     private void handleFailedResolution(PresenceLibrary presenceLibrary, int startRevision) { 
-        LOG.debug("failed resolution " + presenceLibrary.getPresence().getPresenceId() + " "  + startRevision);
+        LOG.debugf("failed resolution for:{0} revision:{1}", presenceLibrary.getPresence().getPresenceId(), startRevision);
         presenceLibrary.setState(LibraryState.FAILED_TO_LOAD);
         
         boolean retry;
