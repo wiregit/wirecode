@@ -18,6 +18,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -63,6 +64,8 @@ public abstract class Dialog extends LimeJDialog {
     protected final JComboBox rating = new JComboBox();
     protected final JTextField year = new JTextField();
     protected final JTextArea description = newTextArea();
+    private final JScrollPane descriptionScrollPane = new JScrollPane(description, 
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     protected final JTextField artist = new JTextField();
     protected final JTextField album = new JTextField();
     protected final JTextField track = new JTextField();
@@ -76,17 +79,16 @@ public abstract class Dialog extends LimeJDialog {
     protected final JXHyperlink copyToClipboard;
     protected final JXHyperlink moreFileInfo;
     protected final JTable readOnlyInfo = new JTable(readOnlyInfoModel);
-    protected final Font smallFont;
-    protected final Font mediumFont;
-    protected final Font largeFont;
+    private final Font smallFont;
+    private final Font mediumFont;
+    private final Font largeFont;
     
-    protected final JPanel overview;
-    protected final JPanel details = newPanel();
+    private final JPanel overview;
+    private final JPanel details = newPanel();
     protected final JPanel location = newPanel();
-    protected Component detailsContainer;
     protected final JPanel mainPanel;
     protected final IconManager iconManager;
-    protected final PropertiableHeadings propertiableHeadings;
+    private final PropertiableHeadings propertiableHeadings;
     
     public Dialog(DialogParam param) {
         this.iconManager = param.getIconManager();
@@ -112,7 +114,8 @@ public abstract class Dialog extends LimeJDialog {
                 company, fileLocation);
         //Use the same border that a textfield uses - JTextAreas by default are not given a border
         //This makes the look consistent with JTextField
-        description.setBorder(artist.getBorder());
+        descriptionScrollPane.setBorder(artist.getBorder());
+        description.setRows(3);
         
         JPanel buttons = newPanel(new MigLayout("", "push[][]", "[]"));
         buttons.add(new JButton(new OKAction()));
@@ -248,8 +251,7 @@ public abstract class Dialog extends LimeJDialog {
     }
 
     private void addDetails() {
-        detailsContainer = box(tr("Details"), details);
-        mainPanel.add(detailsContainer, "cell 0 1, spanx 2");
+        mainPanel.add(box(tr("Details"), details), "cell 0 1, spanx 2");
     }
 
     private void addLocation() {
@@ -343,7 +345,7 @@ public abstract class Dialog extends LimeJDialog {
         details.add(rating, "wmin 90");
         details.add(year, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(description, "grow, span");
+        details.add(descriptionScrollPane, "hmin pref, grow, span");
         
         addDetails();
     }
@@ -363,7 +365,7 @@ public abstract class Dialog extends LimeJDialog {
         details.add(year, "wmin 90");
         details.add(track, "wrap, wmin 40");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(description, "grow, span");
+        details.add(descriptionScrollPane, "hmin pref, grow, span");
         
         addDetails();
     }
@@ -373,7 +375,7 @@ public abstract class Dialog extends LimeJDialog {
         details.add(newSmallLabel(TITLE), "wrap");
         details.add(title, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(description, "grow");
+        details.add(descriptionScrollPane, "hmin pref, grow");
         
         addDetails();
     }
@@ -387,17 +389,17 @@ public abstract class Dialog extends LimeJDialog {
         details.add(platform, "wmin 90");
         details.add(company, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(description, "grow, span");
+        details.add(descriptionScrollPane, "hmin pref, grow, span");
         
         addDetails();
     }
     
     private void configureDocumentDetailsLayout() {
-        details.setLayout(new MigLayout("fillx", "[]", "[][][][]"));
+        details.setLayout(new MigLayout("fillx", "[]", "[][][][30]"));
         details.add(newSmallLabel(AUTHOR), "wrap");
         details.add(author, "growx, wrap");
         details.add(newSmallLabel(DESCRIPTION), "wrap");
-        details.add(description, "grow");
+        details.add(descriptionScrollPane, "hmin pref, grow");
         
         addDetails();
     }
