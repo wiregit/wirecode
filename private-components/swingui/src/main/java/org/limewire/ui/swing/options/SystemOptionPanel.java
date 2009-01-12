@@ -247,7 +247,8 @@ public class SystemOptionPanel extends OptionPanel {
             buttonGroup.add(minimizeButton);
             buttonGroup.add(exitButton);
 
-            add(runAtStartupCheckBox, "split, gapleft 5, wrap");
+            if(OSUtils.isWindows() || OSUtils.isAnyMac())
+                add(runAtStartupCheckBox, "split, gapleft 5, wrap");
 
             if (trayNotifier.supportsSystemTray()) {
                 add(new JLabel(I18n.tr("When I press X:")), "wrap, gapleft 5, gaptop 6");

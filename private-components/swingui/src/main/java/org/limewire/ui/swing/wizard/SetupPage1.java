@@ -145,7 +145,8 @@ public class SetupPage1 extends WizardPage {
                 WindowsUtils.setLoginStatus(startupCheck.isSelected());
 
             StartupSettings.RUN_ON_STARTUP.setValue(startupCheck.isSelected());
-        }
+        } else
+            StartupSettings.RUN_ON_STARTUP.setValue(false);
         InstallSettings.START_STARTUP.setValue(true);
     }
     
