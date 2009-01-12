@@ -90,30 +90,11 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     public Comparator getColumnComparator(int column) {
         switch(column) {
             case PLAY_INDEX: return new NameComparator();
-            case ACTION_INDEX: return new CheckBoxComparator();
+            case ACTION_INDEX: return new CheckBoxComparator(localFileList);
         }
         return super.getColumnComparator(column);
     }
-    
-    /**
-     * Creates a Comparator for sorting checkboxs.
-     */
-    private class CheckBoxComparator implements Comparator<LocalFileItem> {
-        @Override
-        public int compare(LocalFileItem o1, LocalFileItem o2) {
-            boolean isShared1 = localFileList.contains(o1.getFile());
-            boolean isShared2 = localFileList.contains(o2.getFile());
-
-            if(isShared1 && isShared2) {
-                return 0;
-            } else if(isShared1 && !isShared2) {
-                return 1;
-            } else {
-                return -1;
-            }
-        }
-    }
-    
+        
     /**
      * Compares the title field in the NAME_COLUMN
      */

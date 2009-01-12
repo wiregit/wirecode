@@ -24,8 +24,13 @@ class CheckBoxComparator implements Comparator<LocalFileItem> {
             return 0;
         } else if(isShared1 && !isShared2) {
             return 1;
-        } else {
+        } else if(!isShared1 && isShared2){
             return -1;
-        }
+        } else if(o1.isShareable() && o2.isShareable()){
+            return 0;
+        } else if(o1.isShareable() && !o2.isShareable()){
+            return 1;
+        } else
+            return -1;
     }
 }
