@@ -37,6 +37,7 @@ import org.limewire.ui.swing.tray.TrayNotifier;
 import org.limewire.ui.swing.util.EnabledListener;
 import org.limewire.ui.swing.util.EnabledListenerList;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.ui.swing.util.VisibilityListenerList;
 import org.limewire.ui.swing.util.VisibleComponent;
@@ -212,7 +213,7 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         final Message message = event.getMessage();
         String title = tr("Chat from {0}", message.getSenderName());
         String messageString = message.toString();
-        Notification notification = new Notification(title, messageString, new AbstractAction() {
+        Notification notification = new Notification(title, messageString, new AbstractAction(I18n.tr("Reply")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ActionMap map = Application.getInstance().getContext().getActionManager()

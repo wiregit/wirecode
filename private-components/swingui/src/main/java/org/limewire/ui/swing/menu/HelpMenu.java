@@ -1,10 +1,7 @@
 package org.limewire.ui.swing.menu;
 
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.util.Random;
-
-import javax.swing.Icon;
 
 import org.limewire.core.api.Application;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -80,20 +77,17 @@ class HelpMenu extends MnemonicMenu {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (new Random().nextBoolean()) {
-                        Icon icon = iconManager.getIconForFile(new File("limewire.exe"));
-                        Notification notification = new Notification(
-                                "This is a very looooooooooooooooooooooooooooooooong message.",
-                                icon, this);
+                        Notification notification = new Notification("This is a not tooo long message title",
+                                "This is a super looooooooooooooooooooooooooooooooong message.",
+                                this);
                         trayNotifier.showMessage(notification);
                     } else if (new Random().nextBoolean()) {
-                        Icon icon = iconManager.getIconForFile(new File("limewire.html"));
-                        Notification notification = new Notification(
+                        Notification notification = new Notification("Long super loooooooooooooong loooon loooong message title",
                                 "This is a another very loooong  loooong loooong loooong loooong loooong loooong loooong loooong message.",
-                                icon, this);
+                                this);
                         trayNotifier.showMessage(notification);
                     } else {
-                        Icon icon = iconManager.getIconForFile(new File("limewire.html"));
-                        Notification notification = new Notification("Short message.", icon, this);
+                        Notification notification = new Notification("Short Title", "Short message.", this);
                         trayNotifier.showMessage(notification);
                     }
                 }

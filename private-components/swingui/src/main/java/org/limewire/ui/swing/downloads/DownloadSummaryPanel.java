@@ -62,7 +62,6 @@ import org.limewire.ui.swing.nav.NavCategory;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavItemListener;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.SimpleNavSelectable;
 import org.limewire.ui.swing.painter.BarPainterFactory;
 import org.limewire.ui.swing.table.TableColumnDoubleClickHandler;
 import org.limewire.ui.swing.table.TablePopupHandler;
@@ -347,10 +346,12 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
                                         ActionMap map = Application.getInstance().getContext().getActionManager()
-                                                .getActionMap();
+                                        .getActionMap();
                                         map.get("restoreView").actionPerformed(e);
-                                        NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);
-                                        item.select(SimpleNavSelectable.create(downloadItem));
+                                        
+                                        if (downloadItem.isLaunchable()) {
+                                            DownloadItemUtils.launch(downloadItem);
+                                        }
                                     }
                                 }));
                             }
