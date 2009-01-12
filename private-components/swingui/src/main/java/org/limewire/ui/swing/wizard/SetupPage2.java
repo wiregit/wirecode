@@ -46,11 +46,11 @@ public class SetupPage2 extends WizardPage {
     private final String autoText = I18n.tr("Automatically add files to My Library, but don't share any files");
     private final String autoTextUpgrade = I18n.tr("Automatically add files to My Library, but don't share any new files");
     private final String autoExplanation = I18n.tr("Have LimeWire automatically add files from My Documents and the Desktop to My Library.");
-    private final String manualText = I18n.tr("Manually add files to My Library");
+    private final String manualText = I18n.tr("Manually add files to My Library, but don't share any files");
+    private final String manualTextUpgrade = I18n.tr("Manually add files to My Library, but don't share any new files");
     private final String manualExplanation = I18n.tr("Select the folders and categories LimeWire automatically adds to My Library.");
-    private final String manualExplanationOpen = I18n.tr("LimeWire will look in the following folders:");
-    private final String bottomText = I18n.tr("You can change this option later from Tools > Options");
-    private final String categoryText = I18n.tr("LimeWire will add the following categories of files:");
+    private final String manualExplanationOpen = I18n.tr("Add the following categories from the folders below to My Library:");
+    private final String bottomText = I18n.tr("You can change this later from Tools > Options");
     
     private final LibraryData libraryData;
     
@@ -59,7 +59,6 @@ public class SetupPage2 extends WizardPage {
     private final JRadioButton manualButton;
     
     private final JLabel manualLabel;
-    private final JLabel manualCategoryLabel;
     
     private final LibraryManagerTreeTable treeTable;
     private final JScrollPane treeTableScrollPane;
@@ -101,11 +100,7 @@ public class SetupPage2 extends WizardPage {
         initManualPanel();
         treeTableScrollPane = new JScrollPane(treeTable);
         setTreeTableVisiable(false);
-        
-        manualCategoryLabel = new MultiLineLabel(categoryText);
-        decorator.decorateNormalText(manualCategoryLabel);
-        manualCategoryLabel.setVisible(false);
-        
+                
         Collection<Category> selectedCategories = getDefaultManagedCategories();
         checkBoxes = new HorizonalCheckBoxListPanel<Category>(Category.getCategoriesInOrder(), selectedCategories);
         checkBoxes.getCheckBox(Category.PROGRAM).setEnabled(false);
@@ -126,7 +121,7 @@ public class SetupPage2 extends WizardPage {
         }
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(autoButton));
         decorator.decorateHeadingText(label);
-        add(label, "gaptop 10, gapleft 10, wrap");
+        add(label, "gaptop 15, gapleft 10, wrap");
         
         label = new MultiLineLabel(autoExplanation, 500);
         decorator.decorateNormalText(label);
@@ -145,18 +140,24 @@ public class SetupPage2 extends WizardPage {
         });
         add(manualButton, "gaptop 10, gapleft 40");
         
-        label = new JLabel(manualText);
+        if (isUpgrade) {
+            label = new JLabel(manualTextUpgrade);
+        } 
+        else { 
+            label = new JLabel(manualText);
+        }
+
         decorator.decorateHeadingText(label);
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(manualButton));
-        add(label, "gaptop 10, gapleft 10, wrap");
+        add(label, "gaptop 15, gapleft 10, wrap");
 
         add(manualLabel, "gapleft 76, wrap");
+        add(checkBoxes, "gaptop 5, gapleft 76, growx, wrap");
         
-        add(treeTableScrollPane, "gaptop 10, gapleft 76, growx");
-        add(addFolderButton, "gaptop 10, gapright 30, wrap");
+        add(treeTableScrollPane, "gaptop 5, gapleft 76, growx");
+        add(addFolderButton, "gaptop 5, gapright 30, wrap");
 
-        add(manualCategoryLabel, "gaptop 10, gapleft 76, wrap");
-        add(checkBoxes, "gaptop 0, gapleft 76, growx");
+
     }
 
     private void initManualPanel() {
@@ -225,7 +226,6 @@ public class SetupPage2 extends WizardPage {
             boolean visible = buttonGroup.getSelection() == manualButton.getModel();
             setTreeTableVisiable(visible);
             checkBoxes.setVisible(visible);
-            manualCategoryLabel.setVisible(visible);
         }        
     }
     
@@ -236,8 +236,8 @@ public class SetupPage2 extends WizardPage {
         public AddDirectoryAction(Container parent) {
             this.parent = parent;
             
-            putValue(Action.NAME, I18n.tr("Add New Folder"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a folder to automatically scan for changes"));
+            putValue(Action.NAME, I18n.tr("Add Folder"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Choose a folder to automatically add to My Library"));
         }
         
         @Override
