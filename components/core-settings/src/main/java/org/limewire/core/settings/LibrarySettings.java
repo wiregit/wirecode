@@ -110,8 +110,7 @@ public class LibrarySettings extends LimeProps {
     }
     /**
      * Removes a friend from the list of names to always share files with. This friend
-     * will no longer automatically share new files of this type that are added to the library. This
-     * will not remove current files that are already shared with the friend.
+     * will no longer automatically share new files of this type that are added to the library.
      * @param id - friend to remove
      */
     public static final void removeFiendShareNewFiles(StringArraySetting stringArray, String id) {

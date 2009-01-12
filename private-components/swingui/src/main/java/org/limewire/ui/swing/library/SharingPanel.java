@@ -7,8 +7,7 @@ import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -201,12 +200,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
             LockableUI blurUI = new LockedUI(category);
             JXLayer<JComponent> jxlayer = new JXLayer<JComponent>(scrollPane, blurUI);
-            
-            if(category == Category.AUDIO && this.friendFileList.isAddNewAudioAlways()) {
-                blurUI.setLocked(true);
-            } else if(category == Category.VIDEO && this.friendFileList.isAddNewVideoAlways()) {
-                blurUI.setLocked(true);
-            } if(category == Category.IMAGE && this.friendFileList.isAddNewImageAlways()) {
+            if(this.friendFileList.isCategoryAutomaticallyAdded(category)) {
                 blurUI.setLocked(true);
             }
             locked.put(category, blurUI);
@@ -276,13 +270,15 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
                 action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
             } else {
-                if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
-                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-                } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
-                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-                } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
-                    action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
-                } else {
+                switch(category) {
+                case AUDIO:
+                case VIDEO:
+                case IMAGE:
+                    if(friendList.isCategoryAutomaticallyAdded(category)) {
+                        action.putValue(Action.NAME, I18n.tr(category.toString()) + I18n.tr(" ({0})", "all"));
+                        break;
+                    }
+                default:
                     action.putValue(Action.NAME, I18n.tr(category.toString()) + " (" + list.size() + ")");
                 }
             }
@@ -483,26 +479,20 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             checkBox.setBorder(BorderFactory.createEmptyBorder(2,2,2,0));
             checkBox.setOpaque(false);
             checkBox.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
-
-
-            if(category == Category.AUDIO) {
-                checkBox.setSelected(friendFileList.isAddNewAudioAlways());
-            } else if(category == Category.VIDEO) {
-                checkBox.setSelected(friendFileList.isAddNewVideoAlways());
-            } else if(category == Category.IMAGE) {
-                checkBox.setSelected(friendFileList.isAddNewImageAlways());
-            }
+            checkBox.setSelected(friendFileList.isCategoryAutomaticallyAdded(category));     
             
-            checkBox.addItemListener(new ItemListener(){
+            // This is explicitly an ActionListener and not an ItemListener
+            // because we only want to perform events if we CLICKED here..
+            // Since the box is synced up to the setting, the state
+            // will change if other settings changed, and we don't
+            // want to select, change, or clear if other areas change.
+            checkBox.addActionListener(new ActionListener() {
                 @Override
-                public void itemStateChanged(ItemEvent e) {
+                public void actionPerformed(ActionEvent e) {
                     select(category);
-                    if(category == Category.AUDIO) {
-                        friendFileList.setAddNewAudioAlways(checkBox.isSelected());
-                    } else if(category == Category.VIDEO) {
-                        friendFileList.setAddNewVideoAlways(checkBox.isSelected());
-                    } else if(category == Category.IMAGE) {
-                        friendFileList.setAddNewImageAlways(checkBox.isSelected());
+                    friendFileList.setCategoryAutomaticallyAdded(category, checkBox.isSelected());
+                    if(!checkBox.isSelected()) {
+                        friendFileList.clearCategory(category);
                     }
                 }
             });

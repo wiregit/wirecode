@@ -106,6 +106,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             super(new MigLayout("fillx, gap 0, insets 5 10 5 0, hidemode 3"));
             
             GuiUtils.assignResources(this);
+                        
+            this.fileList = fileList;
+            this.friendList = friendList;
+            this.sharedList = sharedList;
+            this.category = category;
             
             categoryLabel = new JLabel(I18n.tr("{0} Info", category));
             categoryLabel.setFont(categoryFont);
@@ -123,11 +128,6 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             initSharedList(sharedList);
             if(!isFriendView && sharedList == null) 
                 initCollectionListener(category);
-            
-            this.fileList = fileList;
-            this.friendList = friendList;
-            this.sharedList = sharedList;
-            this.category = category;
         }
         
         /** 
@@ -208,13 +208,15 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
                 sharingLabel.setText(I18n.tr("Sharing: {0}", count));
             } else {
-                if(category == Category.AUDIO && friendList.isAddNewAudioAlways()) {
-                    sharingLabel.setText(I18n.tr("Sharing: all"));
-                } else if(category == Category.VIDEO && friendList.isAddNewVideoAlways()) {
-                    sharingLabel.setText(I18n.tr("Sharing: all"));
-                } else if(category == Category.IMAGE && friendList.isAddNewImageAlways()) {
-                    sharingLabel.setText(I18n.tr("Sharing: all"));
-                } else {
+                switch(category) {
+                case AUDIO:
+                case VIDEO:
+                case IMAGE:
+                    if(friendList.isCategoryAutomaticallyAdded(category)) {
+                        sharingLabel.setText(I18n.tr("Sharing: all"));
+                        break;
+                    }
+                default:
                     sharingLabel.setText(I18n.tr("Sharing: {0}", count));
                 }
             }

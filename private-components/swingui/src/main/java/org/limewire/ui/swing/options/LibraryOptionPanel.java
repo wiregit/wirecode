@@ -21,10 +21,8 @@ import net.miginfocom.swing.MigLayout;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
-import org.limewire.core.api.library.FriendLibrary;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
-import org.limewire.core.api.library.RemoteLibraryManager;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
@@ -44,30 +42,32 @@ import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.wizard.AutoDirectoryManageConfig;
 
-import ca.odell.glazedlists.EventList;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 /** Library Option View */
 public class LibraryOptionPanel extends OptionPanel {
 
     private final IconManager iconManager;    
     private final LibraryManager libraryManager;
-    private final Provider<RemoteLibraryManager> remoteLibraries;
     private final Provider<ShareListManager> shareListManager;
+    private final Collection<Friend> knownFriends;
 
     private ManualImportPanel manualImportPanel;
     private LibraryManagerOptionPanel libraryManagerPanel;    
     private ShareCategoryPanel shareCategoryPanel;
     
+    
     @Inject
-    public LibraryOptionPanel(LibraryManager libraryManager, Provider<RemoteLibraryManager> remoteLibraries, 
-            Provider<ShareListManager> shareListManager, IconManager iconManager) {
+    public LibraryOptionPanel(LibraryManager libraryManager, 
+            Provider<ShareListManager> shareListManager,
+            IconManager iconManager,
+            @Named("known") Collection<Friend> knownFriends) {
         this.iconManager = iconManager;
         this.libraryManager = libraryManager;
-        this.remoteLibraries = remoteLibraries;
         this.shareListManager = shareListManager;
+        this.knownFriends = knownFriends;
         
         setLayout(new MigLayout("insets 15, fillx, wrap", "", ""));
         
@@ -153,21 +153,21 @@ public class LibraryOptionPanel extends OptionPanel {
             LibrarySettings.SNAPSHOT_SHARING_ENABLED.setValue(shareSnapshot.isSelected());
             // revert to defaults for collection sharing if true
             if(shareSnapshot.isSelected()) {
-                //TODO: put this on a background thread??
-                RemoteLibraryManager manager = remoteLibraries.get();
                 ShareListManager shareManager = shareListManager.get();
-                EventList<FriendLibrary> eventList = manager.getSwingFriendLibraryList();
-                
-                //clear the list of any friends that are currently signed on
-                for(FriendLibrary friendLibrary : eventList) {
-                    Friend friend = friendLibrary.getFriend();
+                // Set friends & gnutella explicitly, so events fire properly.
+                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.AUDIO, false);
+                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.VIDEO, false);
+                shareManager.getGnutellaShareList().setCategoryAutomaticallyAdded(Category.IMAGE, false);
+                for(Friend friend : knownFriends) {
                     FriendFileList fileList = shareManager.getFriendShareList(friend);
-                    
-                    fileList.setAddNewAudioAlways(false);
-                    fileList.setAddNewImageAlways(false);
-                    fileList.setAddNewVideoAlways(false);
+                    if(fileList != null) {                    
+                        fileList.setCategoryAutomaticallyAdded(Category.AUDIO, false);
+                        fileList.setCategoryAutomaticallyAdded(Category.VIDEO, false);
+                        fileList.setCategoryAutomaticallyAdded(Category.IMAGE, false);
+                    }
                 }
-                // clear anyone that may be in an offline list 
+                // clear everyone else, so if you're not signed on,
+                // when you sign on it doesn't continue auto-sharing.
                 LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.revertToDefault();
                 LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.revertToDefault();
                 LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.revertToDefault();

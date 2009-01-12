@@ -42,7 +42,6 @@ public class FileListAdapter implements LocalFileList, LibraryFileList {
         
     }
     
-    
     @Override
     public EventList<LocalFileItem> getSwingModel() {
         return swingEventList;
