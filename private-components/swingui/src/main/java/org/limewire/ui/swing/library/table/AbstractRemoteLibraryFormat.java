@@ -1,8 +1,6 @@
 package org.limewire.ui.swing.library.table;
 
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.RemoteFileItem;
@@ -40,18 +38,6 @@ public abstract class AbstractRemoteLibraryFormat<T extends FileItem> extends Ab
     @Override
     public Comparator getColumnComparator(int column) {
         return getLimeComparator();
-    }
-
-    // TODO remove after implementing method in subclasses for LWC-2422
-    @Override
-    public int getDefaultSortColumn() {
-        return -1;
-    }
-
-    // TODO remove after implementing method in subclasses for LWC-2422
-    @Override
-    public List<Integer> getSecondarySortColumns(int column) {
-        return Collections.emptyList();
     }
     
     public class ActionComparator implements Comparator<RemoteFileItem> {
