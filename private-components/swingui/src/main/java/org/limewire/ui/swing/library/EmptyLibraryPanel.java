@@ -109,8 +109,8 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private class ViewSharedLibraryAction extends AbstractAction {
 
         public ViewSharedLibraryAction() {
-            putValue(Action.NAME, I18n.tr("Share with {0}", getShortPanelName()));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Show files you're sharing with {0}", getShortPanelName()));
+            putValue(Action.NAME, I18n.tr("Share"));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getName()));
         }
         
         @Override
