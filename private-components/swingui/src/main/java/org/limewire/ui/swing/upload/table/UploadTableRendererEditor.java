@@ -24,6 +24,7 @@ import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
+import org.limewire.core.api.upload.UploadItem.BrowseType;
 import org.limewire.core.api.upload.UploadItem.UploadItemType;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeProgressBarFactory;
@@ -55,7 +56,8 @@ public class UploadTableRendererEditor extends TableRendererEditor {
     @Resource private Icon cancelIcon;
     @Resource private Icon cancelIconRollover;
     @Resource private Icon cancelIconPressed;
-    @Resource private Icon browseHostIcon;
+    @Resource private Icon friendBrowseHostIcon;
+    @Resource private Icon p2pBrowseHostIcon;
     
 
     public UploadTableRendererEditor(CategoryIconManager categoryIconManager, LimeProgressBarFactory progressBarFactory){
@@ -183,7 +185,11 @@ public class UploadTableRendererEditor extends TableRendererEditor {
         } else {
             nameLabel.setIcon(null);
             if (isBrowseHost(item)) {
-                iconLabel.setIcon(browseHostIcon);
+                if (item.getBrowseType() == BrowseType.FRIEND) {
+                    iconLabel.setIcon(friendBrowseHostIcon);
+                } else {
+                    iconLabel.setIcon(p2pBrowseHostIcon);
+                }
             } else {
                 iconLabel.setIcon(categoryIconManager.getIcon(item.getCategory()));
             }

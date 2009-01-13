@@ -153,12 +153,24 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public String getHost() {
-        System.out.println(uploader);
-        //TODO: this is less than ideal
-        if ((getState() == UploadState.BROWSE_HOST || getState() == UploadState.BROWSE_HOST_DONE) && getFileName() != null){
+        //TODO: this knows too much about what BrowseRequestHandler is doing
+        if ((getState() == UploadState.BROWSE_HOST || getState() == UploadState.BROWSE_HOST_DONE) && !"".equals(getFileName())){
             return getFileName();
         }
         return uploader.getHost();
+    }
+    
+    @Override
+    public BrowseType getBrowseType(){
+        if (getState() != UploadState.BROWSE_HOST && getState() != UploadState.BROWSE_HOST_DONE){
+            return BrowseType.NONE;
+        }
+        
+        if ("".equals(getFileName())){
+            return BrowseType.P2P;
+        }
+        
+        return BrowseType.FRIEND;
     }
     
     @Override
