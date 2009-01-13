@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.library;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.friend.FriendEvent;
@@ -24,6 +27,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.friends.chat.ChatFramePanel;
 import org.limewire.ui.swing.friends.chat.ChatFriendListPane;
 import org.limewire.ui.swing.util.FontUtils;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
@@ -188,6 +192,13 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 	 * what state their friend is in. 
 	 */
     private class MessageComponent extends JXPanel implements ListEventListener<LocalFileItem>, Disposable {
+        @Resource
+        private Font headingFont;
+        @Resource
+        private Color fontColor;
+        @Resource
+        private Font subFont;
+                
         private EventList<LocalFileItem> friendList;
         private MessageTypes messageType;
         private final JLabel firstLabel;
@@ -201,20 +212,29 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             this.friendList.addListEventListener(this);
             this.messageType = messageType;
             
+            GuiUtils.assignResources(this);
             
-            setLayout(new MigLayout("insets 15 20 15 20, hidemode 3"));
+            setLayout(new MigLayout("insets 18 22 18 22, hidemode 3"));
             
             firstLabel = new JLabel();
+            firstLabel.setFont(headingFont);
+            firstLabel.setForeground(fontColor);
             FontUtils.bold(firstLabel);
 
             shareLink = new HyperlinkButton(new ShowSharingAction());
+            shareLink.setFont(subFont);
             shareLabel = new JLabel();
+            shareLabel.setFont(subFont);
+            shareLabel.setForeground(fontColor);
             chatLink = new HyperlinkButton(new ChatWithAction());
+            chatLink.setFont(subFont);
             chatLabel = new JLabel();
+            chatLabel.setFont(subFont);
+            chatLabel.setForeground(fontColor);
             
             setMessage();
             
-            add(firstLabel, "span, gapbottom 10, wrap");
+            add(firstLabel, "span, gapbottom 14, wrap");
             add(shareLink);
             add(shareLabel);
             add(chatLink);
