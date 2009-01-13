@@ -25,7 +25,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /** An implementation of SessionInfo that gets it's statistics from various LimeWire components. */
-public class LimeSessionInfo implements SessionInfo {
+class LimeSessionInfo implements SessionInfo {
     
     private final NIODispatcher dispatcher;
     private final DownloadManager downloadManager;
