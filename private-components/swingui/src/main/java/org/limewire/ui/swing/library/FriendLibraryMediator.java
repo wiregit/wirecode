@@ -263,13 +263,13 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getFirstName()));
             if(friendList.size() == 1){
                 setShareText(I18n.tr("Sharing"), I18n.tr("1 file with {0}. ", friend.getFirstName()));
-                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
+                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
             } else if(friendList.size() > 1){
                 setShareText(I18n.tr("Sharing"), I18n.tr("{0} files with {1}. ", friendFileList.size(), friend.getFirstName()));
-                setChatText(I18n.tr("Chat"), I18n.tr("about signing into LimeWire 5."));
+                setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
             } else{
                 setShareText(I18n.tr("Share"), I18n.tr("files with {0} and", friend.getFirstName()));
-                setChatText(I18n.tr("chat"), I18n.tr("about signing into LimeWire 5."));
+                setChatText(I18n.tr("chat"), I18n.tr("about using LimeWire 5."));
             }
         }
         
