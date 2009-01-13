@@ -1,6 +1,9 @@
 package org.limewire.ui.swing.library.table;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
@@ -94,7 +97,24 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
         }
         return super.getColumnComparator(column);
     }
-        
+    
+    @Override
+    public int getDefaultSortColumn() {
+        return ARTIST_INDEX;
+    }
+
+    @Override
+    public List<Integer> getSecondarySortColumns(int column) {
+        switch (column) {
+        case ARTIST_INDEX:
+            return Arrays.asList(ALBUM_INDEX, TRACK_INDEX, TITLE_INDEX);
+        case ALBUM_INDEX:
+            return Arrays.asList(TRACK_INDEX, TITLE_INDEX);
+        default:
+            return Collections.emptyList();
+        }
+    }
+    
     /**
      * Compares the title field in the NAME_COLUMN
      */
