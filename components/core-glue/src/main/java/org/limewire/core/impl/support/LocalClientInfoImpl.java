@@ -120,6 +120,7 @@ public final class LocalClientInfoImpl extends LocalAbstractInfo
             _acceptedIncoming = "" +sessionInfo.acceptedIncomingConnection();
             _sharedFiles = "" +sessionInfo.getSharedFileListSize();
             _managedFiles = "" +sessionInfo.getManagedFileListSize();
+            _friendFiles = "" +sessionInfo.getAllFriendsFileListSize();
             _guessCapable = "" + sessionInfo.isGUESSCapable();
             _solicitedCapable= ""+sessionInfo.canReceiveSolicited();
             _latestSIMPP= "" + sessionInfo.getSimppVersion();
@@ -254,6 +255,7 @@ public final class LocalClientInfoImpl extends LocalAbstractInfo
             append(params, USER_COMMENTS, _userComments);
         }
         append(params, MANAGED_FILES, _managedFiles);
+        append(params, FRIEND_FILES, _friendFiles);
         // APPEND OTHER PARAMETERS HERE.
         
         return params.toArray(new Map.Entry[params.size()]);
