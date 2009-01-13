@@ -232,13 +232,8 @@ public class XMPPConnectionImpl implements org.limewire.xmpp.api.client.XMPPConn
                     }
                 }
             }
-        } catch(final UnknownHostException e) {
-            new Thread() {
-                @Override
-                public void run() {
-                    throw new RuntimeException(e);
-                }
-            }.start();
+        } catch(UnknownHostException e) {
+            throw new RuntimeException(e); // FIXME: remove after DNS bug is caught
         } catch(IOException iox) {
             // Failure looking up the SRV record - use the service name
             LOG.debug("Failed to look up SRV record", iox);
