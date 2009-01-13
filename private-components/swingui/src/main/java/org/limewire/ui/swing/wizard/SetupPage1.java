@@ -77,10 +77,10 @@ public class SetupPage1 extends WizardPage {
         label = new MultiLineLabel(filterCheckText, 500);
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(filterCheck));
         decorator.decorateNormalText(label);       
-        add(label, "gaptop 10, gapleft 10, wrap");
+        add(label, "gaptop 0, gapleft 10, wrap");
         add(learnMoreButton, "gapleft 76, wrap");
         
-        if (LimeAssociations.isMagnetAssociationSupported() 
+        if (true || LimeAssociations.isMagnetAssociationSupported() 
                || LimeAssociations.isTorrentAssociationSupported()
                || shouldShowStartOnStartupWindow()) {
             label = new JLabel(associationsAndStartupTitle);
@@ -88,22 +88,22 @@ public class SetupPage1 extends WizardPage {
             add(label, "gaptop 20, gapleft 14, wrap");
         }
         
-        if (LimeAssociations.isMagnetAssociationSupported() 
+        if (true || LimeAssociations.isMagnetAssociationSupported() 
                 || LimeAssociations.isTorrentAssociationSupported()) {
             add(associationCheck, "gaptop 10, gapleft 40");
             label = new MultiLineLabel(associationsText, 500);
             label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(associationCheck));
             decorator.decorateNormalText(label);       
-            add(label, "gaptop 10, gapleft 10, wrap");
+            add(label, "gaptop 9, gapleft 10, wrap");
         }
         
-        if (shouldShowStartOnStartupWindow()) {
+        if (true || shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);
-            add(startupCheck, "gaptop 0, gapleft 40");
+            add(startupCheck, "gaptop 10, gapleft 40");
             label = new MultiLineLabel(startupText, 500);
             label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(startupCheck));
             decorator.decorateNormalText(label);       
-            add(label, "gaptop 10, gapleft 10, wrap");
+            add(label, "gaptop 9, gapleft 10, wrap");
         }
         
     }
