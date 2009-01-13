@@ -239,7 +239,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         } catch (TooManyListenersException ingoreException) {
         }
 
-        EventListJXTableSorting.install(libTable, sortedList);
+        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);
 
         return libTable;
@@ -350,7 +350,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
                 castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
                 remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory));
 
-        EventListJXTableSorting.install(libTable, sortedList);
+        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);
 
         return libTable;
@@ -413,7 +413,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         } catch (TooManyListenersException ignoreException) {            
         } 
         
-        EventListJXTableSorting.install(libTable, sortedList);
+        EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);
         
         return libTable;
