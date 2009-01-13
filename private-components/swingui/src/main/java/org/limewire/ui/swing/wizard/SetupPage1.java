@@ -1,11 +1,14 @@
 package org.limewire.ui.swing.wizard;
 
+import java.awt.event.ActionEvent;
+
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
 import net.miginfocom.swing.MigLayout;
 
 import org.limewire.core.settings.ContentSettings;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.InstallSettings;
@@ -15,6 +18,7 @@ import org.limewire.ui.swing.shell.LimeAssociationOption;
 import org.limewire.ui.swing.shell.LimeAssociations;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.MacOSXUtils;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
 
@@ -25,8 +29,6 @@ public class SetupPage1 extends WizardPage {
     private String titleLine = I18n.tr("Please take a minute to configure these options before moving on.");
     
     private String filterTitle = I18n.tr("Content Filters");
-    
-    private String learnMore = I18n.tr("Learn more"); 
     
     private String filterCheckText = I18n.tr("Don't let me download or upload files copyright owners request not be shared.");
     private JCheckBox filterCheck;
@@ -43,7 +45,12 @@ public class SetupPage1 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
-        HyperlinkButton learnMoreButton = new HyperlinkButton(learnMore);
+        HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                NativeLaunchUtils.openURL("http://filtered.limewire.com/learnmore/contentFiltering");
+            }
+        });
         decorator.decorateNormalText(learnMoreButton);
         decorator.decorateLink(learnMoreButton);
         
