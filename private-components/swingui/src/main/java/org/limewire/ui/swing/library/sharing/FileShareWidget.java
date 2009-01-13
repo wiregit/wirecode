@@ -8,25 +8,27 @@ import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.FileShareModel;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.ThreadSafeList;
 
 public class FileShareWidget implements ShareWidget<File> {
 
-   private LibrarySharePanel sharePanel;
-    
-    public FileShareWidget(ShareListManager shareListManager, EventList<SharingTarget> allFriends, ShapeDialog shapeDialog){
+    private LibrarySharePanel sharePanel;
+    private File file;
+    private ShareListManager shareListManager;
+
+    public FileShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog) {
+        this.shareListManager = shareListManager;
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
-        sharePanel.setShareModel(new FileShareModel(shareListManager));
         sharePanel.setTopLabel(I18n.tr("Currently sharing with"));
         sharePanel.setTitleLabel(I18n.tr("Share one file"));
     }
-    
+
     public void show(Component c) {
-        sharePanel.show(c);
+        sharePanel.show(c, new FileShareModel(shareListManager, file));
     }
-    
-    public void setShareable(File file){
-        ((FileShareModel)sharePanel.getShareModel()).setFile(file);
+
+    public void setShareable(File file) {
+        this.file = file;
     }
 
     @Override

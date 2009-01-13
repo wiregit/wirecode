@@ -2,21 +2,22 @@ package org.limewire.ui.swing.library.sharing;
 
 import java.io.File;
 
+
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.ShareListManager;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.components.ShapeDialog;
-import org.limewire.xmpp.api.client.RosterEvent;
-import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.ThreadSafeList;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 @Singleton
 public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
@@ -31,24 +32,22 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
 
     private ShareListManager shareListManager;
 
-    private EventList<SharingTarget> allFriendsNotSwingSafe;
+    private ThreadSafeList<SharingTarget> allFriendsThreadSafe;
 
     private ShapeDialog shapeDialog;
     
-    private EventListener<RosterEvent> addRemoveListener;
-    private EventListener<XMPPConnectionEvent> disconnectListener;
     
     @Inject
     public ShareWidgetFactoryImpl(ShareListManager shareListManager, ShapeDialog shapeDialog){
         this.shareListManager = shareListManager;
-        allFriendsNotSwingSafe = GlazedListsFactory.threadSafeList(new BasicEventList<SharingTarget>());
+        allFriendsThreadSafe = GlazedListsFactory.threadSafeList(new BasicEventList<SharingTarget>());
         this.shapeDialog = shapeDialog;
     }
 
     @Override
     public ShareWidget<File> createFileShareWidget() {
         if(fileShareWidget == null){
-            fileShareWidget = new FileShareWidget(shareListManager, allFriendsNotSwingSafe, shapeDialog);
+            fileShareWidget = new FileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog);
         }
         return fileShareWidget;
     }
@@ -56,7 +55,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileShareWidget() {
         if(multiFileShareWidget == null){
-            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsNotSwingSafe, shapeDialog);
+            multiFileShareWidget = new MultiFileShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog);
         }
         return multiFileShareWidget;
     }
@@ -64,7 +63,7 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<LocalFileItem[]> createMultiFileUnshareWidget() {
         if(multiFileUnshareWidget == null){
-            multiFileUnshareWidget = new MultiFileUnshareWidget(shareListManager, allFriendsNotSwingSafe, shapeDialog);
+            multiFileUnshareWidget = new MultiFileUnshareWidget(shareListManager, allFriendsThreadSafe, shapeDialog);
         }
         return multiFileUnshareWidget;
     }
@@ -72,40 +71,28 @@ public class ShareWidgetFactoryImpl implements ShareWidgetFactory {
     @Override
     public ShareWidget<Category> createCategoryShareWidget() {
         if(categoryShareWidget == null){
-            categoryShareWidget = new CategoryShareWidget(shareListManager, allFriendsNotSwingSafe, shapeDialog);
+            categoryShareWidget = new CategoryShareWidget(shareListManager, allFriendsThreadSafe, shapeDialog);
         }
         return categoryShareWidget;
     }
     
-    @Inject void register(ListenerSupport<RosterEvent> rosterListeners,
-            ListenerSupport<XMPPConnectionEvent> connectionListeners) {
+    @Inject
+    void register(@Named("known") ListenerSupport<FriendEvent> knownListeners) {
 
-        addRemoveListener = new EventListener<RosterEvent>() {
+        knownListeners.addListener(new EventListener<FriendEvent>() {
             @Override
-            public void handleEvent(RosterEvent event) {
+            public void handleEvent(FriendEvent event) {
                 switch (event.getType()) {
-                case USER_ADDED:
-                    allFriendsNotSwingSafe.add(new SharingTarget(event.getSource()));
+                case ADDED:
+                    allFriendsThreadSafe.add(new SharingTarget(event.getSource()));
                     break;
-                case USER_DELETED:
-                    allFriendsNotSwingSafe.remove(new SharingTarget(event.getSource()));
+                case REMOVED:
+                    allFriendsThreadSafe.remove(new SharingTarget(event.getSource()));
                     break;
                 }
             }
-        };
-        rosterListeners.addListener(addRemoveListener);
+        });
 
-        disconnectListener = new EventListener<XMPPConnectionEvent>() {
-            @Override
-            public void handleEvent(XMPPConnectionEvent event) {
-                switch (event.getType()) {
-                case DISCONNECTED:
-                    allFriendsNotSwingSafe.clear();
-                    break;
-                }
-            }
-        };
-        connectionListeners.addListener(disconnectListener);
     }
 
 }

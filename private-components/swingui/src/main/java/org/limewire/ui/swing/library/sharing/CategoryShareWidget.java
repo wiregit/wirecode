@@ -8,19 +8,22 @@ import org.limewire.ui.swing.components.ShapeDialog;
 import org.limewire.ui.swing.library.sharing.model.CategoryShareModel;
 import org.limewire.ui.swing.util.I18n;
 
-import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.impl.ThreadSafeList;
 
 public class CategoryShareWidget implements ShareWidget<Category> {
-private LibrarySharePanel sharePanel;
     
-    public CategoryShareWidget(ShareListManager shareListManager, EventList<SharingTarget> allFriends, ShapeDialog shapeDialog){
+    private LibrarySharePanel sharePanel;
+    private Category category;
+    private ShareListManager shareListManager;
+    
+    public CategoryShareWidget(ShareListManager shareListManager, ThreadSafeList<SharingTarget> allFriends, ShapeDialog shapeDialog){
+        this.shareListManager = shareListManager;
         sharePanel = new LibrarySharePanel(allFriends, shapeDialog);
-        sharePanel.setShareModel(new CategoryShareModel(shareListManager));
     }
     
     @Override
     public void show(Component c) {
-        sharePanel.show(null);
+        sharePanel.show(null, new CategoryShareModel(shareListManager, category));
     }
     
 
@@ -32,7 +35,7 @@ private LibrarySharePanel sharePanel;
 
     @Override
     public void setShareable(Category category) {
-        ((CategoryShareModel)sharePanel.getShareModel()).setCategory(category);
+        this.category = category;
         String catStr = category.getSingularName();
         sharePanel.setTitleLabel(I18n.tr("Share {0} collection", catStr));
         sharePanel.setTopLabel("Sharing collection with:");
