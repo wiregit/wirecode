@@ -33,7 +33,7 @@ private LibrarySharePanel sharePanel;
     @Override
     public void setShareable(Category category) {
         ((CategoryShareModel)sharePanel.getShareModel()).setCategory(category);
-        String catStr = category.toString();
+        String catStr = category.getSingularName();
         sharePanel.setTitleLabel(I18n.tr("Share {0} collection", catStr));
         sharePanel.setTopLabel("Sharing collection with:");
         sharePanel.setBottomLabel(
