@@ -70,8 +70,19 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         cardPanel.add(panel, category.name());
     }
     
+    /**
+	 * Selects which category info panel to show. If category
+	 * is null, hides the entire card panel since there is no
+     * category visible in this library.
+	 */
     public void showCard(Category category) {
-        cardLayout.show(cardPanel, category.name());
+        if(category == null) 
+            cardPanel.setVisible(false);
+        else {
+            if(!cardPanel.isVisible())
+                cardPanel.setVisible(true);
+            cardLayout.show(cardPanel, category.name());
+        }
     }
     
     /**

@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
-import javax.swing.JComponent;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.Category;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.friend.Friend;
 import org.limewire.core.api.library.FriendFileList;
@@ -48,7 +46,7 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
                     ButtonDecorator buttonDecorator,
                     GhostDragGlassPane ghostPane,
                     LibraryNavigator libraryNavigator) {
-        super(friend, friendFileList, eventList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory, ghostPane, libraryNavigator);
+        super(friend, friendFileList, categoryIconManager, tableFactory, downloadListManager, libraryManager, headerBarFactory, ghostPane, libraryNavigator);
 
         GuiUtils.assignResources(this);
         
@@ -66,11 +64,6 @@ public class FriendLibraryPanel extends AbstractFriendLibraryPanel {
         createMyCategories(eventList);
         selectFirstVisible();
         getHeaderPanel().setText(I18n.tr("Download from {0}", getFullPanelName()));
-    }
-    
-    protected JComponent createMyCategoryAction(Category category, EventList<RemoteFileItem> filtered) {
-        addFriendInfoBar(category, filtered);
-        return super.createMyCategoryAction(category, filtered);
     }
     
     protected String getFullPanelName() {
