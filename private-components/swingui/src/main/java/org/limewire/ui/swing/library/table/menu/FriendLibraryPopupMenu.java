@@ -13,10 +13,8 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
-import org.limewire.core.api.library.MagnetLinkFactory;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.library.MagnetLinkCopier;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.util.BackgroundExecutorService;
 import org.limewire.ui.swing.util.I18n;
@@ -27,29 +25,24 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
     private List<RemoteFileItem> fileItems;
 
     final private JSeparator separator = new JSeparator();
-    final private JMenuItem linkItem;
     final private JMenuItem propertiesItem;
 
     final private DownloadListManager downloadListManager;
     private final SaveLocationExceptionHandler saveLocationExceptionHandler;
 
-    private MagnetLinkFactory magnetFactory;
     private PropertiesFactory<RemoteFileItem> remoteItemPropertiesFactory;
     private PropertiesFactory<DownloadItem> downloadItemPropertiesFactory;
 
-    public FriendLibraryPopupMenu(DownloadListManager downloadListManager, MagnetLinkFactory magnetFactory, 
+    public FriendLibraryPopupMenu(DownloadListManager downloadListManager,  
             PropertiesFactory<RemoteFileItem> remoteItemPropertiesFactory, SaveLocationExceptionHandler saveLocationExceptionHandler,
             PropertiesFactory<DownloadItem> downloadItemPropertiesFactory) {
         this.downloadListManager = downloadListManager;
-        this.magnetFactory = magnetFactory;
         this.remoteItemPropertiesFactory = remoteItemPropertiesFactory;
         this.downloadItemPropertiesFactory = downloadItemPropertiesFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        linkItem = new JMenuItem(linkAction);
         propertiesItem = new JMenuItem(propertiesAction);
 
         add(downloadAction);
-        add(linkItem);
         add(separator);
         add(propertiesItem);
 
@@ -59,7 +52,6 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
         this.fileItems = items;   
           
         boolean isSingleSelection = fileItems.size() == 1;
-        linkItem.setVisible(isSingleSelection);
         separator.setVisible(isSingleSelection);
         propertiesItem.setVisible(isSingleSelection);        
     }
@@ -95,17 +87,9 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
         }
     };
 
-    private Action linkAction = new AbstractAction(I18n.tr("Copy Link to Clipboard")) {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            new MagnetLinkCopier().copyLinkToClipBoard(fileItems.get(0), magnetFactory);
-        }
-    };
-    
     private Action propertiesAction = new AbstractAction(I18n.tr("View File Info")) {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO - Is this correct? Only to show props for first one?
             RemoteFileItem propertiable = fileItems.get(0);
             DownloadItem item = downloadListManager.getDownloadItem(propertiable.getUrn());
             if(item != null) {

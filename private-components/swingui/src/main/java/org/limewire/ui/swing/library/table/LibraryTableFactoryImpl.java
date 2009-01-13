@@ -4,7 +4,6 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.TooManyListenersException;
 
@@ -37,7 +36,7 @@ import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.sharing.SharingCheckBoxRendererEditor;
 import org.limewire.ui.swing.library.table.menu.FriendLibraryPopupHandler;
 import org.limewire.ui.swing.library.table.menu.MyLibraryPopupHandler;
-import org.limewire.ui.swing.library.table.menu.MyImageLibraryPopupHandler.ImageLibraryPopupParams;
+import org.limewire.ui.swing.library.table.menu.ShareLibraryPopupHandler;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchResultFromWidgetFactory;
 import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
@@ -58,7 +57,6 @@ import ca.odell.glazedlists.swing.EventSelectionModel;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 @Singleton
 public class LibraryTableFactoryImpl implements LibraryTableFactory {
@@ -96,8 +94,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
 
-    private Collection<Friend> allFriends;
-
     private ShareWidgetFactory shareFactory;
 
     @Inject
@@ -112,7 +108,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             PropertiesFactory<DownloadItem> downloadItemPropFactory,
             LibraryImageSubPanelFactory factory, 
             SaveLocationExceptionHandler saveLocationExceptionHandler,
-            @Named("known") Collection<Friend> allFriends,
             ShareTableRendererEditorFactory shareTableRendererEditorFactory, 
             ShareWidgetFactory shareFactory,
             GhostDragGlassPane ghostPane, 
@@ -129,7 +124,6 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         this.downloadItemPropFactory = downloadItemPropFactory;
         this.subPanelFactory = factory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
-        this.allFriends = allFriends;
         this.shareFactory = shareFactory;
         this.ghostPane = ghostPane;
         this.fromWidgetFactory = fromWidgetfactory;
@@ -161,10 +155,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     @Override
     public LibraryImagePanel createImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, ShareWidget<File> sharePanel) {
-        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory, shareFactory);
-        
-        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
+        LibraryImagePanel imagePanel = new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
                 libraryManager.getLibraryManagedList(), scrollPane, subPanelFactory,
                 sharePanel, null);       
 
@@ -186,9 +177,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     @Override
     public LibraryImagePanel createSharingImagePanel(EventList<LocalFileItem> eventList,
             JScrollPane scrollPane, LocalFileList currentFriendList) {
-        ImageLibraryPopupParams params = new ImageLibraryPopupParams(libraryManager,
-                shareListManager, magnetLinkFactory, allFriends, localItemPropFactory, shareFactory);
-        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), params, eventList,
+        return new LibraryImagePanel(I18n.tr(Category.IMAGE.name()), eventList,
                 libraryManager.getLibraryManagedList(), scrollPane,
                 subPanelFactory, null, currentFriendList);
     }
@@ -231,7 +220,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
 
         libTable.setTransferHandler(new MyLibraryTransferHandler(getSelectionModel(libTable), libraryManager.getLibraryManagedList()));
         libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable),
-                category, libraryManager, shareListManager, magnetLinkFactory, allFriends,
+                category, libraryManager, shareListManager, magnetLinkFactory,
                 localItemPropFactory, shareFactory));
         
         try {
@@ -347,8 +336,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             }     
         }
         libTable.setPopupHandler(new FriendLibraryPopupHandler(
-                castToRemoteLibraryTable(libTable), downloadListManager, magnetLinkFactory,
-                remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory));
+                castToRemoteLibraryTable(libTable), downloadListManager, remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory));
 
         EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);
@@ -403,8 +391,8 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             throw new IllegalArgumentException("Unknown category: " + category);
         }
         
-        libTable.setPopupHandler(new MyLibraryPopupHandler(castToLocalLibraryTable(libTable), category, libraryManager, shareListManager, 
-                    magnetLinkFactory, allFriends, localItemPropFactory, shareFactory));
+        libTable.setPopupHandler(new ShareLibraryPopupHandler(friendFileList, castToLocalLibraryTable(libTable), category, libraryManager, 
+                    magnetLinkFactory, localItemPropFactory));
         
 
         libTable.setTransferHandler(new SharingLibraryTransferHandler(libTable, friendFileList));

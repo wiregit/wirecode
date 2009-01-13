@@ -8,22 +8,22 @@ import java.util.List;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.library.image.LibraryImageSubPanel;
-import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.properties.PropertiesFactory;
 import org.limewire.ui.swing.table.TablePopupHandler;
 
-public class MyImageLibraryPopupHandler implements TablePopupHandler {
+public class ShareImageLibraryPopupHandler implements TablePopupHandler {
     private LibraryImageSubPanel imagePanel;
 
-    private MyLibraryPopupMenu popupMenu;
+    private ShareLibraryPopupMenu popupMenu;
 
-    public MyImageLibraryPopupHandler(LibraryImageSubPanel imagePanel,
-            ShareWidgetFactory shareWidgetFactory, LibraryManager libraryManager, PropertiesFactory<LocalFileItem> localFilePropFactory) {
+    public ShareImageLibraryPopupHandler(LocalFileList friendFileList,
+            LibraryImageSubPanel imagePanel, LibraryManager libraryManager,
+            PropertiesFactory<LocalFileItem> localFilePropFactory) {
         this.imagePanel = imagePanel;
-        this.popupMenu = new MyLibraryPopupMenu(Category.IMAGE,
-                libraryManager, shareWidgetFactory, localFilePropFactory);
-
+        this.popupMenu = new ShareLibraryPopupMenu(friendFileList, Category.IMAGE, libraryManager,
+                localFilePropFactory);
     }
 
     @Override
@@ -36,15 +36,16 @@ public class MyImageLibraryPopupHandler implements TablePopupHandler {
 
         int popupRow = imagePanel.getImageList().locationToIndex(new Point(x, y));
         LocalFileItem selectedItem = (LocalFileItem) imagePanel.getImageList().getModel()
-        .getElementAt(popupRow);
-        
-        List<LocalFileItem> selectedItems = new ArrayList<LocalFileItem>(imagePanel.getSelectedItems());
+                .getElementAt(popupRow);
+
+        List<LocalFileItem> selectedItems = new ArrayList<LocalFileItem>(imagePanel
+                .getSelectedItems());
 
         if (selectedItems.size() <= 1 || !selectedItems.contains(selectedItem)) {
             selectedItems.clear();
             imagePanel.setSelectedIndex(popupRow);
             selectedItems.add(selectedItem);
-        } 
+        }
 
         popupMenu.setFileItems(selectedItems);
         popupMenu.show(component, x, y);
