@@ -130,29 +130,46 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
     }
     
     @Override
-    public void clearCategory(Category category) {
-        List<FileDesc> fdList = new ArrayList<FileDesc>(size());
-        getReadLock().lock();
-        try {
-            for(FileDesc fd : this) {
-                if(CategoryConverter.categoryForFile(fd.getFile()) == category) {
-                    fdList.add(fd);
+    public void clearCategory(final Category category) {
+        ThreadExecutor.newManagedThread(new Runnable(){
+            public void run() {
+                
+                final List<FileDesc> fdList = new ArrayList<FileDesc>(size());
+                getReadLock().lock();
+                try {
+                    for(FileDesc fd : FriendFileListImpl.this) {
+                        if(CategoryConverter.categoryForFile(fd.getFile()) == category) {
+                            fdList.add(fd);
+                        }
+                    }
+                } finally {
+                    getReadLock().unlock();
+                }
+        
+                for(FileDesc fd : fdList) {
+                    remove(fd);
                 }
             }
-        } finally {
-            getReadLock().unlock();
-        }
-        
-        for(FileDesc fd : fdList) {
-            remove(fd);
-        }
+        }).start();
+
+    }
+
+    @Override
+    public void addSnapshotCategory(Category category) {
+        ThreadExecutor.newManagedThread(new AddCategory(category, true)).start();
     }
     
     private class AddCategory implements Runnable {
         private final Category category;
+        private final boolean isSnapshot;
         
         public AddCategory(Category category) {
+            this(category, false);
+        }
+        
+        public AddCategory(Category category, boolean isSnapShot) {
             this.category = category;
+            this.isSnapshot = isSnapShot;
         }
         
         @Override
@@ -161,17 +178,17 @@ class FriendFileListImpl extends AbstractFileList implements FriendFileList {
                 // exit early if off.
                 switch(category) {
                 case AUDIO:
-                    if (!addNewAudioAlways) {
+                    if (!addNewAudioAlways && !isSnapshot) {
                         return;
                     }
                     break;
                 case IMAGE:
-                    if (!addNewImagesAlways) {
+                    if (!addNewImagesAlways && !isSnapshot) {
                         return;
                     }
                     break;
                 case VIDEO:
-                    if (!addNewVideoAlways) {
+                    if (!addNewVideoAlways && !isSnapshot) {
                         return;
                     }
                     break;

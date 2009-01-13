@@ -13,7 +13,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Comparator;
 import java.util.EnumMap;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.TooManyListenersException;
 
@@ -217,7 +216,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
-        SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this, new ShareAction(filteredAllFileList), new UnshareAction(filteredAllFileList));
+        SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this, new ShareAction(category), new UnshareAction(category));
         listeners.put(category, panel);
         addNavigation(panel.getButton());
         return panel;
@@ -635,10 +634,10 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
      * Shares all the files currently in a category, with a friend
      */
     private class ShareAction<T extends FileItem> extends AbstractAction {
-        FilterList<T> filteredAllFileList;
+        private Category category;
         
-        public ShareAction(FilterList<T> filteredAllFileList) {
-            this.filteredAllFileList = filteredAllFileList;
+        public ShareAction(Category category) {
+            this.category = category;
             
             putValue(Action.NAME, I18n.tr("all"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
@@ -646,14 +645,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         
         @Override
         public void actionPerformed(ActionEvent e) {
-            //TODO: move to background executor
-            filteredAllFileList.getReadWriteLock().readLock().lock();
-            ListIterator<T> iter = filteredAllFileList.listIterator();
-            while(iter.hasNext()) {
-                friendFileList.addFile(((LocalFileItem)iter.next()).getFile());
-            }
-            filteredAllFileList.getReadWriteLock().readLock().unlock();
-            
+            friendFileList.addSnapshotCategory(category);           
             SharingPanel.this.repaint();
         }
     }
@@ -662,25 +654,19 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
      * Unshares all the files currently in a category, with a friend
      */
     private class UnshareAction<T extends FileItem> extends AbstractAction {
-        FilterList<T> filteredAllFileList;
-        
-        public UnshareAction(FilterList<T> filteredAllFileList) {
-            this.filteredAllFileList = filteredAllFileList;
+        private Category category;
+
+        public UnshareAction(Category category) {
+            this.category = category;
             
             putValue(Action.NAME, I18n.tr("none"));
             putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
         }
         
         @Override
-        public void actionPerformed(ActionEvent e) {            
-            //TODO: move to background executor
-            filteredAllFileList.getReadWriteLock().readLock().lock();
-            ListIterator<T> iter = filteredAllFileList.listIterator();
-            while(iter.hasNext()) {
-                friendFileList.removeFile(((LocalFileItem)iter.next()).getFile());
-            }
-            filteredAllFileList.getReadWriteLock().readLock().unlock();
-            
+        public void actionPerformed(ActionEvent e) {   
+            friendFileList.clearCategory(category);
+
             SharingPanel.this.repaint();
         }
     }
