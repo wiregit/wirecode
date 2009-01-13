@@ -8,6 +8,8 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
@@ -47,6 +49,8 @@ public class EmptyLibraryPanel extends LibraryPanel {
     private Color innerNavBorder;
     @Resource
     private Color backgroundColor;
+    @Resource
+    private Icon arrowIcon;
     
     private final Friend friend;
     private final FriendLibraryMediator mediator;
@@ -84,16 +88,22 @@ public class EmptyLibraryPanel extends LibraryPanel {
     }
     
     private void createEmptyPanel(JXPanel component) {
-        JPanel p = new JPanel(new MigLayout("nocache, insets 0, gap 0, fill", "[125!][][fill]", "[fill]"));
+        JPanel p = new JPanel(new MigLayout("insets 0, gap 0, fill", "[125!][][fill]", "[fill]"));
         JXPanel leftPanel = new JXPanel();
         leftPanel.setBackground(navColor);
         
         JXPanel rightPanel = new JXPanel();
         rightPanel.setBackground(backgroundColor);
         
+        JXPanel messageWrapper = new JXPanel(new MigLayout("insets 0 0 " + (arrowIcon.getIconHeight()-2) + " 0, gap 0"));
+        messageWrapper.setOpaque(false);
         component.setOpaque(false);
         component.setBackgroundPainter(new MessagePainter());
-        p.add(component, "pos 0.5al 0.5al");
+
+        messageWrapper.add(new JLabel(arrowIcon), "pos 0.2al 0.99al");
+        messageWrapper.add(component, "wrap");
+        
+        p.add(messageWrapper, "pos 0.5al 0.5al");
         
         p.add(leftPanel, "grow");
         p.add(Line.createVerticalLine(innerNavBorder), "growy, width 1!");
