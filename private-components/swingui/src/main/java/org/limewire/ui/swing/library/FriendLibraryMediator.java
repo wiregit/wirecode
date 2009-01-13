@@ -266,7 +266,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 * Friend is offline.
 		 */
         private void setOfflineMessage() {
-            firstLabel.setText(I18n.tr("{0} is offline", friend.getName()));
+            firstLabel.setText(I18n.tr("{0} is offline", friend.getRenderName()));
             if(friendList.size() == 1)
                 setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend."));
             else if(friendList.size() > 1)
@@ -280,7 +280,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 * Friend is online but not on LimeWire.
 		 */
         private void setOnlineMessage() {
-            firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getName()));
+            firstLabel.setText(I18n.tr("{0} isn't on LimeWire", friend.getRenderName()));
             if(friendList.size() == 1){
                 setShareText(I18n.tr("Sharing"), I18n.tr("1 file with your friend. "));
                 setChatText(I18n.tr("Chat"), I18n.tr("about using LimeWire 5."));
@@ -298,7 +298,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setLWLoading() {
             if(!friend.isAnonymous()) {
-                firstLabel.setText(I18n.tr("Loading {0}'s files...", friend.getName()));
+                firstLabel.setText(I18n.tr("Loading {0}'s files...", friend.getRenderName()));
                 setShareText(null, null);
                 setChatText(null, null);
             } else {
@@ -313,7 +313,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setLWNoFiles() {
             if(!friend.isAnonymous()) {
-                firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getName()));
+                firstLabel.setText(I18n.tr("{0} isn't sharing with you", friend.getRenderName()));
                 setShareText(null, null);
                 setChatText(I18n.tr("Chat"), I18n.tr("about sharing with you."));
             } else {
@@ -329,7 +329,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
 		 */
         private void setLWConnectionError() {
             if(!friend.isAnonymous()) {
-                firstLabel.setText(I18n.tr("There was a problem viewing {0}'s files.", friend.getName()));
+                firstLabel.setText(I18n.tr("There was a problem viewing {0}'s files.", friend.getRenderName()));
                 setShareText(null, null);
                 setChatText(null, null);
             } else {

@@ -120,7 +120,7 @@ public class EmptyLibraryPanel extends LibraryPanel {
 
         public ViewSharedLibraryAction() {
             putValue(Action.NAME, I18n.tr("Share"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getName()));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share your files with {0}", friend.getRenderName()));
         }
         
         @Override
