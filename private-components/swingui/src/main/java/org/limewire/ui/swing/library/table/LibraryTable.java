@@ -110,7 +110,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
      * Creates a column handler that handles saving column state
      */
     private void setupColumnHandler() {
-        columnStateHandler = new ColumnStateHandler(this, getTabelFormat());
+        columnStateHandler = new ColumnStateHandler(this, getTableFormat());
     }
     
     protected void setupCellRenderers(LibraryTableFormat<T> format) {
@@ -134,7 +134,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         menu.show(getTableHeader(), p.x, p.y);
     }
     
-    public LibraryTableFormat<T> getTabelFormat() {
+    public LibraryTableFormat<T> getTableFormat() {
         return format;
     }
     
