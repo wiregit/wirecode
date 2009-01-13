@@ -8,9 +8,9 @@ import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
-import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
@@ -22,8 +22,6 @@ import org.limewire.ui.swing.util.MacOSXUtils;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
 import org.limewire.ui.swing.util.WindowsUtils;
 import org.limewire.util.OSUtils;
-
-
 
 public class SetupPage1 extends WizardPage {
 
@@ -46,7 +44,7 @@ public class SetupPage1 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
-        JXHyperlink learnMoreButton = new JXHyperlink(new AbstractAction(I18n.tr("Learn more")) {
+        HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL("http://filtered.limewire.com/learnmore/contentFiltering");

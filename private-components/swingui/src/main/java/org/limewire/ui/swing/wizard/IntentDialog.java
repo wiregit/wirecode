@@ -25,9 +25,9 @@ import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
 
 import org.jdesktop.swingx.JXButton;
-import org.jdesktop.swingx.JXHyperlink;
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
@@ -96,7 +96,7 @@ public class IntentDialog extends LimeJDialog {
         headingLabel.setFont(headingFont);
         agreeLabel = new MultiLineLabel("", 450);
         agreeLabel.setFont(normalFont);
-        linkButton = new JXHyperlink(urlAction);
+        linkButton = new HyperlinkButton(urlAction);
         linkButton.setFont(normalFont);
         FontUtils.underline(linkButton);
         linkButton.setForeground(new Color(0x2152a6));
