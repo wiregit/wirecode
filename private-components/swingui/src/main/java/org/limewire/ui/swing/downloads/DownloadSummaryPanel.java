@@ -177,6 +177,14 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
                 }
                 return super.prepareRenderer(renderer, row, column);
             }
+            
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                if (row >= getRowCount() || col >= getColumnCount() || row < 0 || col < 0) {
+                    return false;
+                }
+                return getColumnModel().getColumn(col).getCellEditor() != null;
+            }
         };
         table.setModel(horizontalTableModel);
 		table.setShowHorizontalLines(false);
@@ -538,6 +546,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 
         @Override
         public void update(DownloadItem item){
+            // can be null because of accessibility calls.
+            if(item == null) {
+                return;
+            }
+            
             nameLabel.setText(item.getTitle());
             progressBar.setVisible(item.getState() == DownloadState.DOWNLOADING || item.getState() == DownloadState.PAUSED);
             if (progressBar.isVisible()) { 
