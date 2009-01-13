@@ -270,13 +270,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         initializeDownloadCompleteListener();
         initializeDownloadAddedListener();
 
-        setLayout(new MigLayout("nocache, ins 0, gap 0! 0!, novisualpadding"));
+        setLayout(new MigLayout("nocache, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         
-        JPanel rightPanel = new JPanel(new MigLayout("nogrid, ins 0, gap 0! 0!, novisualpadding"));
+        JPanel rightPanel = new JPanel(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         rightPanel.setMaximumSize(new Dimension(clearFinishedButton.getPreferredSize().width + 32, panelHeight));
         rightPanel.setOpaque(false);
-        rightPanel.add(showAllButton, "aligny 100%, wrap");
-        rightPanel.add(clearFinishedButton, "gaptop 10, aligny 0%, hidemode 3");
+        rightPanel.add(showAllButton, "aligny 100%, gapbottom 5, wrap");
+        rightPanel.add(clearFinishedButton, "gaptop 5, aligny 0%, hidemode 3");
         
         add(tableScroll, "aligny 50%, growx, growy, push");
         add(rightPanel, "gapleft 12, gapright 20");
