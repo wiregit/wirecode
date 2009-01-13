@@ -285,8 +285,6 @@ public class MyLibraryPanel extends LibraryPanel {
         @Resource Color selectedTextColor;
         @Resource Color textColor;
         @Resource Font shareButtonFont;
-        @Resource Color shareForegroundColor;
-        @Resource Color shareMouseOverColor;
         
         private JButton button;
         private HyperlinkButton shareButton;
@@ -347,8 +345,6 @@ public class MyLibraryPanel extends LibraryPanel {
                 shareButton.setBorder(BorderFactory.createEmptyBorder(2,0,2,4));
                 shareButton.setVisible(false);
                 shareButton.setFont(shareButtonFont);
-                shareButton.setForeground(shareForegroundColor);
-                shareButton.setRolloverForeground(shareMouseOverColor);
                 add(shareButton, "wrap");
             }
         }

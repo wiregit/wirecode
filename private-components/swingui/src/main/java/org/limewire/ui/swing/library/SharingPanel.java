@@ -361,8 +361,6 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Resource Color selectedBackground;
         @Resource Color selectedTextColor;
         @Resource Color textColor;
-        @Resource Color shareMouseOverColor;
-        @Resource Color shareForegroundColor;
         @Resource Font  shareButtonFont;
         
         private JCheckBox checkBox;
@@ -456,13 +454,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             shareButton = new HyperlinkButton(shareAction);
             unshareButton = new HyperlinkButton(unshareAction);
 
-            shareButton.setFont(shareButtonFont);
-            shareButton.setForeground(shareForegroundColor);
-            shareButton.setRolloverForeground(shareMouseOverColor);
-            
+            shareButton.setFont(shareButtonFont);        
             unshareButton.setFont(shareButtonFont);
-            unshareButton.setForeground(shareForegroundColor);
-            unshareButton.setRolloverForeground(shareMouseOverColor);
             
             boolean visible = LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue() && category == Category.AUDIO;
             shareLabel.setVisible(visible);
