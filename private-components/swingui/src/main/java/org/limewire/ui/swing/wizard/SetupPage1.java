@@ -4,12 +4,13 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 
+import org.jdesktop.swingx.JXHyperlink;
 import org.limewire.core.settings.ContentSettings;
 import org.limewire.ui.swing.action.AbstractAction;
-import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.settings.InstallSettings;
 import org.limewire.ui.swing.settings.StartupSettings;
@@ -45,7 +46,7 @@ public class SetupPage1 extends WizardPage {
         setOpaque(false);
         setLayout(new MigLayout("insets 0, gap 0, nogrid"));
         
-        HyperlinkButton learnMoreButton = new HyperlinkButton(new AbstractAction(I18n.tr("Learn more")) {
+        JXHyperlink learnMoreButton = new JXHyperlink(new AbstractAction(I18n.tr("Learn more")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 NativeLaunchUtils.openURL("http://filtered.limewire.com/learnmore/contentFiltering");
@@ -65,7 +66,6 @@ public class SetupPage1 extends WizardPage {
         decorator.decorateLargeCheckBox(startupCheck);
         decorator.decorateNormalText(startupCheck);
         
-
         JLabel label;
         
         label = new JLabel(filterTitle);
@@ -77,8 +77,10 @@ public class SetupPage1 extends WizardPage {
         label = new MultiLineLabel(filterCheckText, 500);
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(filterCheck));
         decorator.decorateNormalText(label);       
-        add(label, "gaptop 0, gapleft 10, wrap");
-        add(learnMoreButton, "gapleft 76, wrap");
+        JPanel textAndLinkCell = new JPanel(new MigLayout("flowy, gap 2, insets 0, fill"));
+        textAndLinkCell.add(label);
+        textAndLinkCell.add(learnMoreButton);
+        add(textAndLinkCell, "gaptop 10, gapleft 10, wrap");
         
         if (LimeAssociations.isMagnetAssociationSupported() 
                || LimeAssociations.isTorrentAssociationSupported()

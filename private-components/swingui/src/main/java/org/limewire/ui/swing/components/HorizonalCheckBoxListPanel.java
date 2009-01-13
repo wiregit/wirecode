@@ -28,7 +28,7 @@ public class HorizonalCheckBoxListPanel<K> extends JPanel {
      */
     public HorizonalCheckBoxListPanel(Collection<K> options, Collection<K> selected) {
         
-        setLayout(new MigLayout("gapx 18"));
+        setLayout(new MigLayout("gapx 5"));
         setOpaque(false);
         
         optionsMap = new HashMap<K,JCheckBox>();

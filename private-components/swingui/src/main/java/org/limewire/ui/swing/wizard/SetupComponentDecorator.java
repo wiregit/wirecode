@@ -21,6 +21,7 @@ import org.limewire.ui.swing.painter.GenericBarPainter;
 import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.util.ButtonDecorator;
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.PainterUtils;
 
@@ -104,6 +105,7 @@ public class SetupComponentDecorator {
     
     public void decorateLink(JComponent link) {
         link.setForeground(backButtonForeground);
+        FontUtils.underline(link);
     }
     
     public void decoratePlainButton(JXButton button) {

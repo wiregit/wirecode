@@ -121,7 +121,7 @@ public class SetupPage2 extends WizardPage {
         }
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(autoButton));
         decorator.decorateHeadingText(label);
-        add(label, "gaptop 15, gapleft 10, wrap");
+        add(label, "gaptop 5, gapleft 10, wrap");
         
         label = new MultiLineLabel(autoExplanation, 500);
         decorator.decorateNormalText(label);
@@ -149,7 +149,7 @@ public class SetupPage2 extends WizardPage {
 
         decorator.decorateHeadingText(label);
         label.addMouseListener(new SetupComponentDecorator.ToggleExtenderListener(manualButton));
-        add(label, "gaptop 15, gapleft 10, wrap");
+        add(label, "gaptop 5, gapleft 10, wrap");
 
         add(manualLabel, "gapleft 76, wrap");
         add(checkBoxes, "gaptop 5, gapleft 76, growx, wrap");
