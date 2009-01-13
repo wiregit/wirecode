@@ -345,6 +345,11 @@ public final class FatalBugManager {
         }
 
         @Override
+        public int getManagedFileListSize() {
+            return 0;
+        }
+
+        @Override
         public int getSimppVersion() {
             return 0;
         }

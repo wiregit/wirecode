@@ -239,6 +239,11 @@ public class LimeSessionInfo implements SessionInfo {
     }
 
     @Override
+    public int getManagedFileListSize() {
+        return fileManager.getManagedFileList().size();
+    }
+
+    @Override
     public int getSimppVersion() {
         return simppManager.getVersion();
     }

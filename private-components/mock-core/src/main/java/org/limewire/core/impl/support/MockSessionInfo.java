@@ -130,6 +130,11 @@ public class MockSessionInfo implements SessionInfo {
     }
 
     @Override
+    public int getManagedFileListSize() {
+        return 0;
+    }
+
+    @Override
     public int getSimppVersion() {
         return 0;
     }

@@ -301,6 +301,12 @@ abstract class LocalAbstractInfo {
     protected String _userComments = "";
     
     /**
+     * Constant for the number of managed files.
+     */
+    protected static final String MANAGED_FILES = "64";
+    protected String _managedFiles;
+    
+    /**
      * sets the variable _userComments value to the comments user entered
      * @param comments is the comment user entered
      */    
@@ -350,6 +356,7 @@ abstract class LocalAbstractInfo {
     	append(pw, "Number of Active HTTP Downloaders", _httpDownloaders);
         append(pw, "Number of Waiting Downloads", _waitingDownloaders);
     	append(pw, "Received incoming this session", _acceptedIncoming);
+        append(pw, "Number of Managed Files", _managedFiles);
     	append(pw, "Number of Shared Files", _sharedFiles);
     	append(pw, "Guess Capable", _guessCapable);
     	append(pw, "Received Solicited UDP",_solicitedCapable);
