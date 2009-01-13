@@ -80,7 +80,7 @@ public class SetupPage1 extends WizardPage {
         add(label, "gaptop 0, gapleft 10, wrap");
         add(learnMoreButton, "gapleft 76, wrap");
         
-        if (true || LimeAssociations.isMagnetAssociationSupported() 
+        if (LimeAssociations.isMagnetAssociationSupported() 
                || LimeAssociations.isTorrentAssociationSupported()
                || shouldShowStartOnStartupWindow()) {
             label = new JLabel(associationsAndStartupTitle);
@@ -88,7 +88,7 @@ public class SetupPage1 extends WizardPage {
             add(label, "gaptop 20, gapleft 14, wrap");
         }
         
-        if (true || LimeAssociations.isMagnetAssociationSupported() 
+        if (LimeAssociations.isMagnetAssociationSupported() 
                 || LimeAssociations.isTorrentAssociationSupported()) {
             add(associationCheck, "gaptop 10, gapleft 40");
             label = new MultiLineLabel(associationsText, 500);
@@ -97,7 +97,7 @@ public class SetupPage1 extends WizardPage {
             add(label, "gaptop 9, gapleft 10, wrap");
         }
         
-        if (true || shouldShowStartOnStartupWindow()) {
+        if (shouldShowStartOnStartupWindow()) {
             startupCheck.setSelected(true);
             add(startupCheck, "gaptop 10, gapleft 40");
             label = new MultiLineLabel(startupText, 500);

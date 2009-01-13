@@ -94,13 +94,13 @@ public class IntentDialog extends LimeJDialog {
         
         headingLabel = new JLabel();
         headingLabel.setFont(headingFont);
-        agreeLabel = new MultiLineLabel("", 500);
+        agreeLabel = new MultiLineLabel("", 450);
         agreeLabel.setFont(normalFont);
         linkButton = new JXHyperlink(urlAction);
         linkButton.setFont(normalFont);
         FontUtils.underline(linkButton);
         linkButton.setForeground(new Color(0x2152a6));
-        bodyLabel = new MultiLineLabel("", 500);        
+        bodyLabel = new MultiLineLabel("", 450);        
         bodyLabel.setFont(normalFont);
         languageLabel = new JLabel();
         languageLabel.setFont(normalFont);
