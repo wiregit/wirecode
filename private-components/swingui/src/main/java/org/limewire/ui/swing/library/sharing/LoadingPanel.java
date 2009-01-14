@@ -10,7 +10,7 @@ import net.miginfocom.swing.MigLayout;
 public class LoadingPanel extends JXPanel{
     
     public LoadingPanel(){
-        super(new MigLayout("gap 5 5 5 5"));
+        super(new MigLayout("gap 15 15 15 15"));
         //TODO make this loading dialog not suck
         JLabel loadingLabel = new JLabel(I18n.tr("Loading..."));
         
