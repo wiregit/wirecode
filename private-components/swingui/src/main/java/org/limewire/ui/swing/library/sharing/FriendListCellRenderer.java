@@ -20,7 +20,7 @@ class FriendListCellRenderer extends DefaultListCellRenderer {
             text = friend.getRenderName();
         } else {
             StringBuilder stringBuilder = new StringBuilder("<HTML>").append(friend.getRenderName());
-            stringBuilder.append(" - <font color=#808080>").append(friend.getId()).append("</font></HTML>");
+            stringBuilder.append(" <font color=#808080>&#60;").append(friend.getId()).append("&#62;</font></HTML>");
             text = stringBuilder.toString();
         }
         
