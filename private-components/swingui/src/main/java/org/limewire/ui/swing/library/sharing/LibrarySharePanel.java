@@ -28,13 +28,11 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -53,7 +51,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.painter.Painter;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
-import org.limewire.core.api.friend.Friend;
 import org.limewire.ui.swing.components.Disposable;
 import org.limewire.ui.swing.components.IconButton;
 import org.limewire.ui.swing.components.LimeEditableComboBox;
@@ -431,15 +428,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         };
         
         comboPopup.getList().addMouseListener(shareListener);
-        comboPopup.getList().setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-                Friend friend = ((SharingTarget)value).getFriend();
-                String text = ((SharingTarget)value).isGnutellaNetwork()? friend.getRenderName() : I18n.tr("<HTML>{0} <font color=#cccccc>({1})</font></HTML>", friend.getRenderName(), friend.getId());
-                return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
-            }
-        });
+        comboPopup.getList().setCellRenderer(new FriendListCellRenderer());
     }
 
     //must be called after friendCombo is initialized
@@ -497,6 +486,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
 
     private void initializeShareTable() {
         final int actionCol = 0;
+        final int friendNameCol = 1;
         shareTable = new MouseableTable(GlazedListsSwingFactory.eventTableModel(shareFriendListEDTOnly, new LibraryShareTableFormat(actionCol)));
         shareTable.setTableHeader(null);
         final ShareRendererEditor removeEditor = new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed);
@@ -516,6 +506,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         shareTable.getColumnModel().getColumn(actionCol).setPreferredWidth(removeEditor.getPreferredSize().width + 4);    
         shareTable.getColumnModel().getColumn(actionCol).setMaxWidth(removeEditor.getPreferredSize().width + 4);    
         shareTable.getColumnModel().getColumn(actionCol).setCellRenderer(new ShareRendererEditor(removeIcon, removeIconRollover, removeIconPressed));      
+        shareTable.getColumnModel().getColumn(friendNameCol).setCellRenderer(new FocuslessTableCellRenderer());      
         shareTable.setShowGrid(false);   
         shareTable.setIntercellSpacing(new Dimension(0, 0));
         shareTable.setOpaque(false);
