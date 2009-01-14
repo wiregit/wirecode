@@ -1466,8 +1466,14 @@ public class HostCatcher implements Service {
         LOG.trace("Clearing hosts");
         FREE_LEAF_SLOTS_SET.clear();
         FREE_ULTRAPEER_SLOTS_SET.clear();
+        LOCALE_SET_MAP.clear();
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
+        restoredHosts.clear();
+        PROBATION_HOSTS.clear();
+        EXPIRED_HOSTS.clear();
+        permanentHosts.clear();
+        permanentHostsSet.clear();
     }
     
     public UDPPinger getPinger() {
