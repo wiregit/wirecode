@@ -19,6 +19,7 @@ import org.limewire.ui.swing.library.table.menu.actions.PlayAction;
 import org.limewire.ui.swing.library.table.menu.actions.RemoveAction;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
 import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 /**
@@ -149,6 +150,7 @@ public class ShareLibraryPopupMenu extends JPopupMenu {
                     friendFileList.addFile(localFileItem.getFile());
                 }
             }
+            GuiUtils.getMainFrame().repaint();
         }
     }
 
@@ -168,6 +170,7 @@ public class ShareLibraryPopupMenu extends JPopupMenu {
             for (LocalFileItem localFileItem : localFileItems) {
                 friendFileList.removeFile(localFileItem.getFile());
             }
+            GuiUtils.getMainFrame().repaint();
         }
     }
 }
