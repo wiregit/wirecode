@@ -234,6 +234,7 @@ public class UploadTableRendererEditor extends TableRendererEditor {
                         GuiUtils.rate2speed(item.getUploadSpeed()), item.getHost());
             }
         case QUEUED:
+            // {0}: number of uploads before this upload that have to finish
             return I18n.trn("Waiting for {0} upload to finish", "Waiting for {0} uploads to finish", item.getQueuePosition());
         case WAITING:
             return I18n.tr("Waiting for connections...");
