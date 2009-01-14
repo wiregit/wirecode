@@ -100,10 +100,10 @@ public class EmptyLibraryPanel extends LibraryPanel {
         component.setOpaque(false);
         component.setBackgroundPainter(new MessagePainter());
 
-        messageWrapper.add(new JLabel(arrowIcon), "pos 0.2al 0.99al");
-        messageWrapper.add(component, "wrap");
+        messageWrapper.add(new JLabel(arrowIcon), "pos (messageWrapper.x + 157) 0.99al");
+        messageWrapper.add(component, "gapbefore 127, wrap");
         
-        p.add(messageWrapper, "pos 0.5al 0.5al");
+        p.add(messageWrapper, "pos 0.50al 0.4al");
         
         p.add(leftPanel, "grow");
         p.add(Line.createVerticalLine(innerNavBorder), "growy, width 1!");

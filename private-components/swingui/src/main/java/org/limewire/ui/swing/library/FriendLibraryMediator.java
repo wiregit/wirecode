@@ -234,7 +234,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
             
             setMessage();
             
-            add(firstLabel, "span, gapbottom 14, wrap");
+            add(firstLabel, "span, gapbottom 0, wrap");
             add(shareLink);
             add(shareLabel);
             add(chatLink);
