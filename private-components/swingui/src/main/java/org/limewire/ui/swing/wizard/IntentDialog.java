@@ -247,7 +247,7 @@ public class IntentDialog extends LimeJDialog {
 
         String heading  = I18n.tr("State Your Intent");
         String bodyText1
-        = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only.  Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
+        = I18n.tr("LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing authorized files only. Installing and using either program does not constitute a license for obtaining or distributing unauthorized content.");
         String linkText = I18n.tr("Learn more");
         String agreementText = I18n.tr("By clicking \"I Agree\", you agree to not use LimeWire for copyright infringement.");
         String languageText = I18n.tr("Choose your language");
