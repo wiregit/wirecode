@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -38,6 +39,7 @@ import org.limewire.ui.swing.library.manager.LibraryManagerModel;
 import org.limewire.ui.swing.library.manager.LibraryManagerTreeTable;
 import org.limewire.ui.swing.library.manager.NoChildrenLibraryManagerItem;
 import org.limewire.ui.swing.library.manager.RootLibraryManagerItem;
+import org.limewire.ui.swing.settings.SwingUiSettings;
 import org.limewire.ui.swing.util.FileChooser;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
@@ -58,6 +60,7 @@ public class LibraryOptionPanel extends OptionPanel {
     private ManualImportPanel manualImportPanel;
     private LibraryManagerOptionPanel libraryManagerPanel;    
     private ShareCategoryPanel shareCategoryPanel;
+    private UsePlayerPanel playerPanel;
     
     
     @Inject
@@ -75,6 +78,7 @@ public class LibraryOptionPanel extends OptionPanel {
         add(getLibraryManagerPanel(), "pushx, growx");
         add(getManualImportPanel(), "pushx, growx, hidemode 2");
         add(getShareCategoryPanel(), "pushx, growx");
+        add(getPlayerPanel(), "pushx, growx");
     }
     
     private LibraryManagerOptionPanel getLibraryManagerPanel() {
@@ -97,19 +101,28 @@ public class LibraryOptionPanel extends OptionPanel {
         }
         return manualImportPanel;
     }
+    
+    private UsePlayerPanel getPlayerPanel() {
+        if(playerPanel == null) {
+            playerPanel = new UsePlayerPanel();
+        }
+        return playerPanel;
+    }
 
     @Override
     boolean applyOptions() {
         return getLibraryManagerPanel().applyOptions() ||
                getShareCategoryPanel().applyOptions() ||
-               getManualImportPanel().applyOptions();
+               getManualImportPanel().applyOptions() ||
+               getPlayerPanel().applyOptions();
     }
 
     @Override
     boolean hasChanged() {
         return getLibraryManagerPanel().hasChanged() ||
                getShareCategoryPanel().hasChanged() ||
-               getManualImportPanel().hasChanged();
+               getManualImportPanel().hasChanged() ||
+               getPlayerPanel().hasChanged();
     }
 
     @Override
@@ -117,6 +130,7 @@ public class LibraryOptionPanel extends OptionPanel {
         getLibraryManagerPanel().initOptions();
         getShareCategoryPanel().initOptions();
         getManualImportPanel().initOptions();
+        getPlayerPanel().initOptions();
     }
     
     
@@ -386,4 +400,39 @@ public class LibraryOptionPanel extends OptionPanel {
         }
     }
 
+    /**
+     * Share Category Panel
+     */
+    private class UsePlayerPanel extends OptionPanel {
+
+        private JCheckBox useLimeWirePlayer;
+
+
+        public UsePlayerPanel() {
+            super("");
+            setBorder(new EmptyBorder(0, 0, 0, 0));
+            setLayout(new MigLayout("ins 0 0 0 0, gap 0! 0!, fill"));
+
+            useLimeWirePlayer = new JCheckBox(I18n.tr("Use the LimeWire player when I play audio files"));
+            useLimeWirePlayer.setOpaque(false);
+        
+            add(useLimeWirePlayer);
+        }
+        
+        @Override
+        boolean applyOptions() {
+            SwingUiSettings.PLAYER_ENABLED.setValue(useLimeWirePlayer.isSelected());
+            return false;
+        }
+
+        @Override
+        boolean hasChanged() {
+            return useLimeWirePlayer.isSelected() != SwingUiSettings.PLAYER_ENABLED.getValue();
+        }
+
+        @Override
+        public void initOptions() {
+            useLimeWirePlayer.setSelected(SwingUiSettings.PLAYER_ENABLED.getValue());
+        }
+    }
 }
