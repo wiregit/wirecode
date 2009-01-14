@@ -215,7 +215,6 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     }   
     
     @Override
-    @SuppressWarnings("unchecked")
     protected <T extends FileItem> JComponent createCategoryButton(Action action, Category category, FilterList<T> filteredAllFileList) {
         SharingSelectionPanel panel = new SharingSelectionPanel(action, category, this, new ShareAction(category), new UnshareAction(category));
         listeners.put(category, panel);
