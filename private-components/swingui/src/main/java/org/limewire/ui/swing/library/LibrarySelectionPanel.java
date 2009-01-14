@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -177,7 +178,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.addSettingListener(new SettingListener(){
                     @Override
                     public void settingChanged(SettingEvent evt) {
-                        setCollectionLabel(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);
+                        SwingUtilities.invokeLater(new Runnable(){
+                            public void run() {
+                                setCollectionLabel(LibrarySettings.SHARE_NEW_AUDIO_ALWAYS.getValue().length);                                
+                            }
+                        });
                     }
                  });
             } else if(category == Category.VIDEO) {
@@ -186,7 +191,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.addSettingListener(new SettingListener(){
                     @Override
                     public void settingChanged(SettingEvent evt) {
-                        setCollectionLabel(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);
+                        SwingUtilities.invokeLater(new Runnable(){
+                            public void run() {
+                                setCollectionLabel(LibrarySettings.SHARE_NEW_VIDEO_ALWAYS.getValue().length);                                
+                            }
+                        });
                     }
                  });
             } else if(category == Category.IMAGE) { 
@@ -195,7 +204,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
                 LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.addSettingListener(new SettingListener(){
                     @Override
                     public void settingChanged(SettingEvent evt) {
-                        setCollectionLabel(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);
+                        SwingUtilities.invokeLater(new Runnable(){
+                            public void run() {
+                                setCollectionLabel(LibrarySettings.SHARE_NEW_IMAGES_ALWAYS.getValue().length);                                
+                            }
+                        });
                     }
                  });
             }
@@ -258,7 +271,11 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
 
         @Override
         public void settingChanged(SettingEvent evt) {
-            collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    collectionLabel.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());                    
+                }
+            });
         }
     }
 

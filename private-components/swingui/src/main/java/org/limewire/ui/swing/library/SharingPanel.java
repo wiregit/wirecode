@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -312,7 +313,11 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
 
         @Override
         public void settingChanged(SettingEvent evt) {
-            setText();
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    setText();                    
+                }
+            });
         }
     }    
     
@@ -506,25 +511,29 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
 
         @Override
         public void settingChanged(SettingEvent evt) {
-            if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
-                if(checkBox != null) {
-                    checkBox.setVisible(false);
-                    checkBox.setSelected(false);
-                }
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    if(LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue()) {
+                        if(checkBox != null) {
+                            checkBox.setVisible(false);
+                            checkBox.setSelected(false);
+                        }
 
-                if(button != null && 
-                   button.getAction() != null && 
-                   button.getAction().getValue(Action.SELECTED_KEY) != null && 
-                   button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
-                    setShareButtonVisible(true);
+                        if(button != null && 
+                           button.getAction() != null && 
+                           button.getAction().getValue(Action.SELECTED_KEY) != null && 
+                           button.getAction().getValue(Action.SELECTED_KEY).equals(Boolean.TRUE)) {
+                            setShareButtonVisible(true);
+                        }
+                    } else {
+                        if(checkBox != null) {
+                            checkBox.setVisible(true);
+                        }
+                        setShareButtonVisible(false);
+                    }
+                    revalidate();
                 }
-            } else {
-                if(checkBox != null) {
-                    checkBox.setVisible(true);
-                }
-                setShareButtonVisible(false);
-            }
-            revalidate();
+            });
         }
     }    
     

@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -230,7 +231,11 @@ public class LibraryOptionPanel extends OptionPanel {
             LibrarySettings.ALLOW_PROGRAMS.addSettingListener( new SettingListener() {
                 @Override
                  public void settingChanged(SettingEvent evt) {
-                    enablePrograms(LibrarySettings.ALLOW_PROGRAMS.getValue());
+                    SwingUtilities.invokeLater(new Runnable(){
+                        public void run() {
+                            enablePrograms(LibrarySettings.ALLOW_PROGRAMS.getValue());                            
+                        }
+                    });
                 }
              });
         }

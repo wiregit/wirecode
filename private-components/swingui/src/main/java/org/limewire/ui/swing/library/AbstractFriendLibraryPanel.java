@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
@@ -174,7 +175,11 @@ abstract class AbstractFriendLibraryPanel extends LibraryPanel {
 
         @Override
         public void settingChanged(SettingEvent evt) {
-            setText();
+            SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                    setText();                    
+                }
+            });
         }
     }    
     
