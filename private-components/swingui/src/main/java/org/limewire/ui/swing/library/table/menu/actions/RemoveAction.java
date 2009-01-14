@@ -15,7 +15,7 @@ public class RemoveAction extends AbstractAction {
     private final LocalFileItem[] fileItemArray;
     
     public RemoveAction(final LocalFileItem[] fileItemArray, LibraryManager libraryManager) {
-        super(I18n.tr("Remove from library"));
+        super(I18n.tr("Remove from Library"));
         this.libraryManager = libraryManager;
         this.fileItemArray = fileItemArray;
     }

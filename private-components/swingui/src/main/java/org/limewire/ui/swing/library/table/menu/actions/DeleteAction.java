@@ -2,6 +2,8 @@ package org.limewire.ui.swing.library.table.menu.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.Action;
+
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -21,7 +23,14 @@ public class DeleteAction extends AbstractAction {
     private final LibraryManager libraryManager;
 
     public DeleteAction(final LocalFileItem[] fileItemArray, LibraryManager libraryManager) {
-        super(I18n.tr("Delete files"));
+        super();
+        String deleteName = I18n.tr("Delete Files");
+        if(OSUtils.isAnyMac()) {
+            deleteName = I18n.tr("Move to Trash");
+        } else if(OSUtils.isWindows()) {
+            deleteName = I18n.tr("Move to Recycle Bin");
+        }
+        putValue(Action.NAME, deleteName);
         this.fileItemArray = fileItemArray;
         this.libraryManager = libraryManager;
     }

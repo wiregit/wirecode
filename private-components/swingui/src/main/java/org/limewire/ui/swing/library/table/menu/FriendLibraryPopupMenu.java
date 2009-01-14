@@ -97,7 +97,7 @@ public class FriendLibraryPopupMenu extends JPopupMenu {
 
     private final class DownloadFromFriendAction extends AbstractAction {
         private DownloadFromFriendAction() {
-            super(I18n.tr("Download Selected Files"));
+            super(I18n.tr("Download"));
         }
 
         @Override

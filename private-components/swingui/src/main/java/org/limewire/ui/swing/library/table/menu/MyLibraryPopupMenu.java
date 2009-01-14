@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.library.table.menu;
 
+import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.JPopupMenu;
@@ -7,6 +9,8 @@ import javax.swing.JPopupMenu;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.ui.swing.action.AbstractAction;
+import org.limewire.ui.swing.library.sharing.ShareWidget;
 import org.limewire.ui.swing.library.sharing.ShareWidgetFactory;
 import org.limewire.ui.swing.library.table.menu.actions.DeleteAction;
 import org.limewire.ui.swing.library.table.menu.actions.LaunchFileAction;
@@ -17,10 +21,11 @@ import org.limewire.ui.swing.library.table.menu.actions.ShareAction;
 import org.limewire.ui.swing.library.table.menu.actions.UnshareAction;
 import org.limewire.ui.swing.library.table.menu.actions.ViewFileInfoAction;
 import org.limewire.ui.swing.properties.PropertiesFactory;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
 /**
- * Popup menu implementation for MyLibrary 
+ * Popup menu implementation for MyLibrary
  */
 public class MyLibraryPopupMenu extends JPopupMenu {
 
@@ -58,14 +63,14 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         boolean locateActionEnabled = singleFile && !firstItem.isIncomplete();
         boolean viewFileInfoEnabled = singleFile;
         boolean shareActionEnabled = false;
-        
-        for(LocalFileItem localFileItem : fileItems) {
-            if(localFileItem.isShareable() && !localFileItem.isIncomplete()) {
+
+        for (LocalFileItem localFileItem : fileItems) {
+            if (localFileItem.isShareable() && !localFileItem.isIncomplete()) {
                 shareActionEnabled = true;
                 break;
             }
         }
-        
+
         removeAll();
         switch (category) {
         case AUDIO:
@@ -80,10 +85,16 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         case OTHER:
             add(new LocateFileAction(firstItem)).setEnabled(locateActionEnabled);
         }
-        add(new ShareAction(createFileItemArray(), shareFactory)).setEnabled(shareActionEnabled);
+        if (singleFile) {
+            add(new SingleFileShareAction(firstItem, shareFactory)).setEnabled(shareActionEnabled);
+        } else {
+            add(new ShareAction(createFileItemArray(), shareFactory))
+                    .setEnabled(shareActionEnabled);
+        }
 
         if (multiFile) {
-            add(new UnshareAction(createFileItemArray(), shareFactory)).setEnabled(shareActionEnabled);
+            add(new UnshareAction(createFileItemArray(), shareFactory)).setEnabled(
+                    shareActionEnabled);
         }
 
         addSeparator();
@@ -92,6 +103,7 @@ public class MyLibraryPopupMenu extends JPopupMenu {
         }
 
         add(new RemoveAction(createFileItemArray(), libraryManager));
+        
         add(new DeleteAction(createFileItemArray(), libraryManager));
 
         addSeparator();
@@ -101,4 +113,22 @@ public class MyLibraryPopupMenu extends JPopupMenu {
     LocalFileItem[] createFileItemArray() {
         return fileItems.toArray(new LocalFileItem[fileItems.size()]);
     };
+
+    private class SingleFileShareAction extends AbstractAction {
+        private final ShareWidgetFactory shareWidgetFactory;
+        private final LocalFileItem localFileItem;
+        
+        public SingleFileShareAction(LocalFileItem localFileItem, ShareWidgetFactory shareWidgetFactory) {
+            super(I18n.tr("Share"));
+            this.localFileItem = localFileItem;
+            this.shareWidgetFactory = shareWidgetFactory;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ShareWidget<File> shareWidget = shareWidgetFactory.createFileShareWidget();
+            shareWidget.setShareable(localFileItem.getFile());
+            shareWidget.show(GuiUtils.getMainFrame());
+        }
+    }
 }
