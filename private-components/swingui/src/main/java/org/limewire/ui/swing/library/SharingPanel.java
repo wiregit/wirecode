@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -367,6 +368,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         @Resource Color textColor;
         @Resource Font  shareButtonFont;
         
+        private JLabel emptyCheckBox;
         private JCheckBox checkBox;
         private JButton button;
         
@@ -387,16 +389,19 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             GuiUtils.assignResources(this);     
             
             setOpaque(false);
-            
+            LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);            
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 createCheckBox(); 
                 add(checkBox);
-                LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
                 createSelectionButton(action);
                 add(button, "gapleft 2, growx, span, wrap");
             } else {
                 createSelectionButton(action);
-                add(button, "gapleft 20, growx, span, wrap");
+                emptyCheckBox = new JLabel();
+                emptyCheckBox.setPreferredSize(new Dimension(16,16));
+                emptyCheckBox.setVisible(!LibrarySettings.SNAPSHOT_SHARING_ENABLED.getValue());
+                add(emptyCheckBox);
+                add(button, "gapleft 2, growx, span, wrap");
             }
             
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
@@ -506,8 +511,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
 
         @Override
         public void dispose() {
-            if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE)
-                LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
+            LibrarySettings.SNAPSHOT_SHARING_ENABLED.removeSettingListener(this);
         }
 
         @Override
@@ -518,6 +522,9 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                         if(checkBox != null) {
                             checkBox.setVisible(false);
                             checkBox.setSelected(false);
+                        }
+                        if(emptyCheckBox != null) {
+                            emptyCheckBox.setVisible(false);
                         }
 
                         if(button != null && 
@@ -530,6 +537,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                         if(checkBox != null) {
                             checkBox.setVisible(true);
                         }
+                        if(emptyCheckBox != null)
+                            emptyCheckBox.setVisible(true);
                         setShareButtonVisible(false);
                     }
                     revalidate();
