@@ -336,7 +336,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             }     
         }
         libTable.setPopupHandler(new FriendLibraryPopupHandler(
-                castToRemoteLibraryTable(libTable), downloadListManager, remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory));
+                castToRemoteLibraryTable(libTable), downloadListManager, remoteItemPropFactory, saveLocationExceptionHandler, downloadItemPropFactory, libraryManager));
 
         EventListJXTableSorting.install(libTable, sortedList, libTable.getTableFormat());
         libTable.setDropMode(DropMode.ON);

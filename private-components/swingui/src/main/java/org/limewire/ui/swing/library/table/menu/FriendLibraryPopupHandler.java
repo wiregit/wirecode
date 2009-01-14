@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.properties.PropertiesFactory;
@@ -19,9 +20,9 @@ public class FriendLibraryPopupHandler implements TablePopupHandler {
     final private FriendLibraryPopupMenu popupMenu;
 
     public FriendLibraryPopupHandler(LibraryTable<RemoteFileItem> table, DownloadListManager downloadListManager, 
-            PropertiesFactory<RemoteFileItem> propertiesFactory, SaveLocationExceptionHandler saveLocationExceptionHandler, PropertiesFactory<DownloadItem> downloadItemPropertiesFactory) {
+            PropertiesFactory<RemoteFileItem> propertiesFactory, SaveLocationExceptionHandler saveLocationExceptionHandler, PropertiesFactory<DownloadItem> downloadItemPropertiesFactory, LibraryManager libraryManager) {
         this.table = table;
-        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager, propertiesFactory, saveLocationExceptionHandler, downloadItemPropertiesFactory);
+        this.popupMenu = new FriendLibraryPopupMenu(downloadListManager, propertiesFactory, saveLocationExceptionHandler, downloadItemPropertiesFactory, libraryManager);
     }
 
     @Override
