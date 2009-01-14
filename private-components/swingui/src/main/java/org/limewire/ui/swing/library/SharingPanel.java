@@ -643,7 +643,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             this.category = category;
             
             putValue(Action.NAME, I18n.tr("all"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Share all the files in this category."));
         }
         
         @Override
@@ -663,7 +663,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
             this.category = category;
             
             putValue(Action.NAME, I18n.tr("none"));
-            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Return to what's being shared with you."));
+            putValue(Action.SHORT_DESCRIPTION, I18n.tr("Unshare all the files in this category."));
         }
         
         @Override
