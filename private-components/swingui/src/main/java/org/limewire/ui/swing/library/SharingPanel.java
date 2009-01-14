@@ -393,10 +393,12 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 createCheckBox(); 
                 add(checkBox);
                 LibrarySettings.SNAPSHOT_SHARING_ENABLED.addSettingListener(this);
+                createSelectionButton(action);
+                add(button, "gapleft 2, growx, span, wrap");
+            } else {
+                createSelectionButton(action);
+                add(button, "gapleft 20, growx, span, wrap");
             }
-
-            createSelectionButton(action);
-            add(button, "gapleft 2, growx, span, wrap");
             
             if(category == Category.AUDIO || category == Category.VIDEO || category == Category.IMAGE) {
                 createShareButtons(shareAction, unshareAction);
