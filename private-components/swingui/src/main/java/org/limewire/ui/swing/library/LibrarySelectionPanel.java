@@ -7,7 +7,6 @@ import java.awt.LayoutManager;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -22,7 +21,6 @@ import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.Disposable;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -92,8 +90,6 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
      */
     private class InfoPanel<T extends FileItem> extends JPanel implements Disposable, ListEventListener<T>, SettingListener {
         @Resource
-        private Color lineColor;
-        @Resource
         private Color backgroundColor;
         @Resource
         private Color fontColor;
@@ -101,8 +97,6 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
         private Font categoryFont;
         @Resource
         private Font smallFont;
-        @Resource
-        private Color borderHighlight;
         
         private JLabel categoryLabel;
         private JLabel totalLabel;
@@ -127,11 +121,6 @@ class LibrarySelectionPanel extends JPanel implements Disposable {
             categoryLabel = new JLabel(I18n.tr("{0} Info", category));
             categoryLabel.setFont(categoryFont);
             categoryLabel.setForeground(fontColor);
-            FontUtils.bold(categoryLabel);
-            
-            setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(1, 0, 0, 0, lineColor), 
-                    BorderFactory.createMatteBorder(1, 0, 0, 1, borderHighlight)));
 
             setBackground(backgroundColor);
             add(categoryLabel, "wrap, gapbottom 2");
