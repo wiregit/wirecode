@@ -14,6 +14,7 @@ import org.limewire.core.api.upload.UploadErrorState;
 import org.limewire.core.api.upload.UploadItem;
 import org.limewire.core.api.upload.UploadState;
 import org.limewire.core.impl.URNImpl;
+import org.limewire.core.impl.friend.GnutellaPresence;
 import org.limewire.core.impl.util.FilePropertyKeyPopulator;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.CategoryConverter;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.library.FileDesc;
+import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.uploader.UploadType;
 
 class CoreUploadItem implements UploadItem {
@@ -153,9 +155,15 @@ class CoreUploadItem implements UploadItem {
 
     @Override
     public String getHost() {
-        //TODO: this knows too much about what BrowseRequestHandler is doing
-        if ((getState() == UploadState.BROWSE_HOST || getState() == UploadState.BROWSE_HOST_DONE) && !"".equals(getFileName())){
-            return getFileName();
+        // TODO: this knows too much about what BrowseRequestHandler is doing
+        if (getState() == UploadState.BROWSE_HOST || getState() == UploadState.BROWSE_HOST_DONE) {
+            if (!"".equals(getFileName())) {
+                return getFileName();
+            } else if (uploader instanceof HTTPUploader) {
+                String id = uploader.getAddress() + ":" + uploader.getPort();
+                return new GnutellaPresence(uploader, id).getFriend().getRenderName();
+            }
+
         }
         return uploader.getHost();
     }
