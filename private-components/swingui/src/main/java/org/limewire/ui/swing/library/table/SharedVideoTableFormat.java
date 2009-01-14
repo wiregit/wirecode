@@ -47,7 +47,7 @@ public class SharedVideoTableFormat<T extends LocalFileItem> extends AbstractMyL
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
-        case NAME_INDEX: return baseObject.getFileName();
+        case NAME_INDEX: return baseObject;
         case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
         case MISC_INDEX: return "";
         case YEAR_INDEX: return baseObject.getProperty(FilePropertyKey.YEAR);

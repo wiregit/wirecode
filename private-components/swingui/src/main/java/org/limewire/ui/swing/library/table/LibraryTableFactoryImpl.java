@@ -43,6 +43,7 @@ import org.limewire.ui.swing.search.resultpanel.classic.FromTableCellRenderer;
 import org.limewire.ui.swing.table.CalendarRenderer;
 import org.limewire.ui.swing.table.FileSizeRenderer;
 import org.limewire.ui.swing.table.IconLabelRenderer;
+import org.limewire.ui.swing.table.NameRenderer;
 import org.limewire.ui.swing.table.TimeRenderer;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.DNDUtils;
@@ -90,6 +91,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
     private final FileSizeRenderer fileSizeRenderer = new FileSizeRenderer();
     private final CalendarRenderer calendarRenderer = new CalendarRenderer();
     private final IconLabelRenderer iconLabelRenderer;
+    private final NameRenderer nameRenderer = new NameRenderer();
     private final IconManager iconManager;
     private final ShareTableRendererEditorFactory shareTableRendererEditorFactory;
     private final GhostDragGlassPane ghostPane;
@@ -198,6 +200,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             libTable = new LibraryTable<T>(sortedList,  new VideoTableFormat<T>(), saveLocationExceptionHandler, shareTableRendererEditorFactory);
             libTable.getColumnModel().getColumn(VideoTableFormat.LENGTH_INDEX).setCellRenderer(timeRenderer);
             libTable.getColumnModel().getColumn(VideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
+            libTable.getColumnModel().getColumn(VideoTableFormat.NAME_INDEX).setCellRenderer(nameRenderer);
             break;
         case DOCUMENT:
             libTable = new LibraryTable<T>(sortedList, new DocumentTableFormat<T>(iconManager), saveLocationExceptionHandler, shareTableRendererEditorFactory);
@@ -365,6 +368,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
             libTable.getColumnModel().getColumn(SharedVideoTableFormat.SIZE_INDEX).setCellRenderer(fileSizeRenderer);
             libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
             libTable.getColumnModel().getColumn(SharedVideoTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
+            libTable.getColumnModel().getColumn(SharedVideoTableFormat.NAME_INDEX).setCellRenderer(nameRenderer);
             break;
         case DOCUMENT:
             libTable = new LibraryTable<T>(sortedList, new SharedDocumentTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);

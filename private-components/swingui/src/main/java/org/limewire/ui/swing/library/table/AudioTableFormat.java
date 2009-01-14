@@ -60,11 +60,7 @@ public class AudioTableFormat<T extends LocalFileItem> extends AbstractMyLibrary
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
         case PLAY_INDEX: return baseObject;
-        case TITLE_INDEX:
-            if(baseObject.getProperty(FilePropertyKey.TITLE) == null)
-                return baseObject.getProperty(FilePropertyKey.NAME);
-            else
-                return baseObject.getProperty(FilePropertyKey.TITLE);
+        case TITLE_INDEX: return baseObject;
         case ARTIST_INDEX: return baseObject.getProperty(FilePropertyKey.AUTHOR);
         case ALBUM_INDEX: return baseObject.getProperty(FilePropertyKey.ALBUM);
         case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
