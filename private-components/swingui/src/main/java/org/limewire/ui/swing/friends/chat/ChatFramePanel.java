@@ -195,6 +195,8 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
             borderPanel.invalidate();
             borderPanel.repaint();
         }
+        
+        visibilityListenerList.visibilityChanged(true);
     }
     
     @EventSubscriber
@@ -204,6 +206,8 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
         }
         borderPanel.invalidate();
         borderPanel.repaint();
+        
+        visibilityListenerList.visibilityChanged(true);
     }
 
     private Notification getNoticeForMessage(MessageReceivedEvent event) {
@@ -361,9 +365,10 @@ public class ChatFramePanel extends JXPanel implements Resizable, VisibleCompone
                 g.drawLine(0, height-1, width-1, height-1);
                 g.drawLine(width-1, 0, width-1, height-1);
                 
-                // TODO: if (chatting) :
-                g.setPaint(border);
-                // TODO: paint upper lip
+                if (lastSelectedConversationFriendId != null) {
+                    g.setPaint(border);
+                    g.drawLine(0,0,width-1,0);
+                }
             } else if (object.getModel().isRollover()) {
                 g.setPaint(rolloverBackground);
                 g.fillRect(0, 2, width-1, height-2);

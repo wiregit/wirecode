@@ -23,6 +23,7 @@ import org.limewire.ui.swing.friends.chat.IconLibrary;
 import org.limewire.ui.swing.mainframe.UnseenMessageListener;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
+import org.limewire.ui.swing.util.VisibilityListener;
 import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import com.google.inject.Inject;
@@ -42,14 +43,12 @@ class FriendStatusPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 friendsPanel.toggleVisibility();
-                
                 mainComponent.invalidate();
                 mainComponent.repaint();
             }
         });
         
         chatButton.setName("ChatButton");
-        
         
         chatButton.setBackgroundPainter(friendsPanel.getChatButtonPainter());
         
@@ -66,7 +65,13 @@ class FriendStatusPanel {
         chatButton.setPaintBorderInsets(true);
                 
         friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
-                
+        friendsPanel.addVisibilityListener(new VisibilityListener() {
+            @Override
+            public void visibilityChanged(boolean visible) {
+                chatButton.repaint();
+            }
+        });
+        
         mainComponent = chatButton;
     }
     
