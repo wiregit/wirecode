@@ -20,10 +20,10 @@ class FriendListCellRenderer extends DefaultListCellRenderer {
             text = friend.getRenderName();
         } else {
             StringBuilder stringBuilder = new StringBuilder("<HTML>").append(friend.getRenderName());
-            stringBuilder.append("<font color=#cccccc>(").append(friend.getId()).append(")</font></HTML>");
+            stringBuilder.append(" - <font color=#808080>").append(friend.getId()).append("</font></HTML>");
             text = stringBuilder.toString();
         }
         
-        return super.getListCellRendererComponent(list, text, index, false, false);
+        return super.getListCellRendererComponent(list, text, index, isSelected, cellHasFocus);
     }
 }
