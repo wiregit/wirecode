@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -22,6 +23,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 import net.miginfocom.swing.MigLayout;
 
@@ -34,6 +36,7 @@ import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
+import org.limewire.core.api.library.ShareListManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.listener.ListenerSupport;
 import org.limewire.ui.swing.action.AbstractAction;
@@ -61,6 +64,8 @@ import org.limewire.xmpp.api.client.XMPPConnectionEvent;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
@@ -81,6 +86,8 @@ public class MyLibraryPanel extends LibraryPanel {
     private ShareWidget<Category> categoryShareWidget = null;
     private ShareWidget<LocalFileItem[]> multiShareWidget = null;
     
+    private Timer repaintTimer;
+    
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
                           IconManager iconManager,
@@ -91,6 +98,7 @@ public class MyLibraryPanel extends LibraryPanel {
                           PlayerPanel player, 
                           GhostDragGlassPane ghostPane,
                           ListenerSupport<XMPPConnectionEvent> connectionListeners,
+                          ShareListManager shareListManager,
                           @Named("available") ListenerSupport<FriendEvent> availListeners) {
         
         super(headerBarFactory);
@@ -126,13 +134,23 @@ public class MyLibraryPanel extends LibraryPanel {
         } catch (TooManyListenersException ignoreException) {            
         }      
         
-        libraryManager.getLibraryManagedList().addPropertyChangeListener(new PropertyChangeListener(){
+        shareListManager.getCombinedShareList().getModel().addListEventListener(new ListEventListener<LocalFileItem>(){
             @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().equals("share_count")) {
-                    if(isVisible())
-                        repaint();
-                }
+            public void listChanged(ListEvent<LocalFileItem> listChanges) {
+                //coalesces repaint calls. Updates usually come in bulk, ie you sign on/off,
+                // share a collection, etc..
+                if(repaintTimer.isRunning())
+                    repaintTimer.restart();
+                else
+                    repaintTimer.start();
+            }
+        });
+        
+        repaintTimer = new Timer(250, new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MyLibraryPanel.this.repaint();
+                repaintTimer.stop();
             }
         });
     }

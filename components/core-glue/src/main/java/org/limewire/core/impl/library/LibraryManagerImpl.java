@@ -15,8 +15,6 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LibraryState;
 import org.limewire.core.api.library.LocalFileItem;
-import org.limewire.listener.EventListener;
-import org.limewire.listener.ListenerSupport;
 import org.limewire.listener.SwingSafePropertyChangeSupport;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -24,7 +22,6 @@ import ca.odell.glazedlists.BasicEventList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.library.FileDesc;
-import com.limegroup.gnutella.library.FileDescChangeEvent;
 import com.limegroup.gnutella.library.IncompleteFileDesc;
 import com.limegroup.gnutella.library.LibraryUtils;
 import com.limegroup.gnutella.library.ManagedFileList;
@@ -37,8 +34,8 @@ class LibraryManagerImpl implements LibraryManager {
     private final LibraryData libraryData;
     
     @Inject
-    public LibraryManagerImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory, ListenerSupport<FileDescChangeEvent> fileDescSupport) {
-        this.libraryList = new LibraryFileListImpl(managedList, coreLocalFileItemFactory, fileDescSupport);
+    public LibraryManagerImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
+        this.libraryList = new LibraryFileListImpl(managedList, coreLocalFileItemFactory);
         this.libraryData = new LibraryDataImpl(managedList);
     }
     
@@ -141,8 +138,7 @@ class LibraryManagerImpl implements LibraryManager {
         private final PropertyChangeSupport changeSupport = new SwingSafePropertyChangeSupport(this);
         private volatile LibraryState libraryState = LibraryState.LOADING;
         
-        LibraryFileListImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory,
-                ListenerSupport<FileDescChangeEvent> fileDescSupport) {
+        LibraryFileListImpl(ManagedFileList managedList, CoreLocalFileItemFactory coreLocalFileItemFactory) {
             super(new BasicEventList<LocalFileItem>(), coreLocalFileItemFactory);
             this.managedList = managedList;
             this.managedList.addFileListListener(newEventListener());
@@ -160,15 +156,6 @@ class LibraryManagerImpl implements LibraryManager {
                     changeSupport.firePropertyChange("state", oldState, libraryState);
                 }
             });
-            fileDescSupport.addListener(new EventListener<FileDescChangeEvent>() {
-                @Override
-                public void handleEvent(FileDescChangeEvent event) {
-                    switch(event.getType()) {
-                    case SHARE_COUNT_CHANGED:
-                        changeSupport.firePropertyChange("share_count", event.getSource().getShareListCount(), -1);
-                    }
-                }
-            });                
         }
         
         @Override

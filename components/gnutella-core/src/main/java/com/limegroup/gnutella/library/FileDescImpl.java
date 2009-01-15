@@ -476,9 +476,6 @@ public class FileDescImpl implements FileDesc {
      */
     public void incrementShareListCount() {
         shareListCount.incrementAndGet();
-        if(multicaster != null) {
-            multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.SHARE_COUNT_CHANGED));
-        }
     }
 
     /* (non-Javadoc)
@@ -486,9 +483,6 @@ public class FileDescImpl implements FileDesc {
      */
     public void decrementShareListCount() {
         shareListCount.decrementAndGet();
-        if(multicaster != null) {
-            multicaster.handleEvent(new FileDescChangeEvent(this, FileDescChangeEvent.Type.SHARE_COUNT_CHANGED));
-        }
     }
     
     /* (non-Javadoc)

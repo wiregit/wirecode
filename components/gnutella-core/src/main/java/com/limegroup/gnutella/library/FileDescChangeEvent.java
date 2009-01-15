@@ -9,7 +9,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class FileDescChangeEvent extends DefaultEvent<FileDesc, FileDescChangeEvent.Type> {
     
-    public static enum Type { URNS_CHANGED, LOAD, SHARE_COUNT_CHANGED }
+    public static enum Type { URNS_CHANGED, LOAD }
     
     private final List<? extends LimeXMLDocument> xmlDocs;
     
