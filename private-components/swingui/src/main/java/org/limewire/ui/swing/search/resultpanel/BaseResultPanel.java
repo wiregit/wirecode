@@ -409,7 +409,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private class ResultDownloaderAdaptor extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2) {
+            if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) {
                 int row = resultsList.rowAtPoint(e.getPoint());
                 if (row == -1 || row == MAX_DISPLAYED_RESULT_SIZE) return;
                 TableModel tm = resultsList.getModel();
