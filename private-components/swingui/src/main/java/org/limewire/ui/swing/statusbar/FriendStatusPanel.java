@@ -63,7 +63,7 @@ class FriendStatusPanel {
         
         chatButton.setBorder(BorderFactory.createEmptyBorder(2, 10, 0, 10));
         chatButton.setPaintBorderInsets(true);
-                
+        
         friendsPanel.setUnseenMessageListener(new UnseenMessageFlasher(chatButton, iconLibrary));       
         friendsPanel.addVisibilityListener(new VisibilityListener() {
             @Override
@@ -121,6 +121,7 @@ class FriendStatusPanel {
 
         @Override
         public void messageReceivedFrom(String senderId, boolean chatIsVisible) {
+            
             unseenSenderIds.add(senderId);
             if (!chatIsVisible) {
                 flash();
@@ -144,15 +145,20 @@ class FriendStatusPanel {
 
         public void flash() {
             if (!hasFlashed) {
-                new Timer(1500, new ActionListener() {
+                new Timer(1000, new ActionListener() {
                     private int flashCount;
                     
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        
                         if (flashCount++ < 5) {
                             flashingButton.setForeground(toggle(flashingButton.getForeground()));
                             flashingButton.setBackgroundPainter(toggle(flashingButton.getBackgroundPainter()));
                         } else {
+                            
+                            flashingButton.setForeground(originalForeground);
+                            flashingButton.setBackgroundPainter(originalBackgroundPainter);
+                            
                             Timer timer = (Timer)e.getSource();
                             timer.stop();
                         }
