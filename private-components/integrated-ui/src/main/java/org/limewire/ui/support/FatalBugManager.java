@@ -163,14 +163,28 @@ public final class FatalBugManager {
             }
         });
 
-        JButton sendButton = new JButton("Send Bug");
+        final JButton sendButton = new JButton("Send Bug");
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String userComments = userCommentsTextArea.getText();
                 if(!userComments.equals(defaultDesc))
                     info.addUserComments(userComments);
-                sendToServlet(info);
-                dialog.dispose();
+                sendButton.setEnabled(false);
+                sendButton.setText("Sending...");
+                new Thread("Fatal Bug Sending Thread") {
+                    public void run() {
+                        try {
+                            sendToServlet(info);
+                        } finally {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    dialog.dispose();
+                                    System.exit(1);
+                                }
+                            });
+                        }
+                    }
+                }.start();
             }
         });
 
