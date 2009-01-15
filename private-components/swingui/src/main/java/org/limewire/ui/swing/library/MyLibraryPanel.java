@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.limewire.ui.swing.library;
 
 import java.awt.Color;
@@ -38,9 +35,7 @@ import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.settings.LibrarySettings;
-import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.listener.SwingEDTEvent;
 import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
@@ -71,7 +66,7 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class MyLibraryPanel extends LibraryPanel implements EventListener<FriendEvent> {
+public class MyLibraryPanel extends LibraryPanel {
     
     @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
     private Color selectionPanelBackgroundOverride = null;
@@ -85,8 +80,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
    
     private ShareWidget<Category> categoryShareWidget = null;
     private ShareWidget<LocalFileItem[]> multiShareWidget = null;
-    
-    private boolean refreshOnSignOn = true;
     
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
@@ -110,8 +103,6 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         this.shareFactory = shareFactory;
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
-
-        availListeners.addListener(this);
         
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
@@ -135,41 +126,15 @@ public class MyLibraryPanel extends LibraryPanel implements EventListener<Friend
         } catch (TooManyListenersException ignoreException) {            
         }      
         
-        connectionListeners.addListener(new EventListener<XMPPConnectionEvent>() {
+        libraryManager.getLibraryManagedList().addPropertyChangeListener(new PropertyChangeListener(){
             @Override
-            @SwingEDTEvent
-            public void handleEvent(XMPPConnectionEvent event) {
-                switch(event.getType()) {
-                case CONNECT_FAILED: break;
-                case DISCONNECTED: 
-                    refreshOnSignOn = true;
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().equals("share_count")) {
                     if(isVisible())
                         repaint();
-                    break;
-                case CONNECTING: break;
-                case CONNECTED:
-                    if(isVisible())
-                        repaint();
-                    break;
                 }
             }
         });
-    }
-    
-    @Override
-    @SwingEDTEvent
-    public void handleEvent(FriendEvent event) {
-        switch(event.getType()) {
-        case ADDED:
-            if(refreshOnSignOn) {
-                if(isVisible())
-                    repaint(); 
-                refreshOnSignOn = false;
-            }
-            break;
-        case REMOVED:
-            break;
-        }
     }
     
     private void createMyCategories(LibraryFileList libraryFileList) {
