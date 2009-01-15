@@ -32,6 +32,7 @@ import org.jdesktop.application.Resource;
 import org.limewire.collection.glazedlists.GlazedListsFactory;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.URN;
+import org.limewire.core.api.friend.FriendEvent;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LibraryFileList;
 import org.limewire.core.api.library.LibraryManager;
@@ -68,8 +69,9 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
-public class MyLibraryPanel extends LibraryPanel {
+public class MyLibraryPanel extends LibraryPanel implements EventListener<FriendEvent> {
     
     @Resource(key="LibraryPanel.selectionPanelBackgroundOverride")
     private Color selectionPanelBackgroundOverride = null;
@@ -84,6 +86,8 @@ public class MyLibraryPanel extends LibraryPanel {
     private ShareWidget<Category> categoryShareWidget = null;
     private ShareWidget<LocalFileItem[]> multiShareWidget = null;
     
+    private boolean refreshOnSignOn = true;
+    
     @Inject
     public MyLibraryPanel(LibraryManager libraryManager,
                           IconManager iconManager,
@@ -93,7 +97,8 @@ public class MyLibraryPanel extends LibraryPanel {
                           LimeHeaderBarFactory headerBarFactory,
                           PlayerPanel player, 
                           GhostDragGlassPane ghostPane,
-                          ListenerSupport<XMPPConnectionEvent> connectionListeners) {
+                          ListenerSupport<XMPPConnectionEvent> connectionListeners,
+                          @Named("available") ListenerSupport<FriendEvent> availListeners) {
         
         super(headerBarFactory);
         
@@ -106,6 +111,8 @@ public class MyLibraryPanel extends LibraryPanel {
         this.playerPanel = player;
         this.selectableMap = new EnumMap<Category, LibraryOperable<LocalFileItem>>(Category.class);
 
+        availListeners.addListener(this);
+        
         if (selectionPanelBackgroundOverride != null) { 
             getSelectionPanel().setBackground(selectionPanelBackgroundOverride);
         }
@@ -134,7 +141,8 @@ public class MyLibraryPanel extends LibraryPanel {
             public void handleEvent(XMPPConnectionEvent event) {
                 switch(event.getType()) {
                 case CONNECT_FAILED: break;
-                case DISCONNECTED:
+                case DISCONNECTED: 
+                    refreshOnSignOn = true;
                     if(isVisible())
                         repaint();
                     break;
@@ -146,6 +154,22 @@ public class MyLibraryPanel extends LibraryPanel {
                 }
             }
         });
+    }
+    
+    @Override
+    @SwingEDTEvent
+    public void handleEvent(FriendEvent event) {
+        switch(event.getType()) {
+        case ADDED:
+            if(refreshOnSignOn) {
+                if(isVisible())
+                    repaint(); 
+                refreshOnSignOn = false;
+            }
+            break;
+        case REMOVED:
+            break;
+        }
     }
     
     private void createMyCategories(LibraryFileList libraryFileList) {
