@@ -84,8 +84,13 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     /** The ScrollablePanel that the scroll pane is embedding. */
     private ScrollablePanel scrollablePanel;
     
+    /** The label where text about your search started poorly or later is written. */
     private JLabel messageLabel;
+    /** The panel that displays the {@link #messageLabel}. */
     private JPanel messagePanel;
+    
+    /** The class search warning panel. */
+    private ClassicSearchWarningPanel classicSearchReminderPanel;
     
     private final SettingListener viewTypeListener;
     
@@ -174,6 +179,8 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         messagePanel = new JPanel();
         messagePanel.add(messageLabel);
         messagePanel.setVisible(false);
+        
+        classicSearchReminderPanel = new ClassicSearchWarningPanel();
         layoutComponents();
     }
 
@@ -181,6 +188,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     public void dispose() {
         SwingUiSettings.SEARCH_VIEW_TYPE_ID.removeSettingListener(viewTypeListener);
         sortAndFilterPanel.dispose();
+        classicSearchReminderPanel.dispose();
     }
 
     /**
@@ -248,10 +256,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     }
         
     private void layoutComponents() {
-        MigLayout layout = new MigLayout(
-                "hidemode 2, insets 0 0 0 0, gap 0!",
-                "[grow]",
-                "[][][grow]");
+        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!");
         
         setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
@@ -273,10 +278,10 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         
         LimeHeaderBar header = headerBarFactory.createBasic(searchTab);
         sortAndFilterPanel.layoutComponents(header);
-        add(header, "wrap");
-        
-        add(messagePanel, "span, growx");
-        add(scrollPane, "span, grow");
+        add(header, "growx, wrap");
+        add(classicSearchReminderPanel, "growx, wrap");
+        add(messagePanel, "growx, wrap");
+        add(scrollPane, "grow, wrap");
 
         scrollablePanel.setScrollableTracksViewportHeight(false);
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));

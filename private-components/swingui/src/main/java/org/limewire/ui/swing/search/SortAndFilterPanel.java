@@ -211,6 +211,7 @@ public class SortAndFilterPanel implements Disposable {
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
                     SwingUiSettings.SEARCH_VIEW_TYPE_ID.setValue(SearchViewType.TABLE.getId());
+                    SwingUiSettings.SHOW_CLASSIC_REMINDER.setValue(false);
                     selectTableView(outerThis);
                 }
             }

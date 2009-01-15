@@ -73,6 +73,10 @@ public final class SwingUiSettings extends LimeProps {
                 "http://www.limewire.com/index.jsp/pro&29",
                 "0.111111"},
                 "UpdateSettings.proAds");
+    
+    /** Show classic warning. */
+    public static final BooleanSetting SHOW_CLASSIC_REMINDER =
+        FACTORY.createBooleanSetting("SHOW_CLASSIC_SEARCH_REMINDER", true);
 
     /**
      * Setting for whether or not to group similar results
