@@ -17,6 +17,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
@@ -219,6 +221,13 @@ public class ConversationPane extends JPanel implements Displayable {
             }
         });
         
+        conversationScroll.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                chatWrapper.repaint();
+            }
+        });
+        
         add(chatWrapper, BorderLayout.CENTER);
 
         PopupUtil.addPopupMenus(editor, new CopyAction(editor), new CopyAllAction());
@@ -354,9 +363,9 @@ public class ConversationPane extends JPanel implements Displayable {
             });
         }
         
-        chatWrapper.repaint();
-                
         decorateFileOfferButtons();
+        
+        chatWrapper.repaint();
     }
 
     private void decorateFileOfferButtons() {
