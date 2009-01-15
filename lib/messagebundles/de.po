@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-15 12:07-0500\n"
-"PO-Revision-Date: 2009-01-15 14:27-0500\n"
+"PO-Revision-Date: 2009-01-15 16:56-0500\n"
 "Last-Translator: Mikko <mikko@unused.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +19,7 @@ msgstr ""
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
 msgid "All Types"
-msgstr "Alle Dateitypen"
+msgstr "Alle Datentypen"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -88,6 +88,7 @@ msgid "Document"
 msgstr "Dokumente"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
+#, fuzzy
 msgid "Program"
 msgstr "Programme"
 
@@ -100,12 +101,14 @@ msgid "There is a disk problem"
 msgstr ""
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:20
+#, fuzzy
 msgid "The file is corrupted"
 msgstr "Fehlerhafte Datei"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:21
+#, fuzzy
 msgid "This file is not shareable"
-msgstr "Diese Datei kann nicht freigegeben werden"
+msgstr "Diese Datei ist nicht freigegeben."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
 msgid "Trouble connecting to people"
@@ -224,8 +227,9 @@ msgstr ""
 "unterstützt werden."
 
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:31
+#, fuzzy
 msgid "Firewall Manager"
-msgstr "Firewall Manager"
+msgstr "Firewalls"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 msgid "Statistic Management"
@@ -242,8 +246,9 @@ msgid "Available"
 msgstr "Online"
 
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:34
+#, fuzzy
 msgid "Away"
-msgstr "Nicht da"
+msgstr "Immer"
 
 #. away and extended away given the same order for now, since they are rendered in the ui the same otherwise it would be confusing
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:35
@@ -251,16 +256,18 @@ msgid "Away for a while"
 msgstr ""
 
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:36
+#, fuzzy
 msgid "Do not disturb"
-msgstr "Bitte nicht stören"
+msgstr "Müll nicht anzeigen"
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
 msgstr ""
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerPublisherImpl.java:93
+#, fuzzy
 msgid "DHT Peer Publisher"
-msgstr ""
+msgstr "Herausgeber"
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:304
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:48
@@ -273,92 +280,116 @@ msgstr ""
 "ausgeführt."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:402
+#, fuzzy
 msgid "Connection Listener"
-msgstr ""
+msgstr "Connection-Listener wird geladen..."
 
 #: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
+#, fuzzy
 msgid "Browse Host Handler"
-msgstr ""
+msgstr "Rechner Durchbrowsen"
 
 #: core/com/limegroup/gnutella/ConnectionAcceptorGlue.java:59
+#, fuzzy
 msgid "Connection Dispatching"
-msgstr ""
+msgstr "Verbindungen"
 
 #: core/com/limegroup/gnutella/ConnectionManagerImpl.java:396
+#, fuzzy
 msgid "Connection Management"
-msgstr ""
+msgstr "Verbindungsmanagement wird geladen..."
 
 #: core/com/limegroup/gnutella/ConnectionWatchdog.java:66
+#, fuzzy
 msgid "Stale Connection Management"
-msgstr ""
+msgstr "Management für ungültige Verbindungen wird geladen..."
 
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:101
 msgid "Various Core Services"
 msgstr ""
 
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:106
+#, fuzzy
 msgid "Gnutella Connections"
-msgstr "Gnutella Verbindungen"
+msgstr "Gnutella Verbindung hinzufügen"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:204
+#, fuzzy
 msgid "Old Downloads"
-msgstr "Alte Downloads"
+msgstr "Downloads"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
+#, fuzzy
 msgid "Download Management"
-msgstr ""
+msgstr "Downloadmanager laden..."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:278
+#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
-msgstr "Entschuldigung, LimeWire konnte die alten Downloads nicht lesen. Sie können sie starten indem Sie auf \"Nochmals Versuchen\" klicken. Wenn LimeWire eine Quelle für die Datei findet, wird der Download fortgesetzt."
+msgstr ""
+"Entschuldigung, LimeWire konnte die alten Downloads nicht lesen. Sie können "
+"diese jedoch in ihrer Medienbibiothek neu laden. Gehen Sie zum Register "
+"'unvollständige Dateien' und klicken Sie dann auf 'Fortsetzen'"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:280
+#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
-msgstr "Entschuldigung, LimeWire konnte einige alten Downloads nicht lesen. Sie können sie starten indem Sie auf \"Nochmals Versuchen\" klicken. Wenn LimeWire eine Quelle für die Datei findet, wird der Download fortgesetzt."
+msgstr ""
+"Enschuldigung, LimeWire konnte einige alte Downloads nicht lesen. Sie können "
+"diese wieder aufnehmen indem Sie in Ihre Medienbibliothek gehen und dort "
+"unter dem Register \"unvollständige Dateien\" auf \"Fortsetzen\" drücken."
 
 #: core/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
 msgstr ""
 
 #: core/com/limegroup/gnutella/HTTPUploadManager.java:231
+#, fuzzy
 msgid "Upload Management"
-msgstr ""
+msgstr "Uploadmanager laden..."
 
 #: core/com/limegroup/gnutella/HostCatcher.java:384
+#, fuzzy
 msgid "Peer Locator"
-msgstr ""
+msgstr "Quelle"
 
 #: core/com/limegroup/gnutella/LimeCoreGlue.java:107
 msgid "Core Glue"
 msgstr ""
 
 #: core/com/limegroup/gnutella/MessageRouterImpl.java:551
+#, fuzzy
 msgid "Message Routing"
-msgstr ""
+msgstr "Ausgehende Nachrichten"
 
 #: core/com/limegroup/gnutella/NetworkManagerImpl.java:162
+#, fuzzy
 msgid "Network Management"
-msgstr ""
+msgstr "Netzwerkgeschwindigkeit"
 
 #: core/com/limegroup/gnutella/NodeAssignerImpl.java:186
+#, fuzzy
 msgid "Ultrapeer/DHT Management"
-msgstr ""
+msgstr "Ultrapeer/DHT Komponeneten werden geladen..."
 
 #: core/com/limegroup/gnutella/Pinger.java:57
+#, fuzzy
 msgid "Peer Listener"
 msgstr "Peer-Listener wird geladen..."
 
 #: core/com/limegroup/gnutella/PromotionServicesImpl.java:35
+#, fuzzy
 msgid "Promotion System"
 msgstr "Lade Promotionssystem..."
 
 #: core/com/limegroup/gnutella/QueryUnicaster.java:225
+#, fuzzy
 msgid "Directed Querier"
 msgstr "Direktsucher wird geladen..."
 
@@ -367,12 +398,14 @@ msgid "Session Statistics"
 msgstr ""
 
 #: core/com/limegroup/gnutella/auth/ContentManager.java:91
+#, fuzzy
 msgid "Content Management"
-msgstr "Bibliotheksverwaltung"
+msgstr "Safe Content Management wird geladen..."
 
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:32
+#, fuzzy
 msgid "Local Socket Listener"
-msgstr ""
+msgstr "MAGNET-Listener wird geladen..."
 
 #: core/com/limegroup/gnutella/browser/LocalHTTPAcceptor.java:78
 msgid "Magnet Processor"
@@ -397,16 +430,19 @@ msgid "Creative Commons"
 msgstr "Creative Commons"
 
 #: core/com/limegroup/gnutella/dht/DHTManagerImpl.java:139
+#, fuzzy
 msgid "Mojito DHT"
-msgstr "Mojito DHT"
+msgstr "Mojito DHT anzeigen"
 
 #: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
+#, fuzzy
 msgid "LimeWire Store Integration"
-msgstr "LimeWire Store Integration"
+msgstr "LimeWire Store Anzeige"
 
 #: core/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:24
+#, fuzzy
 msgid "Download Upgrade Task"
-msgstr ""
+msgstr "Download-Seite"
 
 #: core/com/limegroup/gnutella/library/FileManagerImpl.java:71
 msgid "Shared Files"
@@ -417,32 +453,38 @@ msgid "OOB Query Handler"
 msgstr ""
 
 #: core/com/limegroup/gnutella/messages/StaticMessages.java:43
+#, fuzzy
 msgid "Static Messages"
-msgstr ""
+msgstr "Nachricht senden"
 
 #: core/com/limegroup/gnutella/routing/QRPUpdater.java:184
+#, fuzzy
 msgid "QRP Updater"
-msgstr ""
+msgstr "Updates"
 
 #: core/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
+#, fuzzy
 msgid "RUDP Message Routing"
-msgstr ""
+msgstr "Ausgehende Nachrichten"
 
 #: core/com/limegroup/gnutella/spam/RatingTable.java:98
+#, fuzzy
 msgid "Spam Management"
-msgstr "Spam Management"
+msgstr "Spam-Komponeneten werden geladen..."
 
 #: core/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
 msgid "Uptime Statistics"
 msgstr ""
 
 #: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
+#, fuzzy
 msgid "Browse"
-msgstr "Durchsuchen"
+msgstr "Browser"
 
 #: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1005
+#, fuzzy
 msgid "Update Checks"
-msgstr "Updates Checks"
+msgstr "Updates"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -611,7 +653,7 @@ msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr "Sterne"
+msgstr "Stars"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -773,11 +815,9 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"Ein interner Fehler ist aufgetreten. LimeWire kann den Fehler beheben und "
-"den Betrieb fortsetzen. Um bei der Fehlerkorrektur zu helfen, klicken Sie "
-"bitte 'Senden', um einen Fehlerbericht an LimeWire zu senden. Klicken Sie "
-"zum Fortsetzen auf 'Ignorieren'. Klicken Sie auf 'Anzeigen', um "
-"Informationen über den Fehler anzuzeigen."
+"Ein interner Fehler ist aufgetreten. LimeWire konnte den Fehler beheben und "
+"das Programm kann fortgesetzt werden. Zum Fortsetzen klicken Sie auf "
+"'Ignorieren'. Um die Fehlermeldung anzuzeigen, klicken Sie auf 'Anzeigen'."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -785,9 +825,8 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
-#, fuzzy
 msgid "Show Bug"
-msgstr "Anzeigen:"
+msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
 msgid "Hide Bug"
@@ -837,18 +876,18 @@ msgstr "HTML-Engine wird geladen..."
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:480
 #, fuzzy
 msgid "Loading browser..."
-msgstr "Browser wird geladen..."
+msgstr "Icons werden geladen..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:505
 #, fuzzy
 msgid "Loading user interface..."
-msgstr "Benutzeroberfläche wird geladen..."
+msgstr "Benutzerschnittstelle wird geladen..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
 #, fuzzy
 msgid "Loading other languages..."
-msgstr "Benutzeroberfläche wird geladen..."
+msgstr "Menüs werden geladen..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:585
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -891,9 +930,8 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:44
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:75
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:87
-#, fuzzy
 msgid "Error"
-msgstr "Daap-Fehler"
+msgstr "Fehler"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:55
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:65
@@ -905,9 +943,8 @@ msgid "Message"
 msgstr "Nachricht"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:119
-#, fuzzy
 msgid "Do not display this message again"
-msgstr "Warnung nicht mehr anzeigen"
+msgstr "Diese Meldung nicht wieder anzeigen"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 #, fuzzy
@@ -929,14 +966,13 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BackAction.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:66
-#, fuzzy
 msgid "Go back"
-msgstr "<Zurück"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 #, fuzzy
 msgid "More File Info"
-msgstr "Dateiinformationen anzeigen"
+msgstr "Mehr informationen..."
 
 #. *
 #. * The copy action.
@@ -984,14 +1020,12 @@ msgid "Select All"
 msgstr "Alles markieren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:41
-#, fuzzy
 msgid "&Available"
-msgstr "Online"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:54
-#, fuzzy
 msgid "&Do Not Disturb"
-msgstr "Bitte nicht stören"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
@@ -1001,7 +1035,7 @@ msgstr "Verbindungen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #, fuzzy
 msgid "View connections to other P2P clients"
-msgstr "Verbindungen zum Mojito DHT deaktivieren"
+msgstr "Verbindungen zu anderen Benutzern anzeigen."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -1084,7 +1118,7 @@ msgstr "Entfernen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:100
 #, fuzzy
 msgid "View Files"
-msgstr "Gültige Dateien"
+msgstr "Lizenz anzeigen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:167
 msgid "Unable to view files - not yet connected to host"
@@ -1374,22 +1408,22 @@ msgstr "Rückgängig"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:158
 #, fuzzy
 msgid "Add to My Library"
-msgstr "Meine Medienbibliothek"
+msgstr "Bibiothek durschsuchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:162
-#, java-format
+#, fuzzy, java-format
 msgid "Share files with {0}"
-msgstr "Dateien an {0} freigegeben"
+msgstr "Freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:164
 #, fuzzy
 msgid "Share files"
-msgstr "{0} Dateien freigegeben"
+msgstr "Freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:259
 #, fuzzy
 msgid "Show all"
-msgstr "Anzeigen:"
+msgstr "Zeige die letzten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:49
@@ -1399,7 +1433,7 @@ msgstr "Fertige Dateien aus Liste entfernen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:339
 #, fuzzy
 msgid "Download Complete"
-msgstr "Herunterladen von"
+msgstr "Download-Geschwindigkeit:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:472
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:176
@@ -1445,13 +1479,13 @@ msgstr[1] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:618
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:528
 msgid "Waiting - remaining time unknown"
-msgstr "In Warteschlange - verbleibende Zeit unbekannt"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:620
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:530
 #, java-format
 msgid "Waiting - Starting in {0}"
-msgstr "In Warteschlange - Starte in {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:68
 msgid "Pause All"
@@ -1467,11 +1501,12 @@ msgstr "Fertige Downloads entfernen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
 msgid "Clear When Finished"
-msgstr "Fertige Downloads entfernen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
+#, fuzzy
 msgid "Categorize Downloads"
-msgstr "Downloads in Kategorien ordnen"
+msgstr "Downloads löschen"
 
 #. add(new AbstractAction(I18n.tr("&Downloads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:162
@@ -1543,24 +1578,28 @@ msgstr "Erneut versuchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:66
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:61
+#, fuzzy
 msgid "Launch File"
-msgstr "Datei öffnen"
+msgstr "Ausführen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:69
+#, fuzzy
 msgid "Remove from List"
-msgstr "Aus Liste entfernen"
+msgstr "Alle Dateien von der Wiedergabeliste entfernen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/LocateFileAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:73
+#, fuzzy
 msgid "Locate on Disk"
-msgstr "Auf Festplatte suchen"
+msgstr "Quellen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
+#, fuzzy
 msgid "Locate in Library"
-msgstr "In Medienbibliothek suchen"
+msgstr "Bibiothek durschsuchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:83
@@ -1575,7 +1614,7 @@ msgstr "Vorschau der Datei anzeigen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:91
 msgid "Share File"
-msgstr "Freigeben"
+msgstr "Datei freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:95
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/PlayAction.java:19
@@ -1593,9 +1632,8 @@ msgid "View"
 msgstr "Anzeigen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:182
-#, fuzzy
 msgid " - "
-msgstr "Fertig - "
+msgstr ""
 
 #. {0}: current size
 #. {1}: total size
@@ -1611,7 +1649,7 @@ msgstr[1] "{0} von {1} heruntergeladen ({2}) von {3} Nutzern"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:505
 #, fuzzy
 msgid "Unable to download - "
-msgstr "Download kann nicht ausgeführt werden:"
+msgstr "Download abbrechen"
 
 #. {0}: current size, {1} total size, {2} percent complete
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:508
@@ -1631,12 +1669,13 @@ msgid "Username:"
 msgstr "Benutzername:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:42
+#, fuzzy
 msgid "Nickname:"
-msgstr "Name"
+msgstr "Name:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:46
 msgid "Add friend"
-msgstr "Freund hinzufügen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:78
@@ -1669,13 +1708,14 @@ msgid "{0} has entered text"
 msgstr "{0} hat Text eingegeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:215
-#, java-format
+#, fuzzy, java-format
 msgid "Chat from {0}"
-msgstr "Chat von {0}"
+msgstr "{0} Clienten die die gleiche datei Herunterladen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:217
+#, fuzzy
 msgid "Reply"
-msgstr "Antworten"
+msgstr "Selten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:566
@@ -1707,7 +1747,7 @@ msgstr "Freigeben"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:832
 #, fuzzy
 msgid "Close chat"
-msgstr "Chat schließen"
+msgstr "Suche schließen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:89
 msgid "<html><u>Hide</u></html>"
@@ -1769,16 +1809,15 @@ msgstr "Auto-Anmeldung bei Freunden"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:68
 #, fuzzy
 msgid "Signing in..."
-msgstr "Anmeldung..."
+msgstr "Speichert Datei..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:89
 msgid "Show:"
 msgstr "Anzeigen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:90
-#, fuzzy
 msgid "Offline Friends"
-msgstr "Freunde offline"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:105
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:95
@@ -1787,9 +1826,8 @@ msgstr "Optionen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:107
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:114
-#, fuzzy
 msgid "Sign Out"
-msgstr "Abmelden"
+msgstr ""
 
 #. TODO fberger
 #. super(I18n.tr("Switch &User"));
@@ -1806,7 +1844,7 @@ msgstr "Anmelden"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:217
 #, fuzzy, java-format
 msgid "Set {0} Status:"
-msgstr "Zu Verbindungsstatus {0} wechseln"
+msgstr "Verbindungsstatus:"
 
 #. private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:55
@@ -1818,23 +1856,20 @@ msgid "Signing in ..."
 msgstr "Anmeldung..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:58
-#, fuzzy
 msgid "Incorrect username or password."
-msgstr "Kennwort ungültig."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:59
 msgid "Network error."
 msgstr "Netzwerkfehler."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:130
-#, fuzzy
 msgid "Sign in with"
-msgstr "Anmelden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:150
-#, fuzzy
 msgid "Domain"
-msgstr "Unternehmen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:152
 msgid "Username"
@@ -1851,17 +1886,17 @@ msgstr "Benutzer speichern"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileItemDialog.java:24
 #, fuzzy
 msgid "Copy Link"
-msgstr "Verknüpfung öffnen (&L)"
+msgstr "Kopieren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:81
 #, fuzzy
 msgid "Search Library..."
-msgstr "Bibliothek anzeigen"
+msgstr "Suche..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AllFriendsLibraryPanel.java:68
 #, fuzzy
 msgid "Download from all friends"
-msgstr "Herunterladen von"
+msgstr "Download von"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyLibraryPanel.java:76
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:66
@@ -1873,12 +1908,12 @@ msgstr "Herunterladen von {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:83
 #, fuzzy, java-format
 msgid "Share your files with {0}"
-msgstr "Dateien an {0} freigegeben"
+msgstr ".torrent Dateien freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:269
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is offline"
-msgstr "{0} ist kein Ordner"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
@@ -1899,9 +1934,8 @@ msgid "Sharing"
 msgstr "Freigabe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
-#, fuzzy
 msgid "1 file with your friend."
-msgstr "Für Freunde freigeben!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
 #, java-format
@@ -1909,9 +1943,8 @@ msgid "{0} files with your friend."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:275
-#, fuzzy
 msgid "files with your friend."
-msgstr "Für Freunde freigeben!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:283
 #, java-format
@@ -1939,7 +1972,7 @@ msgstr "Chat"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:292
 #, fuzzy
 msgid "about using LimeWire 5."
-msgstr "Über LimeWire"
+msgstr "Informationen über LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:288
 #, java-format
@@ -1953,33 +1986,31 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:292
 #, fuzzy
 msgid "chat"
-msgstr "Chat"
+msgstr "Chatten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:301
 #, fuzzy, java-format
 msgid "Loading {0}'s files..."
-msgstr "{0} Dateien freigegeben"
+msgstr "Gespeicherte Dateien werden geladen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:305
 #, fuzzy
 msgid "Loading files..."
-msgstr "Starte..."
+msgstr "Tips laden..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
-#, fuzzy, java-format
+#, java-format
 msgid "{0} isn't sharing with you"
-msgstr "{0} möchte Ihnen eine Datei freigeben"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:318
-#, fuzzy
 msgid "about sharing with you."
-msgstr "Derzeit freigegeben an"
+msgstr ""
 
 #. this should never happen
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:321
-#, fuzzy
 msgid "This person isn't sharing any files with you."
-msgstr "{0} möchte Ihnen eine Datei freigeben"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:332
 #, java-format
@@ -1996,9 +2027,8 @@ msgid "Share with {0}"
 msgstr "Freigeben an {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendSharingPanel.java:92
-#, fuzzy
 msgid "Return to what's being shared with you."
-msgstr "Kehrt zurück zur Anzeige, was Ihnen freigegeben wurde."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:121
 #, fuzzy, java-format
@@ -2014,17 +2044,17 @@ msgstr "Fehler: {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:233
 #, fuzzy, java-format
 msgid "Sharing: {0}"
-msgstr "Freigegeben an {0}"
+msgstr "Warnung: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:229
 #, fuzzy
 msgid "Sharing: all"
-msgstr "Freigabe"
+msgstr "Freigaben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:240
-#, fuzzy, java-format
+#, java-format
 msgid "Sharing Collection: {0}"
-msgstr "Sammlung ist freigeben: {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:156
 msgid "X"
@@ -2033,7 +2063,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:169
 #, fuzzy
 msgid "Sharing with"
-msgstr "Freigegeben an {0}"
+msgstr "Chatten mit"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:113
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:123
@@ -2058,14 +2088,13 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:40
 #, fuzzy
 msgid "Share with the P2P Network"
-msgstr "An P2P-Netzwerk freigeben"
+msgstr "Verbindet Sie mit dem Gnutella-Netzwerk."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:59
-#, fuzzy
 msgid "the P2P Network"
-msgstr "P2P-Netzwerk"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:278
 #, java-format
@@ -2084,13 +2113,11 @@ msgstr "Gesamte {0}-Sammlung freigegeben an {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:571
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:43
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Sharing your {0} collection shares new {1} files that automatically get "
 "added to your Library"
 msgstr ""
-"Wenn Sie Ihre {0}-Sammlung freigeben, werden automatisch neue {1}-Dateien "
-"freigegeben, die Sie Ihrer Medienbibliothek hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:654
 #, fuzzy
@@ -2103,9 +2130,8 @@ msgid "Share all the files in this category."
 msgstr "Anzeige für freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:674
-#, fuzzy
 msgid "none"
-msgstr "Fertig"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:675
 msgid "Unshare all the files in this category."
@@ -2114,15 +2140,13 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:93
 #, fuzzy
 msgid "share folder"
-msgstr "Speicherordner"
+msgstr "Verzeichnis Freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/LibraryTreeTableContainer.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:243
 #, fuzzy
 msgid "*Adding these folders will not automatically share your files"
-msgstr ""
-"Das Durchsuchen dieser Ordner und Hinzufügen zur Medienbibliothek gibt die "
-"Dateien nicht automatisch frei."
+msgstr "Sie können .torrent Dateien automatisch freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonEditor.java:25
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonRenderer.java:18
@@ -2154,9 +2178,9 @@ msgid "All Friends"
 msgstr "Alle Freunde"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:40
-#, fuzzy, java-format
+#, java-format
 msgid "Share {0} collection"
-msgstr "Sammlung freigeben"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:331
@@ -2166,31 +2190,30 @@ msgstr "Derzeit freigegeben an"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
 #, fuzzy
 msgid "Share one file"
-msgstr "Aktuelle Datei anzeigen"
+msgstr ".torrent Dateien freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:104
 msgid "Start typing a friend's name"
 msgstr "Geben Sie den Namen eines Freundes ein"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:105
-#, fuzzy
 msgid "Add another friend"
-msgstr "Freund hinzufügen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:31
 #, fuzzy, java-format
 msgid "Share {0} {1} files"
-msgstr "{0} Dateien freigegeben"
+msgstr "Freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:32
 #, fuzzy, java-format
 msgid "Shared {0} files with:"
-msgstr "{0} Dateien freigegeben"
+msgstr "Freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:37
 #, fuzzy, java-format
 msgid "Unshare {0} files"
-msgstr "{0} Dateien freigegeben"
+msgstr "{0} Datei freigegeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:18
@@ -2286,7 +2309,7 @@ msgstr "Von"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:30
 #, fuzzy
 msgid "Date Created"
-msgstr "Erstellungsdatum"
+msgstr "Erstellt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:31
@@ -2319,9 +2342,8 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
-#, fuzzy
 msgid "Hits"
-msgstr "Höhe"
+msgstr "Treffer"
 
 #. add(new AbstractAction(I18n.tr("&Uploads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
@@ -2342,7 +2364,7 @@ msgstr "Uploads"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #, fuzzy
 msgid "Upload attempts"
-msgstr "Element hochladen"
+msgstr "Uploads"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:157
 msgid "download"
@@ -2354,20 +2376,18 @@ msgid "This file cannot be shared."
 msgstr "Diese Datei ist nicht freigegeben."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:75
-#, fuzzy
 msgid "Sign in to share Documents with your friends"
 msgstr ""
-"Standardmäßig erlaubt LimeWire die Freigabe von Dokumenten an Ihre Freunde"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:80
 #, fuzzy
 msgid "Share this file with a friend"
-msgstr "Für Freunde freigeben!"
+msgstr "Diese Datei ist freigegeben."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:84
-#, fuzzy, java-format
+#, java-format
 msgid "share ({0})"
-msgstr "Freigeben an {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:100
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendDownloadAction.java:20
@@ -2381,12 +2401,12 @@ msgstr "Download"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareAction.java:21
 #, fuzzy
 msgid "Unshare"
-msgstr "freigeben"
+msgstr "Freigeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 #, fuzzy
 msgid "Delete Files"
-msgstr "Datei löschen"
+msgstr "Löscht die ausgewählten Dateien."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2536,33 +2556,31 @@ msgstr "LimeWire Store"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:138
 #, fuzzy
 msgid "Show Sidebar"
-msgstr "Medienbibliotheksleiste anzeigen"
+msgstr "Bibiothek durschsuchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:141
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:146
-#, fuzzy
 msgid "Hide Sidebar"
-msgstr "Medienbibliotheksleiste ausblenden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:152
 #, fuzzy
 msgid "Close All Searches"
-msgstr "Alle Suchanfragen schließen"
+msgstr "Suche schließen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:153
-#, fuzzy
 msgid "Close Search"
-msgstr "Suchanfrage schließen"
+msgstr "Suche schließen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:154
 #, fuzzy
 msgid "Close Other searches"
-msgstr "Andere Suchanfragen schließen"
+msgstr "Suche schließen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:383
 #, fuzzy
 msgid "Find More Results"
-msgstr "Suchergebnisse für Video"
+msgstr "Mehr Ergebnisse bekommen"
 
 #. TODO fberger comment out
 #. super(I18n.tr("&File"));
@@ -2574,10 +2592,11 @@ msgstr "Datei"
 #. super(I18n.tr("F&riend"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:166
+#, fuzzy
 msgid "Friend"
 msgid_plural "Friends"
 msgstr[0] "Freund"
-msgstr[1] "Freunde"
+msgstr[1] "Freund"
 
 #. TODO fberger
 #. super(I18n.tr("&Help"));
@@ -2590,30 +2609,29 @@ msgstr "Hilfe"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:34
 #, fuzzy
 msgid "Using LimeWire"
-msgstr "Verwendung von LimeWire..."
+msgstr "LimeWire verwenden"
 
 #. add(new AbstractAction(I18n.tr("&FAQ")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:42
 #, fuzzy
 msgid "FAQ"
-msgstr "FAQ..."
+msgstr "Häufig gestellte Fragen"
 
 #. add(new AbstractAction(I18n.tr("Get personalized &tech support")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
-#, fuzzy
 msgid "Get personalized tech support"
-msgstr "Persönliche technische Unterstützung anfordern"
+msgstr ""
 
 #. add(new AbstractAction(I18n.tr("&About LimeWire...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:65
 #, fuzzy
 msgid "About LimeWire..."
-msgstr "Über LimeWire"
+msgstr "Informationen über LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/PlayerMenu.java:24
 #, fuzzy
 msgid "&Player"
-msgstr "Mediaplayer"
+msgstr "Player"
 
 #. TODO fberger
 #. super(I18n.tr("&Tools"));
@@ -2624,12 +2642,12 @@ msgstr "Extras"
 #. add(new AbstractAction(I18n.tr("&Advanced Tools...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:67
 msgid "Advanced Tools..."
-msgstr "Erweiterte Tools"
+msgstr "Erweitert..."
 
 #. add(new AbstractAction(I18n.tr("&Options...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:77
 msgid "Options..."
-msgstr "Optionen"
+msgstr "Einstellungen..."
 
 #. JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:88
@@ -2638,11 +2656,12 @@ msgstr "Suche \"Was gibts neues\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
 msgid "Hide &Sidebar"
-msgstr "Medienbibliotheksleiste ausblenden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
+#, fuzzy
 msgid "Show &Sidebar"
-msgstr "Medienbibliotheksleiste anzeigen"
+msgstr "Bibiothek durschsuchen"
 
 #. .tr("Hide &Download Tray"), I18n.tr("Show &Download Tray")));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:37
@@ -2655,18 +2674,20 @@ msgstr "Download-Korb anzeigen"
 
 #. add(buildShowHideAction(friendsPanel, I18n.tr("Hide &Chat Window"), I18n.tr("Show &Chat Window")));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
+#, fuzzy
 msgid "Hide Chat Window"
-msgstr "Chatfenster ausblenden"
+msgstr "Schließt dieses Fenster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
+#, fuzzy
 msgid "Show Chat Window"
-msgstr "Chatfenster anzeigen"
+msgstr "{0} Fenster Anzeigen"
 
 #. TODO fberger
 #. super(I18n.tr("Add F&ile to Library..."));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:28
 msgid "Add File to Library..."
-msgstr "Datei zu Medienbibliothek hinzufügen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:34
 msgid "Add File(s)"
@@ -2683,8 +2704,9 @@ msgstr "Gültige Dateien"
 #. TODO fberger
 #. super(I18n.tr("Add &Folder to Library..."));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:28
+#, fuzzy
 msgid "Add Folder to Library..."
-msgstr "Ordner zu Medienbibliothek hinzufügen"
+msgstr "Ordner für die Dateifreigabe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:35
@@ -2705,12 +2727,14 @@ msgstr "Be&enden"
 #. exit after transfers
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/ExitAfterTransferAction.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:87
+#, fuzzy
 msgid "Exit After Transfers"
-msgstr "Nach Übertragungen beenden"
+msgstr "Nach Transfer beenden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:39
+#, fuzzy
 msgid "Invalid Link"
-msgstr "Verknüpfung ungültig!"
+msgstr "Ungültige Motivdatei"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:54
@@ -2718,8 +2742,9 @@ msgid "Open"
 msgstr "Öffnen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:86
+#, fuzzy
 msgid "Enter a magnet or torrent link below:"
-msgstr "Öffnet Magnet- oder Torrentverknüpfung."
+msgstr "Öffnet einen Magnet oder Torrent-Link"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:44
 #, fuzzy
@@ -2729,7 +2754,7 @@ msgstr "Mehr lernen..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:53
 #, fuzzy
 msgid "Open Torrent"
-msgstr "BitTorrent"
+msgstr "Öffnet Magnet oder Torrent-Datei"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2744,17 +2769,18 @@ msgstr "Diese Datei ist nicht freigegeben."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:91
 #, fuzzy
 msgid "Unable to open torrent"
-msgstr "Maximale Uploads pro Torrent"
+msgstr "Daten konnten nicht entfernt werden."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:51
+#, fuzzy
 msgid "Open &Link..."
-msgstr "Verknüpfung öffnen (&L)"
+msgstr "Öffnen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandler.java:60
 msgid "Open Link"
-msgstr "Verknüpfung öffnen (&L)"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 msgid "Magnet link contains no options."
@@ -2788,7 +2814,7 @@ msgstr "Dateien"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
 #, fuzzy
 msgid "Transfers"
-msgstr "Nach Übertragungen beenden"
+msgstr "Nach Transfer beenden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
 msgid "System"
@@ -2888,7 +2914,7 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:103
 msgid "Add audio files I downloaded from LimeWire to iTunes"
-msgstr "Heruntergeladene Audiodateien zu meiner iTunes-Bibliothek hinzufügen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:108
 msgid "Save downloads to:"
@@ -2916,8 +2942,9 @@ msgid "Manage file extensions"
 msgstr "Dateierweiterungen verwalten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
+#, fuzzy
 msgid "Manage..."
-msgstr "Verwalten..."
+msgstr "Anhalten..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 msgid "Manage file extensions to load"
@@ -2955,8 +2982,9 @@ msgid "LimeWire Store File Organization"
 msgstr "Dateiorganisation im LimeWire Store"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
+#, fuzzy
 msgid "Configure file naming..."
-msgstr "Dateibenennung einrichten..."
+msgstr "Konfigurieren..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
 msgid "Configure how files are automatically named"
@@ -3007,17 +3035,18 @@ msgstr "Daap-Fehler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:39
 #, fuzzy
 msgid "Add Extension"
-msgstr "Erweiterung"
+msgstr "Neue Dateiendung Hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:41
+#, fuzzy
 msgid "Extensions"
-msgstr "Endungen"
+msgstr "Kennungen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:60
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
-msgstr "LimeWire zeigt keine Dateien mit folgenden Endungen in Ihren Suchergebnisse an"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:97
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:202
@@ -3025,8 +3054,9 @@ msgid "Use Default"
 msgstr "Standard verwenden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
+#, fuzzy
 msgid "Revert to default settings"
-msgstr "Standard wiederherstellen"
+msgstr "Standard verwenden:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
@@ -3034,7 +3064,7 @@ msgstr "Schlagwort hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:40
 msgid "Keyword"
-msgstr "Schlagwort"
+msgstr "Suchwort"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:55
 msgid ""
@@ -3157,20 +3187,17 @@ msgstr "Kein Unterordner"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:125
 #, fuzzy
 msgid "Sharing Categories"
-msgstr "Unsichere Kategorien"
+msgstr "Freigebene Dateiendungen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 msgid "Only share files in that category at that point"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:130
-#, fuzzy
 msgid ""
 "Share my entire collection, including new files that automatically get added "
 "to My Library"
 msgstr ""
-"Wenn Sie Ihre {0}-Sammlung freigeben, werden automatisch neue {0}-Dateien "
-"freigegeben, die Sie Ihrer Medienbibliothek hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:142
 msgid "Choose what happens when I share a category"
@@ -3181,23 +3208,19 @@ msgid "Sharing Categories - Configure"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:223
-#, fuzzy
 msgid ""
 "Automatically add the following categories from folders below to My Library:"
-msgstr "Die folgenden Dateitypen zu Ihrer Medienbibliothek hinzufügen:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:235
-#, fuzzy
 msgid ""
 "*Adding these folders will automatically share any collections you shared"
 msgstr ""
-"Das Durchsuchen dieser Ordner und Hinzufügen zur Medienbibliothek gibt die "
-"Dateien nicht automatisch frei."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:329
 #, fuzzy
 msgid "Add New Folder..."
-msgstr "Neuen Ordner hinzufügen"
+msgstr "Neues Verzeichnis freigeben..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:330
 msgid "Choose a folder to automatically scan for changes"
@@ -3220,9 +3243,8 @@ msgstr ""
 "gelesen werden kann."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:347
-#, fuzzy
 msgid "Library Manager Error"
-msgstr "Bibliotheksverwaltung"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:372
 msgid ""
@@ -3232,30 +3254,28 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:373
 #, fuzzy
 msgid "View Folders..."
-msgstr "Speicherordner"
+msgstr "Neues Verzeichnis freigeben..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:381
 #, fuzzy
 msgid "Manually Imported Folders"
-msgstr "Speicherordner verwalten"
+msgstr "Manuelle Port-Weiterleitung:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:428
 msgid "Use the LimeWire player when I play audio files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:43
-#, fuzzy
 msgid "Select which file extensions belong in each category"
-msgstr "Wählen Sie die Dateierweiterungen aus, die zu jeder Kategorie gehören"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:203
 msgid "Revert directories to the default"
 msgstr "Ordner auf Standardeinstellungen zurücksetzen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:55
-#, fuzzy
 msgid "Language:"
-msgstr "Verwalten"
+msgstr "Sprache:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:127
 msgid "Notifications"
@@ -3274,9 +3294,8 @@ msgid "Friends and Chat"
 msgstr "Freunde und Chat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:172
-#, fuzzy
 msgid "Sign into Friends when LimeWire starts"
-msgstr "Beim Start von LimeWire anmelden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:191
 msgid "Jabber Server:"
@@ -3435,7 +3454,7 @@ msgstr "Ähnliche Suchergebnisse zusammenfassen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:88
 #, fuzzy
 msgid "Search bar"
-msgstr "Suchen"
+msgstr "Hier suchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:92
 msgid "By default, search for"
@@ -3446,9 +3465,8 @@ msgid "Suggest files from friends"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
-#, fuzzy
 msgid "Remember my recent searches"
-msgstr "Vorherige Downloads speichern"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3462,7 +3480,7 @@ msgstr "Warnmeldungen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 #, fuzzy
 msgid "Settings..."
-msgstr "Einstellungen"
+msgstr "Verbinden..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Choose which warning messags to display"
@@ -3488,14 +3506,12 @@ msgid "For your safety, LimeWire disables you from:"
 msgstr "Zu Ihrer Sicherheit blockiert LimeWire folgende Optionen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:139
-#, fuzzy
 msgid "- Searching for and sharing programs with anyone"
-msgstr "-Suche nach und Freigabe von Programmen an andere"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:140
-#, fuzzy
 msgid "- Sharing documents with the P2P Network"
-msgstr "-Freigabe von Dokumenten an das P2P-Netzwerk"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:181
 msgid ""
@@ -3503,9 +3519,8 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:184
-#, fuzzy
 msgid "Don't show adult content in search results"
-msgstr "Keine nicht jugendfreien Inhalte anzeigen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:188
 msgid "Filter Keywords"
@@ -3514,7 +3529,7 @@ msgstr "Filtern nach Schlagwörtern"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 #, fuzzy
 msgid "Filter Keywords..."
-msgstr "Filtern nach Schlagwörtern"
+msgstr "Schlüsselwörter"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 msgid ""
@@ -3524,18 +3539,17 @@ msgstr "Dateien mit bestimmten Wörtern von Suchergebnissen ausschließen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:192
 #, fuzzy
 msgid "Filter File Extensions"
-msgstr "Dateierweiterung"
+msgstr "Dateikennung für Freigabe"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
 #, fuzzy
 msgid "Filter File Extensions..."
-msgstr "Dateierweiterung"
+msgstr "Gibt die Dateien mit Standard-Kennungen frei."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
-#, fuzzy
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
-msgstr "Dateien mit bestimmten Wörtern von Suchergebnissen ausschließen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:195
 msgid "In search results..."
@@ -3566,7 +3580,9 @@ msgstr ".magnet-Dateien"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 #, fuzzy
 msgid "Warn me when other programs want to automatically open these types"
-msgstr "Warnen, wenn andere Programme diese Zuordnungen ändern"
+msgstr ""
+"Sie können erfolgreich beendete Downloads automatisch aus der Liste "
+"entfernen lassen."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3593,32 +3609,26 @@ msgid "Bugs"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
-#, fuzzy
 msgid "Let me know about bugs before sending them"
-msgstr "Fehlerbericht vor dem Senden anzeigen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 #, fuzzy
 msgid "Always send bugs to Lime Wire"
-msgstr "Fehlerberichte an LimeWire senden"
+msgstr "Immer ein (#) zum Dateiname hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
-#, fuzzy
 msgid "Never send bugs to Lime Wire"
-msgstr "Fehlerberichte an LimeWire senden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
-#, fuzzy
 msgid ""
 "Allow me to search for and share programs with the P2P Network and my friends"
 msgstr ""
-"Suche nach Programmen und Freigabe im P2P-Netzwerk und bei meinen Freunden "
-"erlauben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:31
-#, fuzzy
 msgid "Allow me to share documents with the P2P Network"
-msgstr "Freigabe von Dokumenten im P2P-Netzwerk erlauben"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:34
 msgid ""
@@ -3676,7 +3686,7 @@ msgstr "Alle Änderungen verwerfen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/HelpAction.java:19
 #, fuzzy
 msgid "Learn more..."
-msgstr "Mehr dazu"
+msgstr "Mehr lernen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:17
 msgid "Keep any changes made"
@@ -3695,21 +3705,20 @@ msgstr "Eigenschaften von \"{0}\""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:228
 #, fuzzy
 msgid "Overview"
-msgstr "Anzeigen"
+msgstr "Bericht"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:251
 msgid "Details"
 msgstr "Details"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:255
-#, fuzzy
 msgid "Location"
-msgstr "Benachrichtigungen"
+msgstr "Quelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, fuzzy
 msgid "Dimensions"
-msgstr "Erweiterung"
+msgstr "Kennungen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, java-format
@@ -3717,45 +3726,43 @@ msgid "({0}px X {1}px)"
 msgstr "({0}px X {1}px)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:20
-#, fuzzy
 msgid "New audio"
-msgstr "Nur Audio"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:21
 #, fuzzy
 msgid "New documents"
-msgstr "Nur Dokumente"
+msgstr "Dokumente"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:22
 #, fuzzy
 msgid "New images"
-msgstr "Nur Bilder"
+msgstr "Bilder"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:23
 #, fuzzy
 msgid "New programs"
-msgstr "Nur Programme"
+msgstr "Programme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:24
-#, fuzzy
 msgid "New videos"
-msgstr "Nur Videos"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:27
 #, fuzzy
 msgid "New files"
-msgstr "Anzahl der Dateien"
+msgstr ".torrent Datei"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:125
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:194
 #, fuzzy
 msgid "Search P2P Network"
-msgstr "An P2P-Netzwerk freigeben"
+msgstr "Hier suchen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:191
 #, fuzzy
 msgid "Search P2P Network and Friends"
-msgstr "An P2P-Netzwerk freigeben"
+msgstr "Durchsucht das Netz nach den angegebenen Wörtern."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:12
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:63
@@ -3790,12 +3797,12 @@ msgstr "Programme"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:32
 #, fuzzy
 msgid "&Videos"
-msgstr "Videos"
+msgstr "Video"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 #, fuzzy
 msgid "&Other"
-msgstr "Sonstiges"
+msgstr "Sonstige"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:42
 msgid "All files"
@@ -3878,9 +3885,8 @@ msgid "Sort by:"
 msgstr "Sortieren nach:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:98
-#, fuzzy
 msgid "Refine results..."
-msgstr "In Suchergebnissen..."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:190
 msgid "List view"
@@ -3897,7 +3903,7 @@ msgstr "Als Spam markieren"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 #, fuzzy
 msgid "Copy link"
-msgstr "Alles kopieren"
+msgstr "Kopieren"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -3918,35 +3924,35 @@ msgid "Do not warn me again"
 msgstr "Warnung nicht mehr anzeigen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:45
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is marked as spam."
-msgstr "Nicht als Spam markieren"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:89
 #, fuzzy, java-format
 msgid "Chat with {0}"
-msgstr "Freigeben an {0}"
+msgstr "Mit Rechner Chatten"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:102
-#, fuzzy, java-format
+#, java-format
 msgid "View Files of {0}"
-msgstr "Dateiinformationen anzeigen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:115
-#, fuzzy, java-format
+#, java-format
 msgid "Share With {0}"
-msgstr "Freigeben an {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:140
 msgid "nobody"
 msgstr "niemand"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:158
-#, fuzzy, java-format
+#, java-format
 msgid "{0} Person"
 msgid_plural "{0} People"
-msgstr[0] "{0} Nutzer"
-msgstr[1] "{0} Nutzer"
+msgstr[0] ""
+msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:160
 #, fuzzy
@@ -3959,8 +3965,8 @@ msgstr[1] "Nutzer"
 #, fuzzy, java-format
 msgid "{0} Friend"
 msgid_plural "{0} Friends"
-msgstr[0] "Freund"
-msgstr[1] "Freund"
+msgstr[0] "Haben Sie Bekannte?"
+msgstr[1] "Haben Sie Bekannte?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:170
 #, java-format
@@ -3970,21 +3976,19 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:172
-#, fuzzy
 msgid "P2P User"
 msgid_plural "P2P Users"
-msgstr[0] "P2P-Netzwerk"
-msgstr[1] "P2P-Netzwerk"
+msgstr[0] ""
+msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:237
 #, fuzzy
 msgid "Friends"
-msgstr "Freund"
+msgstr "Haben Sie Bekannte?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:243
-#, fuzzy
 msgid "P2P Users"
-msgstr "P2P-Netzwerk"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:50
 msgid "Unmark as spam"
@@ -3997,36 +4001,35 @@ msgstr "Als Spam markieren"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:62
 #, fuzzy
 msgid "Hide Similar Files"
-msgstr "Medienbibliotheksleiste ausblenden"
+msgstr "Verstecke .torrent Datei"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:77
 #, fuzzy
 msgid "View File Info..."
-msgstr "Dateiinformationen anzeigen"
+msgstr "Im Browser Anzeigen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:92
 #, fuzzy
 msgid "Block Address"
-msgstr "Adresse"
+msgstr "Rechner blockieren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:179
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
 #, fuzzy
 msgid "Show similar files"
-msgstr "Aktuelle Datei anzeigen"
+msgstr "Freigegebene Dateien"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
-#, fuzzy
 msgid "Hide similar files"
-msgstr "Medienbibliotheksleiste ausblenden"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:210
 #, fuzzy
 msgid "More options"
-msgstr "Weitere Optionen"
+msgstr "Weitere Einstellungen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:377
 #, java-format
@@ -4085,9 +4088,8 @@ msgid "\"magnet:\" links"
 msgstr "\"magnet:\"-Verknüpfungen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
-#, fuzzy
 msgid "Warn me when other programs take LimeWire associations"
-msgstr "Warnen, wenn andere Programme diese Zuordnungen ändern"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 msgid ""
@@ -4110,7 +4112,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 #, fuzzy
 msgid "No Internet Connection"
-msgstr "Verbindung hinzufügen"
+msgstr "Gnutella Verbindung hinzufügen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:113
 msgid "You have no internet connection"
@@ -4120,19 +4122,18 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 #, fuzzy
 msgid "Weak connection"
-msgstr "Verbindung hinzufügen"
+msgstr "Verbindung"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:135
-#, fuzzy
 msgid "You have a weak connection"
-msgstr "Sie sind ein Blattknoten"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 #, fuzzy
 msgid "Medium connection"
-msgstr "Verbindung hinzufügen"
+msgstr "Verbindung"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
@@ -4142,7 +4143,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 #, fuzzy
 msgid "Full Connection"
-msgstr "Verbindungen"
+msgstr "Verbindung"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 #, fuzzy
@@ -4150,9 +4151,8 @@ msgid "You are fully connected"
 msgstr "Sie verbinden sich gerade mit dem Netzwerk."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:156
-#, fuzzy
 msgid "Turbo charged Connection"
-msgstr "Verbindung hinzufügen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:157
 msgid "You have an turbo-charged connection"
@@ -4161,7 +4161,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/MinimizedDownloadSummaryPanel.java:57
 #, fuzzy, java-format
 msgid "Downloads ({0})"
-msgstr "{0} herunterladen"
+msgstr "Downloads"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:41
@@ -4171,9 +4171,9 @@ msgstr "{0} Dateien freigegeben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:60
-#, fuzzy, java-format
+#, java-format
 msgid "{0} (incomplete)"
-msgstr "{0}% abgeschlossen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
 #, fuzzy
@@ -4217,9 +4217,8 @@ msgstr ""
 "Beenden des Programmes starten. Möchten Sie das Update jetzt durchführen?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:173
-#, fuzzy
 msgid "Update Ready"
-msgstr "Aktualisierungen und Programmfehler"
+msgstr "Update erfolgreich beendet"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:195
 msgid "Update Later"
@@ -4228,7 +4227,7 @@ msgstr "Später updaten"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:65
 #, fuzzy
 msgid "Play File"
-msgstr "Datei wiedergeben"
+msgstr "Player"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:216
 #, java-format
@@ -4265,7 +4264,7 @@ msgstr[1] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:240
 #, fuzzy
 msgid "Waiting for connections..."
-msgstr "Geben Sie Ihre Verbindungsgeschwindigkeit an"
+msgstr "Warte auf stabile Verbindung"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:250
 msgid "Unable to upload: file error"
@@ -4316,19 +4315,16 @@ msgid "KB/s"
 msgstr "KB/s"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:403
-#, fuzzy
 msgid "Poor (media quality)"
-msgstr "Schlechte Qualität"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:405
-#, fuzzy
 msgid "Good (media quality)"
-msgstr "Gute Qualität"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:407
-#, fuzzy
 msgid "Excellent (media quality)"
-msgstr "Ausgezeichnete Qualität"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:419
 msgid "Poor Quality"
@@ -4350,19 +4346,19 @@ msgstr "Ungültige Quellen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Unable to open URL"
-msgstr "Download kann nicht ausgeführt werden:"
+msgstr "Daten konnten nicht entfernt werden."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Open URL"
-msgstr "Verknüpfung öffnen (&L)"
+msgstr "Öffnen:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:187
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:190
-#, fuzzy, java-format
+#, java-format
 msgid "Unable to open file: {0}"
-msgstr "Download kann nicht ausgeführt werden:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:188
@@ -4375,7 +4371,7 @@ msgstr "Datei öffnen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:254
 #, fuzzy, java-format
 msgid "Unable to locate file: {0}"
-msgstr "Upload nicht möglich: Dateifehler"
+msgstr "LimeWire konnte die Datei \"{0}\" nicht freigeben."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:251
@@ -4396,7 +4392,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:53
 #, fuzzy
 msgid "Invalid Folder"
-msgstr "Gültige Dateien"
+msgstr "Ungültiger Dateiname"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:166
 #, fuzzy, java-format
@@ -4415,15 +4411,15 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:167
 #, fuzzy
 msgid "Folder Warning"
-msgstr "Filterung"
+msgstr "Warnung"
 
 #. Create user message.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:86
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Unable to download: {0}\n"
 "file {1}"
-msgstr "Download kann nicht ausgeführt werden:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:103
 msgid "Save File As..."
@@ -4438,21 +4434,15 @@ msgid "Overwrite"
 msgstr "Überschreiben"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:248
-#, fuzzy
 msgid "State Your Intent"
-msgstr "Geben Sie Ihre Absicht an"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:250
-#, fuzzy
 msgid ""
 "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
 "authorized files only. Installing and using either program does not "
 "constitute a license for obtaining or distributing unauthorized content."
 msgstr ""
-"LimeWire Basic und LimeWire PRO sind Peer-to-Pee-Programme zum rechtmäßigen "
-"Tausch von Dateien.  Die Installation und Nutzung eines der Programme "
-"stellen keine Lizenz zur Beschaffung oder Verbreitung von nicht "
-"autorisierten Inhalten dar."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
@@ -4460,13 +4450,10 @@ msgid "Learn more"
 msgstr "Mehr dazu"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:252
-#, fuzzy
 msgid ""
 "By clicking \"I Agree\", you agree to not use LimeWire for copyright "
 "infringement."
 msgstr ""
-"Wenn Sie auf \"Ich stimme zu\" klicken, stimmen Sie zu, LimeWire 5 nicht für "
-"Urheberrechtsverletzungen zu verwenden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:253
 #, fuzzy
@@ -4505,11 +4492,8 @@ msgid "Launch LimeWire at Startup"
 msgstr "LimeWire beim Systemstart laden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:43
-#, fuzzy
 msgid "My Library is where you view, share and unshare your files."
 msgstr ""
-"Ihre Medienbibliothek ist ein zentraler Ort zur Anzeige Ihrer Dateien und "
-"der Freigabe und Aufhebung der Freigabe an das P2P-Netzwerk und Ihre Freunde."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:44
 msgid ""
@@ -4526,13 +4510,10 @@ msgid "Automatically add files to My Library, but don't share any new files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
-#, fuzzy
 msgid ""
 "Have LimeWire automatically add files from My Documents and the Desktop to "
 "My Library."
 msgstr ""
-"Mit dieser Option kann LimeWire Dateien automatisch in den Eigenen "
-"Dokumenten und dem Desktop suchen und Ihrer Medienbibliothek hinzufügen."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:48
 msgid "Manually add files to My Library, but don't share any files"
@@ -4548,26 +4529,21 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:51
-#, fuzzy
 msgid "Add the following categories from the folders below to My Library:"
-msgstr "Die folgenden Dateitypen zu Ihrer Medienbibliothek hinzufügen:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:52
-#, fuzzy
 msgid "You can change this later from Tools > Options"
-msgstr "Sie können diese Einstellungen später unter Extras > Optionen ändern"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:236
 #, fuzzy
 msgid "Add Folder"
-msgstr "Ordner hinzufügen"
+msgstr "Alle Verzeichnisse"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:237
-#, fuzzy
 msgid "Choose a folder to automatically add to My Library"
 msgstr ""
-"Wählen Sie einen Ordner aus, der automatisch auf Änderungen überwacht werden "
-"sol"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:58
 msgid "Continue"
@@ -4656,11 +4632,29 @@ msgstr ""
 "Sie können Dateien, die Sie in nicht freigegebene Verzeichnisse "
 "herunterladen, freigeben."
 
+msgid "Loading TLS Encryption..."
+msgstr "TLS Verschlüsselung wird geladen..."
+
+msgid "Loading Message Router..."
+msgstr "Message Router wird geladen..."
+
 msgid "Checking for Updates..."
 msgstr "Updates werden gesucht..."
 
+msgid "Locating Peers..."
+msgstr "Verbindungspartner werden gesucht..."
+
+msgid "Loading Shared Files..."
+msgstr "Gespeicherte Dateien werden geladen..."
+
+msgid "Loading BitTorrent Management..."
+msgstr "Lade BitTorrent Komponente..."
+
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "Anfügen LWS Zuhörer..."
+
+msgid "Loading Network Listeners..."
+msgstr "Netzwerk-Empfänger werden geladen..."
 
 msgid "Could not process bad MAGNET link {0}"
 msgstr "Der ungültige MAGNET-Link \"{0}\" konnte nicht bearbeitet werden."
@@ -4697,12 +4691,21 @@ msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 "LimeWire kann die .torrent Datei nicht von der angegebenen URL herunterladen."
 
+msgid "Automatically start torrents"
+msgstr "Torrents automatisch starten"
+
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
 "Sie können auswählen ob der download von torrents aus dem Gnutella Netz "
 "automatisch staten soll."
+
+msgid "Start automatically"
+msgstr "Automatisch Starten"
+
+msgid "BitTorrent Settings"
+msgstr "BitTorrent Einstellungen"
 
 #, fuzzy
 msgid ""
@@ -4807,11 +4810,17 @@ msgstr ""
 "Einstellungen und vergewissern Sie sich, dass Sie nichts anbieten, was Sie "
 "für sich behalten wollen."
 
+msgid "Do not display this message again."
+msgstr "Diese Nachricht nie wieder anzeigen."
+
 msgid "T1"
 msgstr "T1"
 
 msgid "T3 or Higher"
 msgstr "T3 oder schneller"
+
+msgid "Ethernet"
+msgstr "LAN"
 
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
@@ -4823,8 +4832,23 @@ msgstr ""
 "wird automatisch versuchen, sich mit dem Netz zu verbinden, bis sie \"Trennen"
 "\" aus dem Dateimenü wählen."
 
+msgid "&Search"
+msgstr "&Suchen"
+
 msgid "&Monitor"
 msgstr "&Monitor"
+
+msgid "&Connections"
+msgstr "&Verbindung"
+
+msgid "&Library"
+msgstr "&Dateisammlung"
+
+msgid "C&onsole"
+msgstr "&Konsole"
+
+msgid "Lo&gging"
+msgstr "&Transaktionen"
 
 msgid "Display the {0} Screen"
 msgstr "Zeigt die {0} Ansicht"
@@ -4868,6 +4892,9 @@ msgstr ""
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire konnte den speziellen Vorgang nicht abschließen."
 
+msgid "Loading Core Components..."
+msgstr "Programmkern wird geladen..."
+
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "Digital-Audio-Access-Protokol wird geladen..."
 
@@ -4876,6 +4903,9 @@ msgstr "Eingabe"
 
 msgid "Apply Operation"
 msgstr "Übernimmt die vorgenommen Änderungen."
+
+msgid "Cancel Operation"
+msgstr "Bricht den Vorgang ab und schließt dieses Fenster."
 
 msgid ""
 "You are currently using a beta or pre-release version of Java 1.6.0. This "
@@ -4889,6 +4919,9 @@ msgstr ""
 msgid "Upgrade Java"
 msgstr "Java Upgrade muss durchgeführt werden"
 
+msgid "More Information"
+msgstr "Mehr Informationen"
+
 msgid "Visit {0}"
 msgstr "Besuche {0}"
 
@@ -4899,6 +4932,9 @@ msgid "LimeWire must be restarted for the new language to take effect."
 msgstr ""
 "LimeWire muss neu gestartet werden, bevor die neue Sprache angezeigt werden "
 "kann."
+
+msgid "Help Translate LimeWire"
+msgstr "An der Übersetzung von LimeWire mitwirken"
 
 msgid "Show Language in status bar"
 msgstr "Sprach in der Statusleiste anzeigen"
@@ -4974,11 +5010,17 @@ msgstr "Diese Datei erfordert evtl. eine Lizenz zum Öffnen und Anzeigen."
 msgid "License Details"
 msgstr "Lizenz-Details"
 
+msgid "File Listing for"
+msgstr "Dateiliste für"
+
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr "Magnet-Links für schnellen Download (wenn LimeWire installiert ist)"
 
 msgid "Always use this answer"
 msgstr "Immer diese Antwort benutzen"
+
+msgid "Loading Monitor Window..."
+msgstr "Monitorfenster wird geladen..."
 
 msgid "Show Incoming Searches"
 msgstr "Eingehende Suchanfragen anzeigen"
@@ -4989,6 +5031,9 @@ msgid ""
 msgstr ""
 "Ihr Client ist ein Endpunkt, abgeschirmt durch einen Ultrapeer. Deshalb "
 "erscheinen nur wenige oder gar keine Suchvorgänge im Monitorfenster."
+
+msgid "Searches"
+msgstr "Suchvorgänge an"
 
 msgid ""
 "<html><table width=400>You selected: <i>{0}</i><br>LimeWire cannot use this "
@@ -5018,8 +5063,14 @@ msgstr ""
 "versuchen, die Standardeinstellungen zu benutzen, kann sich jedoch "
 "ungewöhnlich verhalten."
 
+msgid "Shutting down LimeWire..."
+msgstr "LimeWire wird beendet..."
+
 msgid "Please wait while LimeWire shuts down..."
 msgstr "Bitte warten Sie, während Limewire beendet wird..."
+
+msgid "Add..."
+msgstr "Hinzufügen..."
 
 msgid "Add New List Item"
 msgstr "Fügt einen neuen Listen-Eintrag hinzu."
@@ -5027,11 +5078,20 @@ msgstr "Fügt einen neuen Listen-Eintrag hinzu."
 msgid "Remove Selected Item"
 msgstr "Löscht den ausgewählten Eintrag."
 
+msgid "Loading Status Window..."
+msgstr "Statusfenster wird geladen..."
+
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire hat eine Firewall entdeckt."
 
+msgid "You are not connected to the LimeWire Store"
+msgstr "Es besteht keine Verbindung zum LimeWire Store"
+
 msgid "You are connected to the LimeWire Store"
 msgstr "Mit dem dem LimeWire Store verbunden"
+
+msgid "Disconnected"
+msgstr "Getrennt"
 
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
@@ -5040,11 +5100,20 @@ msgstr ""
 "Sie sind nicht mit dem Netzwerk verbunden. Um sich zu verbinden, wählen Sie "
 "Verbinden aus dem Dateimenü."
 
+msgid "Starting"
+msgstr "Starte"
+
+msgid "Poor"
+msgstr "Schlechte"
+
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Sie sind mit wenigen Rechnern verbunden und haben eine instabile Verbindung "
 "mit dem Netzwerk."
+
+msgid "Fair"
+msgstr "Mittelmäßige"
 
 msgid "Your connection to the network is getting stronger"
 msgstr "Ihre Verbindung mit dem Netzwerk wird besser."
@@ -5091,8 +5160,22 @@ msgstr "Firewall-Status anzeigen"
 msgid "Show Store Indicator"
 msgstr "Stor Anzeige anzeigen"
 
+msgid "Show Bandwidth Consumption"
+msgstr "Bandbreiten-Nutzung anzeigen"
+
 msgid "Show Media Player"
 msgstr "Media Player anzeigen"
+
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] "{0} Datei freigegeben (Wird geladen...)"
+msgstr[1] "{0} Dateien freigegeben (Wird geladen...)"
+
+msgid "Downloads:"
+msgstr "Downloads:"
+
+msgid "Uploads:"
+msgstr "Uploads:"
 
 msgid "Total Downstream:"
 msgstr "Gesamter Downstream:"
@@ -5108,6 +5191,12 @@ msgstr "Wussten Sie schon,..."
 
 msgid "Show Tips At Startup"
 msgstr "Bei Programmstart Tip des Tages zeigen"
+
+msgid "Next Tip"
+msgstr "Nächster Tip"
+
+msgid "Previous Tip"
+msgstr "Vorheriger Tip"
 
 #, fuzzy
 msgid ""
@@ -5240,6 +5329,9 @@ msgstr "LimeWire PRO. Jetzt kaufen."
 msgid "What does PRO give me?"
 msgstr "Was bietet Ihnen die PRO-Version?"
 
+msgid "Get LimeWire PRO Later"
+msgstr "Zeigt dieses Fenster später nochmal an."
+
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
@@ -5250,11 +5342,20 @@ msgstr ""
 msgid "Lookup File with Bitzi"
 msgstr "Bitzi-Web-Suche..."
 
+msgid "Copy Magnet Links to Clipboard"
+msgstr "Magnet-Links in die Zwischenablage kopieren"
+
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "Magnet-Links der ausgewählten Dateien in die Zwischenablage kopieren"
 
+msgid "C&onnect"
+msgstr "Verbinden"
+
 msgid "D&isconnect"
 msgstr "Trennen"
+
+msgid "O&pen Magnet or Torrent"
+msgstr "Öffnet Magnet oder Torrent-Datei"
 
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
@@ -5262,6 +5363,15 @@ msgid ""
 msgstr ""
 "Geben Sie einen Magnet Link, einen Dateipfad oder die Web Adresse einer "
 "Torrent Datei an, und LimeWire wird sie herunterladen."
+
+msgid "&Close"
+msgstr "Schließen"
+
+msgid "Launch Selected Files"
+msgstr "Startet die ausgewählten Dateien."
+
+msgid "My Shared Files"
+msgstr "Meine freigegebenen Dateien"
 
 msgid "View My {0} Shared Files"
 msgstr "Meine {0} Freigegebenen Dateien Anzeigen"
@@ -5278,9 +5388,18 @@ msgstr "Suche \"Was ist neu\" für: {0}"
 msgid "Search for {0}: {1}"
 msgstr "Suche nach {0}: {1}"
 
+msgid "Share New File..."
+msgstr "Neue Datei freigeben..."
+
 msgid "Opens a Window and Lets You Choose a New Folder to Share"
 msgstr ""
 "Öffnet ein Fenster und erlaubt es Ihnen, ein neues Verzeichnis freizugeben."
+
+msgid "Block Host"
+msgstr "Rechner blocken"
+
+msgid "Block Current Host"
+msgstr "Blockt den ausgewählten Rechner."
 
 msgid "Send a Message to a Host"
 msgstr "Sendet die Nachricht zum ausgewählten Rechner."
@@ -5309,6 +5428,9 @@ msgstr "Zeigt alle Dateien auf diesem Rechner an."
 msgid "Loading Connections Window..."
 msgstr "Verbindungsfenster wird geladen..."
 
+msgid "Host:"
+msgstr "Rechner:"
+
 msgid "0.6"
 msgstr "0.6"
 
@@ -5324,6 +5446,9 @@ msgstr "Alle ausgewählten Ordner sowie deren Unterordner werden freigegeben."
 
 msgid "Share Dropped Files?"
 msgstr "Fogende datei freigeben"
+
+msgid "Do not show this message again."
+msgstr "Diese Nachricht nicht mehr anzeigen."
 
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
@@ -5368,8 +5493,26 @@ msgstr "Kontrolliert Datei-Inhalt..."
 msgid "Recovering Corrupted File"
 msgstr "Wiederherstellung der beschädigten Datei"
 
+msgid "Paused"
+msgstr "Angehalten"
+
+msgid "Content Removed"
+msgstr "Inhalt zurückgezogen"
+
 msgid "Resuming..."
 msgstr "Fortsetzen..."
+
+msgid "Downloading .torrent file..."
+msgstr "Herunterleden der .torrent Datei"
+
+msgid "Average Bandwidth"
+msgstr "Durchschnittliche Bandbreite"
+
+msgid "Valid Alternate Locations"
+msgstr "Gültige Quellen"
+
+msgid "Finished On"
+msgstr "Beendet am"
 
 msgid "Time Spent"
 msgstr "Benötigte Zeit"
@@ -5379,6 +5522,12 @@ msgstr "Einheiten"
 
 msgid "Lost To Corruption"
 msgstr "Download wegen Beschädigung abgebrochen"
+
+msgid "hosts"
+msgstr "Rechner"
+
+msgid "host"
+msgstr "Rechner"
 
 msgid "A more specific search may be required..."
 msgstr "Eine detalliertere Suche könnte erforderlich sein..."
@@ -5393,12 +5542,27 @@ msgstr ""
 msgid "Possible Hosts"
 msgstr "Mögliche Rechner"
 
+msgid "Busy Hosts"
+msgstr "Ausgelastete Rechner"
+
 msgid "Remotely Queued"
 msgstr "In Warteschlange"
+
+msgid "Locating Sources..."
+msgstr "Sucht Quellen..."
 
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr ""
 "LimeWire kann die .torrent Datei nicht von der angegebenen URL herunterladen."
+
+msgid "Priority"
+msgstr "Priorität"
+
+msgid "Progress"
+msgstr "Fortschritt"
+
+msgid "Speed"
+msgstr "Geschwindigkeit"
 
 msgid "Loading Download Window..."
 msgstr "Downloadfenster wird geladen..."
@@ -5412,6 +5576,9 @@ msgstr "Quellen suchen"
 msgid "Try to Find Additional Sources for Downloads"
 msgstr "Nach weiteren Quellen zum Download suchen."
 
+msgid "Reattempt Selected Downloads"
+msgstr "Download erneut versuchen."
+
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
 "clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
@@ -5423,6 +5590,9 @@ msgstr ""
 
 msgid "&Refresh Skins"
 msgstr "Motive aktualisieren"
+
+msgid "&View"
+msgstr "Ansicht"
 
 msgid "&Apply Skins"
 msgstr "Motive verwenden"
@@ -5442,6 +5612,36 @@ msgstr ""
 "Entweder ist die Datei beschädigt oder LimeWire hat keine Berechtigung auf "
 "die Datei zuzugreifen."
 
+msgid "Clear Download"
+msgstr "Download löschen"
+
+msgid "Clear Selected Downloads"
+msgstr "Ausgewählte Downloads löschen"
+
+msgid "Launch Download"
+msgstr "Download starten"
+
+msgid "Launch Selected Downloads"
+msgstr "Ausgewählte Downloads starten"
+
+msgid "Cancel Selected Downloads"
+msgstr "Bricht die ausgewählten Downloads ab."
+
+msgid "Preview Selected Downloads"
+msgstr "Eine Vorschau der ausgewählten Downloads anzeigen."
+
+msgid "Clear All Inactive Downloads"
+msgstr "Alle inaktiven Downloads löschen"
+
+msgid "Remove Inactive Downloads"
+msgstr "Löscht die inaktiven/abgeschlossenen Downloads."
+
+msgid "Pause Download"
+msgstr "Download unterbrechen"
+
+msgid "Pause Selected Downloads"
+msgstr "Die gewählten Downloads anhalten."
+
 msgid "Explore"
 msgstr "Durchsuchen"
 
@@ -5454,11 +5654,23 @@ msgstr "Weisen Sie dem ausgewählten Download eine höhere Priorität zu."
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr "Weisen Sie dem ausgewählten Download eine niedrigere Priorität zu."
 
+msgid "Change File Location..."
+msgstr "Dateispeicherort ändern..."
+
 msgid "Edit the Final Filename of the Download"
 msgstr "Den Dateinamen des Downloads ändern"
 
+msgid "Always Save As..."
+msgstr "Immer speichern als..."
+
 msgid "Always Append (#)"
 msgstr "Immer hinzufügen (#)"
+
+msgid "Always Ask"
+msgstr "Immer nachfragen"
+
+msgid "Choose a Default Action:"
+msgstr "Eine Standarteinstellung setzen"
 
 msgid ""
 "<b>Note</b>: A file with the same content already exists in the library at "
@@ -5469,6 +5681,12 @@ msgstr ""
 
 msgid "Overwrite the Existing File"
 msgstr "Die vorhandene Datei überschreiben."
+
+msgid "Choose a different location for the Download"
+msgstr "Einen anderen Speicherort für den Download festlegen."
+
+msgid "Append (#)"
+msgstr "Hinzufügen (#)"
 
 msgid "Appends (#) to filename"
 msgstr "Zum Dateiname (#) hinzufügen"
@@ -5489,6 +5707,15 @@ msgstr "Genau die selbe Datei existiert bereits unter {0}."
 msgid "Do you want to continue downloading anyway?"
 msgstr "Wollen Sie den Download trotzdem fortsetzen?"
 
+msgid "Same File Already In Library"
+msgstr "Die gleiche Datei existiert bereits in der Dateisammlung."
+
+msgid "No Filename"
+msgstr "Kein Dateiname"
+
+msgid "File & Protocol Associations"
+msgstr "Datei und Protokoll Verbindung"
+
 msgid "What type of resources should LimeWire open?"
 msgstr "Welchen Dateityp soll Limewire öffnen?"
 
@@ -5497,11 +5724,17 @@ msgstr ""
 "Was soll LimeWire mit den vordefinierten Verbindungen tun wenn das programm "
 "startet."
 
+msgid "Always take the selected associations."
+msgstr "Die vordefinierten Verbindungen immer nehmen."
+
 msgid "Ignore all missing associations."
 msgstr "Alle fehlenden Verbindungen ignorieren."
 
 msgid "Ask me what to do when an association is missing."
 msgstr "Mich fragen was zu tun ist, wenn eine Verbindung fehlt."
+
+msgid "Firewall Setup"
+msgstr "Firewall Einstellungen"
 
 msgid ""
 "LimeWire performs best with full access to the Internet. If firewall or "
@@ -5512,6 +5745,18 @@ msgstr ""
 "ihrer Firewall kommt bitte LimeWire nicht blockieren. Ihre Firwallmeldung "
 "bzw. Fenster kann unter umständen anderst aussehen als dieses hier."
 
+msgid "Miscellaneous Settings"
+msgstr "Verschiedene Einstellungen"
+
+msgid "Broadband (or unsure)"
+msgstr "Breitband (wenn unsicher)"
+
+msgid "System Startup"
+msgstr "Systemstart"
+
+msgid "Start Automatically"
+msgstr "Automatisch starten"
+
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
 "cause LimeWire to start faster when you use it later."
@@ -5520,8 +5765,29 @@ msgstr ""
 "hochfahren? LimeWire startet dann schneller, als wenn Sie das Programm ohne "
 "diese option starten."
 
+msgid "Content Filtering"
+msgstr "Inhaltsfilter"
+
+msgid ""
+"LimeWire can filter files that copyright owners request not be shared. By "
+"enabling filtering, you are telling LimeWire to confirm all files you "
+"download or share with a list of removed content. You can change this at any "
+"time by choosing Filters -> Configure Content Filters from the main menu."
+msgstr ""
+"LimeWire kann kopiergeschützte Dateien, die nicht zum Download freigegeben "
+"sind, filtern. Wenn Sie das filtern erlauben, wird LimeWire alle "
+"heruntergeladene Dateien mit einer Liste von zurückgezogenen Lizenzen "
+"überprüfen.Sie können diese Einstellungen jeder Zeit ändern, im Kontextmenü "
+"Filter - Inhaltsfilter konfigurieren."
+
 msgid "Learn more about this option..."
 msgstr "Mehr über diese Einstellung lernen..."
+
+msgid "Save Folder and Shared Folders"
+msgstr "Gespeicherte Ordner und Freigegebene Ordner"
+
+msgid "Shared Folders"
+msgstr "Freigegebene Verzeichnisse"
 
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
@@ -5542,6 +5808,21 @@ msgid ""
 msgstr ""
 "LimeWire konnte keinen standard mäßig freigegebenen Ordner erstellen {0}, "
 "deshalb wird nichts freigegeben."
+
+msgid "Use the Default Folder"
+msgstr "Standard-Downloadverzeichnis Benutzen"
+
+msgid "Choose Another Folder"
+msgstr "Anderes Verzeichnis Auswählen"
+
+msgid "LimeWire Setup Wizard"
+msgstr "LimeWire Einrichtungsassistent"
+
+msgid "Next >>"
+msgstr "Nächste >>"
+
+msgid "<< Back"
+msgstr "<< Vorherige"
 
 msgid "Welcome"
 msgstr "Willkommen"
@@ -5568,16 +5849,34 @@ msgstr "Einzelene Store Dateien"
 msgid "List of All Individual Purchased Files"
 msgstr "Liste von allen einzeln eingekauften Dateien"
 
+msgid "Loading Library Window..."
+msgstr "Dateisammlungsfenster wird geladen..."
+
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr ""
 "Sie können die freigegebenen Ordner in den LimeWire-Einstellungen "
 "konfigurieren."
+
+msgid "Songs purchased from the LimeWire Store"
+msgstr "Songs vom LimeWire Store eingekauft"
 
 msgid "Search In Shared Files:"
 msgstr "Suchen in Freigegebenen Dateien"
 
 msgid "Holds the Results of the Last Search"
 msgstr "Enthält die Suchresultate der letzten Suche"
+
+msgid "Icon"
+msgstr "Symbol"
+
+msgid "Path"
+msgstr "Pfad"
+
+msgid "Last Modified"
+msgstr "Letzte Änderung"
+
+msgid "Shared"
+msgstr "Freigegeben"
 
 msgid "This folder is shared."
 msgstr "Diese Datei ist freigegeben."
@@ -5619,6 +5918,9 @@ msgstr "Fügt die ausgewählten Dateien zur PlayList hinzu."
 msgid "Describe..."
 msgstr "Kommentieren..."
 
+msgid "Add Description to Selected File"
+msgstr "Die ausgewählte Datei kommentieren."
+
 msgid "Publish..."
 msgstr "Veröffentlichen"
 
@@ -5627,6 +5929,18 @@ msgstr "Unter Creative Commons License veröffentlichen"
 
 msgid "Edit License..."
 msgstr "Lizenz bearbeiten..."
+
+msgid "Continue Downloading Selected Incomplete File"
+msgstr "Download der unvollständigen Datei fortsetzen."
+
+msgid "Rename"
+msgstr "Umbenennen"
+
+msgid "Stop Sharing File"
+msgstr "Dateifreigabe aufheben"
+
+msgid "Stop Sharing Folder"
+msgstr "Verzeichnisfreigabe Aufheben"
 
 msgid "Show Magnet Details"
 msgstr "Magnet-Informationen für Datei"
@@ -5649,11 +5963,20 @@ msgstr ""
 msgid "Add Folder Contents to Playlist"
 msgstr "Verzeichnisinhalt zur PlayList hinzufügen"
 
+msgid "Show .torrent Files"
+msgstr "Zeige .torrent Dateien"
+
 msgid "Refresh"
 msgstr "Aktualisieren"
 
+msgid "Reload Shared Folders"
+msgstr "Lädt die Liste der freigegebenen Verzeichnisse neu."
+
 msgid "Open Library Folder"
 msgstr "Verzeichnis Öffnen"
+
+msgid "Configure Sharing Options"
+msgstr "Freigabe-Einstellungen konfigurieren"
 
 msgid ""
 "The following folders and subfolders will be shared.  You can uncheck any "
@@ -5662,6 +5985,9 @@ msgid ""
 msgstr ""
 "Der folgende Ordner und die Unterordner werden freigegeben. (Sie können "
 "jederzeit die Ordnerfreigeabe in der LimeWire einstellungen ändern.)"
+
+msgid "Legend"
+msgstr "Legende"
 
 msgid "Folder is fully shared including all subfolders."
 msgstr ""
@@ -5679,11 +6005,29 @@ msgstr "Einzeln freigegebene Dateien"
 msgid "List of All Individually Shared Files"
 msgstr "Liste aller einzeln freigegebenen Dateien"
 
+msgid "List of .torrent files"
+msgstr "Liste der .torrent Dateie(n)"
+
+msgid "Logging"
+msgstr "Transaktionen"
+
+msgid "Loading Logging Window..."
+msgstr "Transaktionsfenster wird geladen..."
+
+msgid "&Advanced"
+msgstr "Erweiterte Statistiken"
+
+msgid "Filter&s"
+msgstr "Filter"
+
 msgid "Configure LimeWire's Content Filtering Options"
 msgstr "LimeWire's Inhaltsfilter optionen"
 
 msgid "Learn More about LimeWire's Content Filtering System"
 msgstr "Lerne mehr über LimeWire's Inhaltsfilterungssystem"
+
+msgid "Help for Using LimeWire"
+msgstr "Hilfe zur Benutzung von LimeWire."
 
 msgid "Frequently Asked Questions for LimeWire"
 msgstr "Häufig gestellte Fragen zu LimeWire."
@@ -5697,14 +6041,32 @@ msgstr "Tip des Tages"
 msgid "Show the Tip of the Day Window"
 msgstr "Zeige das Fenster \"Tip des Tages\" an."
 
+msgid "Generate &Error"
+msgstr "Fehler erzeugen"
+
 msgid "Generate a Popup Error for Testing"
 msgstr "Erzeuge einen Fehler zum Test."
+
+msgid "&About LimeWire"
+msgstr "Über LimeWire..."
+
+msgid "Information about LimeWire"
+msgstr "Informationen über LimeWire."
 
 msgid "&Navigation"
 msgstr "Navigation"
 
+msgid "&Resources"
+msgstr "Ressourcen"
+
+msgid "LimeWire &PRO"
+msgstr "LimeWire PRO"
+
 msgid "Display the LimeWire PRO Website"
 msgstr "Die LimeWire PRO-Website anzeigen."
+
+msgid "Result &Filters"
+msgstr "Filter für Resultate"
 
 msgid "Show Search Result Filters"
 msgstr "Filter für Resultate anzeigen."
@@ -5720,6 +6082,15 @@ msgstr "Finden Sie mehr Motive auf limewire.com."
 
 msgid "Reload available skins from disk"
 msgstr "Liest die verfügbaren Motive von der Festplatte neu ein."
+
+msgid "Use &Default"
+msgstr "Standard benutzen"
+
+msgid "Use your default skin"
+msgstr "Auf Standardeinstellung zurücksetzen."
+
+msgid "&Options"
+msgstr "Einstellungen"
 
 msgid "Display the Options Screen"
 msgstr "Zeigt die Einstellungen an."
@@ -5757,6 +6128,12 @@ msgstr "Ihre Sprache einstellen"
 msgid "LimeWire Media Player"
 msgstr "LimeWire Musik Player"
 
+msgid "About"
+msgstr "Über..."
+
+msgid "Restore Defaults"
+msgstr "Standard wiederherstellen"
+
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
@@ -5764,20 +6141,44 @@ msgstr ""
 "Sie haben einige Einstellungen in LimeWire geändert. Möchten Sie diese "
 "Änderungen speichern?"
 
+msgid "Basic"
+msgstr "Einfach"
+
+msgid "Slots"
+msgstr "Verbindungen"
+
+msgid "Status Bar"
+msgstr "Statuszeile"
+
 msgid "Importing"
 msgstr "Importieren"
 
 msgid "Helper Apps"
 msgstr "Hilfsprogramme"
 
+msgid "Bug Reports"
+msgstr "Fehler Berichte"
+
 msgid "Popups"
 msgstr "Popup-Fenster"
+
+msgid "Content"
+msgstr "Inhalt"
 
 msgid "Junk"
 msgstr "Spam"
 
+msgid "Hosts"
+msgstr "Rechner"
+
 msgid "Preferencing"
 msgstr "Einstellungen"
+
+msgid "System Boot"
+msgstr "System Start"
+
+msgid "Loading Options Window..."
+msgstr "Optionsfenster wird geladen..."
 
 msgid "You can choose the folder for saving files."
 msgstr "Sie können das Verzeichnis zum Speichern auswählen."
@@ -5812,8 +6213,17 @@ msgstr ""
 "öffnen. Desweiteren können sie LimeWire anweisen immer wiederherzustellen "
 "auch wenn sie von einem anderen Programm verwendet wird."
 
+msgid "Use LimeWire for..."
+msgstr "LimeWire verwenden für..."
+
 msgid "You can choose which audio player to use."
 msgstr "Sie können wählen, welches Audioabspielprogramm Sie verwenden möchten."
+
+msgid "Audio Player"
+msgstr "Audioabspielprogramm"
+
+msgid "Clear Completed Downloads:"
+msgstr "Automatisches Löschen erfolgreicher Downloads:"
 
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
@@ -5821,6 +6231,9 @@ msgid ""
 msgstr ""
 "Sie können erfolgreich beendete Uploads automatisch aus der Liste entfernen "
 "lassen."
+
+msgid "Automatically Clear Completed Uploads:"
+msgstr "Automatisches Löschen erfolgreicher Uploads:"
 
 msgid "Text Autocompletion"
 msgstr "Text automatisch vervollständigen"
@@ -5831,6 +6244,9 @@ msgstr ""
 
 msgid "Enable Autocompletion of Text Fields:"
 msgstr "Automatische Textvervollständigung einschalten:"
+
+msgid "Browser Options"
+msgstr "Browser-Einstellungen"
 
 msgid "You can choose which browser to use."
 msgstr "Sie können wählen, welchen Browser Sie verwenden möchten."
@@ -5857,14 +6273,29 @@ msgstr ""
 msgid "Send Errors Automatically if LimeWire is Frozen"
 msgstr "Fehler automatisch an LimeWire senden, fals das Programm einfriert."
 
+msgid "Host Communication"
+msgstr "Kommunikation mit Nutzern anderer Rechner"
+
 msgid "You can turn chat on or off."
 msgstr "Sie können die Chat-Funktion an- oder abschalten."
+
+msgid "Enable Chat:"
+msgstr "Chat aktivieren:"
+
+msgid "Connect on Startup"
+msgstr "Automatisch verbinden"
 
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr ""
 "LimeWire kann sich beim Programmstart automatisch mit dem Netzwerk verbinden."
+
+msgid "Connect on Startup:"
+msgstr "Automatisch verbinden:"
+
+msgid "Connection Preferencing"
+msgstr "Verbindungs-Einstellungen"
 
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
@@ -5875,6 +6306,21 @@ msgstr ""
 
 msgid "Files You Must Share to Not be a Freeloader:"
 msgstr "Grenzwert für Freeloader (Anzahl Dateien):"
+
+msgid "Allow Freeloaders:"
+msgstr "Freeloader zulassen:"
+
+msgid ""
+"You can tell LimeWire to filter files that copyright owners request not be "
+"shared. By enabling filtering, you are instructing LimeWire to confirm all "
+"files you download or share with a list of removed content."
+msgstr ""
+"Sie können Dateien die vom Inhaber nicht freigegeben sind filtern lassen. "
+"Wenn sie das filtern erlauben, wird alles was sie downloaden oder freigeben "
+"mit einer liste verglichen."
+
+msgid "Enable Content Filters"
+msgstr "Inhalt Filter einschalten"
 
 msgid "Buffer Size"
 msgstr "Puffergröße"
@@ -5922,6 +6368,18 @@ msgstr ""
 msgid "Always Show the 'Save As' Dialog"
 msgstr "Immer den 'Speichern als' dialog anzeigen"
 
+msgid "Always Ask What to do"
+msgstr "Immer fragen was zu tun ist"
+
+msgid "Capabilities"
+msgstr "Internet verbindung"
+
+msgid "Disable Mojito DHT Capabilities:"
+msgstr "Mojito DHT-Funktion abschalten:"
+
+msgid "OOB Searching"
+msgstr "OOB-Suche"
+
 msgid "You can set the percentage of your bandwidth devoted to downloads."
 msgstr ""
 "Sie können den Prozentsatz Ihrer Bandbreite einstellen, der für Downloads "
@@ -5929,6 +6387,9 @@ msgstr ""
 
 msgid "License Warning"
 msgstr "Downloads löschen"
+
+msgid "Show License Warning:"
+msgstr "Lizenzwarnung anzeigen:"
 
 msgid "Display"
 msgstr "Anzeige"
@@ -5946,6 +6407,9 @@ msgstr "Müll im Suchfenster anzeigen"
 msgid "Display junk at the bottom of search results"
 msgstr "Müll in der Suchleiste anzeigen (nur die Anzahl)"
 
+msgid "Use Defaults"
+msgstr "Standard wiederherstellen"
+
 msgid "Do Nothing (Not Recommended)"
 msgstr "Nichts tun (nicht empfohlen)"
 
@@ -5953,6 +6417,9 @@ msgid ""
 "You must enter a port between 1 and 65535 when manually forcing your port."
 msgstr ""
 "Wenn Sie einen Port manuell wählen muss er zwischen 1 und 65535 liegen."
+
+msgid "Filter Hosts"
+msgstr "Rechner filtern"
 
 msgid ""
 "You can disallow messages from specific hosts by adding their IP addresses "
@@ -5974,8 +6441,14 @@ msgstr ""
 "Sie können allgemeine Eigenschaften einstellen, die zur Filterung der "
 "Suchresultate verwendet werden sollen."
 
+msgid "Ignore Adult Content"
+msgstr "Inhalte für Erwachsene ignorieren"
+
 msgid "Ignore .htm/.html Files"
 msgstr ".HTM/.HTML-Dateien ignorieren"
+
+msgid "Ignore .vbs Files"
+msgstr ".VBS-Dateien ignorieren"
 
 msgid "Ignore .wmv/.asf files"
 msgstr "Dateien des Types .wmv/.asf ignorieren."
@@ -5983,6 +6456,9 @@ msgstr "Dateien des Types .wmv/.asf ignorieren."
 msgid "You can filter out search results containing specific words."
 msgstr ""
 "Sie können Such-Resultate herausfiltern, die bestimmte Wörter enthalten."
+
+msgid "Image Options"
+msgstr "Bilder-Einstellungen"
 
 msgid "You can choose which image viewer to use."
 msgstr "Sie können wählen, welches Bildanzeigeprogramm Sie verwenden möchten."
@@ -6001,8 +6477,14 @@ msgstr ""
 msgid "Turn preferencing on:"
 msgstr "Bevorzugung aktivieren:"
 
+msgid "Maximum Downloads"
+msgstr "Maximale Downloads"
+
 msgid "You can set the maximum number of simultaneous downloads."
 msgstr "Sie können die Höchstzahl der gleichzeitigen Downloads einstellen."
+
+msgid "Maximum Downloads:"
+msgstr "Maximale Downloads:"
 
 msgid "Maximum Searches"
 msgstr "Maximale Suchanfragen"
@@ -6015,6 +6497,9 @@ msgstr ""
 msgid "Maximum Searches:"
 msgstr "Maximale Suchanfragen:"
 
+msgid "Max Upload Slots"
+msgstr "Maximale Upload-Kanäle"
+
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
@@ -6022,8 +6507,17 @@ msgstr ""
 "Begrenzt die maximale Anzahl von Uploads. Dieser Wert wird nur erreicht, "
 "wenn genügend Bandbreite zur Verfügung steht."
 
+msgid "Max Upload Slots:"
+msgstr "Maximale Uploads:"
+
 msgid "Media Type"
 msgstr "Dateityp"
+
+msgid "Open Dialog to Select a Folder"
+msgstr "Öffnen Sie das Dialogfenster, um ein Verzeichnis auszuwählen"
+
+msgid "Reset"
+msgstr "Zurücksetzen"
 
 msgid "Reset to Default Download Folder"
 msgstr "Setzt zum Standard-Downloadverzeichnis zurück"
@@ -6056,6 +6550,9 @@ msgstr ""
 "LimeWire kann Popup-Fenster anzeigen, um über bestimmte Ereignisse zu "
 "informieren (wie z.B. ein fertiger Download). "
 
+msgid "Partial Files"
+msgstr "Teilweise geladene Dateien"
+
 msgid ""
 "You can choose whether or not to automatically share partially downloaded "
 "files."
@@ -6071,6 +6568,9 @@ msgstr "Beschränkt die maximale Anzahl von Uploads pro Person."
 
 msgid "Uploads Per Person:"
 msgstr "Uploads pro Person:"
+
+msgid "Player Options"
+msgstr "Player-Einstellungen"
 
 msgid ""
 "You can choose to play media with LimeWire or your system's default player. "
@@ -6104,12 +6604,18 @@ msgstr "Benutzernamen und Kennwort für den Proxy einstellen."
 msgid "Enable Authentication (Does Not Work for HTTP Proxies):"
 msgstr "Authentifizierung einschalten (funktioniert nicht mit HTTP Proxies):"
 
+msgid "Proxy Options"
+msgstr "Proxy-Optionen"
+
 msgid "Configure Proxy Options for LimeWire."
 msgstr "LimeWire-Einstellungen für einen Proxy."
 
 msgid "You can automatically delete old incomplete download files."
 msgstr ""
 "Alte, unvollständige Downloaddateien können automatisch gelöscht werden."
+
+msgid "Days to Keep Incomplete Files:"
+msgstr "Unvollständige Downloaddateien aufheben für (Tage):"
 
 msgid "You can specify a download location for each media type."
 msgstr "Sie können den Download-Speicherort für jeden Dateityp festlegen."
@@ -6128,6 +6634,9 @@ msgid ""
 msgstr ""
 "Möchten Sie Ihre neu gespeicherten Verzeichnisse freigeben? Die folgenden "
 "neuen Verzeichnisse werden freigegeben:"
+
+msgid "Search Result Quality"
+msgstr "Qualität der Suchresultate"
 
 msgid ""
 "You can select the \"quality\" of search results to display. Four star "
@@ -6170,6 +6679,9 @@ msgstr "Nur Resultate mit Kabel-/DSL-Verbindung oder schneller anzeigen"
 msgid "Show All Speeds"
 msgstr "Alle Geschwindigkeiten anzeigen"
 
+msgid "Download Sharing"
+msgstr "Freigabe herunterladen"
+
 msgid "All downloads will be shared."
 msgstr "Alle Downloads werden freigegeben."
 
@@ -6185,6 +6697,12 @@ msgstr "Abschalt-Verhalten"
 
 msgid "You can choose the default shutdown behavior."
 msgstr "Sie können das Verhalten beim Beenden des Programms einstellen."
+
+msgid "Shutdown Immediately"
+msgstr "Sofort beenden"
+
+msgid "Shutdown after Transfers"
+msgstr "Erst alle Übertragungen beenden"
 
 msgid "Start Upload Slots"
 msgstr "Starte Uploads"
@@ -6211,6 +6729,9 @@ msgstr ""
 "Sie können Ihre Verbindungsgeschwindigkeit einstellen, damit LimeWire die "
 "Leistung optimieren kann."
 
+msgid "Speed:"
+msgstr "Geschwindigkeit:"
+
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
 "computer starts."
@@ -6218,8 +6739,14 @@ msgstr ""
 "Sie können auswählen, ob LimeWire beim Start Ihres Rechners automatisch "
 "gestartet werden soll."
 
+msgid "Bandwidth Indicator"
+msgstr "Anzeige der Bandbreite"
+
 msgid "You can display your bandwidth consumption in the status bar."
 msgstr "Sie können Ihre Bandbreitennutzung in der Statuszeile anzeigen."
+
+msgid "Show Bandwidth Indicator:"
+msgstr "Informationen zur Bandbreite anzeigen:"
 
 msgid "Connection Quality Indicator"
 msgstr "Verbindungsqualitätsanzeige"
@@ -6233,6 +6760,9 @@ msgstr ""
 msgid "Show Connection Quality Indicator:"
 msgstr "Verbindungsqualität anzeigen:"
 
+msgid "Firewall Indicator"
+msgstr "Anzeige des Firewall-Status"
+
 msgid "You can display your firewall status in the status bar."
 msgstr "Sie können Ihren Firewall-Status in der Statuszeile anzeigen."
 
@@ -6243,6 +6773,9 @@ msgid "You can display your LimeWire Store status in the status bar."
 msgstr ""
 "Sie können den Status des LimeWire Stores in der Statuszeile anzeigen lassen."
 
+msgid "Show LimeWire Store Indicator:"
+msgstr "LimeWire Store Anzeige in der Statusleiste anzeigen:"
+
 msgid "You can display how many files you are sharing in the status bar."
 msgstr ""
 "Sie können in der Statuszeile anzeigen, wie viele Dateien Sie freigegeben "
@@ -6250,6 +6783,9 @@ msgstr ""
 
 msgid "Show Shared Files Indicator:"
 msgstr "Anzahl der freigegebenen Dateien anzeigen:"
+
+msgid "LimeWire Store - Save Folder"
+msgstr "LimeWire Store - Ordner abspeichern"
 
 msgid "System Tray Icon"
 msgstr "System Tray Symbol"
@@ -6261,6 +6797,9 @@ msgstr ""
 
 msgid "Show System Tray Icon:"
 msgstr "Zeige System Tray Symbol"
+
+msgid "Update Options"
+msgstr "Update-Einstellungen"
 
 msgid "You can choose when you want to be notified of new LimeWire releases."
 msgstr ""
@@ -6284,8 +6823,17 @@ msgstr ""
 "reserviert ist. Um Uploads ganz auszuschalten, setzen Sie die Upload-Kanäle "
 "auf Null."
 
+msgid "Upload Speed:"
+msgstr "Upload-Geschwindigkeit:"
+
+msgid "Video Options"
+msgstr "Video-Einstellungen"
+
 msgid "You can choose which video player to use."
 msgstr "Sie können wählen, welches Filmabspielprogramm Sie verwenden möchten."
+
+msgid "Video Player"
+msgstr "Filmabspielprogramm"
 
 msgid "You can have LimeWire import newly downloaded songs into iTunes."
 msgstr "Sie können hier die iTunes Unterstützung aktivieren."
@@ -6299,11 +6847,35 @@ msgstr "Öffnet eine vorhandene PlayList."
 msgid "Save the Current Playlist to a File"
 msgstr "Speichert die aktuelle PlayList."
 
+msgid "Remove Selected File from Playlist"
+msgstr "Löscht die ausgewählte Datei aus der PlayList."
+
 msgid "#"
 msgstr "Nr."
 
+msgid "Comment"
+msgstr "Kommentar"
+
+msgid "Playlist"
+msgstr "Wiedergabeliste"
+
+msgid "Loading Playlist Window..."
+msgstr "PlayList-Fenster wird geladen..."
+
+msgid "Play Options:"
+msgstr "Abspiel-Optionen:"
+
+msgid "Shuffle"
+msgstr "Zufällig"
+
+msgid "Continuous"
+msgstr "Kontinuierlich"
+
 msgid "Open Playlist (.m3u)"
 msgstr "PlayList (.m3u) öffnen"
+
+msgid "Save Playlist As"
+msgstr "PlayList speichern unter..."
 
 msgid ""
 "Warning: a file with the name {0} already exists in the folder. Overwrite "
@@ -6315,8 +6887,23 @@ msgstr ""
 msgid "Playlist Files (*.m3u)"
 msgstr "PlayList Dateien (*.m3u)"
 
+msgid "General"
+msgstr "Gesamt"
+
 msgid "Multiple"
 msgstr "Mehrere"
+
+msgid "Option"
+msgstr "Option"
+
+msgid "Filter Results:"
+msgstr "Resultate filtern:"
+
+msgid "Back To Search"
+msgstr "Zurück zur Suche"
+
+msgid "Download As..."
+msgstr "Herunterladen als..."
 
 msgid "Would you like to start downloads from the following magnets?"
 msgstr "Wollen Sie Downloads von den folgenden Magnets starten?"
@@ -6365,6 +6952,9 @@ msgstr "Ausgewähltes suchresultat als Müll markieren"
 msgid "Mark selected search results as Not Junk"
 msgstr "Ausgewähltes suchresultat als kein Müll markieren"
 
+msgid "Search More"
+msgstr "Weitersuchen"
+
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Möchten Sie alle Suchresultate vom folgenden Rechner blockieren?"
 
@@ -6385,6 +6975,12 @@ msgstr "Nach Dokumenten suchen, einschließlich html, txt, pdf und andere"
 
 msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Nach Programmdateien suchen, einschließlich exe, zip, gz und andere"
+
+msgid "Stop Search"
+msgstr "Suche Beenden"
+
+msgid "Download All Selected Files"
+msgstr "Download aller ausgewählten Dateien."
 
 msgid "View All Files on Selected Computer"
 msgstr "Zeigt alle Dateien auf diesem Rechner an."
@@ -6420,6 +7016,9 @@ msgstr ""
 "Ihr Computer ist hinter einer Firewall oder einem Router und kann keine "
 "direkten Verbindungen empfangen."
 
+msgid "Don't Know"
+msgstr "Wissen Sie nicht,..."
+
 msgid "What To Look For?"
 msgstr "Wonach soll gesucht werden?"
 
@@ -6439,8 +7038,20 @@ msgstr "Inhalte für Erwachsene ausblenden"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Das Adressformat ist nicht richtig, bitte so eingeben host:port."
 
+msgid "Launch Action"
+msgstr "Startvorgang"
+
 msgid "Chat With Host"
 msgstr "Chatten"
+
+msgid "Repeat Search"
+msgstr "Suche wiederholen"
+
+msgid "Loading Search Window..."
+msgstr "Suchfenster wird geladen..."
+
+msgid "Firewalled Host"
+msgstr "Firewall geschützter Rechner"
 
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
@@ -6492,6 +7103,12 @@ msgstr ""
 
 msgid "Could not browse host {0}."
 msgstr "Der Rechner {0} konnte nicht durchbrowst werden."
+
+msgid "Vendor"
+msgstr "Hersteller"
+
+msgid "Junk Rating"
+msgstr "Müll wertung"
 
 msgid "Media"
 msgstr "Medien"
@@ -6575,8 +7192,14 @@ msgstr "Sie können nicht alle Spalten ausblenden."
 msgid "View Repository of Saved Files"
 msgstr "Zeigt alle lokalen Dateien an."
 
+msgid "View Logging Messages"
+msgstr "Transaktionsnachrichten anschauen"
+
 msgid "View Searches and Uploads"
 msgstr "Zeigt Suchanfragen und Uploads an"
+
+msgid "Search and Download Files"
+msgstr "Zeigt das Suchfenster und aktuelle Downloads"
 
 msgid ""
 "The skin file you selected does not exist or is invalid. Please choose "
@@ -6605,8 +7228,17 @@ msgstr ""
 "Das Motiv, das Sie verwenden, ist ungültig. LimeWire wird das Standardmotiv "
 "verwenden."
 
+msgid "Kill Upload"
+msgstr "Upload Abbrechen"
+
 msgid "Stop Selected Uploads"
 msgstr "Bricht die ausgewählten Uploads ab."
+
+msgid "Remove Inactive Uploads"
+msgstr "Löscht die beendeten Uploads."
+
+msgid "Freeloader Uploading"
+msgstr "Upload an Freeloader"
 
 msgid "File Not Found"
 msgstr "Datei Nicht Gefunden"
@@ -6623,8 +7255,20 @@ msgstr "Blockierter gieriger Servent"
 msgid "Uploading Hash Tree"
 msgstr "Upload Hash Baum"
 
+msgid "Suspended"
+msgstr "Veschoben"
+
 msgid "Awaiting Requests"
 msgstr "Erwarte Anfragen"
+
+msgid "Loading Upload Window..."
+msgstr "Uploadfenster wird geladen..."
+
+msgid "Seeding"
+msgstr "Am Säen"
+
+msgid "Download Already Finished"
+msgstr "Download bereits abgeschlossen"
 
 msgid "No Write Permission"
 msgstr "Keine Schreibberechtigung"
@@ -6634,6 +7278,15 @@ msgstr "Verzeichnis existiert nicht"
 
 msgid "File Already Exists"
 msgstr "Datei existiert bereits"
+
+msgid "Filename Taken"
+msgstr "Dateiname wird bereits verwendet"
+
+msgid "Not a File"
+msgstr "ist keine Datei"
+
+msgid "Filesystem Error"
+msgstr "Fehler des Dateisystems"
 
 msgid "Same File Already Being Downloaded"
 msgstr "Die gleiche Datei wird bereits heruntergeladen"
@@ -6690,6 +7343,9 @@ msgstr ""
 msgid "There is nothing to preview for file {0}."
 msgstr "Für die Datei {0} ist keine Vorschau verfügbar."
 
+msgid "More Search Options"
+msgstr "Weitere Suchoptionen"
+
 msgid "Publish License"
 msgstr "Veröffentlichungs Lizenz"
 
@@ -6732,6 +7388,9 @@ msgstr ""
 msgid "How does it work?"
 msgstr "Wie arbeitet es??"
 
+msgid "ShareAlike"
+msgstr "ShareAlike"
+
 msgid "Allow commercial use of your work?"
 msgstr "Kommerziellen Gebrauch erlauben?"
 
@@ -6746,6 +7405,12 @@ msgstr "Copyright Besitzer:"
 
 msgid "Copyright Year:"
 msgstr "Jahr des Urheberrechts:"
+
+msgid "Title of Work:"
+msgstr "Name des Werkes:"
+
+msgid "Comment:"
+msgstr "Kommentar:"
 
 msgid "Please enter the copyright holder, copright year and title."
 msgstr "Bitte geben sie den Copyright Inhaber, Jahr sowie den titel an."
@@ -6783,6 +7448,18 @@ msgstr ""
 "Um deine Datei zu veröffentlichen, gib bitte den volgenden Code in deiner "
 "überprüfungs Seite ein:"
 
+msgid "Copy to Clipboard"
+msgstr "In die Zwischenablage kopieren"
+
+msgid "Kind:"
+msgstr "Art:"
+
+msgid "Size:"
+msgstr "Größe:"
+
+msgid "Date Modified:"
+msgstr "Zuletzt geändert:"
+
 msgid "Internal Document Error. Data could not be saved."
 msgstr "Interner Dokument-Fehler. Daten konnten nicht gespeichert werden."
 
@@ -6802,17 +7479,59 @@ msgstr "Datei ist beschädigt. Daten konnten nicht gespeichert werden."
 msgid "Incorrect format entered. Changes will not be saved."
 msgstr "Falsches Format. Anderungen werden nicht gespeichert."
 
+msgid "Title:"
+msgstr "Titel:"
+
+msgid "Artist:"
+msgstr "Künstler:"
+
+msgid "Album:"
+msgstr "Album:"
+
+msgid "Genre:"
+msgstr "Genre:"
+
+msgid "Year:"
+msgstr "Jahr:"
+
+msgid "Type:"
+msgstr "Art:"
+
+msgid "Track:"
+msgstr "Stück:"
+
+msgid "Length:"
+msgstr "Länge:"
+
+msgid "Bitrate:"
+msgstr "Bitrate:"
+
+msgid "Comments:"
+msgstr "Kommentare:"
+
 msgid "SHA1:"
 msgstr "SHA1:"
 
 msgid "Price:"
 msgstr "Preis:"
 
+msgid "Action:"
+msgstr "Aktion:"
+
+msgid "License:"
+msgstr "Lizenz:"
+
+msgid "Rating:"
+msgstr "Bewertung:"
+
 msgid "License Type:"
 msgstr "Lizenzart"
 
 msgid "Director:"
 msgstr "Direktor"
+
+msgid "Studio:"
+msgstr "Studio"
 
 msgid "Stars: (Please separate with comma)"
 msgstr "Stars: (Bitte mit Komma trennen)"
@@ -6826,8 +7545,14 @@ msgstr "Untertitel: (Bitte mit Komma trennen)"
 msgid "Topic:"
 msgstr "Thema:"
 
+msgid "Author:"
+msgstr "Autor:"
+
 msgid "Publisher:"
 msgstr "Verleger:"
+
+msgid "Platform:"
+msgstr "Betriebssystem:"
 
 msgid "Description:"
 msgstr "Beschreibung:"
@@ -6846,42 +7571,6 @@ msgid ""
 msgstr ""
 "Unbekannter Dateityp. Bitte wählen Sie einen Typ, der die Datei am ehesten "
 "beschreibt."
-
-#, fuzzy
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "HTML-Engine wird geladen..."
-
-#, fuzzy
-#~ msgid "Loading Message Router..."
-#~ msgstr "Benutzeroberfläche wird geladen..."
-
-#, fuzzy
-#~ msgid "Locating Peers..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Loading Shared Files..."
-#~ msgstr "LimeWire wird geladen..."
-
-#, fuzzy
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "Bibliotheksverwaltung"
-
-#, fuzzy
-#~ msgid "Loading Network Listeners..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Automatically start torrents"
-#~ msgstr "Automatisch scrollen"
-
-#, fuzzy
-#~ msgid "Start automatically"
-#~ msgstr "Automatisch sortieren"
-
-#, fuzzy
-#~ msgid "BitTorrent Settings"
-#~ msgstr "BitTorrent"
 
 #~ msgid ""
 #~ "Please add any comments you may have (e.g what caused the error). \n"
@@ -6922,507 +7611,14 @@ msgstr ""
 #~ "BitTorrent, das BitTorrent-Symbol und Torrent sind Marken von BitTorrent, "
 #~ "Inc."
 
-#, fuzzy
-#~ msgid "Do not display this message again."
-#~ msgstr "Warnung nicht mehr anzeigen"
-
-#, fuzzy
-#~ msgid "Ethernet"
-#~ msgstr "Sonstiges"
-
-#, fuzzy
-#~ msgid "&Search"
-#~ msgstr "Suchen"
-
-#, fuzzy
-#~ msgid "&Connections"
-#~ msgstr "Verbindungen"
-
-#, fuzzy
-#~ msgid "&Library"
-#~ msgstr "Medienbibliothek"
-
-#, fuzzy
-#~ msgid "C&onsole"
-#~ msgstr "Konsole"
-
-#, fuzzy
-#~ msgid "Lo&gging"
-#~ msgstr "Anmeldung..."
-
-#, fuzzy
-#~ msgid "Loading Core Components..."
-#~ msgstr "Browser wird geladen..."
-
 #~ msgid "Loading Internationalization Support..."
 #~ msgstr "Unterstützung für Übersetzungen wird geladen..."
-
-#, fuzzy
-#~ msgid "Cancel Operation"
-#~ msgstr "Upload abbrechen"
-
-#, fuzzy
-#~ msgid "More Information"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "Fehlerberichte an LimeWire senden"
-
-#, fuzzy
-#~ msgid "File Listing for"
-#~ msgstr "Port für eingehende Verbindungen"
-
-#, fuzzy
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Searches"
-#~ msgstr "Suchen"
-
-#, fuzzy
-#~ msgid "Shutting down LimeWire..."
-#~ msgstr "Verwendung von LimeWire..."
-
-#, fuzzy
-#~ msgid "Add..."
-#~ msgstr "Hinzufügen"
-
-#, fuzzy
-#~ msgid "Loading Status Window..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "You are not connected to the LimeWire Store"
-#~ msgstr ""
-#~ "Wählen Sie aus, wie die im LimeWire Store erworbenen Dateien organisiert "
-#~ "werden sollen"
-
-#, fuzzy
-#~ msgid "Disconnected"
-#~ msgstr "Verbunden am"
-
-#, fuzzy
-#~ msgid "Starting"
-#~ msgstr "Freigabe"
-
-#, fuzzy
-#~ msgid "Poor"
-#~ msgstr "Port"
-
-#, fuzzy
-#~ msgid "Fair"
-#~ msgstr "Filter"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Consumption"
-#~ msgstr "Ausgehende Bandbreite"
-
-#, fuzzy
-#~ msgid "You are sharing {0} file (Loading...)"
-#~ msgid_plural "You are sharing {0} files (Loading...)"
-#~ msgstr[0] "Sie haben {0} Dateien an {1} freigegeben"
-#~ msgstr[1] "Sie haben {0} Dateien an {1} freigegeben"
-
-#, fuzzy
-#~ msgid "Downloads:"
-#~ msgstr "Downloads"
-
-#, fuzzy
-#~ msgid "Uploads:"
-#~ msgstr "Uploads"
-
-#, fuzzy
-#~ msgid "Next Tip"
-#~ msgstr "Weiter"
-
-#, fuzzy
-#~ msgid "Previous Tip"
-#~ msgstr "Zurück"
-
-#, fuzzy
-#~ msgid "Get LimeWire PRO Later"
-#~ msgstr "LimeWire Store"
-
-#, fuzzy
-#~ msgid "Copy Magnet Links to Clipboard"
-#~ msgstr "Verknüpfung in Zwischenablage kopieren"
-
-#, fuzzy
-#~ msgid "C&onnect"
-#~ msgstr "Verbindung wird hergestellt"
-
-#, fuzzy
-#~ msgid "O&pen Magnet or Torrent"
-#~ msgstr "Öffnet Magnet- oder Torrentverknüpfung."
-
-#, fuzzy
-#~ msgid "&Close"
-#~ msgstr "Schließen"
-
-#, fuzzy
-#~ msgid "Launch Selected Files"
-#~ msgstr "Ausgewählte Dateien herunterladen"
-
-#, fuzzy
-#~ msgid "My Shared Files"
-#~ msgstr "Gültige Dateien"
-
-#, fuzzy
-#~ msgid "Share New File..."
-#~ msgstr "Datei speichern unter..."
-
-#, fuzzy
-#~ msgid "Block Host"
-#~ msgstr "Hosts blockieren"
-
-#, fuzzy
-#~ msgid "Block Current Host"
-#~ msgstr "Hosts blockieren"
-
-#, fuzzy
-#~ msgid "Host:"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Do not show this message again."
-#~ msgstr "Warnung nicht mehr anzeigen"
-
-#, fuzzy
-#~ msgid "Paused"
-#~ msgstr "Pause"
-
-#, fuzzy
-#~ msgid "Content Removed"
-#~ msgstr "Inhaltsfilter"
-
-#, fuzzy
-#~ msgid "Downloading .torrent file..."
-#~ msgstr ".torrent-Dateien"
-
-#, fuzzy
-#~ msgid "Average Bandwidth"
-#~ msgstr "Eingehende Bandbreite"
-
-#, fuzzy
-#~ msgid "Valid Alternate Locations"
-#~ msgstr "Authentifizierung aktivieren"
-
-#, fuzzy
-#~ msgid "Finished On"
-#~ msgstr "Fertig"
-
-#, fuzzy
-#~ msgid "hosts"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "host"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Busy Hosts"
-#~ msgstr "Hosts blockieren"
-
-#, fuzzy
-#~ msgid "Locating Sources..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Priority"
-#~ msgstr "Port"
-
-#, fuzzy
-#~ msgid "Progress"
-#~ msgstr "Programme"
-
-#, fuzzy
-#~ msgid "Speed"
-#~ msgstr "Senden"
-
-#, fuzzy
-#~ msgid "Reattempt Selected Downloads"
-#~ msgstr "Vorherige Downloads speichern"
-
-#, fuzzy
-#~ msgid "&View"
-#~ msgstr "Anzeigen"
-
-#, fuzzy
-#~ msgid "Clear Download"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Clear Selected Downloads"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Launch Download"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Launch Selected Downloads"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Cancel Selected Downloads"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Preview Selected Downloads"
-#~ msgstr "Vorherige Downloads"
-
-#, fuzzy
-#~ msgid "Clear All Inactive Downloads"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Remove Inactive Downloads"
-#~ msgstr "Download entfernen"
-
-#, fuzzy
-#~ msgid "Pause Download"
-#~ msgstr "Download abbrechen"
-
-#, fuzzy
-#~ msgid "Pause Selected Downloads"
-#~ msgstr "Vorherige Downloads"
-
-#, fuzzy
-#~ msgid "Change File Location..."
-#~ msgstr "Dateizuordnungen"
-
-#, fuzzy
-#~ msgid "Always Save As..."
-#~ msgstr "Datei speichern unter..."
-
-#, fuzzy
-#~ msgid "Always Ask"
-#~ msgstr "Immer fragen, ob angezeigt werden soll"
-
-#, fuzzy
-#~ msgid "Choose a Default Action:"
-#~ msgstr "Wählen Sie einen anderen Speicherort aus"
-
-#, fuzzy
-#~ msgid "Choose a different location for the Download"
-#~ msgstr "Wählen Sie einen anderen Speicherort aus"
-
-#, fuzzy
-#~ msgid "Append (#)"
-#~ msgstr "Verloren (E/A)"
-
-#, fuzzy
-#~ msgid "Same File Already In Library"
-#~ msgstr "Bereits in Medienbibliothek vorhanden"
-
-#, fuzzy
-#~ msgid "No Filename"
-#~ msgstr "Dateiname"
 
 #~ msgid "Active"
 #~ msgstr "Aktiv"
 
-#, fuzzy
-#~ msgid "File & Protocol Associations"
-#~ msgstr "Dateizuordnungen"
-
-#, fuzzy
-#~ msgid "Always take the selected associations."
-#~ msgstr "Warnen, wenn andere Programme diese Zuordnungen ändern"
-
-#, fuzzy
-#~ msgid "Firewall Setup"
-#~ msgstr "Firewall"
-
-#, fuzzy
-#~ msgid "Miscellaneous Settings"
-#~ msgstr "Verschiedenes"
-
-#, fuzzy
-#~ msgid "Broadband (or unsure)"
-#~ msgstr "Breitband"
-
-#, fuzzy
-#~ msgid "System Startup"
-#~ msgstr "LimeWire beim Systemstart laden"
-
-#, fuzzy
-#~ msgid "Start Automatically"
-#~ msgstr "Automatisch sortieren"
-
-#, fuzzy
-#~ msgid "Content Filtering"
-#~ msgstr "Inhaltsfilter"
-
-#, fuzzy
-#~ msgid ""
-#~ "LimeWire can filter files that copyright owners request not be shared. By "
-#~ "enabling filtering, you are telling LimeWire to confirm all files you "
-#~ "download or share with a list of removed content. You can change this at "
-#~ "any time by choosing Filters -> Configure Content Filters from the main "
-#~ "menu."
-#~ msgstr ""
-#~ "LimeWire kann Dateien ausfiltern, die Urheberrechtsinhaber von der "
-#~ "Freigabe ausgeschlossen haben.  Durch Aktivierung des Kontrollkästchens "
-#~ "teilen Sie LimeWire mit, alle Dateien, die Sie herunterladen oder "
-#~ "freigeben, gegen eine Liste von entfernten Inhalten zu prüfen.  Sie "
-#~ "können diese Einstellung später unter Optionen > Sicherheit > Filterung "
-#~ "ändern."
-
-#, fuzzy
-#~ msgid "Save Folder and Shared Folders"
-#~ msgstr "Fehler beim Speichern des Ordners"
-
-#, fuzzy
-#~ msgid "Shared Folders"
-#~ msgstr "Speicherordner"
-
-#, fuzzy
-#~ msgid "Use the Default Folder"
-#~ msgstr "Standard verwenden"
-
-#, fuzzy
-#~ msgid "Choose Another Folder"
-#~ msgstr "Andere Suchanfragen schließen"
-
-#, fuzzy
-#~ msgid "LimeWire Setup Wizard"
-#~ msgstr "LimeWire Store"
-
-#, fuzzy
-#~ msgid "Next >>"
-#~ msgstr "Weiter"
-
-#, fuzzy
-#~ msgid "<< Back"
-#~ msgstr "Zurück"
-
 #~ msgid "Incomplete Files"
 #~ msgstr "Unvollständige Dateien"
-
-#, fuzzy
-#~ msgid "Loading Library Window..."
-#~ msgstr "LimeWire wird geladen..."
-
-#, fuzzy
-#~ msgid "Songs purchased from the LimeWire Store"
-#~ msgstr ""
-#~ "Wählen Sie aus, wie die im LimeWire Store erworbenen Dateien organisiert "
-#~ "werden sollen"
-
-#, fuzzy
-#~ msgid "Icon"
-#~ msgstr "Eingehend"
-
-#, fuzzy
-#~ msgid "Path"
-#~ msgstr "Einfügen"
-
-#, fuzzy
-#~ msgid "Last Modified"
-#~ msgstr "Letzte Änderung"
-
-#, fuzzy
-#~ msgid "Shared"
-#~ msgstr "Freigeben"
-
-#, fuzzy
-#~ msgid "Add Description to Selected File"
-#~ msgstr "Ausgewählte Dateien herunterladen"
-
-#, fuzzy
-#~ msgid "Continue Downloading Selected Incomplete File"
-#~ msgstr "Ausgewählte Dateien herunterladen"
-
-#, fuzzy
-#~ msgid "Rename"
-#~ msgstr "Dateiname"
-
-#, fuzzy
-#~ msgid "Stop Sharing File"
-#~ msgstr "{0} Dateien freigegeben"
-
-#, fuzzy
-#~ msgid "Stop Sharing Folder"
-#~ msgstr "Downloads freigeben"
-
-#, fuzzy
-#~ msgid "Show .torrent Files"
-#~ msgstr ".torrent-Dateien"
-
-#, fuzzy
-#~ msgid "Reload Shared Folders"
-#~ msgstr "Speicherordner"
-
-#, fuzzy
-#~ msgid "Configure Sharing Options"
-#~ msgstr "Dateibenennung einrichten"
-
-#, fuzzy
-#~ msgid "Legend"
-#~ msgstr "Senden"
-
-#, fuzzy
-#~ msgid "List of .torrent files"
-#~ msgstr ".torrent-Dateien"
-
-#, fuzzy
-#~ msgid "Logging"
-#~ msgstr "Anmeldung..."
-
-#, fuzzy
-#~ msgid "Loading Logging Window..."
-#~ msgstr "Anmeldung..."
-
-#, fuzzy
-#~ msgid "&Advanced"
-#~ msgstr "Erweitert"
-
-#, fuzzy
-#~ msgid "Filter&s"
-#~ msgstr "Filter"
-
-#, fuzzy
-#~ msgid "Help for Using LimeWire"
-#~ msgstr "Verwendung von LimeWire..."
-
-#, fuzzy
-#~ msgid "Generate &Error"
-#~ msgstr "Interner Fehler"
-
-#, fuzzy
-#~ msgid "&About LimeWire"
-#~ msgstr "Über LimeWire"
-
-#, fuzzy
-#~ msgid "Information about LimeWire"
-#~ msgstr "Fehlerberichte an LimeWire senden"
-
-#, fuzzy
-#~ msgid "&Resources"
-#~ msgstr "Wiederherstellen"
-
-#, fuzzy
-#~ msgid "LimeWire &PRO"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Result &Filters"
-#~ msgstr "Inhaltsfilter"
-
-#, fuzzy
-#~ msgid "Use &Default"
-#~ msgstr "Standard verwenden"
-
-#, fuzzy
-#~ msgid "Use your default skin"
-#~ msgstr "Standard verwenden"
-
-#, fuzzy
-#~ msgid "&Options"
-#~ msgstr "Optionen"
 
 #~ msgid "Next"
 #~ msgstr "Weiter"
@@ -7433,490 +7629,53 @@ msgstr ""
 #~ msgid "Restore"
 #~ msgstr "Wiederherstellen"
 
-#, fuzzy
-#~ msgid "About"
-#~ msgstr "Album"
-
-#, fuzzy
-#~ msgid "Restore Defaults"
-#~ msgstr "Standard verwenden"
-
-#, fuzzy
-#~ msgid "Basic"
-#~ msgstr "Zurück"
-
-#, fuzzy
-#~ msgid "Slots"
-#~ msgstr "Schließen"
-
-#, fuzzy
-#~ msgid "Status Bar"
-#~ msgstr "Status"
-
-#, fuzzy
-#~ msgid "Bug Reports"
-#~ msgstr "Bericht kopieren"
-
 #~ msgid "Searching"
 #~ msgstr "Suche"
-
-#, fuzzy
-#~ msgid "Content"
-#~ msgstr "Anmerkungen"
-
-#, fuzzy
-#~ msgid "Hosts"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "System Boot"
-#~ msgstr "System"
-
-#, fuzzy
-#~ msgid "Loading Options Window..."
-#~ msgstr "LimeWire wird geladen..."
-
-#, fuzzy
-#~ msgid "Use LimeWire for..."
-#~ msgstr "Verwendung von LimeWire..."
-
-#, fuzzy
-#~ msgid "Audio Player"
-#~ msgstr "Mediaplayer"
-
-#, fuzzy
-#~ msgid "Clear Completed Downloads:"
-#~ msgstr "Vorherige Downloads"
-
-#, fuzzy
-#~ msgid "Automatically Clear Completed Uploads:"
-#~ msgstr "Automatisch scrollen"
-
-#, fuzzy
-#~ msgid "Browser Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Host Communication"
-#~ msgstr "Konfiguration des Routers"
-
-#, fuzzy
-#~ msgid "Enable Chat:"
-#~ msgstr "Authentifizierung aktivieren"
-
-#, fuzzy
-#~ msgid "Connect on Startup"
-#~ msgstr "Verbindgungsgeschwindigkeit"
-
-#, fuzzy
-#~ msgid "Connect on Startup:"
-#~ msgstr "Verbindgungsgeschwindigkeit"
-
-#, fuzzy
-#~ msgid "Connection Preferencing"
-#~ msgstr "Verbindgungsgeschwindigkeit"
-
-#, fuzzy
-#~ msgid "Allow Freeloaders:"
-#~ msgstr "Alle Ordner"
-
-#, fuzzy
-#~ msgid ""
-#~ "You can tell LimeWire to filter files that copyright owners request not "
-#~ "be shared. By enabling filtering, you are instructing LimeWire to confirm "
-#~ "all files you download or share with a list of removed content."
-#~ msgstr ""
-#~ "LimeWire kann Dateien ausfiltern, die Urheberrechtsinhaber von der "
-#~ "Freigabe ausgeschlossen haben.  Durch Aktivierung des Kontrollkästchens "
-#~ "teilen Sie LimeWire mit, alle Dateien, die Sie herunterladen oder "
-#~ "freigeben, gegen eine Liste von entfernten Inhalten zu prüfen.  Sie "
-#~ "können diese Einstellung später unter Optionen > Sicherheit > Filterung "
-#~ "ändern."
-
-#, fuzzy
-#~ msgid "Enable Content Filters"
-#~ msgstr "Inhaltsfilter"
-
-#, fuzzy
-#~ msgid "Always Ask What to do"
-#~ msgstr "Immer fragen, ob angezeigt werden soll"
-
-#, fuzzy
-#~ msgid "Capabilities"
-#~ msgstr "TLS deaktivieren"
-
-#, fuzzy
-#~ msgid "Disable Mojito DHT Capabilities:"
-#~ msgstr "TLS deaktivieren"
-
-#, fuzzy
-#~ msgid "OOB Searching"
-#~ msgstr "Suche"
-
-#, fuzzy
-#~ msgid "Show License Warning:"
-#~ msgstr "Medienbibliotheksleiste anzeigen"
-
-#, fuzzy
-#~ msgid "Use Defaults"
-#~ msgstr "Standard verwenden"
-
-#, fuzzy
-#~ msgid "Filter Hosts"
-#~ msgstr "Filter"
-
-#, fuzzy
-#~ msgid "Ignore Adult Content"
-#~ msgstr "Keine nicht jugendfreien Inhalte anzeigen"
-
-#, fuzzy
-#~ msgid "Ignore .vbs Files"
-#~ msgstr "Unvollständige Dateien"
-
-#, fuzzy
-#~ msgid "Image Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Maximum Downloads"
-#~ msgstr "Downloads"
-
-#, fuzzy
-#~ msgid "Maximum Downloads:"
-#~ msgstr "Downloads"
-
-#, fuzzy
-#~ msgid "Max Upload Slots"
-#~ msgstr "Maximale Uploads pro Torrent"
-
-#, fuzzy
-#~ msgid "Max Upload Slots:"
-#~ msgstr "Maximale Uploads pro Torrent"
-
-#, fuzzy
-#~ msgid "Open Dialog to Select a Folder"
-#~ msgstr "Ordner auswählen"
-
-#, fuzzy
-#~ msgid "Reset"
-#~ msgstr "Wiederaufnehmen"
-
-#, fuzzy
-#~ msgid "Partial Files"
-#~ msgstr "Gültige Dateien"
-
-#, fuzzy
-#~ msgid "Player Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Proxy Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Days to Keep Incomplete Files:"
-#~ msgstr "Unvollständige Dateien"
-
-#, fuzzy
-#~ msgid "Search Result Quality"
-#~ msgstr "Ausgezeichnete Qualität"
-
-#, fuzzy
-#~ msgid "Download Sharing"
-#~ msgstr "Download läuft"
-
-#, fuzzy
-#~ msgid "Shutdown Immediately"
-#~ msgstr "Immer sofort senden"
-
-#, fuzzy
-#~ msgid "Shutdown after Transfers"
-#~ msgstr "Nach Übertragungen beenden"
-
-#, fuzzy
-#~ msgid "Speed:"
-#~ msgstr "Senden"
-
-#, fuzzy
-#~ msgid "Bandwidth Indicator"
-#~ msgstr "Eingehende Bandbreite"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Indicator:"
-#~ msgstr "Eingehende Bandbreite"
-
-#, fuzzy
-#~ msgid "Firewall Indicator"
-#~ msgstr "Firewall"
-
-#, fuzzy
-#~ msgid "Show LimeWire Store Indicator:"
-#~ msgstr "Dateiorganisation im LimeWire Store"
-
-#, fuzzy
-#~ msgid "LimeWire Store - Save Folder"
-#~ msgstr "LimeWire Store"
-
-#, fuzzy
-#~ msgid "Update Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Upload Speed:"
-#~ msgstr "Element hochladen"
-
-#, fuzzy
-#~ msgid "Video Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "Video Player"
-#~ msgstr "Mediaplayer"
-
-#, fuzzy
-#~ msgid "Remove Selected File from Playlist"
-#~ msgstr "Aus Liste entfernen"
-
-#, fuzzy
-#~ msgid "Comment"
-#~ msgstr "Anmerkungen"
-
-#, fuzzy
-#~ msgid "Playlist"
-#~ msgstr "Wiedergabe"
-
-#, fuzzy
-#~ msgid "Loading Playlist Window..."
-#~ msgstr "LimeWire wird geladen..."
-
-#, fuzzy
-#~ msgid "Play Options:"
-#~ msgstr "Optionen"
-
-#, fuzzy
-#~ msgid "Shuffle"
-#~ msgstr "Unterordner"
-
-#, fuzzy
-#~ msgid "Continuous"
-#~ msgstr "Weiter"
-
-#, fuzzy
-#~ msgid "Save Playlist As"
-#~ msgstr "Speichern unter"
-
-#, fuzzy
-#~ msgid "General"
-#~ msgstr "Genre"
-
-#, fuzzy
-#~ msgid "Option"
-#~ msgstr "Optionen"
-
-#, fuzzy
-#~ msgid "Filter Results:"
-#~ msgstr "Suchergebnisse für Video"
-
-#, fuzzy
-#~ msgid "Back To Search"
-#~ msgstr "Suchen"
-
-#, fuzzy
-#~ msgid "Download As..."
-#~ msgstr "Downloads"
 
 #~ msgid "Configure"
 #~ msgstr "Konfigurieren"
 
-#, fuzzy
-#~ msgid "Search More"
-#~ msgstr "Suchen"
-
-#, fuzzy
-#~ msgid "Stop Search"
-#~ msgstr "Suchen"
-
-#, fuzzy
-#~ msgid "Download All Selected Files"
-#~ msgstr "Ausgewählte Dateien herunterladen"
-
-#, fuzzy
-#~ msgid "Don't Know"
-#~ msgstr "Nicht durchsuchen"
-
-#, fuzzy
-#~ msgid "Launch Action"
-#~ msgstr "Datei öffnen"
-
-#, fuzzy
-#~ msgid "Repeat Search"
-#~ msgstr "Suche wiederholen"
-
-#, fuzzy
-#~ msgid "Loading Search Window..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Firewalled Host"
-#~ msgstr "Firewall"
-
-#, fuzzy
-#~ msgid "Vendor"
-#~ msgstr "Senden"
-
-#, fuzzy
-#~ msgid "Junk Rating"
-#~ msgstr "Bewertung"
-
 #~ msgid "Back"
 #~ msgstr "Zurück"
-
-#, fuzzy
-#~ msgid "View Logging Messages"
-#~ msgstr "Warnmeldungen"
-
-#, fuzzy
-#~ msgid "Search and Download Files"
-#~ msgstr "Vorherige Downloads"
-
-#, fuzzy
-#~ msgid "Kill Upload"
-#~ msgstr "Uploads"
-
-#, fuzzy
-#~ msgid "Remove Inactive Uploads"
-#~ msgstr "Download entfernen"
-
-#, fuzzy
-#~ msgid "Freeloader Uploading"
-#~ msgstr "Upload fertiggestellt"
-
-#, fuzzy
-#~ msgid "Suspended"
-#~ msgstr "Senden"
-
-#, fuzzy
-#~ msgid "Loading Upload Window..."
-#~ msgstr "Browser wird geladen..."
-
-#, fuzzy
-#~ msgid "Seeding"
-#~ msgstr "Einstellungen"
-
-#, fuzzy
-#~ msgid "Download Already Finished"
-#~ msgstr "Ausgewählte Dateien herunterladen"
-
-#, fuzzy
-#~ msgid "Filename Taken"
-#~ msgstr "Dateiname"
-
-#, fuzzy
-#~ msgid "Not a File"
-#~ msgstr "Datei suchen"
-
-#, fuzzy
-#~ msgid "Filesystem Error"
-#~ msgstr "iTunes-Fehler"
-
-#, fuzzy
-#~ msgid "More Search Options"
-#~ msgstr "Weitere Optionen"
-
-#, fuzzy
-#~ msgid "ShareAlike"
-#~ msgstr "Freigeben"
-
-#, fuzzy
-#~ msgid "Title of Work:"
-#~ msgstr "Eingehende Verbindungen an Port:"
-
-#, fuzzy
-#~ msgid "Comment:"
-#~ msgstr "Anmerkungen"
-
-#, fuzzy
-#~ msgid "Copy to Clipboard"
-#~ msgstr "Verknüpfung in Zwischenablage kopieren"
-
-#, fuzzy
-#~ msgid "Kind:"
-#~ msgstr "Verknüpfung:"
-
-#, fuzzy
-#~ msgid "Size:"
-#~ msgstr "Größe"
-
-#, fuzzy
-#~ msgid "Date Modified:"
-#~ msgstr "Letzte Änderung"
-
-#, fuzzy
-#~ msgid "Title:"
-#~ msgstr "Titel"
-
-#, fuzzy
-#~ msgid "Artist:"
-#~ msgstr "Interpret"
-
-#, fuzzy
-#~ msgid "Album:"
-#~ msgstr "Album"
-
-#, fuzzy
-#~ msgid "Genre:"
-#~ msgstr "Genre"
-
-#, fuzzy
-#~ msgid "Year:"
-#~ msgstr "Jahr"
-
-#, fuzzy
-#~ msgid "Type:"
-#~ msgstr "Typ"
-
-#, fuzzy
-#~ msgid "Track:"
-#~ msgstr "Track"
-
-#, fuzzy
-#~ msgid "Length:"
-#~ msgstr "Länge"
-
-#, fuzzy
-#~ msgid "Bitrate:"
-#~ msgstr "Bitrate"
-
-#, fuzzy
-#~ msgid "Comments:"
-#~ msgstr "Anmerkungen"
 
 #~ msgid "Link:"
 #~ msgstr "Verknüpfung:"
 
-#, fuzzy
-#~ msgid "Action:"
-#~ msgstr "Aktiv"
+#~ msgid ""
+#~ "LimeWire has encountered an internal error. It is possible for LimeWire "
+#~ "to recover and continue running normally. To continue using LimeWire, "
+#~ "click 'Discard'. If desired, you can click 'Review' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "Ein interner Fehler ist aufgetreten. LimeWire kann den Fehler beheben und "
+#~ "den Betrieb fortsetzen. Um bei der Fehlerkorrektur zu helfen, klicken Sie "
+#~ "bitte 'Senden', um einen Fehlerbericht an LimeWire zu senden. Klicken Sie "
+#~ "zum Fortsetzen auf 'Ignorieren'. Klicken Sie auf 'Anzeigen', um "
+#~ "Informationen über den Fehler anzuzeigen."
 
-#, fuzzy
-#~ msgid "License:"
-#~ msgstr "Verknüpfung:"
+#~ msgid "Send"
+#~ msgstr "Senden"
 
-#, fuzzy
-#~ msgid "Rating:"
-#~ msgstr "Bewertung"
+#~ msgid "Review"
+#~ msgstr "Anzeigen"
 
-#, fuzzy
-#~ msgid "Studio:"
-#~ msgstr "Audio"
+#~ msgid "Loading HTML Engine..."
+#~ msgstr "HTML-Engine wird geladen..."
 
-#, fuzzy
-#~ msgid "Author:"
-#~ msgstr "Autor"
+#~ msgid "Loading Browser..."
+#~ msgstr "Browser wird geladen..."
 
-#, fuzzy
-#~ msgid "Platform:"
-#~ msgstr "Betriebssystem"
+#~ msgid "Loading User Interface..."
+#~ msgstr "Benutzeroberfläche wird geladen..."
+
+#~ msgid "Do Not Disturb"
+#~ msgstr "Bitte nicht stören"
+
+#~ msgid "View Library"
+#~ msgstr "Bibliothek anzeigen"
+
+#~ msgid "Finished"
+#~ msgstr "Fertig"
 
 #~ msgid "Inactive"
 #~ msgstr "Inaktiv"
@@ -7930,8 +7689,26 @@ msgstr ""
 #~ msgid "Queued - #{0} in line"
 #~ msgstr "In Warteschlange - An #{0}. Stelle"
 
+#~ msgid "Queued - remaining time unknown"
+#~ msgstr "In Warteschlange - verbleibende Zeit unbekannt"
+
+#~ msgid "Queued - Starting in {0}"
+#~ msgstr "In Warteschlange - Starte in {0}"
+
+#~ msgid "Categorize downloads"
+#~ msgstr "Downloads in Kategorien ordnen"
+
+#~ msgid "Launch file"
+#~ msgstr "Datei öffnen"
+
+#~ msgid "Remove from list"
+#~ msgstr "Aus Liste entfernen"
+
 #~ msgid "Locate file"
 #~ msgstr "Datei suchen"
+
+#~ msgid "Done"
+#~ msgstr "Fertig"
 
 #~ msgid "Queued - {0} person ahead of you for this file"
 #~ msgid_plural "Queued - {0} people ahead of you for this file"
@@ -7940,6 +7717,9 @@ msgstr ""
 
 #~ msgid "Queued - About {0} before download can begin"
 #~ msgstr "In Warteschlange - Etwa {0} bis der Download starten kann"
+
+#~ msgid "Chat from {0} - LimeWire 5"
+#~ msgstr "Chat von {0} - LimeWire 5"
 
 #~ msgid "View Files I'm sharing with them ({0})"
 #~ msgstr "Dateien anzeigen, die ich Ihnen freigegeben habe ({0})"
@@ -7952,19 +7732,69 @@ msgstr ""
 #~ msgid "Close chat (closes the current chat window)"
 #~ msgstr "Chat schließen (schließt das aktuelle Chatfenster)"
 
+#~ msgid "Library"
+#~ msgstr "Medienbibliothek"
+
 #~ msgid "Retry Download {0}"
 #~ msgstr "Download erneut versuchen {0}"
+
+#~ msgid "Logging in..."
+#~ msgstr "Anmeldung..."
+
+#~ msgid "Offline friends"
+#~ msgstr "Freunde offline"
+
+#~ msgid "Sign out"
+#~ msgstr "Abmelden"
 
 #~ msgid "Switch user"
 #~ msgstr "Benutzer wechseln"
 
+#~ msgid "Set {0} status"
+#~ msgstr "Zu Verbindungsstatus {0} wechseln"
+
+#~ msgid "Incorrect password."
+#~ msgstr "Kennwort ungültig."
+
 #~ msgid "Show files you're sharing with {0}"
 #~ msgstr "Dateien anzeigen, die Sie an {0} freigeben"
+
+#~ msgid "You're sharing {0} files with {1}"
+#~ msgstr "Sie haben {0} Dateien an {1} freigegeben"
 
 #~ msgid "{0} is on LimeWire but there were problems viewing their library"
 #~ msgstr ""
 #~ "{0} ist auf LimeWire, aber bei der Anzeige der Medienbibliothek  ist ein "
 #~ "Fehler aufgetreten"
+
+#~ msgid "Filter"
+#~ msgstr "Filter"
+
+#~ msgid "Sharing with {0}"
+#~ msgstr "Freigegeben an {0}"
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {0} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "Wenn Sie Ihre {0}-Sammlung freigeben, werden automatisch neue {0}-Dateien "
+#~ "freigegeben, die Sie Ihrer Medienbibliothek hinzufügen"
+
+#~ msgid "Sharing collection: {0}"
+#~ msgstr "Sammlung ist freigeben: {0}"
+
+#~ msgid "Returns to what's being shared with you."
+#~ msgstr "Kehrt zurück zur Anzeige, was Ihnen freigegeben wurde."
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {1} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "Wenn Sie Ihre {0}-Sammlung freigeben, werden automatisch neue {1}-Dateien "
+#~ "freigegeben, die Sie Ihrer Medienbibliothek hinzufügen"
+
+#~ msgid "Don't Scan"
+#~ msgstr "Nicht durchsuchen"
 
 #~ msgid "Scan"
 #~ msgstr "Durchsuchen"
@@ -7972,11 +7802,29 @@ msgstr ""
 #~ msgid "Folder"
 #~ msgstr "Ordner"
 
+#~ msgid "Modified"
+#~ msgstr "Letzte Änderung"
+
 #~ msgid "Created"
 #~ msgstr "Erstellt"
 
+#~ msgid "Already in My Library"
+#~ msgstr "Bereits in Medienbibliothek vorhanden"
+
 #~ msgid "Already downloading"
 #~ msgstr "Wird bereits heruntergeladen"
+
+#~ msgid "Number of Files"
+#~ msgstr "Anzahl der Dateien"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Verschiedenes"
+
+#~ msgid "Copy Link to Clipboard"
+#~ msgstr "Verknüpfung in Zwischenablage kopieren"
+
+#~ msgid "Download Selected Files"
+#~ msgstr "Ausgewählte Dateien herunterladen"
 
 #~ msgid "Share with Friends"
 #~ msgstr "An Freunde freigeben"
@@ -7993,17 +7841,93 @@ msgstr ""
 #~ msgid "Unshare with P2P Network"
 #~ msgstr "Freigabe an P2P-Netzwerk aufheben"
 
+#~ msgid "Share with P2P Network"
+#~ msgstr "An P2P-Netzwerk freigeben"
+
+#~ msgid "Delete File"
+#~ msgstr "Datei löschen"
+
 #~ msgid "Store"
 #~ msgstr "Einkaufsportal"
 
 #~ msgid "Libraries"
 #~ msgstr "Medienbibliotheken"
 
+#~ msgid "Close all searches"
+#~ msgstr "Alle Suchanfragen schließen"
+
+#~ msgid "Close search"
+#~ msgstr "Suchanfrage schließen"
+
+#~ msgid "Close other searches"
+#~ msgstr "Andere Suchanfragen schließen"
+
+#~ msgid "Repeat search"
+#~ msgstr "Suche wiederholen"
+
 #~ msgid "&Open File"
 #~ msgstr "Datei öffnen (&O)"
 
+#~ msgid "Open &Link"
+#~ msgstr "Verknüpfung öffnen (&L)"
+
+#~ msgid "Add File To Library"
+#~ msgstr "Datei zu Medienbibliothek hinzufügen"
+
+#~ msgid "Add Folder To Library"
+#~ msgstr "Ordner zu Medienbibliothek hinzufügen"
+
+#~ msgid "Using LimeWire..."
+#~ msgstr "Verwendung von LimeWire..."
+
+#~ msgid "FAQ..."
+#~ msgstr "FAQ..."
+
+#~ msgid "Get personal tech support"
+#~ msgstr "Persönliche technische Unterstützung anfordern"
+
+#~ msgid "Player"
+#~ msgstr "Mediaplayer"
+
+#~ msgid "Show current file"
+#~ msgstr "Aktuelle Datei anzeigen"
+
+#~ msgid "Hide Libraries bar"
+#~ msgstr "Medienbibliotheksleiste ausblenden"
+
+#~ msgid "Show Libraries bar"
+#~ msgstr "Medienbibliotheksleiste anzeigen"
+
+#~ msgid "Hide Chat window"
+#~ msgstr "Chatfenster ausblenden"
+
+#~ msgid "Show Chat window"
+#~ msgstr "Chatfenster anzeigen"
+
+#~ msgid "Invalid Link!"
+#~ msgstr "Verknüpfung ungültig!"
+
+#~ msgid "Open magnet or torrent link."
+#~ msgstr "Öffnet Magnet- oder Torrentverknüpfung."
+
+#~ msgid "Sharing downloads"
+#~ msgstr "Downloads freigeben"
+
+#~ msgid "Add audio files I downloaded from LimeWire to my iTunes Library"
+#~ msgstr ""
+#~ "Heruntergeladene Audiodateien zu meiner iTunes-Bibliothek hinzufügen"
+
 #~ msgid "Recent downloads"
 #~ msgstr "Vorherige Downloads"
+
+#~ msgid "Remember recent downloads"
+#~ msgstr "Vorherige Downloads speichern"
+
+#~ msgid "Manage"
+#~ msgstr "Verwalten"
+
+#~ msgid "Configure file naming"
+#~ msgstr "Dateibenennung einrichten"
 
 #~ msgid ""
 #~ "LimeWire will automatically scan the folders below and place files in "
@@ -8012,12 +7936,36 @@ msgstr ""
 #~ "LimeWire durchsucht automatisch die unten angegeben Ordner und übernimmt "
 #~ "Dateien in Ihre Medienbibliothek."
 
+#~ msgid "Add the following types of files to your Library:"
+#~ msgstr "Die folgenden Dateitypen zu Ihrer Medienbibliothek hinzufügen:"
+
+#~ msgid ""
+#~ "Scanning these folders into your Library will not automatically share "
+#~ "your files."
+#~ msgstr ""
+#~ "Das Durchsuchen dieser Ordner und Hinzufügen zur Medienbibliothek gibt "
+#~ "die Dateien nicht automatisch frei."
+
+#~ msgid "Add New Folder"
+#~ msgstr "Neuen Ordner hinzufügen"
+
+#~ msgid "Library Management"
+#~ msgstr "Bibliotheksverwaltung"
+
 #~ msgid "Manage Library"
 #~ msgstr "Medienbibliothek verwalten"
 
 #~ msgid "Manage what folders are loaded into your library"
 #~ msgstr ""
 #~ "Verwalten Sie, welche Ordner in Ihre Medienbibliothek geladen werden"
+
+#~ msgid ""
+#~ "Your Library is a central location to view, share and unshare your files "
+#~ "with the P2P Network and your friends."
+#~ msgstr ""
+#~ "Ihre Medienbibliothek ist ein zentraler Ort zur Anzeige Ihrer Dateien und "
+#~ "der Freigabe und Aufhebung der Freigabe an das P2P-Netzwerk und Ihre "
+#~ "Freunde."
 
 #~ msgid ""
 #~ "LimeWire will scan folders and look for files to add to your Library. "
@@ -8031,6 +7979,43 @@ msgstr ""
 #~ msgstr ""
 #~ "Wählen Sie aus, welche Dateierweiterungen zu welchem Datentyp gehören, "
 #~ "wie Audio, Video, usw."
+
+#~ msgid "Sign in when LimeWire starts"
+#~ msgstr "Beim Start von LimeWire anmelden"
+
+#~ msgid "Settings"
+#~ msgstr "Einstellungen"
+
+#~ msgid "-Searching for and sharing Programs with anyone"
+#~ msgstr "-Suche nach und Freigabe von Programmen an andere"
+
+#~ msgid "-Sharing Documents with the P2P Network"
+#~ msgstr "-Freigabe von Dokumenten an das P2P-Netzwerk"
+
+#~ msgid "Don't show adult content"
+#~ msgstr "Keine nicht jugendfreien Inhalte anzeigen"
+
+#~ msgid "Warn me when other programs take these associations"
+#~ msgstr "Warnen, wenn andere Programme diese Zuordnungen ändern"
+
+#~ msgid "Updates and Bugs"
+#~ msgstr "Aktualisierungen und Programmfehler"
+
+#~ msgid "Report bugs to LimeWire"
+#~ msgstr "Fehlerberichte an LimeWire senden"
+
+#~ msgid "Show me the bug report before sending it"
+#~ msgstr "Fehlerbericht vor dem Senden anzeigen"
+
+#~ msgid ""
+#~ "Allow me to search for and share Programs with the P2P Network and my "
+#~ "friends"
+#~ msgstr ""
+#~ "Suche nach Programmen und Freigabe im P2P-Netzwerk und bei meinen "
+#~ "Freunden erlauben"
+
+#~ msgid "Allow me to share Documents with the P2P Network"
+#~ msgstr "Freigabe von Dokumenten im P2P-Netzwerk erlauben"
 
 #~ msgid ""
 #~ "TODO get better copy... LimeWire is currently starting. When it has "
@@ -8062,6 +8047,9 @@ msgstr ""
 #~ msgid "Files I'm Sharing ({0})"
 #~ msgstr "Freigegebene Dateien ({0})"
 
+#~ msgid "{0} person"
+#~ msgstr "{0} Nutzer"
+
 #~ msgid "{0} people"
 #~ msgstr "{0} Nutzer"
 
@@ -8077,8 +8065,20 @@ msgstr ""
 #~ msgid "also not used"
 #~ msgstr "auch nicht verwendet"
 
+#~ msgid "Upload Item"
+#~ msgstr "Element hochladen"
+
+#~ msgid "Exit after Transfers"
+#~ msgstr "Nach Übertragungen beenden"
+
 #~ msgid "Jump to File in Library"
 #~ msgstr "Datei in Medienbibliothek öffnen"
+
+#~ msgid "Cancel Upload"
+#~ msgstr "Upload abbrechen"
+
+#~ msgid "Play file"
+#~ msgstr "Datei wiedergeben"
 
 #~ msgid "Waiting - {0} file needs to finish before upload can begin"
 #~ msgid_plural "Waiting - {0} files need to finish before upload can begin"
@@ -8092,8 +8092,41 @@ msgstr ""
 #~ msgid "LimeWire 5 - Some legal stff"
 #~ msgstr "LimeWire 5 - Rechtliches"
 
+#~ msgid "State your intent"
+#~ msgstr "Geben Sie Ihre Absicht an"
+
+#~ msgid ""
+#~ "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing the "
+#~ "authorized files only.  Installing and using either program does not "
+#~ "constitute a license for obtaining or distributing unauthorized content."
+#~ msgstr ""
+#~ "LimeWire Basic und LimeWire PRO sind Peer-to-Pee-Programme zum "
+#~ "rechtmäßigen Tausch von Dateien.  Die Installation und Nutzung eines der "
+#~ "Programme stellen keine Lizenz zur Beschaffung oder Verbreitung von nicht "
+#~ "autorisierten Inhalten dar."
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright "
+#~ "infringement"
+#~ msgstr ""
+#~ "Wenn Sie auf \"Ich stimme zu\" klicken, stimmen Sie zu, LimeWire 5 nicht "
+#~ "für Urheberrechtsverletzungen zu verwenden"
+
 #~ msgid "A few things before we begin..."
 #~ msgstr "Noch einige Dinge, bevor wir loslegen..."
+
+#~ msgid ""
+#~ "LimeWire can filter files that copyright owners request not be shared.  "
+#~ "By checking the box below you are telling LimeWire to confirm all files "
+#~ "you download or share with a list of removed content.  You can change "
+#~ "this later in Options > Security > Filtering."
+#~ msgstr ""
+#~ "LimeWire kann Dateien ausfiltern, die Urheberrechtsinhaber von der "
+#~ "Freigabe ausgeschlossen haben.  Durch Aktivierung des Kontrollkästchens "
+#~ "teilen Sie LimeWire mit, alle Dateien, die Sie herunterladen oder "
+#~ "freigeben, gegen eine Liste von entfernten Inhalten zu prüfen.  Sie "
+#~ "können diese Einstellung später unter Optionen > Sicherheit > Filterung "
+#~ "ändern."
 
 #~ msgid "Filter out files LimeWire identifies as unauthorized or unlicensed"
 #~ msgstr ""
@@ -8114,6 +8147,13 @@ msgstr ""
 #~ msgid "Automatically manage My Library"
 #~ msgstr "Meine Medienbibliothek automatisch verwalten"
 
+#~ msgid ""
+#~ "Choose this option to have LimeWire automatically scan files into your "
+#~ "Library from My Documents and the Desktop."
+#~ msgstr ""
+#~ "Mit dieser Option kann LimeWire Dateien automatisch in den Eigenen "
+#~ "Dokumenten und dem Desktop suchen und Ihrer Medienbibliothek hinzufügen."
+
 #~ msgid "Manually manage My Library"
 #~ msgstr "Meine Medienbibliothek manuell verwalten"
 
@@ -8123,3 +8163,10 @@ msgstr ""
 #~ msgstr ""
 #~ "Wählen Sie diese Option, wenn Sie auswählen möchten, welche Ordner "
 #~ "LiemWire durchsucht und Ihrer Medienbibliothek hinzufügt."
+
+#~ msgid "You can change these options later from Tools > Options"
+#~ msgstr ""
+#~ "Sie können diese Einstellungen später unter Extras > Optionen ändern"
+
+#~ msgid "<Go back"
+#~ msgstr "<Zurück"

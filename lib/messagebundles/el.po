@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-15 12:07-0500\n"
-"PO-Revision-Date: 2009-01-15 14:19-0500\n"
+"PO-Revision-Date: 2008-12-18 14:04+0530\n"
 "Last-Translator: FolioTS <contact@foliots.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,9 +18,8 @@ msgstr ""
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
-#, fuzzy
 msgid "All Types"
-msgstr "Όλα τα αρχεία"
+msgstr "Όλοι οι τύποι"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -80,15 +79,13 @@ msgstr "Βίντεο"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:13
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
-#, fuzzy
 msgid "Image"
-msgstr "Εικόνες"
+msgstr "Εικόνα"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
-#, fuzzy
 msgid "Document"
-msgstr "Έγγραφα"
+msgstr "Έγγραφο"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #, fuzzy
@@ -114,9 +111,8 @@ msgid "This file is not shareable"
 msgstr "Δεν διαμοιράζεται το αρχείο"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
-#, fuzzy
 msgid "Trouble connecting to people"
-msgstr "Απενεργοποίηση σύνδεσης στο Mojito DHT"
+msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:160
 msgid ""
@@ -230,12 +226,12 @@ msgstr ""
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:31
 #, fuzzy
 msgid "Firewall Manager"
-msgstr "Τείχος προστασίας"
+msgstr "Ένδειξη τείχους προστασίας"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 #, fuzzy
 msgid "Statistic Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Στατιστικές"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -261,7 +257,7 @@ msgstr "Έρευνα για αρχεία"
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:36
 #, fuzzy
 msgid "Do not disturb"
-msgstr "Μην ενοχλείτε"
+msgstr "Απόκρυψη ανεπιθύμητων"
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
@@ -285,7 +281,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/AcceptorImpl.java:402
 #, fuzzy
 msgid "Connection Listener"
-msgstr "Ταχύτητα σύνδεσης"
+msgstr "Φόρτωση ακροατή συνδέσεων..."
 
 #: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 #, fuzzy
@@ -300,12 +296,12 @@ msgstr "Συνδέσεις"
 #: core/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 #, fuzzy
 msgid "Connection Management"
-msgstr "Ταχύτητα σύνδεσης"
+msgstr "Φόρτωση διαχείρισης συνδέσεων..."
 
 #: core/com/limegroup/gnutella/ConnectionWatchdog.java:66
 #, fuzzy
 msgid "Stale Connection Management"
-msgstr "Ταχύτητα σύνδεσης"
+msgstr "Φόρτωση διαχείρισης ξεπερασμένων συνδέσεων..."
 
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:101
 msgid "Various Core Services"
@@ -314,17 +310,17 @@ msgstr ""
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:106
 #, fuzzy
 msgid "Gnutella Connections"
-msgstr "Συνδέσεις"
+msgstr "Προσθήκη σύνδεσης Gnutella"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:204
 #, fuzzy
 msgid "Old Downloads"
-msgstr "Λήψεις"
+msgstr "Λήψεις:"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
 #, fuzzy
 msgid "Download Management"
-msgstr "Γίνεται λήψη"
+msgstr "Φόρτωση διαχείρισης λήψεων..."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:278
 #, fuzzy
@@ -355,7 +351,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/HTTPUploadManager.java:231
 #, fuzzy
 msgid "Upload Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Φόρτωση διαχείρισης αποστολών..."
 
 #: core/com/limegroup/gnutella/HostCatcher.java:384
 #, fuzzy
@@ -374,12 +370,12 @@ msgstr "Εξερχόμενα μηνύματα"
 #: core/com/limegroup/gnutella/NetworkManagerImpl.java:162
 #, fuzzy
 msgid "Network Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Ταχύτητα δικτύου"
 
 #: core/com/limegroup/gnutella/NodeAssignerImpl.java:186
 #, fuzzy
 msgid "Ultrapeer/DHT Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Φόρτωση ρυθμίσεων διαχείρισης υπερ-κόμβου/DHT..."
 
 #: core/com/limegroup/gnutella/Pinger.java:57
 #, fuzzy
@@ -404,7 +400,7 @@ msgstr "Στατιστικές"
 #: core/com/limegroup/gnutella/auth/ContentManager.java:91
 #, fuzzy
 msgid "Content Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Φόρτωση ρυθμίσεων διαχείρισης ασφαλούς περιεχομένου..."
 
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 #, fuzzy
@@ -443,17 +439,16 @@ msgstr "Εμφάνιση τόξων Mojito D&ΗT"
 #: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
 #, fuzzy
 msgid "LimeWire Store Integration"
-msgstr "Οργάνωση αρχείων Καταστήματος LimeWire"
+msgstr "Ένδειξη καταστήματος LimeWire"
 
 #: core/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:24
 #, fuzzy
 msgid "Download Upgrade Task"
-msgstr "Λήψεις"
+msgstr "Σελίδα λήψεως"
 
 #: core/com/limegroup/gnutella/library/FileManagerImpl.java:71
-#, fuzzy
 msgid "Shared Files"
-msgstr "Έγκυρα αρχεία"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: core/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
@@ -462,12 +457,12 @@ msgstr ""
 #: core/com/limegroup/gnutella/messages/StaticMessages.java:43
 #, fuzzy
 msgid "Static Messages"
-msgstr "Προειδοποιητικά μηνύματα"
+msgstr "Μηνύματα Gnutella"
 
 #: core/com/limegroup/gnutella/routing/QRPUpdater.java:184
 #, fuzzy
 msgid "QRP Updater"
-msgstr "QRP Άδειο"
+msgstr "Ενημερώσεις"
 
 #: core/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
 #, fuzzy
@@ -477,7 +472,7 @@ msgstr "Εξερχόμενα μηνύματα"
 #: core/com/limegroup/gnutella/spam/RatingTable.java:98
 #, fuzzy
 msgid "Spam Management"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr "Φόρτωση των ρυθμίσεων διαχείρισης Spam..."
 
 #: core/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
 #, fuzzy
@@ -487,7 +482,7 @@ msgstr "Στατιστικές"
 #: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #, fuzzy
 msgid "Browse"
-msgstr "Αναζήτηση..."
+msgstr "Περιηγητής"
 
 #: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1005
 #, fuzzy
@@ -610,9 +605,8 @@ msgstr "Έτος"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
-#, fuzzy
 msgid "Language"
-msgstr "Διαχείριση"
+msgstr "Γλώσσα"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
@@ -632,15 +626,13 @@ msgstr "Σχόλια"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
-#, fuzzy
 msgid "Action"
-msgstr "Ενεργοποιημένο"
+msgstr "Ενέργεια"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#, fuzzy
 msgid "Copyright"
-msgstr "Αντιγραφή"
+msgstr "Πνευματικά δικαιώματα"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -659,14 +651,12 @@ msgid "Producer"
 msgstr "Παραγωγός"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
-#, fuzzy
 msgid "Studio"
-msgstr "Ήχος"
+msgstr "Στούντιο"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
-#, fuzzy
 msgid "Stars"
-msgstr "Κατάσταση"
+msgstr "Αστέρια"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -828,10 +818,10 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"Το LimeWire αντιμετώπισε ένα εσωτερικό σφάλμα. Το LimeWire είναι δυνατόν να "
-"αποκατασταθεί και να συνεχίσει να λειτουργεί κανονικά. Για να συνεχίσετε να "
-"χρησιμοποιείτε το LimeWire, πατήστε \"Απόρριψη\". Εάν θέλετε, μπορείτε να "
-"πατήσετε \"Ανασκόπηση\" για να δείτε τις πληροφορίες σχετικά με το σφάλμα."
+"Το LimeWire αντιμετώπισε ένα εσωτερικό σφάλμα. Είναι πιθανό να ανακάμψει και "
+"να συνεχίσει τη λειτουργία του κανονικά.Για να συνεχίσετε τη χρήση του, "
+"κάντε κλικ στο κουμπί «Απόρριψη». Αν θέλετε, μπορείτε να κάνετε κλικ στο "
+"κουμπί «Επισκόπηση» για να δείτε πληροφορίες σχετικά με το σφάλμα."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -839,9 +829,8 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
-#, fuzzy
 msgid "Show Bug"
-msgstr "Εμφάνιση:"
+msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
 msgid "Hide Bug"
@@ -891,23 +880,23 @@ msgstr "OK"
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:463
 #, fuzzy
 msgid "Loading HTML engine..."
-msgstr "Φόρτωση μηχανισμού HTML..."
+msgstr "Φόρτωση μηχανής HTML..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:480
 #, fuzzy
 msgid "Loading browser..."
-msgstr "Φόρτωση περιηγητή..."
+msgstr "Φόρτωση εικονιδίων..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:505
 #, fuzzy
 msgid "Loading user interface..."
-msgstr "Φόρτωση περιβάλλοντος εργασίας χρήστη..."
+msgstr "Φόρτωση διασύνδεσης χρήστη..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
 #, fuzzy
 msgid "Loading other languages..."
-msgstr "Φόρτωση περιβάλλοντος εργασίας χρήστη..."
+msgstr "Φόρτωμα Γλωσσών"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:585
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -952,9 +941,8 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:44
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:75
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:87
-#, fuzzy
 msgid "Error"
-msgstr "Σφάλμα Daap"
+msgstr "Σφάλμα"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:55
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:65
@@ -966,9 +954,8 @@ msgid "Message"
 msgstr "Μήνυμα"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:119
-#, fuzzy
 msgid "Do not display this message again"
-msgstr "Να μην εμφανιστεί ξανά αυτή η ειδοποίηση"
+msgstr "Να μην εμφανιστεί ξανά αυτό το μήνυμα"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
@@ -990,14 +977,13 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BackAction.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:66
-#, fuzzy
 msgid "Go back"
-msgstr "<Πίσω"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 #, fuzzy
 msgid "More File Info"
-msgstr "Προβολή πληροφοριών αρχείου"
+msgstr "Περισσότερες πληροφορίες..."
 
 #. *
 #. * The copy action.
@@ -1045,14 +1031,12 @@ msgid "Select All"
 msgstr "Επιλογή όλων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:41
-#, fuzzy
 msgid "&Available"
-msgstr "Διαθέσιμο"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:54
-#, fuzzy
 msgid "&Do Not Disturb"
-msgstr "Μην ενοχλείτε"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
@@ -1062,7 +1046,7 @@ msgstr "Συνδέσεις"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #, fuzzy
 msgid "View connections to other P2P clients"
-msgstr "Απενεργοποίηση σύνδεσης στο Mojito DHT"
+msgstr "Εμφάνιση συνδέσεων με άλλους χρήστες."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -1145,7 +1129,7 @@ msgstr "Κατάργηση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:100
 #, fuzzy
 msgid "View Files"
-msgstr "Έγκυρα αρχεία"
+msgstr "Εμφάνιση αδείας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:167
 msgid "Unable to view files - not yet connected to host"
@@ -1437,22 +1421,22 @@ msgstr "Αναίρεση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:158
 #, fuzzy
 msgid "Add to My Library"
-msgstr "Η βιβλιοθήκη μου"
+msgstr "Προβολή στη βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:162
 #, fuzzy, java-format
 msgid "Share files with {0}"
-msgstr "Κοινή χρήση αρχείου με {0}"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:164
 #, fuzzy
 msgid "Share files"
-msgstr "Κοινή χρήση {0} αρχείων"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:259
 #, fuzzy
 msgid "Show all"
-msgstr "Εμφάνιση:"
+msgstr "Εμφάνιση τελευταίου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:49
@@ -1462,7 +1446,7 @@ msgstr "Καθαρισμός ολοκληρωμένων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:339
 #, fuzzy
 msgid "Download Complete"
-msgstr "Λήψη από"
+msgstr "Ταχύτητα λήψεως:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:472
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:176
@@ -1507,15 +1491,14 @@ msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:618
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:528
-#, fuzzy
 msgid "Waiting - remaining time unknown"
-msgstr "Στην ουρά - χρόνος που απομένει: άγνωστο"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:620
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:530
-#, fuzzy, java-format
+#, java-format
 msgid "Waiting - Starting in {0}"
-msgstr "Στην ουρά - Έναρξη σε {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:68
 msgid "Pause All"
@@ -1530,14 +1513,13 @@ msgid "Clear Finished"
 msgstr "Καθαρισμός ολοκληρωμένων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
-#, fuzzy
 msgid "Clear When Finished"
-msgstr "Καθαρισμός ολοκληρωμένων"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
 #, fuzzy
 msgid "Categorize Downloads"
-msgstr "Κατάταξη λήψεων"
+msgstr "Εκκαθάριση λήψεων"
 
 #. add(new AbstractAction(I18n.tr("&Downloads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:162
@@ -1611,26 +1593,26 @@ msgstr "Προσπαθήστε ξανά"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:61
 #, fuzzy
 msgid "Launch File"
-msgstr "Άνοιγμα αρχείου"
+msgstr "Άνοιαμα Αρχείου(ων)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:69
 #, fuzzy
 msgid "Remove from List"
-msgstr "Κατάργηση από τη λίστα"
+msgstr "Αφαιρεί όλα τα αρχεία από τη λίστα αναπαραγωγής"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/LocateFileAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:73
 #, fuzzy
 msgid "Locate on Disk"
-msgstr "εντοπισμός στον δίσκο"
+msgstr "Τοποθεσίες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
 #, fuzzy
 msgid "Locate in Library"
-msgstr "εντοπισμός στη βιβλιοθήκη"
+msgstr "Προβολή στη βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:83
@@ -1644,9 +1626,8 @@ msgid "Preview File"
 msgstr "Προεπισκόπηση αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:91
-#, fuzzy
 msgid "Share File"
-msgstr "Κοινή χρήση"
+msgstr "Διαμοιρασμός αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:95
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/PlayAction.java:19
@@ -1664,9 +1645,8 @@ msgid "View"
 msgstr "Προβολή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:182
-#, fuzzy
 msgid " - "
-msgstr "Τέλος -"
+msgstr ""
 
 #. {0}: current size
 #. {1}: total size
@@ -1682,7 +1662,7 @@ msgstr[1] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:505
 #, fuzzy
 msgid "Unable to download - "
-msgstr "Δεν είναι δυνατή η λήψη:"
+msgstr "Ακύρωση λήψης"
 
 #. {0}: current size, {1} total size, {2} percent complete
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:508
@@ -1704,12 +1684,11 @@ msgstr "Σύνδεση όταν ξεκινά το LimeWire"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:42
 #, fuzzy
 msgid "Nickname:"
-msgstr "Όνομα"
+msgstr "Όνομα:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:46
-#, fuzzy
 msgid "Add friend"
-msgstr "Προσθήκη φίλου"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:78
@@ -1744,12 +1723,12 @@ msgstr "{{0} εισήγαγε ένα κείμενο"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:215
 #, fuzzy, java-format
 msgid "Chat from {0}"
-msgstr "Συνομιλία από {0} - LimeWire 5"
+msgstr "Σμήνος για: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:217
 #, fuzzy
 msgid "Reply"
-msgstr "Εφαρμογή"
+msgstr "Σπάνια"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:566
@@ -1781,7 +1760,7 @@ msgstr "Κοινή χρήση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:832
 #, fuzzy
 msgid "Close chat"
-msgstr "Κλείσιμο καρτέλας"
+msgstr "Κλείσιμο αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:89
 msgid "<html><u>Hide</u></html>"
@@ -1843,16 +1822,15 @@ msgstr "Αυτόματη εγγραφή φίλου"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:68
 #, fuzzy
 msgid "Signing in..."
-msgstr "Γίνεται σύνδεση..."
+msgstr "Έλεγχος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:89
 msgid "Show:"
 msgstr "Εμφάνιση:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:90
-#, fuzzy
 msgid "Offline Friends"
-msgstr "Φίλοι εκτός σύνδεσης"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:105
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:95
@@ -1861,9 +1839,8 @@ msgstr "Επιλογές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:107
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:114
-#, fuzzy
 msgid "Sign Out"
-msgstr "Αποσύνδεση"
+msgstr ""
 
 #. TODO fberger
 #. super(I18n.tr("Switch &User"));
@@ -1880,7 +1857,7 @@ msgstr "Σύνδεση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:217
 #, fuzzy, java-format
 msgid "Set {0} Status:"
-msgstr "Ορισμός {0} κατάσταση"
+msgstr "Κατάσταση σύνδεσης:"
 
 #. private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:55
@@ -1892,23 +1869,20 @@ msgid "Signing in ..."
 msgstr "Γίνεται σύνδεση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:58
-#, fuzzy
 msgid "Incorrect username or password."
-msgstr "Μη έγκυρος κωδικός πρόσβασης."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:59
 msgid "Network error."
 msgstr "Σφάλμα δικτύου."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:130
-#, fuzzy
 msgid "Sign in with"
-msgstr "Σύνδεση"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:150
-#, fuzzy
 msgid "Domain"
-msgstr "Εταιρεία"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:152
 msgid "Username"
@@ -1925,12 +1899,12 @@ msgstr "Απομνημόνευση"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileItemDialog.java:24
 #, fuzzy
 msgid "Copy Link"
-msgstr "Άνοιγμα &Σύνδεσμος"
+msgstr "Αντιγραφή"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:81
 #, fuzzy
 msgid "Search Library..."
-msgstr "Προβολή βιβλιοθήκης"
+msgstr "Αναζήτηση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AllFriendsLibraryPanel.java:68
 #, fuzzy
@@ -1947,12 +1921,12 @@ msgstr "Λήψη από {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:83
 #, fuzzy, java-format
 msgid "Share your files with {0}"
-msgstr "Κοινή χρήση αρχείου με {0}"
+msgstr "Διαμοιρασμός αρχείων  .torrent."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:269
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is offline"
-msgstr "{0} δεν είναι φάκελος"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
@@ -1973,9 +1947,8 @@ msgid "Sharing"
 msgstr "Κοινή χρήση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
-#, fuzzy
 msgid "1 file with your friend."
-msgstr "Μοιραστείτε με φίλους!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
 #, java-format
@@ -1983,9 +1956,8 @@ msgid "{0} files with your friend."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:275
-#, fuzzy
 msgid "files with your friend."
-msgstr "Μοιραστείτε με φίλους!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:283
 #, java-format
@@ -2013,7 +1985,7 @@ msgstr "Συνομιλία"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:292
 #, fuzzy
 msgid "about using LimeWire 5."
-msgstr "Πληροφορίες για το LimeWire"
+msgstr "Περί LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:288
 #, java-format
@@ -2032,28 +2004,26 @@ msgstr "Συνομιλία"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:301
 #, fuzzy, java-format
 msgid "Loading {0}'s files..."
-msgstr "Κοινή χρήση {0} αρχείων"
+msgstr "Φόρτωση αποθηκευμένων αρχείων..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:305
 #, fuzzy
 msgid "Loading files..."
-msgstr "Φόρτωση..."
+msgstr "Φόρτωμα συμβουλών..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
-#, fuzzy, java-format
+#, java-format
 msgid "{0} isn't sharing with you"
-msgstr "{0} θέλει να μοιραστεί ένα αρχείο μαζί σας"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:318
-#, fuzzy
 msgid "about sharing with you."
-msgstr "Αυτή τη στιγμή γίνεται χρήση με"
+msgstr ""
 
 #. this should never happen
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:321
-#, fuzzy
 msgid "This person isn't sharing any files with you."
-msgstr "{0} θέλει να μοιραστεί ένα αρχείο μαζί σας"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:332
 #, java-format
@@ -2070,9 +2040,8 @@ msgid "Share with {0}"
 msgstr "Κοινή χρήση με {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendSharingPanel.java:92
-#, fuzzy
 msgid "Return to what's being shared with you."
-msgstr "Επιστρέφει σε αυτό που μοιράζονται μαζί σας."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:121
 #, fuzzy, java-format
@@ -2088,17 +2057,17 @@ msgstr "Σφάλμα: {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:233
 #, fuzzy, java-format
 msgid "Sharing: {0}"
-msgstr "Κοινή χρήση με {0}"
+msgstr "Προειδοποίηση: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:229
 #, fuzzy
 msgid "Sharing: all"
-msgstr "Κοινή χρήση"
+msgstr "Διαμοιρασμός"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:240
-#, fuzzy, java-format
+#, java-format
 msgid "Sharing Collection: {0}"
-msgstr "Συλλογή που μοιράζεστε: {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:156
 msgid "X"
@@ -2107,7 +2076,7 @@ msgstr "Χ"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:169
 #, fuzzy
 msgid "Sharing with"
-msgstr "Κοινή χρήση με {0}"
+msgstr "Συνομιλία με"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:113
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:123
@@ -2132,14 +2101,14 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:40
 #, fuzzy
 msgid "Share with the P2P Network"
-msgstr "Μοιραστείτε με το Δίκτυο P2P"
+msgstr "Σύνδεση στο δίκτυο."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:59
 #, fuzzy
 msgid "the P2P Network"
-msgstr "Δίκτυο P2P"
+msgstr "Δίκτυο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:278
 #, java-format
@@ -2149,7 +2118,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:464
 #, fuzzy
 msgid "Share:"
-msgstr "Κοινή χρήση"
+msgstr "Διαμοιρασμός"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:567
 #, java-format
@@ -2158,13 +2127,11 @@ msgstr "Κοινή χρήση ολόκληρης Συλλογής {0} με {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:571
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:43
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Sharing your {0} collection shares new {1} files that automatically get "
 "added to your Library"
 msgstr ""
-"Η κοινή χρήση της συλλογής σας {0} αυτόματα σημαίνει κοινή χρήση των νέων "
-"αρχείων {1} που προστέθηκαν στη Βιβλιοθήκη σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:654
 #, fuzzy
@@ -2177,9 +2144,8 @@ msgid "Share all the files in this category."
 msgstr "Ένδειξη διαμοιραζόμενων αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:674
-#, fuzzy
 msgid "none"
-msgstr "Τέλος"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:675
 msgid "Unshare all the files in this category."
@@ -2188,15 +2154,12 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:93
 #, fuzzy
 msgid "share folder"
-msgstr "Αποθήκευση φακέλων"
+msgstr "Να διαμοιράζεται ο κατάλογος"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/LibraryTreeTableContainer.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:243
-#, fuzzy
 msgid "*Adding these folders will not automatically share your files"
 msgstr ""
-"Η αυτόματη αναζήτηση στους φακέλους αυτούς για την προσθήκη αρχείων στη "
-"Βιβλιοθήκη σας δεν σημαίνει αυτόματη κοινή χρήση των αρχείων σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonEditor.java:25
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonRenderer.java:18
@@ -2228,9 +2191,9 @@ msgid "All Friends"
 msgstr "Όλοι οι φίλοι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:40
-#, fuzzy, java-format
+#, java-format
 msgid "Share {0} collection"
-msgstr "Κοινή χρήση συλλογής"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:331
@@ -2240,31 +2203,30 @@ msgstr "Αυτή τη στιγμή γίνεται χρήση με"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
 #, fuzzy
 msgid "Share one file"
-msgstr "Εμφάνιση τρέχοντος αρχείου"
+msgstr "Διαμοιρασμός αρχείων  .torrent."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:104
 msgid "Start typing a friend's name"
 msgstr "Πληκτρολογήστε το όνομα ενός φίλου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:105
-#, fuzzy
 msgid "Add another friend"
-msgstr "Προσθήκη φίλου"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:31
 #, fuzzy, java-format
 msgid "Share {0} {1} files"
-msgstr "Κοινή χρήση {0} αρχείων"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:32
 #, fuzzy, java-format
 msgid "Shared {0} files with:"
-msgstr "Κοινή χρήση {0} αρχείων"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:37
 #, fuzzy, java-format
 msgid "Unshare {0} files"
-msgstr "Κοινή χρήση {0} αρχείων"
+msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:18
@@ -2360,7 +2322,7 @@ msgstr "Από"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:30
 #, fuzzy
 msgid "Date Created"
-msgstr "Ημερομηνία δημιουργίας"
+msgstr "Δημιουργήθηκε"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:31
@@ -2393,9 +2355,8 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
-#, fuzzy
 msgid "Hits"
-msgstr "Ύψος"
+msgstr "Ευρήματα"
 
 #. add(new AbstractAction(I18n.tr("&Uploads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
@@ -2416,7 +2377,7 @@ msgstr "Αποστολή"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #, fuzzy
 msgid "Upload attempts"
-msgstr "Αποστολή στοιχείου"
+msgstr "Αποστολές:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:157
 msgid "download"
@@ -2428,21 +2389,18 @@ msgid "This file cannot be shared."
 msgstr ". Το αρχείο δεν μπορεί να αναλυθεί."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:75
-#, fuzzy
 msgid "Sign in to share Documents with your friends"
 msgstr ""
-"Ως προεπιλογή, το LimeWire σας επιτρέπει να μοιράζεστε έγγραφα με τους "
-"φίλους σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:80
 #, fuzzy
 msgid "Share this file with a friend"
-msgstr "Μοιραστείτε με φίλους!"
+msgstr "Το αρχείο διαμοιράζεται"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:84
-#, fuzzy, java-format
+#, java-format
 msgid "share ({0})"
-msgstr "Κοινή χρήση με {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:100
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendDownloadAction.java:20
@@ -2456,12 +2414,12 @@ msgstr "Λήψη"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/UnshareAction.java:21
 #, fuzzy
 msgid "Unshare"
-msgstr "κοινή χρήση"
+msgstr "Διαμοιρασμός"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 #, fuzzy
 msgid "Delete Files"
-msgstr "Διαγραφή αρχείου"
+msgstr "Διαγραφή Αρχ&είου(ων)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2612,33 +2570,31 @@ msgstr "Κατάστημα LimeWire"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:138
 #, fuzzy
 msgid "Show Sidebar"
-msgstr "Εμφάνιση γραμμής Βιβλιοθήκες"
+msgstr "Προβολή στη βιβλιοθήκη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:141
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:146
-#, fuzzy
 msgid "Hide Sidebar"
-msgstr "Απόκρυψη γραμμής Βιβλιοθήκες"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:152
 #, fuzzy
 msgid "Close All Searches"
-msgstr "Κλείσιμο όλων των αναζητήσεων"
+msgstr "Κλείσιμο αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:153
-#, fuzzy
 msgid "Close Search"
 msgstr "Κλείσιμο αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:154
 #, fuzzy
 msgid "Close Other searches"
-msgstr "Κλείσιμο όλων των άλλων αναζητήσεων"
+msgstr "Κλείσιμο αναζήτησης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:383
 #, fuzzy
 msgid "Find More Results"
-msgstr "Αποτελέσματα βίντεο"
+msgstr "Περισσότερα αποτελέσματα"
 
 #. TODO fberger comment out
 #. super(I18n.tr("&File"));
@@ -2650,10 +2606,11 @@ msgstr "Αρχείο"
 #. super(I18n.tr("F&riend"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:166
+#, fuzzy
 msgid "Friend"
 msgid_plural "Friends"
 msgstr[0] "Φίλος"
-msgstr[1] ""
+msgstr[1] "Φίλος"
 
 #. TODO fberger
 #. super(I18n.tr("&Help"));
@@ -2666,25 +2623,24 @@ msgstr "Βοήθεια"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:34
 #, fuzzy
 msgid "Using LimeWire"
-msgstr "Χρήση του LimeWire..."
+msgstr "Χρησι&μοποιώντας το LimeWire"
 
 #. add(new AbstractAction(I18n.tr("&FAQ")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:42
 #, fuzzy
 msgid "FAQ"
-msgstr "Συχνές ερωτήσεις..."
+msgstr "Συ&χνές ερωτήσεις"
 
 #. add(new AbstractAction(I18n.tr("Get personalized &tech support")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
-#, fuzzy
 msgid "Get personalized tech support"
-msgstr "Λάβετε προσωπική τεχνική υποστήριξη"
+msgstr ""
 
 #. add(new AbstractAction(I18n.tr("&About LimeWire...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:65
 #, fuzzy
 msgid "About LimeWire..."
-msgstr "Πληροφορίες για το LimeWire"
+msgstr "Περί LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/PlayerMenu.java:24
 #, fuzzy
@@ -2701,7 +2657,7 @@ msgstr "Εργαλεία"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:67
 #, fuzzy
 msgid "Advanced Tools..."
-msgstr "Προηγμένα εργαλεία"
+msgstr "Για προχωρημένους"
 
 #. add(new AbstractAction(I18n.tr("&Options...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:77
@@ -2715,14 +2671,13 @@ msgid "What's New Search"
 msgstr "Αναζήτηση \"Τι νέο υπάρχει\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
-#, fuzzy
 msgid "Hide &Sidebar"
-msgstr "Απόκρυψη γραμμής Βιβλιοθήκες"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
 #, fuzzy
 msgid "Show &Sidebar"
-msgstr "Εμφάνιση γραμμής Βιβλιοθήκες"
+msgstr "Προβολή στη βιβλιοθήκη"
 
 #. .tr("Hide &Download Tray"), I18n.tr("Show &Download Tray")));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:37
@@ -2737,19 +2692,18 @@ msgstr "Εμφάνιση Δίσκου λήψης"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
 #, fuzzy
 msgid "Hide Chat Window"
-msgstr "Απόκρυψη παραθύρου συνομιλίας"
+msgstr "Κλείσιμο παραθύρου."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
 #, fuzzy
 msgid "Show Chat Window"
-msgstr "Εμφάνιση παραθύρου συνομιλίας"
+msgstr "Προβολή του παραθύρου {0}"
 
 #. TODO fberger
 #. super(I18n.tr("Add F&ile to Library..."));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:28
-#, fuzzy
 msgid "Add File to Library..."
-msgstr "Προσθήκη αρχείου στη βιβλιοθήκη"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:34
 msgid "Add File(s)"
@@ -2768,7 +2722,7 @@ msgstr "Έγκυρα αρχεία"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:28
 #, fuzzy
 msgid "Add Folder to Library..."
-msgstr "Προσθήκη φακέλου στη βιβλιοθήκη"
+msgstr "Προσθέστε ένα φάκελο στον επιλεγμένο φάκελο της βιβλιοθήκης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:35
@@ -2791,12 +2745,12 @@ msgstr "Έ&ξοδος"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:87
 #, fuzzy
 msgid "Exit After Transfers"
-msgstr "Τερματισμός μετά τη Μεταφορά"
+msgstr "Έξοδος μετά την ολοκλήρωση των μεταφορών"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:39
 #, fuzzy
 msgid "Invalid Link"
-msgstr "Άκυρος Σύνδεσμος!"
+msgstr "Μη έγκυρη εμφάνιση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:54
@@ -2806,7 +2760,7 @@ msgstr "Άνοιγμα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:86
 #, fuzzy
 msgid "Enter a magnet or torrent link below:"
-msgstr "Άνοιγμα δεσμού magnet ή torrent."
+msgstr "Ανοίγει δεσμό magnet ή αρχείο torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:44
 #, fuzzy
@@ -2816,7 +2770,7 @@ msgstr "Ανοίξτε .&torrent"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:53
 #, fuzzy
 msgid "Open Torrent"
-msgstr "BitTorrent"
+msgstr "Ανοίξτε .&torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2831,19 +2785,18 @@ msgstr "Δεν διαμοιράζεται το αρχείο"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:91
 #, fuzzy
 msgid "Unable to open torrent"
-msgstr "Μέγιστος αριθμός αποστολών ανά torrent"
+msgstr "Αδύνατη η αφαίρεση δεδομένων."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:51
 #, fuzzy
 msgid "Open &Link..."
-msgstr "Άνοιγμα &Σύνδεσμος"
+msgstr "Άνοιγμα..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandler.java:60
-#, fuzzy
 msgid "Open Link"
-msgstr "Άνοιγμα &Σύνδεσμος"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 msgid "Magnet link contains no options."
@@ -2875,9 +2828,8 @@ msgid "Files"
 msgstr "Αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
-#, fuzzy
 msgid "Transfers"
-msgstr "Τερματισμός μετά τη Μεταφορά"
+msgstr "Μεταφορές αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
 msgid "System"
@@ -2973,10 +2925,8 @@ msgid "Share files downloaded from the P2P Network with the P2P Network"
 msgstr "Κοινή χρήση αρχείων που ελήφθησαν από το Δίκτυο P2P με το Δίκτυο P2P'"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:103
-#, fuzzy
 msgid "Add audio files I downloaded from LimeWire to iTunes"
 msgstr ""
-"Προσθήκη αρχείων ήχου που κατέβασα από το LimeWire στη Βιβλιοθήκη μου iTunes"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:108
 msgid "Save downloads to:"
@@ -3006,7 +2956,7 @@ msgstr "Διαχείριση επεκτάσεων αρχείων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 #, fuzzy
 msgid "Manage..."
-msgstr "Διαχείριση"
+msgstr "Παύση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 msgid "Manage file extensions to load"
@@ -3046,7 +2996,7 @@ msgstr "Οργάνωση αρχείων Καταστήματος LimeWire"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
 #, fuzzy
 msgid "Configure file naming..."
-msgstr "Ρύθμιση παραμέτρων ονομασίας αρχείων"
+msgstr "Ρύθμιση..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
 msgid "Configure how files are automatically named"
@@ -3097,21 +3047,18 @@ msgstr "Σφάλμα Daap"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:39
 #, fuzzy
 msgid "Add Extension"
-msgstr "Επέκταση"
+msgstr "Προσθήκη νέας επέκτασης"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:41
 #, fuzzy
 msgid "Extensions"
-msgstr "Επέκταση"
+msgstr "Επεκτάσεις:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:60
-#, fuzzy
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"Το LimeWire θα εμφανίσει τώρα στα αποτελέσματα αναζήτησης αρχεία με τις "
-"παρακάτω λέξεις-κλειδιά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:97
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:202
@@ -3121,16 +3068,15 @@ msgstr "Χρήση προεπιλογής"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #, fuzzy
 msgid "Revert to default settings"
-msgstr "Επαναφορά των προεπιλογών "
+msgstr "Επαναφορά στο αρχικό"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
 msgstr "Προσθήκη λέξης-κλειδί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:40
-#, fuzzy
 msgid "Keyword"
-msgstr "Προσθήκη λέξης-κλειδί"
+msgstr "Λέξη κλειδί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:55
 msgid ""
@@ -3253,20 +3199,17 @@ msgstr "Κανένας υποφάκελος"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:125
 #, fuzzy
 msgid "Sharing Categories"
-msgstr "Μη ασφαλείς κατηγορίες"
+msgstr "Διαμοιρασμός επεκτάσεων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 msgid "Only share files in that category at that point"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:130
-#, fuzzy
 msgid ""
 "Share my entire collection, including new files that automatically get added "
 "to My Library"
 msgstr ""
-"Η κοινή χρήση της συλλογής σας {0} αυτόματα σημαίνει κοινή χρήση των νέων "
-"αρχείων {0} που προστέθηκαν στη Βιβλιοθήκη σας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:142
 msgid "Choose what happens when I share a category"
@@ -3277,23 +3220,19 @@ msgid "Sharing Categories - Configure"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:223
-#, fuzzy
 msgid ""
 "Automatically add the following categories from folders below to My Library:"
-msgstr "Προσθήκη των παρακάτω ειδών αρχείων στη Βιβλιοθήκη σας:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:235
-#, fuzzy
 msgid ""
 "*Adding these folders will automatically share any collections you shared"
 msgstr ""
-"Η αυτόματη αναζήτηση στους φακέλους αυτούς για την προσθήκη αρχείων στη "
-"Βιβλιοθήκη σας δεν σημαίνει αυτόματη κοινή χρήση των αρχείων σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:329
 #, fuzzy
 msgid "Add New Folder..."
-msgstr "Προσθήκη νέου φακέλου"
+msgstr "Διαμοιράστε νέο κατάλογο..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:330
 msgid "Choose a folder to automatically scan for changes"
@@ -3315,9 +3254,8 @@ msgstr ""
 "για διαμοιρασμό.</table></html>"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:347
-#, fuzzy
 msgid "Library Manager Error"
-msgstr "Διαχείριση Βιβλιοθήκης"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:372
 msgid ""
@@ -3327,30 +3265,28 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:373
 #, fuzzy
 msgid "View Folders..."
-msgstr "Αποθήκευση φακέλων"
+msgstr "Διαμοιράστε νέο κατάλογο..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:381
 #, fuzzy
 msgid "Manually Imported Folders"
-msgstr "Διαχείριση αποθήκευσης φακέλων"
+msgstr "Χειρωνακτική προώθηση θύρας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:428
 msgid "Use the LimeWire player when I play audio files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:43
-#, fuzzy
 msgid "Select which file extensions belong in each category"
-msgstr "Επιλέξτε επεκτάσεις αρχείων που ανήκουν σε κάθε κατηγορία"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:203
 msgid "Revert directories to the default"
 msgstr "Επαναφορά καταλόγων στις προεπιλογές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:55
-#, fuzzy
 msgid "Language:"
-msgstr "Διαχείριση"
+msgstr "Γλώσσα:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:127
 msgid "Notifications"
@@ -3369,9 +3305,8 @@ msgid "Friends and Chat"
 msgstr "Φίλοι και Συνομιλία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:172
-#, fuzzy
 msgid "Sign into Friends when LimeWire starts"
-msgstr "Σύνδεση όταν ξεκινά το LimeWire"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:191
 msgid "Jabber Server:"
@@ -3527,7 +3462,7 @@ msgstr "Ομαδοποίηση παρόμοιων αποτελεσμάτων"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:88
 #, fuzzy
 msgid "Search bar"
-msgstr "Αναζήτηση"
+msgstr "Αναζήτηση εδώ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:92
 msgid "By default, search for"
@@ -3538,9 +3473,8 @@ msgid "Suggest files from friends"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
-#, fuzzy
 msgid "Remember my recent searches"
-msgstr "Απομνημόνευση πρόσφατων λήψεων"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3554,7 +3488,7 @@ msgstr "Προειδοποιητικά μηνύματα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 #, fuzzy
 msgid "Settings..."
-msgstr "Ρυθμίσεις"
+msgstr "Φόρτωση ρυθμίσεων χρήστη..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Choose which warning messags to display"
@@ -3580,14 +3514,12 @@ msgid "For your safety, LimeWire disables you from:"
 msgstr "Για την ασφάλειά σας, το LimeWire σας δεν σας δίνει τη δυνατότητα για:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:139
-#, fuzzy
 msgid "- Searching for and sharing programs with anyone"
-msgstr "Αναζήτηση και κοινή χρήση προγραμμάτων με οποιονδήποτε"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:140
-#, fuzzy
 msgid "- Sharing documents with the P2P Network"
-msgstr "Κοινή χρήση εγγράφων με το Δίκτυο P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:181
 msgid ""
@@ -3595,9 +3527,8 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:184
-#, fuzzy
 msgid "Don't show adult content in search results"
-msgstr "Μη προβολή περιεχομένου για ενηλίκους"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:188
 msgid "Filter Keywords"
@@ -3606,7 +3537,7 @@ msgstr "Λέξεις-κλειδιά φίλτρου"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 #, fuzzy
 msgid "Filter Keywords..."
-msgstr "Λέξεις-κλειδιά φίλτρου"
+msgstr "Λέξεις κλειδιά"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 msgid ""
@@ -3616,18 +3547,17 @@ msgstr "Περιορισμός εμφάνισης ορισμένων λέξεω�
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:192
 #, fuzzy
 msgid "Filter File Extensions"
-msgstr "Επέκταση αρχείου"
+msgstr "Διαμοιραζόμενοι τύποι αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
 #, fuzzy
 msgid "Filter File Extensions..."
-msgstr "Επέκταση αρχείου"
+msgstr "Να διαμοιράζονται οι προκαθορισμένες επεκτάσεις αρχείων."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
-#, fuzzy
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
-msgstr "Περιορισμός εμφάνισης ορισμένων λέξεων στα αποτελέσματα της αναζήτησης"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:195
 msgid "In search results..."
@@ -3658,7 +3588,9 @@ msgstr "αρχεία .magnet"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 #, fuzzy
 msgid "Warn me when other programs want to automatically open these types"
-msgstr "Ειδοποιήστε με όταν άλλα προγράμματα παίρνουν αυτές τις συσχετίσεις"
+msgstr ""
+"Μπορείτε να επιλέξετε εάν θέλετε να εκκαθαρίζονται αυτόματα ή όχι οι λήψεις "
+"αρχείων που έχουν ολοκληρωθεί."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3686,32 +3618,26 @@ msgid "Bugs"
 msgstr "Απασχολημένο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
-#, fuzzy
 msgid "Let me know about bugs before sending them"
-msgstr "Εμφάνιση της αναφοράς σφαλμάτων πριν την αποστολή"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 #, fuzzy
 msgid "Always send bugs to Lime Wire"
-msgstr "Αποστολή αναφοράς σφαλμάτων στο LimeWire"
+msgstr "Να γίνεται πάντα προσθήκη αριθμού στο όνομα αρχείου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
-#, fuzzy
 msgid "Never send bugs to Lime Wire"
-msgstr "Αποστολή αναφοράς σφαλμάτων στο LimeWire"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
-#, fuzzy
 msgid ""
 "Allow me to search for and share programs with the P2P Network and my friends"
 msgstr ""
-"Επιτρεψέ μου να κάνω αναζήτηση και να μοιράζομαι προγράμματα με το Δίκτυο "
-"P2P και τους φίλους μου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:31
-#, fuzzy
 msgid "Allow me to share documents with the P2P Network"
-msgstr "Επιτρεψέ μου να μοιράζομαι έγγραφα με το Δίκτυο P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:34
 msgid ""
@@ -3770,7 +3696,7 @@ msgstr "Αναίρεση όλων των αλλαγών"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/HelpAction.java:19
 #, fuzzy
 msgid "Learn more..."
-msgstr "Μάθετε περισσότερα"
+msgstr "Μάθετε περισσότερα..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:17
 msgid "Keep any changes made"
@@ -3789,21 +3715,20 @@ msgstr "\"{0}\" ιδιότητες"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:228
 #, fuzzy
 msgid "Overview"
-msgstr "Ανασκόπηση"
+msgstr "Επισκόπηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:251
 msgid "Details"
 msgstr "Λεπτομέρειες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:255
-#, fuzzy
 msgid "Location"
-msgstr "Ειδοποιήσεις"
+msgstr "Τοποθεσία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, fuzzy
 msgid "Dimensions"
-msgstr "Επέκταση"
+msgstr "Επεκτάσεις:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, java-format
@@ -3811,45 +3736,43 @@ msgid "({0}px X {1}px)"
 msgstr "({0}px X {1}px)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:20
-#, fuzzy
 msgid "New audio"
-msgstr "Μόνο τα αρχεία ήχου"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:21
 #, fuzzy
 msgid "New documents"
-msgstr "Μόνο τα έγγραφα"
+msgstr "Έγγραφα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:22
 #, fuzzy
 msgid "New images"
-msgstr "Μόνο οι εικόνες"
+msgstr "Εικόνες"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:23
 #, fuzzy
 msgid "New programs"
-msgstr "Μόνο τα προγράμματα"
+msgstr "Προγράμματα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:24
-#, fuzzy
 msgid "New videos"
-msgstr "Μόνο τα βίντεο"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:27
 #, fuzzy
 msgid "New files"
-msgstr "Αριθμός αρχείων"
+msgstr "αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:125
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:194
 #, fuzzy
 msgid "Search P2P Network"
-msgstr "Μοιραστείτε με το Δίκτυο P2P"
+msgstr "Αναζήτηση εδώ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:191
 #, fuzzy
 msgid "Search P2P Network and Friends"
-msgstr "Μοιραστείτε με το Δίκτυο P2P"
+msgstr "Αναζήτηση στο δίκτυο για τις δεδομένες λέξεις."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:12
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:63
@@ -3889,7 +3812,7 @@ msgstr "Βίντεο"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 #, fuzzy
 msgid "&Other"
-msgstr "Προγράμματα"
+msgstr "Άλλο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:42
 msgid "All files"
@@ -3972,9 +3895,8 @@ msgid "Sort by:"
 msgstr "Ταξινόμηση κατά:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:98
-#, fuzzy
 msgid "Refine results..."
-msgstr "Αποτελέσματα αναζήτησης..."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:190
 msgid "List view"
@@ -3991,7 +3913,7 @@ msgstr "Σήμανση ως ανεπιθύμητης αλληλογραφίας"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 #, fuzzy
 msgid "Copy link"
-msgstr "Αντιγραφή όλων"
+msgstr "Αντιγραφή"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -4013,35 +3935,35 @@ msgid "Do not warn me again"
 msgstr "Να μην εμφανιστεί ξανά αυτή η ειδοποίηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:45
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is marked as spam."
-msgstr "Άρση σήμανσης ως ανεπιθύμητης αλληλογραφίας"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:89
 #, fuzzy, java-format
 msgid "Chat with {0}"
-msgstr "Κοινή χρήση με {0}"
+msgstr "Συνομιλία με τον κόμβο"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:102
-#, fuzzy, java-format
+#, java-format
 msgid "View Files of {0}"
-msgstr "Προβολή πληροφοριών αρχείου"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:115
-#, fuzzy, java-format
+#, java-format
 msgid "Share With {0}"
-msgstr "Κοινή χρήση με {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:140
 msgid "nobody"
 msgstr "κανείς"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:158
-#, fuzzy, java-format
+#, java-format
 msgid "{0} Person"
 msgid_plural "{0} People"
-msgstr[0] "{0} άτομο"
-msgstr[1] "{0} άτομο"
+msgstr[0] ""
+msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:160
 #, fuzzy
@@ -4054,8 +3976,8 @@ msgstr[1] "Άτομο"
 #, fuzzy, java-format
 msgid "{0} Friend"
 msgid_plural "{0} Friends"
-msgstr[0] "Φίλος"
-msgstr[1] "Φίλος"
+msgstr[0] "Έχετε φίλους;"
+msgstr[1] "Έχετε φίλους;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:170
 #, java-format
@@ -4065,21 +3987,19 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:172
-#, fuzzy
 msgid "P2P User"
 msgid_plural "P2P Users"
-msgstr[0] "Δίκτυο P2P"
-msgstr[1] "Δίκτυο P2P"
+msgstr[0] ""
+msgstr[1] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:237
 #, fuzzy
 msgid "Friends"
-msgstr "Φίλος"
+msgstr "Έχετε φίλους;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:243
-#, fuzzy
 msgid "P2P Users"
-msgstr "Δίκτυο P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:50
 msgid "Unmark as spam"
@@ -4092,31 +4012,30 @@ msgstr "Σήμανση ως ανεπιθύμητης αλληλογραφίας"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:62
 #, fuzzy
 msgid "Hide Similar Files"
-msgstr "Απόκρυψη γραμμής Βιβλιοθήκες"
+msgstr "Απόκρυψη αρχείων .torrent"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:77
 #, fuzzy
 msgid "View File Info..."
-msgstr "Προβολή πληροφοριών αρχείου"
+msgstr "Εμφάνιση στον περιηγητή..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:92
 #, fuzzy
 msgid "Block Address"
-msgstr "Διεύθυνση"
+msgstr "Μπλοκάρισμα κόμβου"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:179
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
 #, fuzzy
 msgid "Show similar files"
-msgstr "Εμφάνιση τρέχοντος αρχείου"
+msgstr "Διαμοιραζόμενα αρχεία"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
-#, fuzzy
 msgid "Hide similar files"
-msgstr "Απόκρυψη γραμμής Βιβλιοθήκες"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:210
 #, fuzzy
@@ -4177,9 +4096,8 @@ msgid "\"magnet:\" links"
 msgstr "\"magnet:\" δεσμοί"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
-#, fuzzy
 msgid "Warn me when other programs take LimeWire associations"
-msgstr "Ειδοποιήστε με όταν άλλα προγράμματα παίρνουν αυτές τις συσχετίσεις"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 #, fuzzy
@@ -4214,7 +4132,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 #, fuzzy
 msgid "No Internet Connection"
-msgstr "Προσθήκη σύνδεσης"
+msgstr "Προσθήκη σύνδεσης Gnutella"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:113
 msgid "You have no internet connection"
@@ -4224,19 +4142,18 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 #, fuzzy
 msgid "Weak connection"
-msgstr "Προσθήκη σύνδεσης"
+msgstr "Σύνδεση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:135
-#, fuzzy
 msgid "You have a weak connection"
-msgstr "Είστε ένας κόμβος κλάδου"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 #, fuzzy
 msgid "Medium connection"
-msgstr "Προσθήκη σύνδεσης"
+msgstr "Σύνδεση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
@@ -4246,7 +4163,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 #, fuzzy
 msgid "Full Connection"
-msgstr "Συνδέσεις"
+msgstr "Σύνδεση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 #, fuzzy
@@ -4254,9 +4171,8 @@ msgid "You are fully connected"
 msgstr "Αυτή τη στιγμή συνδέεστε στο δίκτυο."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:156
-#, fuzzy
 msgid "Turbo charged Connection"
-msgstr "Προσθήκη σύνδεσης"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:157
 msgid "You have an turbo-charged connection"
@@ -4265,7 +4181,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/MinimizedDownloadSummaryPanel.java:57
 #, fuzzy, java-format
 msgid "Downloads ({0})"
-msgstr "Λήψη {0}"
+msgstr "Λήψεις:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:41
@@ -4275,9 +4191,9 @@ msgstr "Κοινή χρήση {0} αρχείων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:60
-#, fuzzy, java-format
+#, java-format
 msgid "{0} (incomplete)"
-msgstr "{0}% ολοκληρώθηκαν"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
 #, fuzzy
@@ -4320,9 +4236,8 @@ msgstr ""
 "όταν κλείσετε. Θέλετε να γίνει η ενημέρωση τώρα;"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:173
-#, fuzzy
 msgid "Update Ready"
-msgstr "Ενημερώσεις και Σφάλματα"
+msgstr "Ενημέρωση έτοιμη"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:195
 msgid "Update Later"
@@ -4331,7 +4246,7 @@ msgstr "Ενημέρωση αργότερα"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:65
 #, fuzzy
 msgid "Play File"
-msgstr "Αναπαραγωγή αρχείου"
+msgstr "Πρόγραμμα αναπαραγωγής"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:216
 #, java-format
@@ -4368,7 +4283,7 @@ msgstr[1] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:240
 #, fuzzy
 msgid "Waiting for connections..."
-msgstr "Ρυθμίστε την ταχύτητα σύνδεσής σας"
+msgstr "Αναμονή για σταθερές συνδέσεις"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:250
 msgid "Unable to upload: file error"
@@ -4419,19 +4334,16 @@ msgid "KB/s"
 msgstr "KB/s"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:403
-#, fuzzy
 msgid "Poor (media quality)"
-msgstr "Κακή ποιότητα"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:405
-#, fuzzy
 msgid "Good (media quality)"
-msgstr "Καλή ποιότητα"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:407
-#, fuzzy
 msgid "Excellent (media quality)"
-msgstr "Εξαιρετική ποιότητα"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:419
 msgid "Poor Quality"
@@ -4453,19 +4365,19 @@ msgstr "Μη έγκυρες εναλλακτικές τοποθεσίες"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Unable to open URL"
-msgstr "Δεν είναι δυνατή η λήψη:"
+msgstr "Αδύνατη η αφαίρεση δεδομένων."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Open URL"
-msgstr "Άνοιγμα &Σύνδεσμος"
+msgstr "Άνοιγμα:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:187
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:190
-#, fuzzy, java-format
+#, java-format
 msgid "Unable to open file: {0}"
-msgstr "Δεν είναι δυνατή η λήψη:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:188
@@ -4478,7 +4390,7 @@ msgstr "Άνοιγμα αρχείου"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:254
 #, fuzzy, java-format
 msgid "Unable to locate file: {0}"
-msgstr "Δεν είναι δυνατή η αποστολή: σφάλμα αρχείου"
+msgstr "Το LimeWire δεν μπορεί να διαμοιράσει το αρχείο «{0}»."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:251
@@ -4499,7 +4411,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:53
 #, fuzzy
 msgid "Invalid Folder"
-msgstr "Έγκυρα αρχεία"
+msgstr "Άκυρος επιλογέας"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:166
 #, fuzzy, java-format
@@ -4517,15 +4429,15 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:167
 #, fuzzy
 msgid "Folder Warning"
-msgstr "Φιλτράρισμα"
+msgstr "Προειδοποίηση"
 
 #. Create user message.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:86
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Unable to download: {0}\n"
 "file {1}"
-msgstr "Δεν είναι δυνατή η λήψη:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:103
 msgid "Save File As..."
@@ -4540,21 +4452,15 @@ msgid "Overwrite"
 msgstr "Αντικατάσταση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:248
-#, fuzzy
 msgid "State Your Intent"
-msgstr "Δηλώστε τις προθέσεις σας"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:250
-#, fuzzy
 msgid ""
 "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
 "authorized files only. Installing and using either program does not "
 "constitute a license for obtaining or distributing unauthorized content."
 msgstr ""
-"Το LimeWire Basic και το LimeWire PRO είναι ομότιμα προγράμματα για την "
-"κοινή χρήση μόνο εγκεκριμένων αρχείων.  Η εγκατάσταση και χρήση οποιουδήποτε "
-"προγράμματος δεν συνιστά άδεια απόκτησης ή διανομής υλικού που δεν είναι "
-"εγκεκριμένο."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
@@ -4562,13 +4468,10 @@ msgid "Learn more"
 msgstr "Μάθετε περισσότερα"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:252
-#, fuzzy
 msgid ""
 "By clicking \"I Agree\", you agree to not use LimeWire for copyright "
 "infringement."
 msgstr ""
-"Επιλέγοντας \"Συμφωνώ\", συμφωνείτε να μη χρησιμοποιείτε το LimeWire 5 για "
-"παραβάσεις πνευματικών δικαιωμάτων"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:253
 #, fuzzy
@@ -4607,11 +4510,8 @@ msgid "Launch LimeWire at Startup"
 msgstr "Εκτέλεση του LimeWire κατά την Εκκίνηση"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:43
-#, fuzzy
 msgid "My Library is where you view, share and unshare your files."
 msgstr ""
-"Η Βιβλιοθήκη σας είναι ένα κεντρικό σημείο για την προβολή, κοινή χρήση και "
-"μη των αρχείων σας με το Δίκτυο P2P και τους φίλους σας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:44
 msgid ""
@@ -4628,14 +4528,10 @@ msgid "Automatically add files to My Library, but don't share any new files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
-#, fuzzy
 msgid ""
 "Have LimeWire automatically add files from My Documents and the Desktop to "
 "My Library."
 msgstr ""
-"Επιλέξτε αυτή την επιλογή ώστε το LimeWire να κάνει αυτόματη αναζήτηση και "
-"εισαγωγή αρχείων στη Βιβλιοθήκη σας από Τα έγγραφά μου και την Επιφάνεια "
-"εργασίας."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:48
 msgid "Manually add files to My Library, but don't share any files"
@@ -4651,25 +4547,21 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:51
-#, fuzzy
 msgid "Add the following categories from the folders below to My Library:"
-msgstr "Προσθήκη των παρακάτω ειδών αρχείων στη Βιβλιοθήκη σας:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:52
-#, fuzzy
 msgid "You can change this later from Tools > Options"
 msgstr ""
-"Αργότερα μπορείτε να αλλάξετε αυτές τις επιλογές από τα Εργαλεία > Επιλογές"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:236
 #, fuzzy
 msgid "Add Folder"
-msgstr "Προσθήκη φακέλου(φακέλων)"
+msgstr "Όλοι οι κατάλογοι"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:237
-#, fuzzy
 msgid "Choose a folder to automatically add to My Library"
-msgstr "Επιλέξτε έναν φάκελο όπου θα γίνει αυτόματη αναζήτηση για αλλαγές"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:58
 msgid "Continue"
@@ -4741,6 +4633,9 @@ msgstr ""
 "πλήρη πρόσβαση στις εισερχόμενες και εξερχόμενες συνδέσεις. Για να θέσετε "
 "εκτός λειτουργίας αυτό το χαρακτηριστικό, πατήστε «Όχι»."
 
+msgid "Modem"
+msgstr "Μόντεμ"
+
 msgid "Cable/DSL"
 msgstr "Καλώδιο/DSL"
 
@@ -4757,6 +4652,14 @@ msgstr ""
 msgid "United States"
 msgstr "Αναβαθμίσεις"
 
+#, fuzzy
+msgid "English"
+msgstr "Τέλος"
+
+#, fuzzy
+msgid "false"
+msgstr "Επικόλληση"
+
 msgid ""
 "Saving downloads to {0} may not function correctly.  To be sure downloads "
 "are saved properly you should save them to a sub-directory of {1}.  Would "
@@ -4765,6 +4668,9 @@ msgstr ""
 "Αν σωθούν τα downloads στο {0} ίσως δεν λειτουργήσουν σωστά. Για να είστε "
 "σίγουροι ότι τα downloads σώθηκαν σωστά θα πρέπει να τα σώστετε σε έναν "
 "υποφάκελο του {1}. Θα θέλατε να διαλέξετε μια άλλη τοποθεσία;"
+
+msgid "You are sharing {0} files (Loading...)"
+msgstr "Ο αριθμός των αρχείων που μοιράζεστε. {0} αρχεία (Φόρτωμα...)"
 
 msgid ""
 "You are attempting to share a folder that is likely to contain sensitive "
@@ -4784,11 +4690,18 @@ msgstr ""
 msgid "Opens a .torrent file from your hard drive"
 msgstr "Ανοίγει ένα αρχείο με επέκταση .torrent από το σκληρό δίσκο."
 
+msgid "&Download .torrent"
+msgstr "Κατεβάστε .torrent"
+
 msgid "Downloads a .torrent file from the WWW"
 msgstr "Κατεβάζει ένα αρχείο με επέκταση .torrent από το WWW"
 
 msgid "URL"
 msgstr "URL(Ιστοσελίδα)"
+
+#, fuzzy
+msgid "Paste from Clipboard"
+msgstr "Αντιγραφή στο Πρόχειρο"
 
 msgid "The specified URL is not valid. Please check your input."
 msgstr ""
@@ -4798,6 +4711,9 @@ msgstr ""
 msgid "Search \"What''s New\" for: {0}"
 msgstr "Ψάξε \"Τί είναι νέο\" για: {0}"
 
+msgid "Waiting"
+msgstr "Αναμονή"
+
 msgid ""
 "LimeWire was unable to load the specified torrent file, - it may be "
 "malformed or LimeWire does not have permission to access this file."
@@ -4805,12 +4721,18 @@ msgstr ""
 "Το LimeWire δεν μπόρεσε να φορτώσε το συγκεκριμένος αρχείο torrent, - ίσως "
 "έχει κακή προέκταση ή το LimeWire δεν έχει άδεια για πρόσβαση στο αρχείο."
 
+msgid "Finish Setup"
+msgstr "Τέλος ρυθμίσεων"
+
 msgid ""
 "Your LimeWire setup has successfully completed. Please press the \"Finish\" "
 "button to begin using LimeWire."
 msgstr ""
 "Η διευθέτηση του LimeWire ολοκληρώθηκε επιτυχώς. Παρακαλώ πατήστε το κουμπί "
 "«Τέλος» για να αρχίσετε να χρησιμοποιείτε το LimeWire."
+
+msgid "Language Options"
+msgstr "Επιλογές γλώσσας"
 
 msgid "Please choose the language you would like LimeWire to use."
 msgstr ""
@@ -4823,6 +4745,12 @@ msgstr ""
 "Παρακαλώ επιλέξτε ένα φάκελο μέσα στον οποίο θα θέλατε το LimeWire να "
 "αποθηκεύει τα αρχεία που κατεβάζετε. Αυτός ο φάκελος επίσης θα μοιράζεται με "
 "άλλους χρήστες του gnutella."
+
+msgid "Save Folder:"
+msgstr "Κατάλογος:"
+
+msgid "Confirm Scan"
+msgstr "Επιβεβαίωση σάρωσης"
 
 msgid ""
 "We identified the folders below as ones that you might like to share. If you "
@@ -4856,6 +4784,9 @@ msgstr ""
 msgid "Scan Hard Drive?"
 msgstr "Εξέταση σκληρού δίσκου;"
 
+msgid "Limewire Setup Dialog"
+msgstr "Διάλογος Setup του LimeWire"
+
 msgid ""
 "Please choose the speed of your Internet connection. Setting this speed "
 "correctly is important for optimum network performance. If you are not sure "
@@ -4868,14 +4799,23 @@ msgstr ""
 "της σύνδεσής σας δεν υπάρχει στη λίστα, απλά επιλέξτε οποιαδήποτε άλλη που "
 "σας φαίνεται πιο κοντινή."
 
+msgid "Select Speed"
+msgstr "Επιλέξτε ταχύτητα"
+
 msgid "Scanning Hard Drive"
 msgstr "Σάρωση σκληρού δίσκου"
 
 msgid "Please wait as LimeWire scans your hard drive..."
 msgstr "Παρακαλώ περιμένετε καθώς το LimeWire σαρώνει τον δίσκο σας..."
 
+msgid "Scan cancelled"
+msgstr "Σάρωση ακυρώθηκε"
+
 msgid "Scanning Hard Drive..."
 msgstr "Εξέταση σκληρού δίσκου..."
+
+msgid "Cancel Scan"
+msgstr "Ακύρωση Σάρωσης"
 
 msgid ""
 "The selected folder cannot be shared.  Please select another folder to share."
@@ -4945,6 +4885,9 @@ msgstr ""
 "Ένα ή περισσότερα αρχεία ή προτόκολα που το LimeWire χρησιμοποιεί δεν είναι "
 "πια συσχετισμένο με το LimeWire. Θα θέλατε το LimeWire να το διορθώσε αυτό;"
 
+msgid "Annotating file"
+msgstr "Αρχείο σχολιασμού"
+
 msgid "Edit annotation of type:"
 msgstr "Επεξεργασία σχολιασμού του τύπου:"
 
@@ -5006,11 +4949,23 @@ msgstr ""
 "Υπήρξε ένα πρόβλημα στην επικοινωνία με το \"Internet Archive\". Παρακαλώ "
 "προσπαθήστε αργότερα."
 
+msgid "Upload"
+msgstr "Ανέβασμα"
+
 msgid "Connecting to the Internet Archive..."
 msgstr "Σύνδεση στο Internet Archieve..."
 
+msgid "Connected..."
+msgstr "Συνδεδεμένο..."
+
+msgid "Uploading file"
+msgstr "Ανέβασμα αρχείου"
+
 msgid "of"
 msgstr "από"
+
+msgid "Uploaded"
+msgstr "Ανεβασμένο"
 
 msgid "V"
 msgstr "E"
@@ -5033,6 +4988,9 @@ msgstr "X"
 msgid "Stop Sharing the Selected Library Folder"
 msgstr "Σταματήστε να μοιράζεστε τον επιλεγμένο φάκελο της βιβλιοθήκης."
 
+msgid "Results"
+msgstr "Αποτελέσματα"
+
 msgid "Recovery Failed"
 msgstr "Η ανάκτηση απέτυχε"
 
@@ -5044,6 +5002,9 @@ msgstr "για τις πηγές"
 
 msgid "Gnutella"
 msgstr "Gnutella"
+
+msgid "files (Loading...)"
+msgstr "αρχεία (Φόρτωμα...)"
 
 msgid "Files with this name"
 msgstr "Αρχεία με αυτό το όνομα"
@@ -5134,11 +5095,23 @@ msgstr ""
 "Σύνολο kilobytes για αιτήσεις push Multicast που στάληκαν από όλους τους "
 "πελάτες του Gnutella, σε αντιδιαστολή με άλλα LimeWire."
 
+msgid "QRP"
+msgstr "QRP"
+
+msgid "Errors"
+msgstr "Σφάλματα"
+
 msgid "Query Replies"
 msgstr "Χτύποι αναζήτησης"
 
 msgid "Ping Replies"
 msgstr "Απαντήσεις σε ping"
+
+msgid "Compression"
+msgstr "Συμπίεση"
+
+msgid "Hit Routing Errors"
+msgstr "Σφάλματα χτύποι αναζήτησης δρομολόγησης."
 
 msgid "Requests"
 msgstr "Αιτήσεις"
@@ -5197,6 +5170,36 @@ msgstr "Gnutella (ενδεχόμενο)"
 msgid "Gnutella (Actual)"
 msgstr "Gnutella (πραγματικό)"
 
+msgid "All Messages"
+msgstr "Όλα τα μηνύματα"
+
+msgid "Hops 1"
+msgstr "Hops 1"
+
+msgid "Hops 2"
+msgstr "Hops 2"
+
+msgid "Hops 3"
+msgstr "Hops 3"
+
+msgid "Hops 4"
+msgstr "Hops 4"
+
+msgid "Hops 5"
+msgstr "Hops 5"
+
+msgid "Hops 6"
+msgstr "Hops 6"
+
+msgid "Hops 7"
+msgstr "Hops 7"
+
+msgid "Hops 8"
+msgstr "Hops 8"
+
+msgid "Hops 9"
+msgstr "Hops 9"
+
 msgid "TTL 0"
 msgstr "TTL 0"
 
@@ -5227,8 +5230,17 @@ msgstr "TTL 8"
 msgid "TTL 9"
 msgstr "TTL 9"
 
+msgid "Pong Errors"
+msgstr "Σφάλματα απαντήσεις σε ping"
+
+msgid "Reply Errors"
+msgstr "Σφάλματα χτύποι αναζήτησης"
+
 msgid "No Route"
 msgstr "Μη δρομολόγηση"
+
+msgid "All Requests"
+msgstr "Όλες οι αιτήσεις"
 
 msgid "HEAD Requests"
 msgstr "Αιτήσεις αποστολή επικεφαλίδες (HEAD)"
@@ -5253,6 +5265,9 @@ msgstr "Αίτηση THEX"
 
 msgid "URN Get"
 msgstr "Αποστολή αρχείων URN"
+
+msgid "Freeloader"
+msgstr "Χρήστες-παράσιτα"
 
 msgid "Normal"
 msgstr "Κανονικό"
@@ -5292,6 +5307,9 @@ msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων Gnutella �
 msgid "The average size in kilobytes of received messages from LimeWires."
 msgstr "Μέσο μέγεθος ληφθέντων μηνυμάτων σε kilobytes από τα LimeWires."
 
+msgid "Current"
+msgstr "Τρέχων"
+
 msgid ". No line is available for output."
 msgstr ". Δεν υπάρχει διαθέσιμη γραμμή για έξοδο."
 
@@ -5306,6 +5324,9 @@ msgstr "Όλα τα ειδικά επελεγμένα ερωτήματα."
 
 msgid "False Positive"
 msgstr "Λάθος Θετικό"
+
+msgid "Generic Errors"
+msgstr "Γενικά σφάλματα"
 
 msgid "Handshaking"
 msgstr "Χειραψία"
@@ -5322,12 +5343,24 @@ msgstr "Στατιστικά στοιχεία για μηνύματα ελεγχ
 msgid "Total messages filtered."
 msgstr "Σύνολο φιλτραρισμένων μηνυμάτων."
 
+msgid "Color"
+msgstr "Χρώμα"
+
 msgid "Write statistics for this graph to files."
 msgstr ""
 "Να γραφούν στατιστικά στοιχεία γι’ αυτή τη γραφική παράσταση στα αρχεία."
 
+msgid "All Errors"
+msgstr "Όλα τα σφάλματα"
+
 msgid "Invalid Payload Length"
 msgstr "Άκυρη έκταση ωφέλιμου φορτίου"
+
+msgid "Invalid Hops"
+msgstr "Άκυρο Hops"
+
+msgid "Invalid TTL"
+msgstr "Άκυρο TTL"
 
 msgid "Hops > Soft Max"
 msgstr "Hops > soft μέγιστος"
@@ -5398,6 +5431,9 @@ msgstr "Άκυρο ωφέλιμο φορτίο αιτήσεις push"
 msgid "All Vendor Message Errors"
 msgstr "Όλα τα σφάλματα μηνυμάτων πωλητή"
 
+msgid "Invalid ID"
+msgstr "Άκυρη ταυτότητα"
+
 msgid "Invalid Payload"
 msgstr "Άκυρο ωφέλιμο φορτίο"
 
@@ -5406,6 +5442,9 @@ msgstr "Άγνωστο μήνυμα πωλητή"
 
 msgid "Route Table Patch"
 msgstr "Προσθήκη προσθήκης στον πίνακα διανομών"
+
+msgid "What's New?"
+msgstr "Τι νέο υπάρχει;"
 
 msgid "Hard Limit"
 msgstr "Ανώτατο όριο"
@@ -5428,8 +5467,20 @@ msgstr "Ανώτατο όριο (TTL 4)"
 msgid "Hard Limit (TTL 5 or above)"
 msgstr "Ανώτατο όριο (TTL 5 ή παραπάνω)"
 
+msgid "Connection Attempts"
+msgstr "Προσπάθειες σύνδεσης"
+
+msgid "Incoming Attempts"
+msgstr "Εισερχόμενες προσπάθειες"
+
 msgid "Unknown Requests"
 msgstr "Άγνωστες αιτήσεις"
+
+msgid "Banned Hosts"
+msgstr "Απαγορευμένοι πάροχοι"
+
+msgid "Closed Immediately"
+msgstr "Άμεσο κλείσιμο"
 
 msgid "Problem Reading Header"
 msgstr "Προβληματική ανάγνωση επικεφαλίδας"
@@ -5439,6 +5490,9 @@ msgstr "Άγνωστος κωδικός απάντησης"
 
 msgid "Content URN mismatch"
 msgstr "Κακός συνδυασμός περιεχομένου URN"
+
+msgid "Incompatible Ranges"
+msgstr "Ασυμβίβαστες σειρές"
 
 msgid "Succeeded"
 msgstr "Πέτυχε"
@@ -5494,6 +5548,9 @@ msgstr "Αποτυχημένη push"
 msgid "Completed Responses"
 msgstr "Συμπληρωμένες απαντήσεις"
 
+msgid "Completed File Transfers"
+msgstr "Επιτυχημένες μεταφορές αρχείων"
+
 msgid "Out Rej. (Leaf)"
 msgstr "Απορριψη εξ. (φύλλα)"
 
@@ -5530,6 +5587,9 @@ msgstr "Δεκτό εισ. (φύλλα)"
 msgid "In Acc. (Guiding To Leaf)"
 msgstr "Δεκτό εισ. (guiding to φύλλα)"
 
+msgid "In Acc. (Ultrapeer)"
+msgstr "Δεκτό εισ. (ultrapeer)"
+
 msgid "In Rej. (All Slots Taken)"
 msgstr "Απορριψη εισ. (all slots taken)"
 
@@ -5541,6 +5601,18 @@ msgstr "Απορριψη διακομιστή"
 
 msgid "No Conclusion"
 msgstr "Χωρίς λήξη"
+
+msgid "LimeWire Ultrapeers"
+msgstr "Ultrapeers LimeWire"
+
+msgid "LimeWire Leaves"
+msgstr "Φύλλα LimeWire"
+
+msgid "Other Ultrapeers"
+msgstr "Άλλοι ultrapeers"
+
+msgid "Other Leaves"
+msgstr "Άλλα Φύλλα"
 
 msgid "Responses Requested"
 msgstr "Αιτηθείσες απαντήσεις"
@@ -5638,6 +5710,9 @@ msgstr ""
 "είναι χρήσιμες για προχωρημένους χρήστες, καθώς επίσης και για ερευνητές που "
 "εργάζονται στο δίκτυο Gnutella. Τα προχωρημένα αυτά στατιστικά στοιχεία δεν "
 "εμφαίνονται εξ ορισμού και δεν συνιστώνται για τους περισσότερους χρήστες."
+
+msgid "Weedshare"
+msgstr "Δημόσιο μοίρασμα"
 
 msgid "All Gnutella messages received by this client."
 msgstr "Όλα τα μηνύματα Gnutella που λήφθηκαν μέσω αυτόν τον πελάτη."
@@ -5790,6 +5865,9 @@ msgstr ""
 
 msgid "All queries that were received from routed connections."
 msgstr "Όλα τα ερωτήματα που λήφθηκαν από συνδέσεις διανομής"
+
+msgid "Hit"
+msgstr "Χτύποι"
 
 msgid "Generic errors while reading messages."
 msgstr "Γενικά σφάλματα κατά την ανάγνωση μηνυμάτων."
@@ -6096,6 +6174,9 @@ msgstr ""
 "στάσιμες. Οι αριθμοί αυτοί αυξάνονται ανά σύνδεση και όχι ανά τμήμα. (Οι "
 "στάσιμες αποστολές θα καταχωρηθούν ως αποστολές που διακόπηκαν.)"
 
+msgid "Not Sharing Files"
+msgstr "Μη μοιραζόμενα αρχεία"
+
 msgid "Interrupted"
 msgstr "Διακοπείσες"
 
@@ -6106,8 +6187,26 @@ msgstr ""
 msgid "Validation Required"
 msgstr "Επικύρωση Αναγκαία"
 
+msgid "Height:"
+msgstr "Ύψος:"
+
+msgid "Display:"
+msgstr "Εμφάνιση:"
+
+msgid "Vendor Messages"
+msgstr "Μηνύματα πωλητή"
+
 msgid "HTTP Content"
 msgstr "Περιεχόμενο HTTP"
+
+msgid "&New Folder"
+msgstr "&Νέος Φάκελος"
+
+msgid "Launch the Selected File(s)"
+msgstr "Άνοιγμα Επελεγμένου(ων) αρχείου(ων)"
+
+msgid "Delete the Selected File(s)"
+msgstr "Διαγράψε το(α) επελεγμένο(να) αρχείο(α)"
 
 msgid "Refre&sh"
 msgstr "Ανανέωση"
@@ -6125,6 +6224,9 @@ msgstr ""
 msgid "You are sharing"
 msgstr "Ο αριθμός των αρχείων που μοιράζεστε."
 
+msgid "Loading Resources..."
+msgstr "Φόρτωση πηγών..."
+
 msgid ""
 "LimeWire was unable to download the torrent file from the specified URL:"
 msgstr ""
@@ -6134,15 +6236,36 @@ msgstr ""
 msgid "Check these associations when starting LimeWire:"
 msgstr "Τσεκάρετε αυτές τις σχέσεις όταν αρχίζετε το LimeWire:"
 
+msgid "Alt. Locations"
+msgstr "Εναλλακτικές τοποθεσίες"
+
 msgid "Only search results with a {0} are official LimeWire communications."
 msgstr ""
 "Μόνο αποτελέσματα με ένα {0} είναι αναγωνρισμένες πληροφορίες του LimeWire."
 
+msgid "Loading TLS Encryption..."
+msgstr "Φόρτωση κρυπτογράφησης TLS..."
+
+msgid "Loading Message Router..."
+msgstr "Φόρτωση δρομολογητή μηνυμάτων..."
+
 msgid "Checking for Updates..."
 msgstr "Έλεγχος για ενημερώσεις..."
 
+msgid "Locating Peers..."
+msgstr "Εντοπισμός κόμβων..."
+
+msgid "Loading Shared Files..."
+msgstr "Φόρτωση διαμοιραζόμενων αρχείων..."
+
+msgid "Loading BitTorrent Management..."
+msgstr "Φόρτωση διαχείρισης BitTorrent..."
+
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "Επισύναψη ακροατών καταστήματος LimeWire..."
+
+msgid "Loading Network Listeners..."
+msgstr "Φόρτωση ακροατών δικτύου..."
 
 msgid "Could not process bad MAGNET link {0}"
 msgstr "Δεν ήταν δυνατή η επεξεργασία του εσφαλμένου δεσμού  MAGNET {0}"
@@ -6180,12 +6303,21 @@ msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 "Το LimeWire δεν μπόρεσε να κατεβάσει ένα αρχείο .torrent από το δεδομένο URL."
 
+msgid "Automatically start torrents"
+msgstr "Αυτόματη εκκίνηση torrent"
+
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
 "Μπορείτε να επιλέξετε την αυτόματη ή όχι εκκίνηση torrent που λαμβάνεται από "
 "το δίκτυο Gnutella."
+
+msgid "Start automatically"
+msgstr "Αυτόματη εκκίνηση"
+
+msgid "BitTorrent Settings"
+msgstr "Ρυθμίσεις BitTorrent"
 
 msgid ""
 "You can choose whether or not LimeWire should manage your BitTorrent "
@@ -6291,11 +6423,17 @@ msgstr ""
 "μία ανασκόπηση στις ρυθμίσεις σας και στο ποια αρχεία θα διαμοιράζονται για "
 "να βεβαιωθείτε ότι δεν διαμοιράζετε αρχεία ευαίσθητων περιεχομένων."
 
+msgid "Do not display this message again."
+msgstr "Να μην εμφανιστεί ξανά αυτό το μήνυμα."
+
 msgid "T1"
 msgstr "T1"
 
 msgid "T3 or Higher"
 msgstr "T3 ή ταχύτερη"
+
+msgid "Ethernet"
+msgstr "Ethernet"
 
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
@@ -6308,8 +6446,23 @@ msgstr ""
 "LimeWire θα συνεχίσει αυτόματα την προσπάθεια να συνδεθεί στο δίκτυο, εκτός "
 "εάν επιλέξετε «Αποσύνδεση» από το μενού «Αρχείο»."
 
+msgid "&Search"
+msgstr "&Αναζήτηση"
+
 msgid "&Monitor"
 msgstr "&Παρακολούθηση"
+
+msgid "&Connections"
+msgstr "&Συνδέσεις"
+
+msgid "&Library"
+msgstr "&Βιβλιοθήκη"
+
+msgid "C&onsole"
+msgstr "Κονσό&λα"
+
+msgid "Lo&gging"
+msgstr "Καταγρα&φή"
 
 msgid "Display the {0} Screen"
 msgstr "Εμφάνιση του παραθύρου {0}"
@@ -6333,6 +6486,20 @@ msgstr ""
 "πιέστε «OK». Μετά επανεκκινήστε το LimeWire."
 
 msgid ""
+"LimeWire is unable to find a license for this file. Download the file "
+"anyway?\n"
+"\n"
+"Please note: LimeWire cannot monitor or control the content of the Gnutella "
+"network. Please respect your local copyright laws."
+msgstr ""
+"To LimeWire αδυνατεί να βρει άδεια για αυτό το αρχείο. Θέλετε να το "
+"κατεβάσετε παρόλα αυτά;\n"
+"\n"
+"Σημείωση: Το LimeWire δεν μπορεί να παρακολουθεί ή να ελέγχει το περιεχόμενο "
+"του δικτύου Grutella. Παρακαλούμε σεβαστείτε τους τοπικούς σας νόμους περί "
+"πνευματικών δικαιωμάτων."
+
+msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
@@ -6354,6 +6521,9 @@ msgstr ""
 msgid "LimeWire could not launch the specified file."
 msgstr "Δεν ήταν δυνατή η εκκίνηση του συγκερκιμένου αρχείου από το LimeWire."
 
+msgid "Loading Core Components..."
+msgstr "Φόρτωση στοιχείων πυρήνα..."
+
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "Φόρτωση πρωτόκολλου ψηφιακής πρόσβασης ήχου..."
 
@@ -6362,6 +6532,9 @@ msgstr "Εισαγωγή"
 
 msgid "Apply Operation"
 msgstr "Εφαρμογή λειτουργίας."
+
+msgid "Cancel Operation"
+msgstr "Ακύρωση λειτουργίας."
 
 msgid ""
 "You are currently using a beta or pre-release version of Java 1.6.0. This "
@@ -6374,6 +6547,9 @@ msgstr ""
 
 msgid "Upgrade Java"
 msgstr "Αναβάθμιση Java"
+
+msgid "More Information"
+msgstr "Περισσότερες πληροφορίες"
 
 msgid "Visit {0}"
 msgstr "Επισκεφτείτε το {0}"
@@ -6388,6 +6564,9 @@ msgstr ""
 
 msgid "Change Language"
 msgstr "Αλλαγή γλώσσας"
+
+msgid "Help Translate LimeWire"
+msgstr "Βοηθήστε να μεταφραστεί το LimeWire"
 
 msgid "Show Language in status bar"
 msgstr "Προβολή ένδειξης γλώσσας στη γραμμή κατάστασης"
@@ -6465,11 +6644,17 @@ msgstr "Το αρχείο ίσως χρειάζεται μια άδεια για
 msgid "License Details"
 msgstr "Λεπτομέρειες αδείας"
 
+msgid "File Listing for"
+msgstr "Λίστα αρχείων για"
+
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr "Δεσμοί Magnet για γρήγορες λήψεις (αν το LimeWire είναι εγκατεστημένο)"
 
 msgid "Always use this answer"
 msgstr "Πάντοτε να χρησιμοποιείται αυτή η απάντηση"
+
+msgid "Loading Monitor Window..."
+msgstr "Φόρτωση παράθυρου παρακολούθησης..."
 
 msgid "Show Incoming Searches"
 msgstr "Προβολή εισερχόμενων αναζητήσεων"
@@ -6481,6 +6666,9 @@ msgstr ""
 "Βρίσκεστε σε κατάσταση δικτυακού κόμβου, προστατευόμενου από έναν υπερ-"
 "κόμβο. Γι' αυτό θα βλέπετε λίγες ή μηδενικές αναζητήσεις στην καρτέλα "
 "παρακολούθησης."
+
+msgid "Searches"
+msgstr "Αναζητήσεις"
 
 msgid ""
 "<html><table width=400>You selected: <i>{0}</i><br>LimeWire cannot use this "
@@ -6510,8 +6698,14 @@ msgstr ""
 "γίνει προσπάθεια να χρησιμοποιηθούν οι προκαθορισμένες ρυθμίσεις, αυτό όμως "
 "μπορεί να αποφέρει απροσδόκητη συμπεριφορά."
 
+msgid "Shutting down LimeWire..."
+msgstr "Διακοπή λειτουργίας του LimeWire..."
+
 msgid "Please wait while LimeWire shuts down..."
 msgstr "Παρακαλώ περιμένετε καθώς το LimeWire διακόπτει τη λειτουργία του..."
+
+msgid "Add..."
+msgstr "Προσθήκη"
 
 msgid "Add New List Item"
 msgstr "Προσθήκη νέου αντικείμενου λίστας."
@@ -6519,11 +6713,20 @@ msgstr "Προσθήκη νέου αντικείμενου λίστας."
 msgid "Remove Selected Item"
 msgstr "Αφαίρεση επιλεγμένου αντικειμένου."
 
+msgid "Loading Status Window..."
+msgstr "Φόρτωση παράθυρου κατάστασης..."
+
 msgid "LimeWire has detected a firewall"
 msgstr "Το LimeWire έχει εντοπίσει τείχος προστασίας"
 
+msgid "You are not connected to the LimeWire Store"
+msgstr "Δεν έχετε συνδεθεί με το κατάστημα LimeWire"
+
 msgid "You are connected to the LimeWire Store"
 msgstr "Έχετε συνδεθεί με το κατάστημα LimeWire"
+
+msgid "Disconnected"
+msgstr "Αποσυνδεμένος"
 
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
@@ -6532,10 +6735,19 @@ msgstr ""
 "Είστε αποσυνδεμένος από το δίκτυο. Για να συνδεθείτε, επιλέξτε «Σύνδεση» από "
 "το μενού «Αρχείο»."
 
+msgid "Starting"
+msgstr "Εκκίνηση"
+
+msgid "Poor"
+msgstr "Κακή"
+
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Είστε συνδεμένος με λίγους παρόχους και έχετε ασταθή σύνδεση με το δίκτυο."
+
+msgid "Fair"
+msgstr "Μέτρια"
 
 msgid "Your connection to the network is getting stronger"
 msgstr "Η σύνδεσή σας στο δίκτυο γίνεται ισχυρότερη."
@@ -6581,8 +6793,27 @@ msgstr "Προβολή ένδειξης τείχους προστασίας"
 msgid "Show Store Indicator"
 msgstr "Προβολή του δείκτη κατάστασης του καταστήματος"
 
+msgid "Show Bandwidth Consumption"
+msgstr "Προβολή ένδειξης απασχόλησης εύρους ζώνης"
+
 msgid "Show Media Player"
 msgstr "Προβολή προγράμματος αναπαραγωγής"
+
+msgid "You are sharing {0} file"
+msgid_plural "You are sharing {0} files"
+msgstr[0] "Διαμοιράζετε (0) αρχείο"
+msgstr[1] "Διαμοιράζετε (0) αρχεία"
+
+msgid "You are sharing {0} file (Loading...)"
+msgid_plural "You are sharing {0} files (Loading...)"
+msgstr[0] "Διαμοιράζετε {0} αρχείο (Γίνεται φόρτωση...)"
+msgstr[1] "Διαμοιράζετε {0} αρχεία (Γίνεται φόρτωση...)"
+
+msgid "Downloads:"
+msgstr "Λήψεις:"
+
+msgid "Uploads:"
+msgstr "Αποστολές:"
 
 msgid "Total Downstream:"
 msgstr "Συνολική εισερχόμενη κίνηση:"
@@ -6598,6 +6829,12 @@ msgstr "Ξέρατε ότι..."
 
 msgid "Show Tips At Startup"
 msgstr "Εμφάνιση συμβουλών κατά την εκκίνηση"
+
+msgid "Next Tip"
+msgstr "Επόμενη συμβουλή"
+
+msgid "Previous Tip"
+msgstr "Προηγούμενη συμβουλή"
 
 msgid ""
 "Tired of downloads stopping halfway through? It helps to pick search results "
@@ -7523,6 +7760,9 @@ msgstr "Αναβάθμιση στο LimeWire PRO τώρα."
 msgid "What does PRO give me?"
 msgstr "Τι προσφέρει το PRO;"
 
+msgid "Get LimeWire PRO Later"
+msgstr "Αναβάθμιση στο LimeWire PRO αργότερα."
+
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
@@ -7533,11 +7773,23 @@ msgstr ""
 msgid "Lookup File with Bitzi"
 msgstr "Αναζήτηση αρχείου στο Bitzi..."
 
+msgid "Copy Magnet Links to Clipboard"
+msgstr "Αντιγραφή δεσμών Magnet στο πρόχειρο"
+
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "Αντιγραφή στο πρόχειρο των δεσμών Magnet για τα επιλεγμένα αρχεία"
 
+msgid "C&onnect"
+msgstr "&Σύνδεση"
+
 msgid "D&isconnect"
 msgstr "Α&ποσύνδεση"
+
+msgid "O&pen Magnet or Torrent"
+msgstr "Ά&νοιγμα magnet ή torrent"
+
+msgid "Open Magnet or Torrent"
+msgstr "Άνοιγμα Magnet ή Torrent"
 
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
@@ -7552,6 +7804,15 @@ msgid ""
 msgstr ""
 "Το LimeWire δεν μπόρεσε να ανοίξει το αρχείο ή τη διεύθυνση. Βεβαιωθείτε ότι "
 "την πληκτρολογήσατε σωστά και προσπαθήστε ξανά."
+
+msgid "&Close"
+msgstr "&Κλείσιμο"
+
+msgid "Launch Selected Files"
+msgstr "Εκκίνηση επιλεγμένων αρχείων."
+
+msgid "My Shared Files"
+msgstr "Τα διαμοιραζόμενα αρχεία μου"
 
 msgid "View My {0} Shared Files"
 msgstr "Εμφάνιση των {0} διαμοιραζόμενων αρχείων μου"
@@ -7568,10 +7829,22 @@ msgstr "Αναζήτηση στο «Τι νέο υπάρχει;» γιά : {0}"
 msgid "Search for {0}: {1}"
 msgstr "Αναζήτηση για {0}: {1}"
 
+msgid "Share New File..."
+msgstr "Διαμοιράστε ένα νέο αρχείο..."
+
 msgid "Opens a Window and Lets You Choose a New Folder to Share"
 msgstr ""
 "Ανοίγει ένα διάλογο που σας επιτρέπει να επιλέξετε νέο κατάλογο για "
 "διαμοιρασμό"
+
+msgid "Block Host"
+msgstr "Παρεμπόδιση κόμβου"
+
+msgid "Send Message"
+msgstr "Αποστολή μηνύματος"
+
+msgid "Block Current Host"
+msgstr "Παρεμπόδιση τρέχοντος κόμβου."
 
 msgid "Send a Message to a Host"
 msgstr "Αποστολή μηνύματος σε κόμβο."
@@ -7600,6 +7873,9 @@ msgstr "Εμφάνιση όλων των αρχείων του επιλεγμέ�
 msgid "Loading Connections Window..."
 msgstr "Φόρτωση παραθύρου συνδέσεων..."
 
+msgid "Host:"
+msgstr "Κόμβος:"
+
 msgid "0.6"
 msgstr "0.6"
 
@@ -7616,6 +7892,9 @@ msgstr ""
 
 msgid "Share Dropped Files?"
 msgstr "Διαμοιρασμός αποθεμένων αρχείων;"
+
+msgid "Do not show this message again."
+msgstr "Να μην επανεμφανιστεί αυτό το μήνυμα."
 
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
@@ -7660,11 +7939,35 @@ msgstr "Αναμονή στη σειρά, θέση"
 msgid "Verifying File Contents..."
 msgstr "Επαλήθευση περιεχομένων αρχείου..."
 
+msgid "Saving File..."
+msgstr "Αποθήκευση αρχείου..."
+
 msgid "Recovering Corrupted File"
 msgstr "Αποκατάσταση κατεστραμμένου αρχείου"
 
+msgid "Paused"
+msgstr "Παύθηκε"
+
+msgid "Content Removed"
+msgstr "Το περιεχόμενο αφαιρέθηκε"
+
 msgid "Resuming..."
 msgstr "Συνέχιση..."
+
+msgid "Downloading .torrent file..."
+msgstr "Γίνεται λήψη αρχείου .torrent..."
+
+msgid "Average Bandwidth"
+msgstr "Μέσος όρος εύρους ζώνης"
+
+msgid "Valid Alternate Locations"
+msgstr "Έγκυρες εναλλακτικές τοποθεσίες"
+
+msgid "Started On"
+msgstr "Εκκινήθηκε"
+
+msgid "Finished On"
+msgstr "Ολοκληρώθηκε"
 
 msgid "Time Spent"
 msgstr "Χρόνος που αναλώθηκε"
@@ -7674,6 +7977,12 @@ msgstr "Τμήματα"
 
 msgid "Lost To Corruption"
 msgstr "Χάθηκε λόγω καταστροφής"
+
+msgid "hosts"
+msgstr "κόμβοι"
+
+msgid "host"
+msgstr "κόμβος"
 
 msgid "A more specific search may be required..."
 msgstr "Ίσως χρειάζεται μια πιο συγκεκριμένη αναζήτηση..."
@@ -7689,12 +7998,27 @@ msgstr ""
 msgid "Possible Hosts"
 msgstr "Πιθανοί κόμβοι"
 
+msgid "Busy Hosts"
+msgstr "Απασχολημένοι κόμβοι"
+
 msgid "Remotely Queued"
 msgstr "Σε ουρά από τον απομακρυσμένο κόμβο"
+
+msgid "Locating Sources..."
+msgstr "Εντοπισμός πηγών..."
 
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr ""
 "Το LimeWire δεν μπορεί να κάνει λήψη του αρχείου torrent. Απόκριση  tracker"
+
+msgid "Priority"
+msgstr "Προτεραιότητα"
+
+msgid "Progress"
+msgstr "Πρόοδος"
+
+msgid "Speed"
+msgstr "Ταχύτητα"
 
 msgid "Loading Download Window..."
 msgstr "Φόρτωση παραθύρου λήψεων..."
@@ -7708,6 +8032,9 @@ msgstr "Εύρεση πηγών"
 msgid "Try to Find Additional Sources for Downloads"
 msgstr "Εύρεση πρόσθετων πηγών για τις λήψεις."
 
+msgid "Reattempt Selected Downloads"
+msgstr "Επανάληψη εκκίνησης επιλεγμένων λήψεων"
+
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
 "clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
@@ -7719,6 +8046,9 @@ msgstr ""
 
 msgid "&Refresh Skins"
 msgstr "Ανα&νέωση εμφανίσεων"
+
+msgid "&View"
+msgstr "&Εμφάνιση"
 
 msgid "&Apply Skins"
 msgstr "Αλλαγή εμ&φάνισης"
@@ -7737,6 +8067,36 @@ msgstr ""
 "Το LimeWire δεν μπόρεσε να φορτώσει το αρχείο torrent «{0}» - Μπορεί να είναι "
 "κακοδιατυπωμένο ή να μην έχει δικαιώματα πρόσβασης σ' αυτό το LimeWire."
 
+msgid "Clear Download"
+msgstr "Εκκαθάριση λήψης"
+
+msgid "Clear Selected Downloads"
+msgstr "Εκκαθάριση επιλεγμένων λήψεων"
+
+msgid "Launch Download"
+msgstr "Εκκίνηση λήψης"
+
+msgid "Launch Selected Downloads"
+msgstr "Εκκίνηση επιλεγμένων λήψεων"
+
+msgid "Cancel Selected Downloads"
+msgstr "Ακύρωση επιλεγμένων λήψεων."
+
+msgid "Preview Selected Downloads"
+msgstr "Προεπισκόπηση των επιλεγμένων λήψεων."
+
+msgid "Clear All Inactive Downloads"
+msgstr "Εκκαθάριση όλων των ανενεργών λήψεων"
+
+msgid "Remove Inactive Downloads"
+msgstr "Αφαίρεση ανενεργών λήψεων."
+
+msgid "Pause Download"
+msgstr "Παύση λήψης"
+
+msgid "Pause Selected Downloads"
+msgstr "Παύση των επιλεγμένων λήψεων."
+
 msgid "Explore"
 msgstr "Εξερεύνηση"
 
@@ -7749,11 +8109,23 @@ msgstr "Μετακινήστε την επιλεγμένη λήψη πλησιέ
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr "Μετακινήστε την επιλεγμένη λήψη μακρύτερα από το να γίνει ενεργή."
 
+msgid "Change File Location..."
+msgstr "Αλλαγή τοποθεσίας αρχείου..."
+
 msgid "Edit the Final Filename of the Download"
 msgstr "Επεξεργασία του οριστικού ονόματος αρχείου της λήψης"
 
+msgid "Always Save As..."
+msgstr "Να γίνεται πάντα αποθήκευση ως..."
+
 msgid "Always Append (#)"
 msgstr "Να γίνεται πάντα προσθήκη αριθμού"
+
+msgid "Always Ask"
+msgstr "Να γίνεται ερώτηση"
+
+msgid "Choose a Default Action:"
+msgstr "Επιλογή προεπιλεγμένης ενέργειας"
 
 msgid ""
 "<b>Note</b>: A file with the same content already exists in the library at "
@@ -7764,6 +8136,12 @@ msgstr ""
 
 msgid "Overwrite the Existing File"
 msgstr "Αντικατάσταση του υπάρχοντος αρχείου"
+
+msgid "Choose a different location for the Download"
+msgstr "Επιλέξτε  διαφορετική τοποθεσία για τη λήψη"
+
+msgid "Append (#)"
+msgstr "Προσθήκη αριθμού"
 
 msgid "Appends (#) to filename"
 msgstr "Προσθήκη αριθμού στο όνομα αρχείου"
@@ -7784,6 +8162,15 @@ msgstr "Έχετε το ίδιο ακριβώς αρχείο στο {0}"
 msgid "Do you want to continue downloading anyway?"
 msgstr "Θέλετε να συνεχίσετε τη λήψη παρόλα αυτά;"
 
+msgid "Same File Already In Library"
+msgstr "Το αρχείο υπάρχει ήδη στη βιβλιοθήκη"
+
+msgid "No Filename"
+msgstr "Κανένα όνομα αρχείου"
+
+msgid "File & Protocol Associations"
+msgstr "Συσχετισμοί αρχείων και πρωτόκολλων"
+
 msgid "What type of resources should LimeWire open?"
 msgstr "Με ποιους πόρους να συσχετιστεί το LimeWire;"
 
@@ -7792,11 +8179,17 @@ msgstr ""
 "Τι πρέπει να κάνει το LimeWire με τους επιλεγμένους συσχετισμούς κατά την "
 "εκκίνηση;"
 
+msgid "Always take the selected associations."
+msgstr "Να γίνεται πάντα ανάκτηση των επιλεγμένων συσχετισμών."
+
 msgid "Ignore all missing associations."
 msgstr "Να αγνοούνται όλοι οι συσχετισμοί που απουσιάζουν."
 
 msgid "Ask me what to do when an association is missing."
 msgstr "Να γίνεται ερώτηση όταν απουσιάζει κάποιος συσχετισμός."
+
+msgid "Firewall Setup"
+msgstr "Ρύθμιση τείχους ασφαλείας"
 
 msgid ""
 "LimeWire performs best with full access to the Internet. If firewall or "
@@ -7809,12 +8202,18 @@ msgstr ""
 "επιλέξτε να διατηρηθούν οι ρυθμίσεις. Το τείχος προστασίας σας ίσως "
 "παρουσιάζεται διαφορετικό από αυτό της παρακάτω εικόνας."
 
+msgid "Miscellaneous Settings"
+msgstr "Διάφορες ρυθμίσεις"
+
 msgid ""
 "Below, are several options that affect the performance and functionality of "
 "LimeWire."
 msgstr ""
 "Παρακάτω βρίσκονται αρκετές επιλογές που επηρεάζουν την απόδοση και τη "
 "λειτουργία του LimeWire."
+
+msgid "Broadband (or unsure)"
+msgstr "Ευρυζωνική (ή άγνωστη)"
 
 msgid ""
 "Please choose the speed of your internet connection. Setting this speed "
@@ -7823,6 +8222,12 @@ msgstr ""
 "Παρακαλούμε επιλέξτε την ταχύτητα της σύνδεσης στο διαδίκτυο. Ο σωστός "
 "ορισμός της ταχύτητας είναι σημαντικός για τη βέλτιστη απόδοση του δικτύου."
 
+msgid "System Startup"
+msgstr "Εκκίνηση συστήματος"
+
+msgid "Start Automatically"
+msgstr "Αυτόματη εκκίνηση"
+
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
 "cause LimeWire to start faster when you use it later."
@@ -7830,8 +8235,27 @@ msgstr ""
 "Θέλετε να εκκινείται το LimeWire όταν ανοίγετε τον υπολογιστή σας; Αυτό θα "
 "σας προσφέρει γρηγορότερη φόρτωση όταν το χρησιμοποιήσετε αργότερα."
 
+msgid "Content Filtering"
+msgstr "Φιλτράρισμα περιεχομένου"
+
+msgid ""
+"LimeWire can filter files that copyright owners request not be shared. By "
+"enabling filtering, you are telling LimeWire to confirm all files you "
+"download or share with a list of removed content. You can change this at any "
+"time by choosing Filters -> Configure Content Filters from the main menu."
+msgstr ""
+"Το LimeWire μπορεί να φιλτράρει τα αρχεία των οποίων οι κάτοχοι των "
+"πνευματικών δικαιωμάτων απαγορεύουν να διαμοιραστούν. Ενεργοποιώντας το "
+"φιλτράρισμα, το LimeWire θα επιβεβαιώνει όλα τα αρχεία που κάνετε λήψη ή "
+"διαμοιράζετε με μια λίστα απαγορευμένου περιεχομένου. Μπορείτε να αλλάξετε "
+"τη ρύθμιση μέσα από την επιλογή «Φίλτρα -> Επεξεργασία φίλτρων περιεχόμενου» "
+"του κύριου μενού."
+
 msgid "Learn more about this option..."
 msgstr "Μάθετε περισσότερα γι' αυτή την επιλογή..."
+
+msgid "Save Folder and Shared Folders"
+msgstr "Κατάλογος αποθήκευσης και διαμοιραζόμενοι κατάλογοι"
 
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. You "
@@ -7851,6 +8275,9 @@ msgstr ""
 "επιβεβαιώστε τον κατάλογο όπου θέλετε να πραγματοποιούνται οι λήψεις σας. "
 "Μπορείτε επίσης να επιλέξετε τους διαμοιραζόμενους με άλλους χρήστες του "
 "LimeWire καταλόγους."
+
+msgid "Shared Folders"
+msgstr "Διαμοιραζόμενοι κατάλογοι"
 
 msgid ""
 "The save folder is invalid. You may not have permissions to write to the "
@@ -7879,6 +8306,21 @@ msgstr ""
 "Το LimeWire δεν μπόρεσε να δημιουργήσει τον προκαθορισμένο κατάλογο "
 "διαμοιραζόμενων {0}, οπότε δε θα διαμοιράζεται."
 
+msgid "Use the Default Folder"
+msgstr "Χρήση προκαθορισμένου καταλόγου"
+
+msgid "Choose Another Folder"
+msgstr "Επιλογή άλλου καταλόγου"
+
+msgid "LimeWire Setup Wizard"
+msgstr "Βοηθός εγκατάστασης LimeWire"
+
+msgid "Next >>"
+msgstr "Επόμενο >>"
+
+msgid "<< Back"
+msgstr "<< Πίσω"
+
 msgid "Welcome"
 msgstr "Καλωσορίσατε"
 
@@ -7904,16 +8346,34 @@ msgstr "Αρχεία από διάφορα καταστήματα"
 msgid "List of All Individual Purchased Files"
 msgstr "Λίστα όλων των αγορασμένων από διάφορα καταστήματα αρχείων"
 
+msgid "Loading Library Window..."
+msgstr "Φόρτωση παραθύρου βιβλιοθήκης..."
+
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr ""
 "Μπορείτε να ρυθμίσετε ποιους καταλόγους θα διαμοιράζετε μέσα απ' τις "
 "επιλογές του LimeWire."
+
+msgid "Songs purchased from the LimeWire Store"
+msgstr "Τραγούδια αγορασμένα από το κατάστημα LimeWire"
 
 msgid "Search In Shared Files:"
 msgstr "Αναζήτηση στα διαμοιραζόμενα αρχεία:"
 
 msgid "Holds the Results of the Last Search"
 msgstr "Διατηρεί τα αποτελέσματα της τελευταίας έρευνας"
+
+msgid "Icon"
+msgstr "Εικονίδιο"
+
+msgid "Path"
+msgstr "Διαδρομή"
+
+msgid "Last Modified"
+msgstr "Τελευταία Τροποποίηση"
+
+msgid "Shared"
+msgstr "Διαμοιραζόμενο"
 
 msgid "This folder is shared."
 msgstr "Αυτός ο κατάλογος διαμοιράζεται."
@@ -7959,8 +8419,14 @@ msgstr "Προσθήκη στην ουρά"
 msgid "Add Selected Files to the Playlist"
 msgstr "Προσθήκη επιλεγμένων αρχείων στη λίστα αναπαραγωγής."
 
+msgid "Delete Selected Files"
+msgstr "Διαγραφή επιλεγμένων αρχείων."
+
 msgid "Describe..."
 msgstr "Περιγραφή..."
+
+msgid "Add Description to Selected File"
+msgstr "Προσθήκη περιγραφής στο επιλεγμένο αρχείο."
 
 msgid "Publish..."
 msgstr "Δημοσίευση..."
@@ -7970,6 +8436,18 @@ msgstr "Δημοσίευση υπό την άδεια Creative Commons"
 
 msgid "Edit License..."
 msgstr "Επεξεργασία αδείας..."
+
+msgid "Continue Downloading Selected Incomplete File"
+msgstr "Συνέχιση λήψης επιλεγμένου ημιτελούς αρχείου."
+
+msgid "Rename"
+msgstr "Μετονομασία"
+
+msgid "Stop Sharing File"
+msgstr "Διακοπή διαμοιρασμού του αρχείου"
+
+msgid "Stop Sharing Folder"
+msgstr "Να μη διαμοιράζεται ο κατάλογος"
 
 msgid "Show Magnet Details"
 msgstr "Προβολή λεπτομερειών Magnet"
@@ -7990,11 +8468,20 @@ msgstr ""
 msgid "Add Folder Contents to Playlist"
 msgstr "Προσθήκη περιεχόμενων καταλόγου στη λίστα αναπαραγωγής"
 
+msgid "Show .torrent Files"
+msgstr "Προβολή αρχείων .torrent"
+
 msgid "Refresh"
 msgstr "Ανανέωση"
 
+msgid "Reload Shared Folders"
+msgstr "Επαναφόρτωση διαμοιραζόμενων καταλόγων."
+
 msgid "Open Library Folder"
 msgstr "Άνοιγμα καταλόγου βιβλιοθήκης"
+
+msgid "Configure Sharing Options"
+msgstr "Διαμόρφωση επιλογών διαμοιρασμού"
 
 msgid "Folders to share"
 msgstr "Κατάλογοι για διαμοιρασμό"
@@ -8008,6 +8495,9 @@ msgstr ""
 "απενεργοποιήσετε την επιλογή όποιων καταλόγων δεν θέλετε να διαμοιράζονται. "
 "(Μπορείτε να αλλάξετε τις επιλογές για τους διαμοιραζόμενους καταλόγους "
 "οποιαδήποτε στιγμή μέσα από τις επιλογές του LimeWire.)"
+
+msgid "Legend"
+msgstr "Υπόμνημα"
 
 msgid "Folder is fully shared including all subfolders."
 msgstr "Ολόκληρος ο κατάλογος και όλοι οι υποκατάλογοί του διαμοιράζονται"
@@ -8024,11 +8514,32 @@ msgstr "Ξεχωριστά διαμοιραζόμενα αρχεία"
 msgid "List of All Individually Shared Files"
 msgstr "Λίστα όλων των ξεχωριστά διαμοιραζόμενων αρχείων"
 
+msgid "List of .torrent files"
+msgstr "Λίστα αρχείων .torrent"
+
+msgid "Logging"
+msgstr "Καταγραφή"
+
+msgid "Loading Logging Window..."
+msgstr "Φόρτωση παραθύρου καταγραφής"
+
+msgid "&Advanced"
+msgstr "&Για προχωρημένους"
+
+msgid "&File"
+msgstr "&Αρχείο"
+
+msgid "Filter&s"
+msgstr "&Φίλτρα"
+
 msgid "Configure LimeWire's Content Filtering Options"
 msgstr "Ρυθμίστε τις επιλογές του LimeWire για τα φίλτρα περιεχομένου"
 
 msgid "Learn More about LimeWire's Content Filtering System"
 msgstr "Μάθετε περισσότερα για το σύστημα φίλτρων περιεχομένου του LimeWire"
+
+msgid "Help for Using LimeWire"
+msgstr "Βοήθεια για τη χρήση του LimeWire."
 
 msgid "Frequently Asked Questions for LimeWire"
 msgstr "Συχνές ερωτήσεις για το LimeWire."
@@ -8042,14 +8553,35 @@ msgstr "Συμβουλή της &ημέρας"
 msgid "Show the Tip of the Day Window"
 msgstr "Εμφάνιση παραθύρου «Συμβουλής της ημέρας»."
 
+msgid "Generate &Error"
+msgstr "Παραγ&ωγή σφάλματος"
+
 msgid "Generate a Popup Error for Testing"
 msgstr "Παραγωγή αναδυόμενου διαλόγου σφάλματος για δοκιμή"
+
+msgid "&About LimeWire"
+msgstr "Π&ερί LimeWire"
+
+msgid "Information about LimeWire"
+msgstr "Πληροφορίες για το LimeWire."
+
+msgid "Loading Menus..."
+msgstr "Φόρτωση των μενού..."
 
 msgid "&Navigation"
 msgstr "Περιήγ&ηση"
 
+msgid "&Resources"
+msgstr "Πό&ροι"
+
+msgid "LimeWire &PRO"
+msgstr "LimeWire &ΡRO"
+
 msgid "Display the LimeWire PRO Website"
 msgstr "Εμφάνιση της ιστοσελίδας του LimeWire PRO."
+
+msgid "Result &Filters"
+msgstr "&Φίλτρα αποτελεσμάτων"
 
 msgid "Show Search Result Filters"
 msgstr "Προβολή φίλτρων αποτελεσμάτων αναζήτησης."
@@ -8065,6 +8597,15 @@ msgstr "Εύρεση περισσότερων εμφανίσεων από το l
 
 msgid "Reload available skins from disk"
 msgstr "Επαναφόρτωση διαθέσιμων εμφανίσεων από το δίσκο."
+
+msgid "Use &Default"
+msgstr "Χρήση &προεπιλογής"
+
+msgid "Use your default skin"
+msgstr "Χρήση της προεπιλεγμένης εμφάνισης."
+
+msgid "&Options"
+msgstr "&Επιλογές"
 
 msgid "Display the Options Screen"
 msgstr "Εμφάνιση πίνακα επιλογών."
@@ -8102,6 +8643,12 @@ msgstr "Προτιμήσεις γλώσσας"
 msgid "LimeWire Media Player"
 msgstr "Πρόγραμμα αναπαραγωγής LimeWire"
 
+msgid "About"
+msgstr "Περί ..."
+
+msgid "Restore Defaults"
+msgstr "Επαναφορά προεπιλογών"
+
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
@@ -8109,20 +8656,50 @@ msgstr ""
 "Έχετε κάνει αλλαγές σε μερικές από τις ρυθμίσεις του LimeWire. Να "
 "αποθηκευθούν;"
 
+msgid "Basic"
+msgstr "Βασικό"
+
+msgid "Types"
+msgstr "Τύποι"
+
+msgid "Slots"
+msgstr "Θέσεις υποδοχής"
+
+msgid "Status Bar"
+msgstr "Γραμμή κατάστασης"
+
 msgid "Importing"
 msgstr "Γίνεται εισαγωγή"
 
 msgid "Helper Apps"
 msgstr "Βοηθητικά προγράμματα"
 
+msgid "Bug Reports"
+msgstr "Αναφορές σφαλμάτων"
+
 msgid "Popups"
 msgstr "Αναδυόμενα"
+
+msgid "Autocomplete"
+msgstr "Αυτόματη συμπλήρωση"
+
+msgid "Content"
+msgstr "Περιεχόμενο"
 
 msgid "Junk"
 msgstr "Ανεπιθύμητα"
 
+msgid "Hosts"
+msgstr "Κόμβοι"
+
 msgid "Preferencing"
 msgstr "Επιλεκτικές προτιμήσεις"
+
+msgid "System Boot"
+msgstr "Εκκίνηση συστήματος"
+
+msgid "Loading Options Window..."
+msgstr "Φόρτωση παραθύρου επιλογών..."
 
 msgid "You can choose the folder for saving files."
 msgstr "Μπορείτε να επιλέξετε τον κατάλογο αποθήκευσης αρχείων."
@@ -8159,9 +8736,18 @@ msgstr ""
 "πρωτόκολλα. Μπορείτε επίσης να ρυθμίσετε το LimeWire ώστε να επανακτήσει "
 "τους συσχετισμούς αρχείων αν τροποποιηθούν από άλλο πρόγραμμα ."
 
+msgid "Use LimeWire for..."
+msgstr "Χρήση του LimeWire για..."
+
 msgid "You can choose which audio player to use."
 msgstr ""
 "Μπορείτε να επιλέξετε ποιο πρόγραμμα αναπαραγωγής ήχου θα χρησιμοποιείτε."
+
+msgid "Audio Player"
+msgstr "Πρόγραμμα αναπαραγωγής ήχου"
+
+msgid "Clear Completed Downloads:"
+msgstr "Αυτόματη εκκαθάριση ολοκληρωμένων λήψεων:"
 
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
@@ -8169,6 +8755,9 @@ msgid ""
 msgstr ""
 "Μπορείτε να επιλέξετε εάν θέλετε να εκκαθαρίζονται αυτόματα ή όχι οι "
 "αποστολές αρχείων που έχουν ολοκληρωθεί."
+
+msgid "Automatically Clear Completed Uploads:"
+msgstr "Αυτόματη εκκαθάριση ολοκληρωμένων αποστολών:"
 
 msgid "Text Autocompletion"
 msgstr "Αυτόματη συμπλήρωση κειμένου"
@@ -8180,6 +8769,9 @@ msgstr ""
 
 msgid "Enable Autocompletion of Text Fields:"
 msgstr "Ενεργοποίηση αυτόματης συμπλήρωσης πεδίων κειμένου:"
+
+msgid "Browser Options"
+msgstr "Επιλογές περιηγητή"
 
 msgid "You can choose which browser to use."
 msgstr "Μπορείτε να επιλέξετε ποιον περιηγητή θα χρησιμοποιείτε."
@@ -8207,8 +8799,17 @@ msgstr ""
 msgid "Send Errors Automatically if LimeWire is Frozen"
 msgstr "Αυτόματη αποστολή σφαλμάτων αν το LimeWire παγώσει"
 
+msgid "Host Communication"
+msgstr "Επικοινωνία με κόμβους"
+
 msgid "You can turn chat on or off."
 msgstr "Μπορείτε να ενεργοποιήσετε ή να απενεργοποιήσετε τις συνομιλίες."
+
+msgid "Enable Chat:"
+msgstr "Ενεργοποίηση συνομιλιών"
+
+msgid "Connect on Startup"
+msgstr "Σύνδεση κατά την εκκίνηση"
 
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
@@ -8216,6 +8817,12 @@ msgid ""
 msgstr ""
 "Μπορείτε να επιλέξετε εάν θα συνδέεστε αυτόματα ή όχι με το δίκτυο, όταν το "
 "πρόγραμμα φορτώνεται."
+
+msgid "Connect on Startup:"
+msgstr "Σύνδεση κατά την εκκίνηση:"
+
+msgid "Connection Preferencing"
+msgstr "Προτιμήσεις σύνδεσης"
 
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
@@ -8228,6 +8835,22 @@ msgid "Files You Must Share to Not be a Freeloader:"
 msgstr ""
 "Αριθμός αρχείων που πρέπει να διαμοιράζετε, για να μη θεωρείστε χρήστης-"
 "παράσιτο:"
+
+msgid "Allow Freeloaders:"
+msgstr "Να επιτρέπονται οι χρήστες-παράσιτα:"
+
+msgid ""
+"You can tell LimeWire to filter files that copyright owners request not be "
+"shared. By enabling filtering, you are instructing LimeWire to confirm all "
+"files you download or share with a list of removed content."
+msgstr ""
+"Μπορείτε να ρυθμίσετε το LimeWire ώστε να φιλτράρει τα αρχεία των οποίων οι "
+"κάτοχοι των πνευματικών δικαιωμάτων απαγορεύουν να διαμοιραστούν. "
+"Ενεργοποιώντας το φιλτράρισμα, το LimeWire θα επιβεβαιώνει όλα τα αρχεία που "
+"κάνετε λήψη ή διαμοιράζετε με μια λίστα απαγορευμένου περιεχόμενου."
+
+msgid "Enable Content Filters"
+msgstr "Ενεργοποίηση φίλτρων περιεχομένου"
 
 msgid "Buffer Size"
 msgstr "Μέγεθος ενδιάμεσης μνήμης"
@@ -8277,6 +8900,18 @@ msgstr ""
 msgid "Always Show the 'Save As' Dialog"
 msgstr "Να προβάλλεται πάντα ο διάλογος «Αποθήκευση ως...»"
 
+msgid "Always Ask What to do"
+msgstr "Να γίνεται πάντα ερώτηση"
+
+msgid "Capabilities"
+msgstr "Δυνατότητες"
+
+msgid "Disable Mojito DHT Capabilities:"
+msgstr "Απενεργοποίηση δυνατοτήτων Mojito DHT."
+
+msgid "OOB Searching"
+msgstr "Αναζήτηση εκτός ζώνης"
+
 msgid "You can set the percentage of your bandwidth devoted to downloads."
 msgstr ""
 "Μπορείτε να ορίσετε το ποσοστό εύρους ζώνης που θα χρησιμοποιείται για τις "
@@ -8284,6 +8919,9 @@ msgstr ""
 
 msgid "License Warning"
 msgstr "Προειδοποίηση αδείας"
+
+msgid "Show License Warning:"
+msgstr "Προβολή προειδοποίησης αδείας:"
 
 msgid "Display"
 msgstr "Εμφάνιση"
@@ -8302,6 +8940,9 @@ msgstr "Εμφάνιση των ανεπιθύμητων κανονικά"
 msgid "Display junk at the bottom of search results"
 msgstr "Εμφάνιση ανεπιθύμητων στο κάτω μέρος των αποτελεσμάτων αναζήτησης"
 
+msgid "Use Defaults"
+msgstr "Χρήση προκαθορισμένων"
+
 msgid "Do Nothing (Not Recommended)"
 msgstr "Καμιά ενέργεια (δε συνιστάται)"
 
@@ -8310,6 +8951,9 @@ msgid ""
 msgstr ""
 "Αν θέλετε να ορίσετε συγκεκριμένη θύρα χειρωνακτικά, θα πρέπει να εισάγετε "
 "μια θύρα μεταξύ 1 και 65535."
+
+msgid "Filter Hosts"
+msgstr "Φιλτράρισμα κόμβων"
 
 msgid ""
 "You can disallow messages from specific hosts by adding their IP addresses "
@@ -8338,8 +8982,14 @@ msgstr ""
 "Μπορείτε να ορίσετε γενικούς τύπους αποτελεσμάτων αναζήτησης που θα "
 "φιλτράρονται."
 
+msgid "Ignore Adult Content"
+msgstr "Αποκλεισμός ακατάλληλου περιεχομένου"
+
 msgid "Ignore .htm/.html Files"
 msgstr "Αποκλεισμός αρχείων .htm/.html"
+
+msgid "Ignore .vbs Files"
+msgstr "Αποκλεισμός αρχείων .vbs"
 
 msgid "Ignore .wmv/.asf files"
 msgstr "Αποκλεισμός αρχείων με κατάληξη .wmv/.asf"
@@ -8348,6 +8998,9 @@ msgid "You can filter out search results containing specific words."
 msgstr ""
 "Μπορείτε να αποκλείσετε αποτελέσματα αναζήτησης που περιέχουν συγκεκριμένες "
 "λέξεις."
+
+msgid "Image Options"
+msgstr "Επιλογές εικόνων"
 
 msgid "You can choose which image viewer to use."
 msgstr ""
@@ -8367,8 +9020,14 @@ msgstr ""
 msgid "Turn preferencing on:"
 msgstr "Ενεργοποίηση προτιμήσεων για:"
 
+msgid "Maximum Downloads"
+msgstr "Μέγιστο όριο λήψεων"
+
 msgid "You can set the maximum number of simultaneous downloads."
 msgstr "Μπορείτε να καθορίσετε τον μέγιστο αριθμό των ταυτόχρονων λήψεων."
+
+msgid "Maximum Downloads:"
+msgstr "Μέγιστος αριθμός λήψεων:"
 
 msgid "Maximum Searches"
 msgstr "Ανώτατο όριο αναζητήσεων"
@@ -8382,6 +9041,9 @@ msgstr ""
 msgid "Maximum Searches:"
 msgstr "Ανώτατο όριο αναζητήσεων:"
 
+msgid "Max Upload Slots"
+msgstr "Μέγιστο όριο αποστολών"
+
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
@@ -8389,8 +9051,17 @@ msgstr ""
 "Δεν επιτρέπεται ποτέ η υπέρβαση αυτού του αριθμού αποστολών. Μόνο εάν έχετε "
 "αρκετό εύρος ζώνης μπορεί να επιτευχθεί αυτός ο αριθμός."
 
+msgid "Max Upload Slots:"
+msgstr "Μέγιστο όριο αποστολών:"
+
 msgid "Media Type"
 msgstr "Τύπος αρχείου πολυμέσων"
+
+msgid "Open Dialog to Select a Folder"
+msgstr "Άνοιγμα διαλόγου επιλογής καταλόγου"
+
+msgid "Reset"
+msgstr "Επαναφορά"
 
 msgid "Reset to Default Download Folder"
 msgstr "Επαναφορά στον αρχικό κατάλογο λήψεων"
@@ -8424,6 +9095,9 @@ msgstr ""
 "Το LimeWire μπορεί να σας ειδοποιεί για διάφορα συμβάντα, όπως την "
 "ολοκλήρωση μιας λήψης, με αναδυόμενα παράθυρα. "
 
+msgid "Partial Files"
+msgstr "Μη ολοκληρωμένα αρχεία"
+
 msgid ""
 "You can choose whether or not to automatically share partially downloaded "
 "files."
@@ -8440,6 +9114,9 @@ msgstr "Επιτρεπόμενος αριθμός αποστολών ανά κό
 msgid "Uploads Per Person:"
 msgstr "Αποστολές ανά κόμβο:"
 
+msgid "Player Options"
+msgstr "Επιλογές προγράμματος αναπαραγωγής"
+
 msgid ""
 "You can choose to play media with LimeWire or your system's default player. "
 "The media player and playlist will appear only if this option is set. A "
@@ -8453,6 +9130,9 @@ msgstr ""
 
 msgid "Use LimeWire Media Player:"
 msgstr "Χρήση του προγράμματος αναπαραγωγής πολυμέσων του LimeWire:"
+
+msgid "LimeWire Popups"
+msgstr "Αναδυόμενα LimeWire"
 
 msgid ""
 "Redisplay messages for which you have chosen 'Do not display this message "
@@ -8478,11 +9158,17 @@ msgstr ""
 msgid "Enable Authentication (Does Not Work for HTTP Proxies):"
 msgstr "Ενεργοποίηση πιστοποίησης. (Δε λειτουργεί για διαμεσολαβητές HTTP)"
 
+msgid "Proxy Options"
+msgstr "Επιλογές διαμεσολαβητή"
+
 msgid "Configure Proxy Options for LimeWire."
 msgstr "Ρύθμιση επιλογών διαμεσολαβητή για το LimeWire."
 
 msgid "You can automatically delete old incomplete download files."
 msgstr "Μπορείτε να διαγράφετε αυτόματα τα παλιά μη ολοκληρωμένα αρχεία."
+
+msgid "Days to Keep Incomplete Files:"
+msgstr "Αριθμός ημερών για διατήρηση μη ολοκληρωμένων αρχείων:"
 
 msgid "You can specify a download location for each media type."
 msgstr "Μπορείτε να ορίσετε μια τοποθεσία λήψης για κάθε τύπο αρχείου."
@@ -8500,6 +9186,9 @@ msgid ""
 msgstr ""
 "Θέλετε να διαμοιράσετε τους νέους καταλόγους αποθήκευσης; Οι ακόλουθοι "
 "κατάλογοι θα διαμοιραστούν:"
+
+msgid "Search Result Quality"
+msgstr "Ποιότητα αποτελεσμάτων αναζήτησης"
 
 msgid ""
 "You can select the \"quality\" of search results to display. Four star "
@@ -8543,6 +9232,9 @@ msgstr "Προβολή μόνο αποτελεσμάτων ταχύτητας Ca
 msgid "Show All Speeds"
 msgstr "Προβολή όλων των ταχυτήτων"
 
+msgid "Download Sharing"
+msgstr "Διαμοιρασμός λήψεων"
+
 msgid "You can share downloads that are saved to unshared folders."
 msgstr ""
 "Μπορείτε να διαμοιράζετε αρχεία των οποίων οι λήψεις έχουν αποθηκευθεί σε μη "
@@ -8581,6 +9273,12 @@ msgstr "Επιλογές τερματισμού"
 msgid "You can choose the default shutdown behavior."
 msgstr "Μπορείτε να επιλέξετε τον προκαθορισμένο τρόπο τερματισμού."
 
+msgid "Shutdown Immediately"
+msgstr "Άμεσος τερματισμός"
+
+msgid "Shutdown after Transfers"
+msgstr "Τερματισμός μετά την ολοκλήρωση των μεταφορών"
+
 msgid "Start Upload Slots"
 msgstr "Εκκίνηση θέσεων υποδοχής αποστολής"
 
@@ -8606,6 +9304,9 @@ msgstr ""
 "Μπορείτε να καθορίσετε την ταχύτητα σύνδεσής σας, έτσι ώστε το LimeWire να "
 "βελτιστοποιήσει την απόδοσή του."
 
+msgid "Speed:"
+msgstr "Ταχύτητα:"
+
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
 "computer starts."
@@ -8613,10 +9314,16 @@ msgstr ""
 "Μπορείτε να επιλέξετε εάν το LimeWire θα εκκινείται αυτόματα όταν "
 "ενεργοποιείτε τον υπολογιστή σας."
 
+msgid "Bandwidth Indicator"
+msgstr "Ένδειξη εύρους ζώνης"
+
 msgid "You can display your bandwidth consumption in the status bar."
 msgstr ""
 "Μπορείτε να εμφανίσετε ένδειξη κατανάλωσης εύρους ζώνης στη γραμμή "
 "κατάστασης."
+
+msgid "Show Bandwidth Indicator:"
+msgstr "Προβολή ένδειξης εύρους ζώνης:"
 
 msgid "Connection Quality Indicator"
 msgstr "Ένδειξη ποιότητας σύνδεσης"
@@ -8642,6 +9349,9 @@ msgstr ""
 "Μπορείτε να εμφανίσετε ένδειξη κατάστασης του καταστήματος LimeWire στη "
 "γραμμή κατάστασης."
 
+msgid "Show LimeWire Store Indicator:"
+msgstr "Προβολή ένδειξης καταστήματος LimeWire:"
+
 msgid "You can display how many files you are sharing in the status bar."
 msgstr ""
 "Μπορείτε να προβάλλετε τον αριθμό των αρχείων που διαμοιράζετε στη γραμμή "
@@ -8649,6 +9359,9 @@ msgstr ""
 
 msgid "Show Shared Files Indicator:"
 msgstr "Προβολή ένδειξης διαμοιραζόμενων αρχείων:"
+
+msgid "LimeWire Store - Save Folder"
+msgstr "Κατάλογος αποθήκευσης καταστήματος LimeWire"
 
 msgid "System Tray Icon"
 msgstr "Εικονίδιο πλαισίου συστήματος"
@@ -8660,6 +9373,9 @@ msgstr ""
 
 msgid "Show System Tray Icon:"
 msgstr "Προβολή εικονιδίου στο πλαίσιο συστήματος:"
+
+msgid "Update Options"
+msgstr "Ενημέρωση επιλογών"
 
 msgid "You can choose when you want to be notified of new LimeWire releases."
 msgstr ""
@@ -8682,8 +9398,17 @@ msgstr ""
 "Μπορείτε να ορίσετε το ποσοστό εύρους ζώνης για τις αποστολές αρχείων. Για "
 "να απενεργοποιήσετε τις αποστολές, ορίστε το ποσοστό αυτό σε μηδέν."
 
+msgid "Upload Speed:"
+msgstr "Ταχύτητα αποστολής:"
+
+msgid "Video Options"
+msgstr "Επιλογές βίντεο"
+
 msgid "You can choose which video player to use."
 msgstr "Μπορείτε να επιλέξετε ποιον αναπαραγωγέα βίντεο θα χρησιμοποιείτε."
+
+msgid "Video Player"
+msgstr "Αναπαραγωγέας βίντεο"
 
 msgid "You can have LimeWire import newly downloaded songs into iTunes."
 msgstr ""
@@ -8699,11 +9424,35 @@ msgstr "Άνοιγμα υπάρχουσας λίστας αναπαραγωγή�
 msgid "Save the Current Playlist to a File"
 msgstr "Αποθήκευση της τρέχουσας λίστας αναπαραγωγής σε αρχείο."
 
+msgid "Remove Selected File from Playlist"
+msgstr "Αφαίρεση επιλεγμένου αρχείου από τη λίστα αναπαραγωγής."
+
 msgid "#"
 msgstr "#"
 
+msgid "Comment"
+msgstr "Σχόλιο"
+
+msgid "Playlist"
+msgstr "Λίστα αναπαραγωγής"
+
+msgid "Loading Playlist Window..."
+msgstr "Φόρτωση παραθύρου λίστας αναπαραγωγής..."
+
+msgid "Play Options:"
+msgstr "Επιλογές αναπαραγωγής:"
+
+msgid "Shuffle"
+msgstr "Τυχαία αναπαραγωγή"
+
+msgid "Continuous"
+msgstr "Συνεχής αναπαραγωγή"
+
 msgid "Open Playlist (.m3u)"
 msgstr "Άνοιγμα λίστας αναπαραγωγής (.m3u)"
+
+msgid "Save Playlist As"
+msgstr "Αποθήκευση λίστας αναπαραγωγής ως"
 
 msgid ""
 "Warning: a file with the name {0} already exists in the folder. Overwrite "
@@ -8715,8 +9464,23 @@ msgstr ""
 msgid "Playlist Files (*.m3u)"
 msgstr "Αρχεία λίστας αναπαραγωγής (*.m3u)"
 
+msgid "General"
+msgstr "Γενικά"
+
 msgid "Multiple"
 msgstr "Πολλαπλό"
+
+msgid "Option"
+msgstr "Επιλογή"
+
+msgid "Filter Results:"
+msgstr "Φιλτράρισμα αποτελεσμάτων:"
+
+msgid "Back To Search"
+msgstr "Πίσω στην αναζήτηση"
+
+msgid "Download As..."
+msgstr "Λήψη ως..."
 
 msgid "Would you like to start downloads from the following magnets?"
 msgstr "Θέλετε να ξεκινήσουν οι λήψεις από τα ακόλουθα magnets;"
@@ -8765,6 +9529,9 @@ msgstr "Σημείωση των επιλεγμένων αποτελεσμάτω�
 msgid "Mark selected search results as Not Junk"
 msgstr "Σημείωση των επιλεγμένων αποτελεσμάτων ως μη ανεπιθύμητων"
 
+msgid "Search More"
+msgstr "Αναζήτηση για περισσότερα"
+
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 "Θέλετε να μπλοκάρετε τα αποτελέσματα αναζήτησης από την παρακάτω λίστα "
@@ -8794,6 +9561,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr ""
 "Αναζήτηση για αρχεία προγραμμάτων, συμπεριλαμβανομένων των exe, zip, gz, και "
 "άλλων"
+
+msgid "Stop Search"
+msgstr "Διακοπή αναζήτησης"
+
+msgid "Download All Selected Files"
+msgstr "Λήψη όλων των επιλεγμένων αρχείων."
 
 msgid "View All Files on Selected Computer"
 msgstr "Εμφάνιση όλων των αρχείων στον επιλεγμένο υπολογιστή."
@@ -8826,6 +9599,9 @@ msgstr ""
 "Ο υπολογιστής είναι πίσω από ένα firewall ή κάποιο router και δεν μπορεί να "
 "δεχθεί άμεσες συνδέσεις."
 
+msgid "Don't Know"
+msgstr "Άγνωστο"
+
 msgid "What To Look For?"
 msgstr "Τι να αναζητηθεί;"
 
@@ -8847,8 +9623,20 @@ msgstr ""
 "Μη έγκυρη μορφή διεύθυνσης, παρακαλούμε επιλέξτε μορφή του τύπου «κόμβος:"
 "θύρα»."
 
+msgid "Launch Action"
+msgstr "Εκκίνηση ενέργειας"
+
 msgid "Chat With Host"
 msgstr "Συνομιλία με τον κόμβο"
+
+msgid "Repeat Search"
+msgstr "Επανάληψη αναζήτησης"
+
+msgid "Loading Search Window..."
+msgstr "Φόρτωση παραθύρου αναζήτησης..."
+
+msgid "Firewalled Host"
+msgstr "Κόμβος πίσω από τείχος προστασίας"
 
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
@@ -8898,6 +9686,12 @@ msgstr ""
 
 msgid "Could not browse host {0}."
 msgstr "Δεν ήταν δυνατή η περιήγηση στον κόμβο {0} ."
+
+msgid "Vendor"
+msgstr "Πωλητής"
+
+msgid "Junk Rating"
+msgstr "Ανεπιθύμητη αξιολόγηση"
 
 msgid "Media"
 msgstr "Τύπος"
@@ -9003,8 +9797,14 @@ msgstr "Δεν μπορείτε να απενεργοποιήσετε όλες �
 msgid "View Repository of Saved Files"
 msgstr "Εμφάνιση χώρου αποθήκευσης των αποθηκευμένων αρχείων."
 
+msgid "View Logging Messages"
+msgstr "Εμφάνιση μηνυμάτων καταγραφής"
+
 msgid "View Searches and Uploads"
 msgstr "Εμφάνιση αναζητήσεων και αποστολών αρχείων."
+
+msgid "Search and Download Files"
+msgstr "Αναζήτηση και λήψη αρχείων."
 
 msgid ""
 "The skin file you selected does not exist or is invalid. Please choose "
@@ -9034,8 +9834,17 @@ msgstr ""
 "Δεν είναι έγκυρο το θέμα που θέλετε να εφαρμόσετε. Το LimeWire θα επανέλθει "
 "στο αρχικό."
 
+msgid "Kill Upload"
+msgstr "Τερματισμός αποστολής"
+
 msgid "Stop Selected Uploads"
 msgstr "Διακοπή επιλεγμένων αποστολών."
+
+msgid "Remove Inactive Uploads"
+msgstr "Αφαίρεση ανενεργών αποστολών."
+
+msgid "Freeloader Uploading"
+msgstr "Αποστολή σε χρήστες-παράσιτα"
 
 msgid "File Not Found"
 msgstr "Δε βρέθηκε το αρχείο"
@@ -9052,8 +9861,23 @@ msgstr "Απαγορευμένος άπληστος κόμβος"
 msgid "Uploading Hash Tree"
 msgstr "Αποστολή δένδρου hash"
 
+msgid "Suspended"
+msgstr "Σε αναστολή"
+
 msgid "Awaiting Requests"
 msgstr "Απαιτήσεις σε αναμονή"
+
+msgid "Loading Upload Window..."
+msgstr "Φόρτωση παραθύρου αποστολής..."
+
+msgid "Seeding"
+msgstr "Διασπορά"
+
+msgid "Invalid Filename"
+msgstr "Μη έγκυρο όνομα αρχείου"
+
+msgid "Download Already Finished"
+msgstr "Η λήψη έχει ήδη ολοκληρωθεί"
 
 msgid "No Write Permission"
 msgstr "Δεν έχετε δικαιώματα εγγραφής"
@@ -9063,6 +9887,15 @@ msgstr "Δεν υπάρχει ο κατάλογος"
 
 msgid "File Already Exists"
 msgstr "Το αρχείο υπάρχει ήδη"
+
+msgid "Filename Taken"
+msgstr "Το όνομα υπάρχει ήδη"
+
+msgid "Not a File"
+msgstr "Δεν είναι αρχείο"
+
+msgid "Filesystem Error"
+msgstr "Σφάλμα συστήματος αρχείων"
 
 msgid "Same File Already Being Downloaded"
 msgstr "Γίνεται ήδη λήψη του ίδιου αρχείου"
@@ -9120,6 +9953,9 @@ msgstr ""
 msgid "There is nothing to preview for file {0}."
 msgstr "Δεν υπάρχει τίποτα για προεπισκόπηση στο αρχείο {0}."
 
+msgid "More Search Options"
+msgstr "Περισσότερες επιλογές αναζήτησης"
+
 msgid "Publish License"
 msgstr "Άδεια δημοσίευσης"
 
@@ -9161,6 +9997,9 @@ msgstr ""
 msgid "How does it work?"
 msgstr "Πώς δουλεύει;"
 
+msgid "ShareAlike"
+msgstr "Διαμοίρασε ομοίως"
+
 msgid "Allow commercial use of your work?"
 msgstr "Επιτρέπεται η επαγγελματική χρήση του έργου σας;"
 
@@ -9175,6 +10014,12 @@ msgstr "Κάτοχος πνευματικών δικαιωμάτων:"
 
 msgid "Copyright Year:"
 msgstr "Έτος κατοχύρωσης πνευματικών δικαιωμάτων:"
+
+msgid "Title of Work:"
+msgstr "Τίτλος έργου:"
+
+msgid "Comment:"
+msgstr "Σχόλιο:"
 
 msgid "Please enter the copyright holder, copright year and title."
 msgstr ""
@@ -9214,6 +10059,18 @@ msgstr ""
 "Για να δημοσιεύσετε το αρχείο σας, παρακαλούμε εισάγετε τον παρακάτω κωδικό "
 "στη σελίδα επαλήθευσής στο:"
 
+msgid "Copy to Clipboard"
+msgstr "Αντιγραφή στο πρόχειρο"
+
+msgid "Kind:"
+msgstr "Είδος:"
+
+msgid "Size:"
+msgstr "Μέγεθος:"
+
+msgid "Date Modified:"
+msgstr "Ημερομηνία τροποποίησης:"
+
 msgid "Internal Document Error. Data could not be saved."
 msgstr "Εσωτερικό σφάλμα εγγράφου. Δεν ήταν δυνατή η αποθήκευση των δεδομένων."
 
@@ -9234,17 +10091,59 @@ msgstr "Κατεστραμμένο αρχείο. Δεν ήταν δυνατή η
 msgid "Incorrect format entered. Changes will not be saved."
 msgstr "Εισαγωγή λανθασμένης διαμόρφωσης. Δε θα αποθηκευθούν οι αλλαγές."
 
+msgid "Title:"
+msgstr "Τίτλος:"
+
+msgid "Artist:"
+msgstr "Καλλιτέχνης:"
+
+msgid "Album:"
+msgstr "Συλλογή:"
+
+msgid "Genre:"
+msgstr "Είδος:"
+
+msgid "Year:"
+msgstr "Χρονολογία:"
+
+msgid "Type:"
+msgstr "Τύπος:"
+
+msgid "Track:"
+msgstr "Κομμάτι:"
+
+msgid "Length:"
+msgstr "Διάρκεια:"
+
+msgid "Bitrate:"
+msgstr "Ρυθμός bit:"
+
+msgid "Comments:"
+msgstr "Σχόλια:"
+
 msgid "SHA1:"
 msgstr "SHA1:"
 
 msgid "Price:"
 msgstr "Τιμή:"
 
+msgid "Action:"
+msgstr "Ενέργεια:"
+
+msgid "License:"
+msgstr "Άδεια:"
+
+msgid "Rating:"
+msgstr "Βαθμολογία:"
+
 msgid "License Type:"
 msgstr "Τύπος αδείας:"
 
 msgid "Director:"
 msgstr "Σκηνοθέτης:"
+
+msgid "Studio:"
+msgstr "Στούντιο:"
 
 msgid "Stars: (Please separate with comma)"
 msgstr "Αστέρια: (Παρακαλούμε χωρίστε με κόμμα)"
@@ -9258,8 +10157,14 @@ msgstr "Υπότιτλοι: (Παρακαλούμε χωρίστε με κόμμ
 msgid "Topic:"
 msgstr "Θέμα:"
 
+msgid "Author:"
+msgstr "Συγγραφέας:"
+
 msgid "Publisher:"
 msgstr "Εκδότης:"
+
+msgid "Platform:"
+msgstr "Πλατφόρμα:"
 
 msgid "Description:"
 msgstr "Περιγραφή:"
@@ -9278,322 +10183,6 @@ msgid ""
 msgstr ""
 "Άγνωστος τύπος αρχείου. Παρακαλούμε επιλέξτε τον τύπο που περιγράφει "
 "καλύτερα το αρχείο."
-
-#, fuzzy
-#~ msgid "Modem"
-#~ msgstr "Τροποποιήθηκε"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "Τέλος"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Επικόλληση"
-
-#, fuzzy
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "Μοιράζεστε {0} αρχεία με {1}"
-
-#, fuzzy
-#~ msgid "&Download .torrent"
-#~ msgstr "Λήψη από"
-
-#, fuzzy
-#~ msgid "Paste from Clipboard"
-#~ msgstr "Κατάργηση από τη βιβλιοθήκη"
-
-#, fuzzy
-#~ msgid "Waiting"
-#~ msgstr "Κατάταξη"
-
-#, fuzzy
-#~ msgid "Finish Setup"
-#~ msgstr "Ολοκληρώθηκε"
-
-#, fuzzy
-#~ msgid "Language Options"
-#~ msgstr "Διαχείριση επεκτάσεων"
-
-#, fuzzy
-#~ msgid "Save Folder:"
-#~ msgstr "Αποθήκευση φακέλων"
-
-#, fuzzy
-#~ msgid "Confirm Scan"
-#~ msgstr "Χωρίς σάρωση"
-
-#, fuzzy
-#~ msgid "Limewire Setup Dialog"
-#~ msgstr "Κατάστημα LimeWire"
-
-#, fuzzy
-#~ msgid "Select Speed"
-#~ msgstr "Επιλογή όλων"
-
-#, fuzzy
-#~ msgid "Scan cancelled"
-#~ msgstr "Ακυρώθηκε"
-
-#, fuzzy
-#~ msgid "Cancel Scan"
-#~ msgstr "Ακύρωση"
-
-#, fuzzy
-#~ msgid "Annotating file"
-#~ msgstr "Εντοπισμός αρχείου"
-
-#, fuzzy
-#~ msgid "Upload"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Connected..."
-#~ msgstr "Γίνεται σύνδεση..."
-
-#, fuzzy
-#~ msgid "Uploading file"
-#~ msgstr "Αποστολή στοιχείου"
-
-#, fuzzy
-#~ msgid "Uploaded"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Results"
-#~ msgstr "Συνέχιση"
-
-#, fuzzy
-#~ msgid "files (Loading...)"
-#~ msgstr "Φόρτωση..."
-
-#, fuzzy
-#~ msgid "QRP"
-#~ msgstr "QRP (%)"
-
-#, fuzzy
-#~ msgid "Errors"
-#~ msgstr "Σφάλμα Daap"
-
-#, fuzzy
-#~ msgid "Compression"
-#~ msgstr "Συμπιεσμένη χωρητικότητα εισερχόμενων"
-
-#, fuzzy
-#~ msgid "Hit Routing Errors"
-#~ msgstr "Σφάλμα iTunes"
-
-#, fuzzy
-#~ msgid "All Messages"
-#~ msgstr "Μήνυμα"
-
-#, fuzzy
-#~ msgid "Hops 1"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 2"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 3"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 4"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 5"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 6"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 7"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 8"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Hops 9"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Pong Errors"
-#~ msgstr "Σφάλμα iTunes"
-
-#, fuzzy
-#~ msgid "Reply Errors"
-#~ msgstr "Σφάλμα Daap"
-
-#, fuzzy
-#~ msgid "All Requests"
-#~ msgstr "Επιτρέπονται οι κεντρικοί υπολογιστές"
-
-#, fuzzy
-#~ msgid "Freeloader"
-#~ msgstr "Φάκελος"
-
-#, fuzzy
-#~ msgid "Current"
-#~ msgstr "Αποκοπή"
-
-#, fuzzy
-#~ msgid "Generic Errors"
-#~ msgstr "Εσωτερικό σφάλμα "
-
-#, fuzzy
-#~ msgid "Color"
-#~ msgstr "Καθαρισμός"
-
-#, fuzzy
-#~ msgid "All Errors"
-#~ msgstr "Όλοι οι φάκελοι"
-
-#, fuzzy
-#~ msgid "Invalid Hops"
-#~ msgstr "Άκυρος Σύνδεσμος!"
-
-#, fuzzy
-#~ msgid "Invalid TTL"
-#~ msgstr "Άκυρος Σύνδεσμος!"
-
-#, fuzzy
-#~ msgid "Invalid ID"
-#~ msgstr "Άκυρος Σύνδεσμος!"
-
-#, fuzzy
-#~ msgid "What's New?"
-#~ msgstr "Τι νέο υπάρχει;"
-
-#, fuzzy
-#~ msgid "Connection Attempts"
-#~ msgstr "Συνδέσεις"
-
-#, fuzzy
-#~ msgid "Incoming Attempts"
-#~ msgstr "Εισερχόμενα"
-
-#, fuzzy
-#~ msgid "Banned Hosts"
-#~ msgstr "Αποκλεισμός κεντρικών υπολογιστών"
-
-#, fuzzy
-#~ msgid "Closed Immediately"
-#~ msgstr "Πάντα άμεση αποστολή"
-
-#, fuzzy
-#~ msgid "Incompatible Ranges"
-#~ msgstr "Μη ολοκληρωμένα αρχεία"
-
-#, fuzzy
-#~ msgid "Completed File Transfers"
-#~ msgstr "Μη ολοκληρωμένα αρχεία"
-
-#, fuzzy
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Ultrapeer"
-
-#, fuzzy
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Κατάστημα LimeWire"
-
-#, fuzzy
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Ultrapeers"
-
-#, fuzzy
-#~ msgid "Other Leaves"
-#~ msgstr "Φύλλα"
-
-#, fuzzy
-#~ msgid "Weedshare"
-#~ msgstr "κοινή χρήση"
-
-#, fuzzy
-#~ msgid "Hit"
-#~ msgstr "Ύψος"
-
-#, fuzzy
-#~ msgid "Not Sharing Files"
-#~ msgstr "Κοινή χρήση {0} αρχείων"
-
-#, fuzzy
-#~ msgid "Height:"
-#~ msgstr "Ύψος"
-
-#, fuzzy
-#~ msgid "Display:"
-#~ msgstr "Καθυστέρηση"
-
-#, fuzzy
-#~ msgid "Vendor Messages"
-#~ msgstr "Προειδοποιητικά μηνύματα"
-
-#, fuzzy
-#~ msgid "&New Folder"
-#~ msgstr "Προσθήκη νέου φακέλου"
-
-#, fuzzy
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Loading Resources..."
-#~ msgstr "Φόρτωση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Alt. Locations"
-#~ msgstr "Συσχετίσεις αρχείων"
-
-#, fuzzy
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "Φόρτωση μηχανισμού HTML..."
-
-#, fuzzy
-#~ msgid "Loading Message Router..."
-#~ msgstr "Φόρτωση περιβάλλοντος εργασίας χρήστη..."
-
-#, fuzzy
-#~ msgid "Locating Peers..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Loading Shared Files..."
-#~ msgstr "Φόρτωση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "Διαχείριση Βιβλιοθήκης"
-
-#, fuzzy
-#~ msgid "Loading Network Listeners..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Automatically start torrents"
-#~ msgstr "Αυτόματη κύλιση"
-
-#, fuzzy
-#~ msgid "Start automatically"
-#~ msgstr "Αυτόματη ταξινόμηση"
-
-#, fuzzy
-#~ msgid "BitTorrent Settings"
-#~ msgstr "BitTorrent"
 
 #~ msgid ""
 #~ "Please add any comments you may have (e.g what caused the error). \n"
@@ -9634,556 +10223,14 @@ msgstr ""
 #~ "Οι ονομασίες BitTorrent, BitTorrent Logo και Torrent είναι εμπορικές "
 #~ "ονομασίες της BitTorrent, Inc."
 
-#, fuzzy
-#~ msgid "Do not display this message again."
-#~ msgstr "Να μην εμφανιστεί ξανά αυτή η ειδοποίηση"
-
-#, fuzzy
-#~ msgid "Ethernet"
-#~ msgstr "Προγράμματα"
-
-#, fuzzy
-#~ msgid "&Search"
-#~ msgstr "Αναζήτηση"
-
-#, fuzzy
-#~ msgid "&Connections"
-#~ msgstr "Συνδέσεις"
-
-#, fuzzy
-#~ msgid "&Library"
-#~ msgstr "Βιβλιοθήκη"
-
-#, fuzzy
-#~ msgid "C&onsole"
-#~ msgstr "Κονσόλα"
-
-#, fuzzy
-#~ msgid "Lo&gging"
-#~ msgstr "Γίνεται εγγραφή..."
-
-#, fuzzy
-#~ msgid ""
-#~ "LimeWire is unable to find a license for this file. Download the file "
-#~ "anyway?\n"
-#~ "\n"
-#~ "Please note: LimeWire cannot monitor or control the content of the "
-#~ "Gnutella network. Please respect your local copyright laws."
-#~ msgstr ""
-#~ "Το LimeWire δεν είναι δυνατό να βρει άδεια γι' αυτό το αρχείο. Λήψη σε "
-#~ "κάθε περίπτωση;\n"
-#~ "\n"
-#~ "Το LimeWire δεν είναι δυνατό να παρακολουθήσει ή να ελέγξει το "
-#~ "περιεχόμενο του Δικτύου P2P. Παρακαλούμε σεβαστείτε τους τοπικούς νόμους "
-#~ "περί πνευματικής ιδιοκτησίας."
-
-#, fuzzy
-#~ msgid "Loading Core Components..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
 #~ msgid "Loading Internationalization Support..."
 #~ msgstr "Φόρτωση υποστήριξης διεθνοποίησης..."
-
-#, fuzzy
-#~ msgid "Cancel Operation"
-#~ msgstr "Ακύρωση αποστολής"
-
-#, fuzzy
-#~ msgid "More Information"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "Αποστολή αναφοράς σφαλμάτων στο LimeWire"
-
-#, fuzzy
-#~ msgid "File Listing for"
-#~ msgstr "Ενεργή θύρα"
-
-#, fuzzy
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Searches"
-#~ msgstr "Αναζήτηση"
-
-#, fuzzy
-#~ msgid "Shutting down LimeWire..."
-#~ msgstr "Χρήση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Add..."
-#~ msgstr "Προσθήκη"
-
-#, fuzzy
-#~ msgid "Loading Status Window..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "You are not connected to the LimeWire Store"
-#~ msgstr ""
-#~ "“Επιλέξτε πώς να οργανώσετε τα αρχεία που αγοράσατε από το Κατάστημα "
-#~ "LimeWire”"
-
-#, fuzzy
-#~ msgid "Disconnected"
-#~ msgstr "Συνδέθηκε στον"
-
-#, fuzzy
-#~ msgid "Starting"
-#~ msgstr "Κοινή χρήση"
-
-#, fuzzy
-#~ msgid "Poor"
-#~ msgstr "Θύρα"
-
-#, fuzzy
-#~ msgid "Fair"
-#~ msgstr "Φίλτρο"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Consumption"
-#~ msgstr "Εξερχόμενο εύρος ζώνης"
-
-#, fuzzy
-#~ msgid "You are sharing {0} file"
-#~ msgid_plural "You are sharing {0} files"
-#~ msgstr[0] "Μοιράζεστε {0} αρχεία με {1}"
-#~ msgstr[1] "Μοιράζεστε {0} αρχεία με {1}"
-
-#, fuzzy
-#~ msgid "You are sharing {0} file (Loading...)"
-#~ msgid_plural "You are sharing {0} files (Loading...)"
-#~ msgstr[0] "Μοιράζεστε {0} αρχεία με {1}"
-#~ msgstr[1] "Μοιράζεστε {0} αρχεία με {1}"
-
-#, fuzzy
-#~ msgid "Downloads:"
-#~ msgstr "Λήψεις"
-
-#, fuzzy
-#~ msgid "Uploads:"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Next Tip"
-#~ msgstr "Επόμενο"
-
-#, fuzzy
-#~ msgid "Previous Tip"
-#~ msgstr "Προηγούμενο"
-
-#, fuzzy
-#~ msgid "Get LimeWire PRO Later"
-#~ msgstr "Κατάστημα LimeWire"
-
-#, fuzzy
-#~ msgid "Copy Magnet Links to Clipboard"
-#~ msgstr "Αντιγραφή συνδέσμου στο Πρόχειρο"
-
-#, fuzzy
-#~ msgid "C&onnect"
-#~ msgstr "Γίνεται σύνδεση"
-
-#, fuzzy
-#~ msgid "O&pen Magnet or Torrent"
-#~ msgstr "Άνοιγμα δεσμού magnet ή torrent."
-
-#, fuzzy
-#~ msgid "Open Magnet or Torrent"
-#~ msgstr "Άνοιγμα δεσμού magnet ή torrent."
-
-#, fuzzy
-#~ msgid "&Close"
-#~ msgstr "Κλείσιμο"
-
-#, fuzzy
-#~ msgid "Launch Selected Files"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "My Shared Files"
-#~ msgstr "Έγκυρα αρχεία"
-
-#, fuzzy
-#~ msgid "Share New File..."
-#~ msgstr "Αποθήκευση αρχείου ως..."
-
-#, fuzzy
-#~ msgid "Block Host"
-#~ msgstr "Αποκλεισμός κεντρικών υπολογιστών"
-
-#, fuzzy
-#~ msgid "Send Message"
-#~ msgstr "Μήνυμα"
-
-#, fuzzy
-#~ msgid "Block Current Host"
-#~ msgstr "Αποκλεισμός κεντρικών υπολογιστών"
-
-#, fuzzy
-#~ msgid "Host:"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Do not show this message again."
-#~ msgstr "Να μην εμφανιστεί ξανά αυτή η ειδοποίηση"
-
-#, fuzzy
-#~ msgid "Saving File..."
-#~ msgstr "Αποθήκευση αρχείου ως..."
-
-#, fuzzy
-#~ msgid "Paused"
-#~ msgstr "Παύση"
-
-#, fuzzy
-#~ msgid "Content Removed"
-#~ msgstr "Φίλτρα περιεχομένου"
-
-#, fuzzy
-#~ msgid "Downloading .torrent file..."
-#~ msgstr "αρχεία .torrent"
-
-#, fuzzy
-#~ msgid "Average Bandwidth"
-#~ msgstr "Εισερχόμενο εύρος ζώνης"
-
-#, fuzzy
-#~ msgid "Valid Alternate Locations"
-#~ msgstr "Ενεργοποίηση ελέγχου ταυτότητας"
-
-#, fuzzy
-#~ msgid "Started On"
-#~ msgstr "Διεκόπη -"
-
-#, fuzzy
-#~ msgid "Finished On"
-#~ msgstr "Ολοκληρώθηκε"
-
-#, fuzzy
-#~ msgid "hosts"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "host"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "Busy Hosts"
-#~ msgstr "Αποκλεισμός κεντρικών υπολογιστών"
-
-#, fuzzy
-#~ msgid "Locating Sources..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Priority"
-#~ msgstr "Θύρα"
-
-#, fuzzy
-#~ msgid "Progress"
-#~ msgstr "Προγράμματα"
-
-#, fuzzy
-#~ msgid "Speed"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Reattempt Selected Downloads"
-#~ msgstr "Απομνημόνευση πρόσφατων λήψεων"
-
-#, fuzzy
-#~ msgid "&View"
-#~ msgstr "Προβολή"
-
-#, fuzzy
-#~ msgid "Clear Download"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Clear Selected Downloads"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Launch Download"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Launch Selected Downloads"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Cancel Selected Downloads"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Preview Selected Downloads"
-#~ msgstr "Πρόσφατες λήψεις"
-
-#, fuzzy
-#~ msgid "Clear All Inactive Downloads"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Remove Inactive Downloads"
-#~ msgstr "Κατάργηση λήψης"
-
-#, fuzzy
-#~ msgid "Pause Download"
-#~ msgstr "Ακύρωση λήψης"
-
-#, fuzzy
-#~ msgid "Pause Selected Downloads"
-#~ msgstr "Πρόσφατες λήψεις"
-
-#, fuzzy
-#~ msgid "Change File Location..."
-#~ msgstr "Συσχετίσεις αρχείων"
-
-#, fuzzy
-#~ msgid "Always Save As..."
-#~ msgstr "Αποθήκευση αρχείου ως..."
-
-#, fuzzy
-#~ msgid "Always Ask"
-#~ msgstr "Πάντα ερώτηση για ανασκόπηση"
-
-#, fuzzy
-#~ msgid "Choose a Default Action:"
-#~ msgstr "Επιλέξτε μια διαφορετική Τοποθεσία αποθήκευσης"
-
-#, fuzzy
-#~ msgid "Choose a different location for the Download"
-#~ msgstr "Επιλέξτε μια διαφορετική Τοποθεσία αποθήκευσης"
-
-#, fuzzy
-#~ msgid "Append (#)"
-#~ msgstr "Απορρίφθηκαν (I/O)"
-
-#, fuzzy
-#~ msgid "Same File Already In Library"
-#~ msgstr "Ήδη στη βιβλιοθήκη μου"
-
-#, fuzzy
-#~ msgid "No Filename"
-#~ msgstr "Όνομα αρχείου"
 
 #~ msgid "Active"
 #~ msgstr "Ενεργοποιημένο"
 
-#, fuzzy
-#~ msgid "File & Protocol Associations"
-#~ msgstr "Συσχετίσεις αρχείων"
-
-#, fuzzy
-#~ msgid "Always take the selected associations."
-#~ msgstr "Ειδοποιήστε με όταν άλλα προγράμματα παίρνουν αυτές τις συσχετίσεις"
-
-#, fuzzy
-#~ msgid "Firewall Setup"
-#~ msgstr "Τείχος προστασίας"
-
-#, fuzzy
-#~ msgid "Miscellaneous Settings"
-#~ msgstr "Διάφορα"
-
-#, fuzzy
-#~ msgid "Broadband (or unsure)"
-#~ msgstr "Σύνδεση ευρείας ζώνης"
-
-#, fuzzy
-#~ msgid "System Startup"
-#~ msgstr "Εκτέλεση του LimeWire κατά την Εκκίνηση του συστήματος"
-
-#, fuzzy
-#~ msgid "Start Automatically"
-#~ msgstr "Αυτόματη ταξινόμηση"
-
-#, fuzzy
-#~ msgid "Content Filtering"
-#~ msgstr "Φίλτρα περιεχομένου"
-
-#, fuzzy
-#~ msgid ""
-#~ "LimeWire can filter files that copyright owners request not be shared. By "
-#~ "enabling filtering, you are telling LimeWire to confirm all files you "
-#~ "download or share with a list of removed content. You can change this at "
-#~ "any time by choosing Filters -> Configure Content Filters from the main "
-#~ "menu."
-#~ msgstr ""
-#~ "Το LimeWire μπορεί να φιλτράρει αρχεία, των οποίων οι πνευματικοί "
-#~ "ιδιοκτήτες δεν επιθυμούν την κοινή χρήση.  Ελέγχοντας το πλαίσιο παρακάτω "
-#~ "δίνετε στο LimeWire την εντολή να επιβεβαιώνει όλα τα αρχεία που "
-#~ "κατεβάζετε ή που μοιράζεστε σύμφωνα με μια λίστα περιεχομένου που έχει "
-#~ "καταργηθεί.  Αργότερα μπορείτε να το αλλάξετε αυτό στις Επιλογές > "
-#~ "Ασφάλεια > Φιλτράρισμα."
-
-#, fuzzy
-#~ msgid "Save Folder and Shared Folders"
-#~ msgstr "Αποθήκευση σφάλματος φακέλου"
-
-#, fuzzy
-#~ msgid "Shared Folders"
-#~ msgstr "Αποθήκευση φακέλων"
-
-#, fuzzy
-#~ msgid "Use the Default Folder"
-#~ msgstr "Χρήση προεπιλογής"
-
-#, fuzzy
-#~ msgid "Choose Another Folder"
-#~ msgstr "Κλείσιμο όλων των άλλων αναζητήσεων"
-
-#, fuzzy
-#~ msgid "LimeWire Setup Wizard"
-#~ msgstr "Κατάστημα LimeWire"
-
-#, fuzzy
-#~ msgid "Next >>"
-#~ msgstr "Επόμενο"
-
-#, fuzzy
-#~ msgid "<< Back"
-#~ msgstr "Πίσω"
-
 #~ msgid "Incomplete Files"
 #~ msgstr "Μη ολοκληρωμένα αρχεία"
-
-#, fuzzy
-#~ msgid "Loading Library Window..."
-#~ msgstr "Φόρτωση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Songs purchased from the LimeWire Store"
-#~ msgstr ""
-#~ "“Επιλέξτε πώς να οργανώσετε τα αρχεία που αγοράσατε από το Κατάστημα "
-#~ "LimeWire”"
-
-#, fuzzy
-#~ msgid "Icon"
-#~ msgstr "Εισερχόμενα"
-
-#, fuzzy
-#~ msgid "Path"
-#~ msgstr "Επικόλληση"
-
-#, fuzzy
-#~ msgid "Last Modified"
-#~ msgstr "Τροποποιήθηκε"
-
-#, fuzzy
-#~ msgid "Shared"
-#~ msgstr "Κοινή χρήση"
-
-#, fuzzy
-#~ msgid "Delete Selected Files"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Add Description to Selected File"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Continue Downloading Selected Incomplete File"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Rename"
-#~ msgstr "Όνομα αρχείου"
-
-#, fuzzy
-#~ msgid "Stop Sharing File"
-#~ msgstr "Κοινή χρήση {0} αρχείων"
-
-#, fuzzy
-#~ msgid "Stop Sharing Folder"
-#~ msgstr "Κοινή χρήση λήψεων"
-
-#, fuzzy
-#~ msgid "Show .torrent Files"
-#~ msgstr "αρχεία .torrent"
-
-#, fuzzy
-#~ msgid "Reload Shared Folders"
-#~ msgstr "Αποθήκευση φακέλων"
-
-#, fuzzy
-#~ msgid "Configure Sharing Options"
-#~ msgstr "Ρύθμιση παραμέτρων ονομασίας αρχείων"
-
-#, fuzzy
-#~ msgid "Legend"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "List of .torrent files"
-#~ msgstr "αρχεία .torrent"
-
-#, fuzzy
-#~ msgid "Logging"
-#~ msgstr "Γίνεται εγγραφή..."
-
-#, fuzzy
-#~ msgid "Loading Logging Window..."
-#~ msgstr "Γίνεται εγγραφή..."
-
-#, fuzzy
-#~ msgid "&Advanced"
-#~ msgstr "Για προχωρημένους"
-
-#, fuzzy
-#~ msgid "&File"
-#~ msgstr "Αρχείο"
-
-#, fuzzy
-#~ msgid "Filter&s"
-#~ msgstr "Φίλτρο"
-
-#, fuzzy
-#~ msgid "Help for Using LimeWire"
-#~ msgstr "Χρήση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Generate &Error"
-#~ msgstr "Εσωτερικό σφάλμα "
-
-#, fuzzy
-#~ msgid "&About LimeWire"
-#~ msgstr "Πληροφορίες για το LimeWire"
-
-#, fuzzy
-#~ msgid "Information about LimeWire"
-#~ msgstr "Αποστολή αναφοράς σφαλμάτων στο LimeWire"
-
-#, fuzzy
-#~ msgid "Loading Menus..."
-#~ msgstr "Φόρτωση..."
-
-#, fuzzy
-#~ msgid "&Resources"
-#~ msgstr "Επαναφορά"
-
-#, fuzzy
-#~ msgid "LimeWire &PRO"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Result &Filters"
-#~ msgstr "Φίλτρα περιεχομένου"
-
-#, fuzzy
-#~ msgid "Use &Default"
-#~ msgstr "Χρήση προεπιλογής"
-
-#, fuzzy
-#~ msgid "Use your default skin"
-#~ msgstr "Χρήση προεπιλογής"
-
-#, fuzzy
-#~ msgid "&Options"
-#~ msgstr "Επιλογές"
 
 #~ msgid "Next"
 #~ msgstr "Επόμενο"
@@ -10194,506 +10241,53 @@ msgstr ""
 #~ msgid "Restore"
 #~ msgstr "Επαναφορά"
 
-#, fuzzy
-#~ msgid "About"
-#~ msgstr "Άλμπουμ"
-
-#, fuzzy
-#~ msgid "Restore Defaults"
-#~ msgstr "Χρήση προεπιλογής"
-
-#, fuzzy
-#~ msgid "Basic"
-#~ msgstr "Πίσω"
-
-#, fuzzy
-#~ msgid "Types"
-#~ msgstr "Τύπος"
-
-#, fuzzy
-#~ msgid "Slots"
-#~ msgstr "Κλείσιμο"
-
-#, fuzzy
-#~ msgid "Status Bar"
-#~ msgstr "Κατάσταση"
-
-#, fuzzy
-#~ msgid "Bug Reports"
-#~ msgstr ""
-#~ "Το LimeWire δεν ήταν δυνατόν να συνδεθεί με τον διακομιστή σφαλμάτων για "
-#~ "να στείλει την παρακάτω αναφορά σφαλμάτων. Για περισσότερες πληροφορίες "
-#~ "και για βοήθεια σχετικά με τον εντοπισμό λαθών, επισκεφθείτε την "
-#~ "ιστοσελίδα www.limewire.com και πατήστε 'Support'. Σας ευχαριστούμε."
-
-#, fuzzy
-#~ msgid "Autocomplete"
-#~ msgstr "{0}% ολοκληρώθηκαν"
-
 #~ msgid "Searching"
 #~ msgstr "Γίνεται αναζήτηση"
-
-#, fuzzy
-#~ msgid "Content"
-#~ msgstr "Σχόλια"
-
-#, fuzzy
-#~ msgid "Hosts"
-#~ msgstr "Κεντρικός υπολογιστής"
-
-#, fuzzy
-#~ msgid "System Boot"
-#~ msgstr "Σύστημα"
-
-#, fuzzy
-#~ msgid "Loading Options Window..."
-#~ msgstr "Φόρτωση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Use LimeWire for..."
-#~ msgstr "Χρήση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Audio Player"
-#~ msgstr "Πρόγραμμα αναπαραγωγής"
-
-#, fuzzy
-#~ msgid "Clear Completed Downloads:"
-#~ msgstr "Πρόσφατες λήψεις"
-
-#, fuzzy
-#~ msgid "Automatically Clear Completed Uploads:"
-#~ msgstr "Αυτόματη κύλιση"
-
-#, fuzzy
-#~ msgid "Browser Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Host Communication"
-#~ msgstr "Παράμετροι δρομολογητή"
-
-#, fuzzy
-#~ msgid "Enable Chat:"
-#~ msgstr "Ενεργοποίηση ελέγχου ταυτότητας"
-
-#, fuzzy
-#~ msgid "Connect on Startup"
-#~ msgstr "Ταχύτητα σύνδεσης"
-
-#, fuzzy
-#~ msgid "Connect on Startup:"
-#~ msgstr "Ταχύτητα σύνδεσης"
-
-#, fuzzy
-#~ msgid "Connection Preferencing"
-#~ msgstr "Ταχύτητα σύνδεσης"
-
-#, fuzzy
-#~ msgid "Allow Freeloaders:"
-#~ msgstr "Όλοι οι φάκελοι"
-
-#, fuzzy
-#~ msgid ""
-#~ "You can tell LimeWire to filter files that copyright owners request not "
-#~ "be shared. By enabling filtering, you are instructing LimeWire to confirm "
-#~ "all files you download or share with a list of removed content."
-#~ msgstr ""
-#~ "Το LimeWire μπορεί να φιλτράρει αρχεία, των οποίων οι πνευματικοί "
-#~ "ιδιοκτήτες δεν επιθυμούν την κοινή χρήση.  Ελέγχοντας το πλαίσιο παρακάτω "
-#~ "δίνετε στο LimeWire την εντολή να επιβεβαιώνει όλα τα αρχεία που "
-#~ "κατεβάζετε ή που μοιράζεστε σύμφωνα με μια λίστα περιεχομένου που έχει "
-#~ "καταργηθεί.  Αργότερα μπορείτε να το αλλάξετε αυτό στις Επιλογές > "
-#~ "Ασφάλεια > Φιλτράρισμα."
-
-#, fuzzy
-#~ msgid "Enable Content Filters"
-#~ msgstr "Φίλτρα περιεχομένου"
-
-#, fuzzy
-#~ msgid "Always Ask What to do"
-#~ msgstr "Πάντα ερώτηση για ανασκόπηση"
-
-#, fuzzy
-#~ msgid "Capabilities"
-#~ msgstr "Απενεργοποίηση δυνατοτήτων TLS"
-
-#, fuzzy
-#~ msgid "Disable Mojito DHT Capabilities:"
-#~ msgstr "Απενεργοποίηση δυνατοτήτων TLS"
-
-#, fuzzy
-#~ msgid "OOB Searching"
-#~ msgstr "Γίνεται αναζήτηση"
-
-#, fuzzy
-#~ msgid "Show License Warning:"
-#~ msgstr "Εμφάνιση γραμμής Βιβλιοθήκες"
-
-#, fuzzy
-#~ msgid "Use Defaults"
-#~ msgstr "Χρήση προεπιλογής"
-
-#, fuzzy
-#~ msgid "Filter Hosts"
-#~ msgstr "Φίλτρο"
-
-#, fuzzy
-#~ msgid "Ignore Adult Content"
-#~ msgstr "Μη προβολή περιεχομένου για ενηλίκους"
-
-#, fuzzy
-#~ msgid "Ignore .vbs Files"
-#~ msgstr "Μη ολοκληρωμένα αρχεία"
-
-#, fuzzy
-#~ msgid "Image Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Maximum Downloads"
-#~ msgstr "Λήψεις"
-
-#, fuzzy
-#~ msgid "Maximum Downloads:"
-#~ msgstr "Λήψεις"
-
-#, fuzzy
-#~ msgid "Max Upload Slots"
-#~ msgstr "Μέγιστος αριθμός αποστολών ανά torrent"
-
-#, fuzzy
-#~ msgid "Max Upload Slots:"
-#~ msgstr "Μέγιστος αριθμός αποστολών ανά torrent"
-
-#, fuzzy
-#~ msgid "Open Dialog to Select a Folder"
-#~ msgstr "Επιλογή φακέλου"
-
-#, fuzzy
-#~ msgid "Reset"
-#~ msgstr "Συνέχιση"
-
-#, fuzzy
-#~ msgid "Partial Files"
-#~ msgstr "Έγκυρα αρχεία"
-
-#, fuzzy
-#~ msgid "Player Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "LimeWire Popups"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Proxy Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Days to Keep Incomplete Files:"
-#~ msgstr "Μη ολοκληρωμένα αρχεία"
-
-#, fuzzy
-#~ msgid "Search Result Quality"
-#~ msgstr "Εξαιρετική ποιότητα"
-
-#, fuzzy
-#~ msgid "Download Sharing"
-#~ msgstr "Γίνεται λήψη"
-
-#, fuzzy
-#~ msgid "Shutdown Immediately"
-#~ msgstr "Πάντα άμεση αποστολή"
-
-#, fuzzy
-#~ msgid "Shutdown after Transfers"
-#~ msgstr "Τερματισμός μετά τη Μεταφορά"
-
-#, fuzzy
-#~ msgid "Speed:"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Bandwidth Indicator"
-#~ msgstr "Εισερχόμενο εύρος ζώνης"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Indicator:"
-#~ msgstr "Εισερχόμενο εύρος ζώνης"
-
-#, fuzzy
-#~ msgid "Show LimeWire Store Indicator:"
-#~ msgstr "Οργάνωση αρχείων Καταστήματος LimeWire"
-
-#, fuzzy
-#~ msgid "LimeWire Store - Save Folder"
-#~ msgstr "Κατάστημα LimeWire"
-
-#, fuzzy
-#~ msgid "Update Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Upload Speed:"
-#~ msgstr "Αποστολή στοιχείου"
-
-#, fuzzy
-#~ msgid "Video Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "Video Player"
-#~ msgstr "Πρόγραμμα αναπαραγωγής"
-
-#, fuzzy
-#~ msgid "Remove Selected File from Playlist"
-#~ msgstr "Κατάργηση από τη λίστα"
-
-#, fuzzy
-#~ msgid "Comment"
-#~ msgstr "Σχόλια"
-
-#, fuzzy
-#~ msgid "Playlist"
-#~ msgstr "Αναπαραγωγή"
-
-#, fuzzy
-#~ msgid "Loading Playlist Window..."
-#~ msgstr "Φόρτωση του LimeWire..."
-
-#, fuzzy
-#~ msgid "Play Options:"
-#~ msgstr "Επιλογές"
-
-#, fuzzy
-#~ msgid "Shuffle"
-#~ msgstr "Υποφάκελος"
-
-#, fuzzy
-#~ msgid "Continuous"
-#~ msgstr "Συνέχιση"
-
-#, fuzzy
-#~ msgid "Save Playlist As"
-#~ msgstr "Αποθήκευση ως"
-
-#, fuzzy
-#~ msgid "General"
-#~ msgstr "Είδος"
-
-#, fuzzy
-#~ msgid "Option"
-#~ msgstr "Επιλογές"
-
-#, fuzzy
-#~ msgid "Filter Results:"
-#~ msgstr "Αποτελέσματα βίντεο"
-
-#, fuzzy
-#~ msgid "Back To Search"
-#~ msgstr "Αναζήτηση"
-
-#, fuzzy
-#~ msgid "Download As..."
-#~ msgstr "Λήψεις"
 
 #~ msgid "Configure"
 #~ msgstr "Παράμετροι"
 
-#, fuzzy
-#~ msgid "Search More"
-#~ msgstr "Αναζήτηση"
-
-#, fuzzy
-#~ msgid "Stop Search"
-#~ msgstr "Αναζήτηση"
-
-#, fuzzy
-#~ msgid "Download All Selected Files"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Don't Know"
-#~ msgstr "Χωρίς σάρωση"
-
-#, fuzzy
-#~ msgid "Launch Action"
-#~ msgstr "Άνοιγμα αρχείου"
-
-#, fuzzy
-#~ msgid "Repeat Search"
-#~ msgstr "Επανάληψη αναζήτησης"
-
-#, fuzzy
-#~ msgid "Loading Search Window..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Firewalled Host"
-#~ msgstr "Τείχος προστασίας"
-
-#, fuzzy
-#~ msgid "Vendor"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Junk Rating"
-#~ msgstr "Κατάταξη"
-
 #~ msgid "Back"
 #~ msgstr "Πίσω"
-
-#, fuzzy
-#~ msgid "View Logging Messages"
-#~ msgstr "Προειδοποιητικά μηνύματα"
-
-#, fuzzy
-#~ msgid "Search and Download Files"
-#~ msgstr "Πρόσφατες λήψεις"
-
-#, fuzzy
-#~ msgid "Kill Upload"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Remove Inactive Uploads"
-#~ msgstr "Κατάργηση λήψης"
-
-#, fuzzy
-#~ msgid "Freeloader Uploading"
-#~ msgstr "Τέλος αποστολής"
-
-#, fuzzy
-#~ msgid "Suspended"
-#~ msgstr "Αποστολή"
-
-#, fuzzy
-#~ msgid "Loading Upload Window..."
-#~ msgstr "Φόρτωση περιηγητή..."
-
-#, fuzzy
-#~ msgid "Seeding"
-#~ msgstr "Ρυθμίσεις"
-
-#, fuzzy
-#~ msgid "Invalid Filename"
-#~ msgstr "Άκυρος Σύνδεσμος!"
-
-#, fuzzy
-#~ msgid "Download Already Finished"
-#~ msgstr "Λήψη επιλεγμένων αρχείων"
-
-#, fuzzy
-#~ msgid "Filename Taken"
-#~ msgstr "Όνομα αρχείου"
-
-#, fuzzy
-#~ msgid "Not a File"
-#~ msgstr "Εντοπισμός αρχείου"
-
-#, fuzzy
-#~ msgid "Filesystem Error"
-#~ msgstr "Σφάλμα iTunes"
-
-#, fuzzy
-#~ msgid "More Search Options"
-#~ msgstr "Περισσότερες επιλογές"
-
-#, fuzzy
-#~ msgid "ShareAlike"
-#~ msgstr "Κοινή χρήση"
-
-#, fuzzy
-#~ msgid "Title of Work:"
-#~ msgstr "Εντοπισμός στη θύρα:"
-
-#, fuzzy
-#~ msgid "Comment:"
-#~ msgstr "Σχόλια"
-
-#, fuzzy
-#~ msgid "Copy to Clipboard"
-#~ msgstr "Αντιγραφή συνδέσμου στο Πρόχειρο"
-
-#, fuzzy
-#~ msgid "Kind:"
-#~ msgstr "Σύνδεσμος:"
-
-#, fuzzy
-#~ msgid "Size:"
-#~ msgstr "Μέγεθος"
-
-#, fuzzy
-#~ msgid "Date Modified:"
-#~ msgstr "Τροποποιήθηκε"
-
-#, fuzzy
-#~ msgid "Title:"
-#~ msgstr "Τίτλος"
-
-#, fuzzy
-#~ msgid "Artist:"
-#~ msgstr "Καλλιτέχνης"
-
-#, fuzzy
-#~ msgid "Album:"
-#~ msgstr "Άλμπουμ"
-
-#, fuzzy
-#~ msgid "Genre:"
-#~ msgstr "Είδος"
-
-#, fuzzy
-#~ msgid "Year:"
-#~ msgstr "Έτος"
-
-#, fuzzy
-#~ msgid "Type:"
-#~ msgstr "Τύπος"
-
-#, fuzzy
-#~ msgid "Track:"
-#~ msgstr "Κομμάτι"
-
-#, fuzzy
-#~ msgid "Length:"
-#~ msgstr "Μήκος"
-
-#, fuzzy
-#~ msgid "Bitrate:"
-#~ msgstr "Ρυθμός μετάδοσης bit"
-
-#, fuzzy
-#~ msgid "Comments:"
-#~ msgstr "Σχόλια"
 
 #~ msgid "Link:"
 #~ msgstr "Σύνδεσμος:"
 
-#, fuzzy
-#~ msgid "Action:"
-#~ msgstr "Ενεργοποιημένο"
+#~ msgid ""
+#~ "LimeWire has encountered an internal error. It is possible for LimeWire "
+#~ "to recover and continue running normally. To continue using LimeWire, "
+#~ "click 'Discard'. If desired, you can click 'Review' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "Το LimeWire αντιμετώπισε ένα εσωτερικό σφάλμα. Το LimeWire είναι δυνατόν "
+#~ "να αποκατασταθεί και να συνεχίσει να λειτουργεί κανονικά. Για να "
+#~ "συνεχίσετε να χρησιμοποιείτε το LimeWire, πατήστε \"Απόρριψη\". Εάν "
+#~ "θέλετε, μπορείτε να πατήσετε \"Ανασκόπηση\" για να δείτε τις πληροφορίες "
+#~ "σχετικά με το σφάλμα."
 
-#, fuzzy
-#~ msgid "License:"
-#~ msgstr "Σύνδεσμος:"
+#~ msgid "Send"
+#~ msgstr "Αποστολή"
 
-#, fuzzy
-#~ msgid "Rating:"
-#~ msgstr "Κατάταξη"
+#~ msgid "Review"
+#~ msgstr "Ανασκόπηση"
 
-#, fuzzy
-#~ msgid "Studio:"
-#~ msgstr "Ήχος"
+#~ msgid "Loading HTML Engine..."
+#~ msgstr "Φόρτωση μηχανισμού HTML..."
 
-#, fuzzy
-#~ msgid "Author:"
-#~ msgstr "Συντάκτης"
+#~ msgid "Loading Browser..."
+#~ msgstr "Φόρτωση περιηγητή..."
 
-#, fuzzy
-#~ msgid "Platform:"
-#~ msgstr "Πλατφόρμα"
+#~ msgid "Loading User Interface..."
+#~ msgstr "Φόρτωση περιβάλλοντος εργασίας χρήστη..."
+
+#~ msgid "Do Not Disturb"
+#~ msgstr "Μην ενοχλείτε"
+
+#~ msgid "View Library"
+#~ msgstr "Προβολή βιβλιοθήκης"
+
+#~ msgid "Finished"
+#~ msgstr "Ολοκληρώθηκε"
 
 #~ msgid "Inactive"
 #~ msgstr "Ανενεργό"
@@ -10707,8 +10301,32 @@ msgstr ""
 #~ msgid "Queued - #{0} in line"
 #~ msgstr "Στην ουρά - #{0} στη σειρά"
 
+#~ msgid "Queued - remaining time unknown"
+#~ msgstr "Στην ουρά - χρόνος που απομένει: άγνωστο"
+
+#~ msgid "Queued - Starting in {0}"
+#~ msgstr "Στην ουρά - Έναρξη σε {0}"
+
+#~ msgid "Categorize downloads"
+#~ msgstr "Κατάταξη λήψεων"
+
+#~ msgid "Launch file"
+#~ msgstr "Άνοιγμα αρχείου"
+
+#~ msgid "Remove from list"
+#~ msgstr "Κατάργηση από τη λίστα"
+
+#~ msgid "Locate file"
+#~ msgstr "Εντοπισμός αρχείου"
+
+#~ msgid "Done"
+#~ msgstr "Τέλος"
+
 #~ msgid "Queued - About {0} before download can begin"
 #~ msgstr "Στην ουρά - Περίπου {0} μέχρι να ξεκινήσει η λήψη"
+
+#~ msgid "Chat from {0} - LimeWire 5"
+#~ msgstr "Συνομιλία από {0} - LimeWire 5"
 
 #~ msgid "View Files I'm sharing with them ({0})"
 #~ msgstr "Προβολή Αρχείων που μοιράζομαι μαζί τους ({0})"
@@ -10721,28 +10339,99 @@ msgstr ""
 #~ msgid "Close chat (closes the current chat window)"
 #~ msgstr "Κλείσιμο συνομιλίας (κλείνει το τρέχον παράθυρο συνομιλίας)"
 
+#~ msgid "Library"
+#~ msgstr "Βιβλιοθήκη"
+
 #~ msgid "Retry Download {0}"
 #~ msgstr "Επανάληψη λήψης {0}"
+
+#~ msgid "Logging in..."
+#~ msgstr "Γίνεται εγγραφή..."
+
+#~ msgid "Offline friends"
+#~ msgstr "Φίλοι εκτός σύνδεσης"
+
+#~ msgid "Sign out"
+#~ msgstr "Αποσύνδεση"
 
 #~ msgid "Switch user"
 #~ msgstr "Αλλαγή χρήστη"
 
+#~ msgid "Set {0} status"
+#~ msgstr "Ορισμός {0} κατάσταση"
+
+#~ msgid "Incorrect password."
+#~ msgstr "Μη έγκυρος κωδικός πρόσβασης."
+
 #~ msgid "Show files you're sharing with {0}"
 #~ msgstr "Εμφάνιση αρχείων που μοιράζεστε με {0}"
+
+#~ msgid "You're sharing {0} files with {1}"
+#~ msgstr "Μοιράζεστε {0} αρχεία με {1}"
 
 #~ msgid "{0} is on LimeWire but there were problems viewing their library"
 #~ msgstr ""
 #~ "{0} είναι στο LimeWire αλλά αντιμετωπίζουν πρόβλημα με την προβολή της "
 #~ "βιβλιοθήκης τους"
 
+#~ msgid "Filter"
+#~ msgstr "Φίλτρο"
+
+#~ msgid "Sharing with {0}"
+#~ msgstr "Κοινή χρήση με {0}"
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {0} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "Η κοινή χρήση της συλλογής σας {0} αυτόματα σημαίνει κοινή χρήση των νέων "
+#~ "αρχείων {0} που προστέθηκαν στη Βιβλιοθήκη σας"
+
+#~ msgid "Sharing collection: {0}"
+#~ msgstr "Συλλογή που μοιράζεστε: {0}"
+
+#~ msgid "Returns to what's being shared with you."
+#~ msgstr "Επιστρέφει σε αυτό που μοιράζονται μαζί σας."
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {1} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "Η κοινή χρήση της συλλογής σας {0} αυτόματα σημαίνει κοινή χρήση των νέων "
+#~ "αρχείων {1} που προστέθηκαν στη Βιβλιοθήκη σας"
+
+#~ msgid "Don't Scan"
+#~ msgstr "Χωρίς σάρωση"
+
 #~ msgid "Scan"
 #~ msgstr "Σάρωση"
+
+#~ msgid "Folder"
+#~ msgstr "Φάκελος"
+
+#~ msgid "Modified"
+#~ msgstr "Τροποποιήθηκε"
 
 #~ msgid "Created"
 #~ msgstr "Δημιουργήθηκε"
 
+#~ msgid "Already in My Library"
+#~ msgstr "Ήδη στη βιβλιοθήκη μου"
+
 #~ msgid "Already downloading"
 #~ msgstr "Γίνεται ήδη λήψη"
+
+#~ msgid "Number of Files"
+#~ msgstr "Αριθμός αρχείων"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Διάφορα"
+
+#~ msgid "Copy Link to Clipboard"
+#~ msgstr "Αντιγραφή συνδέσμου στο Πρόχειρο"
+
+#~ msgid "Download Selected Files"
+#~ msgstr "Λήψη επιλεγμένων αρχείων"
 
 #~ msgid "Share with Friends"
 #~ msgstr "Μοιραστείτε με φίλους"
@@ -10750,11 +10439,20 @@ msgstr ""
 #~ msgid "Unshare with Friends"
 #~ msgstr "Μην μοιράζεστε με φίλους"
 
+#~ msgid "Remove from library"
+#~ msgstr "Κατάργηση από τη βιβλιοθήκη"
+
 #~ msgid "Delete file"
 #~ msgstr "Διαγραφή αρχείου"
 
 #~ msgid "Unshare with P2P Network"
 #~ msgstr "Μην μοιράζεστε με το Δίκτυο Ρ2Ρ"
+
+#~ msgid "Share with P2P Network"
+#~ msgstr "Μοιραστείτε με το Δίκτυο P2P"
+
+#~ msgid "Delete File"
+#~ msgstr "Διαγραφή αρχείου"
 
 #~ msgid "Store"
 #~ msgstr "Αποθήκευση"
@@ -10762,11 +10460,82 @@ msgstr ""
 #~ msgid "Libraries"
 #~ msgstr "Βιβλιοθήκες"
 
+#~ msgid "Close all searches"
+#~ msgstr "Κλείσιμο όλων των αναζητήσεων"
+
+#~ msgid "Close search"
+#~ msgstr "Κλείσιμο αναζήτησης"
+
+#~ msgid "Close other searches"
+#~ msgstr "Κλείσιμο όλων των άλλων αναζητήσεων"
+
+#~ msgid "Repeat search"
+#~ msgstr "Επανάληψη αναζήτησης"
+
 #~ msgid "&Open File"
 #~ msgstr "&Άνοιγμα αρχείου"
 
+#~ msgid "Open &Link"
+#~ msgstr "Άνοιγμα &Σύνδεσμος"
+
+#~ msgid "Add File To Library"
+#~ msgstr "Προσθήκη αρχείου στη βιβλιοθήκη"
+
+#~ msgid "Add Folder To Library"
+#~ msgstr "Προσθήκη φακέλου στη βιβλιοθήκη"
+
+#~ msgid "Using LimeWire..."
+#~ msgstr "Χρήση του LimeWire..."
+
+#~ msgid "FAQ..."
+#~ msgstr "Συχνές ερωτήσεις..."
+
+#~ msgid "Get personal tech support"
+#~ msgstr "Λάβετε προσωπική τεχνική υποστήριξη"
+
+#~ msgid "Player"
+#~ msgstr "Πρόγραμμα αναπαραγωγής"
+
+#~ msgid "Show current file"
+#~ msgstr "Εμφάνιση τρέχοντος αρχείου"
+
+#~ msgid "Hide Libraries bar"
+#~ msgstr "Απόκρυψη γραμμής Βιβλιοθήκες"
+
+#~ msgid "Show Libraries bar"
+#~ msgstr "Εμφάνιση γραμμής Βιβλιοθήκες"
+
+#~ msgid "Hide Chat window"
+#~ msgstr "Απόκρυψη παραθύρου συνομιλίας"
+
+#~ msgid "Show Chat window"
+#~ msgstr "Εμφάνιση παραθύρου συνομιλίας"
+
+#~ msgid "Invalid Link!"
+#~ msgstr "Άκυρος Σύνδεσμος!"
+
+#~ msgid "Open magnet or torrent link."
+#~ msgstr "Άνοιγμα δεσμού magnet ή torrent."
+
+#~ msgid "Sharing downloads"
+#~ msgstr "Κοινή χρήση λήψεων"
+
+#~ msgid "Add audio files I downloaded from LimeWire to my iTunes Library"
+#~ msgstr ""
+#~ "Προσθήκη αρχείων ήχου που κατέβασα από το LimeWire στη Βιβλιοθήκη μου "
+#~ "iTunes"
+
 #~ msgid "Recent downloads"
 #~ msgstr "Πρόσφατες λήψεις"
+
+#~ msgid "Remember recent downloads"
+#~ msgstr "Απομνημόνευση πρόσφατων λήψεων"
+
+#~ msgid "Manage"
+#~ msgstr "Διαχείριση"
+
+#~ msgid "Configure file naming"
+#~ msgstr "Ρύθμιση παραμέτρων ονομασίας αρχείων"
 
 #~ msgid ""
 #~ "LimeWire will automatically scan the folders below and place files in "
@@ -10775,11 +10544,34 @@ msgstr ""
 #~ "Το LimeWire θα κάνει αυτόματη αναζήτηση στους παρακάτω φακέλους και θα "
 #~ "τοποθετήσει αρχεία στη Βιβλιοθήκη σας."
 
+#~ msgid "Add the following types of files to your Library:"
+#~ msgstr "Προσθήκη των παρακάτω ειδών αρχείων στη Βιβλιοθήκη σας:"
+
+#~ msgid ""
+#~ "Scanning these folders into your Library will not automatically share "
+#~ "your files."
+#~ msgstr ""
+#~ "Η αυτόματη αναζήτηση στους φακέλους αυτούς για την προσθήκη αρχείων στη "
+#~ "Βιβλιοθήκη σας δεν σημαίνει αυτόματη κοινή χρήση των αρχείων σας."
+
+#~ msgid "Add New Folder"
+#~ msgstr "Προσθήκη νέου φακέλου"
+
+#~ msgid "Library Management"
+#~ msgstr "Διαχείριση Βιβλιοθήκης"
+
 #~ msgid "Manage Library"
 #~ msgstr "Διαχειριστείτε τη Βιβλιοθήκη"
 
 #~ msgid "Manage what folders are loaded into your library"
 #~ msgstr "Διαχειριστείτε τι είδους φάκελοι φορτώνονται στη βιβλιοθήκη σας"
+
+#~ msgid ""
+#~ "Your Library is a central location to view, share and unshare your files "
+#~ "with the P2P Network and your friends."
+#~ msgstr ""
+#~ "Η Βιβλιοθήκη σας είναι ένα κεντρικό σημείο για την προβολή, κοινή χρήση "
+#~ "και μη των αρχείων σας με το Δίκτυο P2P και τους φίλους σας."
 
 #~ msgid ""
 #~ "LimeWire will scan folders and look for files to add to your Library. "
@@ -10792,6 +10584,43 @@ msgstr ""
 #~ msgid "Select which file extensions belong in Audio, Video, etc.."
 #~ msgstr ""
 #~ "Επιλέξτε ποιές επεκτάσεις αρχείων ανήκουν σε αρχεία Ήχου, Βίντεο, κ.λπ..."
+
+#~ msgid "Sign in when LimeWire starts"
+#~ msgstr "Σύνδεση όταν ξεκινά το LimeWire"
+
+#~ msgid "Settings"
+#~ msgstr "Ρυθμίσεις"
+
+#~ msgid "-Searching for and sharing Programs with anyone"
+#~ msgstr "Αναζήτηση και κοινή χρήση προγραμμάτων με οποιονδήποτε"
+
+#~ msgid "-Sharing Documents with the P2P Network"
+#~ msgstr "Κοινή χρήση εγγράφων με το Δίκτυο P2P"
+
+#~ msgid "Don't show adult content"
+#~ msgstr "Μη προβολή περιεχομένου για ενηλίκους"
+
+#~ msgid "Warn me when other programs take these associations"
+#~ msgstr "Ειδοποιήστε με όταν άλλα προγράμματα παίρνουν αυτές τις συσχετίσεις"
+
+#~ msgid "Updates and Bugs"
+#~ msgstr "Ενημερώσεις και Σφάλματα"
+
+#~ msgid "Report bugs to LimeWire"
+#~ msgstr "Αποστολή αναφοράς σφαλμάτων στο LimeWire"
+
+#~ msgid "Show me the bug report before sending it"
+#~ msgstr "Εμφάνιση της αναφοράς σφαλμάτων πριν την αποστολή"
+
+#~ msgid ""
+#~ "Allow me to search for and share Programs with the P2P Network and my "
+#~ "friends"
+#~ msgstr ""
+#~ "Επιτρεψέ μου να κάνω αναζήτηση και να μοιράζομαι προγράμματα με το Δίκτυο "
+#~ "P2P και τους φίλους μου"
+
+#~ msgid "Allow me to share Documents with the P2P Network"
+#~ msgstr "Επιτρεψέ μου να μοιράζομαι έγγραφα με το Δίκτυο P2P"
 
 #~ msgid ""
 #~ "TODO get better copy... LimeWire is currently starting. When it has "
@@ -10823,6 +10652,9 @@ msgstr ""
 #~ msgid "Files I'm Sharing ({0})"
 #~ msgstr "Αρχεία που μοιράζομαι ({0})"
 
+#~ msgid "{0} person"
+#~ msgstr "{0} άτομο"
+
 #~ msgid "{0} people"
 #~ msgstr "{0} άτομα"
 
@@ -10838,14 +10670,59 @@ msgstr ""
 #~ msgid "also not used"
 #~ msgstr "επίσης μη χρησιμοποιημένα"
 
+#~ msgid "Upload Item"
+#~ msgstr "Αποστολή στοιχείου"
+
+#~ msgid "Exit after Transfers"
+#~ msgstr "Τερματισμός μετά τη Μεταφορά"
+
 #~ msgid "Jump to File in Library"
 #~ msgstr "Μεταπήδηση στο Αρχείο στη Βιβλιοθήκη"
+
+#~ msgid "Cancel Upload"
+#~ msgstr "Ακύρωση αποστολής"
+
+#~ msgid "Play file"
+#~ msgstr "Αναπαραγωγή αρχείου"
 
 #~ msgid "LimeWire 5 - Some legal stff"
 #~ msgstr "LimeWire 5 - Μερικά νομικά ζητήματα"
 
+#~ msgid "State your intent"
+#~ msgstr "Δηλώστε τις προθέσεις σας"
+
+#~ msgid ""
+#~ "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing the "
+#~ "authorized files only.  Installing and using either program does not "
+#~ "constitute a license for obtaining or distributing unauthorized content."
+#~ msgstr ""
+#~ "Το LimeWire Basic και το LimeWire PRO είναι ομότιμα προγράμματα για την "
+#~ "κοινή χρήση μόνο εγκεκριμένων αρχείων.  Η εγκατάσταση και χρήση "
+#~ "οποιουδήποτε προγράμματος δεν συνιστά άδεια απόκτησης ή διανομής υλικού "
+#~ "που δεν είναι εγκεκριμένο."
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright "
+#~ "infringement"
+#~ msgstr ""
+#~ "Επιλέγοντας \"Συμφωνώ\", συμφωνείτε να μη χρησιμοποιείτε το LimeWire 5 "
+#~ "για παραβάσεις πνευματικών δικαιωμάτων"
+
 #~ msgid "A few things before we begin..."
 #~ msgstr "Ακόμα μερικά πράγματα πριν ξεκινήσουμε..."
+
+#~ msgid ""
+#~ "LimeWire can filter files that copyright owners request not be shared.  "
+#~ "By checking the box below you are telling LimeWire to confirm all files "
+#~ "you download or share with a list of removed content.  You can change "
+#~ "this later in Options > Security > Filtering."
+#~ msgstr ""
+#~ "Το LimeWire μπορεί να φιλτράρει αρχεία, των οποίων οι πνευματικοί "
+#~ "ιδιοκτήτες δεν επιθυμούν την κοινή χρήση.  Ελέγχοντας το πλαίσιο παρακάτω "
+#~ "δίνετε στο LimeWire την εντολή να επιβεβαιώνει όλα τα αρχεία που "
+#~ "κατεβάζετε ή που μοιράζεστε σύμφωνα με μια λίστα περιεχομένου που έχει "
+#~ "καταργηθεί.  Αργότερα μπορείτε να το αλλάξετε αυτό στις Επιλογές > "
+#~ "Ασφάλεια > Φιλτράρισμα."
 
 #~ msgid "Filter out files LimeWire identifies as unauthorized or unlicensed"
 #~ msgstr ""
@@ -10865,6 +10742,14 @@ msgstr ""
 #~ msgid "Automatically manage My Library"
 #~ msgstr "Αυτόματη διαχείριση της Βιβλιοθήκης μου"
 
+#~ msgid ""
+#~ "Choose this option to have LimeWire automatically scan files into your "
+#~ "Library from My Documents and the Desktop."
+#~ msgstr ""
+#~ "Επιλέξτε αυτή την επιλογή ώστε το LimeWire να κάνει αυτόματη αναζήτηση "
+#~ "και εισαγωγή αρχείων στη Βιβλιοθήκη σας από Τα έγγραφά μου και την "
+#~ "Επιφάνεια εργασίας."
+
 #~ msgid "Manually manage My Library"
 #~ msgstr "Χειροκίνητη διαχείριση της Βιβλιοθήκης μου"
 
@@ -10874,3 +10759,11 @@ msgstr ""
 #~ msgstr ""
 #~ "Επιλέξτε αυτή την επιλογή αν θέλετε να επιλέγετε ποιούς φακέλους αναζητά "
 #~ "και εισάγει το LimeWire στη Βιβλιοθήκη σας."
+
+#~ msgid "You can change these options later from Tools > Options"
+#~ msgstr ""
+#~ "Αργότερα μπορείτε να αλλάξετε αυτές τις επιλογές από τα Εργαλεία > "
+#~ "Επιλογές"
+
+#~ msgid "<Go back"
+#~ msgstr "<Πίσω"

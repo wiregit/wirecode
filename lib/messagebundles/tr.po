@@ -309,9 +309,9 @@ msgid ""
 "clicking 'Try Again' on the downloads.  When LimeWire finds a source for the "
 "file, the download will pick up where it left off."
 msgstr ""
-"Üzgünüz, LimeWire eski indirmelerinizi okuyamadı. Kitaplığınıza giderek, "
-"'Tamamlanmamış Dosyalarınızı' görüntüleyerek ve indirme işlemlerinizi "
-"'Sürdürmeyi' seçerek bunları yeniden başlatabilirsiniz."
+"Üzgünüz, LimeWire önceki yüklemelerinizi okuyamadı. Önceki yüklemelerinizi "
+"kütüphaneye gidip 'Tamamlanmayan Dosyalar'ı görüntüleyerek 'Devam Et'e "
+"tıklayarak devam ettirebilirsiniz"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:280
 #, fuzzy
@@ -320,9 +320,9 @@ msgid ""
 "them by clicking 'Try Again' on the downloads.  When LimeWire finds a source "
 "for the file, the download will pick up where it left off."
 msgstr ""
-"Üzgünüz, LimeWire indirdiğiniz bazı eski dosyaları okuyamadı. Kitaplığınıza "
-"giderek, 'Tamamlanmamış Dosyalarınızı' görüntüleyerek ve indirme "
-"işlemlerinizi 'Sürdürmeyi' seçerek bunları yeniden başlatabilirsiniz."
+"Üzgünüz, LimeWire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye "
+"gidip 'Tamamlanmayan Dosyalar'ı görebilir ve 'Devam Et'e tıklayarak bu "
+"dosyaları indirmeye tekrar başlayabilirsiniz."
 
 #: core/com/limegroup/gnutella/HTTPAcceptor.java:87
 msgid "HTTP Request Listening"
@@ -747,28 +747,19 @@ msgid "A problem occurred..."
 msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:400
-#, fuzzy
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, but please click 'Send Bug' to "
 "remind us to write this.  If you want, you can click 'Show Bug' to look at "
 "the information that will be sent. Thanks!"
 msgstr ""
-"Oops! Henüz yazmadığımız bir işlem yaptınız. Üzgünüz. LimeWire normal "
-"çalışmasına devam edecektir, ama bunu yazmayı hatırlatmak için lütfen "
-"'Gönder'i tıklatın. İsterseniz, gönderilecek bilgilere bakmak için "
-"'İncele'yi de tıklatabilirsiniz. Teşekkürler!"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:402
-#, fuzzy
 msgid ""
 "Oops!  You did something we haven't written yet.  Sorry about that.  "
 "LimeWire's still going to run just fine, so don't worry.  If you want, you "
 "can click 'Show Bug' to look at the information about the error."
 msgstr ""
-"Oops! Henüz yazmadığımız bir işlem yaptınız. Üzgünüz. LimeWire normal "
-"çalışmasına devam edecektir, üzülmeyin. İsterseniz, hata ile ilgili "
-"bilgilere bakmak için 'İncele'yi tıklatabilirsiniz. "
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:406
 msgid ""
@@ -784,10 +775,10 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"LimeWire bir iç hata ile karşılaştı. LimeWire programının kurtarılarak "
-"normal çalışmasına devam etmesi mümkündür. LimeWire programını kullanmaya "
-"devam etmek için 'At'ı tıklatın. İsterseniz, hata ile ilgili bilgilere "
-"bakmak için 'İncele'yi tıklatabilirsiniz. "
+"LimeWire bir iç hata ile karşılaştı. LimeWire'nin kurtarılması ve normal "
+"olarak çalışmaya devam etmesi olasıdır. LimeWire ile çalışmaya devam etmek "
+"için 'Gözardı Et' (Discard) butonuna tıklayın. Dilerseniz sorun hakkında "
+"bilgi almak için 'Review' butonuna tıklayabilirsiniz."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -795,9 +786,8 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
-#, fuzzy
 msgid "Show Bug"
-msgstr "Göster:"
+msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
 msgid "Hide Bug"
@@ -896,9 +886,8 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:44
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:75
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:87
-#, fuzzy
 msgid "Error"
-msgstr "Daap Hatası"
+msgstr "Hata"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:55
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:65
@@ -910,9 +899,8 @@ msgid "Message"
 msgstr "Mesaj"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:119
-#, fuzzy
 msgid "Do not display this message again"
-msgstr "Beni tekrar uyarma"
+msgstr "Bu mesajı tekrar gösterme"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
@@ -938,7 +926,7 @@ msgstr "Geri dön"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 #, fuzzy
 msgid "More File Info"
-msgstr "Dosya Bilgilerini Görüntüle"
+msgstr "Daha çok bilgi"
 
 #. *
 #. * The copy action.
@@ -986,14 +974,12 @@ msgid "Select All"
 msgstr "Tümünü Seç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:41
-#, fuzzy
 msgid "&Available"
-msgstr "Kullanılabilir"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:54
-#, fuzzy
 msgid "&Do Not Disturb"
-msgstr "Rahatsız Etmeyin"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
@@ -1003,7 +989,7 @@ msgstr "Bağlantılar "
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #, fuzzy
 msgid "View connections to other P2P clients"
-msgstr "Mojito DHT bağlantısını devre dışı bırak"
+msgstr "Diğer müşterilere bağlantıları göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -1017,7 +1003,7 @@ msgstr "konsol mesajlarını göster"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 #, fuzzy
 msgid "Mojito"
-msgstr "Mojito DHT"
+msgstr "Denetleme"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:53
 #, fuzzy
@@ -1375,22 +1361,22 @@ msgstr "Geri Al"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:158
 #, fuzzy
 msgid "Add to My Library"
-msgstr "Kitaplığım"
+msgstr "Kütüphanede Göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:162
 #, fuzzy, java-format
 msgid "Share files with {0}"
-msgstr "Paylaşılan Dosyalar"
+msgstr "Paylaşılan dosyalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:164
 #, fuzzy
 msgid "Share files"
-msgstr "Paylaşılan Dosyalar"
+msgstr "Paylaşılan dosyalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:259
 #, fuzzy
 msgid "Show all"
-msgstr "Göster:"
+msgstr "Sonuncuyu göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:49
@@ -1400,7 +1386,7 @@ msgstr "Tamamlananları sil"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:339
 #, fuzzy
 msgid "Download Complete"
-msgstr "Buradan indir"
+msgstr "İndirme Hızı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:472
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:176
@@ -1466,14 +1452,13 @@ msgid "Clear Finished"
 msgstr "Tamamlananları Temizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
-#, fuzzy
 msgid "Clear When Finished"
-msgstr "Tamamlananları Temizle"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
 #, fuzzy
 msgid "Categorize Downloads"
-msgstr "İndirme işlemlerini sınıflandır"
+msgstr "İndirmeleri Temizle"
 
 #. add(new AbstractAction(I18n.tr("&Downloads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:162
@@ -1547,26 +1532,26 @@ msgstr "Tekrar Dene"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:61
 #, fuzzy
 msgid "Launch File"
-msgstr "Dosyayı başlat"
+msgstr "Başlat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:69
 #, fuzzy
 msgid "Remove from List"
-msgstr "Listeden kaldır"
+msgstr "Tüm Dosyaları Çalma Listesinden Çıkar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/LocateFileAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:73
 #, fuzzy
 msgid "Locate on Disk"
-msgstr "diske yerleştir"
+msgstr "Konumlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
 #, fuzzy
 msgid "Locate in Library"
-msgstr "kitaplığa yerleştir"
+msgstr "Kütüphanede Göster"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:83
@@ -1615,7 +1600,7 @@ msgstr[0] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:505
 #, fuzzy
 msgid "Unable to download - "
-msgstr "İndirilemiyor:"
+msgstr "İndirmeyi iptal et"
 
 #. {0}: current size, {1} total size, {2} percent complete
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:508
@@ -1680,13 +1665,13 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:217
 #, fuzzy
 msgid "Reply"
-msgstr "Uygula "
+msgstr "Nadiren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:566
 #, fuzzy
 msgid "Close conversation"
-msgstr "Bağlantı zayıf"
+msgstr "Kayıt Yerini Seçin"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:768
 msgid "Open Chat"
@@ -1712,7 +1697,7 @@ msgstr "Paylaş"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:832
 #, fuzzy
 msgid "Close chat"
-msgstr "Sekmeyi Kapat "
+msgstr "aramayı kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:89
 msgid "<html><u>Hide</u></html>"
@@ -1727,7 +1712,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:464
 #, fuzzy
 msgid "Unable to access remote file"
-msgstr "Torrent açılamadı"
+msgstr "Veri silinemiyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ConversationPane.java:465
 msgid "Hyperlink"
@@ -1820,11 +1805,8 @@ msgid "Signing in ..."
 msgstr "Oturum açılıyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:58
-#, fuzzy
 msgid "Incorrect username or password."
 msgstr ""
-"Hatalı kullanıcı adı\n"
-"veya parola."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:59
 msgid "Network error."
@@ -1835,19 +1817,18 @@ msgid "Sign in with"
 msgstr "Oturum açılıyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:150
-#, fuzzy
 msgid "Domain"
-msgstr "Şirket"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:152
 #, fuzzy
 msgid "Username"
-msgstr "Kullanıcı adı:"
+msgstr "Kullanıcı Adı:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:153
 #, fuzzy
 msgid "Password"
-msgstr "Parola:"
+msgstr "Şifre:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:159
 msgid "Remember me"
@@ -1901,9 +1882,8 @@ msgid "Sharing"
 msgstr "Paylaşılıyor"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
-#, fuzzy
 msgid "1 file with your friend."
-msgstr "Arkadaşlarla paylaş!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
 #, java-format
@@ -1911,9 +1891,8 @@ msgid "{0} files with your friend."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:275
-#, fuzzy
 msgid "files with your friend."
-msgstr "Arkadaşlarla paylaş!"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:283
 #, java-format
@@ -1960,22 +1939,21 @@ msgstr "Sohbet"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:301
 #, fuzzy, java-format
 msgid "Loading {0}'s files..."
-msgstr "Tarayıcı Yükleniyor..."
+msgstr "Kaydedilmiş Dosyalar yükleniyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:305
 #, fuzzy
 msgid "Loading files..."
-msgstr "Yükleniyor..."
+msgstr "İpuçları yükleniyor..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
-#, fuzzy, java-format
+#, java-format
 msgid "{0} isn't sharing with you"
-msgstr "Şu an paylaşılan kişi"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:318
-#, fuzzy
 msgid "about sharing with you."
-msgstr "Şu an paylaşılan kişi"
+msgstr ""
 
 #. this should never happen
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:321
@@ -1997,9 +1975,8 @@ msgid "Share with {0}"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendSharingPanel.java:92
-#, fuzzy
 msgid "Return to what's being shared with you."
-msgstr "Sizinle paylaşılan dosyaya döner."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:121
 #, fuzzy, java-format
@@ -2015,17 +1992,17 @@ msgstr "hata {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:233
 #, fuzzy, java-format
 msgid "Sharing: {0}"
-msgstr "Paylaşılıyor"
+msgstr "Uyarı: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:229
 #, fuzzy
 msgid "Sharing: all"
-msgstr "Paylaşılıyor"
+msgstr "Paylaşım"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:240
-#, fuzzy, java-format
+#, java-format
 msgid "Sharing Collection: {0}"
-msgstr "Koleksiyonu paylaş"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:156
 msgid "X"
@@ -2034,7 +2011,7 @@ msgstr "X"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:169
 #, fuzzy
 msgid "Sharing with"
-msgstr "Paylaşılıyor"
+msgstr "Sohbet:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:113
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:123
@@ -2059,7 +2036,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:40
 #, fuzzy
 msgid "Share with the P2P Network"
-msgstr "P2P Ağı İle Paylaş"
+msgstr "Ağa Bağlan"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:52
@@ -2093,7 +2070,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:654
 #, fuzzy
 msgid "all"
-msgstr "Tümü"
+msgstr "Hepsi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:655
 #, fuzzy
@@ -2101,9 +2078,8 @@ msgid "Share all the files in this category."
 msgstr "Paylaşılan dosya göstergesi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:674
-#, fuzzy
 msgid "none"
-msgstr "Tamam"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:675
 msgid "Unshare all the files in this category."
@@ -2112,15 +2088,12 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:93
 #, fuzzy
 msgid "share folder"
-msgstr "Kayıt Klasörleri"
+msgstr "Dizini Paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/LibraryTreeTableContainer.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:243
-#, fuzzy
 msgid "*Adding these folders will not automatically share your files"
 msgstr ""
-"Bu klasörleri tarayarak Kitaplığınıza eklemeniz onları otomatik olarak "
-"paylaşmanız anlamına gelmez."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonEditor.java:25
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonRenderer.java:18
@@ -2152,9 +2125,9 @@ msgid "All Friends"
 msgstr "Tüm Arkadaşlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:40
-#, fuzzy, java-format
+#, java-format
 msgid "Share {0} collection"
-msgstr "Koleksiyonu paylaş"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:331
@@ -2164,16 +2137,15 @@ msgstr "Şu an paylaşılan kişi"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
 #, fuzzy
 msgid "Share one file"
-msgstr "Dosyayı Paylaş"
+msgstr ".torrent dosyalarını paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:104
 msgid "Start typing a friend's name"
 msgstr "Arkadaş adını yazmaya başla"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:105
-#, fuzzy
 msgid "Add another friend"
-msgstr "Arkadaş ekle"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:31
 #, java-format
@@ -2183,7 +2155,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:32
 #, fuzzy, java-format
 msgid "Shared {0} files with:"
-msgstr "Paylaşılan Dosyalar"
+msgstr "Paylaşılan dosyalar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:37
 #, java-format
@@ -2316,9 +2288,8 @@ msgstr "Çözünürlük"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
-#, fuzzy
 msgid "Hits"
-msgstr "Yükseklik"
+msgstr "Hit"
 
 #. add(new AbstractAction(I18n.tr("&Uploads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
@@ -2339,7 +2310,7 @@ msgstr "Yüklemeler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #, fuzzy
 msgid "Upload attempts"
-msgstr "Öğeyi Yükle"
+msgstr "Yüklemeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:157
 msgid "download"
@@ -2348,24 +2319,21 @@ msgstr "indir"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:71
 #, fuzzy
 msgid "This file cannot be shared."
-msgstr "Bu dosya paylaşılamaz"
+msgstr "Bu dosya paylaşılmaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:75
-#, fuzzy
 msgid "Sign in to share Documents with your friends"
 msgstr ""
-"Varsayılan ayar olarak, LimeWire arkadaşlarınızla belge paylaşmanıza izin "
-"verir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:80
 #, fuzzy
 msgid "Share this file with a friend"
-msgstr "Arkadaşlarla paylaş!"
+msgstr "Bu dosya paylaşılır."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:84
-#, fuzzy, java-format
+#, java-format
 msgid "share ({0})"
-msgstr "paylaş"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:100
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendDownloadAction.java:20
@@ -2383,7 +2351,7 @@ msgstr "Paylaşma"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 #, fuzzy
 msgid "Delete Files"
-msgstr "Dosyayı Sil"
+msgstr "Seçilen Dosyaları Sil"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2550,22 +2518,21 @@ msgstr "Kenar Çubuğunu Gizle"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:152
 #, fuzzy
 msgid "Close All Searches"
-msgstr "Tüm aramaları kapat"
+msgstr "aramayı kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:153
-#, fuzzy
 msgid "Close Search"
-msgstr "Aramayı kapat"
+msgstr "aramayı kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:154
 #, fuzzy
 msgid "Close Other searches"
-msgstr "Diğer aramaları kapat"
+msgstr "aramayı kapat"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:383
 #, fuzzy
 msgid "Find More Results"
-msgstr "Video sonuçları"
+msgstr "Daha çok sonucu al"
 
 #. TODO fberger comment out
 #. super(I18n.tr("&File"));
@@ -2611,7 +2578,7 @@ msgstr "LimeWire Hakkında..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/PlayerMenu.java:24
 #, fuzzy
 msgid "&Player"
-msgstr "Yürütücü"
+msgstr "Oynatıcı"
 
 #. TODO fberger
 #. super(I18n.tr("&Tools"));
@@ -2635,14 +2602,13 @@ msgid "What's New Search"
 msgstr "Yenileri Arama "
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
-#, fuzzy
 msgid "Hide &Sidebar"
-msgstr "Kenar Çubuğunu Gizle"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
 #, fuzzy
 msgid "Show &Sidebar"
-msgstr "Kenar Çubuğunu Göster"
+msgstr "Kütüphanede Göster"
 
 #. .tr("Hide &Download Tray"), I18n.tr("Show &Download Tray")));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:37
@@ -2728,7 +2694,7 @@ msgstr "T&orrenti Aç..."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:53
 #, fuzzy
 msgid "Open Torrent"
-msgstr "T&orrenti Aç..."
+msgstr "Magnet veya Torrent Aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2786,7 +2752,7 @@ msgstr "Dosyalar"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
 #, fuzzy
 msgid "Transfers"
-msgstr "Transfer Tamamlanınca Çık"
+msgstr "Aktarımlar Bitince Çıkış"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
 msgid "System"
@@ -2995,21 +2961,18 @@ msgstr "Daap Hatası"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:39
 #, fuzzy
 msgid "Add Extension"
-msgstr "Uzantı"
+msgstr "Yeni Uzantı Ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:41
 #, fuzzy
 msgid "Extensions"
-msgstr "Uzantı"
+msgstr "Türler:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:60
-#, fuzzy
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"LimeWire arama sonuçlarınızda aşağıdaki anahtar sözcükleri içeren sonuçları "
-"görüntülemeyecek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:97
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:202
@@ -3019,16 +2982,15 @@ msgstr "Varsayılanı Kullan"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #, fuzzy
 msgid "Revert to default settings"
-msgstr "Varsayılan Ayara Dön"
+msgstr "Varsayılana Geri Dön:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
 msgstr "Anahtar Sözcük Ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:40
-#, fuzzy
 msgid "Keyword"
-msgstr "Anahtar Sözcük Ekle"
+msgstr "Anahtar sözcük"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:55
 msgid ""
@@ -3149,7 +3111,7 @@ msgstr "Alt Klasör Yok"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:125
 #, fuzzy
 msgid "Sharing Categories"
-msgstr "Güvensiz Kategoriler"
+msgstr "Uzatmaları paylaşmak"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 msgid "Only share files in that category at that point"
@@ -3170,18 +3132,14 @@ msgid "Sharing Categories - Configure"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:223
-#, fuzzy
 msgid ""
 "Automatically add the following categories from folders below to My Library:"
-msgstr "ve aşağıdaki dosya türlerini Kitaplığım'a ekleyecek:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:235
-#, fuzzy
 msgid ""
 "*Adding these folders will automatically share any collections you shared"
 msgstr ""
-"Bu klasörleri tarayarak Kitaplığınıza eklemeniz onları otomatik olarak "
-"paylaşmanız anlamına gelmez."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:329
 msgid "Add New Folder..."
@@ -3217,12 +3175,12 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:373
 #, fuzzy
 msgid "View Folders..."
-msgstr "Yeni Klasör Ekle..."
+msgstr "Yeni Dizin Paylaş..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:381
 #, fuzzy
 msgid "Manually Imported Folders"
-msgstr "Kayıt Klasörlerini Yönet"
+msgstr "Elle Bağlantı Noktası Yönlendirme:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:428
 msgid "Use the LimeWire player when I play audio files"
@@ -3237,9 +3195,8 @@ msgid "Revert directories to the default"
 msgstr "Dizinleri varsayılan durumuna döndür"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:55
-#, fuzzy
 msgid "Language:"
-msgstr "Dil"
+msgstr "Lisan:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:127
 msgid "Notifications"
@@ -3415,7 +3372,7 @@ msgstr "Benzer arama sonuçlarını gruplandır"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:88
 #, fuzzy
 msgid "Search bar"
-msgstr "Ara"
+msgstr "Burada ara"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:92
 msgid "By default, search for"
@@ -3426,9 +3383,8 @@ msgid "Suggest files from friends"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
-#, fuzzy
 msgid "Remember my recent searches"
-msgstr "Son indirmeleri hatırla"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3475,17 +3431,13 @@ msgid "- Sharing documents with the P2P Network"
 msgstr "- P2P Ağında belge paylaşma"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:181
-#, fuzzy
 msgid ""
 "Don't let me download or upload files copyright owners request not be shared"
 msgstr ""
-"Telif hakkı sahiplerinin paylaşılmasını istemediği dosyaları indirmeme veya "
-"yüklememe izin verme."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:184
-#, fuzzy
 msgid "Don't show adult content in search results"
-msgstr "Cinsel içerik görüntüleme"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:188
 msgid "Filter Keywords"
@@ -3505,20 +3457,17 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:192
 #, fuzzy
 msgid "Filter File Extensions"
-msgstr "Dosya uzantısı"
+msgstr "Paylaşılan Türler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
 #, fuzzy
 msgid "Filter File Extensions..."
-msgstr "Dosya uzantısı"
+msgstr "Varsayılan Dosya Türlerini Paylaş"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
-#, fuzzy
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
 msgstr ""
-"Arama sonuçlarında belirli sözcükleri içeren dosyaların görüntülenmesini "
-"engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:195
 msgid "In search results..."
@@ -3548,7 +3497,9 @@ msgstr ".magnet dosyaları"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 #, fuzzy
 msgid "Warn me when other programs want to automatically open these types"
-msgstr "Diğer programlar bu ilişkilendirmeleri aldığında beni uyar"
+msgstr ""
+"Biten indirmelerin indirme listesinden otomatik olarak silinip "
+"silinmeyeceğini seçebilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3575,19 +3526,17 @@ msgid "Bugs"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
-#, fuzzy
 msgid "Let me know about bugs before sending them"
-msgstr "Göndermeden önce hata ayıklama raporunu bana göster"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 #, fuzzy
 msgid "Always send bugs to Lime Wire"
-msgstr "Hataları LimeWire'a bildir"
+msgstr "Dosya isimlerine her zaman # ekle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
-#, fuzzy
 msgid "Never send bugs to Lime Wire"
-msgstr "Hataları LimeWire'a bildir"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
 msgid ""
@@ -3674,17 +3623,15 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:228
 #, fuzzy
 msgid "Overview"
-msgstr "İncele"
+msgstr "Gözden geçir"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:251
-#, fuzzy
 msgid "Details"
-msgstr "Dosyaları sil"
+msgstr "Detaylar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:255
-#, fuzzy
 msgid "Location"
-msgstr "İşlem"
+msgstr "Konum"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 msgid "Dimensions"
@@ -3696,34 +3643,32 @@ msgid "({0}px X {1}px)"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:20
-#, fuzzy
 msgid "New audio"
-msgstr "Yalnız ses"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:21
 #, fuzzy
 msgid "New documents"
-msgstr "Yalnız belgeler"
+msgstr "Belgeler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:22
 #, fuzzy
 msgid "New images"
-msgstr "Yalnız görüntüler"
+msgstr "Resimler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:23
 #, fuzzy
 msgid "New programs"
-msgstr "Yalnız programlar"
+msgstr "Programlar"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:24
-#, fuzzy
 msgid "New videos"
-msgstr "Yalnız videolar"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:27
 #, fuzzy
 msgid "New files"
-msgstr "Dosyaları Görüntüle"
+msgstr ".torrent dosyaları"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:125
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:194
@@ -3742,7 +3687,7 @@ msgstr "Tümü"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:27
 #, fuzzy
 msgid "&All"
-msgstr "Tümü"
+msgstr "Hepsi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:28
 #, fuzzy
@@ -3757,7 +3702,7 @@ msgstr "Belgeler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
 #, fuzzy
 msgid "&Images"
-msgstr "Görüntüler"
+msgstr "Resimler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 #, fuzzy
@@ -3767,7 +3712,7 @@ msgstr "Programlar"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:32
 #, fuzzy
 msgid "&Videos"
-msgstr "Videolar"
+msgstr "Video"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
 #, fuzzy
@@ -3803,11 +3748,8 @@ msgid "LimeWire will start your search right after it finishes loading."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchResultsPanel.java:376
-#, fuzzy
 msgid "You might not receive many results until LimeWire finishes loading..."
 msgstr ""
-"LimeWire bağlanmayı tamamlamadı. Bağlanmayı tamamlayana kadar çok sayıda "
-"arama sonucu alamayabilirsiniz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:72
 msgid "Audio results"
@@ -3965,18 +3907,18 @@ msgstr "Spam olarak işaretle"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:62
 #, fuzzy
 msgid "Hide Similar Files"
-msgstr "Benzer dosyaları gizle"
+msgstr ".torrent Dosyalarını Gizle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:77
 #, fuzzy
 msgid "View File Info..."
-msgstr "Dosya Bilgilerini Görüntüle"
+msgstr "Tarayıcıda gör..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:92
 #, fuzzy
 msgid "Block Address"
-msgstr "Adres"
+msgstr "Sunucuyu Engelle"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:179
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
@@ -4187,7 +4129,7 @@ msgstr "Daha Sonra Güncelleştir"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:65
 #, fuzzy
 msgid "Play File"
-msgstr "Dosya yürüt"
+msgstr "Oynatıcı"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:216
 #, java-format
@@ -4297,7 +4239,7 @@ msgstr "Kalite"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:423
 #, fuzzy
 msgid "Excellent Quality"
-msgstr "Mükemmel"
+msgstr "Kusursuz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandler.java:60
 #, fuzzy
@@ -4307,19 +4249,19 @@ msgstr "Geçersiz Alternatif Yerler"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Unable to open URL"
-msgstr "Torrent açılamadı"
+msgstr "Veri silinemiyor."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Open URL"
-msgstr "Bağlantıyı Aç"
+msgstr "aç"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:187
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:190
-#, fuzzy, java-format
+#, java-format
 msgid "Unable to open file: {0}"
-msgstr "Torrent açılamadı"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:188
@@ -4332,7 +4274,7 @@ msgstr "Dosya Aç"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:254
 #, fuzzy, java-format
 msgid "Unable to locate file: {0}"
-msgstr "Yükleme yapılamıyor: dosya hatası"
+msgstr "LimeWire, \"{0}\" dosyayı paylaşamadı."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:251
@@ -4369,11 +4311,11 @@ msgstr "Klasör Uyarısı"
 
 #. Create user message.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:86
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Unable to download: {0}\n"
 "file {1}"
-msgstr "İndirilemiyor:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:103
 msgid "Save File As..."
@@ -4392,16 +4334,11 @@ msgid "State Your Intent"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:250
-#, fuzzy
 msgid ""
 "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
 "authorized files only. Installing and using either program does not "
 "constitute a license for obtaining or distributing unauthorized content."
 msgstr ""
-"LimeWire Basic ve LimeWire PRO, yalnız izin verilen dosyaları paylaşmaya "
-"yönelik eşler arası programlardır. Bu programların kurulması veya "
-"kullanılması, izin verilmeyen içeriğin alınması veya dağıtılması için lisans "
-"oluşturmaz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
@@ -4409,13 +4346,10 @@ msgid "Learn more"
 msgstr "Daha fazla bigi"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:252
-#, fuzzy
 msgid ""
 "By clicking \"I Agree\", you agree to not use LimeWire for copyright "
 "infringement."
 msgstr ""
-"\"Kabul Ediyorum\" öğesini tıklattığınızda, LimeWire 5 programını telif "
-"hakkı ihlali oluşturacak şekilde kullanmamayı kabul etmiş sayılıyorsunuz."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:253
 #, fuzzy
@@ -4437,12 +4371,9 @@ msgid "Content Filters"
 msgstr "İçerik Filtreleri"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:32
-#, fuzzy
 msgid ""
 "Don't let me download or upload files copyright owners request not be shared."
 msgstr ""
-"Telif hakkı sahiplerinin paylaşılmasını istemediği dosyaları indirmeme veya "
-"yüklememe izin verme."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:35
 msgid "File Associations and Startup"
@@ -4475,14 +4406,10 @@ msgid "Automatically add files to My Library, but don't share any new files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
-#, fuzzy
 msgid ""
 "Have LimeWire automatically add files from My Documents and the Desktop to "
 "My Library."
 msgstr ""
-"LimeWire programının Belgelerim ve Masaüstü konumlarındaki dosyalarınızı "
-"otomatik olarak tarayarak Kitaplığınıza aktarması için bu seçeneği "
-"işaretleyin."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:48
 msgid "Manually add files to My Library, but don't share any files"
@@ -4498,25 +4425,21 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:51
-#, fuzzy
 msgid "Add the following categories from the folders below to My Library:"
-msgstr "ve aşağıdaki dosya türlerini Kitaplığım'a ekleyecek:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:52
-#, fuzzy
 msgid "You can change this later from Tools > Options"
 msgstr ""
-"Bu seçeneği daha sonra Araçlar > Seçenekler kısmından değiştirebilirsiniz"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:236
 #, fuzzy
 msgid "Add Folder"
-msgstr "Klasör Ekle"
+msgstr "Tüm Klasörler"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:237
-#, fuzzy
 msgid "Choose a folder to automatically add to My Library"
-msgstr " Değişiklikleri otomatik olarak taramak için bir klasör seçin"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:58
 msgid "Continue"
@@ -4567,11 +4490,30 @@ msgstr[0] ""
 msgid "baobab (the tree)"
 msgstr ""
 
+msgid "Loading TLS Encryption..."
+msgstr "TLS Şifrelemesi yükleniyor..."
+
+msgid "Loading Message Router..."
+msgstr "Mesaj Yönlendirici yükleniyor..."
+
 msgid "Checking for Updates..."
 msgstr "Güncellemeler kontrol ediliyor..."
 
+#, fuzzy
+msgid "Locating Peers..."
+msgstr "Paylaşımcılar bulunuyor..."
+
+msgid "Loading Shared Files..."
+msgstr "Paylaşılan Dosyalar yükleniyor..."
+
+msgid "Loading BitTorrent Management..."
+msgstr "BitTorrent Yöneticisi yükleniyor..."
+
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "LimeWire Mağazası Dinleyicilerine ekleniyor..."
+
+msgid "Loading Network Listeners..."
+msgstr "Ağ Kullanıcıları yükleniyor.."
 
 msgid "You are already downloading this file to {0}"
 msgstr "Bu dosyayı zaten {0}e indiriyorsunuz"
@@ -4582,12 +4524,21 @@ msgstr "Seçili .torrent dosyası güvenlik riskleri taşıyor olabilir."
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr "LimeWire verilen URL'den .torrent dosyasını indiremiyor."
 
+msgid "Automatically start torrents"
+msgstr "Torrentleri otomatik olarak başlat."
+
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
 "Gerekli durumlarda Gnutella'dan indirilen torrentlerin otomatik olarak "
 "başlatılmasını tercih edebilirsiniz."
+
+msgid "Start automatically"
+msgstr "Otomatik olarak başlat."
+
+msgid "BitTorrent Settings"
+msgstr "BitTorrent Ayarları"
 
 msgid ""
 "You can choose whether or not LimeWire should manage your BitTorrent "
@@ -4663,6 +4614,9 @@ msgstr ""
 "için 'Evet' i seçip güvenlik duvarınızın 'Limewire.exe' ye tam yetki verecek "
 "şekilde ayarlayın. Kullanmak istemiyorsanız 'Hayır'ı seçin."
 
+msgid "View My Shared Files."
+msgstr "Paylaşılan dosyalarıma bakmak."
+
 msgid ""
 "You are sharing many subfolders within your shared folder: {0}. This "
 "indicates a potential security problem, so please review your \"My Shared "
@@ -4682,11 +4636,17 @@ msgstr ""
 "bu dosyaları paylaşmak mı istiyorsunuz? Lütfen paylaşım ayarlarınızı kontrol "
 "ediniz ve özel dosyalarınızı paylaşıma açmadığınızdan emin olun."
 
+msgid "Do not display this message again."
+msgstr "Bu mesajı yeniden gösterme."
+
 msgid "T1"
 msgstr "T1"
 
 msgid "T3 or Higher"
 msgstr "T3 veya Daha Yüksek"
+
+msgid "Ethernet"
+msgstr "Ethernet"
 
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
@@ -4699,8 +4659,20 @@ msgstr ""
 "menüsünden 'Bağlantıyı Kes' komutunu seçilmedikçe otomatik olarak ağa "
 "bağlanmaya çalşacaktır."
 
+msgid "&Search"
+msgstr "Ara"
+
 msgid "&Monitor"
 msgstr "İzle"
+
+msgid "&Connections"
+msgstr "&Bağlantılar"
+
+msgid "&Library"
+msgstr "&Kütüphane"
+
+msgid "C&onsole"
+msgstr "K&onsol"
 
 msgid "Lo&gging"
 msgstr "Bağlantı Kayıtları"
@@ -4747,6 +4719,9 @@ msgstr ""
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire belirtilen dosyayı başlatamadı."
 
+msgid "Loading Core Components..."
+msgstr "Çekirdek Bileşenleri Yükleniyor..."
+
 msgid "Loading Internationalization Support..."
 msgstr "Uluslararası Desteği Yükleniyor..."
 
@@ -4756,6 +4731,12 @@ msgstr "Sayısal Ses Erişim Protokolü Yükleniyor."
 msgid "Input"
 msgstr "Giriş"
 
+msgid "Apply Operation"
+msgstr "İşlemi Uygula"
+
+msgid "Cancel Operation"
+msgstr "İşlemi İptal Et"
+
 msgid ""
 "You are currently using a beta or pre-release version of Java 1.6.0. This "
 "version is known to have caused problems with LimeWire. Please upgrade to "
@@ -4764,6 +4745,12 @@ msgstr ""
 "Şu anda Java'nın 1.6.0 versiyonunun deneme sürümünü veya ön sürümünü "
 "kullanıyorsunuz. Bu versiyonun LimeWire ile sorun yarattığı bilinmektedir. "
 "Lütfen 1.6.0 versiyonunun son sürümüne yükseltme yapın.\n"
+
+msgid "Upgrade Java"
+msgstr "Java'yı Güncelleştir"
+
+msgid "More Information"
+msgstr "Daha fazla bilgi..."
 
 msgid "Visit {0}"
 msgstr "Ziyaret et {0}"
@@ -4775,6 +4762,9 @@ msgid "LimeWire must be restarted for the new language to take effect."
 msgstr ""
 "Yeni ayarlanan dilin etkin olabilmesi için LimeWire'nin yeniden "
 "başlatıolması gerekiyor."
+
+msgid "Help Translate LimeWire"
+msgstr "LimeWire'nin tercüme edilmesine yardım edin.."
 
 msgid "Show Language in status bar"
 msgstr "Durum çubuğunda Dili göster"
@@ -4796,6 +4786,15 @@ msgstr "İddia edilen lisansın belgesini göster"
 msgid "View Verification Page"
 msgstr "Doğrulama sayfasını göster"
 
+msgid "License Details:"
+msgstr "Lisans Detayları:"
+
+msgid "View License Deed"
+msgstr "Lisans belgesini göster"
+
+msgid "LimeWire is currently locating the details of this license."
+msgstr "LimeWire şu anda bu lisansın detaylarını belirliyor."
+
 msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this Creative Commons license."
@@ -4803,6 +4802,9 @@ msgstr ""
 "LimeWire bu lisansı doğrulayamadı.\n"
 "Bu Creative Commons lisansının detaylarını belirlemek için 'Doğrula' "
 "butonuna tıklayın."
+
+msgid "Creative Commons Details"
+msgstr "Creative Commons detayları"
 
 msgid "LimeWire was unable to locate the details of this Weed file."
 msgstr "LimeWire bu yabancı dosyanın detaylarını bulamıyor."
@@ -4833,12 +4835,21 @@ msgstr "Weedshare Detayları"
 msgid "This file may require a license in order to open and view."
 msgstr "Bu dosya açma ve görüntüleme sırasında lisans gerektirebilir."
 
+msgid "License Details"
+msgstr "Lisans Ayrıntıları"
+
+msgid "File Listing for"
+msgstr "Listelenecek Dosyalar"
+
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr ""
 "Hızlı indirmeler için birleştirme bağlantıları (LimeWire yüklemişseniz)"
 
 msgid "Always use this answer"
 msgstr "Daima bu cevabı kullan"
+
+msgid "Loading Monitor Window..."
+msgstr "İzleme penceresi yükleniyor..."
 
 msgid "Show Incoming Searches"
 msgstr "Gelen Aramaları Göster"
@@ -4850,6 +4861,9 @@ msgstr ""
 "Bilgisayarınız Ultrapeer tarafından korunan uç noktalardan birisi. "
 "Dolayısıyla izleme ekranında bir kaç arama görebilir veya hiç arama "
 "göremeyebilirsiniz."
+
+msgid "Searches"
+msgstr "Aramalar"
 
 #, fuzzy
 msgid ""
@@ -4881,8 +4895,14 @@ msgstr ""
 "hazır gelen değerleri kullanmayı deneyecek; Yine de, beklenmedik şekilde "
 "davranabilir."
 
+msgid "Shutting down LimeWire..."
+msgstr "LimeWire Kapatılıyor, Hoşçakalın..."
+
 msgid "Please wait while LimeWire shuts down..."
 msgstr "LimeWire Kapatılırken Lütfen Bekleyin..."
+
+msgid "Add..."
+msgstr "Ekle..."
 
 msgid "Add New List Item"
 msgstr "Yeni Liste Nesnesi Ekle"
@@ -4890,17 +4910,29 @@ msgstr "Yeni Liste Nesnesi Ekle"
 msgid "Remove Selected Item"
 msgstr "Seçili Nesneyi Kaldır"
 
+msgid "Loading Status Window..."
+msgstr "Durum Penceresi Yükleniyor..."
+
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire, bir güvenlik duvarı algıladı"
 
+msgid "You are not connected to the LimeWire Store"
+msgstr "LimeWire deposuna bağlanamazsın"
+
 msgid "You are connected to the LimeWire Store"
 msgstr "LimeWire Store'a bağlandınız."
+
+msgid "Disconnected"
+msgstr "Bağlantı Kesildi"
 
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
 msgstr ""
 "Ağ ile bağlantınız kesildi. Bağlanmak için, Dosya menüsünden Bağlan'ı seçin."
+
+msgid "Starting"
+msgstr "Başlatılıyor"
 
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
@@ -4926,11 +4958,21 @@ msgstr "daha hızlı"
 msgid "Your connection to the network is extremely strong"
 msgstr "Ağa bağlantınız oldukça zayıf"
 
+msgid ""
+"You can experience Turbo-Charged connections all the time with LimeWire PRO!"
+msgstr "her zaman daha hızlı bağlanmak için Limewire Pro'yu deneyin."
+
 msgid "Waking Up"
 msgstr "Uyku modundan çıkıyor."
 
 msgid "LimeWire is waking up from sleep mode"
 msgstr "Limewire uyku modundan çıkıyor."
+
+msgid "Show Connection Quality"
+msgstr "Bağlantı Kalitesini göster"
+
+msgid "Show Shared Files Count"
+msgstr "Paylaşılan dosya sayısını göster"
 
 msgid "Show Language Status"
 msgstr "Dil seçeneklerini göster"
@@ -4941,12 +4983,21 @@ msgstr "Firewall durumunu göster"
 msgid "Show Store Indicator"
 msgstr "depo göstergesini Göster"
 
+msgid "Show Bandwidth Consumption"
+msgstr "Bandwidth tüketimini göster"
+
 msgid "Show Media Player"
 msgstr "Media Playeri göster"
 
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] "{0} Adet dosya paylaşıyorsunuz (Yükleniyor)..."
+
+msgid "Downloads:"
+msgstr "İndirmeler:"
+
+msgid "Uploads:"
+msgstr "Yüklemeler:"
 
 msgid "Total Downstream:"
 msgstr "Aşağı doğru topla:"
@@ -5569,8 +5620,17 @@ msgstr ""
 msgid "A new version of LimeWire is available."
 msgstr "LimeWire'ın yeni bir sürümü kullanılabilir durumda."
 
+msgid "A newer version is available, update?"
+msgstr "Yeni bir sürüm kullanılabilir durumda, güncellensin mi?"
+
+msgid "Get LimeWire PRO Now"
+msgstr "LimeWire PRO Sürümünü Şimdi Al"
+
 msgid "What does PRO give me?"
 msgstr "PRO bana neler sağlar?"
+
+msgid "Get LimeWire PRO Later"
+msgstr "LimeWire PRO'yu Sonra Al"
 
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
@@ -5582,11 +5642,20 @@ msgstr ""
 msgid "Lookup File with Bitzi"
 msgstr "Bitzi ile Dosya Ara"
 
+msgid "Copy Magnet Links to Clipboard"
+msgstr "Magnet Linklerini Kopyala"
+
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "Seçilen Dosyaların Magnet Linkerini Kopyala"
 
+msgid "C&onnect"
+msgstr "&Bağlan"
+
 msgid "D&isconnect"
 msgstr "Bağlantıyı Ke&s"
+
+msgid "O&pen Magnet or Torrent"
+msgstr "Ma&gnet veya Torrent Aç"
 
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
@@ -5602,6 +5671,18 @@ msgstr ""
 "LimeWire bu dosya yada adresi açamaz. Doğru yazdığınızdan emin olduktan "
 "sonra tekrar deneyin."
 
+msgid "&Close"
+msgstr "&Kapat"
+
+msgid "Launch Selected Files"
+msgstr "Seçili Dosyaları Çalıştır"
+
+msgid "My Shared Files"
+msgstr "Paylaşılan Dosyalarım"
+
+msgid "View My {0} Shared Files"
+msgstr "Paylaşılan {0} Dosyamı Göster"
+
 msgid "Search for Keywords: {0}"
 msgstr "Anahtar sözcükler için ara {0}"
 
@@ -5614,8 +5695,17 @@ msgstr "\"Ne, yenidir\" için ara: {0}"
 msgid "Search for {0}: {1}"
 msgstr "için ara  {0}: {1}"
 
+msgid "Share New File..."
+msgstr "Yeni Dosya Paylaş..."
+
 msgid "Opens a Window and Lets You Choose a New Folder to Share"
 msgstr "Bir Pencere Açar ve Paylaşmak İçin Yeni Bir Klasör Seçmenizi Sağlar"
+
+msgid "Block Host"
+msgstr "Sunucuyu Engelle"
+
+msgid "Block Current Host"
+msgstr "Şu anki Paylaşımcıyı Engelle"
 
 msgid "Send a Message to a Host"
 msgstr "Paylaşımcıya İleti Gönder"
@@ -5635,8 +5725,17 @@ msgstr "Sohbet iletisi gönderilemedi"
 msgid "Create a New Outgoing Connection"
 msgstr "Yeni Bir Dış Bağlantı Oluştur"
 
+msgid "Remove the Selected Connections"
+msgstr "Seçili Bağlantıları Kaldır"
+
 msgid "View All Files on the Selected Computer"
 msgstr "Seçili Bilgisayardaki Tüm Dosyaları Göster"
+
+msgid "Loading Connections Window..."
+msgstr "Bağlantı Penceresi Açılıyor..."
+
+msgid "Host:"
+msgstr "Sunucu:"
 
 msgid "0.6"
 msgstr "0.6"
@@ -5650,6 +5749,12 @@ msgstr ""
 
 msgid "All folders you select will also have their subfolders shared."
 msgstr "Seçmiş olduğunuz dizinlerin altdizinleri de paylaşılacak."
+
+msgid "Share Dropped Files?"
+msgstr "Sürüklenen Dosyalar Paylasima Açilacak mi?"
+
+msgid "Do not show this message again."
+msgstr "Bu mesajı bir daha gösterme."
 
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
@@ -5679,6 +5784,9 @@ msgstr "Kaynaklar Bekleniyor"
 msgid "Disk Problem"
 msgstr "Disk Hatası"
 
+msgid "Waiting {0}s for Sources"
+msgstr "Kaynak için Bekleniyor: {0} s"
+
 msgid "Need More Sources"
 msgstr "Daha Fazla Kaynak Gerekli"
 
@@ -5691,6 +5799,27 @@ msgstr "Dosya İçeriği Doğrulanıyor..."
 msgid "Recovering Corrupted File"
 msgstr "Bozuk Dosya Onarılıyor"
 
+msgid "Paused"
+msgstr "Durdu"
+
+msgid "Content Removed"
+msgstr "İçerik Kaldırıldı"
+
+msgid "Resuming..."
+msgstr "Devam Ediliyor..."
+
+msgid "Downloading .torrent file..."
+msgstr ".torrent dosyası İndiriliyor..."
+
+msgid "Average Bandwidth"
+msgstr "Ortalama Bant Genişliği"
+
+msgid "Valid Alternate Locations"
+msgstr "Geçerli Alternatif Yerler"
+
+msgid "Finished On"
+msgstr "Üzerinde bitirdi"
+
 msgid "Time Spent"
 msgstr "Geçen Zaman"
 
@@ -5699,6 +5828,12 @@ msgstr "Parçalar"
 
 msgid "Lost To Corruption"
 msgstr "Paket Kaybi"
+
+msgid "hosts"
+msgstr "sunucular"
+
+msgid "host"
+msgstr "sunucu"
 
 msgid "A more specific search may be required..."
 msgstr "Daha özel bir arama gerektirilebilir"
@@ -5713,11 +5848,26 @@ msgstr ""
 msgid "Possible Hosts"
 msgstr "Uygun Sunucular"
 
+msgid "Busy Hosts"
+msgstr "Meşgul Sunucu"
+
 msgid "Remotely Queued"
 msgstr "Uzakta Kuyruğa Alındı"
 
+msgid "Locating Sources..."
+msgstr "Kaynaklar saptanıyor"
+
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr "LimeWire, bu seli indiremez.İzleyici  yanıt verdi"
+
+msgid "Priority"
+msgstr "Öncelik"
+
+msgid "Progress"
+msgstr "İşlem"
+
+msgid "Speed"
+msgstr "Hız"
 
 msgid "Loading Download Window..."
 msgstr "İndirme Penceresi Açılıyor..."
@@ -5725,8 +5875,14 @@ msgstr "İndirme Penceresi Açılıyor..."
 msgid "Find More Sources for Download"
 msgstr "İndirme için Daha Fazla Kaynak Bulunuz"
 
+msgid "Find Sources"
+msgstr "Kaynak Bul"
+
 msgid "Try to Find Additional Sources for Downloads"
 msgstr "İndirme için Ekstra Kaynaklar Bulmayı Deneyin"
+
+msgid "Reattempt Selected Downloads"
+msgstr "Seçilileri Tekrar İndirmeyi Dene"
 
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
@@ -5739,6 +5895,9 @@ msgstr ""
 
 msgid "&Refresh Skins"
 msgstr "&Temaları Tazele"
+
+msgid "&View"
+msgstr "&Görünüm"
 
 msgid "&Apply Skins"
 msgstr "&Temaları Uygula"
@@ -5757,6 +5916,36 @@ msgstr ""
 "LimeWire \"{0}\" torrent dosyasini açamiyor, - kötü biçimlendirilmi_ veya "
 "LimeWire'in ilgili dosya üzerinde yetkisi olmayabilir."
 
+msgid "Clear Download"
+msgstr "İndirmeyi Temizle"
+
+msgid "Clear Selected Downloads"
+msgstr "Seçili İndirmeleri Temizle"
+
+msgid "Launch Download"
+msgstr "Başlatma indirmesi"
+
+msgid "Launch Selected Downloads"
+msgstr "Seçilen İndirmeleri Çalıştır"
+
+msgid "Cancel Selected Downloads"
+msgstr "Seçili İndirmeleri İptal Et"
+
+msgid "Preview Selected Downloads"
+msgstr "Seçilen İndirmeleri Önizle"
+
+msgid "Clear All Inactive Downloads"
+msgstr "Açık bütünüyle hareketsiz indirme"
+
+msgid "Remove Inactive Downloads"
+msgstr "Hareketsiz indirmeleri çıkar"
+
+msgid "Pause Download"
+msgstr "İndirmeyi Duraklat"
+
+msgid "Pause Selected Downloads"
+msgstr "indirmeleri duraklatmayı seçti"
+
 msgid "Explore"
 msgstr "Gözat"
 
@@ -5769,11 +5958,23 @@ msgstr "Seçili İndirmeyi Ön Sıraya Al"
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr "Seçili İndirmeyi Arka Sıraya Al"
 
+msgid "Change File Location..."
+msgstr "Dosya Yolunu Değiştir..."
+
 msgid "Edit the Final Filename of the Download"
 msgstr "Dosyanın İndikten Sonraki İsmini Belirle"
 
+msgid "Always Save As..."
+msgstr "Her Zaman Farklı Kaydet..."
+
 msgid "Always Append (#)"
 msgstr "Her Zaman Numaralandır"
+
+msgid "Always Ask"
+msgstr "Her Zaman Sor"
+
+msgid "Choose a Default Action:"
+msgstr "Varsayılan Bir Eylem Seçiniz:"
 
 msgid ""
 "<b>Note</b>: A file with the same content already exists in the library at "
@@ -5782,6 +5983,12 @@ msgstr "<b>Not</b>: Aynı içerikle bir dosya kütüphanede var {0}"
 
 msgid "Overwrite the Existing File"
 msgstr "Mevcut dosyayı fazla yaz"
+
+msgid "Choose a different location for the Download"
+msgstr "İndirme için farklı bir yeri seç"
+
+msgid "Append (#)"
+msgstr "Ekle"
 
 msgid "Appends (#) to filename"
 msgstr "Dosya adına (#) ekle"
@@ -5802,6 +6009,15 @@ msgstr "İndirdiğiniz dosya ile aynı isimde bir dosya zaten var: {0}"
 msgid "Do you want to continue downloading anyway?"
 msgstr "Yine de indirmeye devam etmek istiyor musunuz?"
 
+msgid "Same File Already In Library"
+msgstr "Kütüphanede Aynı Dosya Zaten Var"
+
+msgid "No Filename"
+msgstr "Dosya İsmi Yok"
+
+msgid "File & Protocol Associations"
+msgstr "Dosya & Protokol Bütünleşmeleri"
+
 msgid "What type of resources should LimeWire open?"
 msgstr "Ne çeşit kaynaklar LimeWire ile açılsın?"
 
@@ -5809,11 +6025,17 @@ msgstr "Ne çeşit kaynaklar LimeWire ile açılsın?"
 msgid "What should LimeWire do with the selected associations on startup?"
 msgstr "LimeWire seçilen ilişkilendirmelerle başlangıçta ne yapmalı?"
 
+msgid "Always take the selected associations."
+msgstr "Her zaman seçilen birlikleri al."
+
 msgid "Ignore all missing associations."
 msgstr "Bütün kaçırma birliklerini görmezlikten gel."
 
 msgid "Ask me what to do when an association is missing."
 msgstr "Bir ilişkilendirilme yapılmamışsa bana ne yapılacağını sor."
+
+msgid "Firewall Setup"
+msgstr "Güvenlik Duvarı Kurulumu"
 
 msgid ""
 "LimeWire performs best with full access to the Internet. If firewall or "
@@ -5836,12 +6058,21 @@ msgstr ""
 "Aşağıda, LimeWire'ın işlevselliğini ve performansını etkileyen bazı "
 "seçenekler vardır."
 
+msgid "Broadband (or unsure)"
+msgstr "Genişbant (veya emin değilseniz)"
+
 msgid ""
 "Please choose the speed of your internet connection. Setting this speed "
 "correctly is important for optimum network performance."
 msgstr ""
 "Lütfen  internet bağlantı hızını seç.Bu hızı doğru şekilde  ayarlamak, "
 "optimum şebeke performansı için önemlidir."
+
+msgid "System Startup"
+msgstr "Sistem Başlangıcı"
+
+msgid "Start Automatically"
+msgstr "Otomatik Başlat"
 
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
@@ -5851,8 +6082,14 @@ msgstr ""
 "beğenir miydin? Bu senin LimeWire'yi sonra kullandığın zaman daha hızlı "
 "başlamasına sebep olacak."
 
+msgid "Content Filtering"
+msgstr "İçerik Filtreleme"
+
 msgid "Learn more about this option..."
 msgstr "Bu seçenek hakkında daha çok bilgi.."
+
+msgid "Save Folder and Shared Folders"
+msgstr "Kayıt Kılavuzu ve Paylaşılan Klasörler"
 
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. You "
@@ -5872,6 +6109,23 @@ msgstr ""
 "dosyalarinizi indirmek istediginiz klasörü onaylayiniz. Ayrica LimeWire "
 "kullanan diger kullanicilar ile paylasmak istediginiz klasörleri de seciniz."
 
+msgid "Shared Folders"
+msgstr "Paylaşılan Klasörler"
+
+msgid ""
+"The save folder is invalid. You may not have permissions to write to the "
+"selected folder.  Please choose another save folder."
+msgstr ""
+"Klasör adı geçersiz. Seçilen klasöre yazma hakkınız yok. Lütfen başka klasör "
+"seçin."
+
+msgid ""
+"LimeWire was unable to use the specified folder for saving files. Please try "
+"a different folder."
+msgstr ""
+"LimeWire  dosyaları kaydetmek için belirtilen klasörü kullanamıyor. Lütfen "
+"farklı bir klasör seçmeyi deneyiniz."
+
 msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
@@ -5883,6 +6137,15 @@ msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
 "LimeWire, hazır gelen paylaşım dosyasını yaratamadı {0}, O, paylaşılmayacak."
+
+msgid "Use the Default Folder"
+msgstr "Varsayılan Klasörü Kullan"
+
+msgid "Choose Another Folder"
+msgstr "Başka Bir Klasör Seçiniz"
+
+msgid "LimeWire Setup Wizard"
+msgstr "LimeWire ayar sihirbazı"
 
 msgid "Next >>"
 msgstr "İleri >>"
@@ -5909,21 +6172,48 @@ msgstr ""
 "LimeWire ayar sihirbazına hoş geldin. LimeWire, adımların bir dizisi boyunca "
 "optimum performans için LimeWire'yi ayarlaman için sana rehberlik edecek."
 
+msgid "Incomplete Files"
+msgstr "Tamamlanmayan Dosyalar"
+
 msgid "Individual Store Files"
 msgstr "Bireysel depo dosyalar"
 
 msgid "List of All Individual Purchased Files"
 msgstr "Bütün bireysel satın alınan dosyalardan listele"
 
+msgid "Loading Library Window..."
+msgstr "Kütüphane Yükleniyor..."
+
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr ""
 "Paylaşım klasörlerinizi LimeWire 'ın Seçeneklerinden ayarlayabilirsiniz."
 
+msgid "Songs purchased from the LimeWire Store"
+msgstr "LimeWire Mağazasından satın alınan şarkılar"
+
+msgid "Search In Shared Files:"
+msgstr "Paylaşılan Dosyalarda Ara"
+
 msgid "Holds the Results of the Last Search"
 msgstr "son aramanın yakalanan sonuçlarıdır"
 
+msgid "Icon"
+msgstr "Simge"
+
+msgid "Path"
+msgstr "Dizin"
+
 msgid "Last Modified"
 msgstr "Son Düzenleme"
+
+msgid "Shared"
+msgstr "Paylaşılmış"
+
+msgid "This folder is shared."
+msgstr "Bu klasör paylaşılır."
+
+msgid "This folder is not shared."
+msgstr "Bu klasör paylaşılmaz."
 
 msgid ""
 "LimeWire cannot publish this file because it was unable to find a schema for "
@@ -5965,8 +6255,29 @@ msgstr "Seçilen Dosyayı Çalma Listesine Ekle"
 msgid "Describe..."
 msgstr "Açıklama..."
 
+msgid "Add Description to Selected File"
+msgstr "Seçili Dosyaya Açıklama Ekle"
+
+msgid "Publish..."
+msgstr "Yayımcı"
+
 msgid "Publish under Creative Commons License"
 msgstr "\"Creative Commons License\" altında yayınla"
+
+msgid "Edit License..."
+msgstr "Lisansı Düzenle.."
+
+msgid "Continue Downloading Selected Incomplete File"
+msgstr "Seçilen tamamlanmamış dosyayı indirmeye devam et"
+
+msgid "Rename"
+msgstr "Yeniden Adlandır"
+
+msgid "Stop Sharing File"
+msgstr "Dosya Paylaşımını Durdur"
+
+msgid "Stop Sharing Folder"
+msgstr "Klasörü Paylaştırmayı Durdur"
 
 msgid "Show Magnet Details"
 msgstr "Magnet Ayrıntılarını Göster"
@@ -5985,8 +6296,14 @@ msgstr "LimeWire sildiğin dosyaya izin vermeyecek eksik dosyalar için ayırdı
 msgid "Add Folder Contents to Playlist"
 msgstr "Playlist'e dosya içeriğini ekle"
 
+msgid "Show .torrent Files"
+msgstr ".torrent Dosyalarını Göster"
+
 msgid "Refresh"
 msgstr "Tazele"
+
+msgid "Reload Shared Folders"
+msgstr "Paylaşılan Klasörleri Tekrar Yükle"
 
 msgid "Open Library Folder"
 msgstr "Kütüphane Dizinini Aç"
@@ -6003,6 +6320,9 @@ msgstr ""
 "dosyaların işaretini kaldırabilirsiniz. (Paylaşılan dizinlerinizi "
 "istediğiniz zaman LimeWire seçeneklerinden değiştirebilirsiniz.)"
 
+msgid "Legend"
+msgstr "Alan"
+
 msgid "Folder is fully shared including all subfolders."
 msgstr "Dosya tam olarak, bütün altklasörler dahil paylaşılır."
 
@@ -6012,11 +6332,26 @@ msgstr "Dosya paylaşılmaz ve hiçbir alt klasörler paylaşılmaz."
 msgid "Folder's files and some subfolders are shared."
 msgstr "hiçbir  klasör ve alt klasör  paylaşılmaz."
 
+msgid "Individually Shared Files"
+msgstr "Ayrı ayrı dosyaları paylaştı"
+
 msgid "List of All Individually Shared Files"
 msgstr "Herkesten ayrı ayrı paylaşılan dosyaları listele"
 
+msgid "List of .torrent files"
+msgstr ".torrent dosyalarının listesi"
+
 msgid "Logging"
 msgstr "Günlük Tutuluyor"
+
+msgid "Loading Logging Window..."
+msgstr "Günlük Dosyaları Yükleniyor.."
+
+msgid "&Advanced"
+msgstr "&Gelişmiş"
+
+msgid "Filter&s"
+msgstr "Filtre&ler"
 
 msgid "Configure LimeWire's Content Filtering Options"
 msgstr "LimeWire ın İçerik Filtreleme Seçeneklerini Ayarla"
@@ -6024,6 +6359,9 @@ msgstr "LimeWire ın İçerik Filtreleme Seçeneklerini Ayarla"
 msgid "Learn More about LimeWire's Content Filtering System"
 msgstr ""
 "LimeWire ın İçerik Filtreleme Seçenekleri Sistemi hakkında daha fazla bilgi"
+
+msgid "Help for Using LimeWire"
+msgstr "Lime Wire Kullanımı hakkında Yardım"
 
 msgid "Frequently Asked Questions for LimeWire"
 msgstr "LimeWire için Sıkça Sorulan Sorular"
@@ -6034,14 +6372,41 @@ msgstr "LimeWire Kullanıcıları Forumu'na Giriş"
 msgid "Tip of the &Day"
 msgstr "Günün İpucu"
 
+msgid "Show the Tip of the Day Window"
+msgstr "Günün İpucu Penceresini Göster"
+
+msgid "Generate &Error"
+msgstr "&Hata Raporu"
+
 msgid "Generate a Popup Error for Testing"
 msgstr "Test için Bir Hata Raporu Getir"
+
+msgid "&About LimeWire"
+msgstr "&LimeWire Hakkında"
+
+msgid "Information about LimeWire"
+msgstr "LimeWire hakkında Bilgi"
 
 msgid "&Navigation"
 msgstr "&Gezinti"
 
+msgid "&Resources"
+msgstr "&Kaynaklar"
+
+msgid "LimeWire &PRO"
+msgstr "LimeWire &PRO"
+
+msgid "Display the LimeWire PRO Website"
+msgstr "LimeWire PRO Websitesini Göster"
+
+msgid "Result &Filters"
+msgstr "Sonuç &Filtreleri"
+
 msgid "Show Search Result Filters"
 msgstr "Arama Sonucu Filtrelerini Göster"
+
+msgid "Sho&w/Hide"
+msgstr "Göster/Gizle"
 
 msgid "&Get More Skins"
 msgstr "&Daha Fazla Arayüz (Skin)"
@@ -6051,6 +6416,15 @@ msgstr "limewire.com dan daha fazla arayüz"
 
 msgid "Reload available skins from disk"
 msgstr "Diskten mevcut temaları tekrar yükle"
+
+msgid "Use &Default"
+msgstr "&Varsayılan Kullan"
+
+msgid "Use your default skin"
+msgstr "Varsayılan Arayüzü Kullan"
+
+msgid "&Options"
+msgstr "&Seçenekler"
 
 msgid "Display the Options Screen"
 msgstr "Seçenekler Ekranını Göster"
@@ -6079,6 +6453,9 @@ msgstr "&Font boyutunu küçült"
 msgid "Decreases the Font Size"
 msgstr "yazı tipi boyutunu azaltma"
 
+msgid "C&hange Language"
+msgstr "Lisanı değiştir"
+
 msgid "Select your Language Prefereces"
 msgstr "Lisan Tercihinizi Seçiniz"
 
@@ -6087,6 +6464,18 @@ msgstr "Sonraki"
 
 msgid "Previous"
 msgstr "Önceki"
+
+msgid "LimeWire Media Player"
+msgstr "LimeWire medya oynatıcısı"
+
+msgid "Restore"
+msgstr "Geri Yükle"
+
+msgid "About"
+msgstr "Hakkında"
+
+msgid "Restore Defaults"
+msgstr "Varsayılanlara Dön"
 
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
@@ -6098,11 +6487,20 @@ msgstr ""
 msgid "Basic"
 msgstr "Temel"
 
+msgid "Slots"
+msgstr "Yuvalar"
+
+msgid "Status Bar"
+msgstr "Durum Çubuğu"
+
 msgid "Importing"
 msgstr "İçe aktarılıyor"
 
 msgid "Helper Apps"
 msgstr "Yardımcı Programcıklar"
+
+msgid "Bug Reports"
+msgstr "Hata raporları"
 
 msgid "Popups"
 msgstr "Açılır Pencereler"
@@ -6110,14 +6508,35 @@ msgstr "Açılır Pencereler"
 msgid "Autocomplete"
 msgstr "Otomatik Tamamla"
 
+msgid "Content"
+msgstr "İçerik"
+
 msgid "Junk"
 msgstr "Gereksiz"
+
+msgid "Hosts"
+msgstr "Sunucular"
 
 msgid "Preferencing"
 msgstr "Özelleştirme"
 
+msgid "System Boot"
+msgstr "Sistem yükleme"
+
+msgid "Loading Options Window..."
+msgstr "Seçenek penceresini yükleme"
+
 msgid "You can choose the folder for saving files."
 msgstr "Dosyaların kaydedileceği klasörü seçebilirsiniz."
+
+msgid ""
+"The selected save folder is invalid. You may not have permissions to write "
+"to the selected folder. LimeWire will revert to your previously selected "
+"folder."
+msgstr ""
+"Kaydetme için seçilen klasör geçersiz. İlgili dosyaya yazma izniniz "
+"bulunmuyor olabilir. LimeWire önceden seçtiğiniz klasörü kullanmaya devam "
+"edecek."
 
 msgid ""
 "You can allow messages from specific hosts by adding their IP addresses (e."
@@ -6130,6 +6549,9 @@ msgstr ""
 "paylaşımcılardan gelecek iletilere izin verebilirsiniz. Bu liste sadece "
 "yasaklı listesindeki istisnaları belirtmek içindir."
 
+msgid "Links and File Types"
+msgstr "Linkler ve Dosya Türleri"
+
 msgid ""
 "You can use LimeWire to open certain filetypes and protocols. You can also "
 "instruct LimeWire to always regain these associations if another program "
@@ -6140,8 +6562,17 @@ msgstr ""
 "diğer programların kendilerine uygulamalarına engel olmak için her açılışta "
 "tekrar bütünleştirecek şekilde de yapılandırabilirsiniz."
 
+msgid "Use LimeWire for..."
+msgstr "LimeWire'ı Bunun İçin Kullan:"
+
 msgid "You can choose which audio player to use."
 msgstr "Kullanılacak olan oynatıcıyı seçebilirsiniz."
+
+msgid "Audio Player"
+msgstr "Ses Yürütücüsü"
+
+msgid "Clear Completed Downloads:"
+msgstr "Tamamlanmış İndirmeleri Temizle:"
 
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
@@ -6149,6 +6580,9 @@ msgid ""
 msgstr ""
 "Biten gönderimlerin gönderme listesinden otomatik olarak silinip "
 "silinmeyeceğini seçebilirsiniz."
+
+msgid "Automatically Clear Completed Uploads:"
+msgstr "Tamamlanan Yüklemeleri Otomatik Temizle"
 
 msgid "Text Autocompletion"
 msgstr "Otomatik metin tamamlama"
@@ -6161,19 +6595,40 @@ msgstr ""
 msgid "Enable Autocompletion of Text Fields:"
 msgstr "Yazı Alanlarında Otomatik Tamamlamayı Etkinleştir:"
 
+msgid "Browser Options"
+msgstr "Tarayıcı Seçenekleri"
+
 msgid "You can choose which browser to use."
 msgstr "Kullanmak istediğiniz tarayıcıyı seçebilirsiniz."
+
+msgid "View Example"
+msgstr "Örneği Göster"
 
 msgid "Send Errors Automatically if LimeWire is Frozen"
 msgstr "LimeWire Donarsa Hatayı Otomatik Gönder"
 
+msgid "Host Communication"
+msgstr "Sunucu Bağlantısı"
+
 msgid "You can turn chat on or off."
 msgstr "Sohbeti Açabilir ya da Kapayabilirsiniz."
+
+msgid "Enable Chat:"
+msgstr "Sohbete İzin Ver:"
+
+msgid "Connect on Startup"
+msgstr "Başlangıçta Bağlan"
 
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr "Program başladığında otomatik olarak ağa bağlanmasını seçebilirsiniz."
+
+msgid "Connect on Startup:"
+msgstr "Başlangıçta Bağlan:"
+
+msgid "Connection Preferencing"
+msgstr "Bağlantı Seçenekleri"
 
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
@@ -6182,6 +6637,9 @@ msgstr "Paylaştığınız dosyaların sayısının limitini belirleyebilirsiniz
 
 msgid "Files You Must Share to Not be a Freeloader:"
 msgstr "Paylaştığınız dosyalar beleş olmamalı:"
+
+msgid "Allow Freeloaders:"
+msgstr "Otlakçılığa İzin Ver:"
 
 msgid ""
 "You can tell LimeWire to filter files that copyright owners request not be "
@@ -6192,6 +6650,9 @@ msgstr ""
 "söyleyebilirsin, paylaşılabilirsin.Süzerken senin indirdiğin veya çıkarılmış "
 "içeriğin bir listesiyle paylaştığın bütün dosyaları doğrulaması için "
 "LimeWire'ye bilgi veriyorsun."
+
+msgid "Enable Content Filters"
+msgstr "İçerik Filtresi Aktif"
 
 msgid "Buffer Size"
 msgstr "Tampon Boyutu"
@@ -6213,6 +6674,9 @@ msgstr ""
 msgid "Share My Music:"
 msgstr "Müziğimi Paylaş:"
 
+msgid "Shared Name:"
+msgstr "Paylaşılan İsim:"
+
 msgid "File Already Exists Behavior"
 msgstr "Dosya Zaten Var"
 
@@ -6226,9 +6690,24 @@ msgstr ""
 msgid "Always Show the 'Save As' Dialog"
 msgstr "'Farklı Kaydet' Penceresini Her Zaman Göster"
 
+msgid "Always Ask What to do"
+msgstr "Her Zaman Ne Yapacağını Sor"
+
+msgid "Capabilities"
+msgstr "Yetenekler"
+
+msgid "Disable Mojito DHT Capabilities:"
+msgstr "Mojito DHT yeteneklerini iptal et"
+
+msgid "OOB Searching"
+msgstr "OOB Aranıyor"
+
 msgid "You can set the percentage of your bandwidth devoted to downloads."
 msgstr ""
 "İndirmeler için ayırmak istediğiniz bant genişliğini ayarlayabilirsiniz."
+
+msgid "License Warning"
+msgstr "Lisans Uyarısı"
 
 msgid "Show License Warning:"
 msgstr "Lisans Uyarısını Göster:"
@@ -6250,6 +6729,9 @@ msgstr "Önemsiz dosyaları yerinde göster"
 msgid "Display junk at the bottom of search results"
 msgstr "Önemsiz dosyaları arama sonuçlarının en altında göster"
 
+msgid "Use Defaults"
+msgstr "Varsayılanı Kullan"
+
 msgid "Do Nothing (Not Recommended)"
 msgstr "Hiçbirşey yapma(Tavsiye Edilmez)"
 
@@ -6257,6 +6739,9 @@ msgid ""
 "You must enter a port between 1 and 65535 when manually forcing your port."
 msgstr ""
 "portu elle girmen gerektiği zaman 1 ve 65535'in arasında bir port girmelisin"
+
+msgid "Filter Hosts"
+msgstr "Sunucuları Süz"
 
 msgid ""
 "You can disallow messages from specific hosts by adding their IP addresses "
@@ -6283,6 +6768,9 @@ msgstr "Sonuç Türlerini Süz"
 msgid "You can specify general types of search results to filter."
 msgstr "süzmesi için arama sonuçlarının genel tiplerini belirtebilirsin"
 
+msgid "Ignore Adult Content"
+msgstr "Yetişkinlere Uygun İçeriği Engelle"
+
 msgid "Ignore .htm/.html Files"
 msgstr "Htm. Html  dosyaları görmezlikten gel"
 
@@ -6294,6 +6782,9 @@ msgstr ".wmv/.asf dosyalarını önemseme"
 
 msgid "You can filter out search results containing specific words."
 msgstr "Sonuçları hecelere göre filtreleyebilirsiniz."
+
+msgid "Image Options"
+msgstr "Resim Seçenekleri"
 
 msgid "You can choose which image viewer to use."
 msgstr "Kullanılmasını istediğiniz resim görüntüleyiciyi seçebilirsiniz."
@@ -6310,8 +6801,14 @@ msgstr "Sizinle aynı dili konuşan paylaşımcıları ön tercihinize alabilirs
 msgid "Turn preferencing on:"
 msgstr "Tercih belirtmeyi aç:"
 
+msgid "Maximum Downloads"
+msgstr "Maksimum İndirilenler"
+
 msgid "You can set the maximum number of simultaneous downloads."
 msgstr "Maksimum eşzamanlı indirme sayısını ayarlayabilirsiniz."
+
+msgid "Maximum Downloads:"
+msgstr "Maksimum İndirilenler:"
 
 msgid "Maximum Searches"
 msgstr "Maksimum Aramalar"
@@ -6323,6 +6820,9 @@ msgstr "Maksimum eşzamanlı arama sayısını ayarlayabilirsiniz."
 msgid "Maximum Searches:"
 msgstr "Maksimum Aramalar:"
 
+msgid "Max Upload Slots"
+msgstr "Maksimum Gönderme Sayısı"
+
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
@@ -6330,8 +6830,17 @@ msgstr ""
 "Çok fazla yüklemeye izin vermeyin. Bu değer ancak yeterli band genişliğiniz "
 "varsa kullanılabilir."
 
+msgid "Max Upload Slots:"
+msgstr "Max. Yükleme Slotu:"
+
 msgid "Media Type"
 msgstr "Medya Türü"
+
+msgid "Open Dialog to Select a Folder"
+msgstr "Bir dosyayı seçmek için açık diyalog"
+
+msgid "Reset"
+msgstr "Sıfırla"
 
 msgid "Reset to Default Download Folder"
 msgstr "Varsayılan İndirme Klasörüne Sıfırla"
@@ -6350,6 +6859,9 @@ msgstr ""
 "LimeWire birşeyler olduğu zaman seni haberdar etmesi için bir indirme "
 "tamamlanması gibi popup gösterebilir "
 
+msgid "Partial Files"
+msgstr "Kısmi dosyalar"
+
 msgid ""
 "You can choose whether or not to automatically share partially downloaded "
 "files."
@@ -6366,8 +6878,14 @@ msgstr "Kişi başına  birçok yüklemeye izin ver"
 msgid "Uploads Per Person:"
 msgstr "Kişi başına yüklemeler"
 
+msgid "Player Options"
+msgstr "Oyuncu seçenekleri"
+
 msgid "Use LimeWire Media Player:"
 msgstr "LimeWire medya oynatıcısını kullan"
+
+msgid "LimeWire Popups"
+msgstr "LimeWire Popup"
 
 msgid ""
 "Redisplay messages for which you have chosen 'Do not display this message "
@@ -6390,6 +6908,9 @@ msgstr "kullanılması için kulanıcı adı ve parolayı ayarla"
 
 msgid "Enable Authentication (Does Not Work for HTTP Proxies):"
 msgstr "Yetkilendirmeyi Etkinleştir (HTTP Vekil Sunucularında Çalışmaz)"
+
+msgid "Proxy Options"
+msgstr "Vekil Ayarları"
 
 msgid "Configure Proxy Options for LimeWire."
 msgstr "LimeWire için proxy seçeneklerini ayarla"
@@ -6449,6 +6970,9 @@ msgstr "Sadece kablo DSL hızının sonuçlarını göster veya daha yüksek"
 msgid "Show All Speeds"
 msgstr "Bütün hızları göster"
 
+msgid "Download Sharing"
+msgstr "Paylaşmayı indir"
+
 msgid "You can share downloads that are saved to unshared folders."
 msgstr "Başka klasöre kaydettiğiniz dosyaları paylaşabilirsiniz."
 
@@ -6474,6 +6998,12 @@ msgstr "Kapanma davranışı"
 msgid "You can choose the default shutdown behavior."
 msgstr "hazır gelen kapanma davranışını seçebilirsin"
 
+msgid "Shutdown Immediately"
+msgstr "Hemen kapanma"
+
+msgid "Shutdown after Transfers"
+msgstr "Transferlerden sonra kapanma"
+
 msgid "Start Upload Slots"
 msgstr "Upload bağlantılarını başlat."
 
@@ -6495,6 +7025,9 @@ msgid ""
 msgstr ""
 "bağlantı hızını belirtirsen LimeWire performansı en iyi şekilde kullanabilir"
 
+msgid "Speed:"
+msgstr "Hız:"
+
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
 "computer starts."
@@ -6502,8 +7035,17 @@ msgstr ""
 "bilgisayarın  başladığı zaman LimeWire'yi otomatik olarak çalıştırmayı "
 "seçebilirsin"
 
+msgid "Bandwidth Indicator"
+msgstr "Bandwidth göstergesi"
+
 msgid "You can display your bandwidth consumption in the status bar."
 msgstr "durum barında bandwidth tüketimini gösterebilirsin"
+
+msgid "Show Bandwidth Indicator:"
+msgstr "Bandwidth göstergesini göster"
+
+msgid "Connection Quality Indicator"
+msgstr "Bağlantı kalite göstergesi"
 
 msgid ""
 "You can display a measurement of your connection quality in the status bar."
@@ -6515,11 +7057,23 @@ msgstr "Bağlantı kalite göstergesini göster"
 msgid "You can display your firewall status in the status bar."
 msgstr "durum barında güvenlik duvarı durumunu gösterebilirsin"
 
+msgid "Show Firewall Indicator:"
+msgstr "güvenlik duvarı göstergesini göster"
+
 msgid "You can display your LimeWire Store status in the status bar."
 msgstr "durum barında senin LimeWire depo durumunu gösterebilirsin."
 
+msgid "Show LimeWire Store Indicator:"
+msgstr "LimeWire depo göstergesini göster:"
+
 msgid "You can display how many files you are sharing in the status bar."
 msgstr "kaç dosyayı paylaşıyor olduğunu gösterebilirsin"
+
+msgid "Show Shared Files Indicator:"
+msgstr "dosya paylaşma göstergesini Göster :"
+
+msgid "LimeWire Store - Save Folder"
+msgstr "LimeWire Store - Klasörü Kaydet"
 
 msgid "System Tray Icon"
 msgstr "Sistem Çekmecesi Simgesi"
@@ -6529,6 +7083,9 @@ msgstr "LimeWire görünür olurken sistem tepsi ikonunu gösterebilirsin"
 
 msgid "Show System Tray Icon:"
 msgstr "Sistem tepsi ikonunu göster"
+
+msgid "Update Options"
+msgstr "Seçenekleri güncelleştir"
 
 msgid "You can choose when you want to be notified of new LimeWire releases."
 msgstr ""
@@ -6550,8 +7107,17 @@ msgstr ""
 "Yükseltmelere ayrılmış bant genişliği yüzdesini ayarlayabilirsiniz. "
 "Yükseltmeleri engellemek için bu yüzdeyi sıfıra indirin."
 
+msgid "Upload Speed:"
+msgstr "Yükleme hızı"
+
+msgid "Video Options"
+msgstr "video seçenekleri"
+
 msgid "You can choose which video player to use."
 msgstr "kullanması için  görüntü oynatıcısı seçebilirsin"
+
+msgid "Video Player"
+msgstr "video oynatıcı"
 
 msgid "You can have LimeWire import newly downloaded songs into iTunes."
 msgstr "İsterseniz LimeWire yeni indirilen şarkıları iTunes'a ekleyebilir."
@@ -6565,11 +7131,35 @@ msgstr "Mevcut bir Playlist'i aç"
 msgid "Save the Current Playlist to a File"
 msgstr "Mevcut Çalma Listesini bir Dosyaya Kaydet"
 
+msgid "Remove Selected File from Playlist"
+msgstr "Seçilen Dosyayı Çalma Listesinden Çıkar"
+
 msgid "#"
 msgstr "#"
 
+msgid "Comment"
+msgstr "yorum"
+
+msgid "Playlist"
+msgstr "Çalma Listesi"
+
+msgid "Loading Playlist Window..."
+msgstr "çalma penceresini yüklemek"
+
+msgid "Play Options:"
+msgstr "Oynatma Seçenekleri:"
+
+msgid "Shuffle"
+msgstr "Karıştır"
+
+msgid "Continuous"
+msgstr "Devamlı"
+
 msgid "Open Playlist (.m3u)"
 msgstr "çalma listesini aç (.m3u)"
+
+msgid "Save Playlist As"
+msgstr "Çalma Listesini Farklı Kaydet"
 
 msgid ""
 "Warning: a file with the name {0} already exists in the folder. Overwrite "
@@ -6582,6 +7172,18 @@ msgstr "çalmalistesi dosyaları"
 msgid "Multiple"
 msgstr "Katsayı"
 
+msgid "Option"
+msgstr "Seçenek"
+
+msgid "Filter Results:"
+msgstr "Sonuçları Süz"
+
+msgid "Back To Search"
+msgstr "aramaya geri dön"
+
+msgid "Download As..."
+msgstr "Öyle indir"
+
 msgid "Would you like to start downloads from the following magnets?"
 msgstr "takip eden mıknatıslardan indirmelere başlamayı beğenir miydin?"
 
@@ -6589,6 +7191,9 @@ msgid "You are sharing {0} files. You can control which files LimeWire shares."
 msgstr ""
 "Şu anda {0} dosya paylaşıyorsunuz. LimeWire'ın paylaşacağı dosyaları "
 "belirleyebilirsiniz."
+
+msgid "Configure"
+msgstr "Ayarla"
 
 msgid "Getting Started"
 msgstr "Başlamak"
@@ -6619,6 +7224,9 @@ msgstr "Seçilen arama sonuçlarını Gereksiz olarak işaretle"
 msgid "Mark selected search results as Not Junk"
 msgstr "Seçilen arama sonuçlarından Gereksiz işaretini kaldır"
 
+msgid "Search More"
+msgstr "Daha çok ara"
+
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Sunucunun listesindeki sonuçları engellemek ister misin?"
 
@@ -6640,6 +7248,12 @@ msgstr "Ara doküman dosyaları için, html, txt, pdf ve daha çoğunu kapsar"
 msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Ara program dosyaları için, exe, fermuar, gz, ve daha çoğunu kapsar"
 
+msgid "Stop Search"
+msgstr "aramayı durdur"
+
+msgid "Download All Selected Files"
+msgstr "Bütün seçilen dosyaları indir"
+
 msgid "View All Files on Selected Computer"
 msgstr "Seçilen bilgisayarda bütün dosyaları gör"
 
@@ -6648,6 +7262,9 @@ msgstr "Seçilen koleksiyon için arama sonuçlarını toplamayı durdur"
 
 msgid "New"
 msgstr "Yeni"
+
+msgid "Direct Connect"
+msgstr "direkt bağlan"
 
 #, fuzzy
 msgid ""
@@ -6669,6 +7286,9 @@ msgstr ""
 "bilgisayar bir güvenlik duvarı veya yönlendiricinin arkasındadır ve direkt "
 "bağlantıları alamaz"
 
+msgid "Don't Know"
+msgstr "Bilmiyorum"
+
 #, fuzzy
 msgid "What To Look For?"
 msgstr "Neyin aranacak olduğu?"
@@ -6689,8 +7309,20 @@ msgstr "Yetişkinlere Uygun İçeriği Gizle"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Adres biçimi yanlıştır, lütfen kullanılan veri yolu: port."
 
+msgid "Launch Action"
+msgstr "Hareketi başlat"
+
 msgid "Chat With Host"
 msgstr "Sunucuyla Sohbet Et"
+
+msgid "Repeat Search"
+msgstr "Aramayı tekrarla"
+
+msgid "Loading Search Window..."
+msgstr "Arama penceresini yüklemek"
+
+msgid "Firewalled Host"
+msgstr "Firewall Korumalı Sunucu"
 
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
@@ -6722,6 +7354,13 @@ msgstr ""
 "seçin. Bağlanana kadar aramanız sonuç döndürmeyebilir."
 
 msgid ""
+"LimeWire is currently connecting to the network. Your search may not return "
+"many results until you are fully connected to the network."
+msgstr ""
+"LimeWire güncel olarak şebekeye bağlanıyor. Senin araman şebekeye tam olarak "
+"bağlı oluncaya kadar birçok sonuca dönmeyebilir."
+
+msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
 msgstr ""
@@ -6730,6 +7369,12 @@ msgstr ""
 
 msgid "Could not browse host {0}."
 msgstr "Sunucu{0}'ya bağlanılamıyor."
+
+msgid "Vendor"
+msgstr "Satıcı"
+
+msgid "Junk Rating"
+msgstr "Derecelendirmeyi at"
 
 msgid "Media"
 msgstr "Ortam"
@@ -6777,6 +7422,12 @@ msgstr "Boşta"
 msgid "Sorry, the browser could not be loaded."
 msgstr "Üzgünüz,tarayıcı yüklenemedi."
 
+msgid "Go"
+msgstr "Devam"
+
+msgid "Back"
+msgstr "Geri"
+
 msgid "Forward"
 msgstr "İleri"
 
@@ -6789,8 +7440,14 @@ msgstr "bütün sütunları kapatamazsın"
 msgid "View Repository of Saved Files"
 msgstr "Kaydedilen Dosyalar Deposunu Görüntüle"
 
+msgid "View Logging Messages"
+msgstr "Günlüğe kaydetilmiş mesajları  gör"
+
 msgid "View Searches and Uploads"
 msgstr "Görüşler  aramalar ve yüklemeler"
+
+msgid "Search and Download Files"
+msgstr "Arama ve indirme dosyaları"
 
 msgid ""
 "The skin file you selected does not exist or is invalid. Please choose "
@@ -6817,8 +7474,14 @@ msgid ""
 msgstr ""
 "Senin uyguluyor olduğun tema geçersizdir. LimeWire hazır gelen temaya dönecek"
 
+msgid "Kill Upload"
+msgstr "Yüklemeyi durdur"
+
 msgid "Stop Selected Uploads"
 msgstr "yüklemelerin Durdurulması seçildi"
+
+msgid "Remove Inactive Uploads"
+msgstr "Hareketsiz yüklemeleri çıkar"
 
 msgid "File Not Found"
 msgstr "Dosya Bulunamadı"
@@ -6826,8 +7489,26 @@ msgstr "Dosya Bulunamadı"
 msgid "Queued at"
 msgstr "Sırada"
 
+msgid "Malformed Request"
+msgstr "Kusurlu istek"
+
 msgid "Uploading Hash Tree"
 msgstr "Şifrelenmiş ağaç yükleniyor"
+
+msgid "Suspended"
+msgstr "Askıya Alındı"
+
+msgid "Awaiting Requests"
+msgstr "İstekleri bekleniyor"
+
+msgid "Loading Upload Window..."
+msgstr "Yükleme penceresi yükleniyor..."
+
+msgid "Seeding"
+msgstr "Gönderiliyor"
+
+msgid "Download Already Finished"
+msgstr "İndirme İşlemi Zaten Sonuçlandı"
 
 msgid "No Write Permission"
 msgstr "Yazma İzni Yok"
@@ -6837,6 +7518,15 @@ msgstr "Böyle Bir Dizin Yok"
 
 msgid "File Already Exists"
 msgstr "Dosya Zaten Mevcut"
+
+msgid "Filename Taken"
+msgstr "Alınan Dosya Adı"
+
+msgid "Not a File"
+msgstr "Dosya Değil"
+
+msgid "Filesystem Error"
+msgstr "Dosya Sistemi Hatası"
 
 msgid "Same File Already Being Downloaded"
 msgstr "aynı dosya şimdi indiriliyor"
@@ -6888,6 +7578,12 @@ msgstr ""
 msgid "There is nothing to preview for file {0}."
 msgstr "{0} dosyası için önizleme yapmak mümkün değil."
 
+msgid "More Search Options"
+msgstr "Daha Fazla Arama Seçeneği"
+
+msgid "Publish License"
+msgstr "Yayımlama Lisansı"
+
 msgid ""
 "Are you sure you want to permanently remove the license from your local copy "
 "of this file?"
@@ -6925,6 +7621,9 @@ msgstr ""
 msgid "How does it work?"
 msgstr "Nasıl çalışır?"
 
+msgid "ShareAlike"
+msgstr "Eşitpaylaşım"
+
 msgid "Allow commercial use of your work?"
 msgstr "Çalışmanızın ticari kullanımına izin veriyor musunuz?"
 
@@ -6933,6 +7632,18 @@ msgstr "Çalışmanızda değişiklik yapılabilsin mi?"
 
 msgid "Save details to file"
 msgstr "Detayları dosyaya kaydet"
+
+msgid "Copyright Holder:"
+msgstr "Telif Hakkı Sahibi:"
+
+msgid "Copyright Year:"
+msgstr "Telif Hakkı Yılı:"
+
+msgid "Title of Work:"
+msgstr "Çalışmanın Başlığı"
+
+msgid "Comment:"
+msgstr "Yorum:"
 
 msgid "Please enter the copyright holder, copright year and title."
 msgstr "Lütfen telif hakkı sahibini, yılını ve başlığını girin."
@@ -6958,13 +7669,22 @@ msgstr "Onaylama dosyasının barındığı adres:"
 msgid "Please enter a verification URL for the license."
 msgstr "Lütfen lisans için bir onaylama adresi giriniz."
 
+msgid "License RDF Output"
+msgstr "RDF çıktısına ruhsat ver"
+
 msgid ""
 "In order to publish your file, please insert the following code in your "
 "verification page at:"
 msgstr "Dosyanızı yayınlamak için gereken kodun bulunduğu onaylanmış sayfa:"
 
+msgid "Copy to Clipboard"
+msgstr "Panoya Kopyala"
+
 msgid "Kind:"
 msgstr "Tür:"
+
+msgid "Size:"
+msgstr "Boyut:"
 
 msgid "Date Modified:"
 msgstr "Düzenlendiği Tarih:"
@@ -6987,6 +7707,36 @@ msgstr "Dosya Hasarlı. Veri kaydedilemedi."
 msgid "Incorrect format entered. Changes will not be saved."
 msgstr "Hatalı biçim girildi. Değişiklikler kaydedilmeyecek."
 
+msgid "Title:"
+msgstr "Başlık:"
+
+msgid "Artist:"
+msgstr "Sanatçı:"
+
+msgid "Album:"
+msgstr "Albüm:"
+
+msgid "Genre:"
+msgstr "Tür:"
+
+msgid "Year:"
+msgstr "Yıl:"
+
+msgid "Type:"
+msgstr "Türü:"
+
+msgid "Track:"
+msgstr "Parça:"
+
+msgid "Length:"
+msgstr "Süre:"
+
+msgid "Bitrate:"
+msgstr "Bit oranı:"
+
+msgid "Comments:"
+msgstr "Yorumlar:"
+
 msgid "SHA1:"
 msgstr "SHA1:"
 
@@ -6996,6 +7746,24 @@ msgstr "Fiyat:"
 msgid "Link:"
 msgstr "Bağlantı:"
 
+msgid "Action:"
+msgstr "Eylem:"
+
+msgid "License:"
+msgstr "Lisans:"
+
+msgid "Rating:"
+msgstr "Değerlendirme:"
+
+msgid "License Type:"
+msgstr "Lisans Türü:"
+
+msgid "Director:"
+msgstr "Yönetmen:"
+
+msgid "Studio:"
+msgstr "Stüdyo"
+
 msgid "Stars: (Please separate with comma)"
 msgstr "Yıldızlar: (Lütfen virgül ile Ayırınız)"
 
@@ -7004,6 +7772,21 @@ msgstr "Üretici: (Lütfen virgülle ayır)"
 
 msgid "Subtitles: (Please separate with comma)"
 msgstr "Altyazılar: (Lütfen virgülle ayırınız)"
+
+msgid "Topic:"
+msgstr "Konu:"
+
+msgid "Author:"
+msgstr "Yazar:"
+
+msgid "Publisher:"
+msgstr "Yayımcı:"
+
+msgid "Platform:"
+msgstr "Çalışma Alanı:"
+
+msgid "Description:"
+msgstr "Açıklama:"
 
 msgid "MPEG-1 Audio Layer 3"
 msgstr "MPEG-1 Ses Katmanı 3"
@@ -7017,30 +7800,6 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
-
-#, fuzzy
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "HTML Motoru Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Loading Message Router..."
-#~ msgstr "Kullanıcı arabirimi yükleniyor..."
-
-#, fuzzy
-#~ msgid "Locating Peers..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Loading Shared Files..."
-#~ msgstr "Diğer diller yükleniyor..."
-
-#, fuzzy
-#~ msgid "Loading BitTorrent Management..."
-#~ msgstr "İçerik Yönetimi"
-
-#, fuzzy
-#~ msgid "Loading Network Listeners..."
-#~ msgstr "Kullanıcı arabirimi yükleniyor..."
 
 #~ msgid "Could not process bad MAGNET link {0}"
 #~ msgstr "Bozuk MAGNET bağ"
@@ -7066,18 +7825,6 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 
 #~ msgid "Upgrade to LimeWire PRO?"
 #~ msgstr "LimeWire PRO'ya yükselt?"
-
-#, fuzzy
-#~ msgid "Automatically start torrents"
-#~ msgstr "Otomatik Kaydır"
-
-#, fuzzy
-#~ msgid "Start automatically"
-#~ msgstr "Otomatik Sırala"
-
-#, fuzzy
-#~ msgid "BitTorrent Settings"
-#~ msgstr "BitTorrent"
 
 #~ msgid ""
 #~ "Please add any comments you may have (e.g what caused the error). \n"
@@ -7119,1124 +7866,57 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ "paylaşmak için) bir hata ile karşılaştı. Bu özellik kapatılacak. Bu "
 #~ "özelliği iTunes -> Paylaşım kısmından tekrar açabilirsiniz."
 
-#, fuzzy
-#~ msgid "View My Shared Files."
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Do not display this message again."
-#~ msgstr "Beni tekrar uyarma"
-
-#, fuzzy
-#~ msgid "Ethernet"
-#~ msgstr "Diğer"
-
-#, fuzzy
-#~ msgid "&Search"
-#~ msgstr "Ara"
-
-#, fuzzy
-#~ msgid "&Connections"
-#~ msgstr "Bağlantılar "
-
-#, fuzzy
-#~ msgid "&Library"
-#~ msgstr "Kitaplık"
-
-#, fuzzy
-#~ msgid "C&onsole"
-#~ msgstr "Konsol"
-
-#, fuzzy
-#~ msgid "Loading Core Components..."
-#~ msgstr "Diğer diller yükleniyor..."
-
-#, fuzzy
-#~ msgid "Apply Operation"
-#~ msgstr "Uygulama"
-
-#, fuzzy
-#~ msgid "Cancel Operation"
-#~ msgstr "Yüklemeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Upgrade Java"
-#~ msgstr "PRO'ya yükselt"
-
-#, fuzzy
-#~ msgid "More Information"
-#~ msgstr "Daha fazla seçenek"
-
-#, fuzzy
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "Hataları LimeWire'a bildir"
-
-#, fuzzy
-#~ msgid "License Details:"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "View License Deed"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "LimeWire is currently locating the details of this license."
-#~ msgstr "LimeWire şu an başlatılıyor. Aramanız, tamamlandığında başlayacak."
-
-#, fuzzy
-#~ msgid "Creative Commons Details"
-#~ msgstr "Creative Commons"
-
-#, fuzzy
-#~ msgid "License Details"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "File Listing for"
-#~ msgstr "Bağlantı Noktası Dinleniyor"
-
-#, fuzzy
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Searches"
-#~ msgstr "Ara"
-
-#, fuzzy
-#~ msgid "Shutting down LimeWire..."
-#~ msgstr "LimeWire programını göster"
-
-#, fuzzy
-#~ msgid "Add..."
-#~ msgstr "Ekle"
-
-#, fuzzy
-#~ msgid "Loading Status Window..."
-#~ msgstr "Kullanıcı arabirimi yükleniyor..."
-
-#, fuzzy
-#~ msgid "You are not connected to the LimeWire Store"
-#~ msgstr ""
-#~ "LimeWire Mağazasından satın aldığınız dosyaları nasıl düzenleyeceğinizi "
-#~ "belirleyin"
-
-#, fuzzy
-#~ msgid "Disconnected"
-#~ msgstr "Buraya bağlandı"
-
-#, fuzzy
-#~ msgid "Starting"
-#~ msgstr "Paylaşılıyor"
-
 #~ msgid "Poor"
 #~ msgstr "Zayıf"
-
-#, fuzzy
-#~ msgid ""
-#~ "You can experience Turbo-Charged connections all the time with LimeWire "
-#~ "PRO!"
-#~ msgstr "Turbo Hızlı aramalar için LimeWire PRO programını alın"
-
-#, fuzzy
-#~ msgid "Show Connection Quality"
-#~ msgstr "Bağlantı Dinleyici"
-
-#, fuzzy
-#~ msgid "Show Shared Files Count"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Consumption"
-#~ msgstr "Giden Bant Genişliği"
-
-#, fuzzy
-#~ msgid "Downloads:"
-#~ msgstr "İndirmeler"
-
-#, fuzzy
-#~ msgid "Uploads:"
-#~ msgstr "Yüklemeler"
-
-#, fuzzy
-#~ msgid "A newer version is available, update?"
-#~ msgstr "Yeni Sürüm Kullanılabilir Durumda!"
-
-#, fuzzy
-#~ msgid "Get LimeWire PRO Now"
-#~ msgstr "LimeWire PRO'ya yükselt?"
-
-#, fuzzy
-#~ msgid "Get LimeWire PRO Later"
-#~ msgstr "LimeWire PRO'ya yükselt?"
-
-#, fuzzy
-#~ msgid "Copy Magnet Links to Clipboard"
-#~ msgstr "Bağlantıyı Panoya Kopyala"
-
-#, fuzzy
-#~ msgid "C&onnect"
-#~ msgstr "Bağlanıyor"
-
-#, fuzzy
-#~ msgid "O&pen Magnet or Torrent"
-#~ msgstr "T&orrenti Aç..."
-
-#, fuzzy
-#~ msgid "&Close"
-#~ msgstr "Kapat"
-
-#, fuzzy
-#~ msgid "Launch Selected Files"
-#~ msgstr "Seçili Dosyaları İndir"
-
-#, fuzzy
-#~ msgid "My Shared Files"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "View My {0} Shared Files"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Share New File..."
-#~ msgstr "Dosyayı Paylaş"
-
-#, fuzzy
-#~ msgid "Block Host"
-#~ msgstr "Bilgisayarları Engelle"
-
-#, fuzzy
-#~ msgid "Block Current Host"
-#~ msgstr "Bilgisayarları Engelle"
-
-#, fuzzy
-#~ msgid "Remove the Selected Connections"
-#~ msgstr "Internet Bağlantısı Yok"
-
-#, fuzzy
-#~ msgid "Loading Connections Window..."
-#~ msgstr "Bağlantılar bekleniyor..."
-
-#, fuzzy
-#~ msgid "Host:"
-#~ msgstr "Ana Bilgisayar"
-
-#, fuzzy
-#~ msgid "Share Dropped Files?"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Do not show this message again."
-#~ msgstr "Beni tekrar uyarma"
-
-#, fuzzy
-#~ msgid "Waiting {0}s for Sources"
-#~ msgstr "Bağlantılar bekleniyor..."
-
-#, fuzzy
-#~ msgid "Paused"
-#~ msgstr "Duraklat"
-
-#, fuzzy
-#~ msgid "Content Removed"
-#~ msgstr "İçerik Yönetimi"
-
-#, fuzzy
-#~ msgid "Resuming..."
-#~ msgstr "Ayarlar..."
-
-#, fuzzy
-#~ msgid "Downloading .torrent file..."
-#~ msgstr ".torrent dosyaları"
-
-#, fuzzy
-#~ msgid "Average Bandwidth"
-#~ msgstr "Gelen Bant Genişliği"
-
-#, fuzzy
-#~ msgid "Valid Alternate Locations"
-#~ msgstr "Kimlik Doğrulamayı Etkinleştir"
-
-#, fuzzy
-#~ msgid "Finished On"
-#~ msgstr "Bitti"
-
-#, fuzzy
-#~ msgid "hosts"
-#~ msgstr "Ana Bilgisayar"
-
-#, fuzzy
-#~ msgid "host"
-#~ msgstr "Ana Bilgisayar"
-
-#, fuzzy
-#~ msgid "Busy Hosts"
-#~ msgstr "Bilgisayarları Engelle"
-
-#, fuzzy
-#~ msgid "Locating Sources..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Priority"
-#~ msgstr "Bağlantı Noktası "
-
-#, fuzzy
-#~ msgid "Progress"
-#~ msgstr "Programlar"
-
-#, fuzzy
-#~ msgid "Speed"
-#~ msgstr "Gönder"
-
-#, fuzzy
-#~ msgid "Find Sources"
-#~ msgstr "Arkadaş İsteği"
-
-#, fuzzy
-#~ msgid "Reattempt Selected Downloads"
-#~ msgstr "Son indirmeleri hatırla"
-
-#, fuzzy
-#~ msgid "&View"
-#~ msgstr "Görüntüle"
-
-#, fuzzy
-#~ msgid "Clear Download"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Clear Selected Downloads"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Launch Download"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Launch Selected Downloads"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Cancel Selected Downloads"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Preview Selected Downloads"
-#~ msgstr "Son İndirmeler"
-
-#, fuzzy
-#~ msgid "Clear All Inactive Downloads"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Remove Inactive Downloads"
-#~ msgstr "İndirilen Dosyayı Kaldır"
-
-#, fuzzy
-#~ msgid "Pause Download"
-#~ msgstr "İndirmeyi İptal Et"
-
-#, fuzzy
-#~ msgid "Pause Selected Downloads"
-#~ msgstr "Son İndirmeler"
-
-#, fuzzy
-#~ msgid "Change File Location..."
-#~ msgstr "Dosya adlandırmayı yapılandır..."
-
-#, fuzzy
-#~ msgid "Always Save As..."
-#~ msgstr "Dosyayı Farklı Kaydet..."
-
-#, fuzzy
-#~ msgid "Always Ask"
-#~ msgstr "Her Zaman İnceleme İçin Sor"
-
-#, fuzzy
-#~ msgid "Choose a Default Action:"
-#~ msgstr "Farklı bir Kayıt Konumu seçin"
-
-#, fuzzy
-#~ msgid "Choose a different location for the Download"
-#~ msgstr "Farklı bir Kayıt Konumu seçin"
-
-#, fuzzy
-#~ msgid "Append (#)"
-#~ msgstr "Atlanan (G/Ç)"
-
-#, fuzzy
-#~ msgid "Same File Already In Library"
-#~ msgstr "Kitaplıktaki Dosyaya Git"
-
-#, fuzzy
-#~ msgid "No Filename"
-#~ msgstr "Dosya Adı"
 
 #~ msgid "Active"
 #~ msgstr "Etkin"
 
-#, fuzzy
-#~ msgid "File & Protocol Associations"
-#~ msgstr "Dosya İlişkilendirmeleri"
-
-#, fuzzy
-#~ msgid "Always take the selected associations."
-#~ msgstr "Diğer programlar bu ilişkilendirmeleri aldığında beni uyar"
-
-#, fuzzy
-#~ msgid "Firewall Setup"
-#~ msgstr "Güvenlik Duvarı"
-
-#, fuzzy
-#~ msgid "Broadband (or unsure)"
-#~ msgstr "Geniş Bant"
-
-#, fuzzy
-#~ msgid "System Startup"
-#~ msgstr "LimeWire programını Sistem Başlatılırken çalıştır"
-
-#, fuzzy
-#~ msgid "Start Automatically"
-#~ msgstr "Otomatik Sırala"
-
-#, fuzzy
-#~ msgid "Content Filtering"
-#~ msgstr "İçerik Filtreleri"
-
-#, fuzzy
-#~ msgid "Save Folder and Shared Folders"
-#~ msgstr "Klasör Kaydetme Hatası"
-
-#, fuzzy
-#~ msgid "Shared Folders"
-#~ msgstr "Kayıt Klasörleri"
-
-#, fuzzy
-#~ msgid ""
-#~ "The save folder is invalid. You may not have permissions to write to the "
-#~ "selected folder.  Please choose another save folder."
-#~ msgstr ""
-#~ "Kayıtlı klasörünüz geçerli değil. Silinmiş olabilir, klasöre yazma "
-#~ "izniniz olmayabilir veya başka bir sorun olabilir. Lütfen farklı bir "
-#~ "klasör seçin."
-
-#, fuzzy
-#~ msgid ""
-#~ "LimeWire was unable to use the specified folder for saving files. Please "
-#~ "try a different folder."
-#~ msgstr ""
-#~ "Dosya başka bir program tarafından kullanıldığı için, LimeWire seçili "
-#~ "dosyayı indiremedi. Lütfen diğer programı kapatık indirmeyi tekrar "
-#~ "deneyin."
-
-#, fuzzy
-#~ msgid "Use the Default Folder"
-#~ msgstr "Varsayılanı Kullan"
-
-#, fuzzy
-#~ msgid "Choose Another Folder"
-#~ msgstr "Diğer aramaları kapat"
-
-#, fuzzy
-#~ msgid "LimeWire Setup Wizard"
-#~ msgstr "LimeWire Mağazası"
-
-#, fuzzy
-#~ msgid "Incomplete Files"
-#~ msgstr "Dosyayı Sil"
-
-#, fuzzy
-#~ msgid "Loading Library Window..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Songs purchased from the LimeWire Store"
-#~ msgstr ""
-#~ "LimeWire Mağazasından satın aldığınız dosyaları nasıl düzenleyeceğinizi "
-#~ "belirleyin"
-
-#, fuzzy
-#~ msgid "Search In Shared Files:"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Icon"
-#~ msgstr "Gelen"
-
-#, fuzzy
-#~ msgid "Path"
-#~ msgstr "Yapıştır"
-
-#, fuzzy
-#~ msgid "Shared"
-#~ msgstr "Paylaş"
-
-#, fuzzy
-#~ msgid "This folder is shared."
-#~ msgstr "Bu dosya paylaşılamaz"
-
-#, fuzzy
-#~ msgid "This folder is not shared."
-#~ msgstr "Bu dosya paylaşılamaz"
-
-#, fuzzy
-#~ msgid "Add Description to Selected File"
-#~ msgstr "Seçili Dosyaları İndir"
-
-#, fuzzy
-#~ msgid "Publish..."
-#~ msgstr "Yayıncı"
-
-#, fuzzy
-#~ msgid "Edit License..."
-#~ msgstr "Lisans"
-
-#, fuzzy
-#~ msgid "Continue Downloading Selected Incomplete File"
-#~ msgstr "Seçili Dosyaları İndir"
-
-#, fuzzy
-#~ msgid "Rename"
-#~ msgstr "Dosya Adı"
-
-#, fuzzy
-#~ msgid "Stop Sharing File"
-#~ msgstr "Dosyayı Paylaş"
-
-#, fuzzy
-#~ msgid "Stop Sharing Folder"
-#~ msgstr "Paylaşılan indirmeler"
-
-#, fuzzy
-#~ msgid "Show .torrent Files"
-#~ msgstr ".torrent dosyaları"
-
-#, fuzzy
-#~ msgid "Reload Shared Folders"
-#~ msgstr "Kayıt Klasörleri"
-
-#, fuzzy
-#~ msgid "Legend"
-#~ msgstr "Gönder"
-
-#, fuzzy
-#~ msgid "Individually Shared Files"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "List of .torrent files"
-#~ msgstr ".torrent dosyaları"
-
-#, fuzzy
-#~ msgid "Loading Logging Window..."
-#~ msgstr "LimeWire Yükleniyor..."
-
-#, fuzzy
-#~ msgid "&Advanced"
-#~ msgstr "Gelişmiş"
-
-#, fuzzy
-#~ msgid "Filter&s"
-#~ msgstr "Dosyalar"
-
-#, fuzzy
-#~ msgid "Help for Using LimeWire"
-#~ msgstr "LimeWire Programını Kullanma"
-
-#, fuzzy
-#~ msgid "Show the Tip of the Day Window"
-#~ msgstr "Sohbet Penceresini Göster"
-
-#, fuzzy
-#~ msgid "Generate &Error"
-#~ msgstr "İç Hata"
-
-#, fuzzy
-#~ msgid "&About LimeWire"
-#~ msgstr "LimeWire Hakkında"
-
-#, fuzzy
-#~ msgid "Information about LimeWire"
-#~ msgstr "Hataları LimeWire'a bildir"
-
-#, fuzzy
-#~ msgid "&Resources"
-#~ msgstr "Sürdür"
-
-#, fuzzy
-#~ msgid "LimeWire &PRO"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Display the LimeWire PRO Website"
-#~ msgstr "LimeWire PRO'ya yükselt?"
-
-#, fuzzy
-#~ msgid "Result &Filters"
-#~ msgstr "İçerik Filtreleri"
-
-#, fuzzy
-#~ msgid "Sho&w/Hide"
-#~ msgstr "Kenar Çubuğunu Göster"
-
-#, fuzzy
-#~ msgid "Use &Default"
-#~ msgstr "Varsayılanı Kullan"
-
-#, fuzzy
-#~ msgid "Use your default skin"
-#~ msgstr "Varsayılanı Kullan"
-
-#, fuzzy
-#~ msgid "&Options"
-#~ msgstr "Seçenekler"
-
-#, fuzzy
-#~ msgid "C&hange Language"
-#~ msgstr "Dil"
-
-#, fuzzy
-#~ msgid "LimeWire Media Player"
-#~ msgstr "LimeWire 5 Alpha"
-
-#, fuzzy
-#~ msgid "Restore"
-#~ msgstr "Kaldır "
-
-#, fuzzy
-#~ msgid "About"
-#~ msgstr "Albüm"
-
-#, fuzzy
-#~ msgid "Restore Defaults"
-#~ msgstr "Varsayılanı Kullan"
-
-#, fuzzy
-#~ msgid "Slots"
-#~ msgstr "Kapat"
-
-#, fuzzy
-#~ msgid "Status Bar"
-#~ msgstr "Durum"
-
-#, fuzzy
-#~ msgid "Bug Reports"
-#~ msgstr "Raporu Kopyala"
-
 #~ msgid "Searching"
 #~ msgstr "Arıyor"
 
-#, fuzzy
-#~ msgid "Content"
-#~ msgstr "Devam"
-
-#, fuzzy
-#~ msgid "Hosts"
-#~ msgstr "Ana Bilgisayar"
-
-#, fuzzy
-#~ msgid "System Boot"
-#~ msgstr "Sistem"
-
-#, fuzzy
-#~ msgid "Loading Options Window..."
-#~ msgstr "LimeWire Yükleniyor..."
-
-#, fuzzy
 #~ msgid ""
-#~ "The selected save folder is invalid. You may not have permissions to "
-#~ "write to the selected folder. LimeWire will revert to your previously "
-#~ "selected folder."
+#~ "Oops!  You did something we haven't written yet.  Sorry about that.  "
+#~ "LimeWire's still going to run just fine, but please click 'Send' to "
+#~ "remind us to write this.  If you want, you can click 'Review' to look at "
+#~ "the information that will be sent. Thanks!"
 #~ msgstr ""
-#~ "Kayıtlı klasörünüz geçerli değil. Silinmiş olabilir, klasöre yazma "
-#~ "izniniz olmayabilir veya başka bir sorun olabilir. Lütfen farklı bir "
-#~ "klasör seçin."
+#~ "Oops! Henüz yazmadığımız bir işlem yaptınız. Üzgünüz. LimeWire normal "
+#~ "çalışmasına devam edecektir, ama bunu yazmayı hatırlatmak için lütfen "
+#~ "'Gönder'i tıklatın. İsterseniz, gönderilecek bilgilere bakmak için "
+#~ "'İncele'yi de tıklatabilirsiniz. Teşekkürler!"
 
-#, fuzzy
-#~ msgid "Links and File Types"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "Use LimeWire for..."
-#~ msgstr "LimeWire Mağazası"
-
-#, fuzzy
-#~ msgid "Audio Player"
-#~ msgstr "Yürütücü"
-
-#, fuzzy
-#~ msgid "Clear Completed Downloads:"
-#~ msgstr "Son İndirmeler"
-
-#, fuzzy
-#~ msgid "Automatically Clear Completed Uploads:"
-#~ msgstr "Otomatik Kaydır"
-
-#, fuzzy
-#~ msgid "Browser Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "View Example"
-#~ msgstr "Dosyaları Görüntüle"
-
-#, fuzzy
-#~ msgid "Host Communication"
-#~ msgstr "Yönlendirici Yapılandırması"
-
-#, fuzzy
-#~ msgid "Enable Chat:"
-#~ msgstr "Kimlik Doğrulamayı Etkinleştir"
-
-#, fuzzy
-#~ msgid "Connect on Startup"
-#~ msgstr "Bağlantı Hızı"
-
-#, fuzzy
-#~ msgid "Connect on Startup:"
-#~ msgstr "Bağlantı Hızı"
-
-#, fuzzy
-#~ msgid "Connection Preferencing"
-#~ msgstr "Bağlantı Hızı"
-
-#, fuzzy
-#~ msgid "Allow Freeloaders:"
-#~ msgstr "Klasör Ekle"
-
-#, fuzzy
-#~ msgid "Enable Content Filters"
-#~ msgstr "İçerik Filtreleri"
-
-#, fuzzy
-#~ msgid "Shared Name:"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "Always Ask What to do"
-#~ msgstr "Her Zaman İnceleme İçin Sor"
-
-#, fuzzy
-#~ msgid "Capabilities"
-#~ msgstr "TLS özelliklerini devre dışı bırak"
-
-#, fuzzy
-#~ msgid "Disable Mojito DHT Capabilities:"
-#~ msgstr "TLS özelliklerini devre dışı bırak"
-
-#, fuzzy
-#~ msgid "OOB Searching"
-#~ msgstr "Arıyor"
-
-#, fuzzy
-#~ msgid "License Warning"
-#~ msgstr "Lisans"
-
-#, fuzzy
-#~ msgid "Use Defaults"
-#~ msgstr "Varsayılanı Kullan"
-
-#, fuzzy
-#~ msgid "Filter Hosts"
-#~ msgstr "Anahtar Sözcükleri Filtrele"
-
-#, fuzzy
-#~ msgid "Ignore Adult Content"
-#~ msgstr "Cinsel içerik görüntüleme"
-
-#, fuzzy
-#~ msgid "Image Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "Maximum Downloads"
-#~ msgstr "İndirmeler"
-
-#, fuzzy
-#~ msgid "Maximum Downloads:"
-#~ msgstr "İndirmeler"
-
-#, fuzzy
-#~ msgid "Max Upload Slots"
-#~ msgstr "Torrent başına maksimum yükleme"
-
-#, fuzzy
-#~ msgid "Max Upload Slots:"
-#~ msgstr "Torrent başına maksimum yükleme"
-
-#, fuzzy
-#~ msgid "Open Dialog to Select a Folder"
-#~ msgstr "Klasör Seç"
-
-#, fuzzy
-#~ msgid "Reset"
-#~ msgstr "Sürdür"
-
-#, fuzzy
-#~ msgid "Partial Files"
-#~ msgstr "Geçerli Dosyalar"
-
-#, fuzzy
-#~ msgid "Player Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "LimeWire Popups"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Proxy Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "Download Sharing"
-#~ msgstr "İndiriliyor"
-
-#, fuzzy
-#~ msgid "Shutdown Immediately"
-#~ msgstr "Her Zaman Hemen Gönder"
-
-#, fuzzy
-#~ msgid "Shutdown after Transfers"
-#~ msgstr "Transfer Tamamlanınca Çık"
-
-#, fuzzy
-#~ msgid "Speed:"
-#~ msgstr "Gönder"
-
-#, fuzzy
-#~ msgid "Bandwidth Indicator"
-#~ msgstr "Gelen Bant Genişliği"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Indicator:"
-#~ msgstr "Gelen Bant Genişliği"
-
-#, fuzzy
-#~ msgid "Connection Quality Indicator"
-#~ msgstr "Bağlantı Dinleyici"
-
-#, fuzzy
-#~ msgid "Show Firewall Indicator:"
-#~ msgstr "Güvenlik Duvarı Yöneticisi"
-
-#, fuzzy
-#~ msgid "Show LimeWire Store Indicator:"
-#~ msgstr "LimeWire Mağaza Entegrasyonu"
-
-#, fuzzy
-#~ msgid "Show Shared Files Indicator:"
-#~ msgstr "Paylaşılan Dosyalar"
-
-#, fuzzy
-#~ msgid "LimeWire Store - Save Folder"
-#~ msgstr "LimeWire Mağazası"
-
-#, fuzzy
-#~ msgid "Update Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "Upload Speed:"
-#~ msgstr "Öğeyi Yükle"
-
-#, fuzzy
-#~ msgid "Video Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "Video Player"
-#~ msgstr "Yürütücü"
-
-#, fuzzy
-#~ msgid "Remove Selected File from Playlist"
-#~ msgstr "Listeden kaldır"
-
-#, fuzzy
-#~ msgid "Comment"
-#~ msgstr "Yorumlar"
-
-#, fuzzy
-#~ msgid "Playlist"
-#~ msgstr "Yürüt"
-
-#, fuzzy
-#~ msgid "Loading Playlist Window..."
-#~ msgstr "LimeWire Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Play Options:"
-#~ msgstr "Seçenekler"
-
-#, fuzzy
-#~ msgid "Shuffle"
-#~ msgstr "Alt klasör"
-
-#, fuzzy
-#~ msgid "Continuous"
-#~ msgstr "Devam"
-
-#, fuzzy
-#~ msgid "Save Playlist As"
-#~ msgstr "Farklı Kaydet "
-
-#, fuzzy
-#~ msgid "Option"
-#~ msgstr "Seçenekler"
-
-#, fuzzy
-#~ msgid "Filter Results:"
-#~ msgstr "Video sonuçları"
-
-#, fuzzy
-#~ msgid "Back To Search"
-#~ msgstr "Ara"
-
-#, fuzzy
-#~ msgid "Download As..."
-#~ msgstr "İndirmeler"
-
-#, fuzzy
-#~ msgid "Configure"
-#~ msgstr "Yapılandır..."
-
-#, fuzzy
-#~ msgid "Search More"
-#~ msgstr "Ara"
-
-#, fuzzy
-#~ msgid "Stop Search"
-#~ msgstr "Ara"
-
-#, fuzzy
-#~ msgid "Download All Selected Files"
-#~ msgstr "Seçili Dosyaları İndir"
-
-#, fuzzy
-#~ msgid "Direct Connect"
-#~ msgstr "Müdür"
-
-#, fuzzy
-#~ msgid "Don't Know"
-#~ msgstr "Tarama"
-
-#, fuzzy
-#~ msgid "Launch Action"
-#~ msgstr "Dosyayı başlat"
-
-#, fuzzy
-#~ msgid "Repeat Search"
-#~ msgstr "Aramayı yinele"
-
-#, fuzzy
-#~ msgid "Loading Search Window..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Firewalled Host"
-#~ msgstr "Güvenlik Duvarı"
-
-#, fuzzy
 #~ msgid ""
-#~ "LimeWire is currently connecting to the network. Your search may not "
-#~ "return many results until you are fully connected to the network."
+#~ "Oops!  You did something we haven't written yet.  Sorry about that.  "
+#~ "LimeWire's still going to run just fine, so don't worry.  If you want, "
+#~ "you can click 'Review' to look at the information about the error."
 #~ msgstr ""
-#~ "LimeWire bağlanmayı tamamlamadı. Bağlanmayı tamamlayana kadar çok sayıda "
-#~ "arama sonucu alamayabilirsiniz."
+#~ "Oops! Henüz yazmadığımız bir işlem yaptınız. Üzgünüz. LimeWire normal "
+#~ "çalışmasına devam edecektir, üzülmeyin. İsterseniz, hata ile ilgili "
+#~ "bilgilere bakmak için 'İncele'yi tıklatabilirsiniz. "
 
-#, fuzzy
-#~ msgid "Vendor"
+#~ msgid ""
+#~ "LimeWire has encountered an internal error. It is possible for LimeWire "
+#~ "to recover and continue running normally. To continue using LimeWire, "
+#~ "click 'Discard'. If desired, you can click 'Review' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "LimeWire bir iç hata ile karşılaştı. LimeWire programının kurtarılarak "
+#~ "normal çalışmasına devam etmesi mümkündür. LimeWire programını kullanmaya "
+#~ "devam etmek için 'At'ı tıklatın. İsterseniz, hata ile ilgili bilgilere "
+#~ "bakmak için 'İncele'yi tıklatabilirsiniz. "
+
+#~ msgid "Send"
 #~ msgstr "Gönder"
 
-#, fuzzy
-#~ msgid "Junk Rating"
-#~ msgstr "Derece"
+#~ msgid "Review"
+#~ msgstr "İncele"
 
-#, fuzzy
-#~ msgid "Go"
-#~ msgstr "İyi"
+#~ msgid "Do Not Disturb"
+#~ msgstr "Rahatsız Etmeyin"
 
-#, fuzzy
-#~ msgid "Back"
-#~ msgstr "Parça"
-
-#, fuzzy
-#~ msgid "View Logging Messages"
-#~ msgstr "Uyarı Mesajları"
-
-#, fuzzy
-#~ msgid "Search and Download Files"
-#~ msgstr "Son İndirmeler"
-
-#, fuzzy
-#~ msgid "Kill Upload"
-#~ msgstr "Yüklemeler"
-
-#, fuzzy
-#~ msgid "Remove Inactive Uploads"
-#~ msgstr "İndirilen Dosyayı Kaldır"
-
-#, fuzzy
-#~ msgid "Malformed Request"
-#~ msgstr "Arkadaş İsteği"
-
-#, fuzzy
-#~ msgid "Suspended"
-#~ msgstr "Gönder"
-
-#, fuzzy
-#~ msgid "Awaiting Requests"
-#~ msgstr "Arkadaş İsteği"
-
-#, fuzzy
-#~ msgid "Loading Upload Window..."
-#~ msgstr "Tarayıcı Yükleniyor..."
-
-#, fuzzy
-#~ msgid "Seeding"
-#~ msgstr "Arıyor"
-
-#, fuzzy
-#~ msgid "Download Already Finished"
-#~ msgstr "Seçili Dosyaları İndir"
-
-#, fuzzy
-#~ msgid "Filename Taken"
-#~ msgstr "Dosya Adı"
-
-#, fuzzy
-#~ msgid "Not a File"
-#~ msgstr "Dosyayı Bul"
-
-#, fuzzy
-#~ msgid "Filesystem Error"
-#~ msgstr "iTunes Hatası"
-
-#, fuzzy
-#~ msgid "More Search Options"
-#~ msgstr "Daha Fazla Seçenek "
-
-#, fuzzy
-#~ msgid "Publish License"
-#~ msgstr "Yayıncı"
-
-#, fuzzy
-#~ msgid "ShareAlike"
-#~ msgstr "Dosyayı Paylaş"
-
-#, fuzzy
-#~ msgid "Copyright Holder:"
-#~ msgstr "Telif Hakkı"
-
-#, fuzzy
-#~ msgid "Copyright Year:"
-#~ msgstr "Telif Hakkı"
-
-#, fuzzy
-#~ msgid "Title of Work:"
-#~ msgstr "Şu bağlantı noktasında dinleme:"
-
-#, fuzzy
-#~ msgid "Comment:"
-#~ msgstr "Yorumlar"
-
-#, fuzzy
-#~ msgid "License RDF Output"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "Copy to Clipboard"
-#~ msgstr "Bağlantıyı Panoya Kopyala"
-
-#, fuzzy
-#~ msgid "Size:"
-#~ msgstr "Boyut"
-
-#, fuzzy
-#~ msgid "Title:"
-#~ msgstr "Başlık"
-
-#, fuzzy
-#~ msgid "Artist:"
-#~ msgstr "Sanatçı"
-
-#, fuzzy
-#~ msgid "Album:"
-#~ msgstr "Albüm"
-
-#, fuzzy
-#~ msgid "Genre:"
-#~ msgstr "Tür"
-
-#, fuzzy
-#~ msgid "Year:"
-#~ msgstr "Yıl"
-
-#, fuzzy
-#~ msgid "Type:"
-#~ msgstr "Tür"
-
-#, fuzzy
-#~ msgid "Track:"
-#~ msgstr "Parça"
-
-#, fuzzy
-#~ msgid "Length:"
-#~ msgstr "Uzunluk"
-
-#, fuzzy
-#~ msgid "Bitrate:"
-#~ msgstr "Bit hızı"
-
-#, fuzzy
-#~ msgid "Comments:"
-#~ msgstr "Yorumlar"
-
-#, fuzzy
-#~ msgid "Action:"
-#~ msgstr "İşlem"
-
-#, fuzzy
-#~ msgid "License:"
-#~ msgstr "Lisans"
-
-#, fuzzy
-#~ msgid "Rating:"
-#~ msgstr "Derece"
-
-#, fuzzy
-#~ msgid "License Type:"
-#~ msgstr "Lisans Türü"
-
-#, fuzzy
-#~ msgid "Director:"
-#~ msgstr "Müdür"
-
-#, fuzzy
-#~ msgid "Studio:"
-#~ msgstr "Stüdyo"
-
-#, fuzzy
-#~ msgid "Topic:"
-#~ msgstr "Konu"
-
-#, fuzzy
-#~ msgid "Author:"
-#~ msgstr "Yazar"
-
-#, fuzzy
-#~ msgid "Publisher:"
-#~ msgstr "Yayıncı"
-
-#, fuzzy
-#~ msgid "Platform:"
-#~ msgstr "Platform"
-
-#, fuzzy
-#~ msgid "Description:"
-#~ msgstr "Tanım"
+#~ msgid "Finished"
+#~ msgstr "Bitti"
 
 #~ msgid "Inactive"
 #~ msgstr "Etkin değil"
@@ -8247,8 +7927,23 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ msgid "<HTML><U><B>See all</B> {0}</U></HTML>"
 #~ msgstr "<HTML><U><B>Tümünü seç</B> {0}</U></HTML>"
 
+#~ msgid "Categorize downloads"
+#~ msgstr "İndirme işlemlerini sınıflandır"
+
+#~ msgid "Launch file"
+#~ msgstr "Dosyayı başlat"
+
+#~ msgid "Remove from list"
+#~ msgstr "Listeden kaldır"
+
 #~ msgid "Locate file"
 #~ msgstr "Dosyayı bul"
+
+#~ msgid "Done"
+#~ msgstr "Tamam"
+
+#~ msgid "Friend Request"
+#~ msgstr "Arkadaş İsteği"
 
 #~ msgid "Accept"
 #~ msgstr "Kabul et"
@@ -8259,26 +7954,78 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ msgid "Close chat (closes the current chat window)"
 #~ msgstr "Sohbeti kapat (geçerli sohbet penceresini kapatır)"
 
+#~ msgid ""
+#~ "Incorrect username\n"
+#~ "or password."
+#~ msgstr ""
+#~ "Hatalı kullanıcı adı\n"
+#~ "veya parola."
+
+#~ msgid "Returns to what's being shared with you."
+#~ msgstr "Sizinle paylaşılan dosyaya döner."
+
+#~ msgid "Don't Scan"
+#~ msgstr "Tarama"
+
 #~ msgid "Scan"
 #~ msgstr "Tara"
 
 #~ msgid "Folder"
 #~ msgstr "Klasör"
 
+#~ msgid "Download Selected Files"
+#~ msgstr "Seçili Dosyaları İndir"
+
+#~ msgid "Copy Link to Clipboard"
+#~ msgstr "Bağlantıyı Panoya Kopyala"
+
 #~ msgid "Remove from library"
 #~ msgstr "Kitaplıktan kaldır"
+
+#~ msgid "Delete files"
+#~ msgstr "Dosyaları sil"
+
+#~ msgid "Share with P2P Network"
+#~ msgstr "P2P Ağı İle Paylaş"
 
 #~ msgid "Share with Friends"
 #~ msgstr "Arkadaşlarla paylaş"
 
+#~ msgid "Delete File"
+#~ msgstr "Dosyayı Sil"
+
+#~ msgid "Close all searches"
+#~ msgstr "Tüm aramaları kapat"
+
+#~ msgid "Close search"
+#~ msgstr "Aramayı kapat"
+
+#~ msgid "Close other searches"
+#~ msgstr "Diğer aramaları kapat"
+
+#~ msgid "Repeat search"
+#~ msgstr "Aramayı yinele"
+
 #~ msgid "Exit After &Transfers"
 #~ msgstr "&Transfer Tamamlanınca Çık"
+
+#~ msgid "Player"
+#~ msgstr "Yürütücü"
+
+#~ msgid "Sharing downloads"
+#~ msgstr "Paylaşılan indirmeler"
 
 #~ msgid "Recent downloads"
 #~ msgstr "Son indirmeler"
 
+#~ msgid "Remember recent downloads"
+#~ msgstr "Son indirmeleri hatırla"
+
 #~ msgid "LimeWire will automatically scan the folders below"
 #~ msgstr "LimeWire aşağıdaki dosyaları otomatik olarak tarayacak"
+
+#~ msgid "and add the following types of files to My Library:"
+#~ msgstr "ve aşağıdaki dosya türlerini Kitaplığım'a ekleyecek:"
 
 #~ msgid ""
 #~ "Scanning these folders into your Library will not automatically share "
@@ -8287,17 +8034,88 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ "Bir koleksiyonu paylaşmayı açıkça seçmediğiniz sürece, bu klasörlerin "
 #~ "Kitaplığınıza taranması dosyalarınızı otomatik olarak paylaştırmaz."
 
+#~ msgid "Library"
+#~ msgstr "Kitaplık"
+
+#~ msgid "Don't show adult content"
+#~ msgstr "Cinsel içerik görüntüleme"
+
+#~ msgid "Warn me when other programs take these associations"
+#~ msgstr "Diğer programlar bu ilişkilendirmeleri aldığında beni uyar"
+
 #~ msgid "Updates and Bugs"
 #~ msgstr "Güncelleştirir ve Hata Ayıklar"
+
+#~ msgid "Report bugs to LimeWire"
+#~ msgstr "Hataları LimeWire'a bildir"
+
+#~ msgid "Show me the bug report before sending it"
+#~ msgstr "Göndermeden önce hata ayıklama raporunu bana göster"
+
+#~ msgid ""
+#~ "LimeWire is currently starting. Your search will start when it completes."
+#~ msgstr "LimeWire şu an başlatılıyor. Aramanız, tamamlandığında başlayacak."
+
+#~ msgid ""
+#~ "LimeWire is not fully connected. You may not receive many search results "
+#~ "until it finishes connecting."
+#~ msgstr ""
+#~ "LimeWire bağlanmayı tamamlamadı. Bağlanmayı tamamlayana kadar çok sayıda "
+#~ "arama sonucu alamayabilirsiniz."
 
 #~ msgid "View library"
 #~ msgstr "Kitaplığı görüntüle"
 
+#~ msgid "Upload Item"
+#~ msgstr "Öğeyi Yükle"
+
 #~ msgid "Alert!"
 #~ msgstr "Uyarı!"
 
+#~ msgid "Jump to File in Library"
+#~ msgstr "Kitaplıktaki Dosyaya Git"
+
+#~ msgid "Cancel Upload"
+#~ msgstr "Yüklemeyi İptal Et"
+
+#~ msgid "Play file"
+#~ msgstr "Dosya yürüt"
+
+#~ msgid "Good"
+#~ msgstr "İyi"
+
+#~ msgid "Excellent"
+#~ msgstr "Mükemmel"
+
+#~ msgid "LimeWire 5 Alpha"
+#~ msgstr "LimeWire 5 Alpha"
+
+#~ msgid ""
+#~ "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
+#~ "authorized files only.  Installing and using either program does not "
+#~ "constitute a license for obtaining or distributing unauthorized content."
+#~ msgstr ""
+#~ "LimeWire Basic ve LimeWire PRO, yalnız izin verilen dosyaları paylaşmaya "
+#~ "yönelik eşler arası programlardır. Bu programların kurulması veya "
+#~ "kullanılması, izin verilmeyen içeriğin alınması veya dağıtılması için "
+#~ "lisans oluşturmaz."
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright "
+#~ "infringement."
+#~ msgstr ""
+#~ "\"Kabul Ediyorum\" öğesini tıklattığınızda, LimeWire 5 programını telif "
+#~ "hakkı ihlali oluşturacak şekilde kullanmamayı kabul etmiş sayılıyorsunuz."
+
 #~ msgid "A few things before we begin..."
 #~ msgstr "Başlamadan önce birkaç noktaya değinelim..."
+
+#~ msgid ""
+#~ "Don't let me download or upload files copyright owners request not to be "
+#~ "shared."
+#~ msgstr ""
+#~ "Telif hakkı sahiplerinin paylaşılmasını istemediği dosyaları indirmeme "
+#~ "veya yüklememe izin verme."
 
 #~ msgid "LimeWire is ready to fill your Library"
 #~ msgstr "LimeWire Kitaplığınızı doldurmaya hazır"
@@ -8313,6 +8131,14 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ msgid "Automatically manage My Library"
 #~ msgstr "Kitaplığım'ı otomatik yönet"
 
+#~ msgid ""
+#~ "Choose this option to have LimeWire automatically scan files into your "
+#~ "Library from My Documents and the Desktop."
+#~ msgstr ""
+#~ "LimeWire programının Belgelerim ve Masaüstü konumlarındaki dosyalarınızı "
+#~ "otomatik olarak tarayarak Kitaplığınıza aktarması için bu seçeneği "
+#~ "işaretleyin."
+
 #~ msgid "Manually manage My Library"
 #~ msgstr "Kitaplığım'ı manuel yönet"
 
@@ -8323,6 +8149,13 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ "LimeWire programının Kitaplığınıza hangi klasörleri taramasını belirlemek "
 #~ "için bu seçeneği işaretleyin."
 
+#~ msgid ""
+#~ "Scanning these folders into your Library will not automatically share "
+#~ "your files."
+#~ msgstr ""
+#~ "Bu klasörleri tarayarak Kitaplığınıza eklemeniz onları otomatik olarak "
+#~ "paylaşmanız anlamına gelmez."
+
 #~ msgid "You can change these options later from Tools > Options"
 #~ msgstr ""
 #~ "Bu seçenekleri daha sonra Araçlar > Seçenekler kısmından "
@@ -8330,6 +8163,10 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 
 #~ msgid "Add New Folder"
 #~ msgstr "Yeni Klasör Ekle"
+
+#~ msgid "You can change this option later from Tools > Options"
+#~ msgstr ""
+#~ "Bu seçeneği daha sonra Araçlar > Seçenekler kısmından değiştirebilirsiniz"
 
 #~ msgid ""
 #~ "LimeWire will import old shared files into your Library and continue "
@@ -8348,3 +8185,22 @@ msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."
 #~ "LimeWire programıın Belgelerim ve Masaüstü konumlarındaki yeni dosyaları "
 #~ "Kitaplığınıza otomatik olarak taramasına izin ver. Bu seçenek "
 #~ "dosyalarınızı otomatik olarak paylaştırmaz."
+
+#~ msgid ""
+#~ "Sorry, LimeWire couldn't read your old downloads.  You can restart them "
+#~ "by going to your Library, viewing your 'Incomplete Files', and clicking "
+#~ "to 'Resume' your downloads."
+#~ msgstr ""
+#~ "Üzgünüz, LimeWire eski indirmelerinizi okuyamadı. Kitaplığınıza giderek, "
+#~ "'Tamamlanmamış Dosyalarınızı' görüntüleyerek ve indirme işlemlerinizi "
+#~ "'Sürdürmeyi' seçerek bunları yeniden başlatabilirsiniz."
+
+#~ msgid ""
+#~ "Sorry, LimeWire couldn't read some of your old downloads.  You can "
+#~ "restart them by going to your Library, viewing your 'Incomplete Files', "
+#~ "and clicking to 'Resume' your downloads."
+#~ msgstr ""
+#~ "Üzgünüz, LimeWire indirdiğiniz bazı eski dosyaları okuyamadı. "
+#~ "Kitaplığınıza giderek, 'Tamamlanmamış Dosyalarınızı' görüntüleyerek ve "
+#~ "indirme işlemlerinizi 'Sürdürmeyi' seçerek bunları yeniden "
+#~ "başlatabilirsiniz."

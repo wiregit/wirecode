@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-15 12:07-0500\n"
-"PO-Revision-Date: 2009-01-15 14:17-0500\n"
+"PO-Revision-Date: 2008-12-14 21:14+0200\n"
 "Last-Translator: Alaa <alaamb@yahoo.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,9 +18,8 @@ msgstr ""
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: components/common/src/main/java/org/limewire/util/MediaType.java:39
-#, fuzzy
 msgid "All Types"
-msgstr "كل الملفات"
+msgstr "كافة الأنواع"
 
 #: components/common/src/main/java/org/limewire/util/MediaType.java:41
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
@@ -82,18 +81,18 @@ msgstr "الفيديو"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #, fuzzy
 msgid "Image"
-msgstr "الصور"
+msgstr "صور"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:14
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #, fuzzy
 msgid "Document"
-msgstr "المستندات"
+msgstr "مستندات"
 
 #: components/core-api/src/main/java/org/limewire/core/api/Category.java:15
 #, fuzzy
 msgid "Program"
-msgstr "البرامج"
+msgstr "برامج"
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:18
 msgid "No problems."
@@ -114,9 +113,8 @@ msgid "This file is not shareable"
 msgstr ".نوع الملف غير معترف به."
 
 #: components/core-api/src/main/java/org/limewire/core/api/download/DownloadItem.java:22
-#, fuzzy
 msgid "Trouble connecting to people"
-msgstr "تعطيل الاتصال بـ Mojito DHT"
+msgstr ""
 
 #: components/core-glue/src/main/java/org/limewire/core/impl/GlueActivityCallback.java:160
 msgid ""
@@ -220,12 +218,12 @@ msgstr ""
 #: components/net/src/main/java/org/limewire/net/FirewallServiceImpl.java:31
 #, fuzzy
 msgid "Firewall Manager"
-msgstr "جدار الحماية"
+msgstr "إعداد الجدار الناري"
 
 #: components/statistic/src/main/java/org/limewire/statistic/StatisticsAccumulatorImpl.java:58
 #, fuzzy
 msgid "Statistic Management"
-msgstr "إدارة المكتبة"
+msgstr "إحصائيات"
 
 #. lower case enum values to allow direct mapping from to the Mode enum
 #. defined in smack
@@ -251,7 +249,7 @@ msgstr "بحث عن الملفات"
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:36
 #, fuzzy
 msgid "Do not disturb"
-msgstr "الرجاء عدم الإزعاج"
+msgstr "عدم عرض هذه الرسالة مرة أخرى"
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
@@ -275,7 +273,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/AcceptorImpl.java:402
 #, fuzzy
 msgid "Connection Listener"
-msgstr "سرعة الاتصال"
+msgstr "يتم الآن تحميل connection-listener..."
 
 #: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 #, fuzzy
@@ -285,17 +283,17 @@ msgstr "خيارات المتصفح"
 #: core/com/limegroup/gnutella/ConnectionAcceptorGlue.java:59
 #, fuzzy
 msgid "Connection Dispatching"
-msgstr "الاتصالات"
+msgstr "الاتصال"
 
 #: core/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 #, fuzzy
 msgid "Connection Management"
-msgstr "سرعة الاتصال"
+msgstr "يتم الآن تحميل نافذة connection-management..."
 
 #: core/com/limegroup/gnutella/ConnectionWatchdog.java:66
 #, fuzzy
 msgid "Stale Connection Management"
-msgstr "سرعة الاتصال"
+msgstr "يتم الآن تحميل stale-connection-management..."
 
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:101
 msgid "Various Core Services"
@@ -304,17 +302,17 @@ msgstr ""
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:106
 #, fuzzy
 msgid "Gnutella Connections"
-msgstr "الاتصالات"
+msgstr "إضافة اتصال Gnutella"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:204
 #, fuzzy
 msgid "Old Downloads"
-msgstr "التحميلات"
+msgstr "التنزيلات:"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
 #, fuzzy
 msgid "Download Management"
-msgstr "التحميل"
+msgstr "يتم الآن تحميل نافذة connection-management..."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:278
 #, fuzzy
@@ -345,7 +343,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/HTTPUploadManager.java:231
 #, fuzzy
 msgid "Upload Management"
-msgstr "إدارة المكتبة"
+msgstr "يتم الآن تحميل نافذة connection-management..."
 
 #: core/com/limegroup/gnutella/HostCatcher.java:384
 #, fuzzy
@@ -359,17 +357,17 @@ msgstr ""
 #: core/com/limegroup/gnutella/MessageRouterImpl.java:551
 #, fuzzy
 msgid "Message Routing"
-msgstr "الرسائل الصادرة"
+msgstr "الرسائل"
 
 #: core/com/limegroup/gnutella/NetworkManagerImpl.java:162
 #, fuzzy
 msgid "Network Management"
-msgstr "إدارة المكتبة"
+msgstr "استخدم واجهة الشبكة المحددة."
 
 #: core/com/limegroup/gnutella/NodeAssignerImpl.java:186
 #, fuzzy
 msgid "Ultrapeer/DHT Management"
-msgstr "إدارة المكتبة"
+msgstr "يتم الآن تحميل stale-connection-management..."
 
 #: core/com/limegroup/gnutella/Pinger.java:57
 #, fuzzy
@@ -393,7 +391,7 @@ msgstr "إحصائيات"
 #: core/com/limegroup/gnutella/auth/ContentManager.java:91
 #, fuzzy
 msgid "Content Management"
-msgstr "إدارة المكتبة"
+msgstr "يتم الآن تحميل stale-connection-management..."
 
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:32
 #, fuzzy
@@ -426,17 +424,16 @@ msgstr ""
 #: core/com/limegroup/gnutella/downloader/LWSIntegrationServicesImpl.java:562
 #, fuzzy
 msgid "LimeWire Store Integration"
-msgstr "تنظيم ملفات متجر LimeWire"
+msgstr "أنداد LimeWire الفائقون"
 
 #: core/com/limegroup/gnutella/downloader/serial/conversion/DownloadUpgradeTaskService.java:24
 #, fuzzy
 msgid "Download Upgrade Task"
-msgstr "التحميلات"
+msgstr "صفحة التنزيل"
 
 #: core/com/limegroup/gnutella/library/FileManagerImpl.java:71
-#, fuzzy
 msgid "Shared Files"
-msgstr "ملفات صحيحة"
+msgstr "الملفات المشتركة"
 
 #: core/com/limegroup/gnutella/messagehandlers/LimeACKHandler.java:67
 msgid "OOB Query Handler"
@@ -445,22 +442,21 @@ msgstr ""
 #: core/com/limegroup/gnutella/messages/StaticMessages.java:43
 #, fuzzy
 msgid "Static Messages"
-msgstr "رسائل التحذير"
+msgstr "رسائل Gnutella"
 
 #: core/com/limegroup/gnutella/routing/QRPUpdater.java:184
 #, fuzzy
 msgid "QRP Updater"
-msgstr "QRP فارغ"
+msgstr "تحديثات"
 
 #: core/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
-#, fuzzy
 msgid "RUDP Message Routing"
-msgstr "الرسائل الصادرة"
+msgstr ""
 
 #: core/com/limegroup/gnutella/spam/RatingTable.java:98
 #, fuzzy
 msgid "Spam Management"
-msgstr "إدارة المكتبة"
+msgstr "يتم الآن تحميل نافذة connection-management..."
 
 #: core/com/limegroup/gnutella/statistics/UptimeStatTimer.java:56
 #, fuzzy
@@ -470,7 +466,7 @@ msgstr "إحصائيات"
 #: core/com/limegroup/gnutella/uploader/BrowseRequestHandler.java:134
 #, fuzzy
 msgid "Browse"
-msgstr "استعراض..."
+msgstr "المتصفح"
 
 #: core/com/limegroup/gnutella/version/UpdateHandlerImpl.java:1005
 #, fuzzy
@@ -595,7 +591,7 @@ msgstr "السنة"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 #, fuzzy
 msgid "Language"
-msgstr "إدارة"
+msgstr "اللغة:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
@@ -617,13 +613,13 @@ msgstr "التعليقات"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 #, fuzzy
 msgid "Action"
-msgstr "نشط"
+msgstr "العمل:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 #, fuzzy
 msgid "Copyright"
-msgstr "نسخ"
+msgstr "سنة حقوق النسخ:"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -643,14 +639,12 @@ msgid "Producer"
 msgstr "المنتج"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
-#, fuzzy
 msgid "Studio"
-msgstr "الصوت"
+msgstr "الاستوديو"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
-#, fuzzy
 msgid "Stars"
-msgstr "الحالة"
+msgstr "النجوم"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -814,9 +808,9 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"واجه LimeWire خطأً داخلياً. من الممكن أن يقوم LimeWire بالاستعادة ومتابعة "
-"التشغيل بشكل عادي. لمتابعة استخدام LimeWire انقر ’تجاهل‘. وإذا كنت تريد، "
-"يمكنك نقر ’مراجعة‘ لمشاهدة المعلومات الخاصة بهذا الخطأ."
+"صادف LimeWire خطأ داخلي. من الممكن أن يقوم LimeWire بإصلاح الخطأ واستكمال "
+"العمل بشكل طبيعي. للاستمرار في استخدام LimeWire, اضغط'تجاهل'. إذا تم تجاهله، "
+"يمكنك أن تضغط 'معاينة' لإلقاء نظرة على المعلومات حول الخطأ."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -824,9 +818,8 @@ msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:471
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:479
-#, fuzzy
 msgid "Show Bug"
-msgstr "إظهار:"
+msgstr ""
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:483
 msgid "Hide Bug"
@@ -871,23 +864,23 @@ msgstr "موافق"
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:463
 #, fuzzy
 msgid "Loading HTML engine..."
-msgstr "تحميل محرك HTML..."
+msgstr "يتم الآن تحميل HTML-engine..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:480
 #, fuzzy
 msgid "Loading browser..."
-msgstr "تحميل المستعرض..."
+msgstr "يتم الآن تحميل الأيقونات..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:505
 #, fuzzy
 msgid "Loading user interface..."
-msgstr "تحميل واجهة الاستخدام..."
+msgstr "يتم الآن تحميل واجهة المستخدم..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
 #, fuzzy
 msgid "Loading other languages..."
-msgstr "تحميل واجهة الاستخدام..."
+msgstr "تحميل اللغات"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:585
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -927,9 +920,8 @@ msgstr ""
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:44
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:75
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:87
-#, fuzzy
 msgid "Error"
-msgstr "خطأ Daap"
+msgstr "خطأ"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:55
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:65
@@ -941,9 +933,8 @@ msgid "Message"
 msgstr "الرسالة"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/MessageHandler.java:119
-#, fuzzy
 msgid "Do not display this message again"
-msgstr "لا تحذرني مرة أخرى"
+msgstr "عدم عرض هذه الرسالة مرة أخرى"
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/SettingsWarningManager.java:20
 msgid ""
@@ -959,14 +950,13 @@ msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BackAction.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:66
-#, fuzzy
 msgid "Go back"
-msgstr "<الرجوع"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/BitziLookupAction.java:24
 #, fuzzy
 msgid "More File Info"
-msgstr "عرض معلومات الملف"
+msgstr "معلومات أكثر..."
 
 #. *
 #. * The copy action.
@@ -1014,14 +1004,12 @@ msgid "Select All"
 msgstr "تحديد الكل"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:41
-#, fuzzy
 msgid "&Available"
-msgstr "متاح"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:54
-#, fuzzy
 msgid "&Do Not Disturb"
-msgstr "الرجاء عدم الإزعاج"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
@@ -1031,7 +1019,7 @@ msgstr "الاتصالات"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #, fuzzy
 msgid "View connections to other P2P clients"
-msgstr "تعطيل الاتصال بـ Mojito DHT"
+msgstr "عرض الاتصالات مع عملاء آخرين"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:52
 msgid "Console"
@@ -1114,7 +1102,7 @@ msgstr "إزالة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:100
 #, fuzzy
 msgid "View Files"
-msgstr "ملفات صحيحة"
+msgstr "عرض الرخصة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:167
 msgid "Unable to view files - not yet connected to host"
@@ -1404,22 +1392,22 @@ msgstr "تراجع"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:158
 #, fuzzy
 msgid "Add to My Library"
-msgstr "مكتبتي"
+msgstr "المكتبة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:162
 #, fuzzy, java-format
 msgid "Share files with {0}"
-msgstr "مشاركة الملف مع {0}"
+msgstr "الملفات المشتركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/dnd/GhostDragGlassPane.java:164
 #, fuzzy
 msgid "Share files"
-msgstr "مشاركة {0} ملفاً"
+msgstr "الملفات المشتركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:259
 #, fuzzy
 msgid "Show all"
-msgstr "إظهار:"
+msgstr "آخر العرض"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:266
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/UploadPanel.java:49
@@ -1429,7 +1417,7 @@ msgstr "مسح المنتهي"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:339
 #, fuzzy
 msgid "Download Complete"
-msgstr "التحميل من"
+msgstr "سرعة التنزيل:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:472
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:176
@@ -1475,15 +1463,14 @@ msgstr[2] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:618
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:528
-#, fuzzy
 msgid "Waiting - remaining time unknown"
-msgstr "في صف الانتظار - الوقت المتبقي غير معروف"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/DownloadSummaryPanel.java:620
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:530
-#, fuzzy, java-format
+#, java-format
 msgid "Waiting - Starting in {0}"
-msgstr "في صف الانتظار - يبدأ في {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:68
 msgid "Pause All"
@@ -1498,14 +1485,13 @@ msgid "Clear Finished"
 msgstr "مسح المنتهي"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:89
-#, fuzzy
 msgid "Clear When Finished"
-msgstr "مسح المنتهي"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:96
 #, fuzzy
 msgid "Categorize Downloads"
-msgstr "تصنيف التحميلات إلى فئات"
+msgstr "مسح الملفات التي تم تنزيلها"
 
 #. add(new AbstractAction(I18n.tr("&Downloads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/MainDownloadPanel.java:162
@@ -1579,26 +1565,26 @@ msgstr "إعادة المحاولة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:61
 #, fuzzy
 msgid "Launch File"
-msgstr "تشغيل الملف"
+msgstr "تنفيذ ملف(s)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:70
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:69
 #, fuzzy
 msgid "Remove from List"
-msgstr "إزالة من القائمة"
+msgstr "إزالة الملفات المحددة من قائمة القراءة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:74
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/LocateFileAction.java:18
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:73
 #, fuzzy
 msgid "Locate on Disk"
-msgstr "تحديد الموقع على القرص"
+msgstr "المواقع"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:78
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
 #, fuzzy
 msgid "Locate in Library"
-msgstr "تحديد الموقع في المكتبة"
+msgstr "المكتبة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:83
@@ -1612,9 +1598,8 @@ msgid "Preview File"
 msgstr "معاينة الملف"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:91
-#, fuzzy
 msgid "Share File"
-msgstr "مشاركة"
+msgstr "ملف مشترك"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:95
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/PlayAction.java:19
@@ -1632,9 +1617,8 @@ msgid "View"
 msgstr "عرض"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:182
-#, fuzzy
 msgid " - "
-msgstr "تم -"
+msgstr ""
 
 #. {0}: current size
 #. {1}: total size
@@ -1651,7 +1635,7 @@ msgstr[2] "تحميل {0} من {1} ({2}) من {3} أشخاص"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:505
 #, fuzzy
 msgid "Unable to download - "
-msgstr "تعذر تحميل:"
+msgstr "إلغاء التنزيل"
 
 #. {0}: current size, {1} total size, {2} percent complete
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadTableCellImpl.java:508
@@ -1673,12 +1657,11 @@ msgstr "اسم المستخدم"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:42
 #, fuzzy
 msgid "Nickname:"
-msgstr "الاسم"
+msgstr "الاسم:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:46
-#, fuzzy
 msgid "Add friend"
-msgstr "إضافة صديق"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/AddFriendDialog.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:78
@@ -1713,12 +1696,12 @@ msgstr "{0} كتب نصاً"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:215
 #, fuzzy, java-format
 msgid "Chat from {0}"
-msgstr "دردشة من {0} - LimeWire 5"
+msgstr "يحتشد لـ {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:217
 #, fuzzy
 msgid "Reply"
-msgstr "تطبيق"
+msgstr "نادرا"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:566
@@ -1750,7 +1733,7 @@ msgstr "مشاركة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:832
 #, fuzzy
 msgid "Close chat"
-msgstr "إغلاق علامة التبويب"
+msgstr "إغلاق البحث"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatTopPanel.java:89
 msgid "<html><u>Hide</u></html>"
@@ -1812,16 +1795,15 @@ msgstr "الدخول التلقائي لصديق"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:68
 #, fuzzy
 msgid "Signing in..."
-msgstr "جاري تسجيل الدخول"
+msgstr "جاري الفحص..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:89
 msgid "Show:"
 msgstr "إظهار:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:90
-#, fuzzy
 msgid "Offline Friends"
-msgstr "الأصدقاء غير المتصلين"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:105
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/OptionsDialog.java:95
@@ -1830,9 +1812,8 @@ msgstr "الخيارات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:107
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:114
-#, fuzzy
 msgid "Sign Out"
-msgstr "تسجيل الخروج"
+msgstr ""
 
 #. TODO fberger
 #. super(I18n.tr("Switch &User"));
@@ -1849,7 +1830,7 @@ msgstr "تسجيل الدخول"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoggedInPanel.java:217
 #, fuzzy, java-format
 msgid "Set {0} Status:"
-msgstr "تعيين حالة {0}"
+msgstr "حالة الاتصال:"
 
 #. private static final Log LOG = LogFactory.getLog(LoginPanel.class);
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:55
@@ -1861,23 +1842,20 @@ msgid "Signing in ..."
 msgstr "جاري تسجيل الدخول"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:58
-#, fuzzy
 msgid "Incorrect username or password."
-msgstr "كلمة مرور غير صحيحة."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:59
 msgid "Network error."
 msgstr "خطأ الشبكة,"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:130
-#, fuzzy
 msgid "Sign in with"
-msgstr "تسجيل الدخول"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:150
-#, fuzzy
 msgid "Domain"
-msgstr "الشركة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/login/LoginPanel.java:152
 msgid "Username"
@@ -1894,17 +1872,17 @@ msgstr "تذكرني"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileItemDialog.java:24
 #, fuzzy
 msgid "Copy Link"
-msgstr "فتح &رابط"
+msgstr "نسخ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:81
 #, fuzzy
 msgid "Search Library..."
-msgstr "عرض المكتبة"
+msgstr "بحث..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AllFriendsLibraryPanel.java:68
 #, fuzzy
 msgid "Download from all friends"
-msgstr "التحميل من"
+msgstr "جاري التنزيل من"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/EmptyLibraryPanel.java:76
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:66
@@ -1916,12 +1894,12 @@ msgstr "تحميل من {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryPanel.java:83
 #, fuzzy, java-format
 msgid "Share your files with {0}"
-msgstr "مشاركة الملف مع {0}"
+msgstr "مشاركة ملفات .تورنت"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:269
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is offline"
-msgstr "{0} ليس مجلداً"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
@@ -1942,9 +1920,8 @@ msgid "Sharing"
 msgstr "المشاركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:271
-#, fuzzy
 msgid "1 file with your friend."
-msgstr "مشاركة مع الأصدقاء"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:273
 #, java-format
@@ -1952,9 +1929,8 @@ msgid "{0} files with your friend."
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:275
-#, fuzzy
 msgid "files with your friend."
-msgstr "مشاركة مع الأصدقاء"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:283
 #, java-format
@@ -1996,33 +1972,31 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:292
 #, fuzzy
 msgid "chat"
-msgstr "دردشة"
+msgstr "دردشة..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:301
 #, fuzzy, java-format
 msgid "Loading {0}'s files..."
-msgstr "مشاركة {0} ملفاً"
+msgstr "يتم الآن تحميل الملفات المحفوظة..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:305
 #, fuzzy
 msgid "Loading files..."
-msgstr "جاري التحميل..."
+msgstr "تحميل التلميحات..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
-#, fuzzy, java-format
+#, java-format
 msgid "{0} isn't sharing with you"
-msgstr "{0} يريد مشاركة ملف معك"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:318
-#, fuzzy
 msgid "about sharing with you."
-msgstr "المشاركة حالياً مع"
+msgstr ""
 
 #. this should never happen
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:321
-#, fuzzy
 msgid "This person isn't sharing any files with you."
-msgstr "{0} يريد مشاركة ملف معك"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:332
 #, java-format
@@ -2039,9 +2013,8 @@ msgid "Share with {0}"
 msgstr "المشاركة مع {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendSharingPanel.java:92
-#, fuzzy
 msgid "Return to what's being shared with you."
-msgstr "يعود إلى الملفات التي يتم مشاركتها معك."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:121
 #, fuzzy, java-format
@@ -2057,17 +2030,17 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:233
 #, fuzzy, java-format
 msgid "Sharing: {0}"
-msgstr "مشاركة مع {0}"
+msgstr "تحذير: {0}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:229
 #, fuzzy
 msgid "Sharing: all"
-msgstr "المشاركة"
+msgstr "يتم الآن الاتصال"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LibrarySelectionPanel.java:240
-#, fuzzy, java-format
+#, java-format
 msgid "Sharing Collection: {0}"
-msgstr "مشاركة المجموعة: {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:156
 msgid "X"
@@ -2076,7 +2049,7 @@ msgstr "X"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/LocalFileItemPropertiesFactory.java:169
 #, fuzzy
 msgid "Sharing with"
-msgstr "مشاركة مع {0}"
+msgstr "الدردشة حالياَ مع"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/MyLibraryPanel.java:113
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/nav/LibraryNavigatorImpl.java:123
@@ -2101,14 +2074,14 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:40
 #, fuzzy
 msgid "Share with the P2P Network"
-msgstr "المشاركة مع شبكة P2P"
+msgstr "اتصال بالشبكة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:48
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:52
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/P2PNetworkSharingPanel.java:59
 #, fuzzy
 msgid "the P2P Network"
-msgstr "شبكة P2P"
+msgstr "الشبكة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:278
 #, java-format
@@ -2127,18 +2100,16 @@ msgstr "مشاركة المجموعة {0} بالكامل مع {1}"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:571
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:43
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Sharing your {0} collection shares new {1} files that automatically get "
 "added to your Library"
 msgstr ""
-"تؤدي مشاركة مجموعتك {0} تلقائياً إلى مشاركة {1} ملفاً الجديدة المضافة إلى "
-"مكتبتك"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:654
 #, fuzzy
 msgid "all"
-msgstr "الكل"
+msgstr "الجميع"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:655
 #, fuzzy
@@ -2146,9 +2117,8 @@ msgid "Share all the files in this category."
 msgstr "مؤشر الملفات المشاركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:674
-#, fuzzy
 msgid "none"
-msgstr "تم"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:675
 msgid "Unshare all the files in this category."
@@ -2157,13 +2127,13 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/image/LibraryImageSubPanel.java:93
 #, fuzzy
 msgid "share folder"
-msgstr "حفظ المجلدات"
+msgstr "المجلدات المشاركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/LibraryTreeTableContainer.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:243
 #, fuzzy
 msgid "*Adding these folders will not automatically share your files"
-msgstr "سوف يؤدي مسح هذه المجلدات إلى مكتبتك إلى مشاركة ملفاتك تلقائياً"
+msgstr "يمكنك مشاركة ملفات .تورنت تلقائياً."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonEditor.java:25
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/manager/RemoveButtonRenderer.java:18
@@ -2195,9 +2165,9 @@ msgid "All Friends"
 msgstr "كل الأصدقاء"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/CategoryShareWidget.java:40
-#, fuzzy, java-format
+#, java-format
 msgid "Share {0} collection"
-msgstr "مشاركة المجموعة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:22
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:331
@@ -2207,31 +2177,30 @@ msgstr "المشاركة حالياً مع"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/FileShareWidget.java:23
 #, fuzzy
 msgid "Share one file"
-msgstr "إظهار الملف الحالي"
+msgstr "مشاركة ملفات .تورنت"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:104
 msgid "Start typing a friend's name"
 msgstr "ابدأ كتابة اسم صديق"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/LibrarySharePanel.java:105
-#, fuzzy
 msgid "Add another friend"
-msgstr "إضافة صديق"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:31
 #, fuzzy, java-format
 msgid "Share {0} {1} files"
-msgstr "مشاركة {0} ملفاً"
+msgstr "الملفات المشتركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileShareWidget.java:32
 #, fuzzy, java-format
 msgid "Shared {0} files with:"
-msgstr "مشاركة {0} ملفاً"
+msgstr "الملفات المشتركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/sharing/MultiFileUnshareWidget.java:37
 #, fuzzy, java-format
 msgid "Unshare {0} files"
-msgstr "مشاركة {0} ملفاً"
+msgstr "عدد الملفات التي تشاركها. {0} ملفات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendAudioTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendVideoTableFormat.java:18
@@ -2327,7 +2296,7 @@ msgstr "من"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/classic/ImageTableFormat.java:30
 #, fuzzy
 msgid "Date Created"
-msgstr "تاريخ الإنشاء:"
+msgstr "الإنشاء"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AllFriendProgramTableFormat.java:19
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:31
@@ -2360,9 +2329,8 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/OtherTableFormat.java:28
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ProgramTableFormat.java:33
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:41
-#, fuzzy
 msgid "Hits"
-msgstr "الارتفاع"
+msgstr "تلميحات"
 
 #. add(new AbstractAction(I18n.tr("&Uploads")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/AudioTableFormat.java:53
@@ -2383,7 +2351,7 @@ msgstr "إيداعات"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/VideoTableFormat.java:43
 #, fuzzy
 msgid "Upload attempts"
-msgstr "إيداع العنصر"
+msgstr "التحميلات:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/LibraryTable.java:157
 msgid "download"
@@ -2395,19 +2363,18 @@ msgid "This file cannot be shared."
 msgstr "الملف لايمكن تعريبه"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:75
-#, fuzzy
 msgid "Sign in to share Documents with your friends"
-msgstr "افتراضياً، يسمح لك LimeWire بمشاركة المستندات مع الأصدقاء"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:80
 #, fuzzy
 msgid "Share this file with a friend"
-msgstr "مشاركة مع الأصدقاء"
+msgstr "البحث عن ملفات بنفس اسم الملف"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/ShareTableRendererEditor.java:84
-#, fuzzy, java-format
+#, java-format
 msgid "share ({0})"
-msgstr "المشاركة مع {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:100
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/FriendDownloadAction.java:20
@@ -2426,7 +2393,7 @@ msgstr "مشاركة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 #, fuzzy
 msgid "Delete Files"
-msgstr "حذف الملف"
+msgstr "حذف ملف(s)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2571,33 +2538,31 @@ msgstr "متجر LimeWire"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:138
 #, fuzzy
 msgid "Show Sidebar"
-msgstr "إظهار شريط المكتبات"
+msgstr "المكتبة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:141
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:146
-#, fuzzy
 msgid "Hide Sidebar"
-msgstr "إخفاء شريط المكتبات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:152
 #, fuzzy
 msgid "Close All Searches"
-msgstr "إغلاق كل حالات البحث"
+msgstr "إغلاق البحث"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:153
-#, fuzzy
 msgid "Close Search"
 msgstr "إغلاق البحث"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:154
 #, fuzzy
 msgid "Close Other searches"
-msgstr "إغلاق حالات البحث الأخرى"
+msgstr "إغلاق البحث"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/mainframe/TopPanel.java:383
 #, fuzzy
 msgid "Find More Results"
-msgstr "نتائج الفيديو"
+msgstr "المزيد من نتائج البحث"
 
 #. TODO fberger comment out
 #. super(I18n.tr("&File"));
@@ -2609,6 +2574,7 @@ msgstr "ملف"
 #. super(I18n.tr("F&riend"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/FriendMenu.java:29
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:166
+#, fuzzy
 msgid "Friend"
 msgid_plural "Friends"
 msgstr[0] "صديق"
@@ -2626,19 +2592,18 @@ msgstr "تعليمات"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:34
 #, fuzzy
 msgid "Using LimeWire"
-msgstr "استخدام LimeWire..."
+msgstr "كيفية استخدام LimeWire"
 
 #. add(new AbstractAction(I18n.tr("&FAQ")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:42
 #, fuzzy
 msgid "FAQ"
-msgstr "الأسئلة الشائعة..."
+msgstr "الأسئلة الأكثر تكرار"
 
 #. add(new AbstractAction(I18n.tr("Get personalized &tech support")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:53
-#, fuzzy
 msgid "Get personalized tech support"
-msgstr "الحصول على دعم فني شخصي"
+msgstr ""
 
 #. add(new AbstractAction(I18n.tr("&About LimeWire...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/HelpMenu.java:65
@@ -2661,13 +2626,13 @@ msgstr "أدوات"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:67
 #, fuzzy
 msgid "Advanced Tools..."
-msgstr "أدوات متقدمة"
+msgstr "متقدم"
 
 #. add(new AbstractAction(I18n.tr("&Options...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:77
 #, fuzzy
 msgid "Options..."
-msgstr "الخيارات"
+msgstr "خيارات"
 
 #. JMenu menu = new MnemonicMenu(I18n.tr("&What's New Search"));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:88
@@ -2675,14 +2640,13 @@ msgid "What's New Search"
 msgstr "البحث عن الجديد"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
-#, fuzzy
 msgid "Hide &Sidebar"
-msgstr "إخفاء شريط المكتبات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:34
 #, fuzzy
 msgid "Show &Sidebar"
-msgstr "إظهار شريط المكتبات"
+msgstr "المكتبة"
 
 #. .tr("Hide &Download Tray"), I18n.tr("Show &Download Tray")));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:37
@@ -2697,19 +2661,18 @@ msgstr "إظهار علبة التحميل"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
 #, fuzzy
 msgid "Hide Chat Window"
-msgstr "إخفاء نافذة الدردشة"
+msgstr "إغلاق النافذة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ViewMenu.java:39
 #, fuzzy
 msgid "Show Chat Window"
-msgstr "إظهار نافذة الدردشة"
+msgstr "إغلاق النافذة"
 
 #. TODO fberger
 #. super(I18n.tr("Add F&ile to Library..."));
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:28
-#, fuzzy
 msgid "Add File to Library..."
-msgstr "إضافة ملف إلى المكتبة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFileAction.java:34
 msgid "Add File(s)"
@@ -2728,7 +2691,7 @@ msgstr "ملفات صحيحة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:28
 #, fuzzy
 msgid "Add Folder to Library..."
-msgstr "إضافة مجلد إلى المكتبة"
+msgstr "أضف مجلد إلى مجلد المكتبة المحدد"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:34
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/AddFolderAction.java:35
@@ -2751,12 +2714,12 @@ msgstr "&خروج"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:87
 #, fuzzy
 msgid "Exit After Transfers"
-msgstr "الخروج بعد النقل"
+msgstr "إغلاق عقب الانتهاء من التحويلات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:39
 #, fuzzy
 msgid "Invalid Link"
-msgstr "رابط غير صحيح!"
+msgstr "سمة غير صالحة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:69
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:54
@@ -2764,9 +2727,8 @@ msgid "Open"
 msgstr "فتح"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/LocationDialog.java:86
-#, fuzzy
 msgid "Enter a magnet or torrent link below:"
-msgstr "فتح رابط .magnet أو torrent"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:44
 #, fuzzy
@@ -2776,7 +2738,7 @@ msgstr "فتح .تورنت"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:53
 #, fuzzy
 msgid "Open Torrent"
-msgstr "BitTorrent"
+msgstr "فتح .تورنت"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:130
@@ -2791,19 +2753,18 @@ msgstr ".نوع الملف غير معترف به."
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenFileAction.java:91
 #, fuzzy
 msgid "Unable to open torrent"
-msgstr "أقصى إيداعات لكل torrent"
+msgstr "غير قادر على حذف البيانات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:51
 #, fuzzy
 msgid "Open &Link..."
-msgstr "فتح &رابط"
+msgstr "فتح..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:64
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/MagnetHandler.java:60
-#, fuzzy
 msgid "Open Link"
-msgstr "فتح &رابط"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/actions/OpenLinkAction.java:75
 msgid "Magnet link contains no options."
@@ -2835,9 +2796,8 @@ msgid "Files"
 msgstr "الملفات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:44
-#, fuzzy
 msgid "Transfers"
-msgstr "الخروج بعد النقل"
+msgstr "تحويلات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/AdvancedOptionPanel.java:45
 msgid "System"
@@ -2933,10 +2893,8 @@ msgid "Share files downloaded from the P2P Network with the P2P Network"
 msgstr "مشاركة الملفات المحملة من شبكة P2P مع شبكة P2P"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:103
-#, fuzzy
 msgid "Add audio files I downloaded from LimeWire to iTunes"
 msgstr ""
-"إضافة ملفات الصوت التي أقوم بتحميلها من LimeWire إلى مكتبة iTunes الخاصة بي"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/DownloadOptionPanel.java:108
 msgid "Save downloads to:"
@@ -2964,7 +2922,7 @@ msgstr "إدارة امتدادات الملفات"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 #, fuzzy
 msgid "Manage..."
-msgstr "إدارة"
+msgstr "يوقف مؤقتاً..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:133
 msgid "Manage file extensions to load"
@@ -3004,7 +2962,7 @@ msgstr "تنظيم ملفات متجر LimeWire"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
 #, fuzzy
 msgid "Configure file naming..."
-msgstr "تكوين اسم الملف"
+msgstr "إعداد..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilesOptionPanel.java:212
 msgid "Configure how files are automatically named"
@@ -3049,20 +3007,18 @@ msgstr "خطأ Daap"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:39
 #, fuzzy
 msgid "Add Extension"
-msgstr "الامتداد"
+msgstr "الامتدادات:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:41
 #, fuzzy
 msgid "Extensions"
-msgstr "الامتداد"
+msgstr "الامتدادات:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:60
-#, fuzzy
 msgid ""
 "LimeWire will not show files with the following extensions in your search "
 "results"
 msgstr ""
-"لن يعرض LimeWire الملفات ذات الكلمات الأساسية التالي في نتائج البحث الخاصة بك"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:97
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:202
@@ -3072,16 +3028,15 @@ msgstr "استخدام الافتراضي"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #, fuzzy
 msgid "Revert to default settings"
-msgstr "استعادة إلى الافتراضي"
+msgstr "استعادة الافتراضي:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
 msgstr "اضافة كلمة أساسية"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:40
-#, fuzzy
 msgid "Keyword"
-msgstr "اضافة كلمة أساسية"
+msgstr "كلمة مفتاحية"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:55
 msgid ""
@@ -3197,20 +3152,17 @@ msgstr "لا يوجد مجلد فرعي"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:125
 #, fuzzy
 msgid "Sharing Categories"
-msgstr "الفئات غير الآمنة"
+msgstr "ملفات غير مشاركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:128
 msgid "Only share files in that category at that point"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:130
-#, fuzzy
 msgid ""
 "Share my entire collection, including new files that automatically get added "
 "to My Library"
 msgstr ""
-"تؤدي مشاركة مجموعتك {0} تلقائياً إلى مشاركة {0} ملفاً الجديدة المضافة إلى "
-"مكتبتك"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:142
 msgid "Choose what happens when I share a category"
@@ -3221,21 +3173,19 @@ msgid "Sharing Categories - Configure"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:223
-#, fuzzy
 msgid ""
 "Automatically add the following categories from folders below to My Library:"
-msgstr "أضف أنواع الملفات التالية إلى مكتبتك:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:235
-#, fuzzy
 msgid ""
 "*Adding these folders will automatically share any collections you shared"
-msgstr "سوف يؤدي مسح هذه المجلدات إلى مكتبتك إلى مشاركة ملفاتك تلقائياً"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:329
 #, fuzzy
 msgid "Add New Folder..."
-msgstr "إضافة مجلد جديد"
+msgstr "مشاركة مجلد جديد..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:330
 msgid "Choose a folder to automatically scan for changes"
@@ -3253,9 +3203,8 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:347
-#, fuzzy
 msgid "Library Manager Error"
-msgstr "إدارة المكتبة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:372
 msgid ""
@@ -3265,30 +3214,28 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:373
 #, fuzzy
 msgid "View Folders..."
-msgstr "حفظ المجلدات"
+msgstr "مشاركة مجلد جديد..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:381
 #, fuzzy
 msgid "Manually Imported Folders"
-msgstr "إدارة حفظ المجلدات"
+msgstr "تكوين منفذ أمامي يدوياً:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/LibraryOptionPanel.java:428
 msgid "Use the LimeWire player when I play audio files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageFileExtensionsOptionPanel.java:43
-#, fuzzy
 msgid "Select which file extensions belong in each category"
-msgstr "اختر امتدادات الملف التي تخص كل فئة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/ManageSaveFoldersOptionPanel.java:203
 msgid "Revert directories to the default"
 msgstr "إعادة الأدلة إلى الافتراضي"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:55
-#, fuzzy
 msgid "Language:"
-msgstr "إدارة"
+msgstr "اللغة:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:127
 msgid "Notifications"
@@ -3307,9 +3254,8 @@ msgid "Friends and Chat"
 msgstr "الأصدقاء والدردشة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:172
-#, fuzzy
 msgid "Sign into Friends when LimeWire starts"
-msgstr "تسجيل الدخول عند بدء LimeWire"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/MiscOptionPanel.java:191
 msgid "Jabber Server:"
@@ -3462,7 +3408,7 @@ msgstr "تجميع نتائج البحث المتشابهة معاً"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:88
 #, fuzzy
 msgid "Search bar"
-msgstr "بحث"
+msgstr "إبحث هنا"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:92
 msgid "By default, search for"
@@ -3473,9 +3419,8 @@ msgid "Suggest files from friends"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:114
-#, fuzzy
 msgid "Remember my recent searches"
-msgstr "تذكر التحميلات الأخيرة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SearchOptionPanel.java:117
 msgid "Clear Now"
@@ -3489,7 +3434,7 @@ msgstr "رسائل التحذير"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 #, fuzzy
 msgid "Settings..."
-msgstr "الإعدادات"
+msgstr "يتم الآن تحميل الخصائص..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:102
 msgid "Choose which warning messags to display"
@@ -3513,14 +3458,12 @@ msgid "For your safety, LimeWire disables you from:"
 msgstr "لحمايتك، يمنعك LimeWire من:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:139
-#, fuzzy
 msgid "- Searching for and sharing programs with anyone"
-msgstr "-البحث عن البرامج ومشاركتها مع أي شخص"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:140
-#, fuzzy
 msgid "- Sharing documents with the P2P Network"
-msgstr "-البحث عن المستندات على شبكة P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:181
 msgid ""
@@ -3528,9 +3471,8 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:184
-#, fuzzy
 msgid "Don't show adult content in search results"
-msgstr "عدم عرض المحتويات الموجهة للراشدين"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:188
 msgid "Filter Keywords"
@@ -3539,7 +3481,7 @@ msgstr "ترشيح الكلمات الأساسية"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 #, fuzzy
 msgid "Filter Keywords..."
-msgstr "ترشيح الكلمات الأساسية"
+msgstr "الكلمات المفتاحية"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:189
 msgid ""
@@ -3549,18 +3491,17 @@ msgstr "تقييد الملفات ذات كلمات معينة من العرض �
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:192
 #, fuzzy
 msgid "Filter File Extensions"
-msgstr "امتداد الملف"
+msgstr "الامتدادات المشاركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
 #, fuzzy
 msgid "Filter File Extensions..."
-msgstr "امتداد الملف"
+msgstr "قم بمشاركة الامتدادات الافتراضية."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:193
-#, fuzzy
 msgid ""
 "Restrict files with certain extensions from being displayed in search results"
-msgstr "تقييد الملفات ذات كلمات معينة من العرض في نتائج البحث"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SecurityOptionPanel.java:195
 msgid "In search results..."
@@ -3590,7 +3531,7 @@ msgstr "ملفات .magnet"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:138
 #, fuzzy
 msgid "Warn me when other programs want to automatically open these types"
-msgstr "تحذيري عند أخذ برامج أخرى لهذه الاقترانات"
+msgstr "يمكنك الاختيار بين المسح التلقائي للملفات التي تم تنزيلها أو لا."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:236
 msgid "Startup and Shutdown"
@@ -3618,30 +3559,26 @@ msgid "Bugs"
 msgstr "مشغول"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:311
-#, fuzzy
 msgid "Let me know about bugs before sending them"
-msgstr "أظهر لي تقرير الأخطاء قبل إرساله"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:313
 #, fuzzy
 msgid "Always send bugs to Lime Wire"
-msgstr "إبلاغ الأخطاء إلى LimeWire"
+msgstr "حول LimeWire"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/SystemOptionPanel.java:315
-#, fuzzy
 msgid "Never send bugs to Lime Wire"
-msgstr "إبلاغ الأخطاء إلى LimeWire"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:30
-#, fuzzy
 msgid ""
 "Allow me to search for and share programs with the P2P Network and my friends"
-msgstr "السماح لي بالبحث عن البرامج ومشاركتها مع شبكة P2P والأصدقاء"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:31
-#, fuzzy
 msgid "Allow me to share documents with the P2P Network"
-msgstr "السماح لي بمشاركة المستندات مع شبكة P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/UnsafeTypeOptionPanel.java:34
 msgid ""
@@ -3698,7 +3635,7 @@ msgstr "التراجع عن أي تغييرات تم إجراؤها"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/HelpAction.java:19
 #, fuzzy
 msgid "Learn more..."
-msgstr "اعرف المزيد"
+msgstr "تعلم أكثر..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/actions/OKDialogAction.java:17
 msgid "Keep any changes made"
@@ -3717,21 +3654,20 @@ msgstr "خصائص \"{0}\""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:228
 #, fuzzy
 msgid "Overview"
-msgstr "مراجعة"
+msgstr "معاينة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:251
 msgid "Details"
 msgstr "تفاصيل"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:255
-#, fuzzy
 msgid "Location"
-msgstr "الإخطارات"
+msgstr "الموقع"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, fuzzy
 msgid "Dimensions"
-msgstr "الامتداد"
+msgstr "الامتدادات:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, java-format
@@ -3739,45 +3675,43 @@ msgid "({0}px X {1}px)"
 msgstr "({0}px X {1}px)"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:20
-#, fuzzy
 msgid "New audio"
-msgstr "الصوت فقط"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:21
 #, fuzzy
 msgid "New documents"
-msgstr "المستندات فقط"
+msgstr "مستندات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:22
 #, fuzzy
 msgid "New images"
-msgstr "الصور فقط"
+msgstr "صور"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:23
 #, fuzzy
 msgid "New programs"
-msgstr "البرامج فقط"
+msgstr "برامج"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:24
-#, fuzzy
 msgid "New videos"
-msgstr "الفيديو فقط"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/DefaultSearchInfo.java:27
 #, fuzzy
 msgid "New files"
-msgstr "عدد الملفات"
+msgstr "ملفات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:125
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:194
 #, fuzzy
 msgid "Search P2P Network"
-msgstr "المشاركة مع شبكة P2P"
+msgstr "إبحث هنا"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchBar.java:191
 #, fuzzy
 msgid "Search P2P Network and Friends"
-msgstr "المشاركة مع شبكة P2P"
+msgstr "بحث على الشبكة عن هذه الكلمات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:12
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchTabItems.java:63
@@ -3787,37 +3721,36 @@ msgstr "الكل"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:27
 #, fuzzy
 msgid "&All"
-msgstr "الكل"
+msgstr "الجميع"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:28
 #, fuzzy
 msgid "A&udio"
-msgstr "الصوت"
+msgstr "صوتي"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:29
 #, fuzzy
 msgid "&Documents"
-msgstr "المستندات"
+msgstr "مستندات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:30
 #, fuzzy
 msgid "&Images"
-msgstr "الصور"
+msgstr "صور"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:31
 #, fuzzy
 msgid "&Programs"
-msgstr "البرامج"
+msgstr "برامج"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:32
 #, fuzzy
 msgid "&Videos"
-msgstr "الفيديو"
+msgstr "فيديو"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:35
-#, fuzzy
 msgid "&Other"
-msgstr "أخرى"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SearchCategoryUtils.java:42
 msgid "All files"
@@ -3900,9 +3833,8 @@ msgid "Sort by:"
 msgstr "فرز حسب:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:98
-#, fuzzy
 msgid "Refine results..."
-msgstr "في نتائج البحث..."
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/SortAndFilterPanel.java:190
 msgid "List view"
@@ -3919,7 +3851,7 @@ msgstr "وضع علامة كغير مرغوب فيه"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 #, fuzzy
 msgid "Copy link"
-msgstr "نسخ الكل"
+msgstr "نسخ"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -3939,36 +3871,36 @@ msgid "Do not warn me again"
 msgstr "لا تحذرني مرة أخرى"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchHeadingDocumentBuilderImpl.java:45
-#, fuzzy, java-format
+#, java-format
 msgid "{0} is marked as spam."
-msgstr "إلغاء وضع العلامة كغير مرغوب فيه"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:89
 #, fuzzy, java-format
 msgid "Chat with {0}"
-msgstr "المشاركة مع {0}"
+msgstr "دردشة مع المضيف"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:102
-#, fuzzy, java-format
+#, java-format
 msgid "View Files of {0}"
-msgstr "عرض معلومات الملف"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:115
-#, fuzzy, java-format
+#, java-format
 msgid "Share With {0}"
-msgstr "المشاركة مع {0}"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:140
 msgid "nobody"
 msgstr "لا أحد"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:158
-#, fuzzy, java-format
+#, java-format
 msgid "{0} Person"
 msgid_plural "{0} People"
-msgstr[0] "{0} شخص"
-msgstr[1] "{0} شخص"
-msgstr[2] "{0} شخص"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:160
 #, fuzzy
@@ -3982,9 +3914,12 @@ msgstr[2] "شخص"
 #, fuzzy, java-format
 msgid "{0} Friend"
 msgid_plural "{0} Friends"
-msgstr[0] "صديق"
-msgstr[1] "صديق"
-msgstr[2] "صديق"
+msgstr[0] "الحصول على أصدقاء?"
+msgstr[1] "الحصول على أصدقاء?"
+msgstr[2] "الحصول على أصدقاء?"
+msgstr[3] "الحصول على أصدقاء?"
+msgstr[4] "الحصول على أصدقاء?"
+msgstr[5] "الحصول على أصدقاء?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:170
 #, java-format
@@ -3995,22 +3930,20 @@ msgstr[1] ""
 msgstr[2] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:172
-#, fuzzy
 msgid "P2P User"
 msgid_plural "P2P Users"
-msgstr[0] "شبكة P2P"
-msgstr[1] "شبكة P2P"
-msgstr[2] "شبكة P2P"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:237
 #, fuzzy
 msgid "Friends"
-msgstr "صديق"
+msgstr "الحصول على أصدقاء?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultFromWidget.java:243
-#, fuzzy
 msgid "P2P Users"
-msgstr "شبكة P2P"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:50
 msgid "Unmark as spam"
@@ -4023,36 +3956,35 @@ msgstr "وضع علامة كغير مرغوب فيه"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:62
 #, fuzzy
 msgid "Hide Similar Files"
-msgstr "إخفاء شريط المكتبات"
+msgstr "إخفاء ملفات .تورنت"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultMenu.java:72
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:77
 #, fuzzy
 msgid "View File Info..."
-msgstr "عرض معلومات الملف"
+msgstr "معلومات أكثر..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/SearchResultPropertiesFactory.java:92
 #, fuzzy
 msgid "Block Address"
-msgstr "العنوان"
+msgstr "حظر المضيّفون"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:179
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
 #, fuzzy
 msgid "Show similar files"
-msgstr "إظهار الملف الحالي"
+msgstr "الملفات المشتركة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:190
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:388
-#, fuzzy
 msgid "Hide similar files"
-msgstr "إخفاء شريط المكتبات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:210
 #, fuzzy
 msgid "More options"
-msgstr "المزيد من الخيارات"
+msgstr "خيارات أخرى"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:377
 #, java-format
@@ -4104,9 +4036,8 @@ msgid "\"magnet:\" links"
 msgstr "روابط \"magnet:\""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:47
-#, fuzzy
 msgid "Warn me when other programs take LimeWire associations"
-msgstr "تحذيري عند أخذ برامج أخرى لهذه الاقترانات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/shell/ShellAssociationManager.java:77
 #, fuzzy
@@ -4138,7 +4069,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 #, fuzzy
 msgid "No Internet Connection"
-msgstr "إضافة توصيل"
+msgstr "إضافة اتصال Gnutella"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:113
 msgid "You have no internet connection"
@@ -4148,19 +4079,18 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 #, fuzzy
 msgid "Weak connection"
-msgstr "إضافة توصيل"
+msgstr "الاتصال"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:135
-#, fuzzy
 msgid "You have a weak connection"
-msgstr "أنت عقدة Leaf"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 #, fuzzy
 msgid "Medium connection"
-msgstr "إضافة توصيل"
+msgstr "الاتصال"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
@@ -4170,7 +4100,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 #, fuzzy
 msgid "Full Connection"
-msgstr "الاتصالات"
+msgstr "الاتصال"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 #, fuzzy
@@ -4178,9 +4108,8 @@ msgid "You are fully connected"
 msgstr "أنت الآن تتصل بالشبكة."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:156
-#, fuzzy
 msgid "Turbo charged Connection"
-msgstr "إضافة توصيل"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:157
 msgid "You have an turbo-charged connection"
@@ -4189,7 +4118,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/MinimizedDownloadSummaryPanel.java:57
 #, fuzzy, java-format
 msgid "Downloads ({0})"
-msgstr "تحميل {0}"
+msgstr "التنزيلات:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:30
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/SharedFileCountPanel.java:41
@@ -4199,14 +4128,14 @@ msgstr "مشاركة {0} ملفاً"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/IconLabelRenderer.java:81
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/table/NameRenderer.java:60
-#, fuzzy, java-format
+#, java-format
 msgid "{0} (incomplete)"
-msgstr "{0}% مكتمل"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/GrowlNotifier.java:28
 #, fuzzy
 msgid "LimeWire 5"
-msgstr "LimeWire"
+msgstr "LimeWire &PRO"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/Notification.java:57
 msgid "Launch Action Text (Notification)"
@@ -4216,7 +4145,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:74
 #, fuzzy
 msgid "Show LimeWire"
-msgstr "LimeWire"
+msgstr "LimeWire &PRO"
 
 #. exit
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/tray/SystemTrayNotifier.java:98
@@ -4243,9 +4172,8 @@ msgstr ""
 "LimeWire سيقوم بالتحديث تلقائياً عند الإغلاق. هل تود التحديث الآن?"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:173
-#, fuzzy
 msgid "Update Ready"
-msgstr "التحديثات والأخطاء"
+msgstr "التحديث جاهز"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/update/UpdatePanel.java:195
 msgid "Update Later"
@@ -4254,7 +4182,7 @@ msgstr "التحديث لاحقاً"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:65
 #, fuzzy
 msgid "Play File"
-msgstr "تشغيل الملف"
+msgstr "المشغل"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:216
 #, java-format
@@ -4292,7 +4220,7 @@ msgstr[2] ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:240
 #, fuzzy
 msgid "Waiting for connections..."
-msgstr "تعيين سرعة اتصالك"
+msgstr "انتظار اتصالات مستقرة"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadTableRendererEditor.java:250
 msgid "Unable to upload: file error"
@@ -4343,19 +4271,16 @@ msgid "KB/s"
 msgstr "كيلو بت/ثانية"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:403
-#, fuzzy
 msgid "Poor (media quality)"
-msgstr "جودة سيئة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:405
-#, fuzzy
 msgid "Good (media quality)"
-msgstr "جودة جيدة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:407
-#, fuzzy
 msgid "Excellent (media quality)"
-msgstr "جودة ممتازة"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/GuiUtils.java:419
 msgid "Poor Quality"
@@ -4377,19 +4302,18 @@ msgstr "مواقع بديلة غير صالحة"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
 #, fuzzy
 msgid "Unable to open URL"
-msgstr "تعذر تحميل:"
+msgstr "غير قادر على حذف البيانات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:111
-#, fuzzy
 msgid "Open URL"
-msgstr "فتح &رابط"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:184
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:187
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:190
-#, fuzzy, java-format
+#, java-format
 msgid "Unable to open file: {0}"
-msgstr "تعذر تحميل:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:185
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:188
@@ -4402,7 +4326,7 @@ msgstr "فتح ملف"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:254
 #, fuzzy, java-format
 msgid "Unable to locate file: {0}"
-msgstr "تعذر الإيداع: خطأ الملف"
+msgstr "LimeWire غير قادر على مشاركة الملف \"{0}\"."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:247
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/NativeLaunchUtils.java:251
@@ -4422,7 +4346,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:53
 #, fuzzy
 msgid "Invalid Folder"
-msgstr "ملفات صحيحة"
+msgstr "مخير غير صحيح"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:166
 #, fuzzy, java-format
@@ -4439,15 +4363,15 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveDirectoryHandler.java:167
 #, fuzzy
 msgid "Folder Warning"
-msgstr "الترشيح"
+msgstr "تحذير"
 
 #. Create user message.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:86
-#, fuzzy, java-format
+#, java-format
 msgid ""
 "Unable to download: {0}\n"
 "file {1}"
-msgstr "تعذر تحميل:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/util/SaveLocationExceptionHandlerImpl.java:103
 msgid "Save File As..."
@@ -4462,20 +4386,15 @@ msgid "Overwrite"
 msgstr "الكتابة فوق"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:248
-#, fuzzy
 msgid "State Your Intent"
-msgstr "اذكر قصدك"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:250
-#, fuzzy
 msgid ""
 "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
 "authorized files only. Installing and using either program does not "
 "constitute a license for obtaining or distributing unauthorized content."
 msgstr ""
-"LimeWire Basic وLimeWire PRO هي برامج نظير إلى نظير لمشاركة الملفات المسموح "
-"بها فقط. ولا يعتبر تثبيت واستخدام أي برنامج بمثابة ترخيص للحصول على محتويات "
-"غير مصرح بها أو توزيعها."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:251
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage1.java:47
@@ -4483,13 +4402,10 @@ msgid "Learn more"
 msgstr "اعرف المزيد"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:252
-#, fuzzy
 msgid ""
 "By clicking \"I Agree\", you agree to not use LimeWire for copyright "
 "infringement."
 msgstr ""
-"عندما تنقر \"أوافق\"، فإنك توافق على عدم استخدام LimeWire 5 لانتهاك حقوق "
-"الطبع والنسخ"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/IntentDialog.java:253
 #, fuzzy
@@ -4526,11 +4442,8 @@ msgid "Launch LimeWire at Startup"
 msgstr "تشغيل LimeWire مع بدء التشغيل"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:43
-#, fuzzy
 msgid "My Library is where you view, share and unshare your files."
 msgstr ""
-"مكتبتك هي موقع مركزي لعرض ومشاركة وإلغاء مشاركة الملفات مع شبكة P2P ومع "
-"الأصدقاء."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:44
 msgid ""
@@ -4547,13 +4460,10 @@ msgid "Automatically add files to My Library, but don't share any new files"
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:47
-#, fuzzy
 msgid ""
 "Have LimeWire automatically add files from My Documents and the Desktop to "
 "My Library."
 msgstr ""
-"حدد هذا الخيار ليقوم LimeWire تلقائياً بمسح الملفات إلى مكتبتك من My "
-"Documents وسطح المكتب."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:48
 msgid "Manually add files to My Library, but don't share any files"
@@ -4569,24 +4479,21 @@ msgid ""
 msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:51
-#, fuzzy
 msgid "Add the following categories from the folders below to My Library:"
-msgstr "أضف أنواع الملفات التالية إلى مكتبتك:"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:52
-#, fuzzy
 msgid "You can change this later from Tools > Options"
-msgstr "يمكنك تغيير هذه الخيارات لاحقاً من أدوات > خيارات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:236
 #, fuzzy
 msgid "Add Folder"
-msgstr "إضافة مجلد (مجلدات)"
+msgstr "جميع المجلدات"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/SetupPage2.java:237
-#, fuzzy
 msgid "Choose a folder to automatically add to My Library"
-msgstr "اختر مجلداً لمسحه تلقائياً للتغييرات"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/wizard/Wizard.java:58
 msgid "Continue"
@@ -4652,6 +4559,17 @@ msgstr ""
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "معذرة، ولكن LimeWire لا يستطيع إعادة ملفات التنزيل القديمة الخاصة بك."
 
+#, fuzzy
+msgid "Loading bittorrent Management..."
+msgstr "يتم الآن تحميل نافذة connection-management..."
+
+#, fuzzy
+msgid "Loading magnet Management..."
+msgstr "يتم الآن تحميل نافذة connection-management..."
+
+msgid "Modem"
+msgstr "مودم"
+
 msgid "Cable/DSL"
 msgstr "كابل/DSL"
 
@@ -4669,6 +4587,17 @@ msgstr ""
 #, fuzzy
 msgid "United States"
 msgstr "تحديثات"
+
+#, fuzzy
+msgid "English"
+msgstr "إنهاء"
+
+#, fuzzy
+msgid "false"
+msgstr "لصق"
+
+msgid "You are sharing {0} files (Loading...)"
+msgstr "عدد الملفات التي تشاركها. {0} ملفات (تحميل...)"
 
 msgid "Upgrade Your Java"
 msgstr "ترقية الجافا"
@@ -4700,17 +4629,27 @@ msgstr ""
 msgid "Opens a .torrent file from your hard drive"
 msgstr "فتح ملف تورنت من القرص الصلب"
 
+msgid "&Download .torrent"
+msgstr "تنزيل .تورنت"
+
 msgid "Downloads a .torrent file from the WWW"
 msgstr "تنزيل ملف تورنت من شبكة الإنترنت"
 
 msgid "URL"
 msgstr "URL"
 
+#, fuzzy
+msgid "Paste from Clipboard"
+msgstr "نسخ إلى ذاكرة النصوص"
+
 msgid "The specified URL is not valid. Please check your input."
 msgstr "العنوان المحدد غير صالح. من فضلك تأكد من الذي قمت بإدخاله."
 
 msgid "Search \"What''s New\" for: {0}"
 msgstr "بحث \"ما الجديد\" عن: {0}"
+
+msgid "Waiting"
+msgstr "انتظار"
 
 msgid ""
 "LimeWire was unable to load the specified torrent file, - it may be "
@@ -4719,12 +4658,18 @@ msgstr ""
 "LimeWire غير قادر على تحميل ملف التورنت المحدد، يبدو أنه مشوه أو أن LimeWire "
 "ليس لديه تصريح الوصول لهذا الملف."
 
+msgid "Finish Setup"
+msgstr "إنهاء التثبيت"
+
 msgid ""
 "Your LimeWire setup has successfully completed. Please press the \"Finish\" "
 "button to begin using LimeWire."
 msgstr ""
 "تم تثبيت LimeWire بنجاح. من فضلك اضغط على زر \"إنهاء\" لكي يبدأ LimeWire في "
 "العمل."
+
+msgid "Language Options"
+msgstr "خيارات اللغة"
 
 msgid "Please choose the language you would like LimeWire to use."
 msgstr "LimeWire من فضلك قم باختيار اللغة التي تود أن يستخدمها"
@@ -4735,6 +4680,12 @@ msgid ""
 msgstr ""
 "من فضلك اختر المجلد الذي ترغب في وضع الملفات التي تقوم بتنزيلها فيه. سيتم "
 "مشاركة هذا المجلد تلقائياً مع مستخدمي شبكة Gnutella."
+
+msgid "Save Folder:"
+msgstr "حفظ مجلد:"
+
+msgid "Confirm Scan"
+msgstr "تأكيد الفحص"
 
 msgid ""
 "We identified the folders below as ones that you might like to share. If you "
@@ -4770,6 +4721,9 @@ msgstr ""
 msgid "Scan Hard Drive?"
 msgstr "فحص الأقراص الصلبة؟"
 
+msgid "Limewire Setup Dialog"
+msgstr "مربع حوار تثبيت Limewire"
+
 msgid ""
 "Please choose the speed of your Internet connection. Setting this speed "
 "correctly is important for optimum network performance. If you are not sure "
@@ -4780,14 +4734,23 @@ msgstr ""
 "الشبكة. إذا لم تكن متأكداً من نوع اتصالك بالإنترنت، أو لديك اتصال غير مدرج "
 "هنا، اختر ما تجده أكثر ملاءمة لك."
 
+msgid "Select Speed"
+msgstr "اختر السرعة"
+
 msgid "Scanning Hard Drive"
 msgstr "يتم الآن فحص القرص الصلب"
 
 msgid "Please wait as LimeWire scans your hard drive..."
 msgstr "من فضلك انتظر إلى أن يقوم LimeWire بفحص قرصك الصلب."
 
+msgid "Scan cancelled"
+msgstr "الفحص إلغي"
+
 msgid "Scanning Hard Drive..."
 msgstr "يتم الآن فحص القرص الصلب..."
+
+msgid "Cancel Scan"
+msgstr "إلغاء الفحص"
 
 msgid ""
 "The selected folder cannot be shared.  Please select another folder to share."
@@ -4843,6 +4806,9 @@ msgid ""
 msgstr ""
 "ادخل عنوان IP للصديق الذي تود الاتصال معه, اضغط 'اتصال مباشر', وسيقوم "
 "LimeWire بمحاولة استعراض الملفات لذلك المستخدم."
+
+msgid "Annotating file"
+msgstr "توثيق الملف"
 
 msgid "Edit annotation of type:"
 msgstr "تحرير التوثيق من نوع:"
@@ -4900,11 +4866,23 @@ msgid ""
 "later."
 msgstr "هناك خطأ أثناء الإتصال مع أرشيف الإنترنت. من فضلك حاول لاحقاً."
 
+msgid "Upload"
+msgstr "تحميل"
+
 msgid "Connecting to the Internet Archive..."
 msgstr "جاري الاتصال بأرشيف الإنترنت..."
 
+msgid "Connected..."
+msgstr "جاري الاتصال..."
+
+msgid "Uploading file"
+msgstr "جاري تحميل الملف"
+
 msgid "of"
 msgstr "من"
+
+msgid "Uploaded"
+msgstr "محمل"
 
 msgid "V"
 msgstr "V"
@@ -4927,6 +4905,9 @@ msgstr "U"
 msgid "Stop Sharing the Selected Library Folder"
 msgstr "أوقف مشاركة مجلد المكتبة المحدد"
 
+msgid "Results"
+msgstr "النتائج"
+
 msgid "Recovery Failed"
 msgstr "الاستعادة فشلت"
 
@@ -4938,6 +4919,9 @@ msgstr "s للمصادر"
 
 msgid "Gnutella"
 msgstr "Gnutella"
+
+msgid "files (Loading...)"
+msgstr "ملفات (تحميل...)"
 
 msgid "Files with this name"
 msgstr "ملفات بهذا الاسم"
@@ -5024,11 +5008,23 @@ msgstr ""
 "كيلوبايتات دفعات Multicast المستقبلة من جميع مستخدمي Gnutella مقارنة "
 "بمستخدمي LimeWire الآخرين."
 
+msgid "QRP"
+msgstr "QRP"
+
+msgid "Errors"
+msgstr "أخطاء"
+
 msgid "Query Replies"
 msgstr "ردود الاستعلام"
 
 msgid "Ping Replies"
 msgstr "ردود Ping"
+
+msgid "Compression"
+msgstr "الضغط"
+
+msgid "Hit Routing Errors"
+msgstr "أخطاء تحديد مسار النتائج"
 
 msgid "Requests"
 msgstr "طلبات"
@@ -5087,6 +5083,36 @@ msgstr "Gnutella (مقترح)"
 msgid "Gnutella (Actual)"
 msgstr "Gnutella (حقيقي)"
 
+msgid "All Messages"
+msgstr "جميع الرسائل"
+
+msgid "Hops 1"
+msgstr "قفزات 1"
+
+msgid "Hops 2"
+msgstr "قفزات 2"
+
+msgid "Hops 3"
+msgstr "قفزات 3"
+
+msgid "Hops 4"
+msgstr "قفزات 4"
+
+msgid "Hops 5"
+msgstr "قفزات 5"
+
+msgid "Hops 6"
+msgstr "قفزات 6"
+
+msgid "Hops 7"
+msgstr "قفزات 7"
+
+msgid "Hops 8"
+msgstr "قفزات 8"
+
+msgid "Hops 9"
+msgstr "قفزات 9"
+
 msgid "TTL 0"
 msgstr "TTL 0"
 
@@ -5117,8 +5143,17 @@ msgstr "TTL 8"
 msgid "TTL 9"
 msgstr "TTL 9"
 
+msgid "Pong Errors"
+msgstr "أخطاء ال Pong"
+
+msgid "Reply Errors"
+msgstr "أخطاء الرد"
+
 msgid "No Route"
 msgstr "لا يوجد مسار"
+
+msgid "All Requests"
+msgstr "جميع الطلبات"
 
 msgid "HEAD Requests"
 msgstr "HEAD طلبات"
@@ -5175,6 +5210,9 @@ msgstr "الحجم المتوسط لرسائل Gnutella المستقبلة با�
 msgid "The average size in kilobytes of received messages from LimeWires."
 msgstr "الحجم المتوسط لرسائل مستخدمي LimeWire المستقبلة بالكيلو بايت."
 
+msgid "Current"
+msgstr "الحالي"
+
 msgid ". No line is available for output."
 msgstr "لا يوجد خط متاح للإخراج."
 
@@ -5186,6 +5224,9 @@ msgstr "استعلامات مخصصة"
 
 msgid "False Positive"
 msgstr "نتائج تقريبية"
+
+msgid "Generic Errors"
+msgstr "أخطاء متنوعة"
 
 msgid "Handshaking"
 msgstr "تعارف"
@@ -5202,11 +5243,23 @@ msgstr "إحصائيات معدل تدفق الرسائل."
 msgid "Total messages filtered."
 msgstr "العدد الكلى للرسائل المنقاه"
 
+msgid "Color"
+msgstr "اللون"
+
 msgid "Write statistics for this graph to files."
 msgstr "قم بكتابة إحصائيات هذا الشكل للملفات."
 
+msgid "All Errors"
+msgstr "جميع الأخطاء"
+
 msgid "Invalid Payload Length"
 msgstr "طول الحمولة غير صحيح"
+
+msgid "Invalid Hops"
+msgstr "قفزات غير صالحة"
+
+msgid "Invalid TTL"
+msgstr "زمن الرحيل غير صالح"
 
 msgid "Hops > Soft Max"
 msgstr "القفزات > الحد الأدنى"
@@ -5277,6 +5330,9 @@ msgstr "حمولة دفع غير صالحة"
 msgid "All Vendor Message Errors"
 msgstr "جميع أخطاء رسالة الموزع"
 
+msgid "Invalid ID"
+msgstr "مميز غير صالح"
+
 msgid "Invalid Payload"
 msgstr "حمولة غير صالحة"
 
@@ -5285,6 +5341,9 @@ msgstr "رسالة موزع غير متعارف عليها"
 
 msgid "Route Table Patch"
 msgstr "جزء من جدول تحديد المسار"
+
+msgid "What's New?"
+msgstr "مجتمع?"
 
 msgid "Hard Limit"
 msgstr "الحد الأقصى"
@@ -5307,8 +5366,20 @@ msgstr "الحد الأقصى (TTL 4)"
 msgid "Hard Limit (TTL 5 or above)"
 msgstr "الحد الأقصى (TTL 5+)"
 
+msgid "Connection Attempts"
+msgstr "محاولات الاتصال."
+
+msgid "Incoming Attempts"
+msgstr "المحاولات الواردة"
+
 msgid "Unknown Requests"
 msgstr "طلبات غير معلومة"
+
+msgid "Banned Hosts"
+msgstr "مضيفون ممنوعون"
+
+msgid "Closed Immediately"
+msgstr "أغلق في الحال"
 
 msgid "Problem Reading Header"
 msgstr "مشكلة في قراءة الترويسة"
@@ -5318,6 +5389,9 @@ msgstr "كود رد غير معروف"
 
 msgid "Content URN mismatch"
 msgstr "محتويات URN غير متوافقة"
+
+msgid "Incompatible Ranges"
+msgstr "قيم المدى غير متوافقة"
 
 msgid "Succeeded"
 msgstr "تم بنجاح"
@@ -5361,6 +5435,9 @@ msgstr "دفع الوكيل غير صالح"
 msgid "Failed Push Proxy"
 msgstr "فشل دفع الوكيل"
 
+msgid "Push Proxy"
+msgstr "دفع الوكيل"
+
 msgid "Traditional Get"
 msgstr "تقليدي GET"
 
@@ -5384,6 +5461,9 @@ msgstr "فشل الدفع"
 
 msgid "Completed Responses"
 msgstr "الردود التامة"
+
+msgid "Completed File Transfers"
+msgstr "الملفات التي تم تحويلها"
 
 msgid "Out Rej. (Leaf)"
 msgstr "رفض صادر. (طرف)"
@@ -5421,6 +5501,9 @@ msgstr "قبول. (طرف)"
 msgid "In Acc. (Guiding To Leaf)"
 msgstr "قبول. (موجه إلى طرف)"
 
+msgid "In Acc. (Ultrapeer)"
+msgstr "قبول. (ند فائق)"
+
 msgid "In Rej. (All Slots Taken)"
 msgstr "رفض وارد (تم أخذ جميع الشرائح)"
 
@@ -5429,6 +5512,15 @@ msgstr "رفض. (تحتاج الشبكة إلى ند فائق)"
 
 msgid "No Conclusion"
 msgstr "لا يوجد استنتاج"
+
+msgid "LimeWire Leaves"
+msgstr "LimeWire طرفيات"
+
+msgid "Other Ultrapeers"
+msgstr "الأنداد الفائقون الآخرون"
+
+msgid "Other Leaves"
+msgstr "الطرفيات الأخرى"
 
 msgid "Responses Requested"
 msgstr "الردود المطلوبة"
@@ -5643,6 +5735,9 @@ msgstr ""
 
 msgid "All queries that were received from routed connections."
 msgstr "جميع الاستعلامات التي تم استقبالها من الاتصالات محددة المسار."
+
+msgid "Hit"
+msgstr "نتيجة الاستعلام"
 
 msgid "Generic errors while reading messages."
 msgstr "حدثت مجموعة من الأخطاء المتنوعة أتناء قراءة الرسائل."
@@ -5907,11 +6002,32 @@ msgstr "انقطع"
 msgid "Number of Responses Requested and Received via the OOB Protocol"
 msgstr "عدد الردود المطلوبة والمستقبلة من خلال بروتوكول خارج النطاق"
 
+msgid "Height:"
+msgstr "الارتفاع:"
+
 msgid "Please press OK to permanently remove license."
 msgstr "من فضلك اضغط موافق دائماً للإزالة الرخصة."
 
+msgid "Display:"
+msgstr "العرض:"
+
+msgid "Vendor Messages"
+msgstr "رسائل الموزع"
+
 msgid "HTTP Content"
 msgstr "HTTP محتوى"
+
+msgid "&New Folder"
+msgstr "مجلد جديد"
+
+msgid "&Rename Folder"
+msgstr "إعادة تسمية المجلد"
+
+msgid "Launch the Selected File(s)"
+msgstr "تنفيذ الملف المحدد(s)"
+
+msgid "Delete the Selected File(s)"
+msgstr "حذف الملف المحدد(s)"
 
 msgid "Refre&sh"
 msgstr "تحديث"
@@ -5940,6 +6056,9 @@ msgstr "من فضلك ادخل صفحة التأكيد الصالحة للرخص
 msgid "You are sharing"
 msgstr "عدد الملفات التي تشاركها."
 
+msgid "Loading Resources..."
+msgstr "يتم الآن تحميل الموارد..."
+
 msgid "Please enter the copyright holder of the file you want to publish."
 msgstr "من فضلك ادخل مالك حقوق النسخ للملف الذي تريد نشره."
 
@@ -5950,9 +6069,31 @@ msgstr "LimeWire غير قادر على تنزيل ملف التورنت من ا
 msgid "Check these associations when starting LimeWire:"
 msgstr "افحص تلك الملحقات عند بدء LimeWire:"
 
+msgid "Alt. Locations"
+msgstr "المواقع البديلة"
+
+#, fuzzy
+msgid "Loading TLS Encryption..."
+msgstr "جاري  تحميل محرك HTML ..."
+
+msgid "Loading Message Router..."
+msgstr "يتم الآن تحميل message-router..."
+
 #, fuzzy
 msgid "Checking for Updates..."
 msgstr "جاري البحث عن تحيين..."
+
+#, fuzzy
+msgid "Locating Peers..."
+msgstr "يتم الآن تحديد مواقع المصادر..."
+
+#, fuzzy
+msgid "Loading Shared Files..."
+msgstr "يتم الآن تحميل الملفات المحفوظة..."
+
+#, fuzzy
+msgid "Loading Network Listeners..."
+msgstr "جاري شحن متنصّتات الشّبكة ..."
 
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
@@ -5985,10 +6126,19 @@ msgstr "ملف .torrent المحدد قد يحتوي على خطر أمني"
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr "LimeWire لايمكنه تنزيل ملف .torrent من الموقع المزود"
 
+msgid "Automatically start torrents"
+msgstr "بدأ التورنت تلقائياً"
+
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr "يمكنك اختيار بدء التنزيل تلقائياً من Gnutella."
+
+msgid "Start automatically"
+msgstr "البدء تلقائياً"
+
+msgid "BitTorrent Settings"
+msgstr "خصائص BitTorrent"
 
 msgid ""
 "Invalid or inappropriate custom values may cause severe performance and/or "
@@ -6014,11 +6164,17 @@ msgstr ""
 msgid "View My Shared Files."
 msgstr "مشاهدة ملفّاتي المتشاركة."
 
+msgid "Do not display this message again."
+msgstr "لا تبرز هذا المحتوى ثانية."
+
 msgid "T1"
 msgstr "T1"
 
 msgid "T3 or Higher"
 msgstr "T3 أو أعلى"
+
+msgid "Ethernet"
+msgstr "Ethernet"
 
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
@@ -6031,8 +6187,28 @@ msgstr ""
 "مالم تقم باختيار \" قطع الاتصال\" من قائمة ملف."
 
 #, fuzzy
+msgid "&Search"
+msgstr "نتيجة بحث"
+
+#, fuzzy
 msgid "&Monitor"
 msgstr "متابعة"
+
+#, fuzzy
+msgid "&Connections"
+msgstr "الاتصال"
+
+#, fuzzy
+msgid "&Library"
+msgstr "المكتبة"
+
+#, fuzzy
+msgid "C&onsole"
+msgstr "اتصال"
+
+#, fuzzy
+msgid "Lo&gging"
+msgstr "الدخول"
 
 msgid "Display the {0} Screen"
 msgstr "عرض شاشة {0}"
@@ -6052,6 +6228,9 @@ msgstr ""
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire لا يمكنه تنفيذ الملف المحدد."
 
+msgid "Loading Core Components..."
+msgstr "جاري تحميل المكونات الداخلية..."
+
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "يتم الآن تحميل Digital Audio Access Protocol..."
 
@@ -6060,6 +6239,9 @@ msgstr "مدخلات"
 
 #, fuzzy
 msgid "Apply Operation"
+msgstr "إلغاء العملية"
+
+msgid "Cancel Operation"
 msgstr "إلغاء العملية"
 
 msgid ""
@@ -6074,6 +6256,10 @@ msgstr ""
 msgid "Upgrade Java"
 msgstr "ترقية الجافا"
 
+#, fuzzy
+msgid "More Information"
+msgstr "معلومات الملف المتعدد"
+
 msgid "Visit {0}"
 msgstr "زيارة {0}"
 
@@ -6085,6 +6271,9 @@ msgstr "يجب إعادة تشغيل LimeWire لكي يظهر تأثير الل�
 
 msgid "Change Language"
 msgstr "تغيير اللغة"
+
+msgid "Help Translate LimeWire"
+msgstr "مساعدة ترجمة LimeWire"
 
 msgid "Show Language in status bar"
 msgstr "إظهار اللغة في شريط الحالة"
@@ -6159,11 +6348,17 @@ msgstr "هذا الملف يتطلب إلى رخصة للفتح والعرض."
 msgid "License Details"
 msgstr "تفاصيل الرخصة"
 
+msgid "File Listing for"
+msgstr "قائمة الملف لـ"
+
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr "وصلات بارزة للتنزيلات السريعة (إذا كان لديك LimeWire مثبتاً)"
 
 msgid "Always use this answer"
 msgstr "استخدم نفس الإجابة دائماً"
+
+msgid "Loading Monitor Window..."
+msgstr "يتم الآن تحميل نافذة المتابعة..."
 
 msgid "Show Incoming Searches"
 msgstr "نتائج البحث الواردة"
@@ -6175,8 +6370,18 @@ msgstr ""
 "أنت تمثل نقطة طرفية محمية بند فائق. لذلك سترى القليل أو لن ترى نتائج بحث في "
 "نافذة المراقبة."
 
+msgid "Searches"
+msgstr "نتيجة بحث"
+
+msgid "Shutting down LimeWire..."
+msgstr "إطفاء LimeWire..."
+
 msgid "Please wait while LimeWire shuts down..."
 msgstr "الرجاء الانتظار بينما يتم إطفاء LimeWire..."
+
+#, fuzzy
+msgid "Add..."
+msgstr "إضافة"
 
 msgid "Add New List Item"
 msgstr "إضافة عنصر جديد للقائمة"
@@ -6184,20 +6389,35 @@ msgstr "إضافة عنصر جديد للقائمة"
 msgid "Remove Selected Item"
 msgstr "إزالة العنصر المحدد"
 
+msgid "Loading Status Window..."
+msgstr "يتم الآن تحميل نافذة الحالة..."
+
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire اكتشف جدار ناري"
 
 msgid "You are connected to the LimeWire Store"
 msgstr "أنت مرتبط بمغازة لايمواير."
 
+msgid "Disconnected"
+msgstr "قطع الاتصال"
+
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
 msgstr "أنت غير متصل بالشبكة. للاتصال اختر اتصال من قائمة ملف."
 
+msgid "Starting"
+msgstr "يتم الآن الاتصال"
+
+msgid "Poor"
+msgstr "ضعيف"
+
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr "أنت متصل بعدد محدود من المضيفين واتصالك بالشبكة غير مستقر."
+
+msgid "Fair"
+msgstr "معتدل"
 
 msgid "Your connection to the network is getting stronger"
 msgstr "اتصالك بالشبكة يتجه للأفضل."
@@ -6238,8 +6458,17 @@ msgstr "عرض حالة اللغة"
 msgid "Show Firewall Status"
 msgstr "عرض حالة الجدار الناري"
 
+msgid "Show Bandwidth Consumption"
+msgstr "عرض استهلاك سرعة النقل"
+
 msgid "Show Media Player"
 msgstr "عرض Media Player"
+
+msgid "Downloads:"
+msgstr "التنزيلات:"
+
+msgid "Uploads:"
+msgstr "التحميلات:"
 
 msgid "Tip of the Day"
 msgstr "تلميح اليوم"
@@ -6249,6 +6478,12 @@ msgstr "...هل تعلم أن"
 
 msgid "Show Tips At Startup"
 msgstr "عرض التلميح عند بدء التشغيل"
+
+msgid "Next Tip"
+msgstr "التلميح التالي"
+
+msgid "Previous Tip"
+msgstr "التلميح السابق"
 
 msgid "A new version of LimeWire is available."
 msgstr "النسخة الحديثة من LimeWire متاحة."
@@ -6262,6 +6497,9 @@ msgstr "احصل على LimeWire PRO الآن."
 msgid "What does PRO give me?"
 msgstr "ما الخدمات التي يقدمها PRO?"
 
+msgid "Get LimeWire PRO Later"
+msgstr "الحصول على LimeWire PRO لاحقا."
+
 msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
@@ -6270,11 +6508,23 @@ msgstr "اكتشف LimeWire خطأ في الملف. {0} هل تريد الاست
 msgid "Lookup File with Bitzi"
 msgstr "مشاهدة الملف مع Bitzi"
 
+msgid "Copy Magnet Links to Clipboard"
+msgstr "نسخ الوصلات الأبرز إلى ذاكرة النصوص"
+
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "نسخ الوصلات الأبرز للملفات المحددة إلى ذاكرة النصوص"
 
+msgid "C&onnect"
+msgstr "اتصال"
+
 msgid "D&isconnect"
 msgstr "قطع الاتصال"
+
+msgid "&Close"
+msgstr "إغلاق"
+
+msgid "Launch Selected Files"
+msgstr "تشغيل الملفات المحددة"
 
 msgid "View My {0} Shared Files"
 msgstr "شاهد {0} ملفاتي المشتركة"
@@ -6288,8 +6538,20 @@ msgstr "بحث عن: {0}"
 msgid "Search for {0}: {1}"
 msgstr "بحث عن {0}: {1}"
 
+msgid "Share New File..."
+msgstr "مشاركة ملف جديد..."
+
 msgid "Opens a Window and Lets You Choose a New Folder to Share"
 msgstr "افتح نافذة واختر مجلد جديد للمشاركة"
+
+msgid "Block Host"
+msgstr "حظر المضيف"
+
+msgid "Send Message"
+msgstr "ارسال رسالة"
+
+msgid "Block Current Host"
+msgstr "حظر المضيف الحالي"
 
 msgid "Send a Message to a Host"
 msgstr "ارسال رسالة إلى المضيف"
@@ -6318,6 +6580,9 @@ msgstr "عرض جميع الملفات على الحاسوب المختار"
 msgid "Loading Connections Window..."
 msgstr "يتم الآن تحميل نافذة الاتصالات..."
 
+msgid "Host:"
+msgstr "المضيف:"
+
 msgid "0.6"
 msgstr "0.6"
 
@@ -6333,6 +6598,9 @@ msgstr "جميع المجلدات التي تم تحديدها لديها أيض
 
 msgid "Share Dropped Files?"
 msgstr "مشاركة الملفات النازلة؟"
+
+msgid "Do not show this message again."
+msgstr "لا تظهر هذه الرسالة مرة ثانية."
 
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
@@ -6375,11 +6643,35 @@ msgstr "في قائمة الانتظار، عند"
 msgid "Verifying File Contents..."
 msgstr "تتم الآن مراجعة محتويات الملف..."
 
+msgid "Saving File..."
+msgstr "يتم الآن حفظ الملف..."
+
 msgid "Recovering Corrupted File"
 msgstr "استعادة الملف التالف"
 
+msgid "Paused"
+msgstr "إيقاف مؤقت"
+
+msgid "Content Removed"
+msgstr "إزالة المحتوى"
+
 msgid "Resuming..."
 msgstr "يوقف مؤقتاً..."
+
+msgid "Downloading .torrent file..."
+msgstr "تنزيل ملف .تورنت..."
+
+msgid "Average Bandwidth"
+msgstr "متوسط سرعة النقل"
+
+msgid "Valid Alternate Locations"
+msgstr "مواقع بديلة صالحة"
+
+msgid "Started On"
+msgstr "بدأ في"
+
+msgid "Finished On"
+msgstr "انتهى في"
 
 msgid "Time Spent"
 msgstr "الوقت المستغرق"
@@ -6387,6 +6679,12 @@ msgstr "الوقت المستغرق"
 #, fuzzy
 msgid "Lost To Corruption"
 msgstr "اتصال المضيف"
+
+msgid "hosts"
+msgstr "المضيفون"
+
+msgid "host"
+msgstr "المضيف"
 
 msgid "A more specific search may be required..."
 msgstr "المزيد من البحث المخصص قد يكون مطلوباً..."
@@ -6401,12 +6699,26 @@ msgstr ""
 msgid "Possible Hosts"
 msgstr "المضيفون الممكنون"
 
+msgid "Busy Hosts"
+msgstr "مضيفون مشغولون"
+
 msgid "Remotely Queued"
 msgstr "موضوع في قائمة الانتظار"
+
+msgid "Locating Sources..."
+msgstr "يتم الآن تحديد مواقع المصادر..."
 
 #, fuzzy
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr "LimeWire لايمكنه تنزيل ملف .torrent من الموقع المزود"
+
+#, fuzzy
+msgid "Progress"
+msgstr "برامج"
+
+#, fuzzy
+msgid "Speed"
+msgstr "السرعة"
 
 msgid "Loading Download Window..."
 msgstr "يتم الآن تحميل نافذة التنزيل..."
@@ -6420,6 +6732,9 @@ msgstr "ابحث عن مصادر"
 msgid "Try to Find Additional Sources for Downloads"
 msgstr "جرب إيجاد مصادر إضافية للتنزيلات."
 
+msgid "Reattempt Selected Downloads"
+msgstr "إعادة محاولة التنزيلات المحددة"
+
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
 "clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
@@ -6431,6 +6746,9 @@ msgstr ""
 msgid "&Refresh Skins"
 msgstr "تحديث السمات"
 
+msgid "&View"
+msgstr "عرض"
+
 msgid "&Apply Skins"
 msgstr "تطبيق السمات"
 
@@ -6439,6 +6757,36 @@ msgid ""
 "skin?"
 msgstr ""
 "لقد قمت بتنزيل سمة جديدة باسم \"{0}.\" هل ترغب في استخدام هذه السمة الجديدة?"
+
+msgid "Clear Download"
+msgstr "مسح التنزيل"
+
+msgid "Clear Selected Downloads"
+msgstr "مسح التنزيلات المحددة"
+
+msgid "Launch Download"
+msgstr "تشغيل التنزيل"
+
+msgid "Launch Selected Downloads"
+msgstr "تشغيل التنزيلات المحددة"
+
+msgid "Cancel Selected Downloads"
+msgstr "إلغاء التنزيلات المحددة"
+
+msgid "Preview Selected Downloads"
+msgstr "مشاهدة التنزيلات المحددة"
+
+msgid "Clear All Inactive Downloads"
+msgstr "مسح جميع التنزيلات الغير نشطة"
+
+msgid "Remove Inactive Downloads"
+msgstr "إزالة الملفات الغير نشطة الجاري تنزيلها"
+
+msgid "Pause Download"
+msgstr "إيقاف مؤقت للتنزيل"
+
+msgid "Pause Selected Downloads"
+msgstr "إيقاف مؤقت للتنزيلات المحددة"
 
 msgid "Explore"
 msgstr "استكشاف"
@@ -6452,8 +6800,20 @@ msgstr "انقل التنزيلات المحددة القريبة لتصبح ن�
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr "انقل التنزيلات المحددة اللاحقة لتصبح نشطة"
 
+msgid "Change File Location..."
+msgstr "تغيير موقع الملف..."
+
 msgid "Edit the Final Filename of the Download"
 msgstr "تحرير اسم ملف التنزيل النهائي"
+
+msgid "Always Save As..."
+msgstr "دائماً حفظ كـ..."
+
+msgid "Always Ask"
+msgstr "دائماً أسال"
+
+msgid "Choose a Default Action:"
+msgstr "اختر العمل الافتراضي:"
 
 msgid ""
 "<b>Note</b>: A file with the same content already exists in the library at "
@@ -6462,6 +6822,13 @@ msgstr "<b>ملاحظة</b>: الملف مع نفس المحتوى موجود م
 
 msgid "Overwrite the Existing File"
 msgstr "الكتابة فوق الملف الموجود"
+
+msgid "Choose a different location for the Download"
+msgstr "اختر موقع آخر للتنزيل"
+
+#, fuzzy
+msgid "Append (#)"
+msgstr "أسقط (I/O)"
 
 msgid ""
 "LimeWire may not be able to start the download you have selected unless you "
@@ -6477,17 +6844,32 @@ msgstr "يجب عليك دائماً تدقيق ملف مشابه في {0}"
 msgid "Do you want to continue downloading anyway?"
 msgstr "هل تريد استمرار التنزيل على أية حال؟"
 
+msgid "Same File Already In Library"
+msgstr "ملف مشابه موجود في المكتبة"
+
+msgid "No Filename"
+msgstr "لا اسم ملف"
+
+msgid "File & Protocol Associations"
+msgstr "ملحقات البروتوكول والملف"
+
 msgid "What type of resources should LimeWire open?"
 msgstr "ماهو نوع المورد الذي يجب أن يفتحه LimeWire?"
 
 msgid "What should LimeWire do with the selected associations on startup?"
 msgstr "ماذا يجب على LimeWire فعله مع الملحقات المحددة في بدء التشغيل؟"
 
+msgid "Always take the selected associations."
+msgstr "أخذ الملحقات المحددة دائماً"
+
 msgid "Ignore all missing associations."
 msgstr "تجاهل جميع الملحقات المفقودة."
 
 msgid "Ask me what to do when an association is missing."
 msgstr "اسألني ماذا تفعل عندما يكون الملحق مفقود."
+
+msgid "Firewall Setup"
+msgstr "تثبيت الجدار الناري"
 
 msgid ""
 "LimeWire performs best with full access to the Internet. If firewall or "
@@ -6498,6 +6880,13 @@ msgstr ""
 "تحذيرات أمنية ظهرت, من فضلك قم بإلغاء حظر LimeWire والاختيار لتذكر الخصائص. "
 "برنامج جدارك الناري قد يكون مختلفاً عن الصورة في الأسفل."
 
+#, fuzzy
+msgid "System Startup"
+msgstr "العمل مع بداية تشغيل النظام"
+
+msgid "Start Automatically"
+msgstr "البدء تلقائياً"
+
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
 "cause LimeWire to start faster when you use it later."
@@ -6505,12 +6894,28 @@ msgstr ""
 "هل تريد LimeWire البدء عندما تدخل داخل حاسوبك? هذا سيمكن LimeWire من البدء "
 "سريعاً عندما تستخدمه لاحقاً."
 
+msgid "Content Filtering"
+msgstr "ترشيح المحتوى"
+
+msgid "Shared Folders"
+msgstr "المجلدات المشاركة"
+
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
 msgstr ""
 "لم يتمكن LimeWire من استخدام المجلد المحدد لحفظ الملفات. من فضلك اختر مجلدا "
 "آخر."
+
+#, fuzzy
+msgid "Use the Default Folder"
+msgstr "إعادة إلى مجلد التنزيل الافتراضي"
+
+msgid "Next >>"
+msgstr "التالي >>"
+
+msgid "<< Back"
+msgstr "<< السابق"
 
 msgid "Welcome"
 msgstr "مرحباً"
@@ -6531,6 +6936,9 @@ msgstr ""
 "مرحباً بك في معالج تثبيت LimeWire. سيقوم المعالج بإرشادك من خلال سلسلة من "
 "الخطوات لكي يعمل LimeWire بشكل صحيح."
 
+msgid "Loading Library Window..."
+msgstr "يتم الآن تحميل نافذة المكتبة..."
+
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "يمكنك إعداد المجلدات التي تشارك بها في خيارات LimeWire's."
 
@@ -6539,6 +6947,12 @@ msgstr "بحث في الملفات المشتركة:"
 
 msgid "Holds the Results of the Last Search"
 msgstr "إبقاء نتائج البحث الأخير"
+
+msgid "Path"
+msgstr "المسار"
+
+msgid "Last Modified"
+msgstr "التعديل الأخير"
 
 msgid ""
 "The following files could not be deleted. They may be in use by another "
@@ -6560,8 +6974,14 @@ msgstr "إلى قائمة القراءة"
 msgid "Add Selected Files to the Playlist"
 msgstr "إضافة الملفات المحددة إلى قائمة القراءة"
 
+msgid "Delete Selected Files"
+msgstr "حذف الملفات المحددة"
+
 msgid "Describe..."
 msgstr "توثيق..."
+
+msgid "Add Description to Selected File"
+msgstr "توثيق الملف المحدد"
 
 msgid "Publish..."
 msgstr "نشر..."
@@ -6571,6 +6991,19 @@ msgstr "نشر تحت رخصة Creative العامة"
 
 msgid "Edit License..."
 msgstr "تحرير الرخصة..."
+
+msgid "Continue Downloading Selected Incomplete File"
+msgstr "استئناف تنزيل الملفات المحددة الغير مكتملة"
+
+msgid "Rename"
+msgstr "إعادة تسمية"
+
+msgid "Stop Sharing File"
+msgstr "إيقاف مشاركة ملف"
+
+#, fuzzy
+msgid "Stop Sharing Folder"
+msgstr "أوقف مشاركة المجلد"
 
 msgid "Show Magnet Details"
 msgstr "عرض التفاصيل الأبرز"
@@ -6584,12 +7017,25 @@ msgstr "هل أنت متأكد أنك تريد إيقاف مشاركة هذا ا
 msgid "Add Folder Contents to Playlist"
 msgstr "إضافة محتويات المجلد إلى قائمة القراءة"
 
+msgid "Show .torrent Files"
+msgstr "عرض ملفات .تورنت"
+
 msgid "Refresh"
 msgstr "تحديث"
+
+msgid "Reload Shared Folders"
+msgstr "إعادة تحميل المجلدات المشتركة"
 
 #, fuzzy
 msgid "Open Library Folder"
 msgstr "إعادة تسمية مجلد المكتبة المحدد"
+
+msgid "Configure Sharing Options"
+msgstr "إعداد خيارات المشاركة"
+
+#, fuzzy
+msgid "Legend"
+msgstr "إرسال"
 
 #, fuzzy
 msgid "Folder is not shared and no subfolders are shared."
@@ -6605,11 +7051,32 @@ msgstr "الملفات المشتركة الفردية"
 msgid "List of All Individually Shared Files"
 msgstr "قائمة جميع الملفات المشتركة الفردية"
 
+msgid "List of .torrent files"
+msgstr "قائمة ملفات .تورنت"
+
+msgid "Logging"
+msgstr "الدخول"
+
+msgid "Loading Logging Window..."
+msgstr "يتم الآن تحميل نافذة الدخول..."
+
+msgid "&Advanced"
+msgstr "متقدم"
+
+msgid "&File"
+msgstr "ملف"
+
+msgid "Filter&s"
+msgstr "مرشحات"
+
 msgid "Configure LimeWire's Content Filtering Options"
 msgstr "إعداد خيارات مرشحات محتوى LimeWire's"
 
 msgid "Learn More about LimeWire's Content Filtering System"
 msgstr "تعلم أكثر حول نظام مرشحات محتوى LimeWire's"
+
+msgid "Help for Using LimeWire"
+msgstr "مساعدة حول كيفية استخدام LimeWire"
 
 msgid "Frequently Asked Questions for LimeWire"
 msgstr "أسئلة متكررة حول LimeWire."
@@ -6623,14 +7090,35 @@ msgstr "تلميح اليوم"
 msgid "Show the Tip of the Day Window"
 msgstr "عرض نافذة تلميح اليوم"
 
+msgid "Generate &Error"
+msgstr "حدوث خطأ"
+
 msgid "Generate a Popup Error for Testing"
 msgstr "حدوث نافذة خطأ منبثقة للاختبار."
+
+msgid "&About LimeWire"
+msgstr "حول LimeWire"
+
+msgid "Information about LimeWire"
+msgstr "معلومات حول LimeWire"
+
+msgid "Loading Menus..."
+msgstr "يتم الآن تحميل القوائم..."
 
 msgid "&Navigation"
 msgstr "جولة"
 
+msgid "&Resources"
+msgstr "الموارد"
+
+msgid "LimeWire &PRO"
+msgstr "LimeWire &PRO"
+
 msgid "Display the LimeWire PRO Website"
 msgstr "عرض موقع Lime PRO."
+
+msgid "Result &Filters"
+msgstr "مرشحات النتائج"
 
 msgid "Show Search Result Filters"
 msgstr "عرض مرشحات نتائج البحث"
@@ -6646,6 +7134,15 @@ msgstr "المزيد من السمات من موقع LimeWire"
 
 msgid "Reload available skins from disk"
 msgstr "إعادة تحميل السمات المتاحة من القرص"
+
+msgid "Use &Default"
+msgstr "استخدام الافتراضي"
+
+msgid "Use your default skin"
+msgstr "استخدام السمة الافتراضية"
+
+msgid "&Options"
+msgstr "خيارات"
 
 msgid "Display the Options Screen"
 msgstr "عرض شاشة الخيارات"
@@ -6671,15 +7168,40 @@ msgstr "أختر تفضيلات لغتك"
 msgid "LimeWire Media Player"
 msgstr "LimeWire Media Player"
 
+msgid "About"
+msgstr "حول"
+
+msgid "Restore Defaults"
+msgstr "إستعادة الافتراضيات"
+
+msgid "Slots"
+msgstr "الشرائح"
+
+msgid "Status Bar"
+msgstr "شريط الحالة"
+
 msgid "Helper Apps"
 msgstr "التطبيقات المساعدة"
+
+#, fuzzy
+msgid "Bug Reports"
+msgstr "نسخ التقرير"
+
+msgid "Content"
+msgstr "المحتوى"
 
 #, fuzzy
 msgid "Junk"
 msgstr "غير تافه"
 
+msgid "Hosts"
+msgstr "المضيفون"
+
 msgid "Preferencing"
 msgstr "تفضيلات"
+
+msgid "Loading Options Window..."
+msgstr "يتم الآن تحميل نافذة الخيارات..."
 
 msgid "You can choose the folder for saving files."
 msgstr "يمكنك اختيار مجلد لحفظ الملفات."
@@ -6714,13 +7236,25 @@ msgstr ""
 "يمكنك استخدام LimeWire لفتح انواع الملفات والبروتوكولات الموثوقة. يمكنك أيضاً "
 "توجيه LimeWire لاستعادة تلك الملحقات دائماً إذا تم اخذها من قبل برنامج آخر."
 
+msgid "Use LimeWire for..."
+msgstr "استخدم LimeWire لـ..."
+
 msgid "You can choose which audio player to use."
 msgstr "يمكنك اختيار مشغل ملفات الصوت الذي ترغب في استخدامه."
+
+msgid "Audio Player"
+msgstr "مشغل ملفات الصوت"
+
+msgid "Clear Completed Downloads:"
+msgstr "مسح تلقائي للملفات التي تم تنزيلها:"
 
 msgid ""
 "You can choose whether or not to automatically clear uploads that have "
 "completed."
 msgstr "يمكنك الاختيار بين مسح الملفات التي تم تحميلها بالكامل أو لا."
+
+msgid "Automatically Clear Completed Uploads:"
+msgstr "مسح تلقائي للملفات التي يتم تحميلها:"
 
 msgid "Text Autocompletion"
 msgstr "استكمال تلقائي للنص"
@@ -6731,6 +7265,9 @@ msgstr "يمكنك تمكين أو تعطيل الاستكمال التلقائ�
 msgid "Enable Autocompletion of Text Fields:"
 msgstr "تمكين الاستكمال التلقائي لحقول النص."
 
+msgid "Browser Options"
+msgstr "خيارات المتصفح"
+
 msgid "You can choose which browser to use."
 msgstr "يمكنك اختيار المتصفح الذي ترغب في استخدامه."
 
@@ -6740,13 +7277,28 @@ msgstr "عرض مثال"
 msgid "Send Errors Automatically if LimeWire is Frozen"
 msgstr "أرسل الأخطاء تلقائياً إذا كان LimeWire مجمداً"
 
+msgid "Host Communication"
+msgstr "اتصال المضيف"
+
 msgid "You can turn chat on or off."
 msgstr "يمكنك تشغيل أو إيقاف الدردشة."
+
+msgid "Enable Chat:"
+msgstr "تمكين الدردشة:"
+
+msgid "Connect on Startup"
+msgstr "الإتصال عند بدء التشغيل"
 
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr "يمكنك الاختيار بين الإتصال التلقائي بالشبكة عند تشغيل البرنامج أو لا."
+
+msgid "Connect on Startup:"
+msgstr "الإتصال عند بدء التشغيل:"
+
+msgid "Connection Preferencing"
+msgstr "تفضيلات الإتصال"
 
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
@@ -6756,6 +7308,12 @@ msgstr ""
 
 msgid "Files You Must Share to Not be a Freeloader:"
 msgstr "يجب أن تكون مشاركاً ليس إستغلالياً"
+
+msgid "Allow Freeloaders:"
+msgstr "السماح للمستغّلين:"
+
+msgid "Enable Content Filters"
+msgstr "تمكين مرشحات المحتوى"
 
 msgid "Password Protection"
 msgstr "حماية كلمة السر"
@@ -6775,11 +7333,29 @@ msgstr "سلوك الملف موجود مسبقاً"
 msgid "Always Show the 'Save As' Dialog"
 msgstr "دائماً أعرض مربع حوار 'حفظ كـ'"
 
+msgid "Always Ask What to do"
+msgstr "اسأل دائماً ماذا تفعل"
+
+msgid "Capabilities"
+msgstr "إمكانيات"
+
+msgid "Disable Mojito DHT Capabilities:"
+msgstr "تعطيل إمكانيات Mojito DHT:"
+
+msgid "OOB Searching"
+msgstr "بحث خارج النطاق"
+
 msgid "You can set the percentage of your bandwidth devoted to downloads."
 msgstr "يمكنك تحديد نسبة من سرعة النقل لتستخدم في الملفات."
 
 msgid "License Warning"
 msgstr "تحذير الرخصة"
+
+msgid "Show License Warning:"
+msgstr "عرض تحذير الرخصة:"
+
+msgid "Use Defaults"
+msgstr "استخدم الافتراضيات"
 
 msgid "Do Nothing (Not Recommended)"
 msgstr "لا تفعل شيئاً (غير مستحسن)"
@@ -6787,6 +7363,9 @@ msgstr "لا تفعل شيئاً (غير مستحسن)"
 msgid ""
 "You must enter a port between 1 and 65535 when manually forcing your port."
 msgstr "يجب عليك ادخل منفذ بين 1 و 65535 يدوياً عند إقصاء منفذك."
+
+msgid "Filter Hosts"
+msgstr "ترشيح المضيفين"
 
 msgid ""
 "You can disallow messages from specific hosts by adding their IP addresses "
@@ -6803,14 +7382,23 @@ msgstr "ترشيح أنواع النتائج"
 msgid "You can specify general types of search results to filter."
 msgstr "يمكنك تحديد أنواع عامة من نتائج البحث ليتم ترشيحها."
 
+msgid "Ignore Adult Content"
+msgstr "تجاهل محتوى البالغين"
+
 msgid "Ignore .htm/.html Files"
 msgstr "تجاهل ملفات .htm/.html"
+
+msgid "Ignore .vbs Files"
+msgstr "تجاهل ملفات .vbs"
 
 msgid "Ignore .wmv/.asf files"
 msgstr "تجاهل ملفات .wmv/.asf"
 
 msgid "You can filter out search results containing specific words."
 msgstr "يمكنك ترشيح نتائج البحث التي تحتوي كلمات معينة."
+
+msgid "Image Options"
+msgstr "خيارات الصورة"
 
 msgid "You can choose which image viewer to use."
 msgstr "يمكنك اختيار عارض الصور الذي ترغب في استخدامه."
@@ -6827,8 +7415,14 @@ msgstr "يمكنك اختيار تفضيل المضيفيين باستخدام �
 msgid "Turn preferencing on:"
 msgstr "تغيير التفضيلات إلى:"
 
+msgid "Maximum Downloads"
+msgstr "أقصى عدد لتنزيل الملفات"
+
 msgid "You can set the maximum number of simultaneous downloads."
 msgstr "يمكنك تحديد أقصى عدد لتنزيل الملفات في نفس الوقت."
+
+msgid "Maximum Downloads:"
+msgstr "أقصى عدد لتنزيل الملفات:"
 
 msgid "Maximum Searches"
 msgstr "أقصى عدد من البحث"
@@ -6840,6 +7434,9 @@ msgstr "يمكنك تحديد أقصى عدد من محاولات البحث ي�
 msgid "Maximum Searches:"
 msgstr "أقصى عدد من البحث:"
 
+msgid "Max Upload Slots"
+msgstr "الحد الأقصى لشرائح التحميل"
+
 msgid ""
 "Never allow more than this many uploads. This value will only be reached if "
 "you have enough bandwidth."
@@ -6847,8 +7444,18 @@ msgstr ""
 "عدم السماح أبداً بهذا العدد من التحميلات. سيتم الوصول إلى هذه القيمة فقط إذا "
 "كان لديك سرعة نقل كافية."
 
+msgid "Max Upload Slots:"
+msgstr "الحد الأقصى لشرائح التحميل:"
+
 msgid "Media Type"
 msgstr "نوع الوسائط"
+
+msgid "Open Dialog to Select a Folder"
+msgstr "فتح مربع حوار لاختيار مجلد"
+
+#, fuzzy
+msgid "Reset"
+msgstr "إستعادة"
 
 msgid "Reset to Default Download Folder"
 msgstr "إعادة إلى مجلد التنزيل الافتراضي"
@@ -6859,6 +7466,9 @@ msgid ""
 msgstr ""
 "LimeWire غير قادر على تحديد أية واجهات الشبكة المتوفرة على هذا الجهاز. "
 "الإتصالات الصادرة سترتبط بأي واجهة تعسّفياً."
+
+msgid "Partial Files"
+msgstr "الملفات الجزئية"
 
 msgid ""
 "You can choose whether or not to automatically share partially downloaded "
@@ -6873,6 +7483,9 @@ msgstr "السماح بهذا العدد من الملفات المحملة لك
 
 msgid "Uploads Per Person:"
 msgstr "عدد الملفات المحملة لكل شخص:"
+
+msgid "Player Options"
+msgstr "خيارات المشغل"
 
 msgid ""
 "You can choose to play media with LimeWire or your system's default player. "
@@ -6913,6 +7526,9 @@ msgstr "ضبط خيارات الوكيل لـ LimeWire."
 msgid "You can automatically delete old incomplete download files."
 msgstr "يمكنك إلغاء الملفات القديمة الغير مكتملة تلقائياً."
 
+msgid "Days to Keep Incomplete Files:"
+msgstr "عدد الأيام لحفظ الملفات الغير مكتملة."
+
 msgid "You can specify a download location for each media type."
 msgstr "يمكنك تحديد موقع التنزيل لكل نوع من الوسائط."
 
@@ -6928,6 +7544,9 @@ msgid ""
 "will be shared:"
 msgstr ""
 "هل تود مشاركة مجلدات الحفظ الجديدة? المجلدات الجديدة التالية ستكون مشاركة:"
+
+msgid "Search Result Quality"
+msgstr "جودة نتيجة البحث"
 
 msgid ""
 "You can select the \"quality\" of search results to display. Four star "
@@ -6967,6 +7586,9 @@ msgstr "عرض النتائج من سرعة cable/DSL أو أعلى"
 msgid "Show All Speeds"
 msgstr "عرض جميع السرعات"
 
+msgid "Download Sharing"
+msgstr "مشاركة التنزيلات"
+
 msgid ""
 "You can choose the folders for sharing files. Files in these folders are "
 "displayed in the library."
@@ -6979,6 +7601,12 @@ msgstr "طريقة إيقاف التشغيل"
 
 msgid "You can choose the default shutdown behavior."
 msgstr "يمكنك اختيار طريقة إيقاف التشغيل الافتراضية."
+
+msgid "Shutdown Immediately"
+msgstr "إيقاف التشغيل في الحال"
+
+msgid "Shutdown after Transfers"
+msgstr "إيقاف التشغيل بعد الإنتهاء من التحويلات"
 
 msgid "Start Upload Slots:"
 msgstr "بداية شرائح التحميل:"
@@ -6994,13 +7622,22 @@ msgid ""
 "performance."
 msgstr "يمكنك تحديد سرعة الإتصال لكي يعمل LimeWire بشكل أفضل."
 
+msgid "Speed:"
+msgstr "السرعة"
+
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
 "computer starts."
 msgstr "يمكنك الاختيار بين عمل LimeWire تلقائياً مع بداية تشغيل النظام أو لا."
 
+msgid "Bandwidth Indicator"
+msgstr "مؤشر معدل النقل"
+
 msgid "You can display your bandwidth consumption in the status bar."
 msgstr "يمكنك عرض إستهلاك معدل النقل في شريط الحالة."
+
+msgid "Show Bandwidth Indicator:"
+msgstr "عرض مؤشر معدل النقل:"
 
 msgid "Connection Quality Indicator"
 msgstr "مؤشر جودة الإتصال"
@@ -7011,6 +7648,9 @@ msgstr "يمكنك عرض مقياس جودة الإتصال في شريط ال�
 
 msgid "Show Connection Quality Indicator:"
 msgstr "عرض مؤشر جودة الإتصال:"
+
+msgid "Firewall Indicator"
+msgstr "مؤشر الجدار الناري"
 
 msgid "You can display your firewall status in the status bar."
 msgstr "يمكنك عرض حالة جدارك الناري في شريط الحالة."
@@ -7033,6 +7673,9 @@ msgstr "يمكنك عرض أيقونة صينية النظام بينما LimeWi
 msgid "Show System Tray Icon:"
 msgstr "عرض أيقونة صينية النظام:"
 
+msgid "Update Options"
+msgstr "خيارات التحديث"
+
 msgid "You can choose when you want to be notified of new LimeWire releases."
 msgstr "يمكنك الاختيار عندما تريد تنبيهك عن إصدارات LimeWire الجديدة."
 
@@ -7047,8 +7690,17 @@ msgstr ""
 "يمكنك تحديد نسبة من سرعة النقل لتستخدم في التحميل. إذا كنت لا ترغب في "
 "التحميل، ضع قيمة شرائح التحميل بصفر."
 
+msgid "Upload Speed:"
+msgstr "سرعة التحميل:"
+
+msgid "Video Options"
+msgstr "خيارات الفيديو"
+
 msgid "You can choose which video player to use."
 msgstr "يمكنك اختيار مشغل ملفات الفيديو الذي ترغب في استخدامه."
+
+msgid "Video Player"
+msgstr "مشغل ملفات الفيديو"
 
 msgid "You can have LimeWire import newly downloaded songs into iTunes."
 msgstr "يمكنك جعل LimeWire يستورد أحدث الأغاني داخل iTunes ."
@@ -7065,11 +7717,41 @@ msgstr "حفظ قائمة القراءة الحالية إلى ملف"
 msgid "#"
 msgstr "#"
 
+msgid "Loading Playlist Window..."
+msgstr "يتم الآن تحميل نافذة قائمة القراءة..."
+
+msgid "Play Options:"
+msgstr "خيارات التشغيل:"
+
+msgid "Shuffle"
+msgstr "تبديل"
+
+msgid "Continuous"
+msgstr "مستمر"
+
 msgid "Open Playlist (.m3u)"
 msgstr "اختر قائمة قراءة (*.m3u)"
 
+msgid "Save Playlist As"
+msgstr "حفظ قائمة القراءة باسم"
+
 msgid "Playlist Files (*.m3u)"
 msgstr "ملفات قائمة القراءة (*.m3u)"
+
+msgid "General"
+msgstr "عام"
+
+msgid "Option"
+msgstr "خيار"
+
+msgid "Filter Results:"
+msgstr "نتائج المرشح:"
+
+msgid "Back To Search"
+msgstr "عودة إلى البحث"
+
+msgid "Download As..."
+msgstr "تنزيل كــ..."
 
 msgid "Would you like to start downloads from the following magnets?"
 msgstr "هل تود البدء في التنزيل من البارزين في القائمة التالية؟"
@@ -7100,6 +7782,9 @@ msgstr "ضع علامة تافه لنتائج البحث المحددة"
 msgid "Mark selected search results as Not Junk"
 msgstr "ضع علامة غير تافه لنتائج البحث المحددة"
 
+msgid "Search More"
+msgstr "بحث أكثر"
+
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "هل تريد حظر نتائج البحث من قائمة المضيفين التالية؟"
 
@@ -7120,6 +7805,13 @@ msgstr "بحث عن ملفات المستند, المتضمن html, txt, pdf, و
 
 msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "بحث عن ملفات البرنامج, المتضمن exe, zip, gz, وأكثر"
+
+#, fuzzy
+msgid "Stop Search"
+msgstr "إغلاق البحث"
+
+msgid "Download All Selected Files"
+msgstr "تنزيل جميع الملفات المحددة"
 
 msgid "View All Files on Selected Computer"
 msgstr "عرض جميع ملفات الحاسوب المحدد"
@@ -7142,6 +7834,9 @@ msgid ""
 "connections."
 msgstr "حاسوبك خلف جدار ناري أو موجه ولايمكنه استقبال الاتصالات المباشرة."
 
+msgid "Don't Know"
+msgstr "لا تعرف"
+
 msgid "What To Look For?"
 msgstr "ما الذي تتطلع إليه?"
 
@@ -7156,8 +7851,17 @@ msgstr "البحث الحالي:"
 msgid "Hide Adult Content"
 msgstr "إخفاء محتوى البالغين"
 
+msgid "Launch Action"
+msgstr "تنفيذ العمل"
+
 msgid "Chat With Host"
 msgstr "دردشة مع المضيف"
+
+msgid "Repeat Search"
+msgstr "إعادة البحث"
+
+msgid "Loading Search Window..."
+msgstr "يتم الآن تحميل نافذة البحث..."
 
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
@@ -7195,6 +7899,13 @@ msgstr ""
 msgid "Could not browse host {0}."
 msgstr "لا يمكن استعراض المضيف {0} ."
 
+msgid "Vendor"
+msgstr "البائع"
+
+#, fuzzy
+msgid "Junk Rating"
+msgstr "التقييم"
+
 msgid "Media"
 msgstr "الوسائط"
 
@@ -7213,6 +7924,9 @@ msgstr "عرض الملفات المحفوظة"
 
 msgid "View Searches and Uploads"
 msgstr "عرض نتائج البحث والملفات الجاري تحميلها"
+
+msgid "Search and Download Files"
+msgstr "بحث وتنزيل ملفات"
 
 msgid ""
 "The skin file you selected does not exist or is invalid. Please choose "
@@ -7237,8 +7951,19 @@ msgid ""
 "theme."
 msgstr "السمة التي تريد تطبيقها غير صالحة. LimeWire سيعود للسمة الافتراضية."
 
+#, fuzzy
+msgid "Kill Upload"
+msgstr "تحميل"
+
 msgid "Stop Selected Uploads"
 msgstr "إيقاف الملفات المحددة الجاري تحميلها."
+
+msgid "Remove Inactive Uploads"
+msgstr "إزالة الملفات الجاري تحميلها الغير نشطة."
+
+#, fuzzy
+msgid "Freeloader Uploading"
+msgstr "جاري التحميل"
 
 msgid "File Not Found"
 msgstr "ملف غير موجود."
@@ -7254,8 +7979,24 @@ msgstr "Magnet طلبات"
 msgid "Uploading Hash Tree"
 msgstr "جاري تحميل الملف"
 
+msgid "Suspended"
+msgstr "متوقف"
+
 msgid "Awaiting Requests"
 msgstr "طلبات الانتظار"
+
+msgid "Loading Upload Window..."
+msgstr "يتم الآن تحميل نافذة التحميل..."
+
+#, fuzzy
+msgid "Seeding"
+msgstr "بحث"
+
+msgid "Invalid Filename"
+msgstr "اسم ملف غير صالح"
+
+msgid "Download Already Finished"
+msgstr "التنزيل اكتمل الآن"
 
 msgid "No Write Permission"
 msgstr "لا ترخيص بالكتابة"
@@ -7265,6 +8006,15 @@ msgstr "المجلد غير موجود"
 
 msgid "File Already Exists"
 msgstr "الملف موجود مسبقاً"
+
+msgid "Filename Taken"
+msgstr "اسم الملف مأخوذ"
+
+msgid "Not a File"
+msgstr "ليس ملف"
+
+msgid "Filesystem Error"
+msgstr "خطأ نظام الملفات"
 
 msgid "Same File Already Being Downloaded"
 msgstr "نفس الملف تم تنزيله من قبل"
@@ -7302,6 +8052,9 @@ msgstr "لايمكن وضع موقع الملف بسبب خطأ في نظام ا
 msgid "The same file is already being downloaded."
 msgstr "ملف مشابه تم تنزيله مسبقاً"
 
+msgid "More Search Options"
+msgstr "المزيد من خيارات البحث"
+
 msgid "Publish License"
 msgstr "رخصة النشر"
 
@@ -7338,6 +8091,9 @@ msgstr "هذه الأداة تساعد في نشر الصوت تحت رخصة Cr
 msgid "How does it work?"
 msgstr "كيف يعمل؟"
 
+msgid "ShareAlike"
+msgstr "تطابق المشاركة"
+
 msgid "Allow commercial use of your work?"
 msgstr "السماح للإستخدام التجاري لعملك؟"
 
@@ -7352,6 +8108,9 @@ msgstr "صاحب حقوق النسخ:"
 
 msgid "Copyright Year:"
 msgstr "سنة حقوق النسخ:"
+
+msgid "Title of Work:"
+msgstr "عنوان العمل:"
 
 msgid "Please enter the copyright holder, copright year and title."
 msgstr "من فضلك ادخل مالك حقوق النسخ، سنة حقوق النسخ والعنوان."
@@ -7376,6 +8135,18 @@ msgstr "من فضلك ادخل رابط التأكيد للرخصة"
 msgid "License RDF Output"
 msgstr "تفاصيل الرخصة"
 
+msgid "Copy to Clipboard"
+msgstr "نسخ إلى ذاكرة النصوص"
+
+msgid "Kind:"
+msgstr "نوع:"
+
+msgid "Size:"
+msgstr "الحجم:"
+
+msgid "Date Modified:"
+msgstr "تاريخ التعديل"
+
 msgid "Internal Document Error. Data could not be saved."
 msgstr "حدث خطأ داخلي في المستند. لا يمكن حفظ البيانات"
 
@@ -7394,17 +8165,59 @@ msgstr "الملف تالف. لا يمكن حفظ البيانات"
 msgid "Incorrect format entered. Changes will not be saved."
 msgstr "تم إدخال هيئة غير صحيحة. لن يتم حفظ التغييرات."
 
+msgid "Title:"
+msgstr "العنوان:"
+
+msgid "Artist:"
+msgstr "الفنان:"
+
+msgid "Album:"
+msgstr "الألبوم:"
+
+msgid "Genre:"
+msgstr "الصنف:"
+
+msgid "Year:"
+msgstr "السنة:"
+
+msgid "Type:"
+msgstr "النوع:"
+
+msgid "Track:"
+msgstr "المسار:"
+
+msgid "Length:"
+msgstr "الطول:"
+
+msgid "Bitrate:"
+msgstr "معدّل البِتّات:"
+
+msgid "Comments:"
+msgstr "التعليقات:"
+
 msgid "SHA1:"
 msgstr "SHA1:"
 
 msgid "Price:"
 msgstr "السعر:"
 
+msgid "Action:"
+msgstr "العمل:"
+
+msgid "License:"
+msgstr "الرخصة:"
+
+msgid "Rating:"
+msgstr "التقييم:"
+
 msgid "License Type:"
 msgstr "نوع الرخصة:"
 
 msgid "Director:"
 msgstr "المخرج:"
+
+msgid "Studio:"
+msgstr "الاستديو:"
 
 msgid "Stars: (Please separate with comma)"
 msgstr "النجوم: (من فضلك افصلها مع فاصلة)"
@@ -7418,8 +8231,14 @@ msgstr "عناوين فرعية: (من فضلك افصلها مع فاصلة)"
 msgid "Topic:"
 msgstr "الموضوع:"
 
+msgid "Author:"
+msgstr "المؤلف:"
+
 msgid "Publisher:"
 msgstr "الناشر:"
+
+msgid "Platform:"
+msgstr "الجهاز:"
 
 #, fuzzy
 msgid "Description:"
@@ -7437,318 +8256,6 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr "لم يتم التعرف على نوع الملف الرجاء اختيار النوع الذي يناسب هذا الملف"
-
-#, fuzzy
-#~ msgid "Loading bittorrent Management..."
-#~ msgstr "إدارة المكتبة"
-
-#, fuzzy
-#~ msgid "Loading magnet Management..."
-#~ msgstr "إدارة المكتبة"
-
-#, fuzzy
-#~ msgid "Modem"
-#~ msgstr "معدل"
-
-#, fuzzy
-#~ msgid "English"
-#~ msgstr "إنهاء"
-
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "لصق"
-
-#, fuzzy
-#~ msgid "You are sharing {0} files (Loading...)"
-#~ msgstr "أنت تشارك {0} ملفاً (ملفات) مع {1}"
-
-#, fuzzy
-#~ msgid "&Download .torrent"
-#~ msgstr "التحميل من"
-
-#, fuzzy
-#~ msgid "Paste from Clipboard"
-#~ msgstr "إزالة من المكتبة"
-
-#, fuzzy
-#~ msgid "Waiting"
-#~ msgstr "التقييم"
-
-#, fuzzy
-#~ msgid "Finish Setup"
-#~ msgstr "انتهى"
-
-#, fuzzy
-#~ msgid "Language Options"
-#~ msgstr "إدارة الامتدادات"
-
-#, fuzzy
-#~ msgid "Save Folder:"
-#~ msgstr "حفظ المجلدات"
-
-#, fuzzy
-#~ msgid "Confirm Scan"
-#~ msgstr "بدون مسح"
-
-#, fuzzy
-#~ msgid "Limewire Setup Dialog"
-#~ msgstr "متجر LimeWire"
-
-#, fuzzy
-#~ msgid "Select Speed"
-#~ msgstr "تحديد"
-
-#, fuzzy
-#~ msgid "Scan cancelled"
-#~ msgstr "ملغي"
-
-#, fuzzy
-#~ msgid "Cancel Scan"
-#~ msgstr "إلغاء"
-
-#, fuzzy
-#~ msgid "Annotating file"
-#~ msgstr "تحديد موقع الملف"
-
-#, fuzzy
-#~ msgid "Upload"
-#~ msgstr "إيداعات"
-
-#, fuzzy
-#~ msgid "Connected..."
-#~ msgstr "جاري الاتصال..."
-
-#, fuzzy
-#~ msgid "Uploading file"
-#~ msgstr "إيداع العنصر"
-
-#, fuzzy
-#~ msgid "Uploaded"
-#~ msgstr "إيداعات"
-
-#, fuzzy
-#~ msgid "Results"
-#~ msgstr "استئناف"
-
-#, fuzzy
-#~ msgid "files (Loading...)"
-#~ msgstr "جاري التحميل..."
-
-#, fuzzy
-#~ msgid "QRP"
-#~ msgstr "QRP (%)"
-
-#, fuzzy
-#~ msgid "Errors"
-#~ msgstr "خطأ Daap"
-
-#, fuzzy
-#~ msgid "Compression"
-#~ msgstr "المضغوط الوارد"
-
-#, fuzzy
-#~ msgid "Hit Routing Errors"
-#~ msgstr "خطأ iTunes"
-
-#, fuzzy
-#~ msgid "All Messages"
-#~ msgstr "الرسالة"
-
-#, fuzzy
-#~ msgid "Hops 1"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 2"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 3"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 4"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 5"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 6"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 7"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 8"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Hops 9"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Pong Errors"
-#~ msgstr "خطأ iTunes"
-
-#, fuzzy
-#~ msgid "Reply Errors"
-#~ msgstr "خطأ Daap"
-
-#, fuzzy
-#~ msgid "All Requests"
-#~ msgstr "السماح بالمضيفين"
-
-#, fuzzy
-#~ msgid "Current"
-#~ msgstr "قطع"
-
-#, fuzzy
-#~ msgid "Generic Errors"
-#~ msgstr "خطأ داخلي"
-
-#, fuzzy
-#~ msgid "Color"
-#~ msgstr "مسح"
-
-#, fuzzy
-#~ msgid "All Errors"
-#~ msgstr "إضافة مجلدات"
-
-#, fuzzy
-#~ msgid "Invalid Hops"
-#~ msgstr "رابط غير صحيح!"
-
-#, fuzzy
-#~ msgid "Invalid TTL"
-#~ msgstr "رابط غير صحيح!"
-
-#, fuzzy
-#~ msgid "Invalid ID"
-#~ msgstr "رابط غير صحيح!"
-
-#, fuzzy
-#~ msgid "What's New?"
-#~ msgstr "ما الجديد"
-
-#, fuzzy
-#~ msgid "Connection Attempts"
-#~ msgstr "الاتصالات"
-
-#, fuzzy
-#~ msgid "Incoming Attempts"
-#~ msgstr "الوارد"
-
-#, fuzzy
-#~ msgid "Banned Hosts"
-#~ msgstr "حجب المضيفين"
-
-#, fuzzy
-#~ msgid "Closed Immediately"
-#~ msgstr "إرسال فوري دائماً"
-
-#, fuzzy
-#~ msgid "Incompatible Ranges"
-#~ msgstr "ملفات غير كاملة"
-
-#, fuzzy
-#~ msgid "Push Proxy"
-#~ msgstr "لا يوجد ملقم وكيل"
-
-#, fuzzy
-#~ msgid "Completed File Transfers"
-#~ msgstr "ملفات غير كاملة"
-
-#, fuzzy
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "نظير فائق"
-
-#, fuzzy
-#~ msgid "LimeWire Leaves"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Other Ultrapeers"
-#~ msgstr "نظراء فائقون"
-
-#, fuzzy
-#~ msgid "Other Leaves"
-#~ msgstr "تابعون"
-
-#, fuzzy
-#~ msgid "Hit"
-#~ msgstr "الارتفاع"
-
-#, fuzzy
-#~ msgid "Height:"
-#~ msgstr "الارتفاع"
-
-#, fuzzy
-#~ msgid "Display:"
-#~ msgstr "التأخير:"
-
-#, fuzzy
-#~ msgid "Vendor Messages"
-#~ msgstr "رسائل التحذير"
-
-#, fuzzy
-#~ msgid "&New Folder"
-#~ msgstr "إضافة مجلد جديد"
-
-#, fuzzy
-#~ msgid "&Rename Folder"
-#~ msgstr "حفظ المجلدات"
-
-#, fuzzy
-#~ msgid "Launch the Selected File(s)"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Delete the Selected File(s)"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Loading Resources..."
-#~ msgstr "تحميل LimeWire..."
-
-#, fuzzy
-#~ msgid "Alt. Locations"
-#~ msgstr "اقترانات الملف"
-
-#, fuzzy
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "تحميل محرك HTML..."
-
-#, fuzzy
-#~ msgid "Loading Message Router..."
-#~ msgstr "تحميل واجهة الاستخدام..."
-
-#, fuzzy
-#~ msgid "Locating Peers..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Loading Shared Files..."
-#~ msgstr "تحميل LimeWire..."
-
-#, fuzzy
-#~ msgid "Loading Network Listeners..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Automatically start torrents"
-#~ msgstr "تمرير تلقائي"
-
-#, fuzzy
-#~ msgid "Start automatically"
-#~ msgstr "فرز تلقائي"
-
-#, fuzzy
-#~ msgid "BitTorrent Settings"
-#~ msgstr "BitTorrent"
 
 #~ msgid ""
 #~ "LimeWire has encountered an internal error. It is possible for LimeWire "
@@ -7773,458 +8280,14 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Always Discard All Errors"
 #~ msgstr "تجاهل كل الأخطاء دائماً"
 
-#, fuzzy
-#~ msgid "Do not display this message again."
-#~ msgstr "لا تحذرني مرة أخرى"
-
-#, fuzzy
-#~ msgid "Ethernet"
-#~ msgstr "أخرى"
-
-#, fuzzy
-#~ msgid "&Search"
-#~ msgstr "بحث"
-
-#, fuzzy
-#~ msgid "&Connections"
-#~ msgstr "الاتصالات"
-
-#, fuzzy
-#~ msgid "&Library"
-#~ msgstr "المكتبة"
-
-#, fuzzy
-#~ msgid "C&onsole"
-#~ msgstr "لوحة التحكم"
-
-#, fuzzy
-#~ msgid "Lo&gging"
-#~ msgstr "جاري تسجيل الدخول..."
-
-#, fuzzy
-#~ msgid "Loading Core Components..."
-#~ msgstr "تحميل المستعرض..."
-
 #~ msgid "Loading Internationalization Support..."
 #~ msgstr "تحميل دعم الترجمة إلى لغات عديدة..."
-
-#, fuzzy
-#~ msgid "Cancel Operation"
-#~ msgstr "إلغاء الإيداع"
-
-#, fuzzy
-#~ msgid "More Information"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Help Translate LimeWire"
-#~ msgstr "إبلاغ الأخطاء إلى LimeWire"
-
-#, fuzzy
-#~ msgid "File Listing for"
-#~ msgstr "الاستماع للمنفذ"
-
-#, fuzzy
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Searches"
-#~ msgstr "بحث"
-
-#, fuzzy
-#~ msgid "Shutting down LimeWire..."
-#~ msgstr "استخدام LimeWire..."
-
-#, fuzzy
-#~ msgid "Add..."
-#~ msgstr "إضافة"
-
-#, fuzzy
-#~ msgid "Loading Status Window..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Disconnected"
-#~ msgstr "متصل في"
-
-#, fuzzy
-#~ msgid "Starting"
-#~ msgstr "المشاركة"
-
-#, fuzzy
-#~ msgid "Poor"
-#~ msgstr "المنفذ"
-
-#, fuzzy
-#~ msgid "Fair"
-#~ msgstr "المرشح"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Consumption"
-#~ msgstr "عرض النطاق الصادر"
-
-#, fuzzy
-#~ msgid "Downloads:"
-#~ msgstr "التحميلات"
-
-#, fuzzy
-#~ msgid "Uploads:"
-#~ msgstr "إيداعات"
-
-#, fuzzy
-#~ msgid "Next Tip"
-#~ msgstr "التالي"
-
-#, fuzzy
-#~ msgid "Previous Tip"
-#~ msgstr "السابق"
-
-#, fuzzy
-#~ msgid "Get LimeWire PRO Later"
-#~ msgstr "متجر LimeWire"
-
-#, fuzzy
-#~ msgid "Copy Magnet Links to Clipboard"
-#~ msgstr "نسخ الرابط إلى الحافظة"
-
-#, fuzzy
-#~ msgid "C&onnect"
-#~ msgstr "التوصيل"
-
-#, fuzzy
-#~ msgid "&Close"
-#~ msgstr "إغلاق"
-
-#, fuzzy
-#~ msgid "Launch Selected Files"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Share New File..."
-#~ msgstr "حفظ الملف باسم"
-
-#, fuzzy
-#~ msgid "Block Host"
-#~ msgstr "حجب المضيفين"
-
-#, fuzzy
-#~ msgid "Send Message"
-#~ msgstr "الرسالة"
-
-#, fuzzy
-#~ msgid "Block Current Host"
-#~ msgstr "حجب المضيفين"
-
-#, fuzzy
-#~ msgid "Host:"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Do not show this message again."
-#~ msgstr "لا تحذرني مرة أخرى"
-
-#, fuzzy
-#~ msgid "Saving File..."
-#~ msgstr "حفظ الملف باسم"
-
-#, fuzzy
-#~ msgid "Paused"
-#~ msgstr "إيقاف مؤقت"
-
-#, fuzzy
-#~ msgid "Content Removed"
-#~ msgstr "مرشحات المحتوى"
-
-#, fuzzy
-#~ msgid "Downloading .torrent file..."
-#~ msgstr "ملفات .torrent"
-
-#, fuzzy
-#~ msgid "Average Bandwidth"
-#~ msgstr "عرض النطاق الوارد"
-
-#, fuzzy
-#~ msgid "Valid Alternate Locations"
-#~ msgstr "تمكين المصادقة"
-
-#, fuzzy
-#~ msgid "Started On"
-#~ msgstr "متوقف -"
-
-#, fuzzy
-#~ msgid "Finished On"
-#~ msgstr "انتهى"
-
-#, fuzzy
-#~ msgid "hosts"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "host"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Busy Hosts"
-#~ msgstr "حجب المضيفين"
-
-#, fuzzy
-#~ msgid "Locating Sources..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Progress"
-#~ msgstr "البرامج"
-
-#, fuzzy
-#~ msgid "Speed"
-#~ msgstr "إرسال"
-
-#, fuzzy
-#~ msgid "Reattempt Selected Downloads"
-#~ msgstr "تذكر التحميلات الأخيرة"
-
-#, fuzzy
-#~ msgid "&View"
-#~ msgstr "عرض"
-
-#, fuzzy
-#~ msgid "Clear Download"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Clear Selected Downloads"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Launch Download"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Launch Selected Downloads"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Cancel Selected Downloads"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Preview Selected Downloads"
-#~ msgstr "التحميلات الحديثة"
-
-#, fuzzy
-#~ msgid "Clear All Inactive Downloads"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Remove Inactive Downloads"
-#~ msgstr "إزلة التحميل"
-
-#, fuzzy
-#~ msgid "Pause Download"
-#~ msgstr "إلغاء التحميل"
-
-#, fuzzy
-#~ msgid "Pause Selected Downloads"
-#~ msgstr "التحميلات الحديثة"
-
-#, fuzzy
-#~ msgid "Change File Location..."
-#~ msgstr "اقترانات الملف"
-
-#, fuzzy
-#~ msgid "Always Save As..."
-#~ msgstr "حفظ الملف باسم"
-
-#, fuzzy
-#~ msgid "Always Ask"
-#~ msgstr "السؤال عن المراجعة دائماً"
-
-#, fuzzy
-#~ msgid "Choose a Default Action:"
-#~ msgstr "اختر موقع حفظ مختلف"
-
-#, fuzzy
-#~ msgid "Choose a different location for the Download"
-#~ msgstr "اختر موقع حفظ مختلف"
-
-#, fuzzy
-#~ msgid "Append (#)"
-#~ msgstr "المنقطع (المدخلات/المخرجات)"
-
-#, fuzzy
-#~ msgid "Same File Already In Library"
-#~ msgstr "في مكتبتي بالفعل"
-
-#, fuzzy
-#~ msgid "No Filename"
-#~ msgstr "اسم الملف"
 
 #~ msgid "Active"
 #~ msgstr "نشط"
 
-#, fuzzy
-#~ msgid "File & Protocol Associations"
-#~ msgstr "اقترانات الملف"
-
-#, fuzzy
-#~ msgid "Always take the selected associations."
-#~ msgstr "تحذيري عند أخذ برامج أخرى لهذه الاقترانات"
-
-#, fuzzy
-#~ msgid "Firewall Setup"
-#~ msgstr "جدار الحماية"
-
-#, fuzzy
-#~ msgid "System Startup"
-#~ msgstr "تشغيل LimeWire عند بدء تشغيل النظام"
-
-#, fuzzy
-#~ msgid "Start Automatically"
-#~ msgstr "فرز تلقائي"
-
-#, fuzzy
-#~ msgid "Content Filtering"
-#~ msgstr "مرشحات المحتوى"
-
-#, fuzzy
-#~ msgid "Shared Folders"
-#~ msgstr "حفظ المجلدات"
-
-#, fuzzy
-#~ msgid "Use the Default Folder"
-#~ msgstr "استخدام الافتراضي"
-
-#, fuzzy
-#~ msgid "Next >>"
-#~ msgstr "التالي"
-
-#, fuzzy
-#~ msgid "<< Back"
-#~ msgstr "رجوع"
-
 #~ msgid "Incomplete Files"
 #~ msgstr "ملفات غير كاملة"
-
-#, fuzzy
-#~ msgid "Loading Library Window..."
-#~ msgstr "تحميل LimeWire..."
-
-#, fuzzy
-#~ msgid "Path"
-#~ msgstr "لصق"
-
-#, fuzzy
-#~ msgid "Last Modified"
-#~ msgstr "معدل"
-
-#, fuzzy
-#~ msgid "Delete Selected Files"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Add Description to Selected File"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Continue Downloading Selected Incomplete File"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Rename"
-#~ msgstr "اسم الملف"
-
-#, fuzzy
-#~ msgid "Stop Sharing File"
-#~ msgstr "مشاركة {0} ملفاً"
-
-#, fuzzy
-#~ msgid "Stop Sharing Folder"
-#~ msgstr "مشاركة التحميلات"
-
-#, fuzzy
-#~ msgid "Show .torrent Files"
-#~ msgstr "ملفات .torrent"
-
-#, fuzzy
-#~ msgid "Reload Shared Folders"
-#~ msgstr "حفظ المجلدات"
-
-#, fuzzy
-#~ msgid "Configure Sharing Options"
-#~ msgstr "تكوين اسم الملف"
-
-#, fuzzy
-#~ msgid "Legend"
-#~ msgstr "إرسال"
-
-#, fuzzy
-#~ msgid "List of .torrent files"
-#~ msgstr "ملفات .torrent"
-
-#, fuzzy
-#~ msgid "Logging"
-#~ msgstr "جاري تسجيل الدخول..."
-
-#, fuzzy
-#~ msgid "Loading Logging Window..."
-#~ msgstr "جاري تسجيل الدخول..."
-
-#, fuzzy
-#~ msgid "&Advanced"
-#~ msgstr "متقدم"
-
-#, fuzzy
-#~ msgid "&File"
-#~ msgstr "ملف"
-
-#, fuzzy
-#~ msgid "Filter&s"
-#~ msgstr "المرشح"
-
-#, fuzzy
-#~ msgid "Help for Using LimeWire"
-#~ msgstr "استخدام LimeWire..."
-
-#, fuzzy
-#~ msgid "Generate &Error"
-#~ msgstr "خطأ داخلي"
-
-#, fuzzy
-#~ msgid "&About LimeWire"
-#~ msgstr "حول LimeWire"
-
-#, fuzzy
-#~ msgid "Information about LimeWire"
-#~ msgstr "إبلاغ الأخطاء إلى LimeWire"
-
-#, fuzzy
-#~ msgid "Loading Menus..."
-#~ msgstr "جاري التحميل..."
-
-#, fuzzy
-#~ msgid "&Resources"
-#~ msgstr "استعادة"
-
-#, fuzzy
-#~ msgid "LimeWire &PRO"
-#~ msgstr "LimeWire"
-
-#, fuzzy
-#~ msgid "Result &Filters"
-#~ msgstr "مرشحات المحتوى"
-
-#, fuzzy
-#~ msgid "Use &Default"
-#~ msgstr "استخدام الافتراضي"
-
-#, fuzzy
-#~ msgid "Use your default skin"
-#~ msgstr "استخدام الافتراضي"
-
-#, fuzzy
-#~ msgid "&Options"
-#~ msgstr "الخيارات"
 
 #~ msgid "Next"
 #~ msgstr "التالي"
@@ -8235,431 +8298,21 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Restore"
 #~ msgstr "استعادة"
 
-#, fuzzy
-#~ msgid "About"
-#~ msgstr "الألبوم"
-
-#, fuzzy
-#~ msgid "Restore Defaults"
-#~ msgstr "استخدام الافتراضي"
-
-#, fuzzy
-#~ msgid "Slots"
-#~ msgstr "إغلاق"
-
-#, fuzzy
-#~ msgid "Status Bar"
-#~ msgstr "الحالة"
-
-#, fuzzy
-#~ msgid "Bug Reports"
-#~ msgstr "نسخ التقرير"
-
 #~ msgid "Searching"
 #~ msgstr "البحث"
-
-#, fuzzy
-#~ msgid "Content"
-#~ msgstr "التعليقات"
-
-#, fuzzy
-#~ msgid "Hosts"
-#~ msgstr "المضيف"
-
-#, fuzzy
-#~ msgid "Loading Options Window..."
-#~ msgstr "تحميل LimeWire..."
-
-#, fuzzy
-#~ msgid "Use LimeWire for..."
-#~ msgstr "استخدام LimeWire..."
-
-#, fuzzy
-#~ msgid "Audio Player"
-#~ msgstr "المشغل"
-
-#, fuzzy
-#~ msgid "Clear Completed Downloads:"
-#~ msgstr "التحميلات الحديثة"
-
-#, fuzzy
-#~ msgid "Automatically Clear Completed Uploads:"
-#~ msgstr "تمرير تلقائي"
-
-#, fuzzy
-#~ msgid "Browser Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Host Communication"
-#~ msgstr "تكوين جهاز التوجيه"
-
-#, fuzzy
-#~ msgid "Enable Chat:"
-#~ msgstr "تمكين المصادقة"
-
-#, fuzzy
-#~ msgid "Connect on Startup"
-#~ msgstr "سرعة الاتصال"
-
-#, fuzzy
-#~ msgid "Connect on Startup:"
-#~ msgstr "سرعة الاتصال"
-
-#, fuzzy
-#~ msgid "Connection Preferencing"
-#~ msgstr "سرعة الاتصال"
-
-#, fuzzy
-#~ msgid "Allow Freeloaders:"
-#~ msgstr "إضافة مجلدات"
-
-#, fuzzy
-#~ msgid "Enable Content Filters"
-#~ msgstr "مرشحات المحتوى"
-
-#, fuzzy
-#~ msgid "Always Ask What to do"
-#~ msgstr "السؤال عن المراجعة دائماً"
-
-#, fuzzy
-#~ msgid "Capabilities"
-#~ msgstr "تعطيل قدرات TLS"
-
-#, fuzzy
-#~ msgid "Disable Mojito DHT Capabilities:"
-#~ msgstr "تعطيل قدرات TLS"
-
-#, fuzzy
-#~ msgid "OOB Searching"
-#~ msgstr "البحث"
-
-#, fuzzy
-#~ msgid "Show License Warning:"
-#~ msgstr "إظهار شريط المكتبات"
-
-#, fuzzy
-#~ msgid "Use Defaults"
-#~ msgstr "استخدام الافتراضي"
-
-#, fuzzy
-#~ msgid "Filter Hosts"
-#~ msgstr "المرشح"
-
-#, fuzzy
-#~ msgid "Ignore Adult Content"
-#~ msgstr "عدم عرض المحتويات الموجهة للراشدين"
-
-#, fuzzy
-#~ msgid "Ignore .vbs Files"
-#~ msgstr "ملفات غير كاملة"
-
-#, fuzzy
-#~ msgid "Image Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Maximum Downloads"
-#~ msgstr "التحميلات"
-
-#, fuzzy
-#~ msgid "Maximum Downloads:"
-#~ msgstr "التحميلات"
-
-#, fuzzy
-#~ msgid "Max Upload Slots"
-#~ msgstr "أقصى إيداعات لكل torrent"
-
-#, fuzzy
-#~ msgid "Max Upload Slots:"
-#~ msgstr "أقصى إيداعات لكل torrent"
-
-#, fuzzy
-#~ msgid "Open Dialog to Select a Folder"
-#~ msgstr "تحديد المجلد"
-
-#, fuzzy
-#~ msgid "Reset"
-#~ msgstr "استئناف"
-
-#, fuzzy
-#~ msgid "Partial Files"
-#~ msgstr "ملفات صحيحة"
-
-#, fuzzy
-#~ msgid "Player Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Days to Keep Incomplete Files:"
-#~ msgstr "ملفات غير كاملة"
-
-#, fuzzy
-#~ msgid "Search Result Quality"
-#~ msgstr "جودة ممتازة"
-
-#, fuzzy
-#~ msgid "Download Sharing"
-#~ msgstr "التحميل"
-
-#, fuzzy
-#~ msgid "Shutdown Immediately"
-#~ msgstr "إرسال فوري دائماً"
-
-#, fuzzy
-#~ msgid "Shutdown after Transfers"
-#~ msgstr "الخروج بعد النقل"
-
-#, fuzzy
-#~ msgid "Speed:"
-#~ msgstr "إرسال"
-
-#, fuzzy
-#~ msgid "Bandwidth Indicator"
-#~ msgstr "عرض النطاق الوارد"
-
-#, fuzzy
-#~ msgid "Show Bandwidth Indicator:"
-#~ msgstr "عرض النطاق الوارد"
-
-#, fuzzy
-#~ msgid "Firewall Indicator"
-#~ msgstr "جدار الحماية"
-
-#, fuzzy
-#~ msgid "Update Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Upload Speed:"
-#~ msgstr "إيداع العنصر"
-
-#, fuzzy
-#~ msgid "Video Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "Video Player"
-#~ msgstr "المشغل"
-
-#, fuzzy
-#~ msgid "Loading Playlist Window..."
-#~ msgstr "تحميل LimeWire..."
-
-#, fuzzy
-#~ msgid "Play Options:"
-#~ msgstr "الخيارات"
-
-#, fuzzy
-#~ msgid "Shuffle"
-#~ msgstr "المجلد الفرعي"
-
-#, fuzzy
-#~ msgid "Continuous"
-#~ msgstr "متابعة"
-
-#, fuzzy
-#~ msgid "Save Playlist As"
-#~ msgstr "حفظ باسم"
-
-#, fuzzy
-#~ msgid "General"
-#~ msgstr "النوع"
-
-#, fuzzy
-#~ msgid "Option"
-#~ msgstr "الخيارات"
-
-#, fuzzy
-#~ msgid "Filter Results:"
-#~ msgstr "نتائج الفيديو"
-
-#, fuzzy
-#~ msgid "Back To Search"
-#~ msgstr "بحث"
-
-#, fuzzy
-#~ msgid "Download As..."
-#~ msgstr "التحميلات"
-
-#, fuzzy
-#~ msgid "Search More"
-#~ msgstr "بحث"
-
-#, fuzzy
-#~ msgid "Stop Search"
-#~ msgstr "بحث"
-
-#, fuzzy
-#~ msgid "Download All Selected Files"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Don't Know"
-#~ msgstr "بدون مسح"
-
-#, fuzzy
-#~ msgid "Launch Action"
-#~ msgstr "تشغيل الملف"
-
-#, fuzzy
-#~ msgid "Repeat Search"
-#~ msgstr "تكرار البحث"
-
-#, fuzzy
-#~ msgid "Loading Search Window..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Vendor"
-#~ msgstr "إرسال"
-
-#, fuzzy
-#~ msgid "Junk Rating"
-#~ msgstr "التقييم"
-
-#, fuzzy
-#~ msgid "Search and Download Files"
-#~ msgstr "التحميلات الحديثة"
-
-#, fuzzy
-#~ msgid "Kill Upload"
-#~ msgstr "إيداعات"
-
-#, fuzzy
-#~ msgid "Remove Inactive Uploads"
-#~ msgstr "إزلة التحميل"
-
-#, fuzzy
-#~ msgid "Freeloader Uploading"
-#~ msgstr "تم الإيداع"
-
-#, fuzzy
-#~ msgid "Suspended"
-#~ msgstr "إرسال"
-
-#, fuzzy
-#~ msgid "Loading Upload Window..."
-#~ msgstr "تحميل المستعرض..."
-
-#, fuzzy
-#~ msgid "Seeding"
-#~ msgstr "الإعدادات"
-
-#, fuzzy
-#~ msgid "Invalid Filename"
-#~ msgstr "رابط غير صحيح!"
-
-#, fuzzy
-#~ msgid "Download Already Finished"
-#~ msgstr "تحميل الملفات المحددة"
-
-#, fuzzy
-#~ msgid "Filename Taken"
-#~ msgstr "اسم الملف"
-
-#, fuzzy
-#~ msgid "Not a File"
-#~ msgstr "تحديد موقع الملف"
-
-#, fuzzy
-#~ msgid "Filesystem Error"
-#~ msgstr "خطأ iTunes"
-
-#, fuzzy
-#~ msgid "More Search Options"
-#~ msgstr "المزيد من الخيارات"
-
-#, fuzzy
-#~ msgid "ShareAlike"
-#~ msgstr "مشاركة"
-
-#, fuzzy
-#~ msgid "Title of Work:"
-#~ msgstr "الاستماع للمنفذ:"
-
-#, fuzzy
-#~ msgid "Copy to Clipboard"
-#~ msgstr "نسخ الرابط إلى الحافظة"
-
-#, fuzzy
-#~ msgid "Kind:"
-#~ msgstr "الرابط:"
-
-#, fuzzy
-#~ msgid "Size:"
-#~ msgstr "الحجم"
-
-#, fuzzy
-#~ msgid "Date Modified:"
-#~ msgstr "معدل"
-
-#, fuzzy
-#~ msgid "Title:"
-#~ msgstr "العنوان"
-
-#, fuzzy
-#~ msgid "Artist:"
-#~ msgstr "الفنان"
-
-#, fuzzy
-#~ msgid "Album:"
-#~ msgstr "الألبوم"
-
-#, fuzzy
-#~ msgid "Genre:"
-#~ msgstr "النوع"
-
-#, fuzzy
-#~ msgid "Year:"
-#~ msgstr "السنة"
-
-#, fuzzy
-#~ msgid "Type:"
-#~ msgstr "النوع"
-
-#, fuzzy
-#~ msgid "Track:"
-#~ msgstr "المسار"
-
-#, fuzzy
-#~ msgid "Length:"
-#~ msgstr "الطول"
-
-#, fuzzy
-#~ msgid "Bitrate:"
-#~ msgstr "معدل البت"
-
-#, fuzzy
-#~ msgid "Comments:"
-#~ msgstr "التعليقات"
 
 #~ msgid "Link:"
 #~ msgstr "الرابط:"
 
-#, fuzzy
-#~ msgid "Action:"
-#~ msgstr "نشط"
-
-#, fuzzy
-#~ msgid "License:"
-#~ msgstr "الرابط:"
-
-#, fuzzy
-#~ msgid "Rating:"
-#~ msgstr "التقييم"
-
-#, fuzzy
-#~ msgid "Studio:"
-#~ msgstr "الصوت"
-
-#, fuzzy
-#~ msgid "Author:"
-#~ msgstr "المؤلف"
-
-#, fuzzy
-#~ msgid "Platform:"
-#~ msgstr "النظام الأساسي"
+#~ msgid ""
+#~ "LimeWire has encountered an internal error. It is possible for LimeWire "
+#~ "to recover and continue running normally. To continue using LimeWire, "
+#~ "click 'Discard'. If desired, you can click 'Review' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "واجه LimeWire خطأً داخلياً. من الممكن أن يقوم LimeWire بالاستعادة ومتابعة "
+#~ "التشغيل بشكل عادي. لمتابعة استخدام LimeWire انقر ’تجاهل‘. وإذا كنت تريد، "
+#~ "يمكنك نقر ’مراجعة‘ لمشاهدة المعلومات الخاصة بهذا الخطأ."
 
 #~ msgid ""
 #~ "Please add any comments you may have (e.g what caused the error). \n"
@@ -8667,6 +8320,30 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgstr ""
 #~ "الرجاء إضافة أي تعليقات لديك (مثال سبب الخطأ). \n"
 #~ "نشكرك والرجاء استخدام اللغة الإنجليزية."
+
+#~ msgid "Send"
+#~ msgstr "إرسال"
+
+#~ msgid "Review"
+#~ msgstr "مراجعة"
+
+#~ msgid "Loading HTML Engine..."
+#~ msgstr "تحميل محرك HTML..."
+
+#~ msgid "Loading Browser..."
+#~ msgstr "تحميل المستعرض..."
+
+#~ msgid "Loading User Interface..."
+#~ msgstr "تحميل واجهة الاستخدام..."
+
+#~ msgid "Do Not Disturb"
+#~ msgstr "الرجاء عدم الإزعاج"
+
+#~ msgid "View Library"
+#~ msgstr "عرض المكتبة"
+
+#~ msgid "Finished"
+#~ msgstr "انتهى"
 
 #~ msgid "Inactive"
 #~ msgstr "غير نشط"
@@ -8680,6 +8357,27 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Queued - #{0} in line"
 #~ msgstr "في صف الانتظار - #{0} في السطر"
 
+#~ msgid "Queued - remaining time unknown"
+#~ msgstr "في صف الانتظار - الوقت المتبقي غير معروف"
+
+#~ msgid "Queued - Starting in {0}"
+#~ msgstr "في صف الانتظار - يبدأ في {0}"
+
+#~ msgid "Categorize downloads"
+#~ msgstr "تصنيف التحميلات إلى فئات"
+
+#~ msgid "Launch file"
+#~ msgstr "تشغيل الملف"
+
+#~ msgid "Remove from list"
+#~ msgstr "إزالة من القائمة"
+
+#~ msgid "Locate file"
+#~ msgstr "تحديد موقع الملف"
+
+#~ msgid "Done"
+#~ msgstr "تم"
+
 #~ msgid "Queued - {0} person ahead of you for this file"
 #~ msgid_plural "Queued - {0} people ahead of you for this file"
 #~ msgstr[0] "في صف الانتظار - {0} شخص أمامك بالنسبة لهذا الملف"
@@ -8688,6 +8386,9 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 
 #~ msgid "Queued - About {0} before download can begin"
 #~ msgstr "في صف الانتظار - حوالب {0} قبل إمكانية بدء التحميل"
+
+#~ msgid "Chat from {0} - LimeWire 5"
+#~ msgstr "دردشة من {0} - LimeWire 5"
 
 #~ msgid "View Files I'm sharing with them ({0})"
 #~ msgstr "عرض الملفات التي أشاركها معهم ({0})"
@@ -8698,17 +8399,70 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Close chat (closes the current chat window)"
 #~ msgstr "إغلاق الدردشة (يغلق نافذة الدردشة الحالية)"
 
+#~ msgid "Library"
+#~ msgstr "المكتبة"
+
 #~ msgid "Retry Download {0}"
 #~ msgstr "إعادة التحميل {0}"
+
+#~ msgid "Logging in..."
+#~ msgstr "جاري تسجيل الدخول..."
+
+#~ msgid "Offline friends"
+#~ msgstr "الأصدقاء غير المتصلين"
+
+#~ msgid "Sign out"
+#~ msgstr "تسجيل الخروج"
 
 #~ msgid "Switch user"
 #~ msgstr "تبديل المستخدم"
 
+#~ msgid "Set {0} status"
+#~ msgstr "تعيين حالة {0}"
+
+#~ msgid "Incorrect password."
+#~ msgstr "كلمة مرور غير صحيحة."
+
 #~ msgid "Show files you're sharing with {0}"
 #~ msgstr "إظهار الملفات التي تشاركها مع {0}"
 
+#~ msgid "You're sharing {0} files with {1}"
+#~ msgstr "أنت تشارك {0} ملفاً (ملفات) مع {1}"
+
 #~ msgid "{0} is on LimeWire but there were problems viewing their library"
 #~ msgstr "{0} موجود على LimeWire ولكن هناك مشكلة في عرض مكتبته"
+
+#~ msgid "Filter"
+#~ msgstr "المرشح"
+
+#~ msgid "Sharing with {0}"
+#~ msgstr "مشاركة مع {0}"
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {0} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "تؤدي مشاركة مجموعتك {0} تلقائياً إلى مشاركة {0} ملفاً الجديدة المضافة إلى "
+#~ "مكتبتك"
+
+#~ msgid "Sharing collection: {0}"
+#~ msgstr "مشاركة المجموعة: {0}"
+
+#~ msgid "Back"
+#~ msgstr "رجوع"
+
+#~ msgid "Returns to what's being shared with you."
+#~ msgstr "يعود إلى الملفات التي يتم مشاركتها معك."
+
+#~ msgid ""
+#~ "Sharing your {0} collection automatically shares new {1} files added to "
+#~ "your Library"
+#~ msgstr ""
+#~ "تؤدي مشاركة مجموعتك {0} تلقائياً إلى مشاركة {1} ملفاً الجديدة المضافة إلى "
+#~ "مكتبتك"
+
+#~ msgid "Don't Scan"
+#~ msgstr "بدون مسح"
 
 #~ msgid "Scan"
 #~ msgstr "مسح"
@@ -8716,14 +8470,29 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Folder"
 #~ msgstr "المجلد"
 
+#~ msgid "Modified"
+#~ msgstr "معدل"
+
 #~ msgid "Created"
 #~ msgstr "تاريخ الإنشاء:"
+
+#~ msgid "Already in My Library"
+#~ msgstr "في مكتبتي بالفعل"
 
 #~ msgid "Already downloading"
 #~ msgstr "جاري التحميل بالفعل"
 
+#~ msgid "Number of Files"
+#~ msgstr "عدد الملفات"
+
 #~ msgid "Miscellaneous"
 #~ msgstr "متنوع"
+
+#~ msgid "Copy Link to Clipboard"
+#~ msgstr "نسخ الرابط إلى الحافظة"
+
+#~ msgid "Download Selected Files"
+#~ msgstr "تحميل الملفات المحددة"
 
 #~ msgid "Share with Friends"
 #~ msgstr "مشاركة مع الأصدقاء"
@@ -8731,11 +8500,20 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Unshare with Friends"
 #~ msgstr "إلغاء المشاركة مع الأصدقاء"
 
+#~ msgid "Remove from library"
+#~ msgstr "إزالة من المكتبة"
+
 #~ msgid "Delete file"
 #~ msgstr "حذف الملف"
 
 #~ msgid "Unshare with P2P Network"
 #~ msgstr "إلغاء المشاركة مع شبكة P2P"
+
+#~ msgid "Share with P2P Network"
+#~ msgstr "المشاركة مع شبكة P2P"
+
+#~ msgid "Delete File"
+#~ msgstr "حذف الملف"
 
 #~ msgid ""
 #~ "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of "
@@ -8750,14 +8528,85 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Libraries"
 #~ msgstr "المكتبات"
 
+#~ msgid "Close all searches"
+#~ msgstr "إغلاق كل حالات البحث"
+
+#~ msgid "Close search"
+#~ msgstr "إغلاق البحث"
+
+#~ msgid "Close other searches"
+#~ msgstr "إغلاق حالات البحث الأخرى"
+
+#~ msgid "Repeat search"
+#~ msgstr "تكرار البحث"
+
 #~ msgid "&Open File"
 #~ msgstr "&فتح ملف"
+
+#~ msgid "Open &Link"
+#~ msgstr "فتح &رابط"
+
+#~ msgid "Add File To Library"
+#~ msgstr "إضافة ملف إلى المكتبة"
+
+#~ msgid "Add Folder To Library"
+#~ msgstr "إضافة مجلد إلى المكتبة"
+
+#~ msgid "Using LimeWire..."
+#~ msgstr "استخدام LimeWire..."
+
+#~ msgid "FAQ..."
+#~ msgstr "الأسئلة الشائعة..."
+
+#~ msgid "Get personal tech support"
+#~ msgstr "الحصول على دعم فني شخصي"
+
+#~ msgid "Player"
+#~ msgstr "المشغل"
+
+#~ msgid "Show current file"
+#~ msgstr "إظهار الملف الحالي"
+
+#~ msgid "Hide Libraries bar"
+#~ msgstr "إخفاء شريط المكتبات"
+
+#~ msgid "Show Libraries bar"
+#~ msgstr "إظهار شريط المكتبات"
+
+#~ msgid "Hide Chat window"
+#~ msgstr "إخفاء نافذة الدردشة"
+
+#~ msgid "Show Chat window"
+#~ msgstr "إظهار نافذة الدردشة"
+
+#~ msgid "Invalid Link!"
+#~ msgstr "رابط غير صحيح!"
+
+#~ msgid "Open magnet or torrent link."
+#~ msgstr "فتح رابط .magnet أو torrent"
+
+#~ msgid "Sharing downloads"
+#~ msgstr "مشاركة التحميلات"
+
+#~ msgid "Add audio files I downloaded from LimeWire to my iTunes Library"
+#~ msgstr ""
+#~ "إضافة ملفات الصوت التي أقوم بتحميلها من LimeWire إلى مكتبة iTunes الخاصة "
+#~ "بي"
 
 #~ msgid "Recent downloads"
 #~ msgstr "التحميلات الأخيرة"
 
+#~ msgid "Remember recent downloads"
+#~ msgstr "تذكر التحميلات الأخيرة"
+
+#~ msgid "Manage"
+#~ msgstr "إدارة"
+
 #~ msgid "Configure"
 #~ msgstr "تكوين"
+
+#~ msgid "Configure file naming"
+#~ msgstr "تكوين اسم الملف"
 
 #~ msgid ""
 #~ "LimeWire will automatically scan the folders below and place files in "
@@ -8765,11 +8614,32 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgstr ""
 #~ "سوف يقوم LimeWire تلقائياً بمسح المجلدات التالية ووضع الملفات في مكتبتك."
 
+#~ msgid "Add the following types of files to your Library:"
+#~ msgstr "أضف أنواع الملفات التالية إلى مكتبتك:"
+
+#~ msgid ""
+#~ "Scanning these folders into your Library will not automatically share "
+#~ "your files."
+#~ msgstr "سوف يؤدي مسح هذه المجلدات إلى مكتبتك إلى مشاركة ملفاتك تلقائياً"
+
+#~ msgid "Add New Folder"
+#~ msgstr "إضافة مجلد جديد"
+
+#~ msgid "Library Management"
+#~ msgstr "إدارة المكتبة"
+
 #~ msgid "Manage Library"
 #~ msgstr "إدارة المكتبة"
 
 #~ msgid "Manage what folders are loaded into your library"
 #~ msgstr "إدارة المجلدات التي سيتم تحميلها إلى مكتبتك"
+
+#~ msgid ""
+#~ "Your Library is a central location to view, share and unshare your files "
+#~ "with the P2P Network and your friends."
+#~ msgstr ""
+#~ "مكتبتك هي موقع مركزي لعرض ومشاركة وإلغاء مشاركة الملفات مع شبكة P2P ومع "
+#~ "الأصدقاء."
 
 #~ msgid ""
 #~ "LimeWire will scan folders and look for files to add to your Library. "
@@ -8780,6 +8650,41 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 
 #~ msgid "Select which file extensions belong in Audio, Video, etc.."
 #~ msgstr "حدد امتدادات الملفات التي تنتمي إلى الصوت، والفيديو، إلخ.."
+
+#~ msgid "Sign in when LimeWire starts"
+#~ msgstr "تسجيل الدخول عند بدء LimeWire"
+
+#~ msgid "Settings"
+#~ msgstr "الإعدادات"
+
+#~ msgid "-Searching for and sharing Programs with anyone"
+#~ msgstr "-البحث عن البرامج ومشاركتها مع أي شخص"
+
+#~ msgid "-Sharing Documents with the P2P Network"
+#~ msgstr "-البحث عن المستندات على شبكة P2P"
+
+#~ msgid "Don't show adult content"
+#~ msgstr "عدم عرض المحتويات الموجهة للراشدين"
+
+#~ msgid "Warn me when other programs take these associations"
+#~ msgstr "تحذيري عند أخذ برامج أخرى لهذه الاقترانات"
+
+#~ msgid "Updates and Bugs"
+#~ msgstr "التحديثات والأخطاء"
+
+#~ msgid "Report bugs to LimeWire"
+#~ msgstr "إبلاغ الأخطاء إلى LimeWire"
+
+#~ msgid "Show me the bug report before sending it"
+#~ msgstr "أظهر لي تقرير الأخطاء قبل إرساله"
+
+#~ msgid ""
+#~ "Allow me to search for and share Programs with the P2P Network and my "
+#~ "friends"
+#~ msgstr "السماح لي بالبحث عن البرامج ومشاركتها مع شبكة P2P والأصدقاء"
+
+#~ msgid "Allow me to share Documents with the P2P Network"
+#~ msgstr "السماح لي بمشاركة المستندات مع شبكة P2P"
 
 #~ msgid ""
 #~ "TODO get better copy... LimeWire is currently starting. When it has "
@@ -8810,6 +8715,9 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Files I'm Sharing ({0})"
 #~ msgstr "الملفات التي أشاركها ({0})"
 
+#~ msgid "{0} person"
+#~ msgstr "{0} شخص"
+
 #~ msgid "{0} people"
 #~ msgstr "{0} شخصاً (أشخاص)"
 
@@ -8825,8 +8733,20 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "also not used"
 #~ msgstr "غير مستخدم أيضاً"
 
+#~ msgid "Upload Item"
+#~ msgstr "إيداع العنصر"
+
+#~ msgid "Exit after Transfers"
+#~ msgstr "الخروج بعد النقل"
+
 #~ msgid "Jump to File in Library"
 #~ msgstr "الانتقال إلى ملف في المكتبة"
+
+#~ msgid "Cancel Upload"
+#~ msgstr "إلغاء الإيداع"
+
+#~ msgid "Play file"
+#~ msgstr "تشغيل الملف"
 
 #~ msgid "Waiting - {0} file needs to finish before upload can begin"
 #~ msgid_plural "Waiting - {0} files need to finish before upload can begin"
@@ -8836,6 +8756,25 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 
 #~ msgid "LimeWire 5 - Some legal stff"
 #~ msgstr "LimeWire 5 - بعض الأشياء القانونية"
+
+#~ msgid "State your intent"
+#~ msgstr "اذكر قصدك"
+
+#~ msgid ""
+#~ "LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing the "
+#~ "authorized files only.  Installing and using either program does not "
+#~ "constitute a license for obtaining or distributing unauthorized content."
+#~ msgstr ""
+#~ "LimeWire Basic وLimeWire PRO هي برامج نظير إلى نظير لمشاركة الملفات "
+#~ "المسموح بها فقط. ولا يعتبر تثبيت واستخدام أي برنامج بمثابة ترخيص للحصول "
+#~ "على محتويات غير مصرح بها أو توزيعها."
+
+#~ msgid ""
+#~ "By clicking \"I Agree\", you agree to not use LimeWire 5 for copyright "
+#~ "infringement"
+#~ msgstr ""
+#~ "عندما تنقر \"أوافق\"، فإنك توافق على عدم استخدام LimeWire 5 لانتهاك حقوق "
+#~ "الطبع والنسخ"
 
 #~ msgid "A few things before we begin..."
 #~ msgstr "بعض الأشياء قبل أن تبدأ..."
@@ -8867,6 +8806,13 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ msgid "Automatically manage My Library"
 #~ msgstr "إدارة مكتبتي تلقائياً"
 
+#~ msgid ""
+#~ "Choose this option to have LimeWire automatically scan files into your "
+#~ "Library from My Documents and the Desktop."
+#~ msgstr ""
+#~ "حدد هذا الخيار ليقوم LimeWire تلقائياً بمسح الملفات إلى مكتبتك من My "
+#~ "Documents وسطح المكتب."
+
 #~ msgid "Manually manage My Library"
 #~ msgstr "إدارة مكتبتي يدوياً"
 
@@ -8875,3 +8821,9 @@ msgstr "لم يتم التعرف على نوع الملف الرجاء اختي�
 #~ "into your Library."
 #~ msgstr ""
 #~ "حدد هذا الخيار إذا كنت تريد تحديد الملفات التي يمسحها LimeWire إلى مكتبتك."
+
+#~ msgid "You can change these options later from Tools > Options"
+#~ msgstr "يمكنك تغيير هذه الخيارات لاحقاً من أدوات > خيارات"
+
+#~ msgid "<Go back"
+#~ msgstr "<الرجوع"

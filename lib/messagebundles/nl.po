@@ -258,7 +258,7 @@ msgstr "Bestanden zoeken"
 #: components/xmpp-api/src/main/java/org/limewire/xmpp/api/client/Presence.java:36
 #, fuzzy
 msgid "Do not disturb"
-msgstr "Niet storen"
+msgstr "Ongewenste bestanden niet tonen"
 
 #: core/com/limegroup/bittorrent/dht/DHTPeerLocatorImpl.java:76
 msgid "DHT Peer Locator"
@@ -282,7 +282,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/AcceptorImpl.java:402
 #, fuzzy
 msgid "Connection Listener"
-msgstr "Verbindingen"
+msgstr "Connectie-overzicht wordt geladen..."
 
 #: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:74
 #, fuzzy
@@ -297,7 +297,7 @@ msgstr "Verbindingen"
 #: core/com/limegroup/gnutella/ConnectionManagerImpl.java:396
 #, fuzzy
 msgid "Connection Management"
-msgstr "Bezig met verbinden"
+msgstr "Verbindingsbeheer wordt geladen..."
 
 #: core/com/limegroup/gnutella/ConnectionWatchdog.java:66
 #, fuzzy
@@ -311,7 +311,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/CoreRandomGlue.java:106
 #, fuzzy
 msgid "Gnutella Connections"
-msgstr "Verbindingen"
+msgstr "Gnutella-verbinding toevoegen"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:204
 #, fuzzy
@@ -366,7 +366,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/MessageRouterImpl.java:551
 #, fuzzy
 msgid "Message Routing"
-msgstr "Bericht"
+msgstr "Berichten uit"
 
 #: core/com/limegroup/gnutella/NetworkManagerImpl.java:162
 #, fuzzy
@@ -456,7 +456,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/messages/StaticMessages.java:43
 #, fuzzy
 msgid "Static Messages"
-msgstr "Bericht"
+msgstr "Gnutella-berichten"
 
 #: core/com/limegroup/gnutella/routing/QRPUpdater.java:184
 #, fuzzy
@@ -630,9 +630,8 @@ msgstr "Actie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#, fuzzy
 msgid "Copyright"
-msgstr "Kopiëren"
+msgstr "Copyright"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -655,9 +654,8 @@ msgid "Studio"
 msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
-#, fuzzy
 msgid "Stars"
-msgstr "Standaard"
+msgstr "Sterren"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -819,11 +817,10 @@ msgid ""
 "this window. If desired, you can click 'Show Bug' to look at the information "
 "about the error."
 msgstr ""
-"Er is in LimeWire een interne fout opgetreden. Het is mogelijk dat LimeWire "
-"dit kan herstellen en vervolgens normaal kan worden uitgevoerd. Om LimeWire "
-"te blijven gebruiken, dient u op \"Weggooien\" te klikken. Indien gewenst, "
-"kunt u klikken op \"Bekijken\" om de informatie betreffende de fout te "
-"bekijken."
+"LimeWire heeft een interne fout ontdekt. Het is mogelijk dat LimeWire toch "
+"normaal door blijft werken. Om LimeWire te blijven gebruiken, klik op "
+"'Verwerpen'. Desgewenst kunt op 'Overzicht' klikken om de informatie te "
+"bekijken over de fout."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/support/BugManager.java:444
 msgid "Tell us what you were doing before LimeWire ran into this problem."
@@ -878,23 +875,23 @@ msgstr "OK"
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:463
 #, fuzzy
 msgid "Loading HTML engine..."
-msgstr "Bezig met het laden van de HTML-enging...."
+msgstr "HTML-engine wordt geladen..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:480
 #, fuzzy
 msgid "Loading browser..."
-msgstr "Bezig met het laden van de browser..."
+msgstr "Iconen worden geladen..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:505
 #, fuzzy
 msgid "Loading user interface..."
-msgstr "Bezig met het laden van de gebruikersinterface..."
+msgstr "Gebruikersomgeving wordt geladen..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:541
 #, fuzzy
 msgid "Loading other languages..."
-msgstr "Bezig met het laden van de gebruikersinterface..."
+msgstr "Talen laden..."
 
 #: private-components/integrated-ui/src/main/java/org/limewire/ui/swing/Initializer.java:585
 msgid "This Alpha version has expired.  Press Ok to exit. "
@@ -1026,14 +1023,12 @@ msgid "Select All"
 msgstr "Alles selecteren"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:41
-#, fuzzy
 msgid "&Available"
-msgstr "Beschikbaar"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/action/StatusActions.java:54
-#, fuzzy
 msgid "&Do Not Disturb"
-msgstr "Niet storen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/AdvancedToolsPanel.java:51
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/advanced/connection/ConnectionDetailPanel.java:168
@@ -1607,7 +1602,7 @@ msgstr "Locaties"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/upload/table/UploadPopupHandler.java:53
 #, fuzzy
 msgid "Locate in Library"
-msgstr "Bibliotheek bekijken"
+msgstr "Tonen in bibliotheek"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/downloads/table/DownloadPopupHandler.java:83
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/FriendLibraryPopupMenu.java:83
@@ -1723,7 +1718,7 @@ msgstr "Zwerm voor {0}"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFramePanel.java:217
 #, fuzzy
 msgid "Reply"
-msgstr "Toepassen"
+msgstr "Zelden"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:528
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/friends/chat/ChatFriendListPane.java:566
@@ -1899,7 +1894,7 @@ msgstr "Kopiëren"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AbstractFileListPanel.java:81
 #, fuzzy
 msgid "Search Library..."
-msgstr "Bibliotheek bekijken"
+msgstr "Zoeken..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/AllFriendsLibraryPanel.java:68
 #, fuzzy
@@ -1999,12 +1994,12 @@ msgstr "Chatten"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:301
 #, fuzzy, java-format
 msgid "Loading {0}'s files..."
-msgstr "Bezig met het laden van de browser..."
+msgstr "Opgeslagen bestanden worden geladen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:305
 #, fuzzy
 msgid "Loading files..."
-msgstr "Bezig met het laden van de browser..."
+msgstr "Tips worden geladen..."
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/FriendLibraryMediator.java:316
 #, java-format
@@ -2113,7 +2108,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:464
 #, fuzzy
 msgid "Share:"
-msgstr "Opslaan"
+msgstr "Delen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/SharingPanel.java:567
 #, java-format
@@ -2414,7 +2409,7 @@ msgstr "Delen"
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:27
 #, fuzzy
 msgid "Delete Files"
-msgstr "Verwijderen"
+msgstr "B&estand(en) verwijderen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/library/table/menu/actions/DeleteAction.java:29
 msgid "Move to Trash"
@@ -2628,7 +2623,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:67
 #, fuzzy
 msgid "Advanced Tools..."
-msgstr "Geavanceerde programma's"
+msgstr "Geavanceerd"
 
 #. add(new AbstractAction(I18n.tr("&Options...")) {
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/menu/ToolsMenu.java:77
@@ -3031,7 +3026,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterFileExtensionsOptionPanel.java:98
 #, fuzzy
 msgid "Revert to default settings"
-msgstr "Herstellen naar standaardinstellingen"
+msgstr "Terugkeren naar de standaardwaarde:"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/options/FilterKeywordOptionPanel.java:38
 msgid "Add Keyword"
@@ -3644,16 +3639,15 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:228
 #, fuzzy
 msgid "Overview"
-msgstr "Bekijken"
+msgstr "Overzicht"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:251
 msgid "Details"
 msgstr "Details"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:255
-#, fuzzy
 msgid "Location"
-msgstr "Verbindingen"
+msgstr "Locatie"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/properties/Dialog.java:309
 #, fuzzy
@@ -3843,7 +3837,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/CopyMagnetLinkToClipboardAction.java:17
 #, fuzzy
 msgid "Copy link"
-msgstr "Alles kopiëren"
+msgstr "Kopiëren"
 
 #. show dialog.  if "no", don't download, just return.
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/LicenseWarningDownloadPreprocessor.java:39
@@ -3963,7 +3957,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:210
 #, fuzzy
 msgid "More options"
-msgstr "Verbindingen"
+msgstr "Meer opties"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/search/resultpanel/list/ListViewTableEditorRenderer.java:377
 #, java-format
@@ -4049,7 +4043,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:112
 #, fuzzy
 msgid "No Internet Connection"
-msgstr "Een verbinding toevoegen"
+msgstr "Gnutella-verbinding toevoegen"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:113
 msgid "You have no internet connection"
@@ -4059,19 +4053,18 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:134
 #, fuzzy
 msgid "Weak connection"
-msgstr "Een verbinding toevoegen"
+msgstr "verbinding"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:130
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:135
-#, fuzzy
 msgid "You have a weak connection"
-msgstr "U bent een leaf-node"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:139
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:144
 #, fuzzy
 msgid "Medium connection"
-msgstr "Een verbinding toevoegen"
+msgstr "verbinding"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:140
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:145
@@ -4081,7 +4074,7 @@ msgstr ""
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:150
 #, fuzzy
 msgid "Full Connection"
-msgstr "Verbindingen"
+msgstr "verbinding"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:151
 #, fuzzy
@@ -4089,9 +4082,8 @@ msgid "You are fully connected"
 msgstr "Er wordt nu een verbinding met het netwerk gemaakt"
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:156
-#, fuzzy
 msgid "Turbo charged Connection"
-msgstr "Een verbinding toevoegen"
+msgstr ""
 
 #: private-components/swingui/src/main/java/org/limewire/ui/swing/statusbar/ConnectionStatusPanel.java:157
 msgid "You have an turbo-charged connection"
@@ -4559,6 +4551,10 @@ msgstr "Updates"
 msgid "English"
 msgstr "Afronden"
 
+#, fuzzy
+msgid "false"
+msgstr "Plakken"
+
 msgid "You are sharing {0} files (Loading...)"
 msgstr "Je deelt  {0} bestanden (Bezig met laden...)"
 
@@ -4695,6 +4691,9 @@ msgstr ""
 "internetverbinding u heeft, of staat uw verbindingstype niet in de lijst, "
 "selecteer dan degene die het meest geschikt is."
 
+msgid "Select Speed"
+msgstr "Selecteer uw snelheid"
+
 msgid "Scanning Hard Drive"
 msgstr "Bezig met zoeken"
 
@@ -4829,6 +4828,9 @@ msgstr "Uploaden"
 
 msgid "Connecting to the Internet Archive..."
 msgstr "Verbindt met het \"Internet Archive\"..."
+
+msgid "Connected..."
+msgstr "Verbonden..."
 
 msgid "Uploading file"
 msgstr "Uploadt bestand"
@@ -5045,6 +5047,36 @@ msgstr "Gnutella (potentieel)"
 msgid "Gnutella (Actual)"
 msgstr "Gnutella (daadwerkelijk)"
 
+msgid "All Messages"
+msgstr "Alle berichten"
+
+msgid "Hops 1"
+msgstr "Hops 1"
+
+msgid "Hops 2"
+msgstr "Hops 2"
+
+msgid "Hops 3"
+msgstr "Hops 3"
+
+msgid "Hops 4"
+msgstr "Hops 4"
+
+msgid "Hops 5"
+msgstr "Hops 5"
+
+msgid "Hops 6"
+msgstr "Hops 6"
+
+msgid "Hops 7"
+msgstr "Hops 7"
+
+msgid "Hops 8"
+msgstr "Hops 8"
+
+msgid "Hops 9"
+msgstr "Hops 9"
+
 msgid "TTL 0"
 msgstr "TTL 0"
 
@@ -5077,6 +5109,9 @@ msgstr "TTL 9"
 
 msgid "Pong Errors"
 msgstr "Pongfouten"
+
+msgid "Reply Errors"
+msgstr "Antwoordfouten"
 
 msgid "No Route"
 msgstr "Geen route"
@@ -5144,6 +5179,9 @@ msgstr "De gemiddelde grootte in kilobytes van ontvangen Gnutella-berichten."
 msgid "The average size in kilobytes of received messages from LimeWires."
 msgstr "De gemiddelde grootte in kilobytes van ontvangen LimeWire-berichten."
 
+msgid "Current"
+msgstr "Huidig"
+
 msgid ". No line is available for output."
 msgstr ". Er is geen lijn naar buiten beschikbaar."
 
@@ -5159,6 +5197,9 @@ msgstr "Alle speciaal gemarkeerde aanvragen."
 msgid "False Positive"
 msgstr "Incorrecte waarde"
 
+msgid "Generic Errors"
+msgstr "Generische fouten"
+
 msgid "Handshaking"
 msgstr "Handschudden"
 
@@ -5173,6 +5214,9 @@ msgstr "Statistieken voor flowbestuurde berichten."
 
 msgid "Total messages filtered."
 msgstr "Totaal aantal gefiltreerde berichten."
+
+msgid "Color"
+msgstr "Kleur"
 
 msgid "Write statistics for this graph to files."
 msgstr "Statistieken van deze grafiek naar bestanden schrijven."
@@ -5294,6 +5338,9 @@ msgstr "Hard limiet (TTL 4)"
 msgid "Hard Limit (TTL 5 or above)"
 msgstr "Hard limiet (TTL 5 of hoger)"
 
+msgid "Connection Attempts"
+msgstr "Verbindingspogingen"
+
 msgid "Incoming Attempts"
 msgstr "Inkomende pogingen"
 
@@ -5302,6 +5349,9 @@ msgstr "Onbekende verzoeken"
 
 msgid "Banned Hosts"
 msgstr "Verbannen hosts"
+
+msgid "Closed Immediately"
+msgstr "Onmiddellijk gesloten"
 
 msgid "Problem Reading Header"
 msgstr "Leesprobleem met header"
@@ -5423,6 +5473,9 @@ msgstr "Inkom. geacc. (Leaf)"
 msgid "In Acc. (Guiding To Leaf)"
 msgstr "Inkom. geacc. (begeleiding naar Leaf)"
 
+msgid "In Acc. (Ultrapeer)"
+msgstr "Inkom. geacc. (Ultrapeer)"
+
 msgid "In Rej. (All Slots Taken)"
 msgstr "Inkom. weig. (alle slots bezet)"
 
@@ -5435,8 +5488,17 @@ msgstr "Serverweigering"
 msgid "No Conclusion"
 msgstr "Geen conclusie"
 
+msgid "LimeWire Ultrapeers"
+msgstr "LimeWire-ultrapeers"
+
 msgid "LimeWire Leaves"
 msgstr "LimeWire-leaves"
+
+msgid "Other Ultrapeers"
+msgstr "Andere ultrapeers"
+
+msgid "Other Leaves"
+msgstr "Andere leaves"
 
 msgid "Responses Requested"
 msgstr "Aangevraagde antwoorden"
@@ -5999,6 +6061,12 @@ msgstr "Hoogte:"
 msgid "Please press OK to permanently remove license."
 msgstr "Klik op OK om de licentie permanent te verwijderen."
 
+msgid "Display:"
+msgstr "Weergave:"
+
+msgid "Vendor Messages"
+msgstr "Leverancierberichten"
+
 msgid "HTTP Content"
 msgstr "HTTP-inhoud"
 
@@ -6038,6 +6106,9 @@ msgstr "Voer a.u.b. een geldige verificatie-URL van de licentie in."
 msgid "You are sharing"
 msgstr "Je deelt"
 
+msgid "Loading Resources..."
+msgstr "Bronnen worden geladen..."
+
 msgid "Please enter the copyright holder of the file you want to publish."
 msgstr ""
 "Voer de naam van de eigenaar van het copyright in van het bestand dat u wilt "
@@ -6054,14 +6125,29 @@ msgstr "Controleer deze associaties bij het opstarten van LimeWire:"
 msgid "Alt. Locations"
 msgstr "Alt. locaties"
 
+msgid "Loading TLS Encryption..."
+msgstr "TLS-encryptie wordt geladen..."
+
+msgid "Loading Message Router..."
+msgstr "Berichtenrouter wordt geladen..."
+
 msgid "Checking for Updates..."
 msgstr "Controle voor updates"
+
+msgid "Locating Peers..."
+msgstr "Peers worden gelokaliseerd..."
+
+msgid "Loading Shared Files..."
+msgstr "Gedeelde bestanden worden geladen..."
 
 msgid "Loading BitTorrent Management..."
 msgstr "BitTorrent-beheer wordt geladen..."
 
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "Limewire Store-toebehoren worden bevestigd..."
+
+msgid "Loading Network Listeners..."
+msgstr "Netwerkluisteraars worden geladen..."
 
 msgid "Could not process bad MAGNET link {0}"
 msgstr "Kon slechte Magnet-link \"{0}\" niet verwerken"
@@ -6108,6 +6194,9 @@ msgid ""
 msgstr ""
 "U kunt er voor kiezen of u wel/niet wilt dat torrents, gedownload van "
 "Gnutella, automatisch starten."
+
+msgid "Start automatically"
+msgstr "Automatisch starten"
 
 msgid "BitTorrent Settings"
 msgstr "BitTorrent-instellingen"
@@ -6239,6 +6328,15 @@ msgstr "Zoeken"
 msgid "&Monitor"
 msgstr "Overzicht"
 
+msgid "&Connections"
+msgstr "Verbindingen"
+
+msgid "&Library"
+msgstr "Bibliotheek"
+
+msgid "C&onsole"
+msgstr "Logboek"
+
 msgid "Lo&gging"
 msgstr "Lo&gboek"
 
@@ -6296,6 +6394,9 @@ msgstr ""
 
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire kan het aangegeven bestand niet opstarten."
+
+msgid "Loading Core Components..."
+msgstr "Standaardcomponenten worden geladen..."
 
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "Digitaal audiotoegangsprotocol wordt geladen..."
@@ -6422,6 +6523,9 @@ msgstr "Magnetlinks voor snelle downloads (als u LimeWire heeft geïnstalleerd)"
 msgid "Always use this answer"
 msgstr "Altijd dit antwoord gebruiken"
 
+msgid "Loading Monitor Window..."
+msgstr "Overzichtvenster wordt geladen..."
+
 msgid "Show Incoming Searches"
 msgstr "Toon inkomende zoekopdrachten"
 
@@ -6470,11 +6574,17 @@ msgstr "LimeWire wordt afgesloten..."
 msgid "Please wait while LimeWire shuts down..."
 msgstr "Wacht a.u.b. terwijl LimeWire afsluit..."
 
+msgid "Add..."
+msgstr "Toevoegen…"
+
 msgid "Add New List Item"
 msgstr "Nieuw item toevoegen"
 
 msgid "Remove Selected Item"
 msgstr "Geselecteerde item verwijderen"
+
+msgid "Loading Status Window..."
+msgstr "Statusvenster wordt geladen..."
 
 msgid "LimeWire has detected a firewall"
 msgstr "LimeWire heeft een firewall ontdekt"
@@ -6485,6 +6595,9 @@ msgstr "U bent niet verbonden met de LimeWire Store"
 msgid "You are connected to the LimeWire Store"
 msgstr "U bent verbonden met de LimeWire Store"
 
+msgid "Disconnected"
+msgstr "Niet verbonden"
+
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
@@ -6494,6 +6607,9 @@ msgstr ""
 
 msgid "Starting"
 msgstr "Verbinding maken..."
+
+msgid "Poor"
+msgstr "Slechte"
 
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
@@ -7054,6 +7170,9 @@ msgstr "Magnet-links naar het klembord kopiëren"
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "Magnet-links van de geselecteerde bestanden naar het klembord kopiëren"
 
+msgid "C&onnect"
+msgstr "&Verbinden"
+
 msgid "D&isconnect"
 msgstr "Verbinding verbre&ken"
 
@@ -7073,6 +7192,9 @@ msgid ""
 msgstr ""
 "LimeWire kan het bestand of adres niet openen. Zorg ervoor dat je het "
 "correct hebt getypt, en probeer het dan opnieuw."
+
+msgid "&Close"
+msgstr "&Sluiten"
 
 msgid "Launch Selected Files"
 msgstr "Geselecteerde bestanden uitvoeren"
@@ -7104,6 +7226,9 @@ msgstr "Opent een venster waarin u een nieuwe map kunt kiezen om te delen"
 msgid "Block Host"
 msgstr "Host blokkeren"
 
+msgid "Send Message"
+msgstr "Bericht verzenden"
+
 msgid "Block Current Host"
 msgstr "Huidige host blokkeren"
 
@@ -7133,6 +7258,9 @@ msgstr "Bekijk alle bestanden op de geselecteerde computer"
 
 msgid "Loading Connections Window..."
 msgstr "Verbindingsvenster wordt geladen..."
+
+msgid "Host:"
+msgstr "Host:"
 
 msgid "0.6"
 msgstr "0.6"
@@ -7204,6 +7332,9 @@ msgstr "Bestand opslaan..."
 msgid "Recovering Corrupted File"
 msgstr "Poging tot reparatie van bestand"
 
+msgid "Paused"
+msgstr "Gepauzeerd"
+
 msgid "Content Removed"
 msgstr "Bestand verwijderd"
 
@@ -7234,6 +7365,12 @@ msgstr "Chunks"
 msgid "Lost To Corruption"
 msgstr "Beschadigd bestand verloren gegaan"
 
+msgid "hosts"
+msgstr "hosts"
+
+msgid "host"
+msgstr "host"
+
 msgid "A more specific search may be required..."
 msgstr "Een specifiekere zoekopdracht is misschien nodig..."
 
@@ -7254,11 +7391,20 @@ msgstr "Bezige hosts"
 msgid "Remotely Queued"
 msgstr "Op afstand in de rij gezet"
 
+msgid "Locating Sources..."
+msgstr "Bronnen opsporen..."
+
 msgid "LimeWire cannot download this torrent.  The tracker responded"
 msgstr "LimeWire kan deze torrent niet downloaden. De tracker antwoordde:"
 
+msgid "Priority"
+msgstr "Prioriteit"
+
 msgid "Progress"
 msgstr "Voortgang"
+
+msgid "Speed"
+msgstr "Snelheid"
 
 msgid "Loading Download Window..."
 msgstr "Downloadvenster wordt geladen..."
@@ -7361,6 +7507,9 @@ msgstr "Altijd opslaan als..."
 msgid "Always Append (#)"
 msgstr "Altijd (#) toevoegen"
 
+msgid "Always Ask"
+msgstr "Altijd vragen"
+
 msgid "Choose a Default Action:"
 msgstr "Kies een standaardactie:"
 
@@ -7460,6 +7609,9 @@ msgstr ""
 
 msgid "System Startup"
 msgstr "Systeemopstart"
+
+msgid "Start Automatically"
+msgstr "Automatisch opstarten"
 
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
@@ -7576,6 +7728,9 @@ msgstr "Individuele winkelbestanden"
 msgid "List of All Individual Purchased Files"
 msgstr "Lijst van alle individueel gekochte bestanden"
 
+msgid "Loading Library Window..."
+msgstr "Bibliotheekvenster wordt geladen..."
+
 msgid "You can configure the folders you share in LimeWire's Options."
 msgstr "U kunt de gedeelde mappen configureren in de opties van LimeWire."
 
@@ -7591,8 +7746,14 @@ msgstr "Behoud de resultaten van de laatste zoekactie"
 msgid "Icon"
 msgstr "Icoon"
 
+msgid "Path"
+msgstr "Pad"
+
 msgid "Last Modified"
 msgstr "Laatst bewerkt"
+
+msgid "Shared"
+msgstr "Gedeeld"
 
 msgid "This folder is shared."
 msgstr "Deze map wordt gedeeld."
@@ -7659,6 +7820,9 @@ msgstr "Licentie bewerken"
 msgid "Continue Downloading Selected Incomplete File"
 msgstr "Hervat het downloaden van het geselecteerde incomplete bestand"
 
+msgid "Rename"
+msgstr "Hernoemen"
+
 msgid "Stop Sharing File"
 msgstr "Bestand delen afbreken"
 
@@ -7711,6 +7875,9 @@ msgstr ""
 "uitvinken die u niet wilt delen (u kunt uw gedeelde mappen altijd in de "
 "opties van LimeWire veranderen)."
 
+msgid "Legend"
+msgstr "Geschiedenis"
+
 msgid "Folder is fully shared including all subfolders."
 msgstr "De map is helemaal gedeeld inclusief alle submappen!"
 
@@ -7731,6 +7898,12 @@ msgstr "Lijst met .torrent bestanden"
 
 msgid "Logging"
 msgstr "Logging"
+
+msgid "Loading Logging Window..."
+msgstr "Logvenster wordt geladen..."
+
+msgid "&Advanced"
+msgstr "Ge&avanceerd"
 
 msgid "&File"
 msgstr "&Bestand"
@@ -7759,6 +7932,9 @@ msgstr "Tip van &de dag"
 msgid "Show the Tip of the Day Window"
 msgstr "Toon het 'Tip van de dag'-venster"
 
+msgid "Generate &Error"
+msgstr "&Fout genereren"
+
 msgid "Generate a Popup Error for Testing"
 msgstr "Genereer een popupfout voor een test"
 
@@ -7767,6 +7943,9 @@ msgstr "&Over LimeWire..."
 
 msgid "Information about LimeWire"
 msgstr "Informatie over LimeWire"
+
+msgid "Loading Menus..."
+msgstr "Menu's worden geladen..."
 
 msgid "&Navigation"
 msgstr "&Navigatie"
@@ -7797,6 +7976,9 @@ msgstr "Vind meer skins op limewire.com"
 
 msgid "Reload available skins from disk"
 msgstr "Beschikbare skins van schijf herladen"
+
+msgid "Use &Default"
+msgstr "Gebruik &standaard"
 
 msgid "Use your default skin"
 msgstr "Gebruik uw standaardskin"
@@ -7843,6 +8025,9 @@ msgstr "LimeWire-mediaspeler"
 msgid "About"
 msgstr "Over..."
 
+msgid "Restore Defaults"
+msgstr "Standaardinstellingen herstellen."
+
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
@@ -7868,20 +8053,32 @@ msgstr "Importeren"
 msgid "Helper Apps"
 msgstr "Hulpprogramma's"
 
+msgid "Bug Reports"
+msgstr "Foutrapporten"
+
 msgid "Popups"
 msgstr "Popups"
 
 msgid "Autocomplete"
 msgstr "Automatisch aanvullen"
 
+msgid "Content"
+msgstr "Inhoud"
+
 msgid "Junk"
 msgstr "Ongewenst"
+
+msgid "Hosts"
+msgstr "Hosts"
 
 msgid "Preferencing"
 msgstr "Voorkeuren"
 
 msgid "System Boot"
 msgstr "Systeem start"
+
+msgid "Loading Options Window..."
+msgstr "Optiesvenster wordt geladen..."
 
 msgid "You can choose the folder for saving files."
 msgstr "U kunt de map kiezen waarin nieuwe bestanden worden opslagen."
@@ -7987,12 +8184,21 @@ msgstr "U kunt de chatmogelijkheid aan- of uitzetten."
 msgid "Enable Chat:"
 msgstr "Chatten inschakelen:"
 
+msgid "Connect on Startup"
+msgstr "Verbinden bij opstarten"
+
 msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr ""
 "U kunt er voor kiezen of u wel/niet automatisch wilt verbinden met het "
 "netwerk als de applicatie opstart."
+
+msgid "Connect on Startup:"
+msgstr "Verbinden bij opstarten:"
+
+msgid "Connection Preferencing"
+msgstr "Verbindingsvoorkeuren"
 
 msgid ""
 "You can limit who is able to connect to you based on the number of files "
@@ -8065,6 +8271,9 @@ msgstr ""
 msgid "Always Show the 'Save As' Dialog"
 msgstr "Altijd het 'Opslaan als...'-venster tonen"
 
+msgid "Always Ask What to do"
+msgstr "Altijd vragen wat te doen"
+
 msgid "Capabilities"
 msgstr "Mogelijkheden"
 
@@ -8100,6 +8309,9 @@ msgstr "Ongewenste bestanden tonen op plaats"
 
 msgid "Display junk at the bottom of search results"
 msgstr "Ongewenste bestanden onder de gewenste bestanden tonen"
+
+msgid "Use Defaults"
+msgstr "Standaardwaardes gebruiken"
 
 msgid "Do Nothing (Not Recommended)"
 msgstr "Geen actie ondernemen (niet aanbevolen)"
@@ -8414,6 +8626,9 @@ msgstr "Afsluitgedrag"
 msgid "You can choose the default shutdown behavior."
 msgstr "U kunt het standaard afsluitgedrag kiezen."
 
+msgid "Shutdown Immediately"
+msgstr "Direct afsluiten"
+
 msgid "Shutdown after Transfers"
 msgstr "Afsluiten na gegevensoverdrachten"
 
@@ -8441,6 +8656,9 @@ msgid ""
 msgstr ""
 "U kunt uw verbindingssnelheid specificeren zodat LimeWire zichzelf kan "
 "optimaliseren."
+
+msgid "Speed:"
+msgstr "Snelheid:"
 
 msgid ""
 "You can choose whether or not to automatically run LimeWire when your "
@@ -8560,6 +8778,9 @@ msgstr "Aantal"
 msgid "Comment"
 msgstr "Commentaar"
 
+msgid "Playlist"
+msgstr "Afspeellijst"
+
 msgid "Loading Playlist Window..."
 msgstr "Afspeellijstvenster wordt geladen..."
 
@@ -8569,8 +8790,14 @@ msgstr "Afspeelopties:"
 msgid "Shuffle"
 msgstr "Schudden"
 
+msgid "Continuous"
+msgstr "Continu"
+
 msgid "Open Playlist (.m3u)"
 msgstr "Afspeellijst openen (.m3u)"
+
+msgid "Save Playlist As"
+msgstr "Afspeellijst opslaan als"
 
 msgid ""
 "Warning: a file with the name {0} already exists in the folder. Overwrite "
@@ -8740,6 +8967,9 @@ msgstr "Chatten met host"
 msgid "Repeat Search"
 msgstr "Zoekopdracht herhalen"
 
+msgid "Loading Search Window..."
+msgstr "Zoekvenster wordt geladen..."
+
 msgid "Firewalled Host"
 msgstr "Host achter firewall"
 
@@ -8791,6 +9021,9 @@ msgstr ""
 
 msgid "Could not browse host {0}."
 msgstr "Kon niet kijken bij host {0} ."
+
+msgid "Vendor"
+msgstr "Leverancier"
 
 msgid "Junk Rating"
 msgstr "Ongewenstheidswaarde"
@@ -8960,8 +9193,14 @@ msgstr "Gretige downloader verbannen"
 msgid "Uploading Hash Tree"
 msgstr "Hashtree uploaden"
 
+msgid "Suspended"
+msgstr "Uitgesteld"
+
 msgid "Awaiting Requests"
 msgstr "Wachtende aanvragen"
+
+msgid "Loading Upload Window..."
+msgstr "Uploadvenster wordt geladen..."
 
 msgid "Seeding"
 msgstr "Uitzaaien"
@@ -9190,6 +9429,9 @@ msgstr "Album:"
 msgid "Genre:"
 msgstr "Genre:"
 
+msgid "Year:"
+msgstr "Jaar:"
+
 msgid "Type:"
 msgstr "Type:"
 
@@ -9267,134 +9509,6 @@ msgid ""
 msgstr ""
 "Onbekend bestandstype. Kies een type dat het beste bij dit bestand hoort."
 
-#, fuzzy
-#~ msgid "false"
-#~ msgstr "Plakken"
-
-#, fuzzy
-#~ msgid "Select Speed"
-#~ msgstr "Alles selecteren"
-
-#, fuzzy
-#~ msgid "Connected..."
-#~ msgstr "Verbinding met:"
-
-#, fuzzy
-#~ msgid "All Messages"
-#~ msgstr "Bericht"
-
-#, fuzzy
-#~ msgid "Hops 1"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 2"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 3"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 4"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 5"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 6"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 7"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 8"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Hops 9"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Reply Errors"
-#~ msgstr "Interne fout"
-
-#, fuzzy
-#~ msgid "Current"
-#~ msgstr "Knippen"
-
-#, fuzzy
-#~ msgid "Generic Errors"
-#~ msgstr "Interne fout"
-
-#, fuzzy
-#~ msgid "Color"
-#~ msgstr "Wissen"
-
-#, fuzzy
-#~ msgid "Connection Attempts"
-#~ msgstr "Verbindingen"
-
-#, fuzzy
-#~ msgid "Closed Immediately"
-#~ msgstr "Altijd direct verzenden"
-
-#, fuzzy
-#~ msgid "In Acc. (Ultrapeer)"
-#~ msgstr "Ultrapeers"
-
-#, fuzzy
-#~ msgid "LimeWire Ultrapeers"
-#~ msgstr "Ultrapeers"
-
-#, fuzzy
-#~ msgid "Other Ultrapeers"
-#~ msgstr "Ultrapeers"
-
-#, fuzzy
-#~ msgid "Other Leaves"
-#~ msgstr "Leaves"
-
-#, fuzzy
-#~ msgid "Display:"
-#~ msgstr "Vertraging:"
-
-#, fuzzy
-#~ msgid "Vendor Messages"
-#~ msgstr "Bericht"
-
-#, fuzzy
-#~ msgid "Loading Resources..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Loading TLS Encryption..."
-#~ msgstr "Bezig met het laden van de HTML-enging...."
-
-#, fuzzy
-#~ msgid "Loading Message Router..."
-#~ msgstr "Bezig met het laden van de gebruikersinterface..."
-
-#, fuzzy
-#~ msgid "Locating Peers..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Loading Shared Files..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Loading Network Listeners..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Start automatically"
-#~ msgstr "Automatisch sorteren"
-
 #~ msgid ""
 #~ "Please add any comments you may have (e.g what caused the error). \n"
 #~ "Thank you and please use English."
@@ -9428,209 +9542,38 @@ msgstr ""
 #~ msgid "Always Discard All Errors"
 #~ msgstr "Altijd alle fouten weggooien"
 
-#, fuzzy
-#~ msgid "&Connections"
-#~ msgstr "Verbindingen"
-
-#, fuzzy
-#~ msgid "&Library"
-#~ msgstr "Bibliotheek bekijken"
-
-#, fuzzy
-#~ msgid "C&onsole"
-#~ msgstr "Console"
-
-#, fuzzy
-#~ msgid "Loading Core Components..."
-#~ msgstr "Bezig met het laden van de browser..."
-
 #~ msgid "Loading Internationalization Support..."
 #~ msgstr "Bezig met het laden van de internationalisatie ondersteuning..."
 
-#, fuzzy
-#~ msgid "Loading Monitor Window..."
-#~ msgstr "Bezig met het laden van de browser..."
+#~ msgid ""
+#~ "LimeWire has encountered an internal error. It is possible for LimeWire "
+#~ "to recover and continue running normally. To continue using LimeWire, "
+#~ "click 'Discard'. If desired, you can click 'Review' to look at the "
+#~ "information about the error."
+#~ msgstr ""
+#~ "Er is in LimeWire een interne fout opgetreden. Het is mogelijk dat "
+#~ "LimeWire dit kan herstellen en vervolgens normaal kan worden uitgevoerd. "
+#~ "Om LimeWire te blijven gebruiken, dient u op \"Weggooien\" te klikken. "
+#~ "Indien gewenst, kunt u klikken op \"Bekijken\" om de informatie "
+#~ "betreffende de fout te bekijken."
 
-#, fuzzy
-#~ msgid "Add..."
-#~ msgstr "Toevoegen"
-
-#, fuzzy
-#~ msgid "Loading Status Window..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Disconnected"
-#~ msgstr "Verbinding met:"
-
-#, fuzzy
-#~ msgid "Poor"
-#~ msgstr "Poort"
-
-#, fuzzy
-#~ msgid "C&onnect"
-#~ msgstr "Bezig met verbinden"
-
-#, fuzzy
-#~ msgid "&Close"
-#~ msgstr "Console"
-
-#, fuzzy
-#~ msgid "Send Message"
-#~ msgstr "Bericht"
-
-#, fuzzy
-#~ msgid "Host:"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Paused"
-#~ msgstr "Plakken"
-
-#, fuzzy
-#~ msgid "hosts"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "host"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Locating Sources..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Priority"
-#~ msgstr "Poort"
-
-#, fuzzy
-#~ msgid "Speed"
+#~ msgid "Send"
 #~ msgstr "Verzenden"
 
-#, fuzzy
-#~ msgid "Always Ask"
-#~ msgstr "Altijd vragen om te bekijken"
+#~ msgid "Review"
+#~ msgstr "Bekijken"
 
-#, fuzzy
-#~ msgid "Start Automatically"
-#~ msgstr "Automatisch sorteren"
-
-#, fuzzy
-#~ msgid "Loading Library Window..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Path"
-#~ msgstr "Plakken"
-
-#, fuzzy
-#~ msgid "Shared"
-#~ msgstr "Verzenden"
-
-#, fuzzy
-#~ msgid "Rename"
-#~ msgstr "Verwijderen"
-
-#, fuzzy
-#~ msgid "Legend"
-#~ msgstr "Verzenden"
-
-#, fuzzy
-#~ msgid "Loading Logging Window..."
+#~ msgid "Loading HTML Engine..."
 #~ msgstr "Bezig met het laden van de HTML-enging...."
 
-#, fuzzy
-#~ msgid "&Advanced"
-#~ msgstr "Geavanceerde programma's"
-
-#, fuzzy
-#~ msgid "Generate &Error"
-#~ msgstr "Interne fout"
-
-#, fuzzy
-#~ msgid "Loading Menus..."
+#~ msgid "Loading Browser..."
 #~ msgstr "Bezig met het laden van de browser..."
 
-#, fuzzy
-#~ msgid "Use &Default"
-#~ msgstr "Herstellen naar standaardinstellingen"
+#~ msgid "Loading User Interface..."
+#~ msgstr "Bezig met het laden van de gebruikersinterface..."
 
-#, fuzzy
-#~ msgid "Restore Defaults"
-#~ msgstr "Herstellen naar standaardinstellingen"
+#~ msgid "Do Not Disturb"
+#~ msgstr "Niet storen"
 
-#, fuzzy
-#~ msgid "Bug Reports"
-#~ msgstr "Rapport kopiëren"
-
-#, fuzzy
-#~ msgid "Content"
-#~ msgstr "Verbinding met:"
-
-#, fuzzy
-#~ msgid "Hosts"
-#~ msgstr "Host"
-
-#, fuzzy
-#~ msgid "Loading Options Window..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Connect on Startup"
-#~ msgstr "Verbindingen"
-
-#, fuzzy
-#~ msgid "Connect on Startup:"
-#~ msgstr "Verbinding met:"
-
-#, fuzzy
-#~ msgid "Connection Preferencing"
-#~ msgstr "Bezig met verbinden"
-
-#, fuzzy
-#~ msgid "Always Ask What to do"
-#~ msgstr "Altijd vragen om te bekijken"
-
-#, fuzzy
-#~ msgid "Use Defaults"
-#~ msgstr "Herstellen naar standaardinstellingen"
-
-#, fuzzy
-#~ msgid "Shutdown Immediately"
-#~ msgstr "Altijd direct verzenden"
-
-#, fuzzy
-#~ msgid "Speed:"
-#~ msgstr "Verzenden"
-
-#, fuzzy
-#~ msgid "Playlist"
-#~ msgstr "Plakken"
-
-#, fuzzy
-#~ msgid "Continuous"
-#~ msgstr "Verbindingen"
-
-#, fuzzy
-#~ msgid "Save Playlist As"
-#~ msgstr "Opslaan als"
-
-#, fuzzy
-#~ msgid "Loading Search Window..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Vendor"
-#~ msgstr "Verzenden"
-
-#, fuzzy
-#~ msgid "Suspended"
-#~ msgstr "Verzenden"
-
-#, fuzzy
-#~ msgid "Loading Upload Window..."
-#~ msgstr "Bezig met het laden van de browser..."
-
-#, fuzzy
-#~ msgid "Year:"
-#~ msgstr "Wissen"
+#~ msgid "View Library"
+#~ msgstr "Bibliotheek bekijken"
