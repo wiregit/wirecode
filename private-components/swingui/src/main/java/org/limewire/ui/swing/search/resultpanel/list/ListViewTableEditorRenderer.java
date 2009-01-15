@@ -210,7 +210,7 @@ public class ListViewTableEditorRenderer extends AbstractCellEditor implements T
         propertiesButton.setRolloverIcon(propertiesHover);
         propertiesButton.setRolloverEnabled(true);
         propertiesButton.setPressedIcon(propertiesDown);
-        propertiesButton.setToolTipText(I18n.tr("More options"));
+        propertiesButton.setToolTipText(I18n.tr("View file info"));
         propertiesButton.setBorderPainted(false);
         propertiesButton.setContentAreaFilled(false);
         propertiesButton.setFocusPainted(false);
