@@ -91,7 +91,8 @@ public class ToolsMenu extends MnemonicMenu {
                 continue;
             }
 
-            Action action = new AbstractAction(SearchCategoryUtils.getWhatsNewMenuName(category)) {
+            // TODO fberger: change back to menu name
+            Action action = new AbstractAction(SearchCategoryUtils.getName(category)) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     searchHandler.doSearch(DefaultSearchInfo.createWhatsNewSearch(category));
