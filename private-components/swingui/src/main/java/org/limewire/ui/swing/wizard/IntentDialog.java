@@ -31,8 +31,6 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeJDialog;
 import org.limewire.ui.swing.components.MultiLineLabel;
 import org.limewire.ui.swing.painter.GenericBarPainter;
-import org.limewire.ui.swing.painter.GreenButtonBackgroundPainter;
-import org.limewire.ui.swing.painter.LightButtonBackgroundPainter;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.LanguageUtils;
@@ -44,10 +42,9 @@ import org.limewire.util.SystemUtils;
 public class IntentDialog extends LimeJDialog {
 
     private final Color backgroundColor = Color.WHITE;
-    private final Font headingFont = new Font("Arial", Font.BOLD, 16);
-    private final Font normalFont = new Font("Arial", Font.PLAIN, 14);
-    private final Font buttonFont = new Font("Arial", Font.BOLD, 14);
-    
+    private final Font headingFont = new Font("Dialog", Font.BOLD, 16);
+    private final Font normalFont = new Font("Dialog", Font.PLAIN, 14);
+    private final Font buttonFont = new Font("Dialog", Font.BOLD, 14);
     
     private final Color headerGradientTop = new Color(0xf4f4f4);
     private final Color headerGradientBottom = new Color(0xd7d7d7);
@@ -55,7 +52,6 @@ public class IntentDialog extends LimeJDialog {
     private final Paint headerTopBorder2 = PainterUtils.TRASPARENT; 
     private final Paint headerBottomBorder1 = new Color(0x696969);
     private final Paint headerBottomBorder2 = new Color(0xffffff);
-    
     
     private final JLabel headingLabel;
     private final MultiLineLabel bodyLabel;
@@ -106,10 +102,10 @@ public class IntentDialog extends LimeJDialog {
         languageLabel.setFont(normalFont);
         agreeButton = new JXButton();
         decorateButton(agreeButton);
-        agreeButton.setBackgroundPainter(new GreenButtonBackgroundPainter());
+        agreeButton.setBackgroundPainter(new IntentGreenButtonBackgroundPainter());
         exitButton = new JXButton();
         decorateButton(exitButton);
-        exitButton.setBackgroundPainter(new LightButtonBackgroundPainter(6,6));
+        exitButton.setBackgroundPainter(new IntentLightButtonBackgroundPainter());
 
         JComboBox languageDropDown = createLanguageDropDown(normalFont);
                 
