@@ -31,9 +31,6 @@ public class BasicProgressPainterFactory implements ProgressPainterFactory {
     
     @Override
     public AbstractPainter<JComponent> createRegularBackgroundPainter() {
-        
-        System.out.println(barBackgroundGradientTop);
-        
         return new ProgressBarBackgroundPainter(
              new GradientPaint(0,0,this.barBackgroundGradientTop,0,1,this.barBackgroundGradientBottom),
              this.barBorder, this.barBorderDisabled);
