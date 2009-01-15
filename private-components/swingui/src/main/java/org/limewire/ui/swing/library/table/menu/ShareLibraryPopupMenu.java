@@ -61,12 +61,20 @@ public class ShareLibraryPopupMenu extends JPopupMenu {
         boolean locateActionEnabled = singleFile && !firstItem.isIncomplete();
         boolean viewFileInfoEnabled = singleFile;
         boolean shareActionEnabled = false;
-        boolean removeActionEnabled = multiFile || (!firstItem.isIncomplete());
-        boolean deleteActionEnabled = multiFile || (!firstItem.isIncomplete());
+        boolean removeActionEnabled = false;
+        boolean deleteActionEnabled = false;
         
         for(LocalFileItem localFileItem : fileItems) {
             if(localFileItem.isShareable() && !localFileItem.isIncomplete()) {
                 shareActionEnabled = true;
+                break;
+            }
+        }
+        
+        for(LocalFileItem localFileItem : fileItems) {
+            if(!localFileItem.isIncomplete()) {
+                removeActionEnabled = true;
+                deleteActionEnabled = true;
                 break;
             }
         }
