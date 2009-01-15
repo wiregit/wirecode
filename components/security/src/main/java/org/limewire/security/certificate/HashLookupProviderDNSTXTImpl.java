@@ -39,6 +39,7 @@ public class HashLookupProviderDNSTXTImpl implements HashLookupProvider {
             LOG.error("Failed lookup for key '" + key + "'", ex);
             return null;
         } catch (ExceptionInInitializerError error) {
+            // FIXME: remove after DNS bug is caught
             // LWC-2214 dnsjava signals initialization
             // failure by failing to load its classes,
             // instead of something like IllegalStateException
