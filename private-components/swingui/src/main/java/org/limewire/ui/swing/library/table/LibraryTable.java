@@ -84,7 +84,7 @@ public class LibraryTable<T extends FileItem> extends MouseableTable
         setSelectionModel(model);
         model.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
         this.listSelection = model.getSelected();
-        setHighlighters(tableColors.getEvenHighLighter(), tableColors.getOddHighLighter(), 
+        setHighlighters(tableColors.getEvenHighlighter(), tableColors.getOddHighlighter(), 
                 new ColorHighlighter(new DisabledHighlightPredicate(this), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
        
         setFillsViewportHeight(true);

@@ -444,8 +444,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             
             colors.evenColor = Color.WHITE;
             colors.oddColor = Color.WHITE;
-            colors.getEvenHighLighter().setBackground(colors.evenColor);
-            colors.getOddHighLighter().setBackground(colors.oddColor);
+            colors.getEvenHighlighter().setBackground(colors.evenColor);
+            colors.getOddHighlighter().setBackground(colors.oddColor);
             return colors;
         }
         

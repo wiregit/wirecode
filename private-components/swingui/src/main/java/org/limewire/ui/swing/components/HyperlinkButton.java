@@ -72,6 +72,8 @@ public class HyperlinkButton extends JXButton implements MouseListener {
     }
     
     public void removeUnderline() {
+        // Note: cannot use FontUtils.removeUnderline because that
+        // calls setFont, which will just re-add the underline!
         Font font = getFont();
         if (font != null) {
             Map<TextAttribute, ?> map = font.getAttributes();
