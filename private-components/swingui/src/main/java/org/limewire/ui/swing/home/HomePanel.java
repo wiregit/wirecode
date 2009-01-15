@@ -3,6 +3,8 @@ package org.limewire.ui.swing.home;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
@@ -49,7 +51,17 @@ public class HomePanel extends JXPanel {
         gbc.weightx = 1;
         gbc.weighty = 1;
         
-        if(MozillaInitialization.isInitialized()) {
+        
+        
+        if(MozillaInitialization.isInitialized()) {            
+            // Hide the page when the browser goes away.
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentHidden(ComponentEvent e) {
+                    browser.load("about:blank");
+                }
+            });
+            
             BrowserUtils.addTargetedUrlAction("_lwHome", new TargetedUrlAction() {
                 @Override
                 public void targettedUrlClicked(final TargetedUrl targetedUrl) {
