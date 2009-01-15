@@ -273,7 +273,13 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             }
         });
         clearFinishedButton.setVisible(false);
-  
+        
+        //Dimension prefSize = showAllButton.getPreferredSize().width > clearFinishedButton.getPreferredSize().width ?
+                //showAllButton.getPreferredSize() : clearFinishedButton.getPreferredSize();
+                
+        //showAllButton.setPreferredSize(prefSize);
+        //clearFinishedButton.setPreferredSize(prefSize);
+        
         
         initializeDownloadCompleteListener();
         initializeDownloadAddedListener();
@@ -283,8 +289,8 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         JPanel rightPanel = new JPanel(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         rightPanel.setMaximumSize(new Dimension(clearFinishedButton.getPreferredSize().width + 32, panelHeight));
         rightPanel.setOpaque(false);
-        rightPanel.add(showAllButton, "aligny 100%, gapbottom 5, wrap");
-        rightPanel.add(clearFinishedButton, "gaptop 5, aligny 0%, hidemode 3");
+        rightPanel.add(showAllButton, "aligny 100%, gapbottom 3, wrap");
+        rightPanel.add(clearFinishedButton, "gaptop 3, aligny 0%, hidemode 3");
         
         add(tableScroll, "aligny 50%, growx, growy, push");
         add(rightPanel, "gapleft 12, gapright 20");
@@ -450,7 +456,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 			statusLabel.setFont(itemFont);
 			timeLabel = new JLabel("TIME");
 			timeLabel.setFont(itemFont);
-			timeLabel.setForeground(fontColor);
+			timeLabel.setForeground(grayForeground);
 			nameLabel = new JLabel("NAME");
             nameLabel.setFont(itemFont);
             nameLabel.setForeground(fontColor);
@@ -472,21 +478,21 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             launchButton.setText(I18n.tr("Launch"));
             launchButton.setFont(itemFont);
             launchButton.setActionCommand(DownloadActionHandler.LAUNCH_COMMAND);
-            FontUtils.bold(launchButton);
+            //FontUtils.bold(launchButton);
             FontUtils.underline(launchButton);            
           
             tryAgainButton = new HyperlinkButton();
             tryAgainButton.setText(I18n.tr("Try again"));
             tryAgainButton.setFont(itemFont);
             tryAgainButton.setActionCommand(DownloadActionHandler.RESUME_COMMAND);
-            FontUtils.bold(tryAgainButton);
+            //FontUtils.bold(tryAgainButton);
             FontUtils.underline(tryAgainButton);
 
             cancelButton = new HyperlinkButton();
             cancelButton.setText(I18n.tr("Remove"));
             cancelButton.setFont(itemFont);
             cancelButton.setActionCommand(DownloadActionHandler.CANCEL_COMMAND);
-            FontUtils.bold(cancelButton);
+            //FontUtils.bold(cancelButton);
             FontUtils.underline(cancelButton);
 
             linkButtons = new JButton[]{launchButton, tryAgainButton, cancelButton};
@@ -502,19 +508,19 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             setLayout(new MigLayout("fill, ins 0 0 0 0 , nogrid, gap 0! 0!, novisualpadding"));
             
             add(nameLabel, "bottom, left, gapleft 15, gapright 15, gaptop 10, wrap");
-            add(progressBar, "top, left,gapleft 15, gapright 2, gaptop 6, hidemode 3");
-            add(statusLabel, "top, left, gapleft 15, gapright 2, gaptop 6, hidemode 3");
+            add(progressBar, "top, left,gapleft 15, gapright 2, gaptop 2, hidemode 3");     //6
+            add(statusLabel, "top, left, gapleft 15, gapright 2, gaptop 3, hidemode 3");    //6
             for(JButton button : linkButtons){
-                add(button, "top, hidemode 3, gaptop 6, gapright 15");
+                add(button, "top, hidemode 3, gaptop 3, gapright 15");          //6
             }            
 
             for(JButton button : buttons){
-                add(button, "top, hidemode 3, gaptop 4, gapright 15");
+                add(button, "top, hidemode 3, gaptop 0, gapright 15");          //4
             }
            // force line wrap
             add(new JLabel(), "wrap");
             
-            add(timeLabel, "top, left, gapleft 15, gaptop 4");
+            add(timeLabel, "top, left, gapleft 15, gaptop 1");          //4
         }
 
 
@@ -598,7 +604,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             case STALLED:
                 return I18n.tr("Stalled - ");
             case ERROR:         
-                return I18n.tr("Unable to download: ");            
+                return I18n.tr("Unable to download  - ");            
             case LOCAL_QUEUED:
                 return getQueueTime(item.getRemainingQueueTime());                
             case REMOTE_QUEUED:

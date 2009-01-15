@@ -100,6 +100,11 @@ public class MockDownloadListManager implements DownloadListManager {
                 DownloadState.CONNECTING, Category.VIDEO);
         item.addDownloadSource(new MockDownloadSource("23.12.33.4"));
         addDownload(item);
+        
+        item = new MockDownloadItem("Tester.bmp", 46,
+                DownloadState.STALLED, Category.AUDIO);
+        item.addDownloadSource(new MockDownloadSource("234.2.2.2"));
+        addDownload(item);
 
 	}
 	
