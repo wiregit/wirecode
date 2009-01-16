@@ -128,7 +128,7 @@ public class MouseableTable extends StripedJXTable {
 		setRowSelectionAllowed(true);
 	    setTableHeaderRenderer();
 	    setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-		
+	    setFont(colors.getTableFont());
 		// See http://sites.google.com/site/glazedlists/documentation/swingx		
 		getSelectionMapper().setEnabled(false); // Breaks horribly with glazedlists
 		
