@@ -241,6 +241,10 @@ public final class SwingUiSettings extends LimeProps {
     /** If the LimeWire media player is enabled. */
     public static final BooleanSetting PLAYER_ENABLED =
         FACTORY.createBooleanSetting("PLAYER_ENABLED", true);
+    
+    /** Shows an overlay on My Library first time logging in */
+    public static final BooleanSetting SHOW_FRIEND_OVERLAY_MESSAGE =
+        FACTORY.createBooleanSetting("SHOW_FRIEND_OVERLAY_MESSAGE", true);
 
 
     /**

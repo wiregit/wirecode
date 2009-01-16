@@ -55,6 +55,7 @@ import org.limewire.ui.swing.components.HyperlinkButton;
 import org.limewire.ui.swing.components.LimeHeaderBar;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
+import org.limewire.ui.swing.components.MessageComponent;
 import org.limewire.ui.swing.dnd.GhostDragGlassPane;
 import org.limewire.ui.swing.dnd.GhostDropTargetListener;
 import org.limewire.ui.swing.dnd.SharingLibraryTransferHandler;
@@ -63,13 +64,11 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
-import org.limewire.ui.swing.painter.BackgroundMessagePainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableColors;
 import org.limewire.ui.swing.table.TableDoubleClickHandler;
 import org.limewire.ui.swing.util.CategoryIconManager;
-import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.NativeLaunchUtils;
@@ -553,32 +552,28 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
      */
     private class LockedUI extends LockableUI {
         private JXPanel panel;
-        private JXPanel messagePanel;
+        private MessageComponent messageComponent;
         private JLabel label;
         private JLabel minLabel;
         
         public LockedUI(Category category, LayerEffect... lockedEffects) {
             super(lockedEffects);
             
-            messagePanel = new JXPanel(new MigLayout("insets 10, gapy 10, wrap, alignx 50%"));
-            messagePanel.setOpaque(false);
-            messagePanel.setBackgroundPainter(new BackgroundMessagePainter<JXPanel>());
+            messageComponent = new MessageComponent();
             
             label = new JLabel(I18n.tr("Sharing entire {0} Collection with {1}", category.getSingularName(), getFullPanelName()));
-            FontUtils.setSize(label, 12);
-            FontUtils.bold(label);
+            messageComponent.decorateHeaderLabel(label);
             
-            minLabel = new JLabel(I18n.tr("Sharing your {0} collection shares new {1} files that automatically get added to your Library", category.getSingularName(), category.getSingularName().toLowerCase()));
-            FontUtils.setSize(minLabel, 10);
+            minLabel = new JLabel(I18n.tr("New {0} files that are added to your Library will be automatically shared with this person", category.getSingularName()));
+            messageComponent.decorateSubLabel(minLabel);
+
+            messageComponent.addComponent(label, "wrap");
+            messageComponent.addComponent(minLabel, "");
             
-            panel = new JXPanel(new MigLayout("aligny 50%, alignx 50%"));
+            panel = new JXPanel(new MigLayout("fill"));
             panel.setBackground(new Color(147,170,209,80));
-            panel.setVisible(false);
-            
-            messagePanel.add(label, "alignx 50%");
-            messagePanel.add(minLabel, "alignx 50%");
-            
-            panel.add(messagePanel);
+            panel.setVisible(false);           
+            panel.add(messageComponent, "align 50% 40%");
         }
         
         @SuppressWarnings("unchecked")
