@@ -30,37 +30,42 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
     
     /** Default banner to use on non-English systems */
     private static final Banner DEFAULT_BANNER = new Banner(new String[] {
-                I18nMarker
-                        .marktr("For Turbo-Charged searches get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&21",
-                "0.111111",
-                I18nMarker
-                        .marktr("Support LimeWire\'s peer-to-peer development. Get PRO."),
-                "http://www.limewire.com/index.jsp/pro&22",
-                "0.111111",
-                I18nMarker
-                        .marktr("Purchase LimeWire PRO to help us make downloads faster."),
-                "http://www.limewire.com/index.jsp/pro&23",
-                "0.111111",
-                I18nMarker.marktr("For Turbo-Charged downloads get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&24",
-                "0.111111",
-                I18nMarker.marktr("Support open networks. Get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&25",
-                "0.111111",
-                I18nMarker
-                        .marktr("Support open source and open protocols. Get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&26",
-                "0.111111",
-                I18nMarker.marktr("For Turbo-Charged performance get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&27",
-                "0.111111",
-                I18nMarker.marktr("Keep the Internet open. Get LimeWire PRO."),
-                "http://www.limewire.com/index.jsp/pro&28",
-                "0.111111",
-                I18nMarker.marktr("Developing LimeWire costs real money. Get PRO."),
-                "http://www.limewire.com/index.jsp/pro&29",
-        "0.111111"});
+        I18nMarker.marktr("For Turbo-Charged searches get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&21",
+        "0.111111",
+        
+        I18nMarker.marktr("Support LimeWire\'s peer-to-peer development. Get PRO."),
+        "http://www.limewire.com/index.jsp/pro&22",
+        "0.111111",
+        
+        I18nMarker.marktr("Purchase LimeWire PRO to help us make downloads faster."),
+        "http://www.limewire.com/index.jsp/pro&23",
+        "0.111111",
+        
+        I18nMarker.marktr("For Turbo-Charged downloads get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&24",
+        "0.111111",
+        
+        I18nMarker.marktr("Support open networks. Get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&25",
+        "0.111111",
+        
+        I18nMarker.marktr("Support open source and open protocols. Get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&26",
+        "0.111111",
+        
+        I18nMarker.marktr("For Turbo-Charged performance get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&27",
+        "0.111111",
+        
+        I18nMarker.marktr("Keep the Internet open. Get LimeWire PRO."),
+        "http://www.limewire.com/index.jsp/pro&28",
+        "0.111111",
+        
+        I18nMarker.marktr("Developing LimeWire costs real money. Get PRO."),
+        "http://www.limewire.com/index.jsp/pro&29",
+        "0.111111"
+    });
     
     /**
      * banner of pro ads.
@@ -79,12 +84,13 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
     private LabelURLPair currentLabel;
 
     private boolean isInitialised = false;
+    
+    private final Application application;
 
     @Inject
     public ProStatusPanel(Application application) {
-
-        setName("ProStatusPanel");
-        
+        this.application = application;
+        setName("ProStatusPanel");        
         if (application.isProVersion()) {
             addCondition(InvisibilityCondition.IS_PRO);
         }
@@ -117,8 +123,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         setVisible(conditions.isEmpty());
     }
     
-    private void init() {
-        
+    private void init() {        
         if (LanguageUtils.isEnglishLocale(LanguageUtils.getCurrentLocale())) {
             loadLabels();
             SwingUiSettings.PRO_ADS.addSettingListener(this);
@@ -126,8 +131,9 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         
         // if not english or loading from props failed, load default
         synchronized(labels) {
-            if (labels.isEmpty())
+            if (labels.isEmpty()) {
                 updateLabels(DEFAULT_BANNER);
+            }
             assert !labels.isEmpty() : "couldn't load any pro banner!";
         }
         
@@ -203,7 +209,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
      * page.
      */
     private void handleLinkClick() {
-        NativeLaunchUtils.openURL(currentLabel.getURL());
+        NativeLaunchUtils.openURL(application.getUniqueUrl(currentLabel.getURL()));
     }
     
     @Override
