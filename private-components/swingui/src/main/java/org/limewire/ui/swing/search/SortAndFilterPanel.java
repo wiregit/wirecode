@@ -37,6 +37,7 @@ import org.limewire.ui.swing.components.LimeComboBoxFactory;
 import org.limewire.ui.swing.components.LimeHeaderBarFactory;
 import org.limewire.ui.swing.components.LimePromptTextField;
 import org.limewire.ui.swing.components.Disposable;
+import org.limewire.ui.swing.painter.FilterPainter;
 import org.limewire.ui.swing.painter.ButtonBackgroundPainter.DrawMode;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingComparator;
 import org.limewire.ui.swing.search.model.SimilarResultsGroupingDelegateComparator;
@@ -95,7 +96,8 @@ public class SortAndFilterPanel implements Disposable {
     private final LimeComboBox sortCombo;
     
     private final JLabel sortLabel = new JLabel(tr("Sort by:"));
-    private final JTextField filterBox = new LimePromptTextField(tr("Refine results..."));
+    private final JTextField filterBox = FilterPainter.decorate(
+            new LimePromptTextField(tr("Refine results...")));
     private final JXButton listViewToggleButton = new JXButton();
     private final JXButton tableViewToggleButton = new JXButton();
     

@@ -64,6 +64,7 @@ import org.limewire.ui.swing.library.table.LibraryTable;
 import org.limewire.ui.swing.library.table.LibraryTableFactory;
 import org.limewire.ui.swing.library.table.LibraryTableModel;
 import org.limewire.ui.swing.lists.CategoryFilter;
+import org.limewire.ui.swing.painter.FilterPainter;
 import org.limewire.ui.swing.painter.BorderPainter.AccentType;
 import org.limewire.ui.swing.player.PlayerUtils;
 import org.limewire.ui.swing.table.TableColors;
@@ -139,7 +140,8 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
     
     @Override
     protected LimePromptTextField createFilterField(String prompt) {
-        return new LimePromptTextField(prompt, AccentType.GREEN_SHADOW);
+        // Create filter field and install painter.
+        return FilterPainter.decorate(new LimePromptTextField(prompt, AccentType.GREEN_SHADOW));
     }
     
     protected void addBackButton(JButton button) {
