@@ -266,7 +266,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         resultsTable = new ConfigurableTable<VisualSearchResult>(sortedList, tableFormat, true);
 
         //link the jxtable column headers to the sorted list
-        EventListJXTableSorting.install(resultsTable, sortedList);
+        EventListJXTableSorting.install(resultsTable, sortedList, tableFormat);
             
         setupCellRenderers(tableFormat);
   
