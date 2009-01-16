@@ -34,7 +34,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         "http://www.limewire.com/index.jsp/pro&21",
         "0.111111",
         
-        I18nMarker.marktr("Support LimeWire\'s peer-to-peer development. Get PRO."),
+        I18nMarker.marktr("Want faster downloads?  Get LimeWire PRO."),
         "http://www.limewire.com/index.jsp/pro&22",
         "0.111111",
         
@@ -46,11 +46,11 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         "http://www.limewire.com/index.jsp/pro&24",
         "0.111111",
         
-        I18nMarker.marktr("Support open networks. Get LimeWire PRO."),
+        I18nMarker.marktr("For the best BitTorrent downloads, get LimeWire PRO."),
         "http://www.limewire.com/index.jsp/pro&25",
         "0.111111",
         
-        I18nMarker.marktr("Support open source and open protocols. Get LimeWire PRO."),
+        I18nMarker.marktr("LimeWire PRO comes with FREE tech support. "),
         "http://www.limewire.com/index.jsp/pro&26",
         "0.111111",
         
@@ -62,7 +62,7 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         "http://www.limewire.com/index.jsp/pro&28",
         "0.111111",
         
-        I18nMarker.marktr("Developing LimeWire costs real money. Get PRO."),
+        I18nMarker.marktr("FREE updates and support - LimeWire PRO."),
         "http://www.limewire.com/index.jsp/pro&29",
         "0.111111"
     });
