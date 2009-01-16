@@ -753,7 +753,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
     }
 
     //Need to ensure 
-    private class SetupWorker extends SwingWorker {
+    private class SetupWorker extends SwingWorker<Void, Void> {
         private final List<SharingTarget> sharedFriendsTemp = Collections.synchronizedList(new ArrayList<SharingTarget>());
         private final List<SharingTarget> noShareFriendsTemp = Collections.synchronizedList(new ArrayList<SharingTarget>());
         private final LibraryShareModel setupShareModel;
@@ -763,7 +763,7 @@ class LibrarySharePanel extends JXPanel implements Disposable, ShapeComponent {
         }
         
         @Override
-        protected Object doInBackground() throws Exception {
+        protected Void doInBackground() throws Exception {
             reloadSharedFriendsInBackground();
             return null;
         }
