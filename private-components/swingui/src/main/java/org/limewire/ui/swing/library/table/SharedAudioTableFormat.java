@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.FileItem;
 import org.limewire.core.api.library.LocalFileItem;
@@ -95,8 +97,12 @@ public class SharedAudioTableFormat<T extends LocalFileItem> extends AbstractMyL
     }
     
     @Override
-    public int getDefaultSortColumn() {
-        return ARTIST_INDEX;
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
+                new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
+                new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
+                new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
     }
 
     @Override

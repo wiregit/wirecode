@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.library.LocalFileItem;
 import org.limewire.core.api.library.LocalFileList;
 import org.limewire.ui.swing.table.ColumnStateInfo;
@@ -51,8 +53,11 @@ public class SharedOtherTableFormat<T extends LocalFileItem> extends AbstractMyL
     }
 
     @Override
-    public int getDefaultSortColumn() {
-        return NAME_INDEX;
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.ASCENDING, NAME_INDEX),
+                new SortKey(SortOrder.ASCENDING, TYPE_INDEX),
+                new SortKey(SortOrder.ASCENDING, SIZE_INDEX));
     }
 
     @Override

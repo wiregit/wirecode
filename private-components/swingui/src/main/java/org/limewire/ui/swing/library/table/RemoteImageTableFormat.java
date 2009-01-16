@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.table.ColumnStateInfo;
@@ -50,8 +52,10 @@ public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRe
     }
 
     @Override
-    public int getDefaultSortColumn() {
-        return CREATED_INDEX;
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.ASCENDING, CREATED_INDEX),
+                new SortKey(SortOrder.ASCENDING, NAME_INDEX));
     }
 
     @Override

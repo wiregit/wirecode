@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.core.api.library.RemoteFileItem;
 import org.limewire.ui.swing.table.ColumnStateInfo;
@@ -71,8 +73,12 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     }
     
     @Override
-    public int getDefaultSortColumn() {
-        return ARTIST_INDEX;
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
+                new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
+                new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
+                new SortKey(SortOrder.ASCENDING, NAME_INDEX));
     }
 
     @Override
