@@ -56,7 +56,7 @@ public class SplashWindow {
         
         textLabel = new JLabel();
         textLabel.setOpaque(false);
-        textLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        textLabel.setFont(new Font("Dialog", Font.PLAIN, 12));
         textLabel.setForeground(Color.WHITE);
                 
         progressBar = LimeProgressBarFactory.createSplashProgressBar();
