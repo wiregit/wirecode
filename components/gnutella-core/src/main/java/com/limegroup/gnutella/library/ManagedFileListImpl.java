@@ -779,7 +779,7 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         final File file;
         try {
             File canonicalFile = FileUtils.getCanonicalFile(f);
-            file = new File(canonicalFile.getCanonicalPath().intern());
+            file = new File(canonicalFile.getPath().intern());
         } catch (IOException e) {
             LOG.debugf("Not adding {0} because canonicalize failed", f);
             FileListChangedEvent event = dispatchFailure(f, oldFileDesc);
