@@ -281,13 +281,6 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         setLayout(new MigLayout("nocache, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         
         JPanel rightPanel = new JPanel(new MigLayout("nocache, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
-        int rightPanelWidth = showAllButton.getPreferredSize().width > clearFinishedButton.getPreferredSize().width ?
-                showAllButton.getPreferredSize().width : clearFinishedButton.getPreferredSize().width;
-                
-        rightPanelWidth+=32;
-                
-        rightPanel.setMaximumSize(new Dimension(rightPanelWidth, panelHeight));
-        rightPanel.setMinimumSize(new Dimension(rightPanelWidth, 0));
         rightPanel.setOpaque(false);
         rightPanel.add(showAllButton, "alignx 0%, aligny 100%, gapbottom 3, gaptop 3, wrap");
         rightPanel.add(clearFinishedButton, "gapbottom 3, gaptop 3, alignx 0%, aligny 0%, hidemode 3");
@@ -505,7 +498,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		
 
         private void addComponents() {
-            setLayout(new MigLayout("fill, ins 0 0 0 0 , nogrid, gap 0! 0!, novisualpadding"));
+            setLayout(new MigLayout("fill, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
             
             add(nameLabel, "bottom, left, gapleft 15, gapright 15, gaptop 10, wrap");
             add(progressBar, "top, left,gapleft 15, gapright 2, gaptop 2, hidemode 3");     //6
@@ -520,7 +513,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
            // force line wrap
             add(new JLabel(), "wrap");
             
-            add(timeLabel, "top, left, gapleft 15, gaptop 1");          //4
+            add(timeLabel, "top, left, gapleft 15, pad -5 0 0 0");          //4
         }
 
 
