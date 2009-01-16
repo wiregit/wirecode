@@ -18,6 +18,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.connection.ConnectionStrength;
 import org.limewire.core.api.connection.GnutellaConnectionManager;
 import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.statusbar.ProStatusPanel.InvisibilityCondition;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -27,6 +28,8 @@ import com.google.inject.Singleton;
 @Singleton
 class ConnectionStatusPanel extends JXPanel {
        
+    private final ProStatusPanel proStatusPanel;
+    
     private final String connectingText = I18n.tr("Connecting");
     
     private ConnectionStrength currentStrength;
@@ -53,10 +56,13 @@ class ConnectionStatusPanel extends JXPanel {
     @Resource private Font font;
 
     @Inject
-    ConnectionStatusPanel(final GnutellaConnectionManager gnutellaConnectionManager) {
+    ConnectionStatusPanel(final GnutellaConnectionManager gnutellaConnectionManager, 
+            ProStatusPanel proStatusPanel) {
         
         GuiUtils.assignResources(this);
-             
+        
+        this.proStatusPanel = proStatusPanel;
+        
         this.setLayout(new BorderLayout());
         this.setOpaque(false);
         this.setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
@@ -161,7 +167,12 @@ class ConnectionStatusPanel extends JXPanel {
                
         if (shouldHideStatusLater) {
             hideStatusLater();
+        } else {
+            // The pro status panel ad should not be shown because this panel is 
+            //  in a state of flux and will cause strange movements in the status bar
+            proStatusPanel.addCondition(InvisibilityCondition.NOT_FULLY_CONNECTED);
         }
+            
         
         connectionStatusLabel.setVisible(true);
         connectionStatusLabel.setText(statusMessage);
@@ -192,6 +203,9 @@ class ConnectionStatusPanel extends JXPanel {
             public void actionPerformed(ActionEvent e) {
                 if (initialStength == currentStrength) {
                     connectionStatusLabel.setVisible(false);
+                    
+                    // We now have room to show the pro ad
+                    proStatusPanel.removeCondition(InvisibilityCondition.NOT_FULLY_CONNECTED);
                 }
             }
         });

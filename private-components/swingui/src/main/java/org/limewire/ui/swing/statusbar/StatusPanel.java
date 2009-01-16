@@ -35,7 +35,7 @@ public class StatusPanel extends JXPanel {
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
             FriendStatusPanel friendStatusPanel, LibraryNavigator libraryNavigator,
-            ConnectionStatusPanel connectionStatus, ProUpgradePanel proUpgradePanel,
+            ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
             SharedFileCountPanel sharedFileCountPanel,
             BarPainterFactory barPainterFactory) {
         
@@ -67,7 +67,7 @@ public class StatusPanel extends JXPanel {
         
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 2");
-        centerPanel.add(proUpgradePanel, "growy, gaptop 2");
+        centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
         rightPanel.add(chatButton, "growy, growy");
         
