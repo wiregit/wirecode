@@ -61,6 +61,11 @@ public interface DownloadListManager extends ResultDownloader {
      * all downloads are completed.
      */
     public void updateDownloadsCompleted();
+    
+    /**
+     * Clears all completed downloads
+     */
+    public void clearFinished();
 
     /**
      * Returns a download item for the given URN if any, null is returned otherwise. 
