@@ -61,8 +61,6 @@ import org.limewire.ui.swing.util.EventListJXTableSorting;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.ui.swing.util.SaveLocationExceptionHandler;
 
-import ca.odell.glazedlists.CollectionList;
-import ca.odell.glazedlists.CompositeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.RangeList;
 import ca.odell.glazedlists.SortedList;
@@ -264,23 +262,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         final ResultsTableFormat<VisualSearchResult> tableFormat, Navigator navigator,
         PropertiesFactory<VisualSearchResult> properties) {
         
-        CollectionList<VisualSearchResult, VisualSearchResult> explodedParentResults = 
-            new CollectionList<VisualSearchResult, VisualSearchResult>(eventList, 
-                    new CollectionList.Model<VisualSearchResult, VisualSearchResult>() {
-                @Override
-                public List<VisualSearchResult> getChildren(VisualSearchResult parent) {
-                    return parent.getSimilarResults();
-                }
-            });
-        
-        //Group together all search results (parent & similar) into one big list so that
-        //everything displays by default in the table view.
-        CompositeList<VisualSearchResult> allTogetherList = new CompositeList<VisualSearchResult>(eventList.getPublisher(),
-                eventList.getReadWriteLock());
-        allTogetherList.addMemberList(eventList);
-        allTogetherList.addMemberList(explodedParentResults);
-
-        SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(allTogetherList);
+        SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(eventList);
         resultsTable = new ConfigurableTable<VisualSearchResult>(sortedList, tableFormat, true);
 
         //link the jxtable column headers to the sorted list
