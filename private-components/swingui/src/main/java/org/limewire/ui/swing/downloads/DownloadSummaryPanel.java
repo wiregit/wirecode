@@ -274,23 +274,23 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
         });
         clearFinishedButton.setVisible(false);
         
-        //Dimension prefSize = showAllButton.getPreferredSize().width > clearFinishedButton.getPreferredSize().width ?
-                //showAllButton.getPreferredSize() : clearFinishedButton.getPreferredSize();
-                
-        //showAllButton.setPreferredSize(prefSize);
-        //clearFinishedButton.setPreferredSize(prefSize);
-        
         
         initializeDownloadCompleteListener();
         initializeDownloadAddedListener();
 
         setLayout(new MigLayout("nocache, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
         
-        JPanel rightPanel = new JPanel(new MigLayout("ins 0 0 0 0, gap 0! 0!, novisualpadding"));
-        rightPanel.setMaximumSize(new Dimension(clearFinishedButton.getPreferredSize().width + 32, panelHeight));
+        JPanel rightPanel = new JPanel(new MigLayout("nocache, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
+        int rightPanelWidth = showAllButton.getPreferredSize().width > clearFinishedButton.getPreferredSize().width ?
+                showAllButton.getPreferredSize().width : clearFinishedButton.getPreferredSize().width;
+                
+        rightPanelWidth+=32;
+                
+        rightPanel.setMaximumSize(new Dimension(rightPanelWidth, panelHeight));
+        rightPanel.setMinimumSize(new Dimension(rightPanelWidth, 0));
         rightPanel.setOpaque(false);
-        rightPanel.add(showAllButton, "aligny 100%, gapbottom 3, wrap");
-        rightPanel.add(clearFinishedButton, "gaptop 3, aligny 0%, hidemode 3");
+        rightPanel.add(showAllButton, "alignx 0%, aligny 100%, gapbottom 3, gaptop 3, wrap");
+        rightPanel.add(clearFinishedButton, "gapbottom 3, gaptop 3, alignx 0%, aligny 0%, hidemode 3");
         
         add(tableScroll, "aligny 50%, growx, growy, push");
         add(rightPanel, "gapleft 12, gapright 20");
