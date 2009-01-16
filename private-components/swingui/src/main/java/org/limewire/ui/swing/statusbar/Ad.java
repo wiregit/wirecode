@@ -3,7 +3,7 @@ package org.limewire.ui.swing.statusbar;
 /**
  * A short message with an associated URL and probability of being displayed.
  */
-public class Ad implements Comparable<Ad>{
+class Ad implements Comparable<Ad>{
     private final String text;
     private final String uri;
     private final float probability;

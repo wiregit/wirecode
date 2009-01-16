@@ -9,14 +9,7 @@ import java.util.List;
  * Class that keeps track of several ad messages and displays a single
  * one based on their probability. 
  */
-public class Banner {
-
-    /** A default banner that only displays one message */
-    private static final Banner DEFAULT_BANNER;
-    static {
-        DEFAULT_BANNER = new Banner("Only search results with a {0} are official LimeWire communications.",
-                "http://results.limewire.com/officialresults","1.0f");
-    }
+class Banner {
     
     private final List<Ad> ads;
     
@@ -59,9 +52,5 @@ public class Banner {
     
     public Collection<Ad> getAllAds() {
         return Collections.unmodifiableCollection(ads);
-    }
-    
-    public static Banner getDefaultBanner() {
-        return DEFAULT_BANNER;
     }
 }
