@@ -1,7 +1,12 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
@@ -76,5 +81,27 @@ public class AudioTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case DESCRIPTION_INDEX: return "";
         }
         throw new IllegalArgumentException("Unknown column:" + column);
+    }
+    
+    @Override
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                new SortKey(SortOrder.ASCENDING, ARTIST_INDEX),
+                new SortKey(SortOrder.ASCENDING, ALBUM_INDEX),
+                new SortKey(SortOrder.ASCENDING, TRACK_INDEX),
+                new SortKey(SortOrder.ASCENDING, TITLE_INDEX));
+    }
+    
+    @Override
+    public List<Integer> getSecondarySortColumns(int column) {
+        switch (column) {
+        case ARTIST_INDEX:
+            return Arrays.asList(ALBUM_INDEX, TRACK_INDEX, TITLE_INDEX);
+        case ALBUM_INDEX:
+            return Arrays.asList(TRACK_INDEX, TITLE_INDEX);
+        default:
+            return Collections.emptyList();
+        }
     }
 }

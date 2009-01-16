@@ -1,8 +1,13 @@
 package org.limewire.ui.swing.search.resultpanel.classic;
 
 import java.awt.Component;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
+import org.jdesktop.swingx.decorator.SortKey;
+import org.jdesktop.swingx.decorator.SortOrder;
 import org.limewire.core.api.FilePropertyKey;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.ResultsTableFormat;
@@ -56,5 +61,25 @@ public class ImageTableFormat extends ResultsTableFormat<VisualSearchResult> {
             case TITLE_INDEX: return vsr.getProperty(FilePropertyKey.TITLE);
         }
         throw new IllegalArgumentException("Unknown column:" + index);
+    }
+    
+    @Override
+    public List<SortKey> getDefaultSortKeys() {
+        return Arrays.asList(
+                new SortKey(SortOrder.DESCENDING, FROM_INDEX),
+                new SortKey(SortOrder.ASCENDING, DATE_INDEX),
+                new SortKey(SortOrder.ASCENDING, NAME_INDEX));
+    }
+    
+    @Override
+    public List<Integer> getSecondarySortColumns(int column) {
+        switch (column) {
+        case NAME_INDEX:
+            return Arrays.asList(DATE_INDEX);
+        case DATE_INDEX:
+            return Arrays.asList(NAME_INDEX);
+        default:
+            return Collections.emptyList();
+        }
     }
 }
