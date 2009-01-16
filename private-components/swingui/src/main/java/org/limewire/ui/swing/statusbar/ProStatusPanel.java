@@ -18,8 +18,6 @@ public class ProStatusPanel extends JXLabel {
     public ProStatusPanel(Application application) {
         super("Testing");
         
-        setVisible(false);
-        
         if (application.isProVersion()) {
             addCondition(InvisibilityCondition.IS_PRO);
         }
