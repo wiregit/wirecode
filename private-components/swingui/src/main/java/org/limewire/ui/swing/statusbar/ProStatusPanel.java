@@ -136,11 +136,10 @@ public class ProStatusPanel extends HyperlinkButton implements SettingListener, 
         // only build and start timer if there are labels to cycle through
         if (labels.size() > 1) {
             new Timer(30 * 1000, new LabelTimerListener()).start();
+            
+            // Load first label
+            handleLinkChange();
         }
-        
-        // Load first label
-        handleLinkChange();
-
     }
         
     /**
