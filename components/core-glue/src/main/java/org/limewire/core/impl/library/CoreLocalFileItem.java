@@ -31,7 +31,7 @@ class CoreLocalFileItem implements LocalFileItem , Comparable {
 
     private final Category category;
 
-    private Map<FilePropertyKey, Object> propertiesMap;
+    private Map<FilePropertyKey, Object> propertiesMap;  // TODO this is a shallow copy of LimeXMLDocument.fieldToValue
 
     private final FileDesc fileDesc;
 

@@ -778,7 +778,8 @@ class ManagedFileListImpl implements ManagedFileList, FileList {
         // Make sure capitals are resolved properly, etc.
         final File file;
         try {
-            file = FileUtils.getCanonicalFile(f);
+            File canonicalFile = FileUtils.getCanonicalFile(f);
+            file = new File(canonicalFile.getCanonicalPath().intern());
         } catch (IOException e) {
             LOG.debugf("Not adding {0} because canonicalize failed", f);
             FileListChangedEvent event = dispatchFailure(f, oldFileDesc);

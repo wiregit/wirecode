@@ -66,7 +66,7 @@ public class FilePropertyKeyPopulator {
                 if (FilePropertyKey.isLong(property)) {
                     value = CommonUtils.parseLongNoException((String)value);
                 } else {
-                    value = I18NConvert.instance().compose((String) value);
+                    value = I18NConvert.instance().compose((String) value).intern();
                 }
             }
             map.put(property, value);
