@@ -243,11 +243,19 @@ public class CheckBoxList<E> extends BoxPanel {
     /**
      * Deletes an item from the list with key "key"
      */
-    public void removeItem(Object key) {
+    public void removeItem(E key) {
         Set<E> newElements = new HashSet<E>(this.elements);
         Set<E> newUnchecked = new HashSet<E>(this.unchecked);
         newElements.remove(key);
         newUnchecked.remove(key);
+        this.setElements(newElements, newUnchecked);
+    }
+    
+    public void addItem(E key) {
+        Set<E> newElements = new HashSet<E>(this.elements);
+        Set<E> newUnchecked = new HashSet<E>(this.unchecked);
+        newElements.add(key);
+        newUnchecked.add(key);
         this.setElements(newElements, newUnchecked);
     }
    

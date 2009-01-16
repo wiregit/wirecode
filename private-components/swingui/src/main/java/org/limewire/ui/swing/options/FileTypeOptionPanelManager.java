@@ -16,11 +16,15 @@ import java.util.TreeSet;
 import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
 import org.limewire.core.api.library.LibraryData;
 import org.limewire.core.api.library.LibraryManager;
+import org.limewire.core.settings.LibrarySettings;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 import org.limewire.ui.swing.components.CheckBoxList;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeListener;
@@ -166,10 +170,32 @@ public final class FileTypeOptionPanelManager {
             this.currentPanel.add(this.panels.get(key), key.toString());
         }
         
+        
         this.sidePanel = new CheckBoxList<Category>(this.mediaKeys, this.mediaUnchecked,
                 new MediaProvider(), new MediaExtrasProvider(),
                 CheckBoxList.SELECT_FIRST_ON);
         
+        if (!LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+            sidePanel.removeItem(Category.PROGRAM);
+        }
+        
+        LibrarySettings.ALLOW_PROGRAMS.addSettingListener(new SettingListener() {            
+            @Override
+            public void settingChanged(SettingEvent evt) {
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {
+                        if (LibrarySettings.ALLOW_PROGRAMS.getValue()) {
+                            sidePanel.removeItem(Category.PROGRAM);
+                        } 
+                        else {
+                            sidePanel.addItem(Category.PROGRAM);
+                        }
+                        
+                    }
+                });
+            }            
+        });
+         
         this.sidePanel.setPreferredSize(new Dimension(150, 0));
         this.sidePanel.setSelectionListener(new SideSelectListener(this));
         this.sidePanel.setCheckChangeListener(new CheckChangeListener(this));
