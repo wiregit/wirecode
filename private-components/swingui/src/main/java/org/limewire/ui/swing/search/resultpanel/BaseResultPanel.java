@@ -30,6 +30,7 @@ import org.limewire.core.api.download.DownloadAction;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.api.search.Search;
 import org.limewire.logging.Log;
 import org.limewire.logging.LogFactory;
@@ -96,7 +97,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
     private CategoryIconManager categoryIconManager;
     private List<DownloadPreprocessor> downloadPreprocessors = new ArrayList<DownloadPreprocessor>();
     
-    private LibraryNavigator libraryNavigator;
+    private final LibraryNavigator libraryNavigator;
+    private final LibraryManager libraryManager;
 
     BaseResultPanel(ListViewTableEditorRendererFactory listViewTableEditorRendererFactory,
             EventList<VisualSearchResult> eventList,
@@ -109,7 +111,8 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
             ListViewRowHeightRule rowHeightRule,
             SaveLocationExceptionHandler saveLocationExceptionHandler,
             SearchResultFromWidgetFactory fromWidgetFactory, IconManager iconManager, CategoryIconManager categoryIconManager,
-            LibraryNavigator libraryNavigator) {
+            LibraryNavigator libraryNavigator,
+            LibraryManager libraryManager) {
         
         this.listViewTableEditorRendererFactory = listViewTableEditorRendererFactory;
         this.saveLocationExceptionHandler = saveLocationExceptionHandler;
@@ -121,6 +124,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         this.categoryIconManager = categoryIconManager;
         this.downloadPreprocessors.add(new LicenseWarningDownloadPreprocessor());
         this.libraryNavigator = libraryNavigator;
+        this.libraryManager = libraryManager;
         
         setLayout(layout);
                 
@@ -283,7 +287,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
 
     protected void setupCellRenderers(final ResultsTableFormat<VisualSearchResult> tableFormat) {
         CalendarRenderer calendarRenderer = new CalendarRenderer();
-        IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager);
+        IconLabelRenderer iconLabelRenderer = new IconLabelRenderer(iconManager, categoryIconManager, downloadListManager, libraryManager);
         TableCellRenderer defaultRenderer = new DefaultLibraryRenderer();
         
         int columnCount = tableFormat.getColumnCount();
@@ -364,10 +368,7 @@ public abstract class BaseResultPanel extends JXPanel implements DownloadHandler
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             VisualSearchResult result = sortedList.get(adapter.row);
-            return (result.getDownloadState() == BasicDownloadState.LIBRARY || 
-                    result.getDownloadState() == BasicDownloadState.DOWNLOADING ||
-                    result.getDownloadState() == BasicDownloadState.DOWNLOADED ||
-                    result.isSpam());
+            return result.isSpam();
         }       
     }
     

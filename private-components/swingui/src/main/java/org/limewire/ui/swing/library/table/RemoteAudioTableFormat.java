@@ -55,7 +55,7 @@ public class RemoteAudioTableFormat<T extends RemoteFileItem> extends AbstractRe
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
-            case NAME_INDEX: return (baseObject.getProperty(FilePropertyKey.TITLE) == null) ? baseObject.getProperty(FilePropertyKey.NAME) : baseObject.getProperty(FilePropertyKey.TITLE);
+            case NAME_INDEX: return baseObject;
             case ARTIST_INDEX: return baseObject.getProperty(FilePropertyKey.AUTHOR);
             case ALBUM_INDEX: return baseObject.getProperty(FilePropertyKey.ALBUM);
             case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);

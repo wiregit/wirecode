@@ -41,7 +41,7 @@ public class RemoteImageTableFormat<T extends RemoteFileItem> extends AbstractRe
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
-            case NAME_INDEX: return baseObject.getName();
+            case NAME_INDEX: return baseObject;
             case SIZE_INDEX: return baseObject.getSize();
             case CREATED_INDEX: return baseObject.getCreationTime();
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());

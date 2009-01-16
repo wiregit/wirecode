@@ -188,7 +188,7 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
                 scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
             }
 			TableColors tableColors = new TableColors();
-            table.addHighlighter(new ColorHighlighter(new UnsharedHighlightPredicate(getTableModel(table), friendFileList), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
+            table.addHighlighter(new ColorHighlighter(new IncompleteHighlightPredicate(getTableModel(table)), null, tableColors.getDisabledForegroundColor(), null, tableColors.getDisabledForegroundColor()));
         } else {//Category.IMAGE
             scrollPane = new JScrollPane();
             scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -349,17 +349,15 @@ abstract class SharingPanel extends AbstractFileListPanel implements PropertyCha
         }
     }
     
-    private static class UnsharedHighlightPredicate implements HighlightPredicate {
+    private static class IncompleteHighlightPredicate implements HighlightPredicate {
         LibraryTableModel<LocalFileItem> libraryTableModel;
-        private LocalFileList friendFileList;
-        public UnsharedHighlightPredicate (LibraryTableModel<LocalFileItem> libraryTableModel, LocalFileList friendFileList) {
+        public IncompleteHighlightPredicate (LibraryTableModel<LocalFileItem> libraryTableModel) {
             this.libraryTableModel = libraryTableModel;
-            this.friendFileList = friendFileList;
         }
         @Override
         public boolean isHighlighted(Component renderer, ComponentAdapter adapter) {
             LocalFileItem fileItem = libraryTableModel.getFileItem(adapter.row);
-            return !friendFileList.contains(fileItem.getFile());
+            return fileItem.isIncomplete() || !fileItem.isShareable();
         }       
     }
     

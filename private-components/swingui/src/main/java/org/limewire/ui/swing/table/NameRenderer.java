@@ -61,7 +61,7 @@ public class NameRenderer extends DefaultLibraryRenderer {
 
         if (name != null) {
             if (localFileItem.isIncomplete()) {
-                name = I18n.tr("{0} (incomplete)", name);
+                name = I18n.tr("{0} (downloading)", name);
             }
         }
         return name;

@@ -51,7 +51,7 @@ public class RemoteVideoTableFormat<T extends RemoteFileItem> extends AbstractRe
     @Override
     public Object getColumnValue(T baseObject, int column) {
         switch(column) {
-            case NAME_INDEX: return baseObject.getName();
+            case NAME_INDEX: return baseObject;
             case EXTENSION_INDEX: return FileUtils.getFileExtension(baseObject.getFileName());
             case LENGTH_INDEX: return baseObject.getProperty(FilePropertyKey.LENGTH);
             case MISC_INDEX: return baseObject.getProperty(FilePropertyKey.DESCRIPTION);
