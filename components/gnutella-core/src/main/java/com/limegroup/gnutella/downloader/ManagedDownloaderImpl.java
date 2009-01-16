@@ -524,8 +524,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         isFriendDownload = isFriendDownload(rfds);
         
-        if (rfds.size() > 0) 
-            initPropertiesMap(rfds.iterator().next());
+        if (rfds.size() > 0) {
+            RemoteFileDesc initialRfd = rfds.iterator().next();
+            initPropertiesMap(initialRfd);
+            setAttribute("LimeXMLDocument", initialRfd.getXMLDocument(), false);
+        }
 
         assert rfds.size() > 0 || defaultFileName != null;
         if (!hasDefaultFileName())
