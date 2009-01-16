@@ -498,7 +498,7 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		
 
         private void addComponents() {
-            setLayout(new MigLayout("fill, ins 0 0 0 0, gap 0! 0!, novisualpadding"));
+            setLayout(new MigLayout("fill, ins 0 0 0 0, nogrid, gap 0! 0!, novisualpadding"));
             
             add(nameLabel, "bottom, left, gapleft 15, gapright 15, gaptop 10, wrap");
             add(progressBar, "top, left,gapleft 15, gapright 2, gaptop 2, hidemode 3");     //6
