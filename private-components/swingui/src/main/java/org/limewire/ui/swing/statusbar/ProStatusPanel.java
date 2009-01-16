@@ -1,22 +1,33 @@
 package org.limewire.ui.swing.statusbar;
 
+import java.awt.event.ActionEvent;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jdesktop.swingx.JXLabel;
+import javax.swing.AbstractAction;
+
 import org.limewire.core.api.Application;
+import org.limewire.ui.swing.components.HyperlinkButton;
+import org.limewire.ui.swing.util.NativeLaunchUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ProStatusPanel extends JXLabel {
+public class ProStatusPanel extends HyperlinkButton {
 
     private final Set<InvisibilityCondition> conditions = new HashSet<InvisibilityCondition>();
     
     @Inject
     public ProStatusPanel(Application application) {
-        super("Testing");
+        super(new AbstractAction("For faster downloads, get LimeWire PRO") {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                NativeLaunchUtils.openURL("http://www.limewire.com/download/pro.php?ref=lwn");
+            }
+        });
+
+        setName("ProStatusPanel");
         
         if (application.isProVersion()) {
             addCondition(InvisibilityCondition.IS_PRO);
