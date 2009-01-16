@@ -487,6 +487,7 @@ public class MyLibraryPanel extends LibraryPanel {
         messageComponent.decorateSubLabel(secondMinLabel);
         
         JButton cancelButton = new JButton(closeButton);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder());
         cancelButton.setRolloverIcon(closeHoverButton);
         cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         cancelButton.setContentAreaFilled(false);
