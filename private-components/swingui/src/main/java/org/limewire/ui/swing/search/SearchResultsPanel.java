@@ -257,7 +257,10 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     }
         
     private void layoutComponents() {
-        setLayout(new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!"));
+        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!", 
+        		                "[grow]", "[][][][grow]");
+        
+        setLayout(layout);
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
         
         RectanglePainter tabHighlight = new RectanglePainter();
