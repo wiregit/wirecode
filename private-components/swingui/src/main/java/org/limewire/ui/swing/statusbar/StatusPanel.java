@@ -35,7 +35,8 @@ public class StatusPanel extends JXPanel {
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
             FriendStatusPanel friendStatusPanel, LibraryNavigator libraryNavigator,
-            ConnectionStatusPanel connectionStatus, SharedFileCountPanel sharedFileCountPanel,
+            ConnectionStatusPanel connectionStatus, ProUpgradePanel proUpgradePanel,
+            SharedFileCountPanel sharedFileCountPanel,
             BarPainterFactory barPainterFactory, MinimizedDownloadSummaryPanel minDownloadPanel) {
         
         GuiUtils.assignResources(this);
@@ -58,9 +59,9 @@ public class StatusPanel extends JXPanel {
         Component chatButton = friendStatusPanel.getComponent();
         chatButton.setVisible(false);
         
-        JPanel leftPanel = new JPanel(new MigLayout("insets 0, gap 0, fill, nogrid"));
-        JPanel centerPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, center"));
-        JPanel rightPanel = new JPanel(new MigLayout("insets 0, gap 0, fill, nogrid"));
+        JPanel leftPanel = new JPanel(new MigLayout("insets 0, gap 0, nogrid, hidemode 3"));
+        JPanel centerPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, alignx 35%, hidemode 3"));
+        JPanel rightPanel = new JPanel(new MigLayout("insets 0, gap 0, fill, nogrid, hidemode 3"));
         
         leftPanel.setOpaque(false);
         centerPanel.setOpaque(false);
@@ -69,8 +70,9 @@ public class StatusPanel extends JXPanel {
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 2");
         centerPanel.add(minDownloadPanel, "growy, gaptop 2");
-        rightPanel.add(miniPlayerPanel, "gapafter 4, hidemode 3");
-        rightPanel.add(chatButton, "growy, growy, hidemode 3");
+        centerPanel.add(proUpgradePanel, "growy, gaptop 2");
+        rightPanel.add(miniPlayerPanel, "gapafter 4");
+        rightPanel.add(chatButton, "growy, growy");
         
         add(leftPanel, BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);
