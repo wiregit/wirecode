@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -93,7 +94,7 @@ public class HomePanel extends JXPanel {
             JScrollPane scroller = new JScrollPane(fallbackBrowser,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            scroller.setBorder(null);
+            scroller.setBorder(BorderFactory.createEmptyBorder());
             add(scroller, gbc);
         }
     }

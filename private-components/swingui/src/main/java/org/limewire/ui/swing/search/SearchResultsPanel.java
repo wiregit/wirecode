@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -127,7 +128,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         sponsoredResultsPanel.setVisible(false);
         this.sortAndFilterPanel = sortAndFilterPanel;
         this.scrollPane = new JScrollPane();
-        scrollPane.setBorder(null);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         this.scrollablePanel = new ScrollablePanel();
         configureEnclosingScrollPane();
 
@@ -256,9 +257,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
     }
         
     private void layoutComponents() {
-        MigLayout layout = new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!");
-        
-        setLayout(layout);
+        setLayout(new MigLayout("hidemode 2, insets 0 0 0 0, gap 0!"));
         setMinimumSize(new Dimension(getPreferredSize().width, 33));
         
         RectanglePainter tabHighlight = new RectanglePainter();
