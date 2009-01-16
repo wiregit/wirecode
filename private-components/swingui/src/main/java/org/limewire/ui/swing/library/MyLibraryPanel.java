@@ -229,12 +229,14 @@ public class MyLibraryPanel extends LibraryPanel {
                 public void handleEvent(XMPPConnectionEvent event) {
                     switch(event.getType()) { 
                     case CONNECTED:
-                        JPanel panel = new JPanel(new MigLayout("fill"));
-                        panel.setOpaque(false);
-                        panel.add(getMessageComponent(), "align 50% 50%");
-                        JXLayer layer = map.get(category);
-                        layer.getGlassPane().add(panel);
-                        layer.getGlassPane().setVisible(true);
+                        if(SwingUiSettings.SHOW_FRIEND_OVERLAY_MESSAGE.getValue() == true) {
+                            JPanel panel = new JPanel(new MigLayout("fill"));
+                            panel.setOpaque(false);
+                            panel.add(getMessageComponent(), "align 50% 40%");
+                            JXLayer layer = map.get(category);
+                            layer.getGlassPane().add(panel);
+                            layer.getGlassPane().setVisible(true);
+                        }
                     }
                 }
             });
