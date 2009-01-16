@@ -84,7 +84,7 @@ public class IconLabelRenderer extends JXPanel implements TableCellRenderer {
             if(item instanceof LocalFileItem) {
                 LocalFileItem localFileItem = (LocalFileItem) item;
                 if(localFileItem.isIncomplete()) {
-                    label.setText(I18n.tr("{0} (incomplete)", item.getFileName()));
+                    label.setText(I18n.tr("{0} (downloading)", item.getFileName()));
                 } else {
                     label.setText(item.getFileName());
                 }
