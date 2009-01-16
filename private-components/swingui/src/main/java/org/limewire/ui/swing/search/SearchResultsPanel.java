@@ -289,7 +289,7 @@ public class SearchResultsPanel extends JXPanel implements Disposable {
         scrollablePanel.setLayout(new MigLayout("hidemode 3, gap 0, insets 0", "[]", "[grow][]"));
         
         scrollablePanel.add(resultsContainer, "grow, push, alignx left, aligny top");
-        scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin 140, pad 8 8 8 0");
+        scrollablePanel.add(sponsoredResultsPanel, "aligny top, alignx right, wmin " + sponsoredResultsPanel.getPreferredSize().width + ", pad 8 8 8 0");
         scrollPane.setViewportView(scrollablePanel);
         syncScrollPieces();
     }
