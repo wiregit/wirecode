@@ -90,8 +90,10 @@ public class CachingEventMulticasterImpl<E> implements CachingEventMulticaster<E
 
     private boolean eventConsistentWithBroadcastPolicy(E event) {
         return broadcastPolicy == BroadcastPolicy.ALWAYS ||
-                event.getClass().isEnum() ||
-                System.identityHashCode(event) != event.hashCode(); // other case caching won't work
+                event.getClass().isEnum();
+        // cannot include because the identity hashcode _can_ be the event.hashCode
+        // even if hashCode is overridden (and we've gotten bugs where that's the case)
+                //|| System.identityHashCode(event) != event.hashCode(); // other case caching won't work
     }
 
     @Override
