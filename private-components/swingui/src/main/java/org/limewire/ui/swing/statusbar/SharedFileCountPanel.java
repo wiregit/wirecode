@@ -38,7 +38,10 @@ class SharedFileCountPanel extends JXLabel {
         shareListManager.getCombinedShareList().getSwingModel().addListEventListener(new ListEventListener<LocalFileItem>() {
             @Override
             public void listChanged(ListEvent<LocalFileItem> listChanges) {
-                setText(I18n.tr("Sharing {0} files", listChanges.getSourceList().size()));
+                if(listChanges.getSourceList().size() == 1)
+                    setText(I18n.tr("Sharing {0} file", listChanges.getSourceList().size()));
+                else
+                    setText(I18n.tr("Sharing {0} files", listChanges.getSourceList().size()));
             }
         });
         
