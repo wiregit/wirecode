@@ -70,6 +70,8 @@ public class ProNag extends JXPanel implements Resizable {
                                                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         parent.add(scroller, BorderLayout.CENTER);
+        
+        proStatusPanel.addCondition(InvisibilityCondition.PRO_ADD_SHOWN);
     }
 
     @Override

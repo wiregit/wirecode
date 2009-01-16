@@ -58,7 +58,7 @@ public class StatusPanel extends JXPanel {
         chatButton.setVisible(false);
         
         JPanel leftPanel = new JPanel(new MigLayout("insets 0, gap 0, nogrid, hidemode 3"));
-        JPanel centerPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, alignx 35%, hidemode 3"));
+        JPanel centerPanel = new JPanel(new MigLayout("insets 0, gap 0, filly, nogrid, alignx 40%, hidemode 3"));
         JPanel rightPanel = new JPanel(new MigLayout("insets 0, gap 0, fill, nogrid, hidemode 3"));
         
         leftPanel.setOpaque(false);
