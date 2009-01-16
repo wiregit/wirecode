@@ -70,8 +70,6 @@ public class ProNag extends JXPanel implements Resizable {
                                                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         parent.add(scroller, BorderLayout.CENTER);
-        
-        proStatusPanel.addCondition(InvisibilityCondition.PRO_ADD_SHOWN);
     }
 
     @Override
@@ -81,6 +79,8 @@ public class ProNag extends JXPanel implements Resizable {
         int w = childPreferredSize.width;
         int h = childPreferredSize.height; 
         setBounds(parentBounds.width / 2 - w / 2, parentBounds.height - h, w, h);
+        
+        notifyVisibilityChange();
     }
     
     @Override
@@ -89,11 +89,18 @@ public class ProNag extends JXPanel implements Resizable {
         super.setVisible(flag);
         if(notViz && isVisible()) {
             resize();
+        } 
+        else {
+            notifyVisibilityChange();
         }
-        
-        // Add or remove the pro add shown condition for the pro add status panel.
-        //  May cause the pro status add to change visibility.
-        if (flag) {
+    }
+
+    /**
+     *  Add or remove the pro add shown condition for the pro add status panel.
+     *    May cause the pro status add to change visibility.
+     */
+    private void notifyVisibilityChange() {
+       if (isVisible()) {
             proStatusPanel.addCondition(InvisibilityCondition.PRO_ADD_SHOWN);
         } 
         else {
