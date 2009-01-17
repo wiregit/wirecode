@@ -2,6 +2,7 @@ package org.limewire.core.impl.upload;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.glazedlists.GlazedListsFactory;
@@ -72,6 +73,22 @@ public class MockUploadListManager implements UploadListManager {
             if (item.getState() == UploadState.CANCELED) {
                 uploadItems.remove(item);
             }
+        }
+    }
+    
+    @Override
+    public void clearFinished() {
+        List<UploadItem> finishedItems = new ArrayList<UploadItem>();
+        uploadItems.getReadWriteLock().writeLock().lock();
+        try {
+            for(UploadItem item : uploadItems){
+                if(item.getState() == UploadState.DONE || item.getState() == UploadState.UNABLE_TO_UPLOAD || item.getState() == UploadState.BROWSE_HOST_DONE){
+                    finishedItems.add(item);
+                }
+            }
+            uploadItems.removeAll(finishedItems);
+        } finally {
+            uploadItems.getReadWriteLock().writeLock().unlock();
         }
     }
 
