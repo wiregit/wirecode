@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,10 +14,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.Action;
 import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+
+import net.miginfocom.swing.MigLayout;
 
 import org.limewire.collection.CollectionUtils;
 import org.limewire.core.api.Category;
@@ -25,6 +33,7 @@ import org.limewire.core.api.library.LibraryManager;
 import org.limewire.core.settings.LibrarySettings;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
+import org.limewire.ui.swing.action.AbstractAction;
 import org.limewire.ui.swing.components.CheckBoxList;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListCheckChangeListener;
@@ -32,6 +41,7 @@ import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionEvent;
 import org.limewire.ui.swing.components.CheckBoxList.CheckBoxListSelectionListener;
 import org.limewire.ui.swing.util.CategoryIconManager;
 import org.limewire.ui.swing.util.CategoryUtils;
+import org.limewire.ui.swing.util.I18n;
 import org.limewire.ui.swing.util.IconManager;
 import org.limewire.util.MediaType;
 
@@ -49,6 +59,8 @@ import com.google.inject.Singleton;
 @Singleton
 public final class FileTypeOptionPanelManager {
 
+    private static final int MAX_EXT_LENGTH = 7;
+    
     private JPanel mainContainer;
     private CardLayout mediaLayout;
     private JPanel currentPanel;
@@ -56,7 +68,7 @@ public final class FileTypeOptionPanelManager {
     private CheckBoxList<Category> sidePanel;
         
     private Map<Category,CheckBoxList<String>> panels;
-    
+        
     private final ExtensionProvider extensionProvider = new ExtensionProvider();
     private final ExtensionsExtrasProvider extensionExtrasProvider = new ExtensionsExtrasProvider();
     
@@ -69,6 +81,15 @@ public final class FileTypeOptionPanelManager {
     private final CategoryIconManager categoryIconManager;
     private final IconManager iconManager;
     private final LibraryData libraryData;
+    private JButton addButton;
+    private JTextField extTextField;
+
+    private Action addAction = new AbstractAction(I18n.tr("Add New Extension")) {
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            addNewExt();
+        }
+    };
     
     @Inject
     public FileTypeOptionPanelManager(CategoryIconManager categoryIconManager,
@@ -170,7 +191,6 @@ public final class FileTypeOptionPanelManager {
             this.currentPanel.add(this.panels.get(key), key.toString());
         }
         
-        
         this.sidePanel = new CheckBoxList<Category>(this.mediaKeys, this.mediaUnchecked,
                 new MediaProvider(), new MediaExtrasProvider(),
                 CheckBoxList.SELECT_FIRST_ON);
@@ -209,8 +229,98 @@ public final class FileTypeOptionPanelManager {
         
         this.mainContainer.add(splitPane, BorderLayout.CENTER);
         
+        JPanel addExtPanel = new JPanel(new MigLayout("insets 5, gap 10, alignx right"));
+        addExtPanel.setOpaque(false);
+        addExtPanel.add(new JLabel(I18n.tr("File Name:")));
+        extTextField = new JTextField(6);
+        addExtPanel.add(extTextField);
+        addButton = new JButton(addAction);
+        addExtPanel.add(addButton);
+        
+        mainContainer.add(addExtPanel, BorderLayout.SOUTH);      
+        
         this.mainContainer.validate();
+    }
+    
+    private void addNewExt() {
+        String text = extTextField.getText();
+        
+        if (text == null || text.isEmpty()) {
+            return;
+        }
+        
+        extTextField.setText("");
+        
+        if (!checkExt(text)) {
+            return;
+        }
+        
+        CheckBoxList<String> otherPanel = panels.get(Category.OTHER);
+        otherPanel.addItem(text);
+        otherPanel.setItemChecked(text);
+        otherPanel.setRemovable(text, true);
+        otherPanel.setItemSelected(text);
+        switchPanel(Category.OTHER);
+    }
+    
+    
+    private boolean checkExt(String text) {
+        if (text == null) {
+            return false;
+        }
+        
+        CheckBoxList<String> otherPanel = panels.get(Category.OTHER);
+        
+        String malformedMsg = I18n.tr("The extension name was not valid, could not add.");
+        
+        if (   text.length() == 0 
+            || text.length() > MAX_EXT_LENGTH
+           ) {                            
+            JOptionPane.showMessageDialog(null, malformedMsg);
+            return false;
+        }
+        
+        if (contains(libraryData.getDefaultExtensions(), text)) {
+            Category type = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(text));
+            
+            if (type == null) {
+                type = Category.OTHER;
+            }
+            
+            CheckBoxList<String> panel = this.panels.get(type); 
+            
+            if (panel == null) {
+                JOptionPane.showMessageDialog(null, malformedMsg);
+                return false;    
+            }
+         
+            this.switchPanel(type);
+            panel.setItemChecked(text);
+            this.sidePanel.setItemSelected(type);
+            
+            return false;
+        }
 
+        if (otherPanel.getElements().contains(text)) {
+            
+            this.switchPanel(Category.OTHER);
+            otherPanel.setItemChecked(text);
+            this.sidePanel.setItemSelected(Category.OTHER);
+            
+            return false;
+        }
+        
+        
+        return true;
+    }
+    
+    private static boolean contains(Collection<String> list, String value) {
+        for ( Object item : list ) {
+            if (item.equals(value)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     private static Map<Category, List<String>> createExtensionsMap(Collection<String> extensions) {
