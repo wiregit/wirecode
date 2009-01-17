@@ -72,6 +72,7 @@ public final class FileTypeOptionPanelManager {
     private final ExtensionProvider extensionProvider = new ExtensionProvider();
     private final ExtensionsExtrasProvider extensionExtrasProvider = new ExtensionsExtrasProvider();
     
+    
     private Set<Category> mediaKeys;
     private Set<Category> mediaUnchecked;   
     private Category currentKey;
@@ -83,6 +84,7 @@ public final class FileTypeOptionPanelManager {
     private final LibraryData libraryData;
     private JButton addButton;
     private JTextField extTextField;
+    private Set<String> removableExts;
 
     private Action addAction = new AbstractAction(I18n.tr("Add New Extension")) {
         @Override
@@ -136,6 +138,7 @@ public final class FileTypeOptionPanelManager {
     void initCore() {        
         Collection<String> selectedExts = CollectionUtils.flatten(libraryData.getExtensionsPerCategory().values());
         Collection<String> allExts = new TreeSet<String>();
+        removableExts = new HashSet<String>();
         
         allExts.addAll(libraryData.getDefaultExtensions());
         allExts.addAll(selectedExts);
@@ -151,7 +154,7 @@ public final class FileTypeOptionPanelManager {
         this.panels = new LinkedHashMap<Category,CheckBoxList<String>>();
         this.mediaUnchecked = new HashSet<Category>();
         this.currentKey = null;
-
+        
         final PanelsCheckChangeListener refreshListener = new PanelsCheckChangeListener(this);
         
         for (Category key : mediaKeys) {
@@ -175,6 +178,11 @@ public final class FileTypeOptionPanelManager {
             }
             
             this.panels.put(key, newPanel);
+        }
+        
+        CheckBoxList<String> otherPanel = panels.get(Category.OTHER);
+        for ( String item : removableExts ) {
+            otherPanel.setRemovable(item, true);
         }
     }
 
@@ -215,7 +223,7 @@ public final class FileTypeOptionPanelManager {
                 });
             }            
         });
-         
+        
         this.sidePanel.setPreferredSize(new Dimension(150, 0));
         this.sidePanel.setSelectionListener(new SideSelectListener(this));
         this.sidePanel.setCheckChangeListener(new CheckChangeListener(this));
@@ -323,19 +331,25 @@ public final class FileTypeOptionPanelManager {
         return false;
     }
     
-    private static Map<Category, List<String>> createExtensionsMap(Collection<String> extensions) {
+    private Map<Category, List<String>> createExtensionsMap(Collection<String> extensions) {
         Map<Category, List<String>> extensionsByType = new LinkedHashMap<Category, List<String>>();
         for (String extension : extensions) { 
-            Category nm = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(extension));
-            if (nm == null) {
-                nm = CategoryUtils.getCategory(MediaType.getOtherMediaType());
+            Category category = CategoryUtils.getCategory(MediaType.getMediaTypeForExtension(extension));
+            if (category == null) {
+                category = CategoryUtils.getCategory(MediaType.getOtherMediaType());
             }
-            if (!extensionsByType.containsKey(nm)) {
-                extensionsByType.put(nm, new ArrayList<String>(8));
+            if (!extensionsByType.containsKey(category)) {
+                extensionsByType.put(category, new ArrayList<String>(8));
             }
-            List<String> typeExtension = extensionsByType.get(nm);
+            List<String> typeExtension = extensionsByType.get(category);
             if (!typeExtension.contains(extension)) {
                 typeExtension.add(extension);
+                
+                if (category == Category.OTHER) {
+                    if (!contains(libraryData.getDefaultExtensions(), extension)) {
+                        removableExts.add(extension);
+                    }
+                }
             }
         }
         
