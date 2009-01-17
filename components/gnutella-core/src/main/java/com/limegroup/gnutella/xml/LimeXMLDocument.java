@@ -184,7 +184,14 @@ public class LimeXMLDocument implements StringLookup {
 
     private void internStrings() {
         for(Map.Entry<String, String> entry : fieldToValue.entrySet()) {
-            fieldToValue.put(entry.getKey(), entry.getValue().intern());    
+            if(entry.getValue() != null) {
+                fieldToValue.put(entry.getKey(), entry.getValue().intern());    
+            } else {
+                // TODO rm this case?
+                // TODO make sure no callers need
+                // TODO the keys to be there
+                fieldToValue.put(entry.getKey(), null);
+            }
         }
     }
 
