@@ -220,13 +220,19 @@ class ConnectionStatusPanel extends JXPanel {
                     return;
                 }
                 
-                int numDots = (connectionStatusLabel.getText().length()
+                int numDots = (connectionStatusLabel.getText().trim().length()
                             -  connectingText.length() + 1)
                             % 4;
-                
+
                 StringBuffer message = new StringBuffer(connectingText);
-                for ( int i=0 ; i<numDots ; i++ ) {
-                    message.append('.');
+                // must be a nicer way of doing this. By always appending same # of .'s or ' '
+                // we ensure the positioning on the status bar doesn't move while
+                // in connecting mode
+                for ( int i=0 ; i<4 ; i++ ) {
+                    if(i < numDots)
+                        message.append('.');
+                    else
+                        message.append(' ');
                 }
                 
                 connectionStatusLabel.setText(message.toString());
