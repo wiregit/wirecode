@@ -48,7 +48,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
     private final FriendFileList friendFileList;
     private EventList<RemoteFileItem> eventList;
     
-    private ListenerSupport<FriendEvent> availListeners;
+    private final ListenerSupport<FriendEvent> availListeners;
 
     @AssistedInject
     public FriendLibraryMediator(@Assisted Friend friend, FriendLibraryFactory factory, EmptyLibraryFactory emptyFactory,
@@ -109,6 +109,10 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 }
                 break;
             case LOADED:
+                // must do this here also, may skip loading step all together
+                if(this.eventList != eventList) {
+                    this.eventList = eventList;
+                } 
                 if(eventList.size() == 0) {
                     emptyPanelMessage.setMessageType(MessageTypes.LW_NO_FILES);
                     if(!isSharingCardShown()) {
@@ -117,7 +121,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     if(isEmptyCardShown()) {
-                        showLibraryCard();
+                        super.showLibraryCard();
                     }
                 }
                 break;
@@ -133,7 +137,7 @@ public class FriendLibraryMediator extends LibraryMediator implements EventListe
                 } else {
                     setLibraryCard(factory.createFriendLibrary(friend, friendFileList, eventList, this));
                     if(isEmptyCardShown()) {
-                        showLibraryCard();
+                        super.showLibraryCard();
                     }
                 }
                 break;
