@@ -364,7 +364,7 @@ public class LibraryTableFactoryImpl implements LibraryTableFactory {
         
         switch (category) {
         case AUDIO:
-            libTable = new SharedAudioLibraryTable<T>(sortedList, new SharedAudioTableFormat<T>(friendFileList), player, saveLocationExceptionHandler, shareTableRendererEditorFactory);
+            libTable = new SharedAudioLibraryTable<T>(sortedList, new SharedAudioTableFormat<T>(friendFileList), saveLocationExceptionHandler, shareTableRendererEditorFactory);
             libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellRenderer(new SharingCheckBoxRendererEditor(friendFileList, libTable));
             libTable.getColumnModel().getColumn(SharedAudioTableFormat.ACTION_INDEX).setCellEditor(new SharingCheckBoxRendererEditor(friendFileList, libTable));
             break;
