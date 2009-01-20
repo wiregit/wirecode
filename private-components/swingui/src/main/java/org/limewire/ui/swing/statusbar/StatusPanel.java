@@ -68,9 +68,9 @@ public class StatusPanel extends JXPanel {
         centerPanel.setOpaque(false);
         rightPanel.setOpaque(false);
         
-        leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 3");
-        leftPanel.add(sharedFileCountPanel, "growy, gaptop 3");
-        leftPanel.add(downloadCountPanel, "growy, gaptop 3");
+        leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 2");
+        leftPanel.add(sharedFileCountPanel, "growy, gaptop 2");
+        leftPanel.add(downloadCountPanel, "growy, gaptop 2");
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
         rightPanel.add(chatButton, "growy");
