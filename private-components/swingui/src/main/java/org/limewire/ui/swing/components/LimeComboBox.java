@@ -5,9 +5,6 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
@@ -25,8 +22,6 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
@@ -36,6 +31,7 @@ import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.icon.EmptyIcon;
+import org.limewire.ui.swing.util.ResizeUtils;
 import org.limewire.util.Objects;
 
 /** A combobox rendered in the LimeWire 5.0 style. */
@@ -134,7 +130,7 @@ public class LimeComboBox extends JXButton {
         if (selectedAction == null) {
             selectedAction = actions.get(0);
         }
-        updateSize();
+        ResizeUtils.updateSize(this, actions);
         if (menu == null) {
             createPopupMenu();
         }
@@ -151,7 +147,7 @@ public class LimeComboBox extends JXButton {
         if (selectedAction == null) {
             selectedAction = actions.get(0);
         }
-        updateSize();
+        ResizeUtils.updateSize(this, actions);
         if (menu == null) {
             createPopupMenu();
         }
@@ -215,7 +211,7 @@ public class LimeComboBox extends JXButton {
     public void setText(String promptText) {
         super.setText(promptText);        
         if (promptText != null) {
-            updateSize();
+            ResizeUtils.updateSize(this, actions);
         }
     }
 
@@ -311,7 +307,7 @@ public class LimeComboBox extends JXButton {
     @Override
     public void setFont(Font f) {
         super.setFont(f);
-        updateSize();
+        ResizeUtils.updateSize(this, actions);
     }
     
     /**
@@ -356,70 +352,7 @@ public class LimeComboBox extends JXButton {
         menu = new JPopupMenu();        
         initMenu();
     }
-    
-    /**
-     * Updates the size of the button to match either the explicit text of the
-     * button, or the largest item in the menu.
-     */
-    private void updateSize() {        
-        if (getText() == null && (actions == null || actions.isEmpty())) {
-            return;
-        }
-        
-        Font font = getFont();
-        FontMetrics fm = getFontMetrics(font);
-        Rectangle largest = new Rectangle();
-        Rectangle iconR = new Rectangle();
-        Rectangle textR = new Rectangle();
-        Rectangle viewR = new Rectangle(Short.MAX_VALUE, Short.MAX_VALUE);
-        
-        // If text is explicitly set, layout that text.
-        if(getText() != null && !getText().isEmpty()) {
-            SwingUtilities.layoutCompoundLabel(
-                    this, fm, getText(), null,
-                    SwingConstants.CENTER, SwingConstants.CENTER,
-                    SwingConstants.CENTER, SwingConstants.TRAILING,
-                    viewR, iconR, textR, (getText() == null ? 0 : 4)
-            );
-            Rectangle r = iconR.union(textR);
-            largest = r;
-        } else {
-            // Otherwise, find the largest layout area of all the menu items.
-            for(Action action : actions) {
-                Icon icon = (Icon)action.getValue(Action.SMALL_ICON);
-                String text = (String)action.getValue(Action.NAME);            
-                
-                iconR.height = iconR.width = iconR.x = iconR.y = 0;
-                textR.height = textR.width = textR.x = textR.y = 0;
-                viewR.x = viewR.y = 0;
-                viewR.height = viewR.width = Short.MAX_VALUE;
-                
-                SwingUtilities.layoutCompoundLabel(
-                        this, fm, text, icon,
-                        SwingConstants.CENTER, SwingConstants.CENTER,
-                        SwingConstants.CENTER, SwingConstants.TRAILING,
-                        viewR, iconR, textR, (text == null ? 0 : 4)
-                );
-                Rectangle r = iconR.union(textR);                
-                largest.height = Math.max(r.height, largest.height);
-                largest.width = Math.max(r.width, largest.width);
-            }
-        }
-        
-        Insets insets = getInsets();
-        largest.width += insets.left + insets.right;
-        largest.height += insets.top + insets.bottom;
-        largest.height = Math.max(getMinimumSize().height, largest.height);
-        
-        setMaximumSize(new Dimension(200, 100));
-        setMinimumSize(largest.getSize());
-        setPreferredSize(largest.getSize());
-        setSize(largest.getSize());
-        
-        revalidate();
-        repaint();
-    }
-    
+       
     private void updateMenu() {
         // If custom or not dirty, do nothing.
         if(customMenu || !menuDirty) {
