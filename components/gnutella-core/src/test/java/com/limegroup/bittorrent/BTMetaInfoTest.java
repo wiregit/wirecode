@@ -117,8 +117,14 @@ public class BTMetaInfoTest extends LimeTestCase {
         AssertComparisons.assertEquals("http://localhost:8080/pub2/", metaInfo.getWebSeeds()[1].toString());
     }
     
+    /**
+     * Testing using a bad torrent file. Using a random file name that should not exist.
+     * Testing to make sure that the createMetaInfo method throws an IOException when a bad
+     * file is used.
+     */
     public void testBadFile() {
         File nonExistingFile = new File(UUID.randomUUID().toString() + UUID.randomUUID().toString());
+        Assert.assertFalse(nonExistingFile.exists());
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         try {
             btm.createMetaInfo(nonExistingFile);
