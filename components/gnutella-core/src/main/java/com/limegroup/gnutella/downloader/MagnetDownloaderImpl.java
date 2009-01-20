@@ -148,11 +148,14 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 			String[] defaultURLs = magnet.getDefaultURLs();
 			
 			boolean foundSource = false;
+			long fileSize = magnet.getFileSize();
 			for (int i = 0; i < defaultURLs.length; i++) {
 				try {
 				    RemoteFileDesc rfd = createRemoteFileDesc(defaultURLs[i],
-													 getSaveFile().getName(), magnet.getSHA1Urn());
-							
+													 getSaveFile().getName(), magnet.getSHA1Urn(), fileSize);
+				    // update size in case it was -1, to save HEAD requests
+				    // for the following urls
+				    fileSize = rfd.getSize();
 					initPropertiesMap(rfd);
 					addDownloadForced(rfd, true);
 				} catch (IOException badRFD) {} 
@@ -181,9 +184,9 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * </p>
      */
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn)
+        String filename, URN urn, long fileSize)
             throws IOException, HttpException, InterruptedException, URISyntaxException {
-        return remoteFileDescFactory.createUrlRemoteFileDesc(new URL(defaultURL), filename, urn, -1L);
+        return remoteFileDescFactory.createUrlRemoteFileDesc(new URL(defaultURL), filename, urn, fileSize);
     } 
 
     ////////////////////////////// Requery Logic ///////////////////////////
