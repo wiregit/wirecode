@@ -297,6 +297,11 @@ public class CoreDownloadListManager implements DownloadListManager {
         @Override
         public void downloadRemoved(Downloader downloader) {
             DownloadItem item = getDownloadItem(downloader);
+
+            if (item.getState() == DownloadState.DONE) {
+                changeSupport.firePropertyChange(DOWNLOAD_COMPLETED, null, item);
+            }
+            
             //don't automatically remove finished downloads or downloads in error states
             if ((item.getState() != DownloadState.DONE || SharingSettings.CLEAR_DOWNLOAD.getValue()) && 
                     item.getState() != DownloadState.ERROR) {

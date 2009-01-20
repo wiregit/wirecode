@@ -13,6 +13,8 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.ActionMap;
 import javax.swing.Icon;
@@ -86,7 +88,7 @@ import com.google.inject.Singleton;
 
 
 @Singleton
-public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleComponent {
+public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleComponent, PropertyChangeListener {
 
     /**
      * Number of download items displayed in the table
@@ -148,8 +150,11 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
 		createBorderGradients();
         
         navigator.createNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME, mainDownloadPanel);	
-		
-		chokeList = GlazedListsFactory.rangeList(allList);
+
+        // handle individual completed downloads
+        downloadListManager.addPropertyChangeListener(this);
+
+        chokeList = GlazedListsFactory.rangeList(allList);
 		chokeList.setHeadRange(0, NUMBER_DISPLAYED);
 		horizontalTableModel = new HorizontalDownloadTableModel(allList);
 		table = new AbstractDownloadTable() {
@@ -327,35 +332,29 @@ public class DownloadSummaryPanel extends JXPanel implements ForceInvisibleCompo
             @Override
             public void listChanged(ListEvent<DownloadItem> listChanges) {
                 clearFinishedButton.setVisible(completeDownloads.size() > 0);
-                
-                allList.getReadWriteLock().readLock().lock();
-                try {
-                    while(listChanges.nextBlock()) {
-                        if(listChanges.getType() == ListEvent.INSERT){                            
-                            // loop thru the inserted elements, and add
-                            for (int i=listChanges.getBlockStartIndex(); i<=listChanges.getBlockEndIndex(); i++) {
-                                final DownloadItem downloadItem = listChanges.getSourceList().get(i);
-                                notifier.showMessage(new Notification(I18n.tr("Download Complete"), downloadItem.getFileName(), new AbstractAction() {
-                                    @Override
-                                    public void actionPerformed(ActionEvent e) {
-                                        ActionMap map = Application.getInstance().getContext().getActionManager()
-                                        .getActionMap();
-                                        map.get("restoreView").actionPerformed(e);
-                                        
-                                        if (downloadItem.isLaunchable()) {
-                                            DownloadItemUtils.launch(downloadItem);
-                                        }
-                                    }
-                                }));
-                            }
-                        }
-                    }
-                } finally {
-                    allList.getReadWriteLock().readLock().unlock();
-                }
             }
         });
     }
+
+    public void propertyChange(PropertyChangeEvent event) {
+        if (event.getPropertyName().equals(DownloadListManager.DOWNLOAD_COMPLETED)) {
+            final DownloadItem downloadItem = (DownloadItem)event.getNewValue();
+            notifier.showMessage(new Notification(I18n.tr("Download Complete"),
+                                    downloadItem.getFileName(), new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ActionMap map = Application.getInstance().getContext().getActionManager()
+                            .getActionMap();
+                    map.get("restoreView").actionPerformed(e);
+
+                    if (downloadItem.isLaunchable()) {
+                        DownloadItemUtils.launch(downloadItem);
+                    }
+                }
+            }));
+        }
+    }
+
 
     private MouseListener createDownloadNavListener() {
         final NavItem item = navigator.getNavItem(NavCategory.DOWNLOAD, MainDownloadPanel.NAME);

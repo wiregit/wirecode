@@ -15,7 +15,10 @@ import ca.odell.glazedlists.EventList;
 public interface DownloadListManager extends ResultDownloader {
     /** Property name for downloads completed event. */
     public static final String DOWNLOADS_COMPLETED = "downloadsCompleted";
-	
+
+    /** Property name for a download completed event. */
+    public static final String DOWNLOAD_COMPLETED = "downloadCompleted";
+
     /**
      * Returns all items currently being downloaded.
      */
