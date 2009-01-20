@@ -31,17 +31,19 @@ public class StatusPanel extends JXPanel {
     @Resource private int height;
 
     private final SharedFileCountPanel sharedFileCountPanel;
+    private final DownloadCountPanel downloadCountPanel;
     
     @Inject
     public StatusPanel(GnutellaConnectionManager connectionManager, AudioPlayer player, 
             FriendStatusPanel friendStatusPanel, LibraryNavigator libraryNavigator,
             ConnectionStatusPanel connectionStatus, ProStatusPanel proStatusPanel,
-            SharedFileCountPanel sharedFileCountPanel,
+            SharedFileCountPanel sharedFileCountPanel, DownloadCountPanel downloadCountPanel,
             BarPainterFactory barPainterFactory) {
         
         GuiUtils.assignResources(this);
         
         this.sharedFileCountPanel = sharedFileCountPanel;
+        this.downloadCountPanel = downloadCountPanel;
         
         setLayout(new BorderLayout());
         ResizeUtils.forceHeight(this, height);
@@ -50,6 +52,7 @@ public class StatusPanel extends JXPanel {
  
         StatusBarSectionPainter<JComponent> sectionPainter = new StatusBarSectionPainter<JComponent>();
         sharedFileCountPanel.setBackgroundPainter(sectionPainter);
+        downloadCountPanel.setBackgroundPainter(sectionPainter);
         
         MiniPlayerPanel miniPlayerPanel = new MiniPlayerPanel(player, libraryNavigator);
         miniPlayerPanel.setVisible(false);
@@ -67,6 +70,7 @@ public class StatusPanel extends JXPanel {
         
         leftPanel.add(connectionStatus, "growy, gapbefore 2, gaptop 3");
         leftPanel.add(sharedFileCountPanel, "growy, gaptop 3");
+        leftPanel.add(downloadCountPanel, "growy, gaptop 3");
         centerPanel.add(proStatusPanel, "growy, gaptop 2");
         rightPanel.add(miniPlayerPanel, "gapafter 4");
         rightPanel.add(chatButton, "growy");
@@ -106,6 +110,7 @@ public class StatusPanel extends JXPanel {
         }
         
         this.sharedFileCountPanel.setVisible(sharingVisible);
+        this.downloadCountPanel.setVisible(sharingVisible);
         
     }
 }
