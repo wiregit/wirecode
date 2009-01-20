@@ -201,7 +201,7 @@ public class UDPService implements ReadWriteObserver {
 	@Inject
     public UDPService(NetworkManager networkManager,
             Provider<MessageDispatcher> messageDispatcher,
-            Provider<IPFilter> ipFilter,
+            @Named("hostileFilter") Provider<IPFilter> ipFilter,
             Provider<ConnectionManager> connectionManager,
             Provider<MessageRouter> messageRouter, Provider<Acceptor> acceptor,
             Provider<QueryUnicaster> queryUnicaster,
